@@ -1,0 +1,16 @@
+﻿  Compile Shaders
+  shaders\skybox.vert
+  shaders\skybox.frag
+  shaders\terrain.vert
+  shaders\terrain.frag
+  shaders\vertexSimple.vert
+  shaders\lit.frag
+  shaders\depth.frag
+  shaders\shadow.frag
+  shaders\postProcess.frag
+  shaders\vertexDefault.vert
+  shaders\emissive.frag
+  shaders\tree.vert
+  shaders\pixelSimple.frag
+  Press any key to continue . . . 
+  vkTestProj.vcxproj -> C:\Users\thoma\Downloads\VulkanRenderer-main\VulkanRenderer-main\x64\Release\vkTestApp.exe

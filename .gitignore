@@ -48,3 +48,7 @@ vkTestProj/shaders_bin/skyboxVS.spv
 vkTestProj/shaders_bin/terrainPS.spv
 vkTestProj/shaders_bin/terrainVS.spv
 vkTestProj/shaders_bin/vert.spv
+*.opendb
+*.db-wal
+*.db-shm
+.vs/vkRenderer/v16/.suo
