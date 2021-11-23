@@ -132,9 +132,9 @@ private:
 	size_t							currentFrame = 0;
 	DeviceBuffer					stagingBuffer;
 	VkDescriptorPool				descriptorPool;
-	std::vector<VkDescriptorSet>	descriptorSets;
-	std::vector<VkDescriptorSet>	postDescriptorSets;
-	std::vector<VkDescriptorSet>	shadowDescriptorSets;
+	VkDescriptorSet					descriptorSets[ MAX_FRAMES_STATES ];
+	VkDescriptorSet					postDescriptorSets[ MAX_FRAMES_STATES ];
+	VkDescriptorSet					shadowDescriptorSets[ MAX_FRAMES_STATES ];
 	DeviceBuffer					vb;	// move
 	DeviceBuffer					ib;
 
@@ -1000,23 +1000,16 @@ private:
 		}
 	}
 	
-	void CreateDescriptorSets( RenderProgram& program )
+	void CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
 	{
-		// TODO: where to store descSet?
-	}
-
-	void CreateDescriptorSets( VkDescriptorSetLayout& layout, std::vector<VkDescriptorSet>& descSet )
-	{
-		descSet.clear();
 		std::vector<VkDescriptorSetLayout> layouts( swapChain.GetBufferCount(), layout );
 		VkDescriptorSetAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = descriptorPool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>( swapChain.GetBufferCount() );
+		allocInfo.descriptorSetCount = MAX_FRAMES_STATES;
 		allocInfo.pSetLayouts = layouts.data();
 
-		descSet.resize( swapChain.GetBufferCount() );
-		if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSet.data() ) != VK_SUCCESS )
+		if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to allocate descriptor sets!" );
 		}

@@ -15,4 +15,5 @@
   shaders\pixelSimple.frag
   Press any key to continue . . . 
   vulkinTestApp.cpp
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
