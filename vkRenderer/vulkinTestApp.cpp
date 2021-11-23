@@ -121,25 +121,26 @@ private:
 	FrameBufferState				shadowPassState;
 	FrameBufferState				mainPassState;
 	FrameBufferState				postPassState;
-	DeviceImage						depthImage;
-	VkSampler						depthSampler;
 	VkCommandPool					commandPool;
-	std::vector<VkCommandBuffer>	commandBuffers;
-	std::vector<VkCommandBuffer>	computeBuffers;
-	std::vector<VkSemaphore>		imageAvailableSemaphores;
-	std::vector<VkSemaphore>		renderFinishedSemaphores;
-	std::vector<VkFence>			inFlightFences;
-	std::vector<VkFence>			imagesInFlight;
-	size_t							currentFrame = 0;
+	VkCommandBuffer					commandBuffers[ MAX_FRAMES_STATES ];
+	VkCommandBuffer					computeBuffers[ MAX_FRAMES_STATES ];
+	VkSemaphore						imageAvailableSemaphores[ MAX_FRAMES_STATES ];
+	VkSemaphore						renderFinishedSemaphores[ MAX_FRAMES_STATES ];
+	VkFence							inFlightFences[ MAX_FRAMES_STATES ];
+	VkFence							imagesInFlight[ MAX_FRAMES_STATES ];
 	FrameState						frameState[ MAX_FRAMES_STATES ];
+	size_t							currentFrame = 0;
 	DeviceBuffer					stagingBuffer;
 	VkDescriptorPool				descriptorPool;
 	std::vector<VkDescriptorSet>	descriptorSets;
 	std::vector<VkDescriptorSet>	postDescriptorSets;
 	std::vector<VkDescriptorSet>	shadowDescriptorSets;
+	DeviceBuffer					vb;	// move
+	DeviceBuffer					ib;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
+	VkSampler						vk_depthSampler;
 
 	Camera							mainCamera;
 	float							nearPlane = 1000.0f;
@@ -210,8 +211,8 @@ private:
 		const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
 		modelUpload.resize( models.size() );
 		for ( int i = 0; i < 1; ++i ) {
-			CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].vb.buffer, localMemory, frameState[ i ].vb.allocation );
-			CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].ib.buffer, localMemory, frameState[ i ].ib.allocation );
+			CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb.buffer, localMemory, vb.allocation );
+			CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib.buffer, localMemory, ib.allocation );
 
 			static uint32_t vbBufElements = 0;
 			static uint32_t ibBufElements = 0;
@@ -221,7 +222,7 @@ private:
 				VkDeviceSize ibCopySize = sizeof( models[ m ].indices[ 0 ] ) * models[ m ].indices.size();
 				
 				// VB Copy
-				modelUpload[ m ].vb = frameState[ i ].vb.GetVkObject();
+				modelUpload[ m ].vb = vb.GetVkObject();
 				modelUpload[ m ].vertexOffset = vbBufElements;
 				stagingBuffer.Reset();
 				stagingBuffer.CopyData( models[ m ].vertices.data(), static_cast<size_t>( vbCopySize ) );
@@ -229,14 +230,14 @@ private:
 				VkBufferCopy vbCopyRegion{ };
 				vbCopyRegion.size = vbCopySize;
 				vbCopyRegion.srcOffset = 0;
-				vbCopyRegion.dstOffset = frameState[ i ].vb.allocation.subOffset;
-				UploadToGPU( stagingBuffer.buffer, frameState[ i ].vb.GetVkObject(), vbCopyRegion );
+				vbCopyRegion.dstOffset = vb.allocation.subOffset;
+				UploadToGPU( stagingBuffer.buffer, vb.GetVkObject(), vbCopyRegion );
 
-				frameState[ i ].vb.allocation.subOffset += vbCopySize;
+				vb.allocation.subOffset += vbCopySize;
 				vbBufElements += static_cast< uint32_t >( models[ m ].vertices.size() );
 
 				// IB Copy
-				modelUpload[ m ].ib = frameState[ i ].ib.GetVkObject();
+				modelUpload[ m ].ib = ib.GetVkObject();
 				modelUpload[ m ].firstIndex = ibBufElements;
 
 				stagingBuffer.Reset();
@@ -245,10 +246,10 @@ private:
 				VkBufferCopy ibCopyRegion{ };
 				ibCopyRegion.size = ibCopySize;
 				ibCopyRegion.srcOffset = 0;
-				ibCopyRegion.dstOffset = frameState[ i ].ib.allocation.subOffset;
-				UploadToGPU( stagingBuffer.buffer, frameState[ i ].ib.GetVkObject(), ibCopyRegion );
+				ibCopyRegion.dstOffset = ib.allocation.subOffset;
+				UploadToGPU( stagingBuffer.buffer, ib.GetVkObject(), ibCopyRegion );
 
-				frameState[ i ].ib.allocation.subOffset += ibCopySize;
+				ib.allocation.subOffset += ibCopySize;
 				ibBufElements += static_cast<uint32_t>( models[ m ].indices.size() );
 			}
 		}
@@ -366,7 +367,6 @@ private:
 		}
 		
 		CreateDefaultResources();
-		CreateDepthResources();
 		CreateShadowMapResources();
 		CreateResourceBuffers();
 		CreateTextureSampler( vk_bilinearSampler );
@@ -450,12 +450,10 @@ private:
 		for ( RenderProgram& program : gpuPrograms.programs )
 		{
 			CreateDescriptorSetLayout( program );
-		//	CreateDescriptorSets( program );
 		}
 
 		CreateSceneRenderDescriptorSetLayout( globalLayout );
 		CreateSceneRenderDescriptorSetLayout( postProcessLayout );
-	//	CreatePostProcessDescriptorSetLayout( postProcessLayout );
 		CreateDescriptorSets( globalLayout, descriptorSets );
 		CreateDescriptorSets( globalLayout, shadowDescriptorSets );
 		CreateDescriptorSets( postProcessLayout, postDescriptorSets );
@@ -914,15 +912,16 @@ private:
 		vkDestroyRenderPass( context.device, shadowPassState.pass, nullptr );
 		vkDestroyRenderPass( context.device, postPassState.pass, nullptr );
 
-		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
-			//	vkFreeMemory( context.device, uniformBuffersMemory[i][0], nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.view, nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
+			vkDestroyImage( context.device, frameState[ i ].viewColorImage.image, nullptr );
+			vkDestroyImage( context.device, frameState[ i ].shadowMapImage.image, nullptr );
+			vkDestroyImage( context.device, frameState[ i ].depthImage.image, nullptr );
 		}
-
-		vkDestroyImageView( context.device, depthImage.view, nullptr );
-		vkDestroyImage( context.device, depthImage.image, nullptr );
-		//vkFreeMemory( context.device, depthImageMemory, nullptr );
 
 		vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
 		vkFreeMemory( context.device, sharedMemory.GetDeviceMemory(), nullptr );
@@ -931,7 +930,7 @@ private:
 
 		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
-		vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( commandBuffers.size() ), commandBuffers.data() );
+		vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
 	}
 
 	void RecreateSwapChain()
@@ -974,15 +973,15 @@ private:
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
 			imageAllocations.push_back( AllocRecord() );
-			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapsImages.image, localMemory, imageAllocations.back() );
-			frameState[ i ].shadowMapsImages.view = CreateImageView( frameState[ i ].shadowMapsImages.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage.image, localMemory, imageAllocations.back() );
+			frameState[ i ].shadowMapImage.view = CreateImageView( frameState[ i ].shadowMapImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			std::array<VkImageView, 2> attachments = {
 				r.whiteImage.view,
-				frameState[ i ].shadowMapsImages.view,
+				frameState[ i ].shadowMapImage.view,
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{ };
@@ -1104,7 +1103,7 @@ private:
 		codeImageInfo.reserve( MaxCodeImages );
 		// Shadow Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].shadowMapsImages.view;
+			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1285,7 +1284,7 @@ private:
 		postImageInfo.reserve( 2 );
 		// View Color Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].viewColorImages.view;
+			VkImageView& imageView = frameState[ currentImage ].viewColorImage.view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1294,7 +1293,7 @@ private:
 		}
 		// View Depth Map
 		{
-			VkImageView& imageView = depthImage.view;
+			VkImageView& imageView = frameState[ currentImage ].depthImage.view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1792,12 +1791,17 @@ private:
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
 			imageAllocations.push_back( AllocRecord() );
-			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImages.image, localMemory, imageAllocations.back() );
-			frameState[ i ].viewColorImages.view = CreateImageView( frameState[ i ].viewColorImages.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage.image, localMemory, imageAllocations.back() );
+			frameState[ i ].viewColorImage.view = CreateImageView( frameState[ i ].viewColorImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+
+			VkFormat depthFormat = FindDepthFormat();
+			imageAllocations.push_back( AllocRecord() );
+			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage.image, localMemory, imageAllocations.back() );
+			frameState[ i ].depthImage.view = CreateImageView( frameState[ i ].depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
-				frameState[ i ].viewColorImages.view,
-				depthImage.view
+				frameState[ i ].viewColorImage.view,
+				frameState[ i ].depthImage.view
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{ };
@@ -1991,20 +1995,18 @@ private:
 
 	void CreateCommandBuffers( RenderView& view )
 	{
-		commandBuffers.resize( swapChain.GetBufferCount() );
-
 		VkCommandBufferAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.commandPool = commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = ( uint32_t )commandBuffers.size();
+		allocInfo.commandBufferCount = static_cast< uint32_t >( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers.data() ) != VK_SUCCESS )
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to allocate command buffers!" );
 		}
 
-		for ( size_t i = 0; i < commandBuffers.size(); i++ )
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			VkCommandBufferBeginInfo beginInfo{ };
 			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -2016,10 +2018,10 @@ private:
 				throw std::runtime_error( "Failed to begin recording command buffer!" );
 			}
 
-			VkBuffer vertexBuffers[] = { frameState[ 0 ].vb.GetVkObject() };
+			VkBuffer vertexBuffers[] = { vb.GetVkObject() };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers( commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
-			vkCmdBindIndexBuffer( commandBuffers[ i ], frameState[ 0 ].ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+			vkCmdBindIndexBuffer( commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 			// Shadow Passes
 			{
@@ -2405,22 +2407,8 @@ private:
 		}
 	}
 
-	void CreateDepthResources()
-	{
-		VkFormat depthFormat = FindDepthFormat();
-
-		imageAllocations.push_back( AllocRecord() );
-		CreateImage( swapChain.vk_swapChainExtent.width, swapChain.vk_swapChainExtent.height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage.image, localMemory, imageAllocations.back() );
-		depthImage.view = CreateImageView( depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
-	}
-
 	void CreateSyncObjects()
 	{
-		imageAvailableSemaphores.resize( MAX_FRAMES_IN_FLIGHT );
-		renderFinishedSemaphores.resize( MAX_FRAMES_IN_FLIGHT );
-		inFlightFences.resize( MAX_FRAMES_IN_FLIGHT );
-		imagesInFlight.resize( swapChain.vk_swapChainImages.size(), VK_NULL_HANDLE );
-
 		VkSemaphoreCreateInfo semaphoreInfo{ };
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -2430,9 +2418,9 @@ private:
 
 		for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 		{
-			if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i] ) != VK_SUCCESS ||
-				vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i] ) != VK_SUCCESS ||
-				vkCreateFence( context.device, &fenceInfo, nullptr, &inFlightFences[i] ) != VK_SUCCESS )
+			if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
+				vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||
+				vkCreateFence( context.device, &fenceInfo, nullptr, &inFlightFences[ i ] ) != VK_SUCCESS )
 			{
 				throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 			}
@@ -2683,7 +2671,7 @@ private:
 		WaitForEndFrame();
 
 		uint32_t imageIndex;
-		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex );
+		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, imageAvailableSemaphores[ currentFrame ], VK_NULL_HANDLE, &imageIndex );
 
 		if ( result == VK_ERROR_OUT_OF_DATE_KHR )
 		{
@@ -2696,11 +2684,11 @@ private:
 		}
 
 		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-		if ( imagesInFlight[imageIndex] != VK_NULL_HANDLE ) {
-			vkWaitForFences( context.device, 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX );
+		if ( imagesInFlight[ imageIndex ] != VK_NULL_HANDLE ) {
+			vkWaitForFences( context.device, 1, &imagesInFlight[ imageIndex ], VK_TRUE, UINT64_MAX );
 		}
 		// Mark the image as now being in use by this frame
-		imagesInFlight[imageIndex] = inFlightFences[currentFrame];
+		imagesInFlight[ imageIndex ] = inFlightFences[ currentFrame ];
 
 		UpdateBufferContents( imageIndex );
 		UpdateFrameDescSet( imageIndex );
@@ -2709,7 +2697,7 @@ private:
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
+		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[ currentFrame ] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
@@ -2717,13 +2705,13 @@ private:
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
 
-		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[ currentFrame ] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences( context.device, 1, &inFlightFences[currentFrame] );
+		vkResetFences( context.device, 1, &inFlightFences[ currentFrame ] );
 
-		if ( vkQueueSubmit( graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame] ) != VK_SUCCESS )
+		if ( vkQueueSubmit( graphicsQueue, 1, &submitInfo, inFlightFences[ currentFrame ] ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to submit draw command buffer!" );
 		}
@@ -2765,34 +2753,21 @@ private:
 
 		DestroyResourceBuffers();
 
-		vkDestroyImageView( context.device, depthImage.view, nullptr );
-		vkDestroyImage( context.device, depthImage.image, nullptr );
-		//vkFreeMemory( context.device, depthImageMemory, nullptr );
-
 		for ( auto it = textures.begin(); it != textures.end(); ++it )
 		{
 			const texture_t& texture = it->second;
 			vkDestroyImageView( context.device, texture.vk_imageView, nullptr );
 			vkDestroyImage( context.device, texture.vk_image, nullptr );
-		//	vkFreeMemory( context.device, texture.vk_memory, nullptr );
 		}
 
 		vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
 		vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
 
-		//vkDestroyDescriptorSetLayout( context.device, descriptorSetLayout, nullptr );
-
-		//vkDestroyBuffer( context.device, drawSurf.ib, nullptr );
-		//vkFreeMemory( context.device, drawSurf.ibMemory, nullptr );
-
-		//vkDestroyBuffer( context.device, drawSurf.vb, nullptr );
-		//vkFreeMemory( context.device, drawSurf.vbMemory, nullptr );
-
 		for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 		{
-			vkDestroySemaphore( context.device, renderFinishedSemaphores[i], nullptr );
-			vkDestroySemaphore( context.device, imageAvailableSemaphores[i], nullptr );
-			vkDestroyFence( context.device, inFlightFences[i], nullptr );
+			vkDestroySemaphore( context.device, renderFinishedSemaphores[ i ], nullptr );
+			vkDestroySemaphore( context.device, imageAvailableSemaphores[ i ], nullptr );
+			vkDestroyFence( context.device, inFlightFences[ i ], nullptr );
 		}
 
 		vkDestroyCommandPool( context.device, commandPool, nullptr );

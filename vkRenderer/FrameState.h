@@ -5,12 +5,11 @@
 class FrameState
 {
 public:
-	DeviceImage		viewColorImages;
-	DeviceImage		shadowMapsImages;
+	DeviceImage		viewColorImage;
+	DeviceImage		shadowMapImage;
+	DeviceImage		depthImage;
 	DeviceBuffer	globalConstants;
 	DeviceBuffer	surfParms;
 	DeviceBuffer	materialBuffers;
 	DeviceBuffer	lightParms;
-	DeviceBuffer	vb;
-	DeviceBuffer	ib;
 };
