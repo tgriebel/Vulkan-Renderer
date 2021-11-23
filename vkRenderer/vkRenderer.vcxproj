@@ -166,6 +166,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FrameState.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="assetLib_Images.h" />
     <ClInclude Include="assetLib_Materials.h" />

@@ -71,6 +71,7 @@
     <ClInclude Include="assetLib_Materials.h" />
     <ClInclude Include="assetLib_Images.h" />
     <ClInclude Include="window.h" />
+    <ClInclude Include="FrameState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

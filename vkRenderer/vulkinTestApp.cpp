@@ -6,6 +6,7 @@
 #include "swapChain.h"
 #include "assetLib_GpuProgs.h"
 #include "window.h"
+#include "FrameState.h"
 
 #define USE_IMGUI
 
@@ -160,8 +161,6 @@ private:
 	FrameBufferState				postPassState;
 	DeviceImage						whiteImage;
 	DeviceImage						blackImage;
-	DeviceImage						viewColorImages[ MAX_FRAMES_STATES ];
-	DeviceImage						shadowMapsImages[ MAX_FRAMES_STATES ];
 	VkSampler						depthSampler;
 	VkCommandPool					commandPool;
 	std::vector<VkCommandBuffer>	commandBuffers;
@@ -171,13 +170,7 @@ private:
 	std::vector<VkFence>			inFlightFences;
 	std::vector<VkFence>			imagesInFlight;
 	size_t							currentFrame = 0;
-	bool							framebufferResized = false;
-	DeviceBuffer					globalConstants[ MAX_FRAMES_STATES ];
-	DeviceBuffer					surfParms[ MAX_FRAMES_STATES ];
-	DeviceBuffer					materialBuffers[ MAX_FRAMES_STATES ];
-	DeviceBuffer					lightParms[ MAX_FRAMES_STATES ];
-	DeviceBuffer					vb[ MAX_FRAMES_STATES ];
-	DeviceBuffer					ib[ MAX_FRAMES_STATES ];
+	FrameState						frameState[ MAX_FRAMES_STATES ];
 	DeviceImage						depthImage;
 	DeviceBuffer					stagingBuffer;
 	VkDescriptorPool				descriptorPool;
@@ -187,9 +180,6 @@ private:
 
 	VkSampler						bilinearSampler;
 	VkSampler						depthShadowSampler;
-
-	typedef std::chrono::time_point<std::chrono::steady_clock> timePoint_t;
-	timePoint_t previousTime;
 
 	Camera							mainCamera;
 	float							nearPlane = 1000.0f;
@@ -260,8 +250,8 @@ private:
 		const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
 		modelUpload.resize( models.size() );
 		for ( int i = 0; i < 1; ++i ) {
-			CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb[ i ].buffer, localMemory, vb[ i ].allocation );
-			CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib[ i ].buffer, localMemory, ib[ i ].allocation );
+			CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].vb.buffer, localMemory, frameState[ i ].vb.allocation );
+			CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].ib.buffer, localMemory, frameState[ i ].ib.allocation );
 
 			static uint32_t vbBufElements = 0;
 			static uint32_t ibBufElements = 0;
@@ -271,7 +261,7 @@ private:
 				VkDeviceSize ibCopySize = sizeof( models[ m ].indices[ 0 ] ) * models[ m ].indices.size();
 				
 				// VB Copy
-				modelUpload[ m ].vb = vb[ i ].GetVkObject();
+				modelUpload[ m ].vb = frameState[ i ].vb.GetVkObject();
 				modelUpload[ m ].vertexOffset = vbBufElements;
 				stagingBuffer.Reset();
 				stagingBuffer.CopyData( models[ m ].vertices.data(), static_cast<size_t>( vbCopySize ) );
@@ -279,14 +269,14 @@ private:
 				VkBufferCopy vbCopyRegion{ };
 				vbCopyRegion.size = vbCopySize;
 				vbCopyRegion.srcOffset = 0;
-				vbCopyRegion.dstOffset = vb[ i ].allocation.subOffset;
-				UploadToGPU( stagingBuffer.buffer, vb[ i ].GetVkObject(), vbCopyRegion );
+				vbCopyRegion.dstOffset = frameState[ i ].vb.allocation.subOffset;
+				UploadToGPU( stagingBuffer.buffer, frameState[ i ].vb.GetVkObject(), vbCopyRegion );
 
-				vb[ i ].allocation.subOffset += vbCopySize;
+				frameState[ i ].vb.allocation.subOffset += vbCopySize;
 				vbBufElements += static_cast< uint32_t >( models[ m ].vertices.size() );
 
 				// IB Copy
-				modelUpload[ m ].ib = ib[ i ].GetVkObject();
+				modelUpload[ m ].ib = frameState[ i ].ib.GetVkObject();
 				modelUpload[ m ].firstIndex = ibBufElements;
 
 				stagingBuffer.Reset();
@@ -295,10 +285,10 @@ private:
 				VkBufferCopy ibCopyRegion{ };
 				ibCopyRegion.size = ibCopySize;
 				ibCopyRegion.srcOffset = 0;
-				ibCopyRegion.dstOffset = ib[ i ].allocation.subOffset;
-				UploadToGPU( stagingBuffer.buffer, ib[ i ].GetVkObject(), ibCopyRegion );
+				ibCopyRegion.dstOffset = frameState[ i ].ib.allocation.subOffset;
+				UploadToGPU( stagingBuffer.buffer, frameState[ i ].ib.GetVkObject(), ibCopyRegion );
 
-				ib[ i ].allocation.subOffset += ibCopySize;
+				frameState[ i ].ib.allocation.subOffset += ibCopySize;
 				ibBufElements += static_cast<uint32_t>( models[ m ].indices.size() );
 			}
 		}
@@ -966,7 +956,7 @@ private:
 
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
-			vkDestroyBuffer( context.device, surfParms[ i ].buffer, nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
 			//	vkFreeMemory( context.device, uniformBuffersMemory[i][0], nullptr );
 		}
 
@@ -1024,15 +1014,15 @@ private:
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
 			imageAllocations.push_back( AllocRecord() );
-			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, shadowMapsImages[ i ].image, localMemory, imageAllocations.back() );
-			shadowMapsImages[ i ].view = CreateImageView( context.device, shadowMapsImages[ i ].image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapsImages.image, localMemory, imageAllocations.back() );
+			frameState[ i ].shadowMapsImages.view = CreateImageView( context.device, frameState[ i ].shadowMapsImages.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			std::array<VkImageView, 2> attachments = {
 				whiteImage.view,
-				shadowMapsImages[ i ].view,
+				frameState[ i ].shadowMapsImages.view,
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{ };
@@ -1087,7 +1077,7 @@ private:
 		globalConstantsInfo.reserve( 1 );
 		{
 			VkDescriptorBufferInfo info{ };
-			info.buffer = globalConstants[ i ].GetVkObject();
+			info.buffer = frameState[ i ].globalConstants.GetVkObject();
 			info.offset = 0;
 			info.range = sizeof( globalUboConstants_t );
 			globalConstantsInfo.push_back( info );
@@ -1098,7 +1088,7 @@ private:
 		for ( int j = 0; j < MaxSurfaces; ++j )
 		{
 			VkDescriptorBufferInfo info{ };
-			info.buffer = surfParms[ i ].GetVkObject();
+			info.buffer = frameState[ i ].surfParms.GetVkObject();
 			info.offset = j * sizeof( uniformBufferObject_t );
 			info.range = sizeof( uniformBufferObject_t );
 			bufferInfo.push_back( info );
@@ -1133,7 +1123,7 @@ private:
 		for ( int j = 0; j < MaxMaterialDescriptors; ++j )
 		{
 			VkDescriptorBufferInfo info{ };
-			info.buffer = materialBuffers[ i ].GetVkObject();
+			info.buffer = frameState[ i ].materialBuffers.GetVkObject();
 			info.offset = j * sizeof( materialBufferObject_t );
 			info.range = sizeof( materialBufferObject_t );
 			materialBufferInfo.push_back( info );
@@ -1144,7 +1134,7 @@ private:
 		for ( int j = 0; j < MaxLights; ++j )
 		{
 			VkDescriptorBufferInfo info{ };
-			info.buffer = lightParms[ i ].GetVkObject();
+			info.buffer = frameState[ i ].lightParms.GetVkObject();
 			info.offset = j * sizeof( light_t );
 			info.range = sizeof( light_t );
 			lightBufferInfo.push_back( info );
@@ -1154,7 +1144,7 @@ private:
 		codeImageInfo.reserve( MaxCodeImages );
 		// Shadow Map
 		{
-			VkImageView& imageView = shadowMapsImages[ currentImage ].view;
+			VkImageView& imageView = frameState[ currentImage ].shadowMapsImages.view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1335,7 +1325,7 @@ private:
 		postImageInfo.reserve( 2 );
 		// View Color Map
 		{
-			VkImageView& imageView = viewColorImages[ currentImage ].view;
+			VkImageView& imageView = frameState[ currentImage ].viewColorImages.view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1623,28 +1613,28 @@ private:
 			{
 				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( globalUboConstants_t ) );
 				const VkDeviceSize bufferSize = stride;
-				CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, globalConstants[ i ].buffer, sharedMemory, globalConstants[ i ].allocation );
+				CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].globalConstants.buffer, sharedMemory, frameState[ i ].globalConstants.allocation );
 			}
 
 			// Model Buffer
 			{
 				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( uniformBufferObject_t ) );
 				const VkDeviceSize bufferSize = MaxSurfaces * stride;
-				CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, surfParms[ i ].buffer, sharedMemory, surfParms[ i ].allocation );
+				CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].surfParms.buffer, sharedMemory, frameState[ i ].surfParms.allocation );
 			}
 
 			// Material Buffer
 			{
 				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( materialBufferObject_t ) );
 				const VkDeviceSize materialBufferSize = MaxMaterialDescriptors * stride;
-				CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, materialBuffers[ i ].buffer, sharedMemory, materialBuffers[ i ].allocation );
+				CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].materialBuffers.buffer, sharedMemory, frameState[ i ].materialBuffers.allocation );
 			}
 
 			// Light Buffer
 			{
 				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( light_t ) );
 				const VkDeviceSize lightBufferSize = MaxLights * stride;
-				CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, lightParms[ i ].buffer, sharedMemory, lightParms[ i ].allocation );
+				CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].lightParms.buffer, sharedMemory, frameState[ i ].lightParms.allocation );
 			}
 		}
 	}
@@ -1842,11 +1832,11 @@ private:
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
 			imageAllocations.push_back( AllocRecord() );
-			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, viewColorImages[ i ].image, localMemory, imageAllocations.back() );
-			viewColorImages[ i ].view = CreateImageView( context.device, viewColorImages[ i ].image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImages.image, localMemory, imageAllocations.back() );
+			frameState[ i ].viewColorImages.view = CreateImageView( context.device, frameState[ i ].viewColorImages.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
-				viewColorImages[ i ].view,
+				frameState[ i ].viewColorImages.view,
 				depthImage.view
 			};
 
@@ -2066,10 +2056,10 @@ private:
 				throw std::runtime_error( "Failed to begin recording command buffer!" );
 			}
 
-			VkBuffer vertexBuffers[] = { vb[ 0 ].GetVkObject() };
+			VkBuffer vertexBuffers[] = { frameState[ 0 ].vb.GetVkObject() };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers( commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
-			vkCmdBindIndexBuffer( commandBuffers[ i ], ib[ 0 ].GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+			vkCmdBindIndexBuffer( commandBuffers[ i ], frameState[ 0 ].ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 			// Shadow Passes
 			{
@@ -2792,10 +2782,10 @@ private:
 
 		result = vkQueuePresentKHR( presentQueue, &presentInfo );
 
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized )
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.IsResizeRequested() )
 		{
-			framebufferResized = false;
 			RecreateSwapChain();
+			window.AcceptImageResize();
 			return;
 		}
 		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
@@ -2872,7 +2862,7 @@ private:
 			uboBuffer.push_back( ubo );
 		}
 
-		void* uboMemoryMap = surfParms[ currentImage ].allocation.memory->GetMemoryMapPtr( surfParms[ currentImage ].allocation );
+		void* uboMemoryMap = frameState[ currentImage ].surfParms.allocation.memory->GetMemoryMapPtr( frameState[ currentImage ].surfParms.allocation );
 		if ( uboMemoryMap != nullptr ) {
 			memcpy( uboMemoryMap, uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
 		}
@@ -2947,17 +2937,17 @@ private:
 			lightBuffer.push_back( renderView.lights[ i ] );
 		}
 
-		globalConstants[ currentImage ].Reset();
-		globalConstants[ currentImage ].CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) * globalsBuffer.size() );
+		frameState[ currentImage ].globalConstants.Reset();
+		frameState[ currentImage ].globalConstants.CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) * globalsBuffer.size() );
 
-		surfParms[ currentImage ].Reset();
-		surfParms[ currentImage ].CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
+		frameState[ currentImage ].surfParms.Reset();
+		frameState[ currentImage ].surfParms.CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
 
-		materialBuffers[ currentImage ].Reset();
-		materialBuffers[ currentImage ].CopyData( materialBuffer.data(), sizeof( materialBufferObject_t ) * materialBuffer.size() );
+		frameState[ currentImage ].materialBuffers.Reset();
+		frameState[ currentImage ].materialBuffers.CopyData( materialBuffer.data(), sizeof( materialBufferObject_t ) * materialBuffer.size() );
 
-		lightParms[ currentImage ].Reset();
-		lightParms[ currentImage ].CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
+		frameState[ currentImage ].lightParms.Reset();
+		frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
 	}
 
 	std::vector<const char*> GetRequiredExtensions()
