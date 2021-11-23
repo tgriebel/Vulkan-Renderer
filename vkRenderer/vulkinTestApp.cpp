@@ -1,12 +1,14 @@
 #include "stdafx.h"
 
 #include "common.h"
+#include "deviceContext.h"
 #include "camera.h"
 #include "pipeline.h"
 #include "swapChain.h"
 #include "assetLib_GpuProgs.h"
 #include "window.h"
 #include "FrameState.h"
+#include "renderConstants.h"
 
 #define USE_IMGUI
 
@@ -46,7 +48,6 @@ static imguiControls_t imguiControls;
 pipelineHdl_t						postProcessPipeline;
 VkDescriptorSetLayout				globalLayout;
 VkDescriptorSetLayout				postProcessLayout;
-RenderProgram						programs[ RENDER_PROGRAM_COUNT ];
 std::map<std::string, material_t>	materials;
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
@@ -55,47 +56,11 @@ AssetLibGpuProgram					gpuPrograms;
 
 deviceContext_t						context;
 
+renderConstants_t					r;
+
 static bool							validateVerbose = false;
 static bool							validateWarnings = false;
 static bool							validateErrors = true;
-
-VkImageView CreateImageView( VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels )
-{
-	VkImageViewCreateInfo viewInfo{ };
-	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = image;
-	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format = format;
-	viewInfo.subresourceRange.aspectMask = aspectFlags;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = mipLevels;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = 1;
-
-	VkImageView imageView;
-	if ( vkCreateImageView( device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
-	{
-		throw std::runtime_error( "Failed to create texture image view!" );
-	}
-
-	return imageView;
-}
-
-VkShaderModule CreateShaderModule( const std::vector<char>& code )
-{
-	VkShaderModuleCreateInfo createInfo{ };
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = code.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>( code.data() );
-
-	VkShaderModule shaderModule;
-	if ( vkCreateShaderModule( context.device, &createInfo, nullptr, &shaderModule ) != VK_SUCCESS )
-	{
-		throw std::runtime_error( "Failed to create shader module!" );
-	}
-
-	return shaderModule;
-}
 
 RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile )
 {
@@ -152,15 +117,11 @@ private:
 	uint32_t						queueFamilyIndices[ QUEUE_COUNT ];
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
-	VkPipeline						currentPipeline;
-	VkPipelineLayout				currentPipelineLayout;
-	std::vector<VkFramebuffer>		swapChainFramebuffers;
 	std::vector< AllocRecord >		imageAllocations;
 	FrameBufferState				shadowPassState;
 	FrameBufferState				mainPassState;
 	FrameBufferState				postPassState;
-	DeviceImage						whiteImage;
-	DeviceImage						blackImage;
+	DeviceImage						depthImage;
 	VkSampler						depthSampler;
 	VkCommandPool					commandPool;
 	std::vector<VkCommandBuffer>	commandBuffers;
@@ -171,15 +132,14 @@ private:
 	std::vector<VkFence>			imagesInFlight;
 	size_t							currentFrame = 0;
 	FrameState						frameState[ MAX_FRAMES_STATES ];
-	DeviceImage						depthImage;
 	DeviceBuffer					stagingBuffer;
 	VkDescriptorPool				descriptorPool;
 	std::vector<VkDescriptorSet>	descriptorSets;
 	std::vector<VkDescriptorSet>	postDescriptorSets;
 	std::vector<VkDescriptorSet>	shadowDescriptorSets;
 
-	VkSampler						bilinearSampler;
-	VkSampler						depthShadowSampler;
+	VkSampler						vk_bilinearSampler;
+	VkSampler						vk_depthShadowSampler;
 
 	Camera							mainCamera;
 	float							nearPlane = 1000.0f;
@@ -409,8 +369,8 @@ private:
 		CreateDepthResources();
 		CreateShadowMapResources();
 		CreateResourceBuffers();
-		CreateTextureSampler( bilinearSampler );
-		CreateDepthSampler( depthShadowSampler );
+		CreateTextureSampler( vk_bilinearSampler );
+		CreateDepthSampler( vk_depthShadowSampler );
 	
 		InitScene( renderView );
 
@@ -999,12 +959,12 @@ private:
 	void CreateDefaultResources()
 	{
 		imageAllocations.push_back( AllocRecord() );
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, whiteImage.image, localMemory, imageAllocations.back() );
-		whiteImage.view = CreateImageView( context.device, whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.whiteImage.image, localMemory, imageAllocations.back() );
+		r.whiteImage.view = CreateImageView( r.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		imageAllocations.push_back( AllocRecord() );
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, blackImage.image, localMemory, imageAllocations.back() );
-		blackImage.view = CreateImageView( context.device, blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.blackImage.image, localMemory, imageAllocations.back() );
+		r.blackImage.view = CreateImageView( r.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateShadowMapResources()
@@ -1015,13 +975,13 @@ private:
 		{
 			imageAllocations.push_back( AllocRecord() );
 			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapsImages.image, localMemory, imageAllocations.back() );
-			frameState[ i ].shadowMapsImages.view = CreateImageView( context.device, frameState[ i ].shadowMapsImages.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			frameState[ i ].shadowMapsImages.view = CreateImageView( frameState[ i ].shadowMapsImages.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			std::array<VkImageView, 2> attachments = {
-				whiteImage.view,
+				r.whiteImage.view,
 				frameState[ i ].shadowMapsImages.view,
 			};
 
@@ -1103,7 +1063,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = bilinearSampler;
+			info.sampler = vk_bilinearSampler;
 			imageInfo.push_back( info );
 		}
 		// Defaults
@@ -1114,7 +1074,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = bilinearSampler;
+			info.sampler = vk_bilinearSampler;
 			imageInfo.push_back( info );
 		}
 
@@ -1148,7 +1108,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = depthShadowSampler;
+			info.sampler = vk_depthShadowSampler;
 			codeImageInfo.push_back( info );
 		}
 
@@ -1229,7 +1189,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = bilinearSampler;
+			info.sampler = vk_bilinearSampler;
 			shadowImageInfo.push_back( info );
 		}
 		// Defaults
@@ -1240,7 +1200,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = bilinearSampler;
+			info.sampler = vk_bilinearSampler;
 			shadowImageInfo.push_back( info );
 		}
 
@@ -1253,7 +1213,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = bilinearSampler;
+			info.sampler = vk_bilinearSampler;
 			shadowCodeImageInfo.push_back( info );
 		}
 
@@ -1329,7 +1289,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = bilinearSampler;
+			info.sampler = vk_bilinearSampler;
 			postImageInfo.push_back( info );
 		}
 		// View Depth Map
@@ -1338,7 +1298,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = depthShadowSampler;
+			info.sampler = vk_depthShadowSampler;
 			postImageInfo.push_back( info );
 		}
 
@@ -1833,7 +1793,7 @@ private:
 		{
 			imageAllocations.push_back( AllocRecord() );
 			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImages.image, localMemory, imageAllocations.back() );
-			frameState[ i ].viewColorImages.view = CreateImageView( context.device, frameState[ i ].viewColorImages.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			frameState[ i ].viewColorImages.view = CreateImageView( frameState[ i ].viewColorImages.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
 				frameState[ i ].viewColorImages.view,
@@ -2441,7 +2401,7 @@ private:
 		for ( auto it = textures.begin(); it != textures.end(); ++it )
 		{
 			texture_t& texture = it->second;
-			texture.vk_imageView = CreateImageView( context.device, texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture.mipLevels );
+			texture.vk_imageView = CreateImageView( texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture.mipLevels );
 		}
 	}
 
@@ -2451,7 +2411,7 @@ private:
 
 		imageAllocations.push_back( AllocRecord() );
 		CreateImage( swapChain.vk_swapChainExtent.width, swapChain.vk_swapChainExtent.height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage.image, localMemory, imageAllocations.back() );
-		depthImage.view = CreateImageView( context.device, depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		depthImage.view = CreateImageView( depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
 	void CreateSyncObjects()
@@ -2817,8 +2777,8 @@ private:
 		//	vkFreeMemory( context.device, texture.vk_memory, nullptr );
 		}
 
-		vkDestroySampler( context.device, bilinearSampler, nullptr );
-		vkDestroySampler( context.device, depthShadowSampler, nullptr );
+		vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
+		vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
 
 		//vkDestroyDescriptorSetLayout( context.device, descriptorSetLayout, nullptr );
 

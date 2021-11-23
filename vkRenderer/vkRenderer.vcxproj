@@ -167,6 +167,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="FrameState.h" />
+    <ClInclude Include="renderConstants.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="assetLib_Images.h" />
     <ClInclude Include="assetLib_Materials.h" />
@@ -193,6 +194,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="deviceContext.cpp" />
+    <ClCompile Include="util.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="assetLib_GpuProgs.cpp" />
     <ClCompile Include="assetLib_Images.cpp" />

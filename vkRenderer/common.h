@@ -628,5 +628,3 @@ static inline void RandPlanePoint( glm::vec2& outPoint )
 
 extern deviceContext_t			context;
 extern VkDescriptorSetLayout	globalLayout;
-
-VkImageView CreateImageView( VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels );
