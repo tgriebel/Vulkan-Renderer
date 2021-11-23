@@ -19,7 +19,7 @@ void CreateDescriptorSetLayout( RenderProgram& program )
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
 	layoutInfo.pBindings = bindings.data();
 
-	if ( vkCreateDescriptorSetLayout( device, &layoutInfo, nullptr, &program.descSetLayout ) != VK_SUCCESS )
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &program.descSetLayout ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create descriptor set layout!" );
 	}
@@ -76,7 +76,7 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
 	layoutInfo.pBindings = bindings.data();
 
-	if ( vkCreateDescriptorSetLayout( device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS )
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create descriptor set layout!" );
 	}
@@ -104,7 +104,7 @@ void CreatePostProcessDescriptorSetLayout( VkDescriptorSetLayout& layout )
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
 	layoutInfo.pBindings = bindings.data();
 
-	if ( vkCreateDescriptorSetLayout( device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS )
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create descriptor set layout!" );
 	}
@@ -289,7 +289,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
 	pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 
-	if ( vkCreatePipelineLayout( device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS )
+	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create pipeline layout!" );
 	}
@@ -323,7 +323,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pipelineInfo.basePipelineIndex = -1; // Optional
 	pipelineInfo.pDepthStencilState = &depthStencil;
 
-	if ( vkCreateGraphicsPipelines( device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS )
+	if ( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create graphics pipeline!" );
 	}

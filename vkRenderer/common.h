@@ -519,19 +519,29 @@ enum normalDirection_t
 
 struct mouse_t
 {
-	double x;
-	double y;
+	mouse_t() : speed( 0.005f ),
+				x( 0.0f ),
+				y( 0.0f ),
+				leftDown( false ),
+				rightDown( false ),
+				centered( false ) {}
 
-	bool leftDown;
-	bool rightDown;
+	float	x;
+	float	y;
+	float	speed;
+	bool	leftDown;
+	bool	rightDown;
+	bool	centered;
 };
 
 
 struct input_t
 {
+	mouse_t	mouse;
 	bool	keys[ 256 ];
 	bool	altDown;
 };
+
 
 enum pipelineQueue_t {
 	QUEUE_GRAPHICS,
@@ -587,11 +597,8 @@ struct deviceContext_t
 {
 	VkDevice					device;
 	VkPhysicalDevice			physicalDevice;
-//	VkRenderPass				renderPass;
-//	VkDescriptorSetLayout		descriptorSetLayout;
-//	std::vector<RenderProgram>	programs;
-//	MemoryAllocator				localMemory;
-//	MemoryAllocator				sharedMemory;
+	VkInstance					instance;
+	VkPhysicalDeviceLimits		limits;
 };
 
 static inline void RandSphere( float& theta, float& phi )
@@ -619,7 +626,7 @@ static inline void RandPlanePoint( glm::vec2& outPoint )
 	outPoint.y = ( (float) rand() / ( RAND_MAX ) );
 }
 
-extern VkDevice					device;
+extern deviceContext_t			context;
 extern VkDescriptorSetLayout	globalLayout;
 
 VkImageView CreateImageView( VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels );

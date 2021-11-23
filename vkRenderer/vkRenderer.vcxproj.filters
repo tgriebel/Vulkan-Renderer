@@ -28,6 +28,7 @@
     <ClCompile Include="assetLib_GpuProgs.cpp" />
     <ClCompile Include="assetLib_Materials.cpp" />
     <ClCompile Include="assetLib_Images.cpp" />
+    <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -69,6 +70,7 @@
     <ClInclude Include="assetLib_GpuProgs.h" />
     <ClInclude Include="assetLib_Materials.h" />
     <ClInclude Include="assetLib_Images.h" />
+    <ClInclude Include="window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
