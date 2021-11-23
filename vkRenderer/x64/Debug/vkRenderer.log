@@ -14,6 +14,13 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
+  assetLib_GpuProgs.cpp
+  assetLib_Images.cpp
+  assetLib_Materials.cpp
+  deviceContext.cpp
+  pipeline.cpp
+  util.cpp
   vulkinTestApp.cpp
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  window.cpp
+  Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

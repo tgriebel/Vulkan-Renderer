@@ -5,11 +5,11 @@
 class FrameState
 {
 public:
-	DeviceImage		viewColorImage;
-	DeviceImage		shadowMapImage;
-	DeviceImage		depthImage;
-	DeviceBuffer	globalConstants;
-	DeviceBuffer	surfParms;
-	DeviceBuffer	materialBuffers;
-	DeviceBuffer	lightParms;
+	GpuImage		viewColorImage;
+	GpuImage		shadowMapImage;
+	GpuImage		depthImage;
+	GpuBuffer		globalConstants;
+	GpuBuffer		surfParms;
+	GpuBuffer		materialBuffers;
+	GpuBuffer		lightParms;
 };

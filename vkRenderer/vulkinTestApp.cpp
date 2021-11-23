@@ -118,9 +118,9 @@ private:
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
 	std::vector< AllocRecord >		imageAllocations;
-	FrameBufferState				shadowPassState;
-	FrameBufferState				mainPassState;
-	FrameBufferState				postPassState;
+	DrawPassState					shadowPassState;
+	DrawPassState					mainPassState;
+	DrawPassState					postPassState;
 	VkCommandPool					commandPool;
 	VkCommandBuffer					commandBuffers[ MAX_FRAMES_STATES ];
 	VkCommandBuffer					computeBuffers[ MAX_FRAMES_STATES ];
@@ -130,13 +130,13 @@ private:
 	VkFence							imagesInFlight[ MAX_FRAMES_STATES ];
 	FrameState						frameState[ MAX_FRAMES_STATES ];
 	size_t							currentFrame = 0;
-	DeviceBuffer					stagingBuffer;
+	GpuBuffer					stagingBuffer;
 	VkDescriptorPool				descriptorPool;
 	VkDescriptorSet					descriptorSets[ MAX_FRAMES_STATES ];
 	VkDescriptorSet					postDescriptorSets[ MAX_FRAMES_STATES ];
 	VkDescriptorSet					shadowDescriptorSets[ MAX_FRAMES_STATES ];
-	DeviceBuffer					vb;	// move
-	DeviceBuffer					ib;
+	GpuBuffer					vb;	// move
+	GpuBuffer					ib;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
@@ -191,7 +191,6 @@ private:
 		else
 		{
 			createInfo.enabledLayerCount = 0;
-
 			createInfo.pNext = nullptr;
 		}
 
@@ -891,8 +890,7 @@ private:
 		descIndexing.pNext = NULL;
 		createInfo.pNext = &descIndexing;
 
-		if ( vkCreateDevice( context.physicalDevice, &createInfo, nullptr, &context.device ) != VK_SUCCESS )
-		{
+		if ( vkCreateDevice( context.physicalDevice, &createInfo, nullptr, &context.device ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create logical context.device!" );
 		}
 

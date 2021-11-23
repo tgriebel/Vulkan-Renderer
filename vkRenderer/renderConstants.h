@@ -3,6 +3,6 @@
 
 struct renderConstants_t
 {
-	DeviceImage		whiteImage;
-	DeviceImage		blackImage;
+	GpuImage		whiteImage;
+	GpuImage		blackImage;
 };

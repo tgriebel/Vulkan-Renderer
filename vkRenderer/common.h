@@ -462,7 +462,7 @@ struct entity_t
 };
 
 
-struct DeviceBuffer
+struct GpuBuffer
 {
 	VkBuffer			buffer;
 	AllocRecord			allocation;
@@ -491,7 +491,7 @@ struct DeviceBuffer
 };
 
 
-struct DeviceImage
+struct GpuImage
 {
 	VkImage		image;
 	VkImageView	view;
@@ -499,7 +499,7 @@ struct DeviceImage
 };
 
 
-struct FrameBufferState
+struct DrawPassState
 {
 	VkRenderPass	pass;
 	VkFramebuffer	fb[ MAX_FRAMES_STATES ];
