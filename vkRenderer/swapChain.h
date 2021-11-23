@@ -9,9 +9,9 @@ public:
 	{
 	}
 
-	void Create( VkPhysicalDevice physicalDevice, QueueFamilyIndices& queueIndices, uint32_t queueFamilyIndices[ QUEUE_COUNT ] )
+	void Create( QueueFamilyIndices& queueIndices, uint32_t queueFamilyIndices[ QUEUE_COUNT ] )
 	{
-		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( physicalDevice );
+		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice );
 
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat( swapChainSupport.formats );
 		VkPresentModeKHR presentMode = ChooseSwapPresentMode( swapChainSupport.presentModes );

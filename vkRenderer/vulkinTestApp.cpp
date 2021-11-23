@@ -49,7 +49,6 @@ RenderProgram						programs[ RENDER_PROGRAM_COUNT ];
 std::map<std::string, material_t>	materials;
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
-VkPhysicalDeviceLimits				limits;
 
 AssetLibGpuProgram					gpuPrograms;
 
@@ -150,7 +149,6 @@ private:
 	VkQueue							presentQueue;
 	VkQueue							computeQueue;
 	uint32_t						queueFamilyIndices[ QUEUE_COUNT ];
-	VkPhysicalDevice				physicalDevice = VK_NULL_HANDLE;
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
 	VkPipeline						currentPipeline;
@@ -400,7 +398,7 @@ private:
 		CreateSurface();
 		PickPhysicalDevice();
 		CreateLogicalDevice();
-		swapChain.Create( physicalDevice, FindQueueFamilies( physicalDevice ), queueFamilyIndices );
+		swapChain.Create( FindQueueFamilies( context.physicalDevice ), queueFamilyIndices );
 		CreateMainRenderPass( mainPassState.pass );
 		CreateShadowPass( shadowPassState.pass );
 		CreatePostProcessPass( postPassState.pass );
@@ -429,7 +427,7 @@ private:
 		CreateAssetLibs();
 
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
+		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 
 		CreateFramebuffers();
 
@@ -456,7 +454,7 @@ private:
 
 		ImGui_ImplVulkan_InitInfo vkInfo = {};
 		vkInfo.Instance = instance;
-		vkInfo.PhysicalDevice = physicalDevice;
+		vkInfo.PhysicalDevice = context.physicalDevice;
 		vkInfo.Device = context.device;
 		vkInfo.QueueFamily = queueFamilyIndices[ QUEUE_GRAPHICS ];
 		vkInfo.Queue = graphicsQueue;
@@ -887,12 +885,12 @@ private:
 		{
 			if ( IsDeviceSuitable( device ) )
 			{
-				physicalDevice = device;
+				context.physicalDevice = device;
 				break;
 			}
 		}
 
-		if ( physicalDevice == VK_NULL_HANDLE )
+		if ( context.physicalDevice == VK_NULL_HANDLE )
 		{
 			throw std::runtime_error( "Failed to find a suitable GPU!" );
 		}
@@ -900,7 +898,7 @@ private:
 
 	void CreateLogicalDevice()
 	{
-		QueueFamilyIndices indices = FindQueueFamilies( physicalDevice );
+		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice );
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value(), indices.computeFamily.value() };
@@ -945,7 +943,7 @@ private:
 		descIndexing.pNext = NULL;
 		createInfo.pNext = &descIndexing;
 
-		if ( vkCreateDevice( physicalDevice, &createInfo, nullptr, &context.device ) != VK_SUCCESS )
+		if ( vkCreateDevice( context.physicalDevice, &createInfo, nullptr, &context.device ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to create logical context.device!" );
 		}
@@ -954,7 +952,7 @@ private:
 		vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &presentQueue );
 		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &computeQueue );
 
-		QueueFamilyIndices queueIndices = FindQueueFamilies( physicalDevice );
+		QueueFamilyIndices queueIndices = FindQueueFamilies( context.physicalDevice );
 		queueFamilyIndices[ QUEUE_GRAPHICS ] = queueIndices.graphicsFamily.value();
 		queueFamilyIndices[ QUEUE_PRESENT ] = queueIndices.presentFamily.value();
 		queueFamilyIndices[ QUEUE_COMPUTE ] = queueIndices.computeFamily.value();
@@ -997,7 +995,7 @@ private:
 
 		CleanupFrameResources();
 		swapChain.Destroy();
-		swapChain.Create( physicalDevice, FindQueueFamilies( physicalDevice ), queueFamilyIndices );
+		swapChain.Create( FindQueueFamilies( context.physicalDevice ), queueFamilyIndices );
 	}
 
 	void CreateSurface()
@@ -1426,7 +1424,7 @@ private:
 	uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
+		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 
 		for ( uint32_t i = 0; i < memProperties.memoryTypeCount; i++ )
 		{
@@ -1453,7 +1451,7 @@ private:
 		for ( VkFormat format : candidates )
 		{
 			VkFormatProperties props;
-			vkGetPhysicalDeviceFormatProperties( physicalDevice, format, &props );
+			vkGetPhysicalDeviceFormatProperties( context.physicalDevice, format, &props );
 
 			if ( tiling == VK_IMAGE_TILING_LINEAR && ( props.linearTilingFeatures & features ) == features )
 			{
@@ -1486,7 +1484,7 @@ private:
 		}
 
 		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
+		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 		VkMemoryType type = memProperties.memoryTypes[ typeIndex ];
 		
 		void* memPtr = nullptr;
@@ -1623,28 +1621,28 @@ private:
 		{
 			// Globals Buffer
 			{
-				const VkDeviceSize stride = std::max( limits.minUniformBufferOffsetAlignment, sizeof( globalUboConstants_t ) );
+				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( globalUboConstants_t ) );
 				const VkDeviceSize bufferSize = stride;
 				CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, globalConstants[ i ].buffer, sharedMemory, globalConstants[ i ].allocation );
 			}
 
 			// Model Buffer
 			{
-				const VkDeviceSize stride = std::max( limits.minUniformBufferOffsetAlignment, sizeof( uniformBufferObject_t ) );
+				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( uniformBufferObject_t ) );
 				const VkDeviceSize bufferSize = MaxSurfaces * stride;
 				CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, surfParms[ i ].buffer, sharedMemory, surfParms[ i ].allocation );
 			}
 
 			// Material Buffer
 			{
-				const VkDeviceSize stride = std::max( limits.minUniformBufferOffsetAlignment, sizeof( materialBufferObject_t ) );
+				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( materialBufferObject_t ) );
 				const VkDeviceSize materialBufferSize = MaxMaterialDescriptors * stride;
 				CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, materialBuffers[ i ].buffer, sharedMemory, materialBuffers[ i ].allocation );
 			}
 
 			// Light Buffer
 			{
-				const VkDeviceSize stride = std::max( limits.minUniformBufferOffsetAlignment, sizeof( light_t ) );
+				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( light_t ) );
 				const VkDeviceSize lightBufferSize = MaxLights * stride;
 				CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, lightParms[ i ].buffer, sharedMemory, lightParms[ i ].allocation );
 			}
@@ -1893,7 +1891,7 @@ private:
 
 	void CreateCommandPool()
 	{
-		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies( physicalDevice );
+		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies( context.physicalDevice );
 
 		VkCommandPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -2307,7 +2305,7 @@ private:
 	void GenerateMipmaps( VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels )
 	{
 		VkFormatProperties formatProperties;
-		vkGetPhysicalDeviceFormatProperties( physicalDevice, imageFormat, &formatProperties );
+		vkGetPhysicalDeviceFormatProperties( context.physicalDevice, imageFormat, &formatProperties );
 
 		if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
 		{
@@ -2535,7 +2533,7 @@ private:
 		vkGetPhysicalDeviceProperties( device, &deviceProperties );
 		vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
 
-		limits = deviceProperties.limits; // FIXME: this function, as designed, should be constant
+		context.limits = deviceProperties.limits; // FIXME: this function, as designed, should be constant
 
 		QueueFamilyIndices indices = FindQueueFamilies( device );
 
