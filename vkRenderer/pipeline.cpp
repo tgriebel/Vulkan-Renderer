@@ -146,7 +146,7 @@ bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject )
 
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, pipelineHdl_t& pipelineHdl )
 {
-	pipelineHdl_t hdl;
+	//pipelineHdl_t hdl;
 	//if ( IsPipelineCached( state, hdl ) )
 	//{
 	//	pipelineHdl = ~0;
