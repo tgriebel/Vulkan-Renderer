@@ -2473,10 +2473,6 @@ private:
 
 		// Temp shadow map set-up
 		shadowView.viewport = renderView.viewport;
-		//shadowView.viewMatrix = glm::mat4( -0.01159f,	0.99993f,	0.000000f,	-0.07442f,
-		//									0.46618f,	0.00540f,	-0.88467f,	0.065310f,
-		//									0.88462f,	0.01025f,	0.46621f,	-4.32995f,
-		//									0.00000f,	0.00000f,	0.00000f,	1.000000f );
 		shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
 		shadowView.viewMatrix = glm::transpose( shadowView.viewMatrix );
 		shadowView.viewMatrix[ 3 ][ 0 ] = shadowLightPos[ 0 ];
@@ -2740,7 +2736,7 @@ private:
 		frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
 	}
 
-	std::vector<const char*> GetRequiredExtensions()
+	std::vector<const char*> GetRequiredExtensions() const
 	{
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
@@ -2763,25 +2759,18 @@ private:
 		std::vector<VkLayerProperties> availableLayers( layerCount );
 		vkEnumerateInstanceLayerProperties( &layerCount, availableLayers.data() );
 
-		for ( const char* layerName : validationLayers )
-		{
+		for ( const char* layerName : validationLayers ) {
 			bool layerFound = false;
-
-			for ( const auto& layerProperties : availableLayers )
-			{
-				if ( strcmp( layerName, layerProperties.layerName ) == 0 )
-				{
+			for ( const auto& layerProperties : availableLayers ) {
+				if ( strcmp( layerName, layerProperties.layerName ) == 0 ) {
 					layerFound = true;
 					break;
 				}
 			}
-
-			if ( !layerFound )
-			{
+			if ( !layerFound ) {
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -2803,18 +2792,15 @@ private:
 		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
 		createInfo.messageSeverity = 0;
-		if ( validateVerbose )
-		{
+		if ( validateVerbose ) {
 			createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
 		}
 
-		if ( validateWarnings )
-		{
+		if ( validateWarnings ) {
 			createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		}
 
-		if ( validateErrors )
-		{
+		if ( validateErrors ) {
 			createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		}
 
@@ -2840,12 +2826,9 @@ private:
 	VkResult CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger )
 	{
 		auto func = ( PFN_vkCreateDebugUtilsMessengerEXT )vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" );
-		if ( func != nullptr )
-		{
+		if ( func != nullptr ) {
 			return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
-		}
-		else
-		{
+		} else {
 			return VK_ERROR_EXTENSION_NOT_PRESENT;
 		}
 	}
@@ -2853,8 +2836,7 @@ private:
 	static void DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator )
 	{
 		auto func = ( PFN_vkDestroyDebugUtilsMessengerEXT )vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" );
-		if ( func != nullptr )
-		{
+		if ( func != nullptr ) {
 			func( instance, debugMessenger, pAllocator );
 		}
 	}
