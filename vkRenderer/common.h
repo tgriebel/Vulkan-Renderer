@@ -501,8 +501,9 @@ struct GpuImage
 
 struct DrawPassState
 {
-	VkRenderPass	pass;
-	VkFramebuffer	fb[ MAX_FRAMES_STATES ];
+	VkRenderPass		pass;
+	VkDescriptorSet		descriptorSets[ MAX_FRAMES_STATES ];
+	VkFramebuffer		fb[ MAX_FRAMES_STATES ];
 };
 
 
@@ -599,6 +600,21 @@ struct deviceContext_t
 	VkPhysicalDevice			physicalDevice;
 	VkInstance					instance;
 	VkPhysicalDeviceLimits		limits;
+	VkQueue						graphicsQueue;
+	VkQueue						presentQueue;
+	VkQueue						computeQueue;
+	uint32_t					queueFamilyIndices[ QUEUE_COUNT ];
+};
+
+struct graphicsQueue_t
+{
+	VkQueue						graphicsQueue;
+	VkCommandPool				commandPool;
+	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
+	VkSemaphore					imageAvailableSemaphores[ MAX_FRAMES_STATES ];
+	VkSemaphore					renderFinishedSemaphores[ MAX_FRAMES_STATES ];
+	VkFence						inFlightFences[ MAX_FRAMES_STATES ];
+	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
 };
 
 static inline void RandSphere( float& theta, float& phi )
@@ -626,5 +642,4 @@ static inline void RandPlanePoint( glm::vec2& outPoint )
 	outPoint.y = ( (float) rand() / ( RAND_MAX ) );
 }
 
-extern deviceContext_t			context;
-extern VkDescriptorSetLayout	globalLayout;
+extern deviceContext_t context;

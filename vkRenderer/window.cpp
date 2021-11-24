@@ -105,6 +105,13 @@ void Window::GetWindowFrameBufferSize( int& width, int& height, const bool wait 
 	}
 }
 
+void Window::CreateSurface()
+{
+	if ( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create window surface!" );
+	}
+}
+
 void Window::ClearKeyHistory()
 {
 	memset( input.keys, 0, 255 );

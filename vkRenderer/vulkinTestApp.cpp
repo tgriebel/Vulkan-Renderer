@@ -46,8 +46,6 @@ struct imguiControls_t
 static imguiControls_t imguiControls;
 
 pipelineHdl_t						postProcessPipeline;
-VkDescriptorSetLayout				globalLayout;
-VkDescriptorSetLayout				postProcessLayout;
 std::map<std::string, material_t>	materials;
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
@@ -72,6 +70,44 @@ RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFil
 	shader.ps = CreateShaderModule( psBlob );
 
 	return shader;
+}
+
+QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface )
+{
+	QueueFamilyIndices indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
+
+	std::vector<VkQueueFamilyProperties> queueFamilies( queueFamilyCount );
+	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
+
+	int i = 0;
+	for ( const auto& queueFamily : queueFamilies )
+	{
+		if ( queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
+			indices.graphicsFamily.set_value( i );
+		}
+
+		if ( queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT ) {
+			indices.computeFamily.set_value( i );
+		}
+
+		VkBool32 presentSupport = false;
+		
+		vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
+		if ( presentSupport ) {
+			indices.presentFamily.set_value( i );
+		}
+
+		if ( indices.IsComplete() ) {
+			break;
+		}
+
+		i++;
+	}
+
+	return indices;
 }
 
 class VkRenderer
@@ -110,33 +146,21 @@ private:
 #endif
 
 	Window							window;
-	VkInstance						instance;
-	VkQueue							graphicsQueue;
-	VkQueue							presentQueue;
-	VkQueue							computeQueue;
-	uint32_t						queueFamilyIndices[ QUEUE_COUNT ];
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
 	std::vector< AllocRecord >		imageAllocations;
+	graphicsQueue_t					graphicsQueue;
 	DrawPassState					shadowPassState;
 	DrawPassState					mainPassState;
 	DrawPassState					postPassState;
-	VkCommandPool					commandPool;
-	VkCommandBuffer					commandBuffers[ MAX_FRAMES_STATES ];
-	VkCommandBuffer					computeBuffers[ MAX_FRAMES_STATES ];
-	VkSemaphore						imageAvailableSemaphores[ MAX_FRAMES_STATES ];
-	VkSemaphore						renderFinishedSemaphores[ MAX_FRAMES_STATES ];
-	VkFence							inFlightFences[ MAX_FRAMES_STATES ];
-	VkFence							imagesInFlight[ MAX_FRAMES_STATES ];
+	VkDescriptorSetLayout			globalLayout;
+	VkDescriptorSetLayout			postProcessLayout;
+	VkDescriptorPool				descriptorPool;
 	FrameState						frameState[ MAX_FRAMES_STATES ];
 	size_t							currentFrame = 0;
-	GpuBuffer					stagingBuffer;
-	VkDescriptorPool				descriptorPool;
-	VkDescriptorSet					descriptorSets[ MAX_FRAMES_STATES ];
-	VkDescriptorSet					postDescriptorSets[ MAX_FRAMES_STATES ];
-	VkDescriptorSet					shadowDescriptorSets[ MAX_FRAMES_STATES ];
-	GpuBuffer					vb;	// move
-	GpuBuffer					ib;
+	GpuBuffer						stagingBuffer;
+	GpuBuffer						vb;	// move
+	GpuBuffer						ib;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
@@ -198,7 +222,7 @@ private:
 		createInfo.enabledExtensionCount = static_cast< uint32_t >( extensions.size() );
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
-		if ( vkCreateInstance( &createInfo, nullptr, &instance ) != VK_SUCCESS )
+		if ( vkCreateInstance( &createInfo, nullptr, &context.instance ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to create instance!" );
 		}
@@ -345,10 +369,11 @@ private:
 	{
 		CreateInstance();
 		SetupDebugMessenger();
-		CreateSurface();
+		window.CreateSurface();
 		PickPhysicalDevice();
 		CreateLogicalDevice();
-		swapChain.Create( FindQueueFamilies( context.physicalDevice ), queueFamilyIndices );
+		
+		swapChain.Create( &window );
 		CreateMainRenderPass( mainPassState.pass );
 		CreateShadowPass( shadowPassState.pass );
 		CreatePostProcessPass( postPassState.pass );
@@ -402,11 +427,11 @@ private:
 		ImGui_ImplGlfw_InitForVulkan( window.window, true );
 
 		ImGui_ImplVulkan_InitInfo vkInfo = {};
-		vkInfo.Instance = instance;
+		vkInfo.Instance = context.instance;
 		vkInfo.PhysicalDevice = context.physicalDevice;
 		vkInfo.Device = context.device;
-		vkInfo.QueueFamily = queueFamilyIndices[ QUEUE_GRAPHICS ];
-		vkInfo.Queue = graphicsQueue;
+		vkInfo.QueueFamily = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
+		vkInfo.Queue = context.graphicsQueue;
 		vkInfo.PipelineCache = nullptr;
 		vkInfo.DescriptorPool = descriptorPool;
 		vkInfo.Allocator = nullptr;
@@ -419,7 +444,7 @@ private:
 
 		// Upload Fonts
 		{
-			vkResetCommandPool( context.device, commandPool, 0 );
+			vkResetCommandPool( context.device, graphicsQueue.commandPool, 0 );
 			VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 			ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
 			EndSingleTimeCommands( commandBuffer );
@@ -453,9 +478,9 @@ private:
 
 		CreateSceneRenderDescriptorSetLayout( globalLayout );
 		CreateSceneRenderDescriptorSetLayout( postProcessLayout );
-		CreateDescriptorSets( globalLayout, descriptorSets );
-		CreateDescriptorSets( globalLayout, shadowDescriptorSets );
-		CreateDescriptorSets( postProcessLayout, postDescriptorSets );
+		CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
+		CreateDescriptorSets( globalLayout, shadowPassState.descriptorSets );
+		CreateDescriptorSets( postProcessLayout, postPassState.descriptorSets );
 	}
 
 	gfxStateBits_t GetStateBitsForDrawPass( const drawPass_t pass )
@@ -818,7 +843,7 @@ private:
 	void PickPhysicalDevice()
 	{
 		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
+		vkEnumeratePhysicalDevices( context.instance, &deviceCount, nullptr );
 
 		if ( deviceCount == 0 )
 		{
@@ -826,7 +851,7 @@ private:
 		}
 
 		std::vector<VkPhysicalDevice> devices( deviceCount );
-		vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
+		vkEnumeratePhysicalDevices( context.instance, &deviceCount, devices.data() );
 
 		for ( const auto& device : devices )
 		{
@@ -845,7 +870,10 @@ private:
 
 	void CreateLogicalDevice()
 	{
-		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice );
+		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, window.vk_surface );
+		context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
+		context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
+		context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value(), indices.computeFamily.value() };
@@ -894,14 +922,9 @@ private:
 			throw std::runtime_error( "Failed to create logical context.device!" );
 		}
 
-		vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &graphicsQueue );
-		vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &presentQueue );
-		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &computeQueue );
-
-		QueueFamilyIndices queueIndices = FindQueueFamilies( context.physicalDevice );
-		queueFamilyIndices[ QUEUE_GRAPHICS ] = queueIndices.graphicsFamily.value();
-		queueFamilyIndices[ QUEUE_PRESENT ] = queueIndices.presentFamily.value();
-		queueFamilyIndices[ QUEUE_COMPUTE ] = queueIndices.computeFamily.value();
+		vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &context.graphicsQueue );
+		vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &context.presentQueue );
+		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeQueue );
 	}
 
 	void CleanupFrameResources()
@@ -928,7 +951,7 @@ private:
 
 		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
-		vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
+		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 	}
 
 	void RecreateSwapChain()
@@ -942,15 +965,7 @@ private:
 
 		CleanupFrameResources();
 		swapChain.Destroy();
-		swapChain.Create( FindQueueFamilies( context.physicalDevice ), queueFamilyIndices );
-	}
-
-	void CreateSurface()
-	{
-		if ( glfwCreateWindowSurface( instance, window.window, nullptr, &swapChain.vk_surface ) != VK_SUCCESS )
-		{
-			throw std::runtime_error( "Failed to create window surface!" );
-		}
+		swapChain.Create( &window );
 	}
 
 	void CreateDefaultResources()
@@ -1107,7 +1122,7 @@ private:
 
 		uint32_t descriptorId = 0;
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 0;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1116,7 +1131,7 @@ private:
 		++descriptorId;
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 1;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1125,7 +1140,7 @@ private:
 		++descriptorId;
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 2;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1134,7 +1149,7 @@ private:
 		++descriptorId;
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 3;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1143,7 +1158,7 @@ private:
 		++descriptorId;
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 4;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1152,7 +1167,7 @@ private:
 		++descriptorId;
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 5;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1211,7 +1226,7 @@ private:
 
 		descriptorId = 0;
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		shadowDescriptorWrites[ descriptorId ].dstSet = shadowDescriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 0;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1220,7 +1235,7 @@ private:
 		++descriptorId;
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		shadowDescriptorWrites[ descriptorId ].dstSet = shadowDescriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 1;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1229,7 +1244,7 @@ private:
 		++descriptorId;
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		shadowDescriptorWrites[ descriptorId ].dstSet = shadowDescriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 2;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1238,7 +1253,7 @@ private:
 		++descriptorId;
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		shadowDescriptorWrites[ descriptorId ].dstSet = shadowDescriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 3;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1247,7 +1262,7 @@ private:
 		++descriptorId;
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		shadowDescriptorWrites[ descriptorId ].dstSet = shadowDescriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 4;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1256,7 +1271,7 @@ private:
 		++descriptorId;
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		shadowDescriptorWrites[ descriptorId ].dstSet = shadowDescriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1296,7 +1311,7 @@ private:
 
 		descriptorId = 0;
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		postDescriptorWrites[ descriptorId ].dstSet = postDescriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 0;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1305,7 +1320,7 @@ private:
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		postDescriptorWrites[ descriptorId ].dstSet = postDescriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 1;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1314,7 +1329,7 @@ private:
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		postDescriptorWrites[ descriptorId ].dstSet = postDescriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 2;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1323,7 +1338,7 @@ private:
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		postDescriptorWrites[ descriptorId ].dstSet = postDescriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 3;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1332,7 +1347,7 @@ private:
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		postDescriptorWrites[ descriptorId ].dstSet = postDescriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 4;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1341,7 +1356,7 @@ private:
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		postDescriptorWrites[ descriptorId ].dstSet = postDescriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 5;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1836,14 +1851,12 @@ private:
 
 	void CreateCommandPool()
 	{
-		QueueFamilyIndices queueFamilyIndices = FindQueueFamilies( context.physicalDevice );
-
 		VkCommandPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
 		poolInfo.flags = 0; // Optional
 
-		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) != VK_SUCCESS )
+		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &graphicsQueue.commandPool ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to create command pool!" );
 		}
@@ -1876,7 +1889,7 @@ private:
 		VkCommandBufferAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = commandPool;
+		allocInfo.commandPool = graphicsQueue.commandPool;
 		allocInfo.commandBufferCount = 1;
 
 		VkCommandBuffer commandBuffer;
@@ -1900,10 +1913,10 @@ private:
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		vkQueueSubmit( graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE );
-		vkQueueWaitIdle( graphicsQueue );
+		vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE );
+		vkQueueWaitIdle( context.graphicsQueue );
 
-		vkFreeCommandBuffers( context.device, commandPool, 1, &commandBuffer );
+		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, 1, &commandBuffer );
 	}
 
 	void TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels )
@@ -1988,11 +2001,11 @@ private:
 	{
 		VkCommandBufferAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = commandPool;
+		allocInfo.commandPool = graphicsQueue.commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = static_cast< uint32_t >( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS )
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, graphicsQueue.commandBuffers ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to allocate command buffers!" );
 		}
@@ -2004,15 +2017,15 @@ private:
 			beginInfo.flags = 0; // Optional
 			beginInfo.pInheritanceInfo = nullptr; // Optional
 
-			if ( vkBeginCommandBuffer( commandBuffers[ i ], &beginInfo ) != VK_SUCCESS )
+			if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS )
 			{
 				throw std::runtime_error( "Failed to begin recording command buffer!" );
 			}
 
 			VkBuffer vertexBuffers[] = { vb.GetVkObject() };
 			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers( commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
-			vkCmdBindIndexBuffer( commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+			vkCmdBindVertexBuffers( graphicsQueue.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
+			vkCmdBindIndexBuffer( graphicsQueue.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 			// Shadow Passes
 			{
@@ -2031,7 +2044,7 @@ private:
 				shadowPassInfo.pClearValues = shadowClearValues.data();
 
 				// TODO: how to handle views better?
-				vkCmdBeginRenderPass( commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+				vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 				for ( size_t surfIx = 0; surfIx < shadowView.committedModelCnt; surfIx++ )
 				{
@@ -2044,15 +2057,15 @@ private:
 					GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
 
 					// vkCmdSetDepthBias
-					vkCmdBindPipeline( commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-					vkCmdBindDescriptorSets( commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowDescriptorSets[ i ], 0, nullptr );
+					vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+					vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
 
 					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
-					vkCmdPushConstants( commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-					vkCmdDrawIndexed( commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 				}
-				vkCmdEndRenderPass( commandBuffers[ i ] );
+				vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 			}
 
 			// Main Passes
@@ -2071,7 +2084,7 @@ private:
 				renderPassInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
 				renderPassInfo.pClearValues = clearValues.data();
 
-				vkCmdBeginRenderPass( commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+				vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 				for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
 				{
@@ -2088,16 +2101,16 @@ private:
 						}
 						GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
 
-						vkCmdBindPipeline( commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-						vkCmdBindDescriptorSets( commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &descriptorSets[ i ], 0, nullptr );
+						vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+						vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
 
 						pushConstants_t pushConstants = { surface.objectId, surface.materialId };
-						vkCmdPushConstants( commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+						vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-						vkCmdDrawIndexed( commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+						vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 					}
 				}
-				vkCmdEndRenderPass( commandBuffers[ i ] );
+				vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 			}
 
 			// Post Process Passes
@@ -2116,7 +2129,7 @@ private:
 				postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
 				postProcessPassInfo.pClearValues = postProcessClearValues.data();
 
-				vkCmdBeginRenderPass( commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+				vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 				for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
 				{
 					drawSurf_t& surface = shadowView.surfaces[ surfIx ];
@@ -2125,13 +2138,13 @@ private:
 					}
 					pipelineObject_t* pipelineObject;
 					GetPipelineObject( surface.pipelineObject[ DRAWPASS_POST_2D ], &pipelineObject );
-					vkCmdBindPipeline( commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-					vkCmdBindDescriptorSets( commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postDescriptorSets[ i ], 0, nullptr );
+					vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+					vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
 
 					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
-					vkCmdPushConstants( commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-					vkCmdDrawIndexed( commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 				}
 
 #if defined( USE_IMGUI )
@@ -2191,13 +2204,13 @@ private:
 
 				// Render dear imgui into screen
 				ImGui::Render();
-				ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), commandBuffers[ i ] );
+				ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
 #endif
-				vkCmdEndRenderPass( commandBuffers[ i ] );
+				vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 			}
 
 
-			if ( vkEndCommandBuffer( commandBuffers[i] ) != VK_SUCCESS )
+			if ( vkEndCommandBuffer( graphicsQueue.commandBuffers[i] ) != VK_SUCCESS )
 			{
 				throw std::runtime_error( "Failed to record command buffer!" );
 			}
@@ -2409,50 +2422,13 @@ private:
 
 		for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 		{
-			if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
-				vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||
-				vkCreateFence( context.device, &fenceInfo, nullptr, &inFlightFences[ i ] ) != VK_SUCCESS )
+			if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &graphicsQueue.imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
+				vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &graphicsQueue.renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||
+				vkCreateFence( context.device, &fenceInfo, nullptr, &graphicsQueue.inFlightFences[ i ] ) != VK_SUCCESS )
 			{
 				throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 			}
 		}
-	}
-
-	QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device )
-	{
-		QueueFamilyIndices indices;
-		
-		uint32_t queueFamilyCount = 0;
-		vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
-
-		std::vector<VkQueueFamilyProperties> queueFamilies( queueFamilyCount );
-		vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
-
-		int i = 0;
-		for ( const auto& queueFamily : queueFamilies )
-		{
-			if ( queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
-				indices.graphicsFamily.set_value( i );
-			}
-
-			if( queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT ) {
-				indices.computeFamily.set_value( i );
-			}
-
-			VkBool32 presentSupport = false;
-			vkGetPhysicalDeviceSurfaceSupportKHR( device, i, swapChain.vk_surface, &presentSupport );
-			if ( presentSupport ) {
-				indices.presentFamily.set_value( i );
-			}
-
-			if ( indices.IsComplete() ) {
-				break;
-			}
-
-			i++;
-		}
-
-		return indices;
 	}
 
 	bool IsDeviceSuitable( VkPhysicalDevice device )
@@ -2464,14 +2440,14 @@ private:
 
 		context.limits = deviceProperties.limits; // FIXME: this function, as designed, should be constant
 
-		QueueFamilyIndices indices = FindQueueFamilies( device );
+		QueueFamilyIndices indices = FindQueueFamilies( device, window.vk_surface );
 
 		bool extensionsSupported = CheckDeviceExtensionSupport( device );
 
 		bool swapChainAdequate = false;
 		if ( extensionsSupported )
 		{
-			SwapChainSupportDetails swapChainSupport = swapChain.QuerySwapChainSupport( device );
+			SwapChainSupportDetails swapChainSupport = swapChain.QuerySwapChainSupport( device, window.vk_surface );
 			swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 		}
 
@@ -2552,11 +2528,8 @@ private:
 		while ( !glfwWindowShouldClose( window.window ) )
 		{
 			glfwPollEvents();
-
 			ProcessInput();
-
 			UpdateScene();
-
 			CommitScene();
 
 			DrawFrame();
@@ -2654,7 +2627,7 @@ private:
 
 	void WaitForEndFrame()
 	{
-		vkWaitForFences( context.device, 1, &inFlightFences[ currentFrame ], VK_TRUE, UINT64_MAX );
+		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ currentFrame ], VK_TRUE, UINT64_MAX );
 	}
 
 	void DrawFrame()
@@ -2662,7 +2635,7 @@ private:
 		WaitForEndFrame();
 
 		uint32_t imageIndex;
-		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, imageAvailableSemaphores[ currentFrame ], VK_NULL_HANDLE, &imageIndex );
+		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ currentFrame ], VK_NULL_HANDLE, &imageIndex );
 
 		if ( result == VK_ERROR_OUT_OF_DATE_KHR )
 		{
@@ -2675,11 +2648,11 @@ private:
 		}
 
 		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-		if ( imagesInFlight[ imageIndex ] != VK_NULL_HANDLE ) {
-			vkWaitForFences( context.device, 1, &imagesInFlight[ imageIndex ], VK_TRUE, UINT64_MAX );
+		if ( graphicsQueue.imagesInFlight[ imageIndex ] != VK_NULL_HANDLE ) {
+			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ imageIndex ], VK_TRUE, UINT64_MAX );
 		}
 		// Mark the image as now being in use by this frame
-		imagesInFlight[ imageIndex ] = inFlightFences[ currentFrame ];
+		graphicsQueue.imagesInFlight[ imageIndex ] = graphicsQueue.inFlightFences[ currentFrame ];
 
 		UpdateBufferContents( imageIndex );
 		UpdateFrameDescSet( imageIndex );
@@ -2688,21 +2661,21 @@ private:
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[ currentFrame ] };
+		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ currentFrame ] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[imageIndex];
 
-		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[ currentFrame ] };
+		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ currentFrame ] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences( context.device, 1, &inFlightFences[ currentFrame ] );
+		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ currentFrame ] );
 
-		if ( vkQueueSubmit( graphicsQueue, 1, &submitInfo, inFlightFences[ currentFrame ] ) != VK_SUCCESS )
+		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ currentFrame ] ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to submit draw command buffer!" );
 		}
@@ -2719,7 +2692,7 @@ private:
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr; // Optional
 
-		result = vkQueuePresentKHR( presentQueue, &presentInfo );
+		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 
 		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.IsResizeRequested() )
 		{
@@ -2756,21 +2729,21 @@ private:
 
 		for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 		{
-			vkDestroySemaphore( context.device, renderFinishedSemaphores[ i ], nullptr );
-			vkDestroySemaphore( context.device, imageAvailableSemaphores[ i ], nullptr );
-			vkDestroyFence( context.device, inFlightFences[ i ], nullptr );
+			vkDestroySemaphore( context.device, graphicsQueue.renderFinishedSemaphores[ i ], nullptr );
+			vkDestroySemaphore( context.device, graphicsQueue.imageAvailableSemaphores[ i ], nullptr );
+			vkDestroyFence( context.device, graphicsQueue.inFlightFences[ i ], nullptr );
 		}
 
-		vkDestroyCommandPool( context.device, commandPool, nullptr );
+		vkDestroyCommandPool( context.device, graphicsQueue.commandPool, nullptr );
 		vkDestroyDevice( context.device, nullptr );
 
 		if ( enableValidationLayers )
 		{
-			DestroyDebugUtilsMessengerEXT( instance, debugMessenger, nullptr );
+			DestroyDebugUtilsMessengerEXT( context.instance, debugMessenger, nullptr );
 		}
 
-		vkDestroySurfaceKHR( instance, swapChain.vk_surface, nullptr );
-		vkDestroyInstance( instance, nullptr );
+		vkDestroySurfaceKHR( context.instance, window.vk_surface, nullptr );
+		vkDestroyInstance( context.instance, nullptr );
 
 		window.~Window();
 	}
@@ -2967,7 +2940,7 @@ private:
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		PopulateDebugMessengerCreateInfo( createInfo );
 
-		if ( CreateDebugUtilsMessengerEXT( instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS )
+		if ( CreateDebugUtilsMessengerEXT( context.instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to set up debug messenger!" );
 		}
@@ -2998,11 +2971,11 @@ private:
 
 int main()
 {
-	VkRenderer app;
+	VkRenderer renderer;
 
 	try
 	{
-		app.Run();
+		renderer.Run();
 	}
 	catch (const std::exception& e)
 	{

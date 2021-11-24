@@ -1,6 +1,9 @@
 #pragma once
 
 #include "common.h"
+#include "window.h"
+
+QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 
 class SwapChain
 {
@@ -9,9 +12,10 @@ public:
 	{
 	}
 
-	void Create( QueueFamilyIndices& queueIndices, uint32_t queueFamilyIndices[ QUEUE_COUNT ] )
+	void Create( const Window* _window )
 	{
-		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice );
+		window = _window;
+		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice, window->vk_surface );
 
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat( swapChainSupport.formats );
 		VkPresentModeKHR presentMode = ChooseSwapPresentMode( swapChainSupport.presentModes );
@@ -25,7 +29,7 @@ public:
 
 		VkSwapchainCreateInfoKHR createInfo{ };
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		createInfo.surface = vk_surface;
+		createInfo.surface = window->vk_surface;
 		createInfo.oldSwapchain = vk_swapChain;
 		createInfo.minImageCount = imageCount;
 		createInfo.imageFormat = surfaceFormat.format;
@@ -34,11 +38,11 @@ public:
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-		if ( queueIndices.graphicsFamily.value() != queueIndices.presentFamily.value() )
+		if ( context.queueFamilyIndices[ QUEUE_GRAPHICS ] != context.queueFamilyIndices[ QUEUE_PRESENT ] )
 		{
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 			createInfo.queueFamilyIndexCount = QUEUE_COUNT;
-			createInfo.pQueueFamilyIndices = queueFamilyIndices;
+			createInfo.pQueueFamilyIndices = context.queueFamilyIndices;
 		}
 		else
 		{
@@ -98,43 +102,30 @@ public:
 	
 	}
 
-	SwapChainSupportDetails QuerySwapChainSupport( VkPhysicalDevice device )
+	static SwapChainSupportDetails QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface )
 	{
 		SwapChainSupportDetails details;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR( device, vk_surface, &details.capabilities );
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR( device, surface, &details.capabilities );
 
 		uint32_t formatCount;
-		vkGetPhysicalDeviceSurfaceFormatsKHR( device, vk_surface, &formatCount, nullptr );
+		vkGetPhysicalDeviceSurfaceFormatsKHR( device, surface, &formatCount, nullptr );
 
 		if ( formatCount != 0 )
 		{
 			details.formats.resize( formatCount );
-			vkGetPhysicalDeviceSurfaceFormatsKHR( device, vk_surface, &formatCount, details.formats.data() );
+			vkGetPhysicalDeviceSurfaceFormatsKHR( device, surface, &formatCount, details.formats.data() );
 		}
 
 		uint32_t presentModeCount;
-		vkGetPhysicalDeviceSurfacePresentModesKHR( device, vk_surface, &presentModeCount, nullptr );
+		vkGetPhysicalDeviceSurfacePresentModesKHR( device, surface, &presentModeCount, nullptr );
 
 		if ( presentModeCount != 0 )
 		{
 			details.presentModes.resize( presentModeCount );
-			vkGetPhysicalDeviceSurfacePresentModesKHR( device, vk_surface, &presentModeCount, details.presentModes.data() );
+			vkGetPhysicalDeviceSurfacePresentModesKHR( device, surface, &presentModeCount, details.presentModes.data() );
 		}
 
 		return details;
-	}
-
-	VkSurfaceFormatKHR ChooseSwapSurfaceFormat( const std::vector<VkSurfaceFormatKHR>& availableFormats )
-	{
-		for ( const auto& availableFormat : availableFormats )
-		{
-			if ( availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )
-			{
-				return availableFormat;
-			}
-		}
-
-		return availableFormats[ 0 ];
 	}
 
 	VkPresentModeKHR ChooseSwapPresentMode( const std::vector<VkPresentModeKHR>& availablePresentModes )
@@ -148,23 +139,6 @@ public:
 		}
 
 		return VK_PRESENT_MODE_FIFO_KHR;
-	}
-
-	VkExtent2D ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilities )
-	{
-		if ( capabilities.currentExtent.width != UINT32_MAX ) {
-			return capabilities.currentExtent;
-		} else {
-			VkExtent2D actualExtent = {
-				static_cast<uint32_t>( DISPLAY_WIDTH ),
-				static_cast<uint32_t>( DISPLAY_HEIGHT )
-			};
-
-			actualExtent.width = std::max( capabilities.minImageExtent.width, std::min( capabilities.maxImageExtent.width, actualExtent.width ) );
-			actualExtent.height = std::max( capabilities.minImageExtent.height, std::min( capabilities.maxImageExtent.height, actualExtent.height ) );
-
-			return actualExtent;
-		}
 	}
 
 	VkFormat GetBackBufferFormat() const {
@@ -182,14 +156,43 @@ public:
 	static const uint32_t MaxSwapChainBuffers = 4;
 
 //private:
-	uint32_t				currentImage;
-	uint32_t				imageCount;
+	uint32_t					currentImage;
+	uint32_t					imageCount;
 
+	const Window*				window;
 	VkSwapchainKHR				vk_swapChain;
-	VkSurfaceKHR				vk_surface;
 	std::vector<VkImage>		vk_swapChainImages;
 	std::vector<VkImageView>	vk_swapChainImageViews;
 	std::vector<VkFramebuffer>	vk_framebuffers;
 	VkFormat					vk_swapChainImageFormat;
 	VkExtent2D					vk_swapChainExtent;
+
+private:
+	static VkSurfaceFormatKHR ChooseSwapSurfaceFormat( const std::vector<VkSurfaceFormatKHR>& availableFormats )
+	{
+		for ( const auto& availableFormat : availableFormats ) {
+			if ( availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )	{
+				return availableFormat;
+			}
+		}
+		return availableFormats[ 0 ];
+	}
+
+	static VkExtent2D ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilities )
+	{
+		if ( capabilities.currentExtent.width != UINT32_MAX ) {
+			return capabilities.currentExtent;
+		}
+		else {
+			VkExtent2D actualExtent = {
+				static_cast<uint32_t>( DISPLAY_WIDTH ),
+				static_cast<uint32_t>( DISPLAY_HEIGHT )
+			};
+
+			actualExtent.width = std::max( capabilities.minImageExtent.width, std::min( capabilities.maxImageExtent.width, actualExtent.width ) );
+			actualExtent.height = std::max( capabilities.minImageExtent.height, std::min( capabilities.maxImageExtent.height, actualExtent.height ) );
+
+			return actualExtent;
+		}
+	}
 };
