@@ -271,25 +271,24 @@ private:
 
 		UploadModels();
 
-
 		const int palmTreesNum = 300;
 
 		int entId = 0;
 		scene.entities.resize( 5 + palmTreesNum );
-		CreateEntity( 0, scene.entities[ entId ] );
+		scene.CreateEntity( 0, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 1, scene.entities[ entId ] );
+		scene.CreateEntity( 1, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 3, scene.entities[ entId ] );
+		scene.CreateEntity( 3, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 4, scene.entities[ entId ] );
+		scene.CreateEntity( 4, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 5, scene.entities[ entId ] );
+		scene.CreateEntity( 5, scene.entities[ entId ] );
 		++entId;
 
 		for ( int i = 0; i < palmTreesNum; ++i )
 		{
-			CreateEntity( palmModelId, scene.entities[ entId ] );
+			scene.CreateEntity( palmModelId, scene.entities[ entId ] );
 			++entId;
 		}
 
@@ -782,15 +781,6 @@ private:
 		outModel.name			= modelName;
 		outModel.material		= &materials[ materialName ]; // FIXME: needs to be a look up since an index auto-inserts
 		outModel.materialId		= GetMaterialId( materialName );
-	}
-
-	void CreateEntity( const uint32_t modelId, entity_t& instance )
-	{
-		const modelSource_t& model = scene.models[ modelId ];
-
-		instance.modelId = modelId;
-		instance.materialId = model.materialId;
-		instance.matrix = glm::identity<glm::mat4>();
 	}
 
 	void PickPhysicalDevice()

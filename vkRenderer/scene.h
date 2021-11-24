@@ -18,4 +18,13 @@ struct Scene
 		camera.near = defaultNear;
 		camera.aspect = 16.0f / 9.0f;
 	}
+
+	void CreateEntity( const uint32_t modelId, entity_t& instance )
+	{
+		const modelSource_t& model = models[ modelId ];
+
+		instance.modelId = modelId;
+		instance.materialId = model.materialId;
+		instance.matrix = glm::identity<glm::mat4>();
+	}
 };
