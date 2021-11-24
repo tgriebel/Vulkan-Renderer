@@ -11,10 +11,9 @@
 #include "renderConstants.h"
 
 #define USE_IMGUI
-
-#define STB_IMAGE_IMPLEMENTATION // includes func defs
+//#define STB_IMAGE_IMPLEMENTATION // includes func defs
+//#include "stb_image.h"
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "stb_image.h"
 #include "tiny_obj_loader.h"
 #include "io.h"
 #include "GeoBuilder.h"
@@ -59,6 +58,9 @@ renderConstants_t					r;
 static bool							validateVerbose = false;
 static bool							validateWarnings = false;
 static bool							validateErrors = true;
+
+glm::mat4 MatrixFromVector( const glm::vec3& v );
+bool LoadTextureImage( const char* texturePath, textureSource_t& texture );
 
 RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile )
 {
@@ -856,8 +858,11 @@ private:
 		for ( const auto& device : devices )
 		{
 			if ( IsDeviceSuitable( device ) )
-			{
+			{		
+				VkPhysicalDeviceProperties deviceProperties;
+				vkGetPhysicalDeviceProperties( device, &deviceProperties );
 				context.physicalDevice = device;
+				context.limits = deviceProperties.limits;
 				break;
 			}
 		}
@@ -2362,24 +2367,24 @@ private:
 
 	void CreateTextureImage( const std::vector<std::string>& texturePaths )
 	{
-		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-
+		std::vector<textureSource_t> textureSources;
+		textureSources.reserve( texturePaths.size() );
 		for ( const std::string& texturePath : texturePaths )
 		{
-			int texWidth, texHeight, texChannels;
-			stbi_uc* pixels = stbi_load( ( TexturePath + texturePath ).c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha );
-
-			if ( !pixels )
-			{
-				throw std::runtime_error( "Failed to load texture image!" );
+			textureSource_t texture;
+			if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
+				texture.name = texturePath.c_str();
+				textureSources.push_back( texture );
 			}
+		}
 
+		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+		for ( const textureSource_t& textureSource : textureSources )
+		{
 			texture_t texture;
-			texture.width = texWidth;
-			texture.height = texHeight;
-			texture.channels = texChannels;
-
-			VkDeviceSize imageSize = texture.width * texture.height * 4;
+			texture.width = textureSource.width;
+			texture.height = textureSource.height;
+			texture.channels = textureSource.channels;
 			texture.mipLevels = static_cast< uint32_t >( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
 
 			CreateImage( texture.width, texture.height, texture.mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture.vk_image, localMemory, texture.memory );
@@ -2387,15 +2392,12 @@ private:
 			TransitionImageLayout( texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.mipLevels );
 
 			const VkDeviceSize currentOffset = stagingBuffer.currentOffset;
-			stagingBuffer.CopyData( pixels, static_cast< size_t >( imageSize ) );
-
-			stbi_image_free( pixels );
+			stagingBuffer.CopyData( textureSource.bytes, textureSource.sizeBytes );
 
 			CopyBufferToImage( commandBuffer, stagingBuffer.buffer, currentOffset, texture.vk_image, static_cast< uint32_t >( texture.width ), static_cast< uint32_t >( texture.height ) );
 		
-			textures[ texturePath ] = texture;
+			textures[ textureSource.name ] = texture;
 		}
-
 		EndSingleTimeCommands( commandBuffer );
 
 		for ( auto it = textures.begin(); it != textures.end(); ++it )
@@ -2431,14 +2433,12 @@ private:
 		}
 	}
 
-	bool IsDeviceSuitable( VkPhysicalDevice device )
+	bool IsDeviceSuitable( VkPhysicalDevice device ) const
 	{
 		VkPhysicalDeviceProperties deviceProperties;
 		VkPhysicalDeviceFeatures deviceFeatures;
 		vkGetPhysicalDeviceProperties( device, &deviceProperties );
 		vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
-
-		context.limits = deviceProperties.limits; // FIXME: this function, as designed, should be constant
 
 		QueueFamilyIndices indices = FindQueueFamilies( device, window.vk_surface );
 
@@ -2457,7 +2457,7 @@ private:
 		return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 	}
 
-	bool CheckDeviceExtensionSupport( VkPhysicalDevice device )
+	bool CheckDeviceExtensionSupport( VkPhysicalDevice device ) const
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
@@ -2536,23 +2536,6 @@ private:
 		}
 
 		vkDeviceWaitIdle( context.device );
-	}
-
-	static glm::mat4 MatrixFromVector( const glm::vec3 & v )
-	{
-		glm::vec3 up = glm::vec3( 0.0f, 0.0f, 1.0f );
-		const glm::vec3 u = glm::normalize( v );	
-		if ( glm::dot( v, up ) > 0.99999f ) {
-			up = glm::vec3( 0.0f, 1.0f, 0.0f );
-		}
-		const glm::vec3 left = -glm::cross( u, up );
-
-		const glm::mat4 m = glm::mat4(	up[ 0 ],	up[ 1 ],	up[ 2 ],	0.0f,
-										left[ 0 ],	left[ 1 ],	left[ 2 ],	0.0f,
-										v[ 0 ],		v[ 1 ],		v[ 2 ],		0.0f,
-										0.0f,		0.0f,		0.0f,		1.0f );
-
-		return m;
 	}
 
 	void UpdateScene()

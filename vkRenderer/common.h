@@ -386,6 +386,16 @@ private:
 	void*			ptr;
 };
 
+struct textureSource_t
+{
+	const char *	name;
+	uint8_t*		bytes;
+	uint32_t		sizeBytes;
+	uint32_t		width;
+	uint32_t		height;
+	uint32_t		channels;
+};
+
 
 struct texture_t
 {
