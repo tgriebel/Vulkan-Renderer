@@ -354,8 +354,6 @@ private:
 			AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
 		}
 		
-		CreateDefaultResources();
-		CreateShadowMapResources();
 		CreateResourceBuffers();
 		CreateTextureSampler( vk_bilinearSampler );
 		CreateDepthSampler( vk_depthShadowSampler );
@@ -933,51 +931,6 @@ private:
 		swapChain.Create( &window );
 	}
 
-	void CreateDefaultResources()
-	{
-		imageAllocations.push_back( AllocRecord() );
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.whiteImage.image, localMemory, imageAllocations.back() );
-		r.whiteImage.view = CreateImageView( r.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
-
-		imageAllocations.push_back( AllocRecord() );
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.blackImage.image, localMemory, imageAllocations.back() );
-		r.blackImage.view = CreateImageView( r.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
-	}
-
-	void CreateShadowMapResources()
-	{
-		const VkFormat depthFormat = FindDepthFormat();
-
-		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
-		{
-			imageAllocations.push_back( AllocRecord() );
-			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage.image, localMemory, imageAllocations.back() );
-			frameState[ i ].shadowMapImage.view = CreateImageView( frameState[ i ].shadowMapImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
-		}
-
-		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
-		{
-			std::array<VkImageView, 2> attachments = {
-				r.whiteImage.view,
-				frameState[ i ].shadowMapImage.view,
-			};
-
-			VkFramebufferCreateInfo framebufferInfo{ };
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = shadowPassState.pass;
-			framebufferInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
-			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = ShadowMapWidth;
-			framebufferInfo.height = ShadowMapHeight;
-			framebufferInfo.layers = 1;
-
-			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowPassState.fb[ i ] ) != VK_SUCCESS )
-			{
-				throw std::runtime_error( "Failed to create framebuffer!" );
-			}
-		}
-	}
-	
 	void CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
 	{
 		std::vector<VkDescriptorSetLayout> layouts( swapChain.GetBufferCount(), layout );
@@ -1756,9 +1709,42 @@ private:
 
 	void CreateFramebuffers()
 	{
-		swapChain.vk_framebuffers.resize( swapChain.GetBufferCount() );
+		/////////////////////////////////
+		//       Shadow Map Render     //
+		/////////////////////////////////
+		const VkFormat depthFormat = FindDepthFormat();
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
+		{
+			imageAllocations.push_back( AllocRecord() );
+			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage.image, localMemory, imageAllocations.back() );
+			frameState[ i ].shadowMapImage.view = CreateImageView( frameState[ i ].shadowMapImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		}
 
-		// Main Scene 3D Render
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
+		{
+			std::array<VkImageView, 2> attachments = {
+				r.whiteImage.view,
+				frameState[ i ].shadowMapImage.view,
+			};
+
+			VkFramebufferCreateInfo framebufferInfo{ };
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = shadowPassState.pass;
+			framebufferInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
+			framebufferInfo.pAttachments = attachments.data();
+			framebufferInfo.width = ShadowMapWidth;
+			framebufferInfo.height = ShadowMapHeight;
+			framebufferInfo.layers = 1;
+
+			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowPassState.fb[ i ] ) != VK_SUCCESS )
+			{
+				throw std::runtime_error( "Failed to create framebuffer!" );
+			}
+		}
+
+		/////////////////////////////////
+		//     Main Scene 3D Render    //
+		/////////////////////////////////
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
 			imageAllocations.push_back( AllocRecord() );
@@ -1789,8 +1775,10 @@ private:
 				throw std::runtime_error( "Failed to create scene framebuffer!" );
 			}
 		}
-
-		// Swap Chain Images
+		/////////////////////////////////
+		//       Swap Chain Images     //
+		/////////////////////////////////
+		swapChain.vk_framebuffers.resize( swapChain.GetBufferCount() );
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
 			std::array<VkImageView, 1> attachments = {
@@ -1821,8 +1809,7 @@ private:
 		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
 		poolInfo.flags = 0; // Optional
 
-		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &graphicsQueue.commandPool ) != VK_SUCCESS )
-		{
+		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &graphicsQueue.commandPool ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create command pool!" );
 		}
 	}
@@ -2371,6 +2358,15 @@ private:
 			texture_t& texture = it->second;
 			texture.vk_imageView = CreateImageView( texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture.mipLevels );
 		}
+
+		// Default Images
+		imageAllocations.push_back( AllocRecord() );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.whiteImage.image, localMemory, imageAllocations.back() );
+		r.whiteImage.view = CreateImageView( r.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+
+		imageAllocations.push_back( AllocRecord() );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.blackImage.image, localMemory, imageAllocations.back() );
+		r.blackImage.view = CreateImageView( r.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateSyncObjects()
