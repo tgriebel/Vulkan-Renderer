@@ -17,7 +17,7 @@ public:
 	GLFWwindow*				window;
 	VkSurfaceKHR			vk_surface;
 	input_t					input;
-	void					InitWindow();
+	void					Init();
 	void					CreateSurface();
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );

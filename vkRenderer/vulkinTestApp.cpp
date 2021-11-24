@@ -43,7 +43,6 @@ struct imguiControls_t
 };
 static imguiControls_t imguiControls;
 
-pipelineHdl_t						postProcessPipeline;
 std::map<std::string, material_t>	materials;
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
@@ -67,7 +66,7 @@ class VkRenderer
 {
 public:
 	void Run() {
-		window.InitWindow();
+		window.Init();
 		InitVulkan();
 		InitImGui();
 		MainLoop();

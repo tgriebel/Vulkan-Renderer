@@ -66,7 +66,7 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 }
 
 
-void Window::InitWindow()
+void Window::Init()
 {
 	glfwInit();
 
