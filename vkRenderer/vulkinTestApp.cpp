@@ -3,6 +3,7 @@
 #include "common.h"
 #include "deviceContext.h"
 #include "camera.h"
+#include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"
 #include "assetLib_GpuProgs.h"
@@ -11,8 +12,6 @@
 #include "renderConstants.h"
 
 #define USE_IMGUI
-//#define STB_IMAGE_IMPLEMENTATION // includes func defs
-//#include "stb_image.h"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 #include "io.h"
@@ -52,8 +51,9 @@ MemoryAllocator						sharedMemory;
 AssetLibGpuProgram					gpuPrograms;
 
 deviceContext_t						context;
-
 renderConstants_t					r;
+
+Scene								scene;
 
 static bool							validateVerbose = false;
 static bool							validateWarnings = false;
@@ -93,9 +93,7 @@ private:
 	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "viking_room.png",
 													"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
 
-	std::vector<modelSource_t>			models;
 	std::vector<surfUpload_t>			modelUpload;
-	std::vector<entity_t>				entities;
 	std::map<std::string, texture_t>	textures;
 	RenderView							renderView;
 	RenderView							shadowView;
@@ -130,7 +128,6 @@ private:
 	VkSampler						vk_depthShadowSampler;
 	VkSampler						vk_depthSampler;
 
-	Camera							mainCamera;
 	float							nearPlane = 1000.0f;
 	float							farPlane = 0.1f;
 
@@ -196,23 +193,23 @@ private:
 	{
 		const VkDeviceSize vbSize = sizeof( VertexInput ) * MaxVertices;
 		const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-		modelUpload.resize( models.size() );
+		modelUpload.resize( scene.models.size() );
 		for ( int i = 0; i < 1; ++i ) {
 			CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb.buffer, localMemory, vb.allocation );
 			CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib.buffer, localMemory, ib.allocation );
 
 			static uint32_t vbBufElements = 0;
 			static uint32_t ibBufElements = 0;
-			for ( uint32_t m = 0; m < models.size(); ++m )
+			for ( uint32_t m = 0; m < scene.models.size(); ++m )
 			{
-				VkDeviceSize vbCopySize = sizeof( models[ m ].vertices[ 0 ] ) * models[ m ].vertices.size();
-				VkDeviceSize ibCopySize = sizeof( models[ m ].indices[ 0 ] ) * models[ m ].indices.size();
+				VkDeviceSize vbCopySize = sizeof( scene.models[ m ].vertices[ 0 ] ) * scene.models[ m ].vertices.size();
+				VkDeviceSize ibCopySize = sizeof( scene.models[ m ].indices[ 0 ] ) * scene.models[ m ].indices.size();
 				
 				// VB Copy
 				modelUpload[ m ].vb = vb.GetVkObject();
 				modelUpload[ m ].vertexOffset = vbBufElements;
 				stagingBuffer.Reset();
-				stagingBuffer.CopyData( models[ m ].vertices.data(), static_cast<size_t>( vbCopySize ) );
+				stagingBuffer.CopyData( scene.models[ m ].vertices.data(), static_cast<size_t>( vbCopySize ) );
 
 				VkBufferCopy vbCopyRegion{ };
 				vbCopyRegion.size = vbCopySize;
@@ -221,14 +218,14 @@ private:
 				UploadToGPU( stagingBuffer.buffer, vb.GetVkObject(), vbCopyRegion );
 
 				vb.allocation.subOffset += vbCopySize;
-				vbBufElements += static_cast< uint32_t >( models[ m ].vertices.size() );
+				vbBufElements += static_cast< uint32_t >( scene.models[ m ].vertices.size() );
 
 				// IB Copy
 				modelUpload[ m ].ib = ib.GetVkObject();
 				modelUpload[ m ].firstIndex = ibBufElements;
 
 				stagingBuffer.Reset();
-				stagingBuffer.CopyData( models[ m ].indices.data(), static_cast<size_t>( ibCopySize ) );
+				stagingBuffer.CopyData( scene.models[ m ].indices.data(), static_cast<size_t>( ibCopySize ) );
 
 				VkBufferCopy ibCopyRegion{ };
 				ibCopyRegion.size = ibCopySize;
@@ -237,7 +234,7 @@ private:
 				UploadToGPU( stagingBuffer.buffer, ib.GetVkObject(), ibCopyRegion );
 
 				ib.allocation.subOffset += ibCopySize;
-				ibBufElements += static_cast<uint32_t>( models[ m ].indices.size() );
+				ibBufElements += static_cast<uint32_t>( scene.models[ m ].indices.size() );
 			}
 		}
 	}
@@ -245,7 +242,7 @@ private:
 	void CommitModel( RenderView& view, entity_t& model, const uint32_t objectOffset )
 	{
 		drawSurf_t& surf		= view.surfaces[ view.committedModelCnt ];
-		modelSource_t& source	= models[ model.modelId ];
+		modelSource_t& source	= scene.models[ model.modelId ];
 		surfUpload_t& upload	= modelUpload[ model.modelId ];
 
 		surf.vertexCount		= upload.vertexCount;
@@ -270,7 +267,7 @@ private:
 
 	void MakeBeachScene()
 	{
-		models.resize( 6 );
+		scene.models.resize( 6 );
 		const int skyBoxId = 0;
 		const int terrainId = 1;
 		const int palmModelId = 2;
@@ -278,12 +275,12 @@ private:
 		const int toneQuadId = 4;
 		const int image2dId = 5;
 
-		CreateSkyBoxSurf( models[ skyBoxId ] );
-		CreateTerrainSurface( models[ terrainId ] );
-		CreateStaticModel( "sphere.obj", "PALM", models[ palmModelId ] );
-		CreateWaterSurface( models[ waterId ] );
-		CreateQuadSurface2D( "TONEMAP", models[ toneQuadId ], glm::vec2( 1.0f, 1.0f ), glm::vec2( 2.0f ) );
-		CreateQuadSurface2D( "IMAGE2D", models[ image2dId ], glm::vec2( 1.0f, 1.0f ), glm::vec2( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
+		CreateSkyBoxSurf( scene.models[ skyBoxId ] );
+		CreateTerrainSurface( scene.models[ terrainId ] );
+		CreateStaticModel( "sphere.obj", "PALM", scene.models[ palmModelId ] );
+		CreateWaterSurface( scene.models[ waterId ] );
+		CreateQuadSurface2D( "TONEMAP", scene.models[ toneQuadId ], glm::vec2( 1.0f, 1.0f ), glm::vec2( 2.0f ) );
+		CreateQuadSurface2D( "IMAGE2D", scene.models[ image2dId ], glm::vec2( 1.0f, 1.0f ), glm::vec2( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 
 		UploadModels();
 
@@ -291,26 +288,26 @@ private:
 		const int palmTreesNum = 300;
 
 		int entId = 0;
-		entities.resize( 5 + palmTreesNum );
-		CreateEntity( 0, entities[ entId ] );
+		scene.entities.resize( 5 + palmTreesNum );
+		CreateEntity( 0, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 1, entities[ entId ] );
+		CreateEntity( 1, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 3, entities[ entId ] );
+		CreateEntity( 3, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 4, entities[ entId ] );
+		CreateEntity( 4, scene.entities[ entId ] );
 		++entId;
-		CreateEntity( 5, entities[ entId ] );
+		CreateEntity( 5, scene.entities[ entId ] );
 		++entId;
 
 		for ( int i = 0; i < palmTreesNum; ++i )
 		{
-			CreateEntity( palmModelId, entities[ entId ] );
+			CreateEntity( palmModelId, scene.entities[ entId ] );
 			++entId;
 		}
 
 		// Terrain
-		entities[ 1 ].matrix = glm::identity<glm::mat4>();
+		scene.entities[ 1 ].matrix = glm::identity<glm::mat4>();
 
 		// Model
 		const float scale = 0.0025f;
@@ -320,36 +317,44 @@ private:
 				glm::vec2 randPoint;
 				RandPlanePoint( randPoint );
 				randPoint = 10.0f * ( randPoint - 0.5f );
-				entities[ i ].matrix = scale * glm::identity<glm::mat4>();
-				entities[ i ].matrix[ 3 ][ 0 ] = randPoint.x;
-				entities[ i ].matrix[ 3 ][ 1 ] = randPoint.y;
-				entities[ i ].matrix[ 3 ][ 2 ] = 0.0f;
-				entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
+				scene.entities[ i ].matrix = scale * glm::identity<glm::mat4>();
+				scene.entities[ i ].matrix[ 3 ][ 0 ] = randPoint.x;
+				scene.entities[ i ].matrix[ 3 ][ 1 ] = randPoint.y;
+				scene.entities[ i ].matrix[ 3 ][ 2 ] = 0.0f;
+				scene.entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
 			}
 		}
 	}
 
 	void InitVulkan()
 	{
-		CreateInstance();
-		SetupDebugMessenger();
-		window.CreateSurface();
-		PickPhysicalDevice();
-		CreateLogicalDevice();
-		
-		swapChain.Create( &window );
-		CreateMainRenderPass( mainPassState.pass );
-		CreateShadowPass( shadowPassState.pass );
-		CreatePostProcessPass( postPassState.pass );
-
-		CreateDescriptorPool();
-		CreateCommandPool();
-
-		// Memory Allocations
 		{
+			// Device Set-up
+			CreateInstance();
+			SetupDebugMessenger();
+			window.CreateSurface();
+			PickPhysicalDevice();
+			CreateLogicalDevice();	
+			swapChain.Create( &window );
+		}
+
+		{
+			// Passes
+			CreateMainRenderPass( mainPassState.pass );
+			CreateShadowPass( shadowPassState.pass );
+			CreatePostProcessPass( postPassState.pass );
+		}
+
+		{
+			// Pool Creation
+			CreateDescriptorPool();
+			CreateCommandPool();
+		}
+
+		{
+			// Memory Allocations
 			uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
 			AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
-
 			type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
 			AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
 		}
@@ -357,7 +362,7 @@ private:
 		CreateResourceBuffers();
 		CreateTextureSampler( vk_bilinearSampler );
 		CreateDepthSampler( vk_depthShadowSampler );
-	
+
 		InitScene( renderView );
 
 		CreateAssetLibs();
@@ -795,7 +800,7 @@ private:
 
 	void CreateEntity( const uint32_t modelId, entity_t& instance )
 	{
-		const modelSource_t& model = models[ modelId ];
+		const modelSource_t& model = scene.models[ modelId ];
 
 		instance.modelId = modelId;
 		instance.materialId = model.materialId;
@@ -2116,27 +2121,27 @@ private:
 				const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
 				char entityName[ 256 ];
 				if ( imguiControls.selectedModelId >= 0 ) {
-					modelSource_t& model = models[ entities[ imguiControls.selectedModelId ].modelId ];
+					modelSource_t& model = scene.models[ scene.entities[ imguiControls.selectedModelId ].modelId ];
 					sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, model.name.c_str() );
 				} else {
 					memset( &entityName[ 0 ], 0, 256 );
 				}
 				static glm::vec3 tempOrigin;
 				ImGui::Text( "NDC: (%f, %f )", (float) ndc.x, (float) ndc.y );
-				ImGui::Text( "Camera Origin: (%f, %f, %f)", mainCamera.GetOrigin().x, mainCamera.GetOrigin().y, mainCamera.GetOrigin().z );
+				ImGui::Text( "Camera Origin: (%f, %f, %f)", scene.camera.GetOrigin().x, scene.camera.GetOrigin().y, scene.camera.GetOrigin().z );
 				if ( ImGui::BeginCombo( "Models", entityName ) )
 				{
-					for ( int entityIx = 0; entityIx < entities.size(); ++entityIx ) {
-						modelSource_t& model = models[ entities[ entityIx ].modelId ];
+					for ( int entityIx = 0; entityIx < scene.entities.size(); ++entityIx ) {
+						modelSource_t& model = scene.models[ scene.entities[ entityIx ].modelId ];
 						sprintf_s( entityName, "%i: %s", entityIx, model.name.c_str() );
 						if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
 							imguiControls.selectedModelId = entityIx;
-							entities[ entityIx ].flags = WIREFRAME;
-							tempOrigin.x = entities[ entityIx ].matrix[ 3 ][ 0 ];
-							tempOrigin.y = entities[ entityIx ].matrix[ 3 ][ 1 ];
-							tempOrigin.z = entities[ entityIx ].matrix[ 3 ][ 2 ];
+							scene.entities[ entityIx ].flags = WIREFRAME;
+							tempOrigin.x = scene.entities[ entityIx ].matrix[ 3 ][ 0 ];
+							tempOrigin.y = scene.entities[ entityIx ].matrix[ 3 ][ 1 ];
+							tempOrigin.z = scene.entities[ entityIx ].matrix[ 3 ][ 2 ];
 						} else {
-							entities[ entityIx ].flags = (renderFlags) ( entities[ entityIx ].flags & ~WIREFRAME );
+							scene.entities[ entityIx ].flags = (renderFlags) ( scene.entities[ entityIx ].flags & ~WIREFRAME );
 						}
 					}
 					ImGui::EndCombo();
@@ -2146,7 +2151,7 @@ private:
 				ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin.z, 0.1f, 1.0f );
 
 				if ( imguiControls.selectedModelId >= 0 ) {
-					entity_t& entity = entities[ imguiControls.selectedModelId ];
+					entity_t& entity = scene.entities[ imguiControls.selectedModelId ];
 					entity.matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin.x;
 					entity.matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
 					entity.matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
@@ -2393,38 +2398,38 @@ private:
 	{
 		view.viewport.x = 0.0f;
 		view.viewport.y = 0.0f;
-		view.viewport.width = ( float )DISPLAY_WIDTH;
-		view.viewport.height = ( float )DISPLAY_HEIGHT;
+		view.viewport.width = (float)DISPLAY_WIDTH;
+		view.viewport.height = (float)DISPLAY_HEIGHT;
 		view.viewport.near = 1.0f;
 		view.viewport.far = 0.0f;
 
-		mainCamera = Camera( glm::vec4( 0.0f, 1.66f, 1.0f, 0.0f ) );
-		mainCamera.fov = glm::radians( 90.0f );
-		mainCamera.far = farPlane;
-		mainCamera.near = nearPlane;
-		mainCamera.aspect = ( DISPLAY_WIDTH / (float)DISPLAY_HEIGHT );
+		scene.camera = Camera( glm::vec4( 0.0f, 1.66f, 1.0f, 0.0f ) );
+		scene.camera.fov = glm::radians( 90.0f );
+		scene.camera.far = farPlane;
+		scene.camera.near = nearPlane;
+		scene.camera.aspect = ( DISPLAY_WIDTH / (float)DISPLAY_HEIGHT );
 	}
 
 	void ProcessInput()
 	{
 		const input_t & input = window.input;
 		if ( input.keys['D'] ) {
-			mainCamera.MoveForward( 0.1f );
+			scene.camera.MoveForward( 0.1f );
 		}
 		if ( input.keys['A'] ) {
-			mainCamera.MoveForward( -0.1f );
+			scene.camera.MoveForward( -0.1f );
 		}
 		if ( input.keys['W'] ) {
-			mainCamera.MoveVertical( -0.1f );
+			scene.camera.MoveVertical( -0.1f );
 		}
 		if ( input.keys['S'] ) {
-			mainCamera.MoveVertical( 0.1f );
+			scene.camera.MoveVertical( 0.1f );
 		}
 		if ( input.keys['+'] ) {
-			mainCamera.fov++;
+			scene.camera.fov++;
 		}
 		if ( input.keys['-'] ) {
-			mainCamera.fov--;
+			scene.camera.fov--;
 		}
 
 		const mouse_t & mouse = input.mouse;
@@ -2432,8 +2437,8 @@ private:
 		{
 			const float yawDelta = mouse.speed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
 			const float pitchDelta = -mouse.speed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
-			mainCamera.SetYaw( yawDelta );
-			mainCamera.SetPitch( pitchDelta );
+			scene.camera.SetYaw( yawDelta );
+			scene.camera.SetPitch( pitchDelta );
 		}
 	}
 
@@ -2462,8 +2467,8 @@ private:
 		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, -6.0f, 0.0f );
 		const glm::vec3 lightDir0 = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 
-		renderView.viewMatrix = mainCamera.GetViewMatrix();
-		renderView.projMatrix  = mainCamera.GetPerspectiveMatrix();
+		renderView.viewMatrix = scene.camera.GetViewMatrix();
+		renderView.projMatrix  = scene.camera.GetPerspectiveMatrix();
 		renderView.lights[ 0 ].lightPos = glm::vec4( lightPos0[ 0 ], lightPos0[ 1 ], lightPos0[ 2 ], 0.0f );
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 0 ].lightDir = glm::vec4( lightDir0[ 0 ], lightDir0[ 1 ], lightDir0[ 2 ], 0.0f );
@@ -2498,27 +2503,27 @@ private:
 		shadowView.projMatrix = shadowCam.GetPerspectiveMatrix();
 
 		// Skybox
-		entities[ 0 ].matrix = glm::identity<glm::mat4>();
-		entities[ 0 ].matrix[ 3 ][ 0 ] = mainCamera.GetOrigin()[ 0 ];
-		entities[ 0 ].matrix[ 3 ][ 1 ] = mainCamera.GetOrigin()[ 1 ];
-		entities[ 0 ].matrix[ 3 ][ 2 ] = mainCamera.GetOrigin()[ 2 ] - 0.5f;
+		scene.entities[ 0 ].matrix = glm::identity<glm::mat4>();
+		scene.entities[ 0 ].matrix[ 3 ][ 0 ] = scene.camera.GetOrigin()[ 0 ];
+		scene.entities[ 0 ].matrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
+		scene.entities[ 0 ].matrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	}
 
 	void CommitScene()
 	{
 		renderView.committedModelCnt = 0;
-		for ( uint32_t i = 0; i < entities.size(); ++i )
+		for ( uint32_t i = 0; i < scene.entities.size(); ++i )
 		{
-			CommitModel( renderView, entities[ i ], 0 );
+			CommitModel( renderView, scene.entities[ i ], 0 );
 		}
 
 		shadowView.committedModelCnt = 0;
-		for ( uint32_t i = 0; i < entities.size(); ++i )
+		for ( uint32_t i = 0; i < scene.entities.size(); ++i )
 		{
-			if ( entities[ i ].flags == NO_SHADOWS ) {
+			if ( scene.entities[ i ].flags == NO_SHADOWS ) {
 				continue;
 			}
-			CommitModel( shadowView, entities[ i ], MaxModels );
+			CommitModel( shadowView, scene.entities[ i ], MaxModels );
 		}
 	}
 

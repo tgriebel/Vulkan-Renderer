@@ -427,6 +427,15 @@ struct drawSurf_t
 };
 
 
+struct entity_t
+{
+	glm::mat4					matrix;
+	uint32_t					materialId;
+	uint32_t					modelId;
+	renderFlags					flags;
+};
+
+
 struct RenderView
 {
 	glm::mat4					viewMatrix;
@@ -460,15 +469,6 @@ struct surfUpload_t
 	// TODO: remove
 	AllocRecord					vbMemory;
 	AllocRecord					ibMemory;
-};
-
-
-struct entity_t
-{
-	glm::mat4					matrix;
-	uint32_t					materialId;	
-	uint32_t					modelId;
-	renderFlags					flags;
 };
 
 

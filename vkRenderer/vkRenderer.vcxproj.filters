@@ -75,6 +75,7 @@
     <ClInclude Include="window.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />
+    <ClInclude Include="scene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
