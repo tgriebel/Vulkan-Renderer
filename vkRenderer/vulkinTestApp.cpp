@@ -115,7 +115,6 @@ private:
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
-	VkSampler						vk_depthSampler;
 
 	float							nearPlane = 1000.0f;
 	float							farPlane = 0.1f;
@@ -349,8 +348,7 @@ private:
 		}
 		
 		CreateResourceBuffers();
-		CreateTextureSampler( vk_bilinearSampler );
-		CreateDepthSampler( vk_depthShadowSampler );
+		CreateTextureSamplers();
 
 		InitScene( renderView );
 
@@ -1402,55 +1400,56 @@ private:
 		EndSingleTimeCommands( commandBuffer );
 	}
 
-	void CreateTextureSampler( VkSampler& outSampler )
+	void CreateTextureSamplers()
 	{
-		VkSamplerCreateInfo samplerInfo{ };
-		samplerInfo.sType					= VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter				= VK_FILTER_LINEAR;
-		samplerInfo.minFilter				= VK_FILTER_LINEAR;
-		samplerInfo.addressModeU			= VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV			= VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW			= VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.anisotropyEnable		= VK_TRUE;
-		samplerInfo.maxAnisotropy			= 16.0f;
-		samplerInfo.borderColor				= VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-		samplerInfo.unnormalizedCoordinates	= VK_FALSE;
-		samplerInfo.compareEnable			= VK_FALSE;
-		samplerInfo.compareOp				= VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode				= VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.minLod					= 0.0f;
-		samplerInfo.maxLod					= 16.0f;
-		samplerInfo.mipLodBias				= 0.0f;
-
-		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &outSampler ) != VK_SUCCESS )
 		{
-			throw std::runtime_error( "Failed to create texture sampler!" );
+			// Default Bilinear Sampler
+			VkSamplerCreateInfo samplerInfo{ };
+			samplerInfo.sType					= VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+			samplerInfo.magFilter				= VK_FILTER_LINEAR;
+			samplerInfo.minFilter				= VK_FILTER_LINEAR;
+			samplerInfo.addressModeU			= VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.addressModeV			= VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.addressModeW			= VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.anisotropyEnable		= VK_TRUE;
+			samplerInfo.maxAnisotropy			= 16.0f;
+			samplerInfo.borderColor				= VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+			samplerInfo.unnormalizedCoordinates	= VK_FALSE;
+			samplerInfo.compareEnable			= VK_FALSE;
+			samplerInfo.compareOp				= VK_COMPARE_OP_ALWAYS;
+			samplerInfo.mipmapMode				= VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			samplerInfo.minLod					= 0.0f;
+			samplerInfo.maxLod					= 16.0f;
+			samplerInfo.mipLodBias				= 0.0f;
+
+			if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_bilinearSampler ) != VK_SUCCESS ) {
+				throw std::runtime_error( "Failed to create texture sampler!" );
+			}
 		}
-	}
 
-	void CreateDepthSampler( VkSampler& outSampler )
-	{
-		VkSamplerCreateInfo samplerInfo{ };
-		samplerInfo.sType					= VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter				= VK_FILTER_LINEAR;
-		samplerInfo.minFilter				= VK_FILTER_LINEAR;
-		samplerInfo.addressModeU			= VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.addressModeV			= VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.addressModeW			= VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.anisotropyEnable		= VK_FALSE;
-		samplerInfo.maxAnisotropy			= 0.0f;
-		samplerInfo.borderColor				= VK_BORDER_COLOR_INT_OPAQUE_WHITE;
-		samplerInfo.unnormalizedCoordinates	= VK_FALSE;
-		samplerInfo.compareEnable			= VK_FALSE;
-		samplerInfo.compareOp				= VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode				= VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.minLod					= 0.0f;
-		samplerInfo.maxLod					= 16.0f;
-		samplerInfo.mipLodBias				= 0.0f;
-
-		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &outSampler ) != VK_SUCCESS )
 		{
-			throw std::runtime_error( "Failed to create depth sampler!" );
+			// Depth sampler
+			VkSamplerCreateInfo samplerInfo{ };
+			samplerInfo.sType					= VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+			samplerInfo.magFilter				= VK_FILTER_LINEAR;
+			samplerInfo.minFilter				= VK_FILTER_LINEAR;
+			samplerInfo.addressModeU			= VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			samplerInfo.addressModeV			= VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			samplerInfo.addressModeW			= VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			samplerInfo.anisotropyEnable		= VK_FALSE;
+			samplerInfo.maxAnisotropy			= 0.0f;
+			samplerInfo.borderColor				= VK_BORDER_COLOR_INT_OPAQUE_WHITE;
+			samplerInfo.unnormalizedCoordinates	= VK_FALSE;
+			samplerInfo.compareEnable			= VK_FALSE;
+			samplerInfo.compareOp				= VK_COMPARE_OP_ALWAYS;
+			samplerInfo.mipmapMode				= VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			samplerInfo.minLod					= 0.0f;
+			samplerInfo.maxLod					= 16.0f;
+			samplerInfo.mipLodBias				= 0.0f;
+
+			if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_depthShadowSampler ) != VK_SUCCESS ) {
+				throw std::runtime_error( "Failed to create depth sampler!" );
+			}
 		}
 	}
 
