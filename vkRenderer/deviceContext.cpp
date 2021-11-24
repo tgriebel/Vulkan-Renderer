@@ -1,4 +1,84 @@
 #include "deviceContext.h"
+#include "swapChain.h"
+
+bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
+{
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
+
+	std::vector<VkExtensionProperties> availableExtensions( extensionCount );
+	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
+
+	std::set<std::string> requiredExtensions( deviceExtensions.begin(), deviceExtensions.end() );
+
+	for ( const auto& extension : availableExtensions ) {
+		requiredExtensions.erase( extension.extensionName );
+	}
+
+	return requiredExtensions.empty();
+}
+
+bool IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std::vector<const char*>& deviceExtensions )
+{
+	VkPhysicalDeviceProperties deviceProperties;
+	VkPhysicalDeviceFeatures deviceFeatures;
+	vkGetPhysicalDeviceProperties( device, &deviceProperties );
+	vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
+
+	QueueFamilyIndices indices = FindQueueFamilies( device, surface );
+
+	bool extensionsSupported = CheckDeviceExtensionSupport( device, deviceExtensions );
+
+	bool swapChainAdequate = false;
+	if ( extensionsSupported )
+	{
+		SwapChainSupportDetails swapChainSupport = SwapChain::QuerySwapChainSupport( device, surface );
+		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+	}
+
+	VkPhysicalDeviceFeatures supportedFeatures;
+	vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
+
+	return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
+}
+
+QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface )
+{
+	QueueFamilyIndices indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
+
+	std::vector<VkQueueFamilyProperties> queueFamilies( queueFamilyCount );
+	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
+
+	int i = 0;
+	for ( const auto& queueFamily : queueFamilies )
+	{
+		if ( queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
+			indices.graphicsFamily.set_value( i );
+		}
+
+		if ( queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT ) {
+			indices.computeFamily.set_value( i );
+		}
+
+		VkBool32 presentSupport = false;
+
+		vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
+		if ( presentSupport ) {
+			indices.presentFamily.set_value( i );
+		}
+
+		if ( indices.IsComplete() ) {
+			break;
+		}
+
+		i++;
+	}
+
+	return indices;
+}
 
 VkImageView CreateImageView( VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels )
 {

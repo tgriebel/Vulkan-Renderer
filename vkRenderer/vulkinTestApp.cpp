@@ -74,44 +74,6 @@ RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFil
 	return shader;
 }
 
-QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface )
-{
-	QueueFamilyIndices indices;
-
-	uint32_t queueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, nullptr );
-
-	std::vector<VkQueueFamilyProperties> queueFamilies( queueFamilyCount );
-	vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilies.data() );
-
-	int i = 0;
-	for ( const auto& queueFamily : queueFamilies )
-	{
-		if ( queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
-			indices.graphicsFamily.set_value( i );
-		}
-
-		if ( queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT ) {
-			indices.computeFamily.set_value( i );
-		}
-
-		VkBool32 presentSupport = false;
-		
-		vkGetPhysicalDeviceSurfaceSupportKHR( device, i, surface, &presentSupport );
-		if ( presentSupport ) {
-			indices.presentFamily.set_value( i );
-		}
-
-		if ( indices.IsComplete() ) {
-			break;
-		}
-
-		i++;
-	}
-
-	return indices;
-}
-
 class VkRenderer
 {
 public:
@@ -847,8 +809,7 @@ private:
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices( context.instance, &deviceCount, nullptr );
 
-		if ( deviceCount == 0 )
-		{
+		if ( deviceCount == 0 ) {
 			throw std::runtime_error( "Failed to find GPUs with Vulkan support!" );
 		}
 
@@ -857,7 +818,7 @@ private:
 
 		for ( const auto& device : devices )
 		{
-			if ( IsDeviceSuitable( device ) )
+			if ( IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
 			{		
 				VkPhysicalDeviceProperties deviceProperties;
 				vkGetPhysicalDeviceProperties( device, &deviceProperties );
@@ -867,8 +828,7 @@ private:
 			}
 		}
 
-		if ( context.physicalDevice == VK_NULL_HANDLE )
-		{
+		if ( context.physicalDevice == VK_NULL_HANDLE ) {
 			throw std::runtime_error( "Failed to find a suitable GPU!" );
 		}
 	}
@@ -2431,48 +2391,6 @@ private:
 				throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 			}
 		}
-	}
-
-	bool IsDeviceSuitable( VkPhysicalDevice device ) const
-	{
-		VkPhysicalDeviceProperties deviceProperties;
-		VkPhysicalDeviceFeatures deviceFeatures;
-		vkGetPhysicalDeviceProperties( device, &deviceProperties );
-		vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
-
-		QueueFamilyIndices indices = FindQueueFamilies( device, window.vk_surface );
-
-		bool extensionsSupported = CheckDeviceExtensionSupport( device );
-
-		bool swapChainAdequate = false;
-		if ( extensionsSupported )
-		{
-			SwapChainSupportDetails swapChainSupport = swapChain.QuerySwapChainSupport( device, window.vk_surface );
-			swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-		}
-
-		VkPhysicalDeviceFeatures supportedFeatures;
-		vkGetPhysicalDeviceFeatures( device, &supportedFeatures );
-
-		return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
-	}
-
-	bool CheckDeviceExtensionSupport( VkPhysicalDevice device ) const
-	{
-		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
-
-		std::vector<VkExtensionProperties> availableExtensions( extensionCount );
-		vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
-
-		std::set<std::string> requiredExtensions( deviceExtensions.begin(), deviceExtensions.end() );
-
-		for ( const auto& extension : availableExtensions )
-		{
-			requiredExtensions.erase( extension.extensionName );
-		}
-
-		return requiredExtensions.empty();
 	}
 
 	void InitScene( RenderView& view )
