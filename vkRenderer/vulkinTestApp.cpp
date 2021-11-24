@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <map>
+
 #include "common.h"
 #include "deviceContext.h"
 #include "camera.h"
@@ -12,8 +14,6 @@
 #include "renderConstants.h"
 
 #define USE_IMGUI
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
 #include "io.h"
 #include "GeoBuilder.h"
 
@@ -61,18 +61,7 @@ static bool							validateErrors = true;
 
 glm::mat4 MatrixFromVector( const glm::vec3& v );
 bool LoadTextureImage( const char* texturePath, textureSource_t& texture );
-
-RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile )
-{
-	std::vector<char> vsBlob = ReadFile( vsFile );
-	std::vector<char> psBlob = ReadFile( psFile );
-
-	RenderProgram shader;
-	shader.vs = CreateShaderModule( vsBlob );
-	shader.ps = CreateShaderModule( psBlob );
-
-	return shader;
-}
+RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile );
 
 class VkRenderer
 {

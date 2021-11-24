@@ -1,5 +1,6 @@
 #include "common.h"
 #include "deviceContext.h"
+#include "io.h"
 
 #define STB_IMAGE_IMPLEMENTATION // includes func defs
 #include "stb_image.h"
@@ -42,4 +43,16 @@ bool LoadTextureImage( const char * texturePath, textureSource_t& texture )
 	memcpy( texture.bytes, pixels, texture.sizeBytes );
 	stbi_image_free( pixels );
 	return true;
+}
+
+RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile )
+{
+	std::vector<char> vsBlob = ReadFile( vsFile );
+	std::vector<char> psBlob = ReadFile( psFile );
+
+	RenderProgram shader;
+	shader.vs = CreateShaderModule( vsBlob );
+	shader.ps = CreateShaderModule( psBlob );
+
+	return shader;
 }

@@ -196,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="deviceContext.cpp" />
+    <ClCompile Include="io.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="assetLib_GpuProgs.cpp" />
