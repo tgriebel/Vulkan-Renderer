@@ -9,6 +9,7 @@
 #include "pipeline.h"
 #include "swapChain.h"
 #include "assetLib_GpuProgs.h"
+#include "assetLib_Materials.h"
 #include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"
@@ -43,11 +44,11 @@ struct imguiControls_t
 };
 static imguiControls_t imguiControls;
 
-std::map<std::string, material_t>	materials;
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
 
 AssetLibGpuProgram					gpuPrograms;
+AssetLibMaterials					materialLib;
 
 deviceContext_t						context;
 renderConstants_t					r;
@@ -516,33 +517,24 @@ private:
 
 	uint32_t GetMaterialId( const std::string& name )
 	{
-		auto it = materials.find( name );
-
-		if ( it != materials.end() )
-		{
-			return static_cast<uint32_t>( std::distance( materials.begin(), it ) );
-		}
-		else
-		{
-			return 0;
-		}
+		return materialLib.FindId( name.c_str() );
 	}
 
 	void CreatePipelineObjects()
 	{
-		for ( auto itt = materials.begin(); itt != materials.end(); ++itt )
+		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
 		{
-			material_t& m = itt->second;
+			const material_t* m = materialLib.Find( i );
 
 			for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-				if ( m.shaders[ i ] == nullptr ) {
+				if ( m->shaders[ i ] == nullptr ) {
 					continue;
 				}
 
 				pipelineState_t state;
 				state.viewport = GetDrawPassViewport( (drawPass_t)i );
 				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)i );
-				state.shaders = m.shaders[ i ];
+				state.shaders = m->shaders[ i ];
 
 				VkRenderPass pass;
 				VkDescriptorSetLayout layout;
@@ -557,7 +549,7 @@ private:
 					layout = globalLayout;
 				}
 
-				CreateGraphicsPipeline( layout, pass, state, m.shaders[ i ]->pipeline );
+				CreateGraphicsPipeline( layout, pass, state, m->shaders[ i ]->pipeline );
 			}
 		}
 	}
@@ -571,39 +563,67 @@ private:
 
 	void CreateMaterials()
 	{
-		materials[ "TERRAIN" ].shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_SHADOW ];
-		materials[ "TERRAIN" ].shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
-		materials[ "TERRAIN" ].shaders[ DRAWPASS_TERRAIN ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN ];
-		materials[ "TERRAIN" ].shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
-		materials[ "TERRAIN" ].texture0 = GetTextureId( "heightmap.png" );
-		materials[ "TERRAIN" ].texture1 = GetTextureId( "grass.jpg" );
-		materials[ "TERRAIN" ].texture2 = GetTextureId( "desert.jpg" );
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_SHADOW ];
+			material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
+			material.shaders[ DRAWPASS_TERRAIN ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN ];
+			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
+			material.texture0 = GetTextureId( "heightmap.png" );
+			material.texture1 = GetTextureId( "grass.jpg" );
+			material.texture2 = GetTextureId( "desert.jpg" );
+			materialLib.Add( "TERRAIN", material );
+		}
 
-		materials[ "SKY" ].shaders[ DRAWPASS_SKYBOX ] = &gpuPrograms.programs[ RENDER_PROGRAM_SKY ];
-		materials[ "SKY" ].texture0 = GetTextureId( "skybox.jpg" );
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_SKYBOX ] = &gpuPrograms.programs[ RENDER_PROGRAM_SKY ];
+			material.texture0 = GetTextureId( "skybox.jpg" );
+			materialLib.Add( "SKY", material );
+		}
 
-		materials[ "VIKING" ].shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_SHADOW ];
-		materials[ "VIKING" ].shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		materials[ "VIKING" ].shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
-		materials[ "VIKING" ].shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		materials[ "VIKING" ].texture0 = GetTextureId( "viking_room.png" );
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_SHADOW ];
+			material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
+			material.shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
+			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
+			material.texture0 = GetTextureId( "viking_room.png" );
+			materialLib.Add( "VIKING", material );
+		}
+		
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_TRANS ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_TRANS ];
+			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
+			material.texture0 = GetTextureId( "checker.png" );
+			materialLib.Add( "WATER", material );
+		}
 
-		materials[ "WATER" ].shaders[ DRAWPASS_TRANS ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_TRANS ];
-		materials[ "WATER" ].shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		materials[ "WATER" ].texture0 = GetTextureId( "checker.png" );
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_POST_2D ] = &gpuPrograms.programs[ RENDER_PROGRAM_POST_PROCESS ];
+			material.texture0 = 0;
+			material.texture1 = 1;
+			materialLib.Add( "TONEMAP", material );
+		}
 
-		materials[ "TONEMAP" ].shaders[ DRAWPASS_POST_2D ] = &gpuPrograms.programs[ RENDER_PROGRAM_POST_PROCESS ];
-		materials[ "TONEMAP" ].texture0 = 0;
-		materials[ "TONEMAP" ].texture1 = 1;
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_POST_2D ] = &gpuPrograms.programs[ RENDER_PROGRAM_IMAGE_2D ];
+			material.texture0 = 2;
+			materialLib.Add( "IMAGE2D", material );
+		}
 
-		materials[ "IMAGE2D" ].shaders[ DRAWPASS_POST_2D ] = &gpuPrograms.programs[ RENDER_PROGRAM_IMAGE_2D ];
-		materials[ "IMAGE2D" ].texture0 = 2;
-
-		materials[ "PALM" ].shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_SHADOW ];
-		materials[ "PALM" ].shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		materials[ "PALM" ].shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
-		materials[ "PALM" ].shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		materials[ "PALM" ].texture0 = GetTextureId( "palm_tree_diffuse.jpg" );
+		{
+			material_t material;
+			material.shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_SHADOW ];
+			material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
+			material.shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
+			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
+			material.texture0 = GetTextureId( "palm_tree_diffuse.jpg" );
+			materialLib.Add( "PALM", material );
+		}
 	}
 
 	void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib )
@@ -645,7 +665,7 @@ private:
 		CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
 		outModel.name = "_quad";
-		outModel.material = &materials[ materialName ];
+		outModel.material = materialLib.Find( materialName.c_str() );
 		outModel.materialId = GetMaterialId( materialName );
 	}
 
@@ -667,7 +687,7 @@ private:
 		CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
 		outModel.name		= "_terrain";
-		outModel.material	= &materials[ "TERRAIN" ];
+		outModel.material	= materialLib.Find( "TERRAIN" );
 		outModel.materialId	= GetMaterialId( "TERRAIN" );
 	}
 
@@ -694,7 +714,7 @@ private:
 		CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
 		outModel.name		= "_water";
-		outModel.material	= &materials[ "WATER" ];
+		outModel.material	= materialLib.Find( "WATER" );
 		outModel.materialId	= GetMaterialId( "WATER" );
 	}
 
@@ -770,7 +790,7 @@ private:
 		CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
 		outModel.name		= "_skybox";
-		outModel.material	= &materials[ "SKY" ];
+		outModel.material	= materialLib.Find( "SKY" );
 		outModel.materialId	= GetMaterialId( "SKY" );
 	}
 
@@ -779,7 +799,7 @@ private:
 		LoadModel( modelName, outModel );
 
 		outModel.name			= modelName;
-		outModel.material		= &materials[ materialName ]; // FIXME: needs to be a look up since an index auto-inserts
+		outModel.material		= materialLib.Find( materialName.c_str() );
 		outModel.materialId		= GetMaterialId( materialName );
 	}
 
@@ -2688,19 +2708,22 @@ private:
 		//materials[ "IMAGE_2D" ].texture0 = imguiControls.dbgImageId;
 
 		std::vector< materialBufferObject_t > materialBuffer;
-		materialBuffer.reserve( materials.size() );
+		materialBuffer.reserve( materialLib.Count() );
 		int materialAllocIx = 0;
-		for ( auto it = materials.begin(); it != materials.end(); ++it )
+		const uint32_t materialCount = materialLib.Count();
+		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
 		{
+			const material_t* m = materialLib.Find( i );
+
 			materialBufferObject_t ubo;
-			ubo.texture0 = it->second.texture0;
-			ubo.texture1 = it->second.texture1;
-			ubo.texture2 = it->second.texture2;
-			ubo.texture3 = it->second.texture3;
-			ubo.texture4 = it->second.texture4;
-			ubo.texture5 = it->second.texture5;
-			ubo.texture6 = it->second.texture6;
-			ubo.texture7 = it->second.texture7;
+			ubo.texture0 = m->texture0;
+			ubo.texture1 = m->texture1;
+			ubo.texture2 = m->texture2;
+			ubo.texture3 = m->texture3;
+			ubo.texture4 = m->texture4;
+			ubo.texture5 = m->texture5;
+			ubo.texture6 = m->texture6;
+			ubo.texture7 = m->texture7;
 			materialBuffer.push_back( ubo );
 		}
 
