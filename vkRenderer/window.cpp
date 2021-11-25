@@ -1,4 +1,5 @@
 #include "window.h"
+#include "deviceContext.h"
 
 void FramebufferResizeCallback( GLFWwindow* window, int width, int height )
 {
@@ -65,6 +66,10 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	mouse.centered = true;
 }
 
+bool Window::IsOpen()
+{
+	return ( glfwWindowShouldClose( window ) == false );
+}
 
 void Window::Init()
 {

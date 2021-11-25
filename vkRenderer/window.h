@@ -18,6 +18,7 @@ public:
 	VkSurfaceKHR			vk_surface;
 	input_t					input;
 	void					Init();
+	bool					IsOpen();
 	void					CreateSurface();
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );

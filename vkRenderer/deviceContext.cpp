@@ -1,6 +1,8 @@
 #include "deviceContext.h"
 #include "swapChain.h"
 
+deviceContext_t context;
+
 bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
 	uint32_t extensionCount;

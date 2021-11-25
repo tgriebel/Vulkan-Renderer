@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "pipeline.h"
+#include "deviceContext.h"
 
 static std::vector<pipelineObject_t> pipelineCache;
 

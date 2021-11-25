@@ -1,6 +1,10 @@
 #include "stdafx.h"
 
 #include <map>
+#include <thread>
+#include <chrono>
+#include <mutex>
+#include <semaphore>
 
 #include "common.h"
 #include "deviceContext.h"
@@ -50,10 +54,10 @@ MemoryAllocator						sharedMemory;
 AssetLibGpuProgram					gpuPrograms;
 AssetLibMaterials					materialLib;
 
-deviceContext_t						context;
 renderConstants_t					r;
-
 Scene								scene;
+
+std::mutex							windowReady;
 
 static bool							validateVerbose = false;
 static bool							validateWarnings = false;
@@ -81,14 +85,66 @@ uint32_t GetTextureId( const std::string& name )
 	}
 }
 
+void ProcessInput( const input_t& input, const float dt )
+{
+	if ( input.keys[ 'D' ] ) {
+		scene.camera.MoveForward( dt * 0.01f );
+	}
+	if ( input.keys[ 'A' ] ) {
+		scene.camera.MoveForward( dt * -0.01f );
+	}
+	if ( input.keys[ 'W' ] ) {
+		scene.camera.MoveVertical( dt * -0.01f );
+	}
+	if ( input.keys[ 'S' ] ) {
+		scene.camera.MoveVertical( dt * 0.01f );
+	}
+	if ( input.keys[ '+' ] ) {
+		scene.camera.fov += dt;
+	}
+	if ( input.keys[ '-' ] ) {
+		scene.camera.fov -= dt;
+	}
+
+	const mouse_t& mouse = input.mouse;
+	if ( mouse.centered )
+	{
+		const float yawDelta = dt * mouse.speed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
+		const float pitchDelta = dt * -mouse.speed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
+		scene.camera.SetYaw( yawDelta );
+		scene.camera.SetPitch( pitchDelta );
+	}
+}
+
+void WindowThread()
+{
+	context.window.Init();
+
+	while ( context.window.IsOpen() )
+	{
+		glfwPollEvents();
+
+		static auto prevTime = std::chrono::high_resolution_clock::now();
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
+		prevTime = currentTime;
+		ProcessInput( context.window.input, dt );
+	}
+}
+
 class VkRenderer
 {
 public:
 	void Run() {
-		window.Init();
 		InitVulkan();
 		InitImGui();
-		MainLoop();
+		while ( context.window.IsOpen() )
+		{
+			UpdateScene();
+			CommitScene();
+			DrawFrame();
+		}
+		vkDeviceWaitIdle( context.device );
 		Cleanup();
 	}
 
@@ -110,7 +166,6 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 
-	Window							window;
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
 	std::vector< AllocRecord >		imageAllocations;
@@ -333,10 +388,10 @@ private:
 			// Device Set-up
 			CreateInstance();
 			SetupDebugMessenger();
-			window.CreateSurface();
+			context.window.CreateSurface();
 			PickPhysicalDevice();
 			CreateLogicalDevice();	
-			swapChain.Create( &window );
+			swapChain.Create( &context.window );
 		}
 
 		{
@@ -391,7 +446,7 @@ private:
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForVulkan( window.window, true );
+		ImGui_ImplGlfw_InitForVulkan( context.window.window, true );
 
 		ImGui_ImplVulkan_InitInfo vkInfo = {};
 		vkInfo.Instance = context.instance;
@@ -747,7 +802,7 @@ private:
 
 		for ( const auto& device : devices )
 		{
-			if ( IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
+			if ( IsDeviceSuitable( device, context.window.vk_surface, deviceExtensions ) )
 			{		
 				VkPhysicalDeviceProperties deviceProperties;
 				vkGetPhysicalDeviceProperties( device, &deviceProperties );
@@ -764,7 +819,7 @@ private:
 
 	void CreateLogicalDevice()
 	{
-		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, window.vk_surface );
+		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, context.window.vk_surface );
 		context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
 		context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
 		context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
@@ -853,13 +908,13 @@ private:
 		assert( 0 );
 
 		int width = 0, height = 0;
-		window.GetWindowFrameBufferSize( width, height, true );
+		context.window.GetWindowFrameBufferSize( width, height, true );
 
 		vkDeviceWaitIdle( context.device );
 
 		CleanupFrameResources();
 		swapChain.Destroy();
-		swapChain.Create( &window );
+		swapChain.Create( &context.window );
 	}
 
 	void CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
@@ -2043,8 +2098,8 @@ private:
 				ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 				ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 				ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-				ImGui::Text( "Mouse: (%f, %f )", (float) window.input.mouse.x, (float)window.input.mouse.y );
-				const glm::vec2 screenPoint = glm::vec2( (float)window.input.mouse.x, (float)window.input.mouse.y );
+				ImGui::Text( "Mouse: (%f, %f )", (float) context.window.input.mouse.x, (float)context.window.input.mouse.y );
+				const glm::vec2 screenPoint = glm::vec2( (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
 				const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
 				char entityName[ 256 ];
 				if ( imguiControls.selectedModelId >= 0 ) {
@@ -2337,53 +2392,6 @@ private:
 		scene.camera.aspect = ( DISPLAY_WIDTH / (float)DISPLAY_HEIGHT );
 	}
 
-	void ProcessInput()
-	{
-		const input_t & input = window.input;
-		if ( input.keys['D'] ) {
-			scene.camera.MoveForward( 0.1f );
-		}
-		if ( input.keys['A'] ) {
-			scene.camera.MoveForward( -0.1f );
-		}
-		if ( input.keys['W'] ) {
-			scene.camera.MoveVertical( -0.1f );
-		}
-		if ( input.keys['S'] ) {
-			scene.camera.MoveVertical( 0.1f );
-		}
-		if ( input.keys['+'] ) {
-			scene.camera.fov++;
-		}
-		if ( input.keys['-'] ) {
-			scene.camera.fov--;
-		}
-
-		const mouse_t & mouse = input.mouse;
-		if( mouse.centered )
-		{
-			const float yawDelta = mouse.speed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
-			const float pitchDelta = -mouse.speed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
-			scene.camera.SetYaw( yawDelta );
-			scene.camera.SetPitch( pitchDelta );
-		}
-	}
-
-	void MainLoop()
-	{
-		while ( !glfwWindowShouldClose( window.window ) )
-		{
-			glfwPollEvents();
-			ProcessInput();
-			UpdateScene();
-			CommitScene();
-
-			DrawFrame();
-		}
-
-		vkDeviceWaitIdle( context.device );
-	}
-
 	void UpdateScene()
 	{
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -2519,10 +2527,10 @@ private:
 
 		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.IsResizeRequested() )
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || context.window.IsResizeRequested() )
 		{
 			RecreateSwapChain();
-			window.AcceptImageResize();
+			context.window.AcceptImageResize();
 			return;
 		}
 		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
@@ -2567,10 +2575,10 @@ private:
 			DestroyDebugUtilsMessengerEXT( context.instance, debugMessenger, nullptr );
 		}
 
-		vkDestroySurfaceKHR( context.instance, window.vk_surface, nullptr );
+		vkDestroySurfaceKHR( context.instance, context.window.vk_surface, nullptr );
 		vkDestroyInstance( context.instance, nullptr );
 
-		window.~Window();
+		context.window.~Window();
 	}
 
 	void UpdatePostProcessBuffers( uint32_t currentImage )
@@ -2787,6 +2795,10 @@ int main()
 {
 	VkRenderer renderer;
 
+	std::thread winThread( WindowThread );
+
+	std::this_thread::sleep_for (std::chrono::seconds(1));
+
 	try
 	{
 		renderer.Run();
@@ -2794,8 +2806,9 @@ int main()
 	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
+		winThread.join();
 		return EXIT_FAILURE;
 	}
-
+	winThread.join();
 	return EXIT_SUCCESS;
 }

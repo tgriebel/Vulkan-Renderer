@@ -531,7 +531,7 @@ enum normalDirection_t
 
 struct mouse_t
 {
-	mouse_t() : speed( 0.005f ),
+	mouse_t() : speed( 0.001f ),
 				x( 0.0f ),
 				y( 0.0f ),
 				leftDown( false ),
@@ -605,18 +605,6 @@ struct QueueFamilyIndices
 	}
 };
 
-struct deviceContext_t
-{
-	VkDevice					device;
-	VkPhysicalDevice			physicalDevice;
-	VkInstance					instance;
-	VkPhysicalDeviceLimits		limits;
-	VkQueue						graphicsQueue;
-	VkQueue						presentQueue;
-	VkQueue						computeQueue;
-	uint32_t					queueFamilyIndices[ QUEUE_COUNT ];
-};
-
 struct graphicsQueue_t
 {
 	VkQueue						graphicsQueue;
@@ -652,5 +640,3 @@ static inline void RandPlanePoint( glm::vec2& outPoint )
 	outPoint.x = ( (float) rand() / ( RAND_MAX ) );
 	outPoint.y = ( (float) rand() / ( RAND_MAX ) );
 }
-
-extern deviceContext_t context;

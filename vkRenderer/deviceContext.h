@@ -1,5 +1,21 @@
 #pragma once
 #include "common.h"
+#include "window.h"
+
+struct deviceContext_t
+{
+	Window						window;
+	VkDevice					device;
+	VkPhysicalDevice			physicalDevice;
+	VkInstance					instance;
+	VkPhysicalDeviceLimits		limits;
+	VkQueue						graphicsQueue;
+	VkQueue						presentQueue;
+	VkQueue						computeQueue;
+	uint32_t					queueFamilyIndices[ QUEUE_COUNT ];
+};
+
+extern deviceContext_t context;
 
 bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
