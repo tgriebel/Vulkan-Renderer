@@ -63,6 +63,24 @@ glm::mat4 MatrixFromVector( const glm::vec3& v );
 bool LoadTextureImage( const char* texturePath, textureSource_t& texture );
 RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile );
 
+const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "viking_room.png",
+												"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
+
+std::map<std::string, texture_t>	textures;
+uint32_t GetTextureId( const std::string& name )
+{
+	auto it = textures.find( name );
+
+	if ( it != textures.end() )
+	{
+		return static_cast<uint32_t>( std::distance( textures.begin(), it ) );
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 class VkRenderer
 {
 public:
@@ -79,11 +97,7 @@ private:
 	static const uint32_t ShadowMapWidth = 1280;
 	static const uint32_t ShadowMapHeight = 720;
 
-	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "viking_room.png",
-													"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
-
 	std::vector<surfUpload_t>			modelUpload;
-	std::map<std::string, texture_t>	textures;
 	RenderView							renderView;
 	RenderView							shadowView;
 
@@ -501,20 +515,6 @@ private:
 		return renderView.viewport;
 	}
 
-	uint32_t GetTextureId( const std::string& name )
-	{
-		auto it = textures.find( name );
-
-		if ( it != textures.end() )
-		{
-			return static_cast<uint32_t>( std::distance( textures.begin(), it ) );
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
 	void CreatePipelineObjects()
 	{
 		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
@@ -553,72 +553,7 @@ private:
 	{
 		gpuPrograms.Create();
 		CreateTextureImage( texturePaths );
-		CreateMaterials(); // TODO: enforce ordering somehow. This comes after programs and textures
-	}
-
-	void CreateMaterials()
-	{
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_SHADOW ];
-			material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
-			material.shaders[ DRAWPASS_TERRAIN ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN ];
-			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
-			material.texture0 = GetTextureId( "heightmap.png" );
-			material.texture1 = GetTextureId( "grass.jpg" );
-			material.texture2 = GetTextureId( "desert.jpg" );
-			materialLib.Add( "TERRAIN", material );
-		}
-
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_SKYBOX ] = &gpuPrograms.programs[ RENDER_PROGRAM_SKY ];
-			material.texture0 = GetTextureId( "skybox.jpg" );
-			materialLib.Add( "SKY", material );
-		}
-
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_SHADOW ];
-			material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-			material.shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
-			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-			material.texture0 = GetTextureId( "viking_room.png" );
-			materialLib.Add( "VIKING", material );
-		}
-		
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_TRANS ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_TRANS ];
-			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-			material.texture0 = GetTextureId( "checker.png" );
-			materialLib.Add( "WATER", material );
-		}
-
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_POST_2D ] = &gpuPrograms.programs[ RENDER_PROGRAM_POST_PROCESS ];
-			material.texture0 = 0;
-			material.texture1 = 1;
-			materialLib.Add( "TONEMAP", material );
-		}
-
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_POST_2D ] = &gpuPrograms.programs[ RENDER_PROGRAM_IMAGE_2D ];
-			material.texture0 = 2;
-			materialLib.Add( "IMAGE2D", material );
-		}
-
-		{
-			material_t material;
-			material.shaders[ DRAWPASS_SHADOW ] = &gpuPrograms.programs[ RENDER_PROGRAM_SHADOW ];
-			material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-			material.shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
-			material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-			material.texture0 = GetTextureId( "palm_tree_diffuse.jpg" );
-			materialLib.Add( "PALM", material );
-		}
+		materialLib.Create(); // TODO: enforce ordering somehow. This comes after programs and textures
 	}
 
 	void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib )
