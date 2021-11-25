@@ -515,11 +515,6 @@ private:
 		}
 	}
 
-	uint32_t GetMaterialId( const std::string& name )
-	{
-		return materialLib.FindId( name.c_str() );
-	}
-
 	void CreatePipelineObjects()
 	{
 		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
@@ -666,7 +661,7 @@ private:
 
 		outModel.name = "_quad";
 		outModel.material = materialLib.Find( materialName.c_str() );
-		outModel.materialId = GetMaterialId( materialName );
+		outModel.materialId = materialLib.FindId( materialName.c_str() );
 	}
 
 	void CreateTerrainSurface( modelSource_t& outModel )
@@ -688,7 +683,7 @@ private:
 
 		outModel.name		= "_terrain";
 		outModel.material	= materialLib.Find( "TERRAIN" );
-		outModel.materialId	= GetMaterialId( "TERRAIN" );
+		outModel.materialId	= materialLib.FindId( "TERRAIN" );
 	}
 
 	void CreateWaterSurface( modelSource_t& outModel )
@@ -715,7 +710,7 @@ private:
 
 		outModel.name		= "_water";
 		outModel.material	= materialLib.Find( "WATER" );
-		outModel.materialId	= GetMaterialId( "WATER" );
+		outModel.materialId	= materialLib.FindId( "WATER" );
 	}
 
 	void CreateSkyBoxSurf( modelSource_t& outModel )
@@ -791,7 +786,7 @@ private:
 
 		outModel.name		= "_skybox";
 		outModel.material	= materialLib.Find( "SKY" );
-		outModel.materialId	= GetMaterialId( "SKY" );
+		outModel.materialId	= materialLib.FindId( "SKY" );
 	}
 
 	void CreateStaticModel( const std::string& modelName, const std::string& materialName, modelSource_t& outModel )
@@ -800,7 +795,7 @@ private:
 
 		outModel.name			= modelName;
 		outModel.material		= materialLib.Find( materialName.c_str() );
-		outModel.materialId		= GetMaterialId( materialName );
+		outModel.materialId		= materialLib.FindId( materialName.c_str() );
 	}
 
 	void PickPhysicalDevice()
