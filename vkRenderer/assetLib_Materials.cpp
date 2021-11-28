@@ -42,7 +42,7 @@ void AssetLibMaterials::Create()
 		material_t material;
 		material.shaders[ DRAWPASS_TRANS ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_TRANS ];
 		material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		material.texture0 = textureLib.FindId( "checker.png" );
+		material.texture0 = 0;
 		Add( "WATER", material );
 	}
 

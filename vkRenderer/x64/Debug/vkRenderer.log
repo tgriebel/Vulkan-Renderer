@@ -14,9 +14,4 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  assetLib_Materials.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\assetLib_Materials.cpp(85,41): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-  vulkinTestApp.cpp
-  The contents of <semaphore> are available only with C++20 or later.
-  Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

@@ -973,8 +973,8 @@ private:
 		// Defaults
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			texture_t* texture = textureLib.Find( "checker.png" );
-			VkImageView& imageView = texture->vk_imageView;
+			const texture_t* texture = textureLib.GetDefault();
+			const VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1099,8 +1099,8 @@ private:
 		// Defaults
 		for( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			texture_t* texture = textureLib.Find( "checker.png" );
-			VkImageView& imageView = texture->vk_imageView;
+			const texture_t* texture = textureLib.GetDefault();
+			const VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1112,8 +1112,8 @@ private:
 		shadowCodeImageInfo.reserve( MaxCodeImages );
 		for ( size_t j = 0; j < MaxCodeImages; ++j )
 		{
-			texture_t* texture = textureLib.Find( "checker.png" );
-			VkImageView& imageView = texture->vk_imageView;
+			const texture_t* texture = textureLib.GetDefault();
+			const VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
