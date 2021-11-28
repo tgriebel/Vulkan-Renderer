@@ -31,7 +31,7 @@
     <ClCompile Include="deviceContext.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="io.cpp" />
-    <ClCompile Include="assetLib.cpp" />
+    <ClCompile Include="scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -75,6 +75,7 @@
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="assetLib.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

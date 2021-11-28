@@ -170,6 +170,7 @@
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="scene.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="common.h" />
@@ -193,9 +194,9 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="assetLib.cpp" />
     <ClCompile Include="deviceContext.cpp" />
     <ClCompile Include="io.cpp" />
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="assetLib_GpuProgs.cpp" />
