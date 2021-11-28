@@ -63,7 +63,7 @@ const std::string TexturePath = "textures/";
 using pipelineHdl_t = uint32_t;
 const uint32_t INVALID_HANDLE = ~0;
 
-class VkRenderer;
+class Renderer;
 
 struct VertexInput
 {

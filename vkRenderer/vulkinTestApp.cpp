@@ -127,7 +127,7 @@ void WindowThread()
 	}
 }
 
-class VkRenderer
+class Renderer
 {
 public:
 	void Init()
@@ -2787,7 +2787,7 @@ private:
 
 int main()
 {
-	VkRenderer renderer;
+	Renderer renderer;
 	std::thread winThread( WindowThread );
 
 	while( windowReady == false ) {
