@@ -481,7 +481,6 @@ public:
 
 struct modelSource_t
 {
-	std::string					name;
 	material_t*					material;
 	uint32_t					materialId;
 	std::vector<VertexInput>	vertices;

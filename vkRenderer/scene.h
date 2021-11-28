@@ -1,12 +1,14 @@
 #pragma once
 #include "common.h"
 #include "camera.h"
+#include "assetLib.h"
+
+extern AssetLib< modelSource_t > modelLib;
 
 struct Scene
 {
 	Camera						camera;
 	std::vector<entity_t>		entities;
-	std::vector<modelSource_t>	models;
 	float						defaultNear = 1000.0f;
 	float						defaultFar = 0.1f;
 
@@ -21,10 +23,10 @@ struct Scene
 
 	void CreateEntity( const uint32_t modelId, entity_t& instance )
 	{
-		const modelSource_t& model = models[ modelId ];
+		const modelSource_t* model = modelLib.Find( modelId );
 
 		instance.modelId = modelId;
-		instance.materialId = model.materialId;
+		instance.materialId = model->materialId;
 		instance.matrix = glm::identity<glm::mat4>();
 	}
 };

@@ -6,21 +6,37 @@ extern Scene scene;
 
 void MakeBeachScene()
 {
-	scene.models.resize( 6 );
-	const int skyBoxId = 0;
-	const int terrainId = 1;
-	const int palmModelId = 2;
-	const int waterId = 3;
-	const int toneQuadId = 4;
-	const int image2dId = 5;
-
-	CreateSkyBoxSurf( scene.models[ skyBoxId ] );
-	CreateTerrainSurface( scene.models[ terrainId ] );
-	CreateStaticModel( "sphere.obj", "PALM", scene.models[ palmModelId ] );
-	CreateWaterSurface( scene.models[ waterId ] );
-	CreateQuadSurface2D( "TONEMAP", scene.models[ toneQuadId ], glm::vec2( 1.0f, 1.0f ), glm::vec2( 2.0f ) );
-	CreateQuadSurface2D( "IMAGE2D", scene.models[ image2dId ], glm::vec2( 1.0f, 1.0f ), glm::vec2( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
-
+	{
+		modelSource_t model;
+		CreateSkyBoxSurf( model );
+		modelLib.Add( "_skybox", model );
+	}
+	{
+		modelSource_t model;
+		CreateTerrainSurface( model );
+		modelLib.Add( "_terrain", model );
+	}
+	{
+		modelSource_t model;
+		CreateStaticModel( "sphere.obj", "PALM", model );
+		modelLib.Add( "palmTree", model );
+	}
+	{
+		modelSource_t model;
+		CreateWaterSurface( model );
+		modelLib.Add( "_water", model );
+	}
+	{
+		modelSource_t model;
+		CreateQuadSurface2D( "TONEMAP", model, glm::vec2( 1.0f, 1.0f ), glm::vec2( 2.0f ) );
+		modelLib.Add( "_postProcessQuad", model );
+	}
+	{
+		modelSource_t model;
+		CreateQuadSurface2D( "IMAGE2D", model, glm::vec2( 1.0f, 1.0f ), glm::vec2( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
+		modelLib.Add( "_quadTexDebug", model );
+	}
+	
 	const int palmTreesNum = 300;
 
 	int entId = 0;
@@ -38,6 +54,7 @@ void MakeBeachScene()
 
 	for ( int i = 0; i < palmTreesNum; ++i )
 	{
+		const int palmModelId = modelLib.FindId( "palmTree" );
 		scene.CreateEntity( palmModelId, scene.entities[ entId ] );
 		++entId;
 	}

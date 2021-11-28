@@ -156,7 +156,6 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.name = "_skybox";
 	outModel.material = materialLib.Find( "SKY" );
 	outModel.materialId = materialLib.FindId( "SKY" );
 }
@@ -178,7 +177,6 @@ void CreateTerrainSurface( modelSource_t& outModel )
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.name = "_terrain";
 	outModel.material = materialLib.Find( "TERRAIN" );
 	outModel.materialId = materialLib.FindId( "TERRAIN" );
 }
@@ -205,7 +203,6 @@ void CreateWaterSurface( modelSource_t& outModel )
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.name = "_water";
 	outModel.material = materialLib.Find( "WATER" );
 	outModel.materialId = materialLib.FindId( "WATER" );
 }
@@ -226,7 +223,6 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.name = "_quad";
 	outModel.material = materialLib.Find( materialName.c_str() );
 	outModel.materialId = materialLib.FindId( materialName.c_str() );
 }
@@ -235,7 +231,6 @@ void CreateStaticModel( const std::string& modelName, const std::string& materia
 {
 	LoadModel( modelName, outModel );
 
-	outModel.name = modelName;
 	outModel.material = materialLib.Find( materialName.c_str() );
 	outModel.materialId = materialLib.FindId( materialName.c_str() );
 }

@@ -15,6 +15,7 @@ public:
 	Asset*					Find( const char* name );
 	inline Asset*			Find( const int id ) { return ( id < assets.size() && id >= 0 ) ? &assets[ id ] : NULL; }
 	int						FindId( const char* name );
+	const char*				FindName( const int id ) { return ( id < names.size() && id >= 0 ) ? names[ id ].c_str() : ""; }
 };
 
 template< class Asset >

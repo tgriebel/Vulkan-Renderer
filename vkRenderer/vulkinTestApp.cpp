@@ -51,6 +51,7 @@ static imguiControls_t imguiControls;
 typedef AssetLib< texture_t > AssetLibImages;
 typedef AssetLib< material_t > AssetLibMaterials;
 typedef AssetLib< RenderProgram > AssetLibGpuProgram;
+typedef AssetLib< modelSource_t > AssetLibModels;
 
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
@@ -58,6 +59,7 @@ MemoryAllocator						sharedMemory;
 AssetLibGpuProgram					gpuPrograms;
 AssetLibMaterials					materialLib;
 AssetLibImages						textureLib;
+AssetLibModels						modelLib;
 
 renderConstants_t					r;
 Scene								scene;
@@ -252,70 +254,69 @@ private:
 	{
 		const VkDeviceSize vbSize = sizeof( VertexInput ) * MaxVertices;
 		const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-		modelUpload.resize( scene.models.size() );
-		for ( int i = 0; i < 1; ++i ) {
-			CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb.buffer, localMemory, vb.allocation );
-			CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib.buffer, localMemory, ib.allocation );
+		const uint32_t modelCount = modelLib.Count();
+		modelUpload.resize( modelCount );
+		CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb.buffer, localMemory, vb.allocation );
+		CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib.buffer, localMemory, ib.allocation );
 
-			static uint32_t vbBufElements = 0;
-			static uint32_t ibBufElements = 0;
-			for ( uint32_t m = 0; m < scene.models.size(); ++m )
-			{
-				VkDeviceSize vbCopySize = sizeof( scene.models[ m ].vertices[ 0 ] ) * scene.models[ m ].vertices.size();
-				VkDeviceSize ibCopySize = sizeof( scene.models[ m ].indices[ 0 ] ) * scene.models[ m ].indices.size();
+		static uint32_t vbBufElements = 0;
+		static uint32_t ibBufElements = 0;
+		for ( uint32_t m = 0; m < modelCount; ++m )
+		{
+			VkDeviceSize vbCopySize = sizeof( modelLib.Find( m )->vertices[ 0 ] ) * modelLib.Find( m )->vertices.size();
+			VkDeviceSize ibCopySize = sizeof( modelLib.Find( m )->indices[ 0 ] ) * modelLib.Find( m )->indices.size();
 				
-				// VB Copy
-				modelUpload[ m ].vb = vb.GetVkObject();
-				modelUpload[ m ].vertexOffset = vbBufElements;
-				stagingBuffer.Reset();
-				stagingBuffer.CopyData( scene.models[ m ].vertices.data(), static_cast<size_t>( vbCopySize ) );
+			// VB Copy
+			modelUpload[ m ].vb = vb.GetVkObject();
+			modelUpload[ m ].vertexOffset = vbBufElements;
+			stagingBuffer.Reset();
+			stagingBuffer.CopyData( modelLib.Find( m )->vertices.data(), static_cast<size_t>( vbCopySize ) );
 
-				VkBufferCopy vbCopyRegion{ };
-				vbCopyRegion.size = vbCopySize;
-				vbCopyRegion.srcOffset = 0;
-				vbCopyRegion.dstOffset = vb.allocation.subOffset;
-				UploadToGPU( stagingBuffer.buffer, vb.GetVkObject(), vbCopyRegion );
+			VkBufferCopy vbCopyRegion{ };
+			vbCopyRegion.size = vbCopySize;
+			vbCopyRegion.srcOffset = 0;
+			vbCopyRegion.dstOffset = vb.allocation.subOffset;
+			UploadToGPU( stagingBuffer.buffer, vb.GetVkObject(), vbCopyRegion );
 
-				vb.allocation.subOffset += vbCopySize;
-				vbBufElements += static_cast< uint32_t >( scene.models[ m ].vertices.size() );
+			vb.allocation.subOffset += vbCopySize;
+			vbBufElements += static_cast< uint32_t >( modelLib.Find( m )->vertices.size() );
 
-				// IB Copy
-				modelUpload[ m ].ib = ib.GetVkObject();
-				modelUpload[ m ].firstIndex = ibBufElements;
+			// IB Copy
+			modelUpload[ m ].ib = ib.GetVkObject();
+			modelUpload[ m ].firstIndex = ibBufElements;
 
-				stagingBuffer.Reset();
-				stagingBuffer.CopyData( scene.models[ m ].indices.data(), static_cast<size_t>( ibCopySize ) );
+			stagingBuffer.Reset();
+			stagingBuffer.CopyData( modelLib.Find( m )->indices.data(), static_cast<size_t>( ibCopySize ) );
 
-				VkBufferCopy ibCopyRegion{ };
-				ibCopyRegion.size = ibCopySize;
-				ibCopyRegion.srcOffset = 0;
-				ibCopyRegion.dstOffset = ib.allocation.subOffset;
-				UploadToGPU( stagingBuffer.buffer, ib.GetVkObject(), ibCopyRegion );
+			VkBufferCopy ibCopyRegion{ };
+			ibCopyRegion.size = ibCopySize;
+			ibCopyRegion.srcOffset = 0;
+			ibCopyRegion.dstOffset = ib.allocation.subOffset;
+			UploadToGPU( stagingBuffer.buffer, ib.GetVkObject(), ibCopyRegion );
 
-				ib.allocation.subOffset += ibCopySize;
-				ibBufElements += static_cast<uint32_t>( scene.models[ m ].indices.size() );
-			}
+			ib.allocation.subOffset += ibCopySize;
+			ibBufElements += static_cast<uint32_t>( modelLib.Find( m )->indices.size() );
 		}
 	}
 
 	void CommitModel( RenderView& view, entity_t& model, const uint32_t objectOffset )
 	{
 		drawSurf_t& surf		= view.surfaces[ view.committedModelCnt ];
-		modelSource_t& source	= scene.models[ model.modelId ];
+		modelSource_t* source	= modelLib.Find( model.modelId );
 		surfUpload_t& upload	= modelUpload[ model.modelId ];
 
 		surf.vertexCount		= upload.vertexCount;
 		surf.vertexOffset		= upload.vertexOffset;
 		surf.firstIndex			= upload.firstIndex;
-		surf.indicesCnt			= static_cast<uint32_t>( source.indices.size() );
+		surf.indicesCnt			= static_cast<uint32_t>( source->indices.size() );
 		surf.materialId			= model.materialId;
 		surf.modelMatrix		= model.matrix;
 		surf.objectId			= view.committedModelCnt + objectOffset;
 		surf.flags				= model.flags;
 
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-			if ( source.material->shaders[ i ] != nullptr ) {
-				surf.pipelineObject[ i ] = source.material->shaders[ i ]->pipeline;
+			if ( source->material->shaders[ i ] != nullptr ) {
+				surf.pipelineObject[ i ] = source->material->shaders[ i ]->pipeline;
 			} else {
 				surf.pipelineObject[ i ] = INVALID_HANDLE;
 			}
@@ -1841,8 +1842,7 @@ private:
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
-				modelSource_t& model = scene.models[ scene.entities[ imguiControls.selectedModelId ].modelId ];
-				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, model.name.c_str() );
+				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities[ imguiControls.selectedModelId ].modelId ) );
 			} else {
 				memset( &entityName[ 0 ], 0, 256 );
 			}
@@ -1852,8 +1852,8 @@ private:
 			if ( ImGui::BeginCombo( "Models", entityName ) )
 			{
 				for ( int entityIx = 0; entityIx < scene.entities.size(); ++entityIx ) {
-					modelSource_t& model = scene.models[ scene.entities[ entityIx ].modelId ];
-					sprintf_s( entityName, "%i: %s", entityIx, model.name.c_str() );
+					const modelSource_t* model = modelLib.Find( scene.entities[ entityIx ].modelId );
+					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities[ entityIx ].modelId ) );
 					if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
 						imguiControls.selectedModelId = entityIx;
 						scene.entities[ entityIx ].flags = WIREFRAME;
