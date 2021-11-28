@@ -365,16 +365,15 @@ private:
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 
-		CreateFramebuffers();
-
-		CreateSyncObjects();
-
-		CreateUniformBuffers();
-
-		CreateCommandBuffers();
+		{
+			// Create Frame Resources
+			CreateSyncObjects();
+			CreateFramebuffers();
+			CreateUniformBuffers();
+			CreateCommandBuffers();
+		}
 
 		UpdateDescriptorSets();
-
 		MakeBeachScene();
 		UploadModels();
 	}
@@ -1094,11 +1093,6 @@ private:
 		throw std::runtime_error( "Failed to find supported format!" );
 	}
 
-	bool HasStencilComponent( VkFormat format )
-	{
-		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
-	}
-
 	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, MemoryAllocator& outAllocation )
 	{
 		VkMemoryAllocateInfo allocInfo{ };
@@ -1146,12 +1140,9 @@ private:
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
-		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, subAlloc ) )
-		{
+		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, subAlloc ) ) {
 			vkBindBufferMemory( context.device, buffer, bufferMemory.GetDeviceMemory(), subAlloc.offset );
-		}
-		else
-		{
+		} else {
 			throw std::runtime_error( "buffer could not allocate!" );
 		}
 	}
@@ -1214,34 +1205,6 @@ private:
 				throw std::runtime_error( "Failed to create depth sampler!" );
 			}
 		}
-	}
-
-	void CreateVertexBuffer( modelSource_t& surf, VkBuffer& vb, AllocRecord& subAlloc )
-	{
-		VkDeviceSize bufferSize = sizeof( surf.vertices[0] ) * surf.vertices.size();
-
-		stagingBuffer.Reset();
-		stagingBuffer.CopyData( surf.vertices.data(), static_cast<size_t>( bufferSize ) );
-
-		CreateBuffer( bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory, subAlloc );
-
-		VkBufferCopy copyRegion{ };
-		copyRegion.size = bufferSize;
-		UploadToGPU( stagingBuffer.buffer, vb, copyRegion );
-	}
-
-	void CreateIndexBuffer( modelSource_t& surf, VkBuffer& ib, AllocRecord& subAlloc )
-	{
-		VkDeviceSize bufferSize = sizeof( surf.indices[0] ) * surf.indices.size();
-
-		stagingBuffer.Reset();
-		stagingBuffer.CopyData( surf.indices.data(), static_cast< size_t >( bufferSize ) );
-
-		CreateBuffer( bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory, subAlloc );
-
-		VkBufferCopy copyRegion{ };
-		copyRegion.size = bufferSize;
-		UploadToGPU( stagingBuffer.buffer, ib, copyRegion );
 	}
 
 	void CreateUniformBuffers()
