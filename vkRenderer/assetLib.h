@@ -4,9 +4,10 @@
 
 template< class Asset >
 class AssetLib {
-public:
+private:
 	std::vector< Asset >		assets;
 	std::vector< std::string >	names;
+public:
 	void					Create();
 	const Asset*			GetDefault() const { return ( assets.size() > 0 ) ? &assets[ 0 ] : NULL; };
 	uint32_t				Count() { return static_cast<uint32_t>( assets.size() ); }

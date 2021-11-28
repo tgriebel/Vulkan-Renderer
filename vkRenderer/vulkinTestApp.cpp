@@ -486,9 +486,11 @@ private:
 
 	void CreateDescSetLayouts()
 	{
-		for ( RenderProgram& program : gpuPrograms.assets )
+		const uint32_t gpuProgramCount = gpuPrograms.Count();
+		for ( uint32_t i = 0; i < gpuProgramCount; ++i )
 		{
-			CreateDescriptorSetLayout( program );
+			RenderProgram* program = gpuPrograms.Find( i );
+			CreateDescriptorSetLayout( *program );
 		}
 
 		CreateSceneRenderDescriptorSetLayout( globalLayout );
