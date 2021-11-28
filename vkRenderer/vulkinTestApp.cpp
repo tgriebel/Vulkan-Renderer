@@ -14,6 +14,7 @@
 #include "swapChain.h"
 #include "assetLib_GpuProgs.h"
 #include "assetLib_Materials.h"
+#include "assetLib_Images.h"
 #include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"
@@ -53,6 +54,7 @@ MemoryAllocator						sharedMemory;
 
 AssetLibGpuProgram					gpuPrograms;
 AssetLibMaterials					materialLib;
+AssetLibImages						textureLib;
 
 renderConstants_t					r;
 Scene								scene;
@@ -69,21 +71,6 @@ RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFil
 
 const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "viking_room.png",
 												"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
-
-std::map<std::string, texture_t>	textures;
-uint32_t GetTextureId( const std::string& name )
-{
-	auto it = textures.find( name );
-
-	if ( it != textures.end() )
-	{
-		return static_cast<uint32_t>( std::distance( textures.begin(), it ) );
-	}
-	else
-	{
-		return 0;
-	}
-}
 
 void ProcessInput( const input_t& input, const float dt )
 {
@@ -972,10 +959,11 @@ private:
 
 		std::vector<VkDescriptorImageInfo> imageInfo;
 		imageInfo.reserve( MaxImageDescriptors );
-		for ( auto it = textures.begin(); it != textures.end(); ++it )
+		const uint32_t textureCount = textureLib.Count();
+		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
-			texture_t& texture = it->second;
-			VkImageView& imageView = texture.vk_imageView;
+			texture_t* texture = textureLib.Find( i );
+			VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -983,10 +971,10 @@ private:
 			imageInfo.push_back( info );
 		}
 		// Defaults
-		for ( size_t j = textures.size(); j < MaxImageDescriptors; ++j )
+		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			texture_t& texture = textures[ "checker.png" ];
-			VkImageView& imageView = texture.vk_imageView;
+			texture_t* texture = textureLib.Find( "checker.png" );
+			VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1098,10 +1086,10 @@ private:
 
 		std::vector<VkDescriptorImageInfo> shadowImageInfo;
 		shadowImageInfo.reserve( MaxImageDescriptors );
-		for ( auto it = textures.begin(); it != textures.end(); ++it )
+		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
-			texture_t& texture = it->second;
-			VkImageView& imageView = texture.vk_imageView;
+			texture_t* texture = textureLib.Find( i );
+			VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1109,10 +1097,10 @@ private:
 			shadowImageInfo.push_back( info );
 		}
 		// Defaults
-		for( size_t j = textures.size(); j < MaxImageDescriptors; ++j )
+		for( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			texture_t& texture = textures[ "checker.png" ];
-			VkImageView& imageView = texture.vk_imageView;
+			texture_t* texture = textureLib.Find( "checker.png" );
+			VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1124,8 +1112,8 @@ private:
 		shadowCodeImageInfo.reserve( MaxCodeImages );
 		for ( size_t j = 0; j < MaxCodeImages; ++j )
 		{
-			texture_t& texture = textures[ "checker.png" ];
-			VkImageView& imageView = texture.vk_imageView;
+			texture_t* texture = textureLib.Find( "checker.png" );
+			VkImageView& imageView = texture->vk_imageView;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -2341,21 +2329,22 @@ private:
 			stagingBuffer.CopyData( textureSource.bytes, textureSource.sizeBytes );
 
 			CopyBufferToImage( commandBuffer, stagingBuffer.buffer, currentOffset, texture.vk_image, static_cast< uint32_t >( texture.width ), static_cast< uint32_t >( texture.height ) );
-		
-			textures[ textureSource.name ] = texture;
+
+			textureLib.Add( textureSource.name, texture );
 		}
 		EndSingleTimeCommands( commandBuffer );
 
-		for ( auto it = textures.begin(); it != textures.end(); ++it )
+		const uint32_t textureCount = textureLib.Count();
+		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
-			const texture_t& texture = it->second;
-			GenerateMipmaps( texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.width, texture.height, texture.mipLevels );
+			const texture_t* texture = textureLib.Find( i );
+			GenerateMipmaps( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->width, texture->height, texture->mipLevels );
 		}
 
-		for ( auto it = textures.begin(); it != textures.end(); ++it )
+		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
-			texture_t& texture = it->second;
-			texture.vk_imageView = CreateImageView( texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture.mipLevels );
+			texture_t* texture = textureLib.Find( i );
+			texture->vk_imageView = CreateImageView( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture->mipLevels );
 		}
 
 		// Default Images
@@ -2543,11 +2532,12 @@ private:
 
 		DestroyResourceBuffers();
 
-		for ( auto it = textures.begin(); it != textures.end(); ++it )
+		const uint32_t textureCount = textureLib.Count();
+		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
-			const texture_t& texture = it->second;
-			vkDestroyImageView( context.device, texture.vk_imageView, nullptr );
-			vkDestroyImage( context.device, texture.vk_image, nullptr );
+			const texture_t* texture = textureLib.Find( i );
+			vkDestroyImageView( context.device, texture->vk_imageView, nullptr );
+			vkDestroyImage( context.device, texture->vk_image, nullptr );
 		}
 
 		vkDestroySampler( context.device, vk_bilinearSampler, nullptr );

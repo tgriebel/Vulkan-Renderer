@@ -4,9 +4,9 @@ void AssetLibImages::Create()
 {
 }
 
-void AssetLibImages::Add( const char* name, const texture_t& material )
+void AssetLibImages::Add( const char* name, const texture_t& texture )
 {
-	textures.push_back( material );
+	textures.push_back( texture );
 	names.push_back( name );
 }
 

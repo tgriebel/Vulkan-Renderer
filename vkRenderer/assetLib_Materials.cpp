@@ -2,10 +2,10 @@
 
 #include "assetLib_Materials.h"
 #include "assetLib_GpuProgs.h"
+#include "assetLib_Images.h"
 
 extern AssetLibGpuProgram gpuPrograms;
-
-uint32_t GetTextureId( const std::string& name ); // TODO: move
+extern AssetLibImages textureLib;
 
 void AssetLibMaterials::Create()
 {
@@ -15,16 +15,16 @@ void AssetLibMaterials::Create()
 		material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
 		material.shaders[ DRAWPASS_TERRAIN ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN ];
 		material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_TERRAIN_DEPTH ];
-		material.texture0 = GetTextureId( "heightmap.png" );
-		material.texture1 = GetTextureId( "grass.jpg" );
-		material.texture2 = GetTextureId( "desert.jpg" );
+		material.texture0 = textureLib.FindId( "heightmap.png" );
+		material.texture1 = textureLib.FindId( "grass.jpg" );
+		material.texture2 = textureLib.FindId( "desert.jpg" );
 		Add( "TERRAIN", material );
 	}
 
 	{
 		material_t material;
 		material.shaders[ DRAWPASS_SKYBOX ] = &gpuPrograms.programs[ RENDER_PROGRAM_SKY ];
-		material.texture0 = GetTextureId( "skybox.jpg" );
+		material.texture0 = textureLib.FindId( "skybox.jpg" );
 		Add( "SKY", material );
 	}
 
@@ -34,7 +34,7 @@ void AssetLibMaterials::Create()
 		material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
 		material.shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
 		material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		material.texture0 = GetTextureId( "viking_room.png" );
+		material.texture0 = textureLib.FindId( "viking_room.png" );
 		Add( "VIKING", material );
 	}
 
@@ -42,7 +42,7 @@ void AssetLibMaterials::Create()
 		material_t material;
 		material.shaders[ DRAWPASS_TRANS ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_TRANS ];
 		material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		material.texture0 = GetTextureId( "checker.png" );
+		material.texture0 = textureLib.FindId( "checker.png" );
 		Add( "WATER", material );
 	}
 
@@ -67,7 +67,7 @@ void AssetLibMaterials::Create()
 		material.shaders[ DRAWPASS_DEPTH ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
 		material.shaders[ DRAWPASS_OPAQUE ] = &gpuPrograms.programs[ RENDER_PROGRAM_LIT_OPAQUE ];
 		material.shaders[ DRAWPASS_WIREFRAME ] = &gpuPrograms.programs[ RENDER_PROGRAM_DEPTH_PREPASS ];
-		material.texture0 = GetTextureId( "palm_tree_diffuse.jpg" );
+		material.texture0 = textureLib.FindId( "palm_tree_diffuse.jpg" );
 		Add( "PALM", material );
 	}
 }
