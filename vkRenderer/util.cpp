@@ -28,7 +28,7 @@ glm::mat4 MatrixFromVector( const glm::vec3& v )
 	return m;
 }
 
-bool LoadTextureImage( const char * texturePath, textureSource_t& texture )
+bool LoadTextureImage( const char * texturePath, texture_t& texture )
 {
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load( texturePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha );
@@ -38,7 +38,6 @@ bool LoadTextureImage( const char * texturePath, textureSource_t& texture )
 		return false;
 	}
 
-	texture.name		= "";
 	texture.bytes		= pixels;
 	texture.width		= texWidth;
 	texture.height		= texHeight;

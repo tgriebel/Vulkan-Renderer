@@ -404,30 +404,21 @@ private:
 	void*			ptr;
 };
 
-struct textureSource_t
+struct texture_t
 {
-	const char *	name;
 	uint8_t*		bytes;
 	uint32_t		sizeBytes;
 	uint32_t		width;
 	uint32_t		height;
 	uint32_t		channels;
-};
-
-
-struct texture_t
-{
-	uint32_t		width;
-	uint32_t		height;
-	uint32_t		channels;
 	uint32_t		mipLevels;
+	bool			uploaded;
 
 	AllocRecord		memory;
 
 	VkImage			vk_image;	
 	VkImageView		vk_imageView;
 };
-
 
 struct drawSurf_t
 {

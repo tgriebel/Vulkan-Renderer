@@ -2038,43 +2038,36 @@ private:
 
 	void CreateTextureImage( const std::vector<std::string>& texturePaths )
 	{
-		std::vector<textureSource_t> textureSources;
-		textureSources.reserve( texturePaths.size() );
 		for ( const std::string& texturePath : texturePaths )
 		{
-			textureSource_t texture;
+			texture_t texture;
 			if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
-				texture.name = texturePath.c_str();
-				textureSources.push_back( texture );
+				texture.uploaded = false;
+				texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
+				textureLib.Add( texturePath.c_str(), texture );
 			}
 		}
 
+		const uint32_t textureCount = textureLib.Count();
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-		for ( const textureSource_t& textureSource : textureSources )
+		for ( uint32_t i = 0 ; i < textureCount; ++i )
 		{
-			texture_t texture;
-			texture.width = textureSource.width;
-			texture.height = textureSource.height;
-			texture.channels = textureSource.channels;
-			texture.mipLevels = static_cast< uint32_t >( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
-
-			CreateImage( texture.width, texture.height, texture.mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture.vk_image, localMemory, texture.memory );
+			texture_t* texture = textureLib.Find( i );
+			CreateImage( texture->width, texture->height, texture->mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->vk_image, localMemory, texture->memory );
 		
-			TransitionImageLayout( texture.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.mipLevels );
+			TransitionImageLayout( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->mipLevels );
 
 			const VkDeviceSize currentOffset = stagingBuffer.currentOffset;
-			stagingBuffer.CopyData( textureSource.bytes, textureSource.sizeBytes );
+			stagingBuffer.CopyData( texture->bytes, texture->sizeBytes );
 
-			CopyBufferToImage( commandBuffer, stagingBuffer.buffer, currentOffset, texture.vk_image, static_cast< uint32_t >( texture.width ), static_cast< uint32_t >( texture.height ) );
-
-			textureLib.Add( textureSource.name, texture );
+			CopyBufferToImage( commandBuffer, stagingBuffer.buffer, currentOffset, texture->vk_image, static_cast< uint32_t >( texture->width ), static_cast< uint32_t >( texture->height ) );
+			texture->uploaded = true;
 		}
 		EndSingleTimeCommands( commandBuffer );
 
-		const uint32_t textureCount = textureLib.Count();
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
-			const texture_t* texture = textureLib.Find( i );
+			texture_t* texture = textureLib.Find( i );
 			GenerateMipmaps( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->width, texture->height, texture->mipLevels );
 		}
 
