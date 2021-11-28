@@ -72,37 +72,7 @@ static bool							validateErrors = true;
 
 void MakeBeachScene();
 
-void ProcessInput( const input_t& input, const float dt )
-{
-	if ( input.keys[ 'D' ] ) {
-		scene.camera.MoveForward( dt * 0.01f );
-	}
-	if ( input.keys[ 'A' ] ) {
-		scene.camera.MoveForward( dt * -0.01f );
-	}
-	if ( input.keys[ 'W' ] ) {
-		scene.camera.MoveVertical( dt * -0.01f );
-	}
-	if ( input.keys[ 'S' ] ) {
-		scene.camera.MoveVertical( dt * 0.01f );
-	}
-	if ( input.keys[ '+' ] ) {
-		scene.camera.fov += dt;
-	}
-	if ( input.keys[ '-' ] ) {
-		scene.camera.fov -= dt;
-	}
-
-	const mouse_t& mouse = input.mouse;
-	if ( mouse.centered )
-	{
-		const float maxSpeed = std::min( dt * mouse.speed, 1.0f );
-		const float yawDelta = maxSpeed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
-		const float pitchDelta = -maxSpeed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
-		scene.camera.SetYaw( yawDelta );
-		scene.camera.SetPitch( pitchDelta );
-	}
-}
+void ProcessInput( const input_t& input, const float dt );
 
 static float AdvanceTime()
 {
