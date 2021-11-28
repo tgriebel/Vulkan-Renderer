@@ -166,18 +166,16 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="assetLib.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="window.h" />
-    <ClInclude Include="assetLib_Images.h" />
-    <ClInclude Include="assetLib_Materials.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="deviceContext.h" />
     <ClInclude Include="GeoBuilder.h" />
-    <ClInclude Include="assetLib_GpuProgs.h" />
     <ClInclude Include="imgui\backends\imgui_impl_vulkan.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -195,12 +193,12 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="assetLib.cpp" />
     <ClCompile Include="deviceContext.cpp" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="assetLib_GpuProgs.cpp" />
-    <ClCompile Include="assetLib_Images.cpp" />
     <ClCompile Include="assetLib_Materials.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_vulkan.cpp" />

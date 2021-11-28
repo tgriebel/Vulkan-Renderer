@@ -12,9 +12,7 @@
 #include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"
-#include "assetLib_GpuProgs.h"
-#include "assetLib_Materials.h"
-#include "assetLib_Images.h"
+#include "assetLib.h"
 #include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"
@@ -48,6 +46,10 @@ struct imguiControls_t
 	glm::vec3	selectedModelOrigin;
 };
 static imguiControls_t imguiControls;
+
+typedef AssetLib< texture_t > AssetLibImages;
+typedef AssetLib< material_t > AssetLibMaterials;
+typedef AssetLib< RenderProgram > AssetLibGpuProgram;
 
 MemoryAllocator						localMemory;
 MemoryAllocator						sharedMemory;
@@ -484,7 +486,7 @@ private:
 
 	void CreateDescSetLayouts()
 	{
-		for ( RenderProgram& program : gpuPrograms.programs )
+		for ( RenderProgram& program : gpuPrograms.assets )
 		{
 			CreateDescriptorSetLayout( program );
 		}

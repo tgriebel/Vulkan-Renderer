@@ -27,11 +27,11 @@
     </ClCompile>
     <ClCompile Include="assetLib_GpuProgs.cpp" />
     <ClCompile Include="assetLib_Materials.cpp" />
-    <ClCompile Include="assetLib_Images.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="deviceContext.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="io.cpp" />
+    <ClCompile Include="assetLib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -70,13 +70,11 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="deviceContext.h" />
-    <ClInclude Include="assetLib_GpuProgs.h" />
-    <ClInclude Include="assetLib_Materials.h" />
-    <ClInclude Include="assetLib_Images.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="scene.h" />
+    <ClInclude Include="assetLib.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
