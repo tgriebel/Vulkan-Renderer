@@ -130,15 +130,22 @@ void WindowThread()
 class VkRenderer
 {
 public:
-	void Run() {
+	void Init()
+	{
 		InitVulkan();
 		InitImGui();
+	}
+	void Run()
+	{
 		while ( context.window.IsOpen() )
 		{
 			UpdateScene();
 			CommitScene();
 			DrawFrame();
 		}
+	}
+	void Destroy()
+	{
 		vkDeviceWaitIdle( context.device );
 		Cleanup();
 	}
@@ -2789,7 +2796,9 @@ int main()
 
 	try
 	{
+		renderer.Init();
 		renderer.Run();
+		renderer.Destroy();
 	}
 	catch (const std::exception& e)
 	{
