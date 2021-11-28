@@ -184,6 +184,7 @@ private:
 	VkDescriptorPool				descriptorPool;
 	FrameState						frameState[ MAX_FRAMES_STATES ];
 	size_t							currentFrame = 0;
+	uint32_t						currentBuffer = 0;
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
@@ -439,6 +440,8 @@ private:
 		CreatePipelineObjects();
 
 		CreateUniformBuffers();
+
+		CreateCommandBuffers();
 
 		UpdateDescriptorSets();
 
@@ -1800,7 +1803,7 @@ private:
 		VkCommandPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
-		poolInfo.flags = 0; // Optional
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &graphicsQueue.commandPool ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create command pool!" );
@@ -1942,223 +1945,228 @@ private:
 		);
 	}
 
-	void CreateCommandBuffers( RenderView& view )
+	void CreateCommandBuffers()
 	{
 		VkCommandBufferAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.commandPool = graphicsQueue.commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = static_cast< uint32_t >( MAX_FRAMES_STATES );
+		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, graphicsQueue.commandBuffers ) != VK_SUCCESS )
-		{
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, graphicsQueue.commandBuffers ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to allocate command buffers!" );
 		}
 
-		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+			vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+		}
+	}
+
+	void SubmitCommandBuffers( RenderView& view )
+	{
+		const uint32_t i = currentBuffer;
+		vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+
+		VkCommandBufferBeginInfo beginInfo{ };
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0; // Optional
+		beginInfo.pInheritanceInfo = nullptr; // Optional
+
+		if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to begin recording command buffer!" );
+		}
+
+		VkBuffer vertexBuffers[] = { vb.GetVkObject() };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers( graphicsQueue.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
+		vkCmdBindIndexBuffer( graphicsQueue.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+
+		// Shadow Passes
 		{
-			VkCommandBufferBeginInfo beginInfo{ };
-			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			beginInfo.flags = 0; // Optional
-			beginInfo.pInheritanceInfo = nullptr; // Optional
+			VkRenderPassBeginInfo shadowPassInfo{ };
+			shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			shadowPassInfo.renderPass = shadowPassState.pass;
+			shadowPassInfo.framebuffer = shadowPassState.fb[ i ];
+			shadowPassInfo.renderArea.offset = { 0, 0 };
+			shadowPassInfo.renderArea.extent = { ShadowMapWidth, ShadowMapHeight };
 
-			if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS )
+			std::array<VkClearValue, 2> shadowClearValues{ };
+			shadowClearValues[ 0 ].color = { 1.0f, 1.0f, 1.0f, 1.0f };
+			shadowClearValues[ 1 ].depthStencil = { 1.0f, 0 };
+
+			shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
+			shadowPassInfo.pClearValues = shadowClearValues.data();
+
+			// TODO: how to handle views better?
+			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+			for ( size_t surfIx = 0; surfIx < shadowView.committedModelCnt; surfIx++ )
 			{
-				throw std::runtime_error( "Failed to begin recording command buffer!" );
-			}
+				drawSurf_t& surface = shadowView.surfaces[ surfIx ];
 
-			VkBuffer vertexBuffers[] = { vb.GetVkObject() };
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers( graphicsQueue.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
-			vkCmdBindIndexBuffer( graphicsQueue.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
-
-			// Shadow Passes
-			{
-				VkRenderPassBeginInfo shadowPassInfo{ };
-				shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-				shadowPassInfo.renderPass = shadowPassState.pass;
-				shadowPassInfo.framebuffer = shadowPassState.fb[ i ];
-				shadowPassInfo.renderArea.offset = { 0, 0 };
-				shadowPassInfo.renderArea.extent = { ShadowMapWidth, ShadowMapHeight };
-
-				std::array<VkClearValue, 2> shadowClearValues{ };
-				shadowClearValues[ 0 ].color = { 1.0f, 1.0f, 1.0f, 1.0f };
-				shadowClearValues[ 1 ].depthStencil = { 1.0f, 0 };
-
-				shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
-				shadowPassInfo.pClearValues = shadowClearValues.data();
-
-				// TODO: how to handle views better?
-				vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-
-				for ( size_t surfIx = 0; surfIx < shadowView.committedModelCnt; surfIx++ )
-				{
-					drawSurf_t& surface = shadowView.surfaces[ surfIx ];
-
-					pipelineObject_t* pipelineObject;
-					if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HANDLE ) {
-						continue;
-					}
-					GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
-
-					// vkCmdSetDepthBias
-					vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-					vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
-
-					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
-					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
-
-					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+				pipelineObject_t* pipelineObject;
+				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HANDLE ) {
+					continue;
 				}
-				vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+				GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
+
+				// vkCmdSetDepthBias
+				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
+
+				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 			}
+			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		}
 
-			// Main Passes
+		// Main Passes
+		{
+			VkRenderPassBeginInfo renderPassInfo{ };
+			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			renderPassInfo.renderPass = mainPassState.pass;
+			renderPassInfo.framebuffer = mainPassState.fb[ i ];
+			renderPassInfo.renderArea.offset = { 0, 0 };
+			renderPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
+
+			std::array<VkClearValue, 2> clearValues{ };
+			clearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
+			clearValues[ 1 ].depthStencil = { 0.0f, 0 };
+
+			renderPassInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
+			renderPassInfo.pClearValues = clearValues.data();
+
+			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+			for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
 			{
-				VkRenderPassBeginInfo renderPassInfo{ };
-				renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-				renderPassInfo.renderPass = mainPassState.pass;
-				renderPassInfo.framebuffer = mainPassState.fb[ i ];
-				renderPassInfo.renderArea.offset = { 0, 0 };
-				renderPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
-
-				std::array<VkClearValue, 2> clearValues{ };
-				clearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
-				clearValues[ 1 ].depthStencil = { 0.0f, 0 };
-
-				renderPassInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
-				renderPassInfo.pClearValues = clearValues.data();
-
-				vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-
-				for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
-				{
-					for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
-					{
-						drawSurf_t& surface = view.surfaces[ surfIx ];
-
-						pipelineObject_t* pipelineObject;
-						if ( surface.pipelineObject[ pass ] == INVALID_HANDLE ) {
-							continue;
-						}
-						if ( ( pass == DRAWPASS_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
-							continue;
-						}
-						GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
-
-						vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-						vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
-
-						pushConstants_t pushConstants = { surface.objectId, surface.materialId };
-						vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
-
-						vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
-					}
-				}
-				vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
-			}
-
-			// Post Process Passes
-			{
-				VkRenderPassBeginInfo postProcessPassInfo{ };
-				postProcessPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-				postProcessPassInfo.renderPass = postPassState.pass;
-				postProcessPassInfo.framebuffer = postPassState.fb[ i ];
-				postProcessPassInfo.renderArea.offset = { 0, 0 };
-				postProcessPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
-
-				std::array<VkClearValue, 2> postProcessClearValues{ };
-				postProcessClearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
-				postProcessClearValues[ 1 ].depthStencil = { 0.0f, 0 };
-
-				postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
-				postProcessPassInfo.pClearValues = postProcessClearValues.data();
-
-				vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 				for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
 				{
-					drawSurf_t& surface = shadowView.surfaces[ surfIx ];
-					if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HANDLE ) {
+					drawSurf_t& surface = view.surfaces[ surfIx ];
+
+					pipelineObject_t* pipelineObject;
+					if ( surface.pipelineObject[ pass ] == INVALID_HANDLE ) {
 						continue;
 					}
-					pipelineObject_t* pipelineObject;
-					GetPipelineObject( surface.pipelineObject[ DRAWPASS_POST_2D ], &pipelineObject );
+					if ( ( pass == DRAWPASS_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
+						continue;
+					}
+					GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
+
 					vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-					vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
+					vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
 
 					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 				}
+			}
+			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		}
+
+		// Post Process Passes
+		{
+			VkRenderPassBeginInfo postProcessPassInfo{ };
+			postProcessPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			postProcessPassInfo.renderPass = postPassState.pass;
+			postProcessPassInfo.framebuffer = postPassState.fb[ i ];
+			postProcessPassInfo.renderArea.offset = { 0, 0 };
+			postProcessPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
+
+			std::array<VkClearValue, 2> postProcessClearValues{ };
+			postProcessClearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
+			postProcessClearValues[ 1 ].depthStencil = { 0.0f, 0 };
+
+			postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
+			postProcessPassInfo.pClearValues = postProcessClearValues.data();
+
+			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+			for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
+			{
+				drawSurf_t& surface = shadowView.surfaces[ surfIx ];
+				if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HANDLE ) {
+					continue;
+				}
+				pipelineObject_t* pipelineObject;
+				GetPipelineObject( surface.pipelineObject[ DRAWPASS_POST_2D ], &pipelineObject );
+				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
+
+				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+			}
 
 #if defined( USE_IMGUI )
-				ImGui_ImplVulkan_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
 
-				ImGui::Begin( "Control Panel" );
-				ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
-				ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-				ImGui::Text( "Mouse: (%f, %f )", (float) context.window.input.mouse.x, (float)context.window.input.mouse.y );
-				const glm::vec2 screenPoint = glm::vec2( (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
-				const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
-				char entityName[ 256 ];
-				if ( imguiControls.selectedModelId >= 0 ) {
-					modelSource_t& model = scene.models[ scene.entities[ imguiControls.selectedModelId ].modelId ];
-					sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, model.name.c_str() );
-				} else {
-					memset( &entityName[ 0 ], 0, 256 );
-				}
-				static glm::vec3 tempOrigin;
-				ImGui::Text( "NDC: (%f, %f )", (float) ndc.x, (float) ndc.y );
-				ImGui::Text( "Camera Origin: (%f, %f, %f)", scene.camera.GetOrigin().x, scene.camera.GetOrigin().y, scene.camera.GetOrigin().z );
-				if ( ImGui::BeginCombo( "Models", entityName ) )
-				{
-					for ( int entityIx = 0; entityIx < scene.entities.size(); ++entityIx ) {
-						modelSource_t& model = scene.models[ scene.entities[ entityIx ].modelId ];
-						sprintf_s( entityName, "%i: %s", entityIx, model.name.c_str() );
-						if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
-							imguiControls.selectedModelId = entityIx;
-							scene.entities[ entityIx ].flags = WIREFRAME;
-							tempOrigin.x = scene.entities[ entityIx ].matrix[ 3 ][ 0 ];
-							tempOrigin.y = scene.entities[ entityIx ].matrix[ 3 ][ 1 ];
-							tempOrigin.z = scene.entities[ entityIx ].matrix[ 3 ][ 2 ];
-						} else {
-							scene.entities[ entityIx ].flags = (renderFlags) ( scene.entities[ entityIx ].flags & ~WIREFRAME );
-						}
-					}
-					ImGui::EndCombo();
-				}
-				ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin.x, 0.1f, 1.0f );
-				ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin.y, 0.1f, 1.0f );
-				ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin.z, 0.1f, 1.0f );
-
-				if ( imguiControls.selectedModelId >= 0 ) {
-					entity_t& entity = scene.entities[ imguiControls.selectedModelId ];
-					entity.matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin.x;
-					entity.matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
-					entity.matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
-				}
-				//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
-				ImGui::End();
-
-				// Render dear imgui into screen
-				ImGui::Render();
-				ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
-#endif
-				vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+			ImGui::Begin( "Control Panel" );
+			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
+			ImGui::Text( "Mouse: (%f, %f )", (float) context.window.input.mouse.x, (float)context.window.input.mouse.y );
+			const glm::vec2 screenPoint = glm::vec2( (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
+			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
+			char entityName[ 256 ];
+			if ( imguiControls.selectedModelId >= 0 ) {
+				modelSource_t& model = scene.models[ scene.entities[ imguiControls.selectedModelId ].modelId ];
+				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, model.name.c_str() );
+			} else {
+				memset( &entityName[ 0 ], 0, 256 );
 			}
-
-
-			if ( vkEndCommandBuffer( graphicsQueue.commandBuffers[i] ) != VK_SUCCESS )
+			static glm::vec3 tempOrigin;
+			ImGui::Text( "NDC: (%f, %f )", (float) ndc.x, (float) ndc.y );
+			ImGui::Text( "Camera Origin: (%f, %f, %f)", scene.camera.GetOrigin().x, scene.camera.GetOrigin().y, scene.camera.GetOrigin().z );
+			if ( ImGui::BeginCombo( "Models", entityName ) )
 			{
-				throw std::runtime_error( "Failed to record command buffer!" );
+				for ( int entityIx = 0; entityIx < scene.entities.size(); ++entityIx ) {
+					modelSource_t& model = scene.models[ scene.entities[ entityIx ].modelId ];
+					sprintf_s( entityName, "%i: %s", entityIx, model.name.c_str() );
+					if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
+						imguiControls.selectedModelId = entityIx;
+						scene.entities[ entityIx ].flags = WIREFRAME;
+						tempOrigin.x = scene.entities[ entityIx ].matrix[ 3 ][ 0 ];
+						tempOrigin.y = scene.entities[ entityIx ].matrix[ 3 ][ 1 ];
+						tempOrigin.z = scene.entities[ entityIx ].matrix[ 3 ][ 2 ];
+					} else {
+						scene.entities[ entityIx ].flags = (renderFlags) ( scene.entities[ entityIx ].flags & ~WIREFRAME );
+					}
+				}
+				ImGui::EndCombo();
 			}
+			ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin.x, 0.1f, 1.0f );
+			ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin.y, 0.1f, 1.0f );
+			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin.z, 0.1f, 1.0f );
+
+			if ( imguiControls.selectedModelId >= 0 ) {
+				entity_t& entity = scene.entities[ imguiControls.selectedModelId ];
+				entity.matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin.x;
+				entity.matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
+				entity.matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
+			}
+			//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
+			ImGui::End();
+
+			// Render dear imgui into screen
+			ImGui::Render();
+			ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
+#endif
+			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		}
+
+
+		if ( vkEndCommandBuffer( graphicsQueue.commandBuffers[i] ) != VK_SUCCESS )
+		{
+			throw std::runtime_error( "Failed to record command buffer!" );
 		}
 	}
 
@@ -2473,9 +2481,7 @@ private:
 	{
 		WaitForEndFrame();
 
-		uint32_t imageIndex;
-		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ currentFrame ], VK_NULL_HANDLE, &imageIndex );
-
+		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ currentFrame ], VK_NULL_HANDLE, &currentBuffer );
 		if ( result == VK_ERROR_OUT_OF_DATE_KHR )
 		{
 			RecreateSwapChain();
@@ -2487,15 +2493,15 @@ private:
 		}
 
 		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-		if ( graphicsQueue.imagesInFlight[ imageIndex ] != VK_NULL_HANDLE ) {
-			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ imageIndex ], VK_TRUE, UINT64_MAX );
+		if ( graphicsQueue.imagesInFlight[ currentBuffer ] != VK_NULL_HANDLE ) {
+			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ currentBuffer ], VK_TRUE, UINT64_MAX );
 		}
 		// Mark the image as now being in use by this frame
-		graphicsQueue.imagesInFlight[ imageIndex ] = graphicsQueue.inFlightFences[ currentFrame ];
+		graphicsQueue.imagesInFlight[ currentBuffer ] = graphicsQueue.inFlightFences[ currentFrame ];
 
-		UpdateBufferContents( imageIndex );
-		UpdateFrameDescSet( imageIndex );
-		CreateCommandBuffers( renderView );
+		UpdateBufferContents( currentBuffer );
+		UpdateFrameDescSet( currentBuffer );
+		SubmitCommandBuffers( renderView );
 
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2506,7 +2512,7 @@ private:
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[imageIndex];
+		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[currentBuffer];
 
 		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ currentFrame ] };
 		submitInfo.signalSemaphoreCount = 1;
@@ -2514,8 +2520,7 @@ private:
 
 		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ currentFrame ] );
 
-		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ currentFrame ] ) != VK_SUCCESS )
-		{
+		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ currentFrame ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffer!" );
 		}
 
@@ -2528,7 +2533,7 @@ private:
 		VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &imageIndex;
+		presentInfo.pImageIndices = &currentBuffer;
 		presentInfo.pResults = nullptr; // Optional
 
 		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
