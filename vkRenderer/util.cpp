@@ -50,16 +50,10 @@ bool LoadTextureImage( const char * texturePath, texture_t& texture )
 	return true;
 }
 
-RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile )
+void CreateShaders( GpuProgram& prog )
 {
-	std::vector<char> vsBlob = ReadFile( vsFile );
-	std::vector<char> psBlob = ReadFile( psFile );
-
-	RenderProgram shader;
-	shader.vs = CreateShaderModule( vsBlob );
-	shader.ps = CreateShaderModule( psBlob );
-
-	return shader;
+	prog.vs = CreateShaderModule( prog.vsBlob );
+	prog.ps = CreateShaderModule( prog.psBlob );
 }
 
 void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib )

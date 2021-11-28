@@ -50,7 +50,7 @@ static imguiControls_t imguiControls;
 
 typedef AssetLib< texture_t > AssetLibImages;
 typedef AssetLib< material_t > AssetLibMaterials;
-typedef AssetLib< RenderProgram > AssetLibGpuProgram;
+typedef AssetLib< GpuProgram > AssetLibGpuProgram;
 typedef AssetLib< modelSource_t > AssetLibModels;
 
 MemoryAllocator						localMemory;
@@ -74,6 +74,21 @@ void MakeBeachScene();
 
 const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "viking_room.png",
 												"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
+
+void CreateAssets()
+{
+	gpuPrograms.Create();
+	for ( const std::string& texturePath : texturePaths )
+	{
+		texture_t texture;
+		if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
+			texture.uploaded = false;
+			texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
+			textureLib.Add( texturePath.c_str(), texture );
+		}
+	}
+	materialLib.Create(); // TODO: enforce ordering somehow. This comes after programs and textures
+}
 
 void ProcessInput( const input_t& input, const float dt )
 {
@@ -361,7 +376,10 @@ private:
 		CreateResourceBuffers();
 		CreateTextureSamplers();
 
-		CreateAssets();
+		GenerateGpuPrograms();
+		UploadTextures();
+		CreateDescSetLayouts();
+		CreatePipelineObjects();
 
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
@@ -436,7 +454,7 @@ private:
 		const uint32_t gpuProgramCount = gpuPrograms.Count();
 		for ( uint32_t i = 0; i < gpuProgramCount; ++i )
 		{
-			RenderProgram* program = gpuPrograms.Find( i );
+			GpuProgram* program = gpuPrograms.Find( i );
 			CreateDescriptorSetLayout( *program );
 		}
 
@@ -544,16 +562,6 @@ private:
 				CreateGraphicsPipeline( layout, pass, state, m->shaders[ i ]->pipeline );
 			}
 		}
-	}
-
-	void CreateAssets()
-	{
-		gpuPrograms.Create();
-		CreateTextureImage( texturePaths );
-		materialLib.Create(); // TODO: enforce ordering somehow. This comes after programs and textures
-
-		CreateDescSetLayouts();
-		CreatePipelineObjects();
 	}
 
 	void PickPhysicalDevice()
@@ -2036,18 +2044,18 @@ private:
 	//	vkFreeMemory( context.device, stagingBuffer.memory, nullptr );
 	}
 
-	void CreateTextureImage( const std::vector<std::string>& texturePaths )
+	void GenerateGpuPrograms()
 	{
-		for ( const std::string& texturePath : texturePaths )
+		const uint32_t programCount = gpuPrograms.Count();
+		for ( uint32_t i = 0; i < programCount; ++i )
 		{
-			texture_t texture;
-			if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
-				texture.uploaded = false;
-				texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
-				textureLib.Add( texturePath.c_str(), texture );
-			}
+			GpuProgram* prog = gpuPrograms.Find( i );
+			CreateShaders( *prog );
 		}
+	}
 
+	void UploadTextures()
+	{
 		const uint32_t textureCount = textureLib.Count();
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 		for ( uint32_t i = 0 ; i < textureCount; ++i )
@@ -2515,6 +2523,8 @@ int main()
 
 	try
 	{
+		CreateAssets();
+
 		renderer.Init();
 		renderer.Run();
 		renderer.Destroy();

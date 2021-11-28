@@ -5,7 +5,7 @@
 
 static std::vector<pipelineObject_t> pipelineCache;
 
-void CreateDescriptorSetLayout( RenderProgram& program )
+void CreateDescriptorSetLayout( GpuProgram& program )
 {
 	VkDescriptorSetLayoutBinding uboLayoutBinding{ };
 	uboLayoutBinding.binding = 0;
@@ -112,7 +112,7 @@ void CreatePostProcessDescriptorSetLayout( VkDescriptorSetLayout& layout )
 }
 
 /*
-void CreateDescriptorSets( RenderProgram& program )
+void CreateDescriptorSets( GpuProgram& program )
 {
 }
 */

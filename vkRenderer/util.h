@@ -4,7 +4,7 @@
 
 glm::mat4 MatrixFromVector( const glm::vec3& v );
 bool LoadTextureImage( const char* texturePath, texture_t& texture );
-RenderProgram CreateShaders( const std::string& vsFile, const std::string& psFile );
+void CreateShaders( GpuProgram& prog );
 void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib );
 void CreateSkyBoxSurf( modelSource_t& outModel );
 void CreateTerrainSurface( modelSource_t& outModel );

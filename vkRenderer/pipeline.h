@@ -23,7 +23,7 @@ enum gfxStateBits_t : uint64_t
 struct pipelineState_t
 {
 	gfxStateBits_t	stateBits;
-	RenderProgram*	shaders;
+	GpuProgram*	shaders;
 	viewport_t		viewport;
 };
 
@@ -59,7 +59,7 @@ struct pushConstants_t
 };
 
 bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject );
-void CreateDescriptorSetLayout( RenderProgram& program );
+void CreateDescriptorSetLayout( GpuProgram& program );
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
 void CreatePostProcessDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
 bool IsPipelineCached( const pipelineState_t& state, pipelineHdl_t& hdl );

@@ -2,7 +2,7 @@
 #include "assetLib.h"
 
 typedef AssetLib< texture_t > AssetLibImages;
-extern AssetLib< RenderProgram > gpuPrograms;
+extern AssetLib< GpuProgram > gpuPrograms;
 extern AssetLibImages textureLib;
 
 void AssetLib< material_t >::Create()

@@ -182,8 +182,12 @@ enum RenderProgramName
 	RENDER_PROGRAM_COUNT,
 };
 
-struct RenderProgram
+struct GpuProgram
 {
+	std::string				vsName;
+	std::string				psName;
+	std::vector<char>		vsBlob;
+	std::vector<char>		psBlob;
 	VkShaderModule			vs;
 	VkShaderModule			ps;
 	VkDescriptorSetLayout	descSetLayout;
@@ -204,7 +208,7 @@ struct material_t
 	uint32_t				texture5;
 	uint32_t				texture6;
 	uint32_t				texture7;
-	RenderProgram*			shaders[ DRAWPASS_COUNT ]; // TODO: use handle
+	GpuProgram*			shaders[ DRAWPASS_COUNT ]; // TODO: use handle
 
 	material_t()
 	{
