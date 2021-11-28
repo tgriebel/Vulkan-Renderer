@@ -71,6 +71,11 @@ bool Window::IsOpen()
 	return ( glfwWindowShouldClose( window ) == false );
 }
 
+void Window::PumpMessages()
+{
+	glfwPollEvents();
+}
+
 void Window::Init()
 {
 	glfwInit();

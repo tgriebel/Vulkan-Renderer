@@ -19,6 +19,7 @@ public:
 	input_t					input;
 	void					Init();
 	bool					IsOpen();
+	void					PumpMessages();
 	void					CreateSurface();
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );

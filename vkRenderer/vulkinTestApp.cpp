@@ -57,7 +57,7 @@ AssetLibMaterials					materialLib;
 renderConstants_t					r;
 Scene								scene;
 
-std::mutex							windowReady;
+static bool							windowReady = false;
 
 static bool							validateVerbose = false;
 static bool							validateWarnings = false;
@@ -109,26 +109,32 @@ void ProcessInput( const input_t& input, const float dt )
 	const mouse_t& mouse = input.mouse;
 	if ( mouse.centered )
 	{
-		const float yawDelta = dt * mouse.speed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
-		const float pitchDelta = dt * -mouse.speed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
+		const float maxSpeed = std::min( dt * mouse.speed, 1.0f );
+		const float yawDelta = maxSpeed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
+		const float pitchDelta = -maxSpeed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
 		scene.camera.SetYaw( yawDelta );
 		scene.camera.SetPitch( pitchDelta );
 	}
 }
 
+static float AdvanceTime()
+{
+	static auto prevTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
+	prevTime = currentTime;
+	return dt;
+}
+
 void WindowThread()
 {
 	context.window.Init();
+	windowReady = true;
 
 	while ( context.window.IsOpen() )
 	{
-		glfwPollEvents();
-
-		static auto prevTime = std::chrono::high_resolution_clock::now();
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
-		prevTime = currentTime;
-		ProcessInput( context.window.input, dt );
+		context.window.PumpMessages();
+		ProcessInput( context.window.input, AdvanceTime() );
 	}
 }
 
@@ -2794,10 +2800,11 @@ private:
 int main()
 {
 	VkRenderer renderer;
-
 	std::thread winThread( WindowThread );
 
-	std::this_thread::sleep_for (std::chrono::seconds(1));
+	while( windowReady == false ) {
+		std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+	}
 
 	try
 	{
