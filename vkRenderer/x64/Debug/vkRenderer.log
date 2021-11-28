@@ -14,7 +14,7 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  window.cpp
+  scene.cpp
   vulkinTestApp.cpp
   The contents of <semaphore> are available only with C++20 or later.
   Generating Code...

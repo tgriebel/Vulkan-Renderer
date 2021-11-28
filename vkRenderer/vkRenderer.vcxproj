@@ -199,8 +199,6 @@
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="window.cpp" />
-    <ClCompile Include="assetLib_GpuProgs.cpp" />
-    <ClCompile Include="assetLib_Materials.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />

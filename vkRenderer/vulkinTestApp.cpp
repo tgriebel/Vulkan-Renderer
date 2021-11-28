@@ -72,24 +72,6 @@ static bool							validateErrors = true;
 
 void MakeBeachScene();
 
-const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "viking_room.png",
-												"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
-
-void CreateAssets()
-{
-	gpuPrograms.Create();
-	for ( const std::string& texturePath : texturePaths )
-	{
-		texture_t texture;
-		if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
-			texture.uploaded = false;
-			texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
-			textureLib.Add( texturePath.c_str(), texture );
-		}
-	}
-	materialLib.Create(); // TODO: enforce ordering somehow. This comes after programs and textures
-}
-
 void ProcessInput( const input_t& input, const float dt )
 {
 	if ( input.keys[ 'D' ] ) {
@@ -2523,7 +2505,14 @@ int main()
 
 	try
 	{
-		CreateAssets();
+		{
+			// Create assets
+			// TODO: enforce ordering somehow. This comes after programs and textures
+			gpuPrograms.Create();
+			textureLib.Create();
+			materialLib.Create();
+			modelLib.Create();
+		}
 
 		renderer.Init();
 		renderer.Run();
