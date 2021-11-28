@@ -14,7 +14,12 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  scene.cpp
+  imgui.cpp
+  imgui_draw.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  io.cpp
+  util.cpp
   vulkinTestApp.cpp
   The contents of <semaphore> are available only with C++20 or later.
   Generating Code...

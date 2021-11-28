@@ -28,15 +28,8 @@
 #include "imgui/backends/imgui_impl_vulkan.h"
 #endif
 
-static const glm::vec3 forwardDefault = glm::vec3( 1.0f, 0.0f, 0.0f );
-static const glm::vec3 sideDefault = glm::vec3( 0.0f, -1.0f, 0.0f );
-static const glm::vec3 upDefault = glm::vec3( 0.0f, 0.0f, 1.0f );
-
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
-#endif
-
-using frameRate_t = std::chrono::duration< double, std::ratio<1, 60> >;
 
 struct imguiControls_t
 {
@@ -47,28 +40,20 @@ struct imguiControls_t
 	glm::vec3	selectedModelOrigin;
 };
 static imguiControls_t imguiControls;
+#endif
 
-typedef AssetLib< texture_t > AssetLibImages;
-typedef AssetLib< material_t > AssetLibMaterials;
-typedef AssetLib< GpuProgram > AssetLibGpuProgram;
-typedef AssetLib< modelSource_t > AssetLibModels;
-
-MemoryAllocator						localMemory;
-MemoryAllocator						sharedMemory;
+typedef AssetLib< texture_t >		AssetLibImages;
+typedef AssetLib< material_t >		AssetLibMaterials;
+typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
+typedef AssetLib< modelSource_t >	AssetLibModels;
 
 AssetLibGpuProgram					gpuPrograms;
 AssetLibMaterials					materialLib;
 AssetLibImages						textureLib;
 AssetLibModels						modelLib;
-
-renderConstants_t					r;
 Scene								scene;
 
 static bool							windowReady = false;
-
-static bool							validateVerbose = false;
-static bool							validateWarnings = false;
-static bool							validateErrors = true;
 
 void MakeBeachScene();
 
@@ -120,9 +105,14 @@ public:
 
 private:
 
-	static const uint32_t ShadowMapWidth = 1280;
-	static const uint32_t ShadowMapHeight = 720;
+	static const uint32_t				ShadowMapWidth = 1280;
+	static const uint32_t				ShadowMapHeight = 720;
 
+	static const bool					ValidateVerbose = false;
+	static const bool					ValidateWarnings = false;
+	static const bool					ValidateErrors = true;
+
+	renderConstants_t					rc;
 	std::vector<surfUpload_t>			modelUpload;
 	RenderView							renderView;
 	RenderView							shadowView;
@@ -152,6 +142,9 @@ private:
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
+
+	MemoryAllocator					localMemory;
+	MemoryAllocator					sharedMemory;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
@@ -1403,7 +1396,7 @@ private:
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			std::array<VkImageView, 2> attachments = {
-				r.whiteImage.view,
+				rc.whiteImage.view,
 				frameState[ i ].shadowMapImage.view,
 			};
 
@@ -2039,12 +2032,12 @@ private:
 
 		// Default Images
 		imageAllocations.push_back( AllocRecord() );
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.whiteImage.image, localMemory, imageAllocations.back() );
-		r.whiteImage.view = CreateImageView( r.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage.image, localMemory, imageAllocations.back() );
+		rc.whiteImage.view = CreateImageView( rc.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		imageAllocations.push_back( AllocRecord() );
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, r.blackImage.image, localMemory, imageAllocations.back() );
-		r.blackImage.view = CreateImageView( r.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage.image, localMemory, imageAllocations.back() );
+		rc.blackImage.view = CreateImageView( rc.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateSyncObjects()
@@ -2414,15 +2407,15 @@ private:
 		createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
 		createInfo.messageSeverity = 0;
-		if ( validateVerbose ) {
+		if ( ValidateVerbose ) {
 			createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
 		}
 
-		if ( validateWarnings ) {
+		if ( ValidateWarnings ) {
 			createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		}
 
-		if ( validateErrors ) {
+		if ( ValidateErrors ) {
 			createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 		}
 
