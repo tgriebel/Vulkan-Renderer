@@ -425,9 +425,7 @@ private:
 		CreateResourceBuffers();
 		CreateTextureSamplers();
 
-		InitScene( renderView );
-
-		CreateAssetLibs();
+		CreateAssets();
 
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
@@ -435,9 +433,6 @@ private:
 		CreateFramebuffers();
 
 		CreateSyncObjects();
-
-		CreateDescSetLayouts();
-		CreatePipelineObjects();
 
 		CreateUniformBuffers();
 
@@ -613,11 +608,14 @@ private:
 		}
 	}
 
-	void CreateAssetLibs()
+	void CreateAssets()
 	{
 		gpuPrograms.Create();
 		CreateTextureImage( texturePaths );
 		materialLib.Create(); // TODO: enforce ordering somehow. This comes after programs and textures
+
+		CreateDescSetLayouts();
+		CreatePipelineObjects();
 	}
 
 	void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib )
@@ -2388,22 +2386,6 @@ private:
 				throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 			}
 		}
-	}
-
-	void InitScene( RenderView& view )
-	{
-		view.viewport.x = 0.0f;
-		view.viewport.y = 0.0f;
-		view.viewport.width = (float)DISPLAY_WIDTH;
-		view.viewport.height = (float)DISPLAY_HEIGHT;
-		view.viewport.near = 1.0f;
-		view.viewport.far = 0.0f;
-
-		scene.camera = Camera( glm::vec4( 0.0f, 1.66f, 1.0f, 0.0f ) );
-		scene.camera.fov = glm::radians( 90.0f );
-		scene.camera.far = farPlane;
-		scene.camera.near = nearPlane;
-		scene.camera.aspect = ( DISPLAY_WIDTH / (float)DISPLAY_HEIGHT );
 	}
 
 	void UpdateScene()

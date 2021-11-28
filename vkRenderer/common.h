@@ -437,8 +437,21 @@ struct entity_t
 };
 
 
-struct RenderView
+class RenderView
 {
+public:
+	RenderView()
+	{
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = (float)DISPLAY_WIDTH;
+		viewport.height = (float)DISPLAY_HEIGHT;
+		viewport.near = 1.0f;
+		viewport.far = 0.0f;
+
+		committedModelCnt = 0;
+	}
+
 	glm::mat4					viewMatrix;
 	glm::mat4					projMatrix;
 	viewport_t					viewport;
