@@ -14,13 +14,5 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  imgui.cpp
-  imgui_draw.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  io.cpp
-  util.cpp
-  vulkinTestApp.cpp
-  The contents of <semaphore> are available only with C++20 or later.
-  Generating Code...
+  scene.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
