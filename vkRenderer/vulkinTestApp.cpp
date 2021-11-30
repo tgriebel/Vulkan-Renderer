@@ -29,7 +29,7 @@ AssetLibImages						textureLib;
 AssetLibModels						modelLib;
 Scene								scene;
 
-static bool							windowReady = false;
+static SpinLock						windowReady;
 
 void MakeBeachScene();
 void UpdateScene( const input_t& input, const float dt );
@@ -46,7 +46,7 @@ static float AdvanceTime()
 void WindowThread()
 {
 	context.window.Init();
-	windowReady = true;
+	windowReady.Unlock();
 
 	while ( context.window.IsOpen() )
 	{
@@ -68,11 +68,9 @@ int main()
 	MakeBeachScene();
 
 	Renderer renderer;
+	windowReady.Lock();
 	std::thread winThread( WindowThread );
-
-	while( windowReady == false ) {
-		std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
-	}
+	windowReady.Lock();
 
 	try
 	{
