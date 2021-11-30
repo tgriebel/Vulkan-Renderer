@@ -152,6 +152,9 @@ void AssetLib< modelSource_t >::Create()
 
 void UpdateScene( const input_t& input, const float dt )
 {
+	// FIXME: race conditions
+	// Need to do a ping-pong update
+
 	if ( input.keys[ 'D' ] ) {
 		scene.camera.MoveForward( dt * 0.01f );
 	}
@@ -180,6 +183,14 @@ void UpdateScene( const input_t& input, const float dt )
 		scene.camera.SetYaw( yawDelta );
 		scene.camera.SetPitch( pitchDelta );
 	}
+
+	// Skybox
+	glm::mat4 skyBoxMatrix = glm::identity<glm::mat4>();
+	skyBoxMatrix = glm::identity<glm::mat4>();
+	skyBoxMatrix[ 3 ][ 0 ] = scene.camera.GetOrigin()[ 0 ];
+	skyBoxMatrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
+	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
+	scene.entities[ 0 ].matrix = skyBoxMatrix;
 }
 
 void MakeBeachScene()

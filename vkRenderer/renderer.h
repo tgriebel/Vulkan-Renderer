@@ -61,8 +61,8 @@ public:
 	{
 		while ( context.window.IsOpen() )
 		{
-			UpdateScene();
-			CommitScene();
+			UpdateView();
+			CommitScene( scene );
 			DrawFrame();
 		}
 	}
@@ -228,7 +228,7 @@ private:
 		}
 	}
 
-	void CommitModel( RenderView& view, entity_t& model, const uint32_t objectOffset )
+	void CommitModel( RenderView& view, const entity_t& model, const uint32_t objectOffset )
 	{
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		modelSource_t* source = modelLib.Find( model.modelId );
@@ -2034,7 +2034,7 @@ private:
 		}
 	}
 
-	void UpdateScene()
+	void UpdateView()
 	{
 		static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -2074,15 +2074,9 @@ private:
 		shadowCam.near = farPlane;
 		shadowCam.aspect = ( ShadowMapWidth / (float)ShadowMapHeight );
 		shadowView.projMatrix = shadowCam.GetPerspectiveMatrix();
-
-		// Skybox
-		scene.entities[ 0 ].matrix = glm::identity<glm::mat4>();
-		scene.entities[ 0 ].matrix[ 3 ][ 0 ] = scene.camera.GetOrigin()[ 0 ];
-		scene.entities[ 0 ].matrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
-		scene.entities[ 0 ].matrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	}
 
-	void CommitScene()
+	void CommitScene( const Scene& scene )
 	{
 		renderView.committedModelCnt = 0;
 		for ( uint32_t i = 0; i < scene.entities.size(); ++i )

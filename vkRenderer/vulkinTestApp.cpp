@@ -57,6 +57,16 @@ void WindowThread()
 
 int main()
 {
+	{
+		// Create assets
+		// TODO: enforce ordering somehow. This comes after programs and textures
+		gpuPrograms.Create();
+		textureLib.Create();
+		materialLib.Create();
+		modelLib.Create();
+	}
+	MakeBeachScene();
+
 	Renderer renderer;
 	std::thread winThread( WindowThread );
 
@@ -66,16 +76,6 @@ int main()
 
 	try
 	{
-		{
-			// Create assets
-			// TODO: enforce ordering somehow. This comes after programs and textures
-			gpuPrograms.Create();
-			textureLib.Create();
-			materialLib.Create();
-			modelLib.Create();
-		}
-		MakeBeachScene();
-
 		renderer.Init();
 		renderer.Run();
 		renderer.Destroy();
