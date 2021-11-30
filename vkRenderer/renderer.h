@@ -49,10 +49,6 @@ extern AssetLibImages				textureLib;
 extern AssetLibModels				modelLib;
 extern Scene						scene;
 
-
-void MakeBeachScene();
-void ProcessInput( const input_t& input, const float dt );
-
 class Renderer
 {
 public:
@@ -312,7 +308,6 @@ private:
 		}
 
 		UpdateDescriptorSets();
-		MakeBeachScene();
 		UploadModels();
 	}
 

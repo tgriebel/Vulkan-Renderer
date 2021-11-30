@@ -150,7 +150,7 @@ void AssetLib< modelSource_t >::Create()
 	}
 }
 
-void ProcessInput( const input_t& input, const float dt )
+void UpdateScene( const input_t& input, const float dt )
 {
 	if ( input.keys[ 'D' ] ) {
 		scene.camera.MoveForward( dt * 0.01f );

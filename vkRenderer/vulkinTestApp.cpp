@@ -32,7 +32,7 @@ Scene								scene;
 static bool							windowReady = false;
 
 void MakeBeachScene();
-void ProcessInput( const input_t& input, const float dt );
+void UpdateScene( const input_t& input, const float dt );
 
 static float AdvanceTime()
 {
@@ -51,7 +51,7 @@ void WindowThread()
 	while ( context.window.IsOpen() )
 	{
 		context.window.PumpMessages();
-		ProcessInput( context.window.input, AdvanceTime() );
+		UpdateScene( context.window.input, AdvanceTime() );
 	}
 }
 
@@ -74,6 +74,7 @@ int main()
 			materialLib.Create();
 			modelLib.Create();
 		}
+		MakeBeachScene();
 
 		renderer.Init();
 		renderer.Run();
