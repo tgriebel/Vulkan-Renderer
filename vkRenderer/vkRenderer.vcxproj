@@ -169,6 +169,7 @@
     <ClInclude Include="assetLib.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />
+    <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="window.h" />
@@ -196,6 +197,7 @@
   <ItemGroup>
     <ClCompile Include="deviceContext.cpp" />
     <ClCompile Include="io.cpp" />
+    <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="window.cpp" />
