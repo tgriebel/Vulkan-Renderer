@@ -540,12 +540,16 @@ struct mouse_t
 	mouse_t() : speed( 0.001f ),
 				x( 0.0f ),
 				y( 0.0f ),
+				dx( 0.0f ),
+				dy( 0.0f ),
 				leftDown( false ),
 				rightDown( false ),
 				centered( false ) {}
 
 	float	x;
 	float	y;
+	float	dx; // dx/dt
+	float	dy; // dy/dt
 	float	speed;
 	bool	leftDown;
 	bool	rightDown;

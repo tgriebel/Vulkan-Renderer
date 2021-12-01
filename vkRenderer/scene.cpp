@@ -177,9 +177,9 @@ void UpdateScene( const input_t& input, const float dt )
 	const mouse_t& mouse = input.mouse;
 	if ( mouse.centered )
 	{
-		const float maxSpeed = std::min( dt * mouse.speed, 1.0f );
-		const float yawDelta = maxSpeed * static_cast<float>( 0.5f * DISPLAY_WIDTH - mouse.x );
-		const float pitchDelta = -maxSpeed * static_cast<float>( 0.5f * DISPLAY_HEIGHT - mouse.y );
+		const float maxSpeed = dt * mouse.speed;
+		const float yawDelta = maxSpeed * mouse.dx;
+		const float pitchDelta = -maxSpeed * mouse.dy;
 		scene.camera.SetYaw( yawDelta );
 		scene.camera.SetPitch( pitchDelta );
 	}

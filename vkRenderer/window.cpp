@@ -54,15 +54,19 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 	mouse_t& mouse = app->input.mouse;
 
+	const float x = mouse.x;
+	const float y = mouse.y;
 	mouse.x = static_cast<float>( xpos );
 	mouse.y = static_cast<float>( ypos );
+	mouse.dx = ( x - mouse.x );
+	mouse.dy = ( y - mouse.y );
 
 	if ( app->input.altDown ) {
 		mouse.centered = false;
+		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
 		return;
 	}
-
-	glfwSetCursorPos( window, 0.5f * DISPLAY_WIDTH, 0.5f * DISPLAY_HEIGHT );
+	glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
 	mouse.centered = true;
 }
 
@@ -73,6 +77,8 @@ bool Window::IsOpen()
 
 void Window::PumpMessages()
 {
+	input.mouse.dx = 0.0f;
+	input.mouse.dy = 0.0f;
 	glfwPollEvents();
 }
 

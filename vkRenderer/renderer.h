@@ -65,8 +65,8 @@ public:
 	{
 		while ( context.window.IsOpen() )
 		{
-			UpdateView();
 			CommitScene( scene );
+			UpdateView();	
 			DrawFrame();
 		}
 	}
@@ -1769,6 +1769,7 @@ private:
 			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
 			ImGui::Text( "Mouse: (%f, %f )", (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
+			ImGui::Text( "Mouse Dt: (%f, %f )", (float)context.window.input.mouse.dx, (float)context.window.input.mouse.dy );
 			const glm::vec2 screenPoint = glm::vec2( (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
 			char entityName[ 256 ];
