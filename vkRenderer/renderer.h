@@ -57,6 +57,10 @@ public:
 		InitVulkan();
 		InitImGui();
 	}
+	bool IsReady() {
+		return ( currentFrame > 0 );
+	}
+
 	void Run()
 	{
 		while ( context.window.IsOpen() )
@@ -344,6 +348,7 @@ private:
 			EndSingleTimeCommands( commandBuffer );
 			ImGui_ImplVulkan_DestroyFontUploadObjects();
 		}
+		ImGui_ImplGlfw_NewFrame();
 #endif
 		imguiControls.heightMapHeight = 1.0f;
 		imguiControls.toneMapColor[ 0 ] = 1.0f;
@@ -1752,7 +1757,6 @@ private:
 
 #if defined( USE_IMGUI )
 			ImGui_ImplVulkan_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
 			ImGui::Begin( "Control Panel" );
@@ -2044,8 +2048,6 @@ private:
 		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, -6.0f, 0.0f );
 		const glm::vec3 lightDir0 = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 
-		renderView.viewMatrix = scene.camera.GetViewMatrix();
-		renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
 		renderView.lights[ 0 ].lightPos = glm::vec4( lightPos0[ 0 ], lightPos0[ 1 ], lightPos0[ 2 ], 0.0f );
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 0 ].lightDir = glm::vec4( lightDir0[ 0 ], lightDir0[ 1 ], lightDir0[ 2 ], 0.0f );
@@ -2092,6 +2094,8 @@ private:
 			}
 			CommitModel( shadowView, scene.entities[ i ], MaxModels );
 		}
+		renderView.viewMatrix = scene.camera.GetViewMatrix();
+		renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
 	}
 
 	void WaitForEndFrame()

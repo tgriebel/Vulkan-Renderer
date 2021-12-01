@@ -28,6 +28,7 @@ AssetLibMaterials					materialLib;
 AssetLibImages						textureLib;
 AssetLibModels						modelLib;
 Scene								scene;
+Renderer							renderer;
 
 static SpinLock						windowReady;
 
@@ -51,6 +52,9 @@ void WindowThread()
 	while ( context.window.IsOpen() )
 	{
 		context.window.PumpMessages();
+		if( renderer.IsReady() ) {
+			ImGui_ImplGlfw_NewFrame();
+		}
 		UpdateScene( context.window.input, AdvanceTime() );
 	}
 }
@@ -67,7 +71,6 @@ int main()
 	}
 	MakeBeachScene();
 
-	Renderer renderer;
 	windowReady.Lock();
 	std::thread winThread( WindowThread );
 	windowReady.Lock();

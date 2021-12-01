@@ -60,7 +60,7 @@ public:
 		return view;
 	}
 
-	glm::mat4 GetViewMatrix()
+	glm::mat4 GetViewMatrix() const
 	{
 		glm::mat4 view = GetAxis();
 		glm::vec4 localOrigin = glm::vec4( -glm::dot( view[ 0 ], origin ), -glm::dot( view[ 1 ], origin ), -glm::dot( view[ 2 ], origin ), 0.0f );
@@ -72,7 +72,7 @@ public:
 							localOrigin[ 0 ], localOrigin[ 1 ], localOrigin[ 2 ], 1.0f );
 	}
 
-	glm::mat4 GetPerspectiveMatrix()
+	glm::mat4 GetPerspectiveMatrix() const
 	{
 		const float halfFovX = glm::tan( 0.5f * fov );
 		const float halfFovY = glm::tan( 0.5f * ( fov / aspect ) );
