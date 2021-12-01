@@ -54,12 +54,12 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 	mouse_t& mouse = app->input.mouse;
 
-	const float x = mouse.x;
-	const float y = mouse.y;
-	mouse.x = static_cast<float>( xpos );
-	mouse.y = static_cast<float>( ypos );
-	mouse.dx = ( x - mouse.x );
-	mouse.dy = ( y - mouse.y );
+	const float x = static_cast<float>( xpos );
+	const float y = static_cast<float>( ypos );
+	mouse.dx = ( mouse.x - x );
+	mouse.dy = ( mouse.y - y );
+	mouse.x = x;
+	mouse.y = y;
 
 	if ( app->input.altDown ) {
 		mouse.centered = false;
