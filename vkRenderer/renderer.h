@@ -58,7 +58,7 @@ public:
 		InitImGui();
 	}
 	bool IsReady() {
-		return ( currentFrame > 0 );
+		return ( frameNumber > 0 );
 	}
 
 	void Run()
@@ -110,8 +110,10 @@ private:
 	VkDescriptorSetLayout			postProcessLayout;
 	VkDescriptorPool				descriptorPool;
 	FrameState						frameState[ MAX_FRAMES_STATES ];
-	size_t							currentFrame = 0;
-	uint32_t						currentBuffer = 0;
+	size_t							frameId = 0;
+	uint32_t						bufferId = 0;
+	uint32_t						frameNumber = 0;
+	float							renderTime = 0.0f;
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
@@ -1618,7 +1620,7 @@ private:
 
 	void SubmitCommandBuffers( RenderView& view )
 	{
-		const uint32_t i = currentBuffer;
+		const uint32_t i = bufferId;
 		vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
 
 		VkCommandBufferBeginInfo beginInfo{ };
@@ -1807,6 +1809,9 @@ private:
 				entity.matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
 				entity.matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
 			}
+			ImGui::Text( "Frame Number: %d", frameNumber );
+			ImGui::SameLine();
+			ImGui::Text( "FPS: %f", 1000.0f / renderTime );
 			//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
 			ImGui::End();
 
@@ -2100,14 +2105,14 @@ private:
 
 	void WaitForEndFrame()
 	{
-		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ currentFrame ], VK_TRUE, UINT64_MAX );
+		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
 	}
 
 	void DrawFrame()
 	{
 		WaitForEndFrame();
 
-		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ currentFrame ], VK_NULL_HANDLE, &currentBuffer );
+		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
 		if ( result == VK_ERROR_OUT_OF_DATE_KHR )
 		{
 			RecreateSwapChain();
@@ -2119,34 +2124,34 @@ private:
 		}
 
 		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-		if ( graphicsQueue.imagesInFlight[ currentBuffer ] != VK_NULL_HANDLE ) {
-			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ currentBuffer ], VK_TRUE, UINT64_MAX );
+		if ( graphicsQueue.imagesInFlight[ bufferId ] != VK_NULL_HANDLE ) {
+			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ bufferId ], VK_TRUE, UINT64_MAX );
 		}
 		// Mark the image as now being in use by this frame
-		graphicsQueue.imagesInFlight[ currentBuffer ] = graphicsQueue.inFlightFences[ currentFrame ];
+		graphicsQueue.imagesInFlight[ bufferId ] = graphicsQueue.inFlightFences[ frameId ];
 
-		UpdateBufferContents( currentBuffer );
-		UpdateFrameDescSet( currentBuffer );
+		UpdateBufferContents( bufferId );
+		UpdateFrameDescSet( bufferId );
 		SubmitCommandBuffers( renderView );
 
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ currentFrame ] };
+		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ currentBuffer ];
+		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
 
-		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ currentFrame ] };
+		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ currentFrame ] );
+		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
 
-		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ currentFrame ] ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffer!" );
 		}
 
@@ -2159,7 +2164,7 @@ private:
 		VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &currentBuffer;
+		presentInfo.pImageIndices = &bufferId;
 		presentInfo.pResults = nullptr; // Optional
 
 		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
@@ -2175,7 +2180,12 @@ private:
 			throw std::runtime_error( "Failed to acquire swap chain image!" );
 		}
 
-		currentFrame = ( currentFrame + 1 ) % MAX_FRAMES_IN_FLIGHT;
+		frameId = ( frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;
+		++frameNumber;
+		static auto prevTime = std::chrono::high_resolution_clock::now();
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		renderTime = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
+		prevTime = currentTime;
 	}
 
 	void Cleanup()
