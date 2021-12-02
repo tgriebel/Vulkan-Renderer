@@ -80,8 +80,7 @@ int main()
 		while ( context.window.IsOpen() )
 		{
 			UpdateScene( context.window.input, AdvanceTime() );
-			renderer.Commit( scene );
-			renderer.SubmitFrame();
+			renderer.RenderScene( scene );
 		}
 		renderer.Destroy();
 	}

@@ -58,6 +58,12 @@ public:
 		InitImGui();
 	}
 
+	void RenderScene( Scene& scene )
+	{
+		Commit( scene );
+		SubmitFrame();
+	}
+
 	void Destroy()
 	{
 		vkDeviceWaitIdle( context.device );
@@ -66,88 +72,6 @@ public:
 
 	bool IsReady() {
 		return ( frameNumber > 0 );
-	}
-
-	void Commit( const Scene& scene );
-
-	void SubmitFrame()
-	{
-		WaitForEndFrame();
-
-		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR )
-		{
-			RecreateSwapChain();
-			return;
-		}
-		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
-		{
-			throw std::runtime_error( "Failed to acquire swap chain image!" );
-		}
-
-		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-		if ( graphicsQueue.imagesInFlight[ bufferId ] != VK_NULL_HANDLE ) {
-			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ bufferId ], VK_TRUE, UINT64_MAX );
-		}
-		// Mark the image as now being in use by this frame
-		graphicsQueue.imagesInFlight[ bufferId ] = graphicsQueue.inFlightFences[ frameId ];
-
-		UpdateBufferContents( bufferId );
-		UpdateFrameDescSet( bufferId );
-		SubmitCommandBuffers( renderView );
-
-		VkSubmitInfo submitInfo{ };
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
-
-		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
-
-		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to submit draw command buffer!" );
-		}
-
-		VkPresentInfoKHR presentInfo{ };
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-
-		VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &bufferId;
-		presentInfo.pResults = nullptr; // Optional
-
-		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
-
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || context.window.IsResizeRequested() )
-		{
-			RecreateSwapChain();
-			context.window.AcceptImageResize();
-			return;
-		}
-		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
-		{
-			throw std::runtime_error( "Failed to acquire swap chain image!" );
-		}
-
-		frameId = ( frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;
-		++frameNumber;
-		static auto prevTime = std::chrono::high_resolution_clock::now();
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		renderTime = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
-		prevTime = currentTime;
 	}
 
 private:
@@ -2163,6 +2087,86 @@ private:
 		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
 	}
 
+	void SubmitFrame()
+	{
+		WaitForEndFrame();
+
+		VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR )
+		{
+			RecreateSwapChain();
+			return;
+		}
+		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
+		{
+			throw std::runtime_error( "Failed to acquire swap chain image!" );
+		}
+
+		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+		if ( graphicsQueue.imagesInFlight[ bufferId ] != VK_NULL_HANDLE ) {
+			vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ bufferId ], VK_TRUE, UINT64_MAX );
+		}
+		// Mark the image as now being in use by this frame
+		graphicsQueue.imagesInFlight[ bufferId ] = graphicsQueue.inFlightFences[ frameId ];
+
+		UpdateBufferContents( bufferId );
+		UpdateFrameDescSet( bufferId );
+		SubmitCommandBuffers( renderView );
+
+		VkSubmitInfo submitInfo{ };
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
+
+		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
+
+		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to submit draw command buffer!" );
+		}
+
+		VkPresentInfoKHR presentInfo{ };
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+
+		VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &bufferId;
+		presentInfo.pResults = nullptr; // Optional
+
+		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
+
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || context.window.IsResizeRequested() )
+		{
+			RecreateSwapChain();
+			context.window.AcceptImageResize();
+			return;
+		}
+		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
+		{
+			throw std::runtime_error( "Failed to acquire swap chain image!" );
+		}
+
+		frameId = ( frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;
+		++frameNumber;
+		static auto prevTime = std::chrono::high_resolution_clock::now();
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		renderTime = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
+		prevTime = currentTime;
+	}
+
 	void Cleanup()
 	{
 		CleanupFrameResources();
@@ -2319,6 +2323,8 @@ private:
 
 		return VK_FALSE;
 	}
+
+	void Commit( const Scene& scene );
 
 	std::vector<const char*> GetRequiredExtensions() const;
 	bool CheckValidationLayerSupport();
