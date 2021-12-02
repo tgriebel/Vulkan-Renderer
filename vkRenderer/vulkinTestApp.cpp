@@ -55,7 +55,6 @@ void WindowThread()
 		if( renderer.IsReady() ) {
 			ImGui_ImplGlfw_NewFrame();
 		}
-		UpdateScene( context.window.input, AdvanceTime() );
 	}
 }
 
@@ -78,7 +77,12 @@ int main()
 	try
 	{
 		renderer.Init();
-		renderer.Run();
+		while ( context.window.IsOpen() )
+		{
+			UpdateScene( context.window.input, AdvanceTime() );
+			renderer.Commit( scene );
+			renderer.SubmitFrame();
+		}
 		renderer.Destroy();
 	}
 	catch (const std::exception& e)

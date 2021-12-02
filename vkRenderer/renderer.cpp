@@ -1,5 +1,27 @@
 #include "renderer.h"
 
+void Renderer::Commit( const Scene& scene )
+{
+	renderView.committedModelCnt = 0;
+	for ( uint32_t i = 0; i < scene.entities.size(); ++i )
+	{
+		CommitModel( renderView, scene.entities[ i ], 0 );
+	}
+
+	shadowView.committedModelCnt = 0;
+	for ( uint32_t i = 0; i < scene.entities.size(); ++i )
+	{
+		if ( scene.entities[ i ].flags == NO_SHADOWS ) {
+			continue;
+		}
+		CommitModel( shadowView, scene.entities[ i ], MaxModels );
+	}
+	renderView.viewMatrix = scene.camera.GetViewMatrix();
+	renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
+
+	UpdateView();
+}
+
 std::vector<const char*> Renderer::GetRequiredExtensions() const
 {
 	uint32_t glfwExtensionCount = 0;
