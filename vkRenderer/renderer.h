@@ -1756,9 +1756,9 @@ private:
 			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-			ImGui::Text( "Mouse: (%f, %f )", (float)window.input.mouse.x, (float)window.input.mouse.y );
-			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.mouse.dx, (float)window.input.mouse.dy );
-			const glm::vec2 screenPoint = glm::vec2( (float)window.input.mouse.x, (float)window.input.mouse.y );
+			ImGui::Text( "Mouse: (%f, %f )", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
+			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
+			const glm::vec2 screenPoint = glm::vec2( (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {

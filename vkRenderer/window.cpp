@@ -13,17 +13,17 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 
 	if ( key == GLFW_KEY_D ) {
-		app->input.keys[ 'D' ] = ( action != GLFW_RELEASE );
+		app->input.SetKey( 'D', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_A ) {
-		app->input.keys[ 'A' ] = ( action != GLFW_RELEASE );
+		app->input.SetKey( 'A', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_W ) {
-		app->input.keys[ 'W' ] = ( action != GLFW_RELEASE );
+		app->input.SetKey( 'W', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_S ) {
-		app->input.keys[ 'S' ] = ( action != GLFW_RELEASE );
+		app->input.SetKey( 'S', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_KP_ADD ) {
-		app->input.keys[ '+' ] = ( action != GLFW_RELEASE );
+		app->input.SetKey( '+', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_KP_SUBTRACT ) {
-		app->input.keys[ '-' ] = ( action != GLFW_RELEASE );
+		app->input.SetKey( '-', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_LEFT_ALT ) {
 		app->focused = ( action != GLFW_RELEASE );
 	}
@@ -33,7 +33,7 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 void MousePressCallback( GLFWwindow* window, int button, int action, int mods )
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
-	mouse_t& mouse = app->input.mouse;
+	mouse_t& mouse = app->input.GetMouseRef();
 
 	if ( button == GLFW_MOUSE_BUTTON_LEFT ) {
 		mouse.leftDown = true;
@@ -52,7 +52,7 @@ void MousePressCallback( GLFWwindow* window, int button, int action, int mods )
 void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
-	mouse_t& mouse = app->input.mouse;
+	mouse_t& mouse = app->input.GetMouseRef();
 
 	const float x = static_cast<float>( xpos );
 	const float y = static_cast<float>( ypos );
@@ -82,8 +82,7 @@ bool Window::IsFocused() const
 
 void Window::PumpMessages()
 {
-	input.mouse.dx = 0.0f;
-	input.mouse.dy = 0.0f;
+	input.NewFrame();
 	glfwPollEvents();
 }
 

@@ -180,7 +180,7 @@ void UpdateScene( const float dt )
 		scene.camera.fov -= dt;
 	}
 
-	const mouse_t& mouse = window.input.mouse;
+	const mouse_t& mouse = window.input.GetMouse();
 	if ( mouse.centered )
 	{
 		const float maxSpeed = dt * mouse.speed;

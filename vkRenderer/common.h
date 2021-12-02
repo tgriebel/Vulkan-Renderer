@@ -562,21 +562,45 @@ struct mouse_t
 class Input
 {
 public:
-	bool IsKeyPressed( const char key )
+	Input()
 	{
+		ClearKeyHistory();
+	}
+
+	bool IsKeyPressed( const char key )	{
 		return keys[ key ];
 	}
 
-	void ClearKeyHistory()
+	const mouse_t& GetMouse() const {
+		return mouse;
+	}
+
+	void NewFrame()
 	{
+		mouse.dx = 0.0f;
+		mouse.dy = 0.0f;
+	}
+
+private:
+	mouse_t	mouse;
+	int		bufferId;
+	bool	keys[ 256 ];
+
+	void SetKey( const char key, const bool value ) {
+		keys[ key ] = value;
+	}
+
+	mouse_t& GetMouseRef() {
+		return mouse;
+	}
+
+	void ClearKeyHistory() {
 		memset( keys, 0, 255 );
 	}
 
-	mouse_t	mouse;
-private:
-	bool	keys[ 256 ];
-
 	friend void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );
+	friend void MousePressCallback( GLFWwindow* window, int button, int action, int mods );
+	friend void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos );
 };
 
 #if defined( USE_IMGUI )
