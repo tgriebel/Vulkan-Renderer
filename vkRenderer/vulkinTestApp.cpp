@@ -29,6 +29,7 @@ AssetLibImages						textureLib;
 AssetLibModels						modelLib;
 Scene								scene;
 Renderer							renderer;
+Window								window;
 
 static SpinLock						windowReady;
 
@@ -37,7 +38,7 @@ imguiControls_t imguiControls;
 #endif
 
 void MakeBeachScene();
-void UpdateScene( const input_t& input, const float dt );
+void UpdateScene( const float dt );
 
 static float AdvanceTime()
 {
@@ -50,12 +51,12 @@ static float AdvanceTime()
 
 void WindowThread()
 {
-	context.window.Init();
+	window.Init();
 	windowReady.Unlock();
 
-	while ( context.window.IsOpen() )
+	while ( window.IsOpen() )
 	{
-		context.window.PumpMessages();
+		window.PumpMessages();
 		if( renderer.IsReady() ) {
 			ImGui_ImplGlfw_NewFrame();
 		}
@@ -81,9 +82,9 @@ int main()
 	try
 	{
 		renderer.Init();
-		while ( context.window.IsOpen() )
+		while ( window.IsOpen() )
 		{
-			UpdateScene( context.window.input, AdvanceTime() );
+			UpdateScene( AdvanceTime() );
 			renderer.RenderScene( scene );
 		}
 		renderer.Destroy();

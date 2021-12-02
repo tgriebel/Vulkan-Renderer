@@ -1,10 +1,8 @@
 #pragma once
 #include "common.h"
-#include "window.h"
 
 struct deviceContext_t
 {
-	Window						window;
 	VkDevice					device;
 	VkPhysicalDevice			physicalDevice;
 	VkInstance					instance;

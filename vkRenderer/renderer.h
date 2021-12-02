@@ -10,7 +10,6 @@
 #include "pipeline.h"
 #include "swapChain.h"
 #include "assetLib.h"
-#include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"
 
@@ -38,6 +37,7 @@ extern AssetLibMaterials			materialLib;
 extern AssetLibImages				textureLib;
 extern AssetLibModels				modelLib;
 extern Scene						scene;
+extern Window						window;
 
 class Renderer
 {
@@ -255,10 +255,10 @@ private:
 			// Device Set-up
 			CreateInstance();
 			SetupDebugMessenger();
-			context.window.CreateSurface();
+			window.CreateSurface();
 			PickPhysicalDevice();
 			CreateLogicalDevice();
-			swapChain.Create( &context.window );
+			swapChain.Create( &window );
 		}
 
 		{
@@ -312,7 +312,7 @@ private:
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		// Setup Platform/Renderer bindings
-		ImGui_ImplGlfw_InitForVulkan( context.window.window, true );
+		ImGui_ImplGlfw_InitForVulkan( window.window, true );
 
 		ImGui_ImplVulkan_InitInfo vkInfo = {};
 		vkInfo.Instance = context.instance;
@@ -489,7 +489,7 @@ private:
 
 		for ( const auto& device : devices )
 		{
-			if ( IsDeviceSuitable( device, context.window.vk_surface, deviceExtensions ) )
+			if ( IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
 			{
 				VkPhysicalDeviceProperties deviceProperties;
 				vkGetPhysicalDeviceProperties( device, &deviceProperties );
@@ -506,7 +506,7 @@ private:
 
 	void CreateLogicalDevice()
 	{
-		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, context.window.vk_surface );
+		QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, window.vk_surface );
 		context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
 		context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
 		context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
@@ -595,13 +595,13 @@ private:
 		assert( 0 );
 
 		int width = 0, height = 0;
-		context.window.GetWindowFrameBufferSize( width, height, true );
+		window.GetWindowFrameBufferSize( width, height, true );
 
 		vkDeviceWaitIdle( context.device );
 
 		CleanupFrameResources();
 		swapChain.Destroy();
-		swapChain.Create( &context.window );
+		swapChain.Create( &window );
 	}
 
 	void CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
@@ -1756,9 +1756,9 @@ private:
 			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-			ImGui::Text( "Mouse: (%f, %f )", (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
-			ImGui::Text( "Mouse Dt: (%f, %f )", (float)context.window.input.mouse.dx, (float)context.window.input.mouse.dy );
-			const glm::vec2 screenPoint = glm::vec2( (float)context.window.input.mouse.x, (float)context.window.input.mouse.y );
+			ImGui::Text( "Mouse: (%f, %f )", (float)window.input.mouse.x, (float)window.input.mouse.y );
+			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.mouse.dx, (float)window.input.mouse.dy );
+			const glm::vec2 screenPoint = glm::vec2( (float)window.input.mouse.x, (float)window.input.mouse.y );
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
@@ -2138,10 +2138,10 @@ private:
 
 		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || context.window.IsResizeRequested() )
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.IsResizeRequested() )
 		{
 			RecreateSwapChain();
-			context.window.AcceptImageResize();
+			window.AcceptImageResize();
 			return;
 		}
 		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
@@ -2192,10 +2192,10 @@ private:
 			DestroyDebugUtilsMessengerEXT( context.instance, debugMessenger, nullptr );
 		}
 
-		vkDestroySurfaceKHR( context.instance, context.window.vk_surface, nullptr );
+		vkDestroySurfaceKHR( context.instance, window.vk_surface, nullptr );
 		vkDestroyInstance( context.instance, nullptr );
 
-		context.window.~Window();
+		window.~Window();
 	}
 
 	void UpdatePostProcessBuffers( uint32_t currentImage )

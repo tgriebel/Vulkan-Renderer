@@ -25,7 +25,7 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 	} else if ( key == GLFW_KEY_KP_SUBTRACT ) {
 		app->input.keys[ '-' ] = ( action != GLFW_RELEASE );
 	} else if ( key == GLFW_KEY_LEFT_ALT ) {
-		app->input.altDown = ( action != GLFW_RELEASE );
+		app->focused = ( action != GLFW_RELEASE );
 	}
 }
 
@@ -61,7 +61,7 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	mouse.x = x;
 	mouse.y = y;
 
-	if ( app->input.altDown ) {
+	if ( app->IsFocused() ) {
 		mouse.centered = false;
 		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
 		return;
@@ -70,9 +70,14 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	mouse.centered = true;
 }
 
-bool Window::IsOpen()
+bool Window::IsOpen() const
 {
 	return ( glfwWindowShouldClose( window ) == false );
+}
+
+bool Window::IsFocused() const
+{
+	return focused;
 }
 
 void Window::PumpMessages()
@@ -126,9 +131,4 @@ void Window::CreateSurface()
 	if ( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create window surface!" );
 	}
-}
-
-void Window::ClearKeyHistory()
-{
-	memset( input.keys, 0, 255 );
 }

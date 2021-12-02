@@ -2,6 +2,7 @@
 #include "scene.h"
 #include "util.h"
 #include "io.h"
+#include "window.h"
 
 extern Scene scene;
 
@@ -11,8 +12,8 @@ typedef AssetLib< material_t > AssetLibMaterials;
 extern AssetLib< GpuProgram >	gpuPrograms;
 extern AssetLibImages			textureLib;
 extern AssetLibMaterials		materialLib;
-
-extern imguiControls_t imguiControls;
+extern imguiControls_t			imguiControls;
+extern Window					window;
 
 static GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile )
 {
@@ -155,31 +156,31 @@ void AssetLib< modelSource_t >::Create()
 	}
 }
 
-void UpdateScene( const input_t& input, const float dt )
+void UpdateScene( const float dt )
 {
 	// FIXME: race conditions
 	// Need to do a ping-pong update
 
-	if ( input.keys[ 'D' ] ) {
+	if ( window.input.IsKeyPressed( 'D' ) ) {
 		scene.camera.MoveForward( dt * 0.01f );
 	}
-	if ( input.keys[ 'A' ] ) {
+	if ( window.input.IsKeyPressed( 'A' ) ) {
 		scene.camera.MoveForward( dt * -0.01f );
 	}
-	if ( input.keys[ 'W' ] ) {
+	if ( window.input.IsKeyPressed( 'W' ) ) {
 		scene.camera.MoveVertical( dt * -0.01f );
 	}
-	if ( input.keys[ 'S' ] ) {
+	if ( window.input.IsKeyPressed( 'S' ) ) {
 		scene.camera.MoveVertical( dt * 0.01f );
 	}
-	if ( input.keys[ '+' ] ) {
+	if ( window.input.IsKeyPressed( '+' ) ) {
 		scene.camera.fov += dt;
 	}
-	if ( input.keys[ '-' ] ) {
+	if ( window.input.IsKeyPressed( '-' ) ) {
 		scene.camera.fov -= dt;
 	}
 
-	const mouse_t& mouse = input.mouse;
+	const mouse_t& mouse = window.input.mouse;
 	if ( mouse.centered )
 	{
 		const float maxSpeed = dt * mouse.speed;

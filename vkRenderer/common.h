@@ -559,11 +559,24 @@ struct mouse_t
 };
 
 
-struct input_t
+class Input
 {
+public:
+	bool IsKeyPressed( const char key )
+	{
+		return keys[ key ];
+	}
+
+	void ClearKeyHistory()
+	{
+		memset( keys, 0, 255 );
+	}
+
 	mouse_t	mouse;
+private:
 	bool	keys[ 256 ];
-	bool	altDown;
+
+	friend void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );
 };
 
 #if defined( USE_IMGUI )
