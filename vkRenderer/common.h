@@ -26,7 +26,9 @@
 #include <ratio>
 #include <unordered_map>
 #include <stdlib.h>
-#include <math.h> 
+#include <math.h>
+
+#define USE_IMGUI
 
 const uint32_t KB = 1024;
 const uint32_t MB = 1024 * KB;
@@ -564,6 +566,16 @@ struct input_t
 	bool	altDown;
 };
 
+#if defined( USE_IMGUI )
+struct imguiControls_t
+{
+	float		heightMapHeight;
+	float		toneMapColor[ 4 ];
+	int			dbgImageId;
+	int			selectedModelId;
+	glm::vec3	selectedModelOrigin;
+};
+#endif
 
 enum pipelineQueue_t {
 	QUEUE_GRAPHICS,

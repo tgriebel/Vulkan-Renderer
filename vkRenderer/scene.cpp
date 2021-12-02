@@ -6,8 +6,13 @@
 extern Scene scene;
 
 typedef AssetLib< texture_t > AssetLibImages;
-extern AssetLib< GpuProgram > gpuPrograms;
-extern AssetLibImages textureLib;
+typedef AssetLib< material_t > AssetLibMaterials;
+
+extern AssetLib< GpuProgram >	gpuPrograms;
+extern AssetLibImages			textureLib;
+extern AssetLibMaterials		materialLib;
+
+extern imguiControls_t imguiControls;
 
 static GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile )
 {
@@ -191,6 +196,8 @@ void UpdateScene( const input_t& input, const float dt )
 	skyBoxMatrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
 	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	scene.entities[ 0 ].matrix = skyBoxMatrix;
+
+	materialLib.Find( "IMAGE2D" )->texture0 = imguiControls.dbgImageId;
 }
 
 void MakeBeachScene()

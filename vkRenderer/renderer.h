@@ -14,7 +14,6 @@
 #include "FrameState.h"
 #include "renderConstants.h"
 
-#define USE_IMGUI
 #include "io.h"
 #include "GeoBuilder.h"
 
@@ -26,16 +25,7 @@
 
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
-
-struct imguiControls_t
-{
-	float		heightMapHeight;
-	float		toneMapColor[ 4 ];
-	int			dbgImageId;
-	int			selectedModelId;
-	glm::vec3	selectedModelOrigin;
-};
-static imguiControls_t imguiControls;
+extern imguiControls_t imguiControls;
 #endif
 
 typedef AssetLib< texture_t >		AssetLibImages;
@@ -1616,7 +1606,7 @@ private:
 		}
 	}
 
-	void SubmitCommandBuffers( RenderView& view )
+	void Render( RenderView& view )
 	{
 		const uint32_t i = bufferId;
 		vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
@@ -2111,7 +2101,7 @@ private:
 
 		UpdateBufferContents( bufferId );
 		UpdateFrameDescSet( bufferId );
-		SubmitCommandBuffers( renderView );
+		Render( renderView );
 
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2267,10 +2257,6 @@ private:
 			ubo.proj = shadowView.projMatrix;
 			uboBuffer.push_back( ubo );
 		}
-
-
-		// Hack fix
-		//materials[ "IMAGE_2D" ].texture0 = imguiControls.dbgImageId;
 
 		std::vector< materialBufferObject_t > materialBuffer;
 		materialBuffer.reserve( materialLib.Count() );

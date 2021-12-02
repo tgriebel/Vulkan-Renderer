@@ -32,6 +32,10 @@ Renderer							renderer;
 
 static SpinLock						windowReady;
 
+#if defined( USE_IMGUI )
+imguiControls_t imguiControls;
+#endif
+
 void MakeBeachScene();
 void UpdateScene( const input_t& input, const float dt );
 
