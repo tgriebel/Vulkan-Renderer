@@ -24,6 +24,14 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 		app->input.SetKey( '+', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_KP_SUBTRACT ) {
 		app->input.SetKey( '-', ( action != GLFW_RELEASE ) );
+	} else if ( key == GLFW_KEY_KP_8 ) {
+		app->input.SetKey( '8', ( action != GLFW_RELEASE ) );
+	} else if ( key == GLFW_KEY_KP_2 ) {
+		app->input.SetKey( '2', ( action != GLFW_RELEASE ) );
+	} else if ( key == GLFW_KEY_KP_4 ) {
+		app->input.SetKey( '4', ( action != GLFW_RELEASE ) );
+	} else if ( key == GLFW_KEY_KP_6 ) {
+		app->input.SetKey( '6', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_LEFT_ALT ) {
 		app->focused = ( action != GLFW_RELEASE );
 	}
@@ -54,10 +62,26 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 	mouse_t& mouse = app->input.GetMouseRef();
 
+	static float lastTime = 0.0f;
+	const float time = static_cast<float>( glfwGetTime() );
+	const float deltaTime = ( time - lastTime );
+	lastTime = time;
 	const float x = static_cast<float>( xpos );
 	const float y = static_cast<float>( ypos );
-	mouse.dx = ( mouse.x - x );
-	mouse.dy = ( mouse.y - y );
+	if( fabs( mouse.x - x ) < 1.0f ) {
+		mouse.dx = 0.0f;
+	} else {
+		mouse.dx = ( ( mouse.x - x ) < 0.0f ) ? -1.0f : 1.0f;
+	}
+	if ( fabs( mouse.y - y ) < 1.0f ) {
+		mouse.dy = 0.0f;
+	} else {
+		mouse.dy = ( ( mouse.y - y ) < 0.0f ) ? -1.0f : 1.0f;
+	}
+	mouse.dx *= deltaTime;
+	mouse.dy *= deltaTime;
+	mouse.xPrev = mouse.x;
+	mouse.yPrev = mouse.y;
 	mouse.x = x;
 	mouse.y = y;
 
@@ -82,7 +106,6 @@ bool Window::IsFocused() const
 
 void Window::PumpMessages()
 {
-	input.NewFrame();
 	glfwPollEvents();
 }
 

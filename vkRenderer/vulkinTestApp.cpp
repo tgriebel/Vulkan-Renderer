@@ -85,7 +85,9 @@ int main()
 		while ( window.IsOpen() )
 		{
 			UpdateScene( AdvanceTime() );
+			window.input.NewFrame();
 			renderer.RenderScene( scene );
+			
 		}
 		renderer.Destroy();
 	}

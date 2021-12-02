@@ -173,6 +173,18 @@ void UpdateScene( const float dt )
 	if ( window.input.IsKeyPressed( 'S' ) ) {
 		scene.camera.MoveVertical( dt * 0.01f );
 	}
+	if ( window.input.IsKeyPressed( '8' ) ) {
+		scene.camera.SetPitch( -dt * 0.01f );
+	}
+	if ( window.input.IsKeyPressed( '2' ) ) {
+		scene.camera.SetPitch( dt * 0.01f );
+	}
+	if ( window.input.IsKeyPressed( '4' ) ) {
+		scene.camera.SetYaw( dt * 0.01f );
+	}
+	if ( window.input.IsKeyPressed( '6' ) ) {
+		scene.camera.SetYaw( -dt * 0.01f );
+	}
 	if ( window.input.IsKeyPressed( '+' ) ) {
 		scene.camera.fov += dt;
 	}
@@ -183,11 +195,11 @@ void UpdateScene( const float dt )
 	const mouse_t& mouse = window.input.GetMouse();
 	if ( mouse.centered )
 	{
-		const float maxSpeed = dt * mouse.speed;
+		const float maxSpeed = 5.0f;//mouse.speed;
 		const float yawDelta = maxSpeed * mouse.dx;
 		const float pitchDelta = -maxSpeed * mouse.dy;
-		scene.camera.SetYaw( yawDelta );
-		scene.camera.SetPitch( pitchDelta );
+	//	scene.camera.SetYaw( yawDelta );
+	//	scene.camera.SetPitch( pitchDelta );
 	}
 
 	// Skybox
