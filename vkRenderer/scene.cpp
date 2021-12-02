@@ -198,7 +198,7 @@ void UpdateScene( const float dt )
 	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	scene.entities[ 0 ].matrix = skyBoxMatrix;
 
-	materialLib.Find( "IMAGE2D" )->texture0 = imguiControls.dbgImageId;
+	materialLib.Find( "IMAGE2D" )->texture0 = ( imguiControls.dbgImageId % textureLib.Count() );
 }
 
 void MakeBeachScene()
