@@ -267,12 +267,13 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 
 	VkDynamicState dynamicStates[] = {
 		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR,
 		VK_DYNAMIC_STATE_LINE_WIDTH
 	};
 
 	VkPipelineDynamicStateCreateInfo dynamicState{ };
 	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynamicState.dynamicStateCount = 2;
+	dynamicState.dynamicStateCount = 3;
 	dynamicState.pDynamicStates = dynamicStates;
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
@@ -316,7 +317,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pipelineInfo.pMultisampleState = &multisampling;
 	pipelineInfo.pDepthStencilState = nullptr; // Optional
 	pipelineInfo.pColorBlendState = &colorBlending;
-	pipelineInfo.pDynamicState = nullptr; // Optional
+	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
 	pipelineInfo.renderPass = pass;
 	pipelineInfo.subpass = 0;

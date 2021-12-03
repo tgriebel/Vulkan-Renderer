@@ -1678,6 +1678,20 @@ private:
 				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
 
+				VkViewport viewport{ };
+				viewport.x = view.viewport.x;
+				viewport.y = view.viewport.y;
+				viewport.width = view.viewport.width;
+				viewport.height = view.viewport.height;
+				viewport.minDepth = 0.0f;
+				viewport.maxDepth = 1.0f;
+				vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
+
+				VkRect2D rect{ };
+				rect.extent.width = view.viewport.width;
+				rect.extent.height = view.viewport.height;
+				vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
+
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
@@ -1703,6 +1717,20 @@ private:
 			renderPassInfo.pClearValues = clearValues.data();
 
 			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+			VkViewport viewport{ };
+			viewport.x = view.viewport.x;
+			viewport.y = view.viewport.y;
+			viewport.width = view.viewport.width;
+			viewport.height = view.viewport.height;
+			viewport.minDepth = 0.0f;
+			viewport.maxDepth = 1.0f;
+			vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
+
+			VkRect2D rect{ };
+			rect.extent.width = view.viewport.width;
+			rect.extent.height = view.viewport.height;
+			vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
 
 			for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
 			{

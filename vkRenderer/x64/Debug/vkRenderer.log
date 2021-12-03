@@ -14,11 +14,4 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  renderer.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2068,31): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2069,32): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  vulkinTestApp.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2068,31): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2069,32): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
