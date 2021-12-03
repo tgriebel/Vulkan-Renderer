@@ -1684,8 +1684,8 @@ private:
 				vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
 
 				VkRect2D rect{ };
-				rect.extent.width = view.viewport.width;
-				rect.extent.height = view.viewport.height;
+				rect.extent.width = static_cast< uint32_t >( view.viewport.width );
+				rect.extent.height = static_cast<uint32_t>( view.viewport.height );
 				vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
 
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
@@ -1724,8 +1724,8 @@ private:
 			vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
 
 			VkRect2D rect{ };
-			rect.extent.width = view.viewport.width;
-			rect.extent.height = view.viewport.height;
+			rect.extent.width = static_cast<uint32_t>( view.viewport.width );
+			rect.extent.height = static_cast<uint32_t>( view.viewport.height );
 			vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
 
 			for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
@@ -2085,8 +2085,8 @@ private:
 		int width;
 		int height;
 		window.GetWindowSize( width, height );
-		renderView.viewport.width = width;
-		renderView.viewport.height = height;
+		renderView.viewport.width = static_cast<float>( width );
+		renderView.viewport.height = static_cast<float>( height );
 
 		renderView.lights[ 0 ].lightPos = glm::vec4( lightPos0[ 0 ], lightPos0[ 1 ], lightPos0[ 2 ], 0.0f );
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
