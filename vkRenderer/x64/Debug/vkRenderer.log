@@ -14,4 +14,21 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
+  deviceContext.cpp
+  renderer.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1687,38): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1688,39): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1727,37): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1728,38): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2088,31): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2089,32): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  vulkinTestApp.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1687,38): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1688,39): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1727,37): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(1728,38): warning C4244: '=': conversion from 'float' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2088,31): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.h(2089,32): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

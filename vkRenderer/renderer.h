@@ -569,16 +569,14 @@ private:
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
-		//	vkDestroyBuffer( context.device, frameState[ i ].globalConstants.buffer, nullptr );
-		//	vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
-		//	vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.buffer, nullptr );
-		//	vkDestroyBuffer( context.device, frameState[ i ].lightParms.buffer, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.view, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].depthImage.view, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].viewColorImage.image, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].shadowMapImage.image, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].depthImage.image, nullptr );
+			vkDestroyFramebuffer( context.device, shadowPassState.fb[ i ], nullptr );
+			vkDestroyFramebuffer( context.device, mainPassState.fb[ i ], nullptr );
 		}
 
 		//vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
@@ -1393,8 +1391,7 @@ private:
 			framebufferInfo.height = ShadowMapHeight;
 			framebufferInfo.layers = 1;
 
-			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowPassState.fb[ i ] ) != VK_SUCCESS )
-			{
+			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowPassState.fb[ i ] ) != VK_SUCCESS ) {
 				throw std::runtime_error( "Failed to create framebuffer!" );
 			}
 		}
@@ -1450,8 +1447,7 @@ private:
 			framebufferInfo.height = swapChain.vk_swapChainExtent.height;
 			framebufferInfo.layers = 1;
 
-			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &swapChain.vk_framebuffers[ i ] ) != VK_SUCCESS )
-			{
+			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &swapChain.vk_framebuffers[ i ] ) != VK_SUCCESS ) {
 				throw std::runtime_error( "Failed to create swap chain framebuffer!" );
 			}
 			postPassState.fb[ i ] = swapChain.vk_framebuffers[ i ];
@@ -1884,8 +1880,7 @@ private:
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0; // Optional
 
-		if ( vkCreateImage( context.device, &imageInfo, nullptr, &image ) != VK_SUCCESS )
-		{
+		if ( vkCreateImage( context.device, &imageInfo, nullptr, &image ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create image!" );
 		}
 
@@ -1897,12 +1892,9 @@ private:
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
-		if ( memory.CreateAllocation( memRequirements.alignment, memRequirements.size, subAlloc ) )
-		{
+		if ( memory.CreateAllocation( memRequirements.alignment, memRequirements.size, subAlloc ) ) {
 			vkBindImageMemory( context.device, image, memory.GetDeviceMemory(), subAlloc.offset );
-		}
-		else
-		{
+		} else {
 			throw std::runtime_error( "Buffer could not be allocated!" );
 		}
 	}
