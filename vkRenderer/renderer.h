@@ -258,7 +258,7 @@ private:
 			window.CreateSurface();
 			PickPhysicalDevice();
 			CreateLogicalDevice();
-			swapChain.Create( &window );
+			swapChain.Create( &window, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
 		}
 
 		{
@@ -569,29 +569,29 @@ private:
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
-			vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
+		//	vkDestroyBuffer( context.device, frameState[ i ].globalConstants.buffer, nullptr );
+		//	vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
+		//	vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.buffer, nullptr );
+		//	vkDestroyBuffer( context.device, frameState[ i ].lightParms.buffer, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.view, nullptr );
-			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].depthImage.view, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].viewColorImage.image, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].shadowMapImage.image, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].depthImage.image, nullptr );
 		}
 
-		vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
-		vkFreeMemory( context.device, sharedMemory.GetDeviceMemory(), nullptr );
-		localMemory.Unbind();
-		sharedMemory.Unbind();
+		//vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
+		//vkFreeMemory( context.device, sharedMemory.GetDeviceMemory(), nullptr );
+		//localMemory.Unbind();
+		//sharedMemory.Unbind();
+		//vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
-		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
-
-		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
+		//vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 	}
 
 	void RecreateSwapChain()
 	{
-		assert( 0 );
-
 		int width = 0, height = 0;
 		window.GetWindowFrameBufferSize( width, height, true );
 
@@ -599,7 +599,9 @@ private:
 
 		CleanupFrameResources();
 		swapChain.Destroy();
-		swapChain.Create( &window );
+		swapChain.Create( &window, width, height );
+		CreateRenderPasses();
+		CreateFramebuffers();
 	}
 
 	void CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
@@ -1360,6 +1362,10 @@ private:
 
 	void CreateFramebuffers()
 	{
+		int width = 0;
+		int height = 0;
+		window.GetWindowFrameBufferSize( width, height );
+
 		/////////////////////////////////
 		//       Shadow Map Render     //
 		/////////////////////////////////
@@ -1399,12 +1405,12 @@ private:
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
 			imageAllocations.push_back( AllocRecord() );
-			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage.image, localMemory, imageAllocations.back() );
+			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].viewColorImage.view = CreateImageView( frameState[ i ].viewColorImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
 			imageAllocations.push_back( AllocRecord() );
-			CreateImage( DISPLAY_WIDTH, DISPLAY_HEIGHT, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage.image, localMemory, imageAllocations.back() );
+			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].depthImage.view = CreateImageView( frameState[ i ].depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
@@ -1417,12 +1423,11 @@ private:
 			framebufferInfo.renderPass = mainPassState.pass;
 			framebufferInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
 			framebufferInfo.pAttachments = attachments.data();
-			framebufferInfo.width = DISPLAY_WIDTH;
-			framebufferInfo.height = DISPLAY_HEIGHT;
+			framebufferInfo.width = width;
+			framebufferInfo.height = height;
 			framebufferInfo.layers = 1;
 
-			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &mainPassState.fb[ i ] ) != VK_SUCCESS )
-			{
+			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &mainPassState.fb[ i ] ) != VK_SUCCESS ) {
 				throw std::runtime_error( "Failed to create scene framebuffer!" );
 			}
 		}
@@ -1627,6 +1632,10 @@ private:
 		beginInfo.flags = 0; // Optional
 		beginInfo.pInheritanceInfo = nullptr; // Optional
 
+		int width = 0;
+		int height = 0;
+		window.GetWindowSize( width, height );
+
 		if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
@@ -1770,7 +1779,7 @@ private:
 			ImGui::Text( "Mouse: (%f, %f )", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
 			const glm::vec2 screenPoint = glm::vec2( (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
-			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / DISPLAY_WIDTH, 1.0f / DISPLAY_HEIGHT ) - 1.0f;
+			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / width, 1.0f / height ) - 1.0f;
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
 				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities[ imguiControls.selectedModelId ].modelId ) );
@@ -2052,6 +2061,12 @@ private:
 
 		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, -6.0f, 0.0f );
 		const glm::vec3 lightDir0 = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
+
+		int width;
+		int height;
+		window.GetWindowSize( width, height );
+		renderView.viewport.width = width;
+		renderView.viewport.height = height;
 
 		renderView.lights[ 0 ].lightPos = glm::vec4( lightPos0[ 0 ], lightPos0[ 1 ], lightPos0[ 2 ], 0.0f );
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );

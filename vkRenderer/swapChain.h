@@ -13,14 +13,14 @@ public:
 	{
 	}
 
-	void Create( const Window* _window )
+	void Create( const Window* _window, const int displayWidth, const int displayHeight )
 	{
 		window = _window;
 		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice, window->vk_surface );
 
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat( swapChainSupport.formats );
 		VkPresentModeKHR presentMode = ChooseSwapPresentMode( swapChainSupport.presentModes );
-		VkExtent2D extent = ChooseSwapExtent( swapChainSupport.capabilities );
+		VkExtent2D extent = ChooseSwapExtent( swapChainSupport.capabilities, displayWidth, displayHeight );
 
 		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 		if ( swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount )
@@ -80,7 +80,6 @@ public:
 
 	void Destroy()
 	{
-		// Untested
 		for ( size_t i = 0; i < vk_framebuffers.size(); i++ ) {
 			vkDestroyFramebuffer( context.device, vk_framebuffers[ i ], nullptr );
 		}
@@ -179,15 +178,15 @@ private:
 		return availableFormats[ 0 ];
 	}
 
-	static VkExtent2D ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilities )
+	static VkExtent2D ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilities, const int displayWidth, const int displayHeight )
 	{
 		if ( capabilities.currentExtent.width != UINT32_MAX ) {
 			return capabilities.currentExtent;
-		}
-		else {
+		} else 
+		{
 			VkExtent2D actualExtent = {
-				static_cast<uint32_t>( DISPLAY_WIDTH ),
-				static_cast<uint32_t>( DISPLAY_HEIGHT )
+				static_cast<uint32_t>( displayWidth ),
+				static_cast<uint32_t>( displayHeight )
 			};
 
 			actualExtent.width = std::max( capabilities.minImageExtent.width, std::min( capabilities.maxImageExtent.width, actualExtent.width ) );

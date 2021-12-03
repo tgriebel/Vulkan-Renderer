@@ -53,8 +53,8 @@ const uint32_t	MaxCodeImages					= 1;
 const uint64_t	MaxSharedMemory					= 512 * MB;
 const uint64_t	MaxLocalMemory					= 512 * MB;
 
-const uint32_t DISPLAY_WIDTH					= 1280;
-const uint32_t DISPLAY_HEIGHT					= 720;
+const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
+const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const int MAX_FRAMES_STATES = ( MAX_FRAMES_IN_FLIGHT + 1 );
@@ -440,8 +440,8 @@ public:
 	{
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = (float)DISPLAY_WIDTH;
-		viewport.height = (float)DISPLAY_HEIGHT;
+		viewport.width = (float)DEFAULT_DISPLAY_WIDTH;
+		viewport.height = (float)DEFAULT_DISPLAY_HEIGHT;
 		viewport.near = 1.0f;
 		viewport.far = 0.0f;
 
