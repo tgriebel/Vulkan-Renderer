@@ -561,7 +561,7 @@ private:
 		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeQueue );
 	}
 
-	void CleanupFrameResources()
+	void DestroyFrameResources()
 	{
 		vkDestroyRenderPass( context.device, mainPassState.pass, nullptr );
 		vkDestroyRenderPass( context.device, shadowPassState.pass, nullptr );
@@ -595,7 +595,7 @@ private:
 
 		vkDeviceWaitIdle( context.device );
 
-		CleanupFrameResources();
+		DestroyFrameResources();
 		swapChain.Destroy();
 		swapChain.Create( &window, width, height );
 		CreateRenderPasses();
@@ -2205,7 +2205,7 @@ private:
 
 	void Cleanup()
 	{
-		CleanupFrameResources();
+		DestroyFrameResources();
 		swapChain.Destroy();
 
 		ShutdownImGui();
