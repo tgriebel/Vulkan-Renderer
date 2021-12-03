@@ -195,11 +195,11 @@ void UpdateScene( const float dt )
 	const mouse_t& mouse = window.input.GetMouse();
 	if ( mouse.centered )
 	{
-		const float maxSpeed = 5.0f;//mouse.speed;
+		const float maxSpeed = mouse.speed;
 		const float yawDelta = maxSpeed * mouse.dx;
 		const float pitchDelta = -maxSpeed * mouse.dy;
-	//	scene.camera.SetYaw( yawDelta );
-	//	scene.camera.SetPitch( pitchDelta );
+		scene.camera.SetYaw( yawDelta );
+		scene.camera.SetPitch( pitchDelta );
 	}
 
 	// Skybox

@@ -539,7 +539,7 @@ enum normalDirection_t
 
 struct mouse_t
 {
-	mouse_t() : speed( 0.001f ),
+	mouse_t() : speed( 0.2f ),
 				x( 0.0f ),
 				y( 0.0f ),
 				xPrev( 0.0f ),

@@ -68,18 +68,18 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	lastTime = time;
 	const float x = static_cast<float>( xpos );
 	const float y = static_cast<float>( ypos );
-	if( fabs( mouse.x - x ) < 1.0f ) {
+	if( ( fabs( mouse.x - x ) < 1.0f ) || ( fabs( mouse.x - x ) > 100.0f ) ) {
 		mouse.dx = 0.0f;
 	} else {
-		mouse.dx = ( ( mouse.x - x ) < 0.0f ) ? -1.0f : 1.0f;
+		mouse.dx = ( mouse.x - x );
 	}
-	if ( fabs( mouse.y - y ) < 1.0f ) {
+	if ( ( fabs( mouse.y - y ) < 1.0f ) || ( fabs( mouse.y - y ) > 100.0f ) ) {
 		mouse.dy = 0.0f;
 	} else {
-		mouse.dy = ( ( mouse.y - y ) < 0.0f ) ? -1.0f : 1.0f;
+		mouse.dy = ( mouse.y - y );
 	}
-	mouse.dx *= deltaTime;
-	mouse.dy *= deltaTime;
+	mouse.dx = std::max( -10.0f, std::min( 10.0f, deltaTime * mouse.dx ) );
+	mouse.dy = std::max( -10.0f, std::min( 10.0f, deltaTime * mouse.dy ) );
 	mouse.xPrev = mouse.x;
 	mouse.yPrev = mouse.y;
 	mouse.x = x;

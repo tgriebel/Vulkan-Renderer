@@ -31,7 +31,7 @@ Scene								scene;
 Renderer							renderer;
 Window								window;
 
-static SpinLock						windowReady;
+static SpinLock						acquireNextFrame;
 
 #if defined( USE_IMGUI )
 imguiControls_t imguiControls;
@@ -49,18 +49,8 @@ static float AdvanceTime()
 	return dt;
 }
 
-void WindowThread()
+void RenderThread()
 {
-	window.Init();
-	windowReady.Unlock();
-
-	while ( window.IsOpen() )
-	{
-		window.PumpMessages();
-		if( renderer.IsReady() ) {
-			ImGui_ImplGlfw_NewFrame();
-		}
-	}
 }
 
 int main()
@@ -75,28 +65,31 @@ int main()
 	}
 	MakeBeachScene();
 
-	windowReady.Lock();
-	std::thread winThread( WindowThread );
-	windowReady.Lock();
+	std::thread renderThread( RenderThread );
+
+	window.Init();
 
 	try
 	{
 		renderer.Init();
 		while ( window.IsOpen() )
 		{
+			window.PumpMessages();
 			UpdateScene( AdvanceTime() );
 			window.input.NewFrame();
 			renderer.RenderScene( scene );
-			
+#if defined( USE_IMGUI )
+			ImGui_ImplGlfw_NewFrame();
+#endif
 		}
 		renderer.Destroy();
 	}
 	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
-		winThread.join();
+		renderThread.join();
 		return EXIT_FAILURE;
 	}
-	winThread.join();
+	renderThread.join();
 	return EXIT_SUCCESS;
 }
