@@ -351,10 +351,9 @@ class MemoryPool;
 
 struct allocRecord_t
 {
-	VkDeviceSize		offset;
-	VkDeviceSize		subOffset;
-	VkDeviceSize		size;
-	VkDeviceSize		alignment;
+	uint64_t			offset;
+	uint64_t			size;
+	uint64_t			alignment;
 	MemoryPool*			memory;
 	int					index;
 };
@@ -450,7 +449,7 @@ public:
 		return static_cast<void*>( (uint8_t*)ptr + record.offset );
 	}
 
-	VkDeviceSize GetOffset() const
+	VkDeviceSize GetSize() const
 	{
 		return offset;
 	}
@@ -480,7 +479,6 @@ public:
 
 		subAlloc.memory			= this;
 		subAlloc.offset			= nextOffset;
-		subAlloc.subOffset		= 0;
 		subAlloc.size			= allocSize;
 		subAlloc.alignment		= alignment;
 		subAlloc.index			= static_cast< int >( allocations.size() );
@@ -625,18 +623,25 @@ struct surfUpload_t
 
 struct GpuBuffer
 {
-	VkBuffer			buffer;
-	allocRecord_t		allocation;
-	VkDeviceSize		currentOffset;
-	VkDeviceSize		size;
+	allocRecord_t allocation;
 
-	void Reset()
-	{
-		currentOffset = 0;
+	void Reset() {
+		offset = 0;
 	}
 
-	VkBuffer GetVkObject()
-	{
+	uint64_t GetSize() const {
+		return offset;
+	}
+
+	uint64_t GetMaxSize() const {
+		return allocation.size;
+	}
+
+	void Allocate( const uint64_t size ) {
+		offset += size;
+	}
+
+	VkBuffer& GetVkObject() {
 		return buffer;
 	}
 
@@ -645,10 +650,14 @@ struct GpuBuffer
 		void* mappedData = allocation.memory->GetMemoryMapPtr( allocation );
 		if ( mappedData != nullptr )
 		{
-			memcpy( (uint8_t*) mappedData + currentOffset, data, sizeInBytes );
-			currentOffset += static_cast<uint32_t>( ( sizeInBytes + ( allocation.alignment - 1 ) ) & ~( allocation.alignment - 1 ) );
+			memcpy( (uint8_t*) mappedData + offset, data, sizeInBytes );
+			offset += static_cast<uint32_t>( ( sizeInBytes + ( allocation.alignment - 1 ) ) & ~( allocation.alignment - 1 ) );
 		}
 	}
+
+private:
+	uint64_t	offset;
+	VkBuffer	buffer;
 };
 
 

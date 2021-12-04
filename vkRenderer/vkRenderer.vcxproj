@@ -166,6 +166,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="allocator.h" />
     <ClInclude Include="assetLib.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />

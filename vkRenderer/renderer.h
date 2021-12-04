@@ -198,10 +198,9 @@ private:
 			VkBufferCopy vbCopyRegion{ };
 			vbCopyRegion.size = vbCopySize;
 			vbCopyRegion.srcOffset = 0;
-			vbCopyRegion.dstOffset = vb.allocation.subOffset;
-			UploadToGPU( stagingBuffer.buffer, vb.GetVkObject(), vbCopyRegion );
+			vbCopyRegion.dstOffset = vb.GetSize();
+			CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
 
-			vb.allocation.subOffset += vbCopySize;
 			vbBufElements += static_cast<uint32_t>( modelLib.Find( m )->vertices.size() );
 
 			// IB Copy
@@ -214,10 +213,9 @@ private:
 			VkBufferCopy ibCopyRegion{ };
 			ibCopyRegion.size = ibCopySize;
 			ibCopyRegion.srcOffset = 0;
-			ibCopyRegion.dstOffset = ib.allocation.subOffset;
-			UploadToGPU( stagingBuffer.buffer, ib.GetVkObject(), ibCopyRegion );
+			ibCopyRegion.dstOffset = ib.GetSize();
+			CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
 
-			ib.allocation.subOffset += ibCopySize;
 			ibBufElements += static_cast<uint32_t>( modelLib.Find( m )->indices.size() );
 		}
 	}
@@ -1039,13 +1037,13 @@ private:
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &buffer.buffer ) != VK_SUCCESS )
+		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &buffer.GetVkObject() ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to create buffer!" );
 		}
 
 		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements( context.device, buffer.buffer, &memRequirements );
+		vkGetBufferMemoryRequirements( context.device, buffer.GetVkObject(), &memRequirements );
 
 		VkMemoryAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -1053,18 +1051,20 @@ private:
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
 		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, buffer.allocation ) ) {
-			vkBindBufferMemory( context.device, buffer.buffer, bufferMemory.GetDeviceMemory(), buffer.allocation.offset );
+			vkBindBufferMemory( context.device, buffer.GetVkObject(), bufferMemory.GetDeviceMemory(), buffer.allocation.offset );
 		}
 		else {
 			throw std::runtime_error( "buffer could not allocate!" );
 		}
 	}
 
-	void UploadToGPU( VkBuffer srcBuffer, VkBuffer dstBuffer, VkBufferCopy copyRegion )
+	void CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 	{
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-		vkCmdCopyBuffer( commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion );
+		vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
 		EndSingleTimeCommands( commandBuffer );
+
+		dstBuffer.Allocate( copyRegion.size );
 	}
 
 	void CreateTextureSamplers()
@@ -1984,9 +1984,9 @@ private:
 
 	void CreateResourceBuffers()
 	{
-		stagingBuffer.currentOffset = 0;
-		stagingBuffer.size = 128 * MB;
-		CreateBuffer( stagingBuffer.size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, sharedMemory );
+		stagingBuffer.Reset();
+		const uint64_t size = 128 * MB;
+		CreateBuffer( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, sharedMemory );
 	}
 
 	void GenerateGpuPrograms()
@@ -2010,10 +2010,10 @@ private:
 
 			TransitionImageLayout( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->mipLevels );
 
-			const VkDeviceSize currentOffset = stagingBuffer.currentOffset;
+			const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 			stagingBuffer.CopyData( texture->bytes, texture->sizeBytes );
 
-			CopyBufferToImage( commandBuffer, stagingBuffer.buffer, currentOffset, texture->vk_image, static_cast<uint32_t>( texture->width ), static_cast<uint32_t>( texture->height ) );
+			CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->vk_image, static_cast<uint32_t>( texture->width ), static_cast<uint32_t>( texture->height ) );
 			texture->uploaded = true;
 		}
 		EndSingleTimeCommands( commandBuffer );
@@ -2207,10 +2207,10 @@ private:
 		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-			vkDestroyBuffer( context.device, frameState[ i ].globalConstants.buffer, nullptr );
-			vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
-			vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.buffer, nullptr );
-			vkDestroyBuffer( context.device, frameState[ i ].lightParms.buffer, nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].surfParms.GetVkObject(), nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.GetVkObject(), nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
 		}
 
 		const uint32_t textureCount = textureLib.Count();

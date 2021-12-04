@@ -76,6 +76,7 @@
     <ClInclude Include="assetLib.h" />
     <ClInclude Include="util.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="allocator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
