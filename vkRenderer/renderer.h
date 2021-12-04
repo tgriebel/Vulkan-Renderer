@@ -578,14 +578,6 @@ private:
 			vkDestroyFramebuffer( context.device, shadowPassState.fb[ i ], nullptr );
 			vkDestroyFramebuffer( context.device, mainPassState.fb[ i ], nullptr );
 		}
-
-		//vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
-		//vkFreeMemory( context.device, sharedMemory.GetDeviceMemory(), nullptr );
-		//localMemory.Unbind();
-		//sharedMemory.Unbind();
-		//vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
-
-		//vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 	}
 
 	void RecreateSwapChain()
@@ -1995,12 +1987,6 @@ private:
 		CreateBuffer( stagingBuffer.size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer.buffer, sharedMemory, stagingBuffer.allocation );
 	}
 
-	void DestroyResourceBuffers()
-	{
-		//	vkDestroyBuffer( context.device, stagingBuffer.buffer, nullptr );
-		//	vkFreeMemory( context.device, stagingBuffer.memory, nullptr );
-	}
-
 	void GenerateGpuPrograms()
 	{
 		const uint32_t programCount = gpuPrograms.Count();
@@ -2210,7 +2196,13 @@ private:
 
 		ShutdownImGui();
 
-		DestroyResourceBuffers();
+		vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
+		vkFreeMemory( context.device, sharedMemory.GetDeviceMemory(), nullptr );
+		localMemory.Unbind();
+		sharedMemory.Unbind();
+		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
+
+		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 
 		const uint32_t textureCount = textureLib.Count();
 		for ( uint32_t i = 0; i < textureCount; ++i )
