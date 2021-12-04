@@ -276,7 +276,7 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR>	presentModes;
 };
 
-class MemoryAllocator;
+class MemoryPool;
 
 struct allocRecord_t
 {
@@ -284,25 +284,26 @@ struct allocRecord_t
 	VkDeviceSize		subOffset;
 	VkDeviceSize		size;
 	VkDeviceSize		alignment;
-	MemoryAllocator*	memory;
+	MemoryPool*			memory;
 	int					index;
 };
 
-class MemoryAllocator
+class MemoryPool
 {
 public:
 
-	MemoryAllocator()
+	MemoryPool()
 	{
 		Unbind();
 	}
 
-	MemoryAllocator( VkDeviceMemory& _memory, const VkDeviceSize _size, const uint32_t _type )
+	MemoryPool( VkDeviceMemory& _memory, const VkDeviceSize _size, const uint32_t _type )
 	{
 		offset = 0;
 		memory = _memory;
 		size = _size;
 		type = _type;
+		ptr = NULL;
 	}
 
 	void Bind( VkDeviceMemory& _memory, void* memMap, const VkDeviceSize _size, const uint32_t _type )
