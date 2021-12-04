@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <stdlib.h>
 #include <math.h>
+#include <atomic>
 
 #define USE_IMGUI
 
@@ -178,6 +179,76 @@ struct GpuProgram
 	pipelineHdl_t			pipeline;
 };
 
+class refCount_t
+{
+public:
+	refCount_t() = delete;
+
+	refCount_t( const int count ) {
+		assert( count > 0 );
+		this->count = count;
+	}
+	inline int Add() {
+		return ( count > 0 ) ? ++count : 0;
+	}
+	inline int Release() {
+		return ( count > 0 ) ? --count : 0;
+	}
+	[[nodiscard]]
+	inline int IsFree() const {
+		return ( count <= 0 );
+	}
+private:
+	int count; // Considered dead at 0
+};
+
+
+class hdl_t
+{
+public:
+	hdl_t() = delete;
+
+	hdl_t( const int& handle )
+	{
+		this->value = new int( handle );
+		this->instances = new refCount_t( 1 );
+	}
+
+	hdl_t( const hdl_t& handle )
+	{
+		this->value = handle.value;
+		this->instances = handle.instances;
+		this->instances->Add();
+	}
+
+	~hdl_t()
+	{
+		instances->Release();
+		if ( instances->IsFree() )
+		{
+			delete instances;
+			delete value;
+		}
+	}
+
+	hdl_t& operator=( const hdl_t& handle )
+	{
+		if ( this != &handle )
+		{
+			this->~hdl_t();		
+			this->value = handle.value;
+			this->instances = handle.instances;
+			this->instances->Add();
+		}
+	}
+
+	int Get() const {
+		return *value;
+	}
+private:
+	int*		value;
+	refCount_t*	instances;
+};
 
 struct pipelineObject_t;
 
@@ -378,7 +449,7 @@ public:
 		subAlloc.subOffset		= 0;
 		subAlloc.size			= allocSize;
 		subAlloc.alignment		= alignment;
-		subAlloc.index			= allocations.size();
+		subAlloc.index			= static_cast< int >( allocations.size() );
 		allocations.push_back( subAlloc );
 
 		offset = nextOffset + allocSize;
@@ -389,7 +460,7 @@ public:
 	bool DestroyAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, allocRecord_t& subAlloc )
 	{
 		if( IsValidIndex( subAlloc.index ) && ( subAlloc.memory == this ) ) {
-			freeList.push_back( subAlloc );
+			freeList.push_back( subAlloc.index );
 		}
 	}
 
@@ -413,7 +484,7 @@ private:
 	VkDeviceMemory					memory;
 	void*							ptr;
 	std::vector< allocRecord_t >	allocations;
-	std::vector< allocRecord_t >	freeList;
+	std::vector< int >				freeList;
 };
 
 struct texture_t
