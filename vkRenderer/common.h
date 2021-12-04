@@ -263,7 +263,7 @@ struct material_t
 	uint32_t				texture5;
 	uint32_t				texture6;
 	uint32_t				texture7;
-	GpuProgram*			shaders[ DRAWPASS_COUNT ]; // TODO: use handle
+	GpuProgram*				shaders[ DRAWPASS_COUNT ]; // TODO: use handle
 
 	material_t()
 	{
@@ -617,11 +617,6 @@ struct surfUpload_t
 	uint32_t					indexCount;
 	uint32_t					vertexOffset;
 	uint32_t					firstIndex;
-	VkBuffer					vb;
-	VkBuffer					ib;
-	// TODO: remove
-	allocRecordVk_t				vbMemory;
-	allocRecordVk_t				ibMemory;
 };
 
 

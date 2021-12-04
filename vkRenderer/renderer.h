@@ -190,7 +190,6 @@ private:
 			VkDeviceSize ibCopySize = sizeof( modelLib.Find( m )->indices[ 0 ] ) * modelLib.Find( m )->indices.size();
 
 			// VB Copy
-			modelUpload[ m ].vb = vb.GetVkObject();
 			modelUpload[ m ].vertexOffset = vbBufElements;
 			stagingBuffer.Reset();
 			stagingBuffer.CopyData( modelLib.Find( m )->vertices.data(), static_cast<size_t>( vbCopySize ) );
@@ -204,7 +203,6 @@ private:
 			vbBufElements += static_cast<uint32_t>( modelLib.Find( m )->vertices.size() );
 
 			// IB Copy
-			modelUpload[ m ].ib = ib.GetVkObject();
 			modelUpload[ m ].firstIndex = ibBufElements;
 
 			stagingBuffer.Reset();
