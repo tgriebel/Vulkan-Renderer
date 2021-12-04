@@ -359,9 +359,7 @@ struct allocRecord_t
 	int								index;
 };
 
-using MemoryPoolVk = MemoryPool< VkDeviceMemory >;
-using allocRecordVk_t = allocRecord_t< MemoryPoolVk >;
-
+template< class MemoryType >
 struct alloc_t
 {
 	int GetOffset() const {
@@ -391,10 +389,14 @@ private:
 	}
 
 	hdl_t			handle;
-	MemoryPool< VkDeviceMemory > *	pool;
+	MemoryType*		pool;
 
-	friend MemoryPool< VkDeviceMemory >;
+	friend MemoryType;
 };
+
+using MemoryPoolVk = MemoryPool< VkDeviceMemory >;
+using allocRecordVk_t = allocRecord_t< MemoryPoolVk >;
+using allocVk_t = alloc_t< MemoryPoolVk >;
 
 template< class ResourceType >
 class MemoryPool
@@ -531,7 +533,7 @@ private:
 	std::vector< allocRecord_t >	allocations;
 	std::vector< hdl_t >			freeList;
 
-	friend alloc_t;
+	friend alloc_t< MemoryPool< ResourceType > >;
 };
 
 struct texture_t
