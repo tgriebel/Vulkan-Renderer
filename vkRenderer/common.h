@@ -347,7 +347,7 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR>	presentModes;
 };
 
-template< class ResourceType > class MemoryPool;
+template< class ResourceType > class Allocator;
 
 template< class MemoryType >
 struct allocRecord_t
@@ -394,22 +394,22 @@ private:
 	friend MemoryType;
 };
 
-using MemoryPoolVk = MemoryPool< VkDeviceMemory >;
-using allocRecordVk_t = allocRecord_t< MemoryPoolVk >;
-using allocVk_t = alloc_t< MemoryPoolVk >;
+using AllocatorVkMemory = Allocator< VkDeviceMemory >;
+using allocRecordVk_t = allocRecord_t< AllocatorVkMemory >;
+using allocVk_t = alloc_t< AllocatorVkMemory >;
 
 template< class ResourceType >
-class MemoryPool
+class Allocator
 {
 private:
-	using allocRecord_t = allocRecord_t< MemoryPool< ResourceType > >;
+	using allocRecord_t = allocRecord_t< Allocator< ResourceType > >;
 public:
 
-	MemoryPool() {
+	Allocator() {
 		Unbind();
 	}
 
-	MemoryPool( ResourceType& _memory, const uint64_t _size, const uint32_t _type )
+	Allocator( ResourceType& _memory, const uint64_t _size, const uint32_t _type )
 	{
 		offset = 0;
 		memory = _memory;
@@ -533,7 +533,7 @@ private:
 	std::vector< allocRecord_t >	allocations;
 	std::vector< hdl_t >			freeList;
 
-	friend alloc_t< MemoryPool< ResourceType > >;
+	friend alloc_t< Allocator< ResourceType > >;
 };
 
 struct texture_t

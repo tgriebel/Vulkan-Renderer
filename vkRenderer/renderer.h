@@ -106,8 +106,8 @@ private:
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
 
-	MemoryPoolVk					localMemory;
-	MemoryPoolVk					sharedMemory;
+	AllocatorVkMemory				localMemory;
+	AllocatorVkMemory				sharedMemory;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
@@ -1003,7 +1003,7 @@ private:
 		throw std::runtime_error( "Failed to find supported format!" );
 	}
 
-	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, MemoryPoolVk& outAllocation )
+	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, AllocatorVkMemory& outAllocation )
 	{
 		VkMemoryAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -1029,7 +1029,7 @@ private:
 		outAllocation.Bind( memory, memPtr, allocSize, typeIndex );
 	}
 
-	void CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, MemoryPoolVk& bufferMemory )
+	void CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory )
 	{
 		VkBufferCreateInfo bufferInfo{ };
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1855,7 +1855,7 @@ private:
 		}
 	}
 
-	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, MemoryPoolVk& memory, allocRecordVk_t& subAlloc )
+	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, AllocatorVkMemory& memory, allocRecordVk_t& subAlloc )
 	{
 		VkImageCreateInfo imageInfo{ };
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
