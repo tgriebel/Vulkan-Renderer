@@ -567,6 +567,8 @@ private:
 		vkDestroyRenderPass( context.device, shadowPassState.pass, nullptr );
 		vkDestroyRenderPass( context.device, postPassState.pass, nullptr );
 
+		// FIXME: Buffers need to be released
+
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
@@ -2203,6 +2205,13 @@ private:
 		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
 		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
+
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+			vkDestroyBuffer( context.device, frameState[ i ].globalConstants.buffer, nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].surfParms.buffer, nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.buffer, nullptr );
+			vkDestroyBuffer( context.device, frameState[ i ].lightParms.buffer, nullptr );
+		}
 
 		const uint32_t textureCount = textureLib.Count();
 		for ( uint32_t i = 0; i < textureCount; ++i )
