@@ -15,13 +15,21 @@
   shaders\pixelSimple.frag
   Press any key to continue . . . 
   deviceContext.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   io.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   pipeline.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   renderer.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   scene.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   util.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   vulkinTestApp.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   window.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(380,1): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   Generating Code...
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

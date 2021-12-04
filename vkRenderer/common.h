@@ -285,8 +285,8 @@ struct allocRecord_t
 	VkDeviceSize		size;
 	VkDeviceSize		alignment;
 	MemoryAllocator*	memory;
+	int					index;
 };
-
 
 class MemoryAllocator
 {
@@ -366,8 +366,7 @@ public:
 
 	bool CreateAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, allocRecord_t& subAlloc )
 	{
-		if ( !CanAllocate( alignment, allocSize ) )
-		{
+		if ( !CanAllocate( alignment, allocSize ) ) {
 			return false;
 		}
 
@@ -378,18 +377,42 @@ public:
 		subAlloc.subOffset		= 0;
 		subAlloc.size			= allocSize;
 		subAlloc.alignment		= alignment;
+		subAlloc.index			= allocations.size();
+		allocations.push_back( subAlloc );
 
 		offset = nextOffset + allocSize;
 
 		return true;
 	}
 
+	bool DestroyAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, allocRecord_t& subAlloc )
+	{
+		if( IsValidIndex( subAlloc.index ) && ( subAlloc.memory == this ) ) {
+			freeList.push_back( subAlloc );
+		}
+	}
+
+	void Pack()
+	{
+		const int numPendingFreeRecords = static_cast< int >( freeList.size() );
+		for( int i = 0; i < numPendingFreeRecords; ++i )
+		{
+		//	freeList[ i ].index;
+		}
+	}
+
 private:
-	uint32_t		type;
-	VkDeviceSize	size;
-	VkDeviceSize	offset;
-	VkDeviceMemory	memory;
-	void*			ptr;
+	bool IsValidIndex( const int index ) const {
+		return ( index >= 0 ) && ( index < allocations.size() );
+	}
+
+	uint32_t						type;
+	VkDeviceSize					size;
+	VkDeviceSize					offset;
+	VkDeviceMemory					memory;
+	void*							ptr;
+	std::vector< allocRecord_t >	allocations;
+	std::vector< allocRecord_t >	freeList;
 };
 
 struct texture_t
