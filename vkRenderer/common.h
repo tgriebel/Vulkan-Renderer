@@ -278,7 +278,7 @@ struct SwapChainSupportDetails
 
 class MemoryAllocator;
 
-struct AllocRecord
+struct allocRecord_t
 {
 	VkDeviceSize		offset;
 	VkDeviceSize		subOffset;
@@ -333,7 +333,7 @@ public:
 		return ( type == memoryType );
 	}
 
-	void* GetMemoryMapPtr( AllocRecord& record ) {
+	void* GetMemoryMapPtr( allocRecord_t& record ) {
 		if ( ptr == nullptr ) {
 			return nullptr;
 		}
@@ -364,7 +364,7 @@ public:
 		return ( ( nextOffset + allocSize ) < size );
 	}
 
-	bool CreateAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, AllocRecord& subAlloc )
+	bool CreateAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, allocRecord_t& subAlloc )
 	{
 		if ( !CanAllocate( alignment, allocSize ) )
 		{
@@ -402,7 +402,7 @@ struct texture_t
 	uint32_t		mipLevels;
 	bool			uploaded;
 
-	AllocRecord		memory;
+	allocRecord_t	memory;
 
 	VkImage			vk_image;	
 	VkImageView		vk_imageView;
@@ -476,15 +476,15 @@ struct surfUpload_t
 	VkBuffer					vb;
 	VkBuffer					ib;
 	// TODO: remove
-	AllocRecord					vbMemory;
-	AllocRecord					ibMemory;
+	allocRecord_t				vbMemory;
+	allocRecord_t				ibMemory;
 };
 
 
 struct GpuBuffer
 {
 	VkBuffer			buffer;
-	AllocRecord			allocation;
+	allocRecord_t		allocation;
 	VkDeviceSize		currentOffset;
 	VkDeviceSize		size;
 
@@ -512,9 +512,9 @@ struct GpuBuffer
 
 struct GpuImage
 {
-	VkImage		image;
-	VkImageView	view;
-	AllocRecord	allocation;
+	VkImage			image;
+	VkImageView		view;
+	allocRecord_t	allocation;
 };
 
 
