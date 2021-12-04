@@ -235,7 +235,7 @@ public:
 	{
 		if ( this != &handle )
 		{
-			this->~hdl_t();		
+			this->~hdl_t();
 			this->value = handle.value;
 			this->instances = handle.instances;
 			this->instances->Add();
@@ -359,6 +359,40 @@ struct allocRecord_t
 	int					index;
 };
 
+struct alloc_t
+{
+	int GetOffset() const {
+		//if( IsValid() )
+		//{
+		//	const allocRecord_t* record = pool->GetRecord( handle );
+		//	if ( record != NULL ) {
+		//		return record->offset;
+		//	}
+		//}
+		return 0;
+	}
+
+	int GetSize() const {
+		//if ( IsValid() )
+		//{
+		//	const allocRecord_t* record = pool->GetRecord( handle );
+		//	if ( record != NULL ) {
+		//		return record->size;
+		//	}
+		//}
+		return 0;
+	}
+private:
+	bool IsValid() const {
+		return ( pool != NULL ) && ( handle.Get() >= 0 );
+	}
+
+	hdl_t			handle;
+	MemoryPool *	pool;
+
+	friend MemoryPool;
+};
+
 class MemoryPool
 {
 public:
@@ -474,8 +508,19 @@ public:
 	}
 
 private:
+	[[nodiscard]]
 	bool IsValidIndex( const int index ) const {
 		return ( index >= 0 ) && ( index < allocations.size() );
+	}
+
+	[[nodiscard]]
+	const allocRecord_t* GetRecord( const hdl_t& handle ) const
+	{
+		const int index = handle.Get();
+		if ( IsValidIndex( index ) ) {
+			return &allocations[ index ];
+		}
+		return NULL;
 	}
 
 	uint32_t						type;
@@ -484,7 +529,9 @@ private:
 	VkDeviceMemory					memory;
 	void*							ptr;
 	std::vector< allocRecord_t >	allocations;
-	std::vector< int >				freeList;
+	std::vector< hdl_t >			freeList;
+
+	friend alloc_t;
 };
 
 struct texture_t
