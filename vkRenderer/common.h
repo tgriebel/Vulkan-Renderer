@@ -347,16 +347,20 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR>	presentModes;
 };
 
-class MemoryPool;
+template< class ResourceType > class MemoryPool;
 
+template< class MemoryType >
 struct allocRecord_t
 {
-	uint64_t			offset;
-	uint64_t			size;
-	uint64_t			alignment;
-	MemoryPool*			memory;
-	int					index;
+	uint64_t						offset;
+	uint64_t						size;
+	uint64_t						alignment;
+	MemoryType*						memory;
+	int								index;
 };
+
+using MemoryPoolVk = MemoryPool< VkDeviceMemory >;
+using allocRecordVk_t = allocRecord_t< MemoryPoolVk >;
 
 struct alloc_t
 {
@@ -387,21 +391,23 @@ private:
 	}
 
 	hdl_t			handle;
-	MemoryPool *	pool;
+	MemoryPool< VkDeviceMemory > *	pool;
 
-	friend MemoryPool;
+	friend MemoryPool< VkDeviceMemory >;
 };
 
+template< class ResourceType >
 class MemoryPool
 {
+private:
+	using allocRecord_t = allocRecord_t< MemoryPool< ResourceType > >;
 public:
 
-	MemoryPool()
-	{
+	MemoryPool() {
 		Unbind();
 	}
 
-	MemoryPool( VkDeviceMemory& _memory, const VkDeviceSize _size, const uint32_t _type )
+	MemoryPool( ResourceType& _memory, const uint64_t _size, const uint32_t _type )
 	{
 		offset = 0;
 		memory = _memory;
@@ -410,7 +416,7 @@ public:
 		ptr = NULL;
 	}
 
-	void Bind( VkDeviceMemory& _memory, void* memMap, const VkDeviceSize _size, const uint32_t _type )
+	void Bind( ResourceType& _memory, void* memMap, const uint64_t _size, const uint32_t _type )
 	{
 		offset = 0;
 		memory = _memory;
@@ -422,19 +428,16 @@ public:
 	void Unbind()
 	{
 		offset = 0;
-		memory = nullptr;
 		size = 0;
 		type = 0;
 		ptr = nullptr;
 	}
 
-	VkDeviceMemory& GetDeviceMemory()
-	{
+	ResourceType& GetDeviceMemory() {
 		return memory;
 	}
 
-	bool IsMemoryCompatible( const uint32_t memoryType ) const
-	{
+	bool IsMemoryCompatible( const uint32_t memoryType ) const {
 		return ( type == memoryType );
 	}
 
@@ -449,33 +452,32 @@ public:
 		return static_cast<void*>( (uint8_t*)ptr + record.offset );
 	}
 
-	VkDeviceSize GetSize() const
+	uint64_t GetSize() const
 	{
 		return offset;
 	}
 
-	VkDeviceSize GetAlignedOffset( const VkDeviceSize alignment ) const
+	uint64_t GetAlignedOffset( const uint64_t alignment ) const
 	{
-		const VkDeviceSize boundary = ( offset % alignment );
-		const VkDeviceSize nextOffset = ( boundary == 0 ) ? boundary : ( alignment - boundary );
+		const uint64_t boundary = ( offset % alignment );
+		const uint64_t nextOffset = ( boundary == 0 ) ? boundary : ( alignment - boundary );
 
 		return ( offset + nextOffset );
 	}
 
-	bool CanAllocate( VkDeviceSize alignment, VkDeviceSize allocSize ) const
+	bool CanAllocate( uint64_t alignment, uint64_t allocSize ) const
 	{
-		const VkDeviceSize nextOffset = GetAlignedOffset( alignment );
-
+		const uint64_t nextOffset = GetAlignedOffset( alignment );
 		return ( ( nextOffset + allocSize ) < size );
 	}
 
-	bool CreateAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, allocRecord_t& subAlloc )
+	bool CreateAllocation( uint64_t alignment, uint64_t allocSize, allocRecord_t& subAlloc )
 	{
 		if ( !CanAllocate( alignment, allocSize ) ) {
 			return false;
 		}
 
-		const VkDeviceSize nextOffset = GetAlignedOffset( alignment );
+		const uint64_t nextOffset = GetAlignedOffset( alignment );
 
 		subAlloc.memory			= this;
 		subAlloc.offset			= nextOffset;
@@ -489,7 +491,7 @@ public:
 		return true;
 	}
 
-	bool DestroyAllocation( VkDeviceSize alignment, VkDeviceSize allocSize, allocRecord_t& subAlloc )
+	bool DestroyAllocation( uint64_t alignment, uint64_t allocSize, allocRecord_t& subAlloc )
 	{
 		if( IsValidIndex( subAlloc.index ) && ( subAlloc.memory == this ) ) {
 			freeList.push_back( subAlloc.index );
@@ -522,9 +524,9 @@ private:
 	}
 
 	uint32_t						type;
-	VkDeviceSize					size;
-	VkDeviceSize					offset;
-	VkDeviceMemory					memory;
+	uint64_t						size;
+	uint64_t						offset;
+	ResourceType					memory;
 	void*							ptr;
 	std::vector< allocRecord_t >	allocations;
 	std::vector< hdl_t >			freeList;
@@ -542,7 +544,7 @@ struct texture_t
 	uint32_t		mipLevels;
 	bool			uploaded;
 
-	allocRecord_t	memory;
+	allocRecordVk_t	memory;
 
 	VkImage			vk_image;	
 	VkImageView		vk_imageView;
@@ -616,14 +618,14 @@ struct surfUpload_t
 	VkBuffer					vb;
 	VkBuffer					ib;
 	// TODO: remove
-	allocRecord_t				vbMemory;
-	allocRecord_t				ibMemory;
+	allocRecordVk_t				vbMemory;
+	allocRecordVk_t				ibMemory;
 };
 
 
 struct GpuBuffer
 {
-	allocRecord_t allocation;
+	allocRecordVk_t allocation;
 
 	void Reset() {
 		offset = 0;
@@ -665,7 +667,7 @@ struct GpuImage
 {
 	VkImage			image;
 	VkImageView		view;
-	allocRecord_t	allocation;
+	allocRecordVk_t	allocation;
 };
 
 

@@ -89,7 +89,7 @@ private:
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
-	std::vector< allocRecord_t >	imageAllocations;
+	std::vector< allocRecordVk_t >	imageAllocations;
 	graphicsQueue_t					graphicsQueue;
 	DrawPassState					shadowPassState;
 	DrawPassState					mainPassState;
@@ -106,8 +106,8 @@ private:
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
 
-	MemoryPool					localMemory;
-	MemoryPool					sharedMemory;
+	MemoryPoolVk					localMemory;
+	MemoryPoolVk					sharedMemory;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
@@ -1003,7 +1003,7 @@ private:
 		throw std::runtime_error( "Failed to find supported format!" );
 	}
 
-	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, MemoryPool& outAllocation )
+	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, MemoryPoolVk& outAllocation )
 	{
 		VkMemoryAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -1029,7 +1029,7 @@ private:
 		outAllocation.Bind( memory, memPtr, allocSize, typeIndex );
 	}
 
-	void CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, MemoryPool& bufferMemory )
+	void CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, MemoryPoolVk& bufferMemory )
 	{
 		VkBufferCreateInfo bufferInfo{ };
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1037,8 +1037,7 @@ private:
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &buffer.GetVkObject() ) != VK_SUCCESS )
-		{
+		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &buffer.GetVkObject() ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create buffer!" );
 		}
 
@@ -1364,7 +1363,7 @@ private:
 		const VkFormat depthFormat = FindDepthFormat();
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
-			imageAllocations.push_back( allocRecord_t() );
+			imageAllocations.push_back( allocRecordVk_t() );
 			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].shadowMapImage.view = CreateImageView( frameState[ i ].shadowMapImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
@@ -1395,12 +1394,12 @@ private:
 		/////////////////////////////////
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
-			imageAllocations.push_back( allocRecord_t() );
+			imageAllocations.push_back( allocRecordVk_t() );
 			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].viewColorImage.view = CreateImageView( frameState[ i ].viewColorImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
-			imageAllocations.push_back( allocRecord_t() );
+			imageAllocations.push_back( allocRecordVk_t() );
 			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].depthImage.view = CreateImageView( frameState[ i ].depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
@@ -1856,7 +1855,7 @@ private:
 		}
 	}
 
-	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, MemoryPool& memory, allocRecord_t& subAlloc )
+	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, MemoryPoolVk& memory, allocRecordVk_t& subAlloc )
 	{
 		VkImageCreateInfo imageInfo{ };
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -2031,11 +2030,11 @@ private:
 		}
 
 		// Default Images
-		imageAllocations.push_back( allocRecord_t() );
+		imageAllocations.push_back( allocRecordVk_t() );
 		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage.image, localMemory, imageAllocations.back() );
 		rc.whiteImage.view = CreateImageView( rc.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-		imageAllocations.push_back( allocRecord_t() );
+		imageAllocations.push_back( allocRecordVk_t() );
 		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage.image, localMemory, imageAllocations.back() );
 		rc.blackImage.view = CreateImageView( rc.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
