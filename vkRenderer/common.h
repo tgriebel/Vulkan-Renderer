@@ -243,7 +243,7 @@ public:
 	}
 
 	int Get() const {
-		return *value;
+		return instances->IsFree() ? -1 : *value;
 	}
 private:
 	int*		value;
