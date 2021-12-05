@@ -208,8 +208,8 @@ class hdl_t
 public:
 	hdl_t()
 	{
-		this->value = NULL;
-		this->instances = NULL;
+		this->value = nullptr;
+		this->instances = nullptr;
 	};
 
 	hdl_t( const int& handle )
@@ -220,9 +220,15 @@ public:
 
 	hdl_t( const hdl_t& handle )
 	{
-		this->value = handle.value;
-		this->instances = handle.instances;
-		this->instances->Add();
+		if ( handle.IsValid() )
+		{
+			this->value = handle.value;
+			this->instances = handle.instances;
+			this->instances->Add();
+		} else {
+			this->value = nullptr;
+			this->instances = nullptr;
+		}
 	}
 
 	~hdl_t()
@@ -247,10 +253,11 @@ public:
 			this->instances = handle.instances;
 			this->instances->Add();
 		}
+		return *this;
 	}
 
 	bool IsValid() const {
-		return ( value != NULL ) && ( instances != NULL );
+		return ( value != nullptr ) && ( instances != nullptr );
 	}
 
 	int Get() const {
@@ -360,56 +367,77 @@ struct SwapChainSupportDetails
 
 template< class ResourceType > class Allocator;
 
-template< class MemoryType >
 struct allocRecord_t
 {
-	uint64_t						offset;
-	uint64_t						size;
-	uint64_t						alignment;
-	MemoryType*						memory;
-	int								index;
+	uint64_t	offset;
+	uint64_t	size;
+	uint64_t	alignment;
+	int			index;
 };
 
 template< class AllocatorType >
 struct alloc_t
 {
-private:
-	using allocRecord_t = allocRecord_t< AllocatorType >;
 public:
-	int GetOffset() const {
+	alloc_t() {
+		allocator = nullptr;
+	}
+
+	uint64_t GetOffset() const {
 		if( IsValid() )
 		{
-			const allocRecord_t* record = pool->GetRecord( handle );
-			if ( record != NULL ) {
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
 				return record->offset;
 			}
 		}
 		return 0;
 	}
 
-	int GetSize() const {
+	uint64_t GetSize() const {
 		if ( IsValid() )
 		{
-			const allocRecord_t* record = pool->GetRecord( handle );
-			if ( record != NULL ) {
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
 				return record->size;
 			}
 		}
 		return 0;
 	}
+
+	uint64_t GetAlignment() const {
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
+				return record->alignment;
+			}
+		}
+		return 0;
+	}
+
+	void* GetPtr() {
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
+				return allocator->GetMemoryMapPtr( *record );
+			}
+		}
+		return nullptr;
+	}
 private:
 	bool IsValid() const {
-		return ( pool != NULL ) && ( handle.Get() >= 0 );
+		return ( allocator != nullptr ) && ( handle.Get() >= 0 );
 	}
 
 	hdl_t			handle;
-	AllocatorType*	pool;
+	AllocatorType*	allocator;
 
 	friend AllocatorType;
 };
 
 using AllocatorVkMemory = Allocator< VkDeviceMemory >;
-using allocRecordVk_t = allocRecord_t< AllocatorVkMemory >;
 using allocVk_t = alloc_t< AllocatorVkMemory >;
 
 struct texture_t
@@ -422,7 +450,7 @@ struct texture_t
 	uint32_t		mipLevels;
 	bool			uploaded;
 
-	allocRecordVk_t	memory;
+	allocVk_t		memory;
 
 	VkImage			vk_image;	
 	VkImageView		vk_imageView;

@@ -4,8 +4,7 @@
 
 struct GpuBuffer
 {
-	allocRecordVk_t allocation;
-	allocVk_t		alloc;
+	allocVk_t alloc;
 
 	void Reset() {
 		offset = 0;
@@ -16,7 +15,7 @@ struct GpuBuffer
 	}
 
 	uint64_t GetMaxSize() const {
-		return allocation.size;
+		return alloc.GetSize();
 	}
 
 	void Allocate( const uint64_t size ) {
@@ -29,11 +28,11 @@ struct GpuBuffer
 
 	void CopyData( void* data, const size_t sizeInBytes )
 	{
-		void* mappedData = allocation.memory->GetMemoryMapPtr( allocation );
+		void* mappedData = alloc.GetPtr();
 		if ( mappedData != nullptr )
 		{
 			memcpy( (uint8_t*)mappedData + offset, data, sizeInBytes );
-			offset += static_cast<uint32_t>( ( sizeInBytes + ( allocation.alignment - 1 ) ) & ~( allocation.alignment - 1 ) );
+			offset += static_cast<uint32_t>( ( sizeInBytes + ( alloc.GetAlignment() - 1 ) ) & ~( alloc.GetAlignment() - 1 ) );
 		}
 	}
 
@@ -46,5 +45,5 @@ struct GpuImage
 {
 	VkImage			image;
 	VkImageView		view;
-	allocRecordVk_t	allocation;
+	allocRecord_t	allocation;
 };

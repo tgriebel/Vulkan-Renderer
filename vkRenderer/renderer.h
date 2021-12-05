@@ -89,7 +89,7 @@ private:
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
-	std::vector< allocRecordVk_t >	imageAllocations;
+	std::vector< allocVk_t >		imageAllocations;
 	graphicsQueue_t					graphicsQueue;
 	DrawPassState					shadowPassState;
 	DrawPassState					mainPassState;
@@ -1047,8 +1047,8 @@ private:
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
-		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, buffer.allocation ) ) {
-			vkBindBufferMemory( context.device, buffer.GetVkObject(), bufferMemory.GetDeviceMemory(), buffer.allocation.offset );
+		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, buffer.alloc ) ) {
+			vkBindBufferMemory( context.device, buffer.GetVkObject(), bufferMemory.GetMemoryResource(), buffer.alloc.GetOffset() );
 		}
 		else {
 			throw std::runtime_error( "buffer could not allocate!" );
@@ -1361,7 +1361,7 @@ private:
 		const VkFormat depthFormat = FindDepthFormat();
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
-			imageAllocations.push_back( allocRecordVk_t() );
+			imageAllocations.push_back( allocVk_t() );
 			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].shadowMapImage.view = CreateImageView( frameState[ i ].shadowMapImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
@@ -1392,12 +1392,12 @@ private:
 		/////////////////////////////////
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
-			imageAllocations.push_back( allocRecordVk_t() );
+			imageAllocations.push_back( allocVk_t() );
 			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].viewColorImage.view = CreateImageView( frameState[ i ].viewColorImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
-			imageAllocations.push_back( allocRecordVk_t() );
+			imageAllocations.push_back( allocVk_t() );
 			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage.image, localMemory, imageAllocations.back() );
 			frameState[ i ].depthImage.view = CreateImageView( frameState[ i ].depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
@@ -1853,7 +1853,7 @@ private:
 		}
 	}
 
-	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, AllocatorVkMemory& memory, allocRecordVk_t& subAlloc )
+	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, AllocatorVkMemory& memory, allocVk_t& alloc )
 	{
 		VkImageCreateInfo imageInfo{ };
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1883,8 +1883,8 @@ private:
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
-		if ( memory.CreateAllocation( memRequirements.alignment, memRequirements.size, subAlloc ) ) {
-			vkBindImageMemory( context.device, image, memory.GetDeviceMemory(), subAlloc.offset );
+		if ( memory.CreateAllocation( memRequirements.alignment, memRequirements.size, alloc ) ) {
+			vkBindImageMemory( context.device, image, memory.GetMemoryResource(), alloc.GetOffset() );
 		} else {
 			throw std::runtime_error( "Buffer could not be allocated!" );
 		}
@@ -2028,11 +2028,11 @@ private:
 		}
 
 		// Default Images
-		imageAllocations.push_back( allocRecordVk_t() );
+		imageAllocations.push_back( allocVk_t() );
 		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage.image, localMemory, imageAllocations.back() );
 		rc.whiteImage.view = CreateImageView( rc.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-		imageAllocations.push_back( allocRecordVk_t() );
+		imageAllocations.push_back( allocVk_t() );
 		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage.image, localMemory, imageAllocations.back() );
 		rc.blackImage.view = CreateImageView( rc.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
@@ -2195,8 +2195,8 @@ private:
 
 		ShutdownImGui();
 
-		vkFreeMemory( context.device, localMemory.GetDeviceMemory(), nullptr );
-		vkFreeMemory( context.device, sharedMemory.GetDeviceMemory(), nullptr );
+		vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
+		vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
 		localMemory.Unbind();
 		sharedMemory.Unbind();
 		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
@@ -2255,7 +2255,7 @@ private:
 			uboBuffer.push_back( ubo );
 		}
 
-		void* uboMemoryMap = frameState[ currentImage ].surfParms.allocation.memory->GetMemoryMapPtr( frameState[ currentImage ].surfParms.allocation );
+		void* uboMemoryMap = frameState[ currentImage ].surfParms.alloc.GetPtr();
 		if ( uboMemoryMap != nullptr ) {
 			memcpy( uboMemoryMap, uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
 		}

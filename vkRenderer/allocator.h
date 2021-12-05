@@ -6,7 +6,7 @@ class Allocator
 {
 private:
 	using allocator_t = Allocator< ResourceType >;
-	using allocRecord_t = allocRecord_t< allocator_t >;
+	using alloc_t = alloc_t< allocator_t >;
 public:
 
 	Allocator() {
@@ -16,16 +16,16 @@ public:
 	Allocator( ResourceType& _memory, const uint64_t _size, const uint32_t _type )
 	{
 		offset = 0;
-		memory = _memory;
+		resource = _memory;
 		size = _size;
 		type = _type;
-		ptr = NULL;
+		ptr = nullptr;
 	}
 
 	void Bind( ResourceType& _memory, void* memMap, const uint64_t _size, const uint32_t _type )
 	{
 		offset = 0;
-		memory = _memory;
+		resource = _memory;
 		size = _size;
 		type = _type;
 		ptr = memMap;
@@ -39,27 +39,26 @@ public:
 		ptr = nullptr;
 	}
 
-	ResourceType& GetDeviceMemory() {
-		return memory;
+	ResourceType& GetMemoryResource() {
+		return resource;
 	}
 
 	bool IsMemoryCompatible( const uint32_t memoryType ) const {
 		return ( type == memoryType );
 	}
 
-	void* GetMemoryMapPtr( allocRecord_t& record ) {
+	void* GetMemoryMapPtr( const allocRecord_t& record ) const {
 		if ( ptr == nullptr ) {
 			return nullptr;
 		}
 		if ( ( record.offset + record.size ) > size ) { // starts from 0 offset
 			return nullptr;
 		}
-
-		return static_cast<void*>( (uint8_t*)ptr + record.offset );
+		uint8_t* bytes = reinterpret_cast<uint8_t*>( ptr );
+		return reinterpret_cast< void * >( bytes + record.offset );
 	}
 
-	uint64_t GetSize() const
-	{
+	uint64_t GetSize() const {
 		return offset;
 	}
 
@@ -77,7 +76,7 @@ public:
 		return ( ( nextOffset + allocSize ) < size );
 	}
 
-	bool CreateAllocation( uint64_t alignment, uint64_t allocSize, allocRecord_t& subAlloc )
+	bool CreateAllocation( uint64_t alignment, uint64_t allocSize, alloc_t& handle )
 	{
 		if ( !CanAllocate( alignment, allocSize ) ) {
 			return false;
@@ -85,16 +84,16 @@ public:
 
 		const uint64_t nextOffset = GetAlignedOffset( alignment );
 
-		subAlloc.memory = this;
+		allocRecord_t subAlloc;
 		subAlloc.offset = nextOffset;
 		subAlloc.size = allocSize;
 		subAlloc.alignment = alignment;
 		subAlloc.index = static_cast<int>( allocations.size() );
 		allocations.push_back( subAlloc );
 
-		//handle.hdl = hdl_t( subAlloc.index );
-		//handle.allocator = this;
-		//handles.push_back( allocHandle_t );
+		handle.handle = hdl_t( subAlloc.index );
+		handle.allocator = this;
+		handles.push_back( subAlloc.index );
 
 		offset = nextOffset + allocSize;
 
@@ -103,7 +102,7 @@ public:
 
 	bool DestroyAllocation( uint64_t alignment, uint64_t allocSize, allocRecord_t& subAlloc )
 	{
-		if ( IsValidIndex( subAlloc.index ) && ( subAlloc.memory == this ) ) {
+		if ( IsValidIndex( subAlloc.index ) && ( subAlloc.resource == this ) ) {
 			freeList.push_back( subAlloc.index );
 		}
 	}
@@ -111,9 +110,8 @@ public:
 	void Pack()
 	{
 		const int numPendingFreeRecords = static_cast<int>( freeList.size() );
-		for ( int i = 0; i < numPendingFreeRecords; ++i )
-		{
-			//	freeList[ i ].index;
+		for ( int i = 0; i < numPendingFreeRecords; ++i ) {
+		//	freeList[ i ].index;
 		}
 	}
 
@@ -136,11 +134,11 @@ private:
 	uint32_t						type;
 	uint64_t						size;
 	uint64_t						offset;
-	ResourceType					memory;
-	void* ptr;
+	ResourceType					resource;
+	void*							ptr;
 	std::vector< allocRecord_t >	allocations;
-	//std::vector< allocHdl_t >		handles;
+	std::vector< hdl_t >			handles;
 	std::vector< hdl_t >			freeList;
 
-	friend alloc_t< Allocator< ResourceType > >;
+	friend alloc_t;
 };
