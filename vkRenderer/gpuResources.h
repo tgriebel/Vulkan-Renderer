@@ -45,5 +45,5 @@ struct GpuImage
 {
 	VkImage			image;
 	VkImageView		view;
-	allocRecord_t	allocation;
+	allocVk_t		allocation;
 };

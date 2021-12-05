@@ -456,8 +456,7 @@ struct texture_t
 	uint32_t		mipLevels;
 	bool			uploaded;
 
-	allocVk_t		memory;
-
+	allocVk_t		allocation;
 	VkImage			vk_image;	
 	VkImageView		vk_imageView;
 };
