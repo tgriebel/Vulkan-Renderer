@@ -241,7 +241,7 @@ public:
 				delete instances;
 				delete value;
 			}
-			instances =  nullptr;
+			instances = nullptr;
 			value = nullptr;
 		}
 	}

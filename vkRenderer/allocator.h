@@ -129,7 +129,7 @@ private:
 		if ( IsValidIndex( index ) ) {
 			return &allocations[ index ];
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	uint32_t						type;
