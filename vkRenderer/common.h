@@ -241,6 +241,8 @@ public:
 				delete instances;
 				delete value;
 			}
+			instances =  nullptr;
+			value = nullptr;
 		}
 	}
 
@@ -254,6 +256,11 @@ public:
 			this->instances->Add();
 		}
 		return *this;
+	}
+
+	void Reset()
+	{
+		this->~hdl_t();
 	}
 
 	bool IsValid() const {
