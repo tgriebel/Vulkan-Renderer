@@ -77,6 +77,7 @@
     <ClInclude Include="util.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="allocator.h" />
+    <ClInclude Include="gpuResources.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

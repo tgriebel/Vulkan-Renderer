@@ -17,6 +17,8 @@
 #include "FrameState.h"
 #include "renderConstants.h"
 #include "renderer.h"
+#include "allocator.h"
+#include "gpuResources.h"
 
 typedef AssetLib< texture_t >		AssetLibImages;
 typedef AssetLib< material_t >		AssetLibMaterials;

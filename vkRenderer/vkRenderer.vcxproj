@@ -169,6 +169,7 @@
     <ClInclude Include="allocator.h" />
     <ClInclude Include="assetLib.h" />
     <ClInclude Include="FrameState.h" />
+    <ClInclude Include="gpuResources.h" />
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scene.h" />

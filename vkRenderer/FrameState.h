@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "gpuResources.h"
 
 class FrameState
 {
