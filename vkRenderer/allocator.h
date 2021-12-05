@@ -5,7 +5,8 @@ template< class ResourceType >
 class Allocator
 {
 private:
-	using allocRecord_t = allocRecord_t< Allocator< ResourceType > >;
+	using allocator_t = Allocator< ResourceType >;
+	using allocRecord_t = allocRecord_t< allocator_t >;
 public:
 
 	Allocator() {
@@ -91,6 +92,10 @@ public:
 		subAlloc.index = static_cast<int>( allocations.size() );
 		allocations.push_back( subAlloc );
 
+		//handle.hdl = hdl_t( subAlloc.index );
+		//handle.allocator = this;
+		//handles.push_back( allocHandle_t );
+
 		offset = nextOffset + allocSize;
 
 		return true;
@@ -134,6 +139,7 @@ private:
 	ResourceType					memory;
 	void* ptr;
 	std::vector< allocRecord_t >	allocations;
+	//std::vector< allocHdl_t >		handles;
 	std::vector< hdl_t >			freeList;
 
 	friend alloc_t< Allocator< ResourceType > >;

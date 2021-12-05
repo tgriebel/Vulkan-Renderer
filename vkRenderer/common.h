@@ -206,7 +206,11 @@ private:
 class hdl_t
 {
 public:
-	hdl_t() = delete;
+	hdl_t()
+	{
+		this->value = NULL;
+		this->instances = NULL;
+	};
 
 	hdl_t( const int& handle )
 	{
@@ -223,11 +227,14 @@ public:
 
 	~hdl_t()
 	{
-		instances->Release();
-		if ( instances->IsFree() )
+		if( IsValid() )
 		{
-			delete instances;
-			delete value;
+			instances->Release();
+			if ( instances->IsFree() )
+			{
+				delete instances;
+				delete value;
+			}
 		}
 	}
 
@@ -242,8 +249,12 @@ public:
 		}
 	}
 
+	bool IsValid() const {
+		return ( value != NULL ) && ( instances != NULL );
+	}
+
 	int Get() const {
-		return instances->IsFree() ? -1 : *value;
+		return ( IsValid() && ( instances->IsFree() == false ) ) ? *value : -1;
 	}
 private:
 	int*		value;
@@ -359,28 +370,31 @@ struct allocRecord_t
 	int								index;
 };
 
-template< class MemoryType >
+template< class AllocatorType >
 struct alloc_t
 {
+private:
+	using allocRecord_t = allocRecord_t< AllocatorType >;
+public:
 	int GetOffset() const {
-		//if( IsValid() )
-		//{
-		//	const allocRecord_t* record = pool->GetRecord( handle );
-		//	if ( record != NULL ) {
-		//		return record->offset;
-		//	}
-		//}
+		if( IsValid() )
+		{
+			const allocRecord_t* record = pool->GetRecord( handle );
+			if ( record != NULL ) {
+				return record->offset;
+			}
+		}
 		return 0;
 	}
 
 	int GetSize() const {
-		//if ( IsValid() )
-		//{
-		//	const allocRecord_t* record = pool->GetRecord( handle );
-		//	if ( record != NULL ) {
-		//		return record->size;
-		//	}
-		//}
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = pool->GetRecord( handle );
+			if ( record != NULL ) {
+				return record->size;
+			}
+		}
 		return 0;
 	}
 private:
@@ -389,15 +403,14 @@ private:
 	}
 
 	hdl_t			handle;
-	MemoryType*		pool;
+	AllocatorType*	pool;
 
-	friend MemoryType;
+	friend AllocatorType;
 };
 
 using AllocatorVkMemory = Allocator< VkDeviceMemory >;
 using allocRecordVk_t = allocRecord_t< AllocatorVkMemory >;
 using allocVk_t = alloc_t< AllocatorVkMemory >;
-
 
 struct texture_t
 {
