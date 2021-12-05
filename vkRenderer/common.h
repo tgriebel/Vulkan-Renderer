@@ -446,6 +446,13 @@ private:
 using AllocatorVkMemory = Allocator< VkDeviceMemory >;
 using allocVk_t = alloc_t< AllocatorVkMemory >;
 
+struct GpuImage
+{
+	VkImage			vk_image;
+	VkImageView		vk_view;
+	allocVk_t		allocation;
+};
+
 struct texture_t
 {
 	uint8_t*		bytes;
@@ -456,9 +463,7 @@ struct texture_t
 	uint32_t		mipLevels;
 	bool			uploaded;
 
-	allocVk_t		allocation;
-	VkImage			vk_image;	
-	VkImageView		vk_imageView;
+	GpuImage		image;
 };
 
 struct drawSurf_t

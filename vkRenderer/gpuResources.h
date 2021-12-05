@@ -40,10 +40,3 @@ private:
 	uint64_t	offset;
 	VkBuffer	buffer;
 };
-
-struct GpuImage
-{
-	VkImage			image;
-	VkImageView		view;
-	allocVk_t		allocation;
-};

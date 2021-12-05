@@ -566,12 +566,12 @@ private:
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
-			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.view, nullptr );
-			vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.view, nullptr );
-			vkDestroyImageView( context.device, frameState[ i ].depthImage.view, nullptr );
-			vkDestroyImage( context.device, frameState[ i ].viewColorImage.image, nullptr );
-			vkDestroyImage( context.device, frameState[ i ].shadowMapImage.image, nullptr );
-			vkDestroyImage( context.device, frameState[ i ].depthImage.image, nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.vk_view, nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.vk_view, nullptr );
+			vkDestroyImageView( context.device, frameState[ i ].depthImage.vk_view, nullptr );
+			vkDestroyImage( context.device, frameState[ i ].viewColorImage.vk_image, nullptr );
+			vkDestroyImage( context.device, frameState[ i ].shadowMapImage.vk_image, nullptr );
+			vkDestroyImage( context.device, frameState[ i ].depthImage.vk_image, nullptr );
 			vkDestroyFramebuffer( context.device, shadowPassState.fb[ i ], nullptr );
 			vkDestroyFramebuffer( context.device, mainPassState.fb[ i ], nullptr );
 		}
@@ -643,7 +643,7 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			VkImageView& imageView = texture->vk_imageView;
+			VkImageView& imageView = texture->image.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -654,7 +654,7 @@ private:
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
 			const texture_t* texture = textureLib.GetDefault();
-			const VkImageView& imageView = texture->vk_imageView;
+			const VkImageView& imageView = texture->image.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -688,7 +688,7 @@ private:
 		codeImageInfo.reserve( MaxCodeImages );
 		// Shadow Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.view;
+			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -769,7 +769,7 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			VkImageView& imageView = texture->vk_imageView;
+			VkImageView& imageView = texture->image.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -780,7 +780,7 @@ private:
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
 			const texture_t* texture = textureLib.GetDefault();
-			const VkImageView& imageView = texture->vk_imageView;
+			const VkImageView& imageView = texture->image.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -793,7 +793,7 @@ private:
 		for ( size_t j = 0; j < MaxCodeImages; ++j )
 		{
 			const texture_t* texture = textureLib.GetDefault();
-			const VkImageView& imageView = texture->vk_imageView;
+			const VkImageView& imageView = texture->image.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -869,7 +869,7 @@ private:
 		postImageInfo.reserve( 2 );
 		// View Color Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].viewColorImage.view;
+			VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -878,7 +878,7 @@ private:
 		}
 		// View Depth Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].depthImage.view;
+			VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1360,15 +1360,15 @@ private:
 		const VkFormat depthFormat = FindDepthFormat();
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
-			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage.image, localMemory );
-			frameState[ i ].shadowMapImage.view = CreateImageView( frameState[ i ].shadowMapImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, localMemory );
+			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
 			std::array<VkImageView, 2> attachments = {
-				rc.whiteImage.view,
-				frameState[ i ].shadowMapImage.view,
+				rc.whiteImage.vk_view,
+				frameState[ i ].shadowMapImage.vk_view,
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{ };
@@ -1390,16 +1390,16 @@ private:
 		/////////////////////////////////
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
-			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage.image, localMemory );
-			frameState[ i ].viewColorImage.view = CreateImageView( frameState[ i ].viewColorImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, localMemory );
+			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
-			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage.image, localMemory );
-			frameState[ i ].depthImage.view = CreateImageView( frameState[ i ].depthImage.image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, localMemory );
+			frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
-				frameState[ i ].viewColorImage.view,
-				frameState[ i ].depthImage.view
+				frameState[ i ].viewColorImage.vk_view,
+				frameState[ i ].depthImage.vk_view
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{ };
@@ -1849,7 +1849,7 @@ private:
 		}
 	}
 
-	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, AllocatorVkMemory& memory )
+	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory )
 	{
 		VkImageCreateInfo imageInfo{ };
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1867,12 +1867,12 @@ private:
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0; // Optional
 
-		if ( vkCreateImage( context.device, &imageInfo, nullptr, &image ) != VK_SUCCESS ) {
+		if ( vkCreateImage( context.device, &imageInfo, nullptr, &image.vk_image ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create image!" );
 		}
 
 		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements( context.device, image, &memRequirements );
+		vkGetImageMemoryRequirements( context.device, image.vk_image, &memRequirements );
 
 		VkMemoryAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -1881,7 +1881,7 @@ private:
 
 		allocVk_t alloc;
 		if ( memory.CreateAllocation( memRequirements.alignment, memRequirements.size, alloc ) ) {
-			vkBindImageMemory( context.device, image, memory.GetMemoryResource(), alloc.GetOffset() );
+			vkBindImageMemory( context.device, image.vk_image, memory.GetMemoryResource(), alloc.GetOffset() );
 		} else {
 			throw std::runtime_error( "Buffer could not be allocated!" );
 		}
@@ -2000,14 +2000,14 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			CreateImage( texture->width, texture->height, texture->mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->vk_image, localMemory );
+			CreateImage( texture->width, texture->height, texture->mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
 
-			TransitionImageLayout( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->mipLevels );
+			TransitionImageLayout( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->mipLevels );
 
 			const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 			stagingBuffer.CopyData( texture->bytes, texture->sizeBytes );
 
-			CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->vk_image, static_cast<uint32_t>( texture->width ), static_cast<uint32_t>( texture->height ) );
+			CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->width ), static_cast<uint32_t>( texture->height ) );
 			texture->uploaded = true;
 		}
 		EndSingleTimeCommands( commandBuffer );
@@ -2015,21 +2015,21 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			GenerateMipmaps( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->width, texture->height, texture->mipLevels );
+			GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->width, texture->height, texture->mipLevels );
 		}
 
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			texture->vk_imageView = CreateImageView( texture->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture->mipLevels );
+			texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture->mipLevels );
 		}
 
 		// Default Images
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage.image, localMemory );
-		rc.whiteImage.view = CreateImageView( rc.whiteImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
+		rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage.image, localMemory );
-		rc.blackImage.view = CreateImageView( rc.blackImage.image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
+		rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateSyncObjects()
@@ -2209,8 +2209,8 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			const texture_t* texture = textureLib.Find( i );
-			vkDestroyImageView( context.device, texture->vk_imageView, nullptr );
-			vkDestroyImage( context.device, texture->vk_image, nullptr );
+			vkDestroyImageView( context.device, texture->image.vk_view, nullptr );
+			vkDestroyImage( context.device, texture->image.vk_image, nullptr );
 		}
 
 		vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
