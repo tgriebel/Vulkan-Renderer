@@ -84,16 +84,17 @@ public:
 
 		const uint64_t nextOffset = GetAlignedOffset( alignment );
 
+		const int index = static_cast<int>( allocations.size() );
+
 		allocRecord_t subAlloc;
 		subAlloc.offset = nextOffset;
 		subAlloc.size = allocSize;
 		subAlloc.alignment = alignment;
-		subAlloc.index = static_cast<int>( allocations.size() );
 		allocations.push_back( subAlloc );
 
-		handle.handle = hdl_t( subAlloc.index );
+		handle.handle = hdl_t( index );
 		handle.allocator = this;
-		handles.push_back( subAlloc.index );
+		handles.push_back( index );
 
 		offset = nextOffset + allocSize;
 
@@ -102,9 +103,9 @@ public:
 
 	bool DestroyAllocation( uint64_t alignment, uint64_t allocSize, allocRecord_t& subAlloc )
 	{
-		if ( IsValidIndex( subAlloc.index ) && ( subAlloc.resource == this ) ) {
-			freeList.push_back( subAlloc.index );
-		}
+		//if ( IsValidIndex( subAlloc.index ) && ( subAlloc.resource == this ) ) {
+		//	freeList.push_back( subAlloc.index );
+		//}
 	}
 
 	void Pack()

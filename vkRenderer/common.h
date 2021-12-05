@@ -372,7 +372,6 @@ struct allocRecord_t
 	uint64_t	offset;
 	uint64_t	size;
 	uint64_t	alignment;
-	int			index;
 };
 
 template< class AllocatorType >
