@@ -432,6 +432,13 @@ public:
 		}
 		return nullptr;
 	}
+
+	void Free() {
+		if ( IsValid() ) {
+			allocator->DestroyAllocation( handle );
+		}
+	}
+
 private:
 	bool IsValid() const {
 		return ( allocator != nullptr ) && ( handle.Get() >= 0 );

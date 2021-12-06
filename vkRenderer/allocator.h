@@ -101,11 +101,11 @@ public:
 		return true;
 	}
 
-	bool DestroyAllocation( uint64_t alignment, uint64_t allocSize, allocRecord_t& subAlloc )
+	void DestroyAllocation( hdl_t& handle )
 	{
-		//if ( IsValidIndex( subAlloc.index ) && ( subAlloc.resource == this ) ) {
-		//	freeList.push_back( subAlloc.index );
-		//}
+		if ( IsValidIndex( handle.Get() ) ) {
+			freeList.push_back( handle );
+		}
 	}
 
 	void Pack()

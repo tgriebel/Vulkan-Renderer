@@ -562,18 +562,26 @@ private:
 		vkDestroyRenderPass( context.device, shadowPassState.pass, nullptr );
 		vkDestroyRenderPass( context.device, postPassState.pass, nullptr );
 
-		// FIXME: Buffers need to be released
-
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 		{
+			// Views
 			vkDestroyImageView( context.device, frameState[ i ].viewColorImage.vk_view, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.vk_view, nullptr );
 			vkDestroyImageView( context.device, frameState[ i ].depthImage.vk_view, nullptr );
+
+			// Images
 			vkDestroyImage( context.device, frameState[ i ].viewColorImage.vk_image, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].shadowMapImage.vk_image, nullptr );
 			vkDestroyImage( context.device, frameState[ i ].depthImage.vk_image, nullptr );
+
+			// Passes
 			vkDestroyFramebuffer( context.device, shadowPassState.fb[ i ], nullptr );
 			vkDestroyFramebuffer( context.device, mainPassState.fb[ i ], nullptr );
+			vkDestroyFramebuffer( context.device, postPassState.fb[ i ], nullptr );
+
+			frameState[ i ].viewColorImage.allocation.Free();
+			frameState[ i ].shadowMapImage.allocation.Free();
+			frameState[ i ].depthImage.allocation.Free();
 		}
 	}
 
@@ -1048,9 +1056,8 @@ private:
 
 		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, buffer.alloc ) ) {
 			vkBindBufferMemory( context.device, buffer.GetVkObject(), bufferMemory.GetMemoryResource(), buffer.alloc.GetOffset() );
-		}
-		else {
-			throw std::runtime_error( "buffer could not allocate!" );
+		} else {
+			throw std::runtime_error( "Buffer could not allocate!" );
 		}
 	}
 
