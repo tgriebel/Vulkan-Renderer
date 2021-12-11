@@ -212,7 +212,7 @@ public:
 		this->instances = nullptr;
 	};
 
-	hdl_t( const int& handle )
+	hdl_t( const int handle )
 	{
 		this->value = new int( handle );
 		this->instances = new refCount_t( 1 );
@@ -269,6 +269,12 @@ public:
 
 	int Get() const {
 		return ( IsValid() && ( instances->IsFree() == false ) ) ? *value : -1;
+	}
+
+	void Reassign( const int handle ) {
+		if ( IsValid() ) {
+			*value = handle;
+		}
 	}
 private:
 	int*		value;
@@ -379,6 +385,7 @@ struct allocRecord_t
 	uint64_t	offset;
 	uint64_t	size;
 	uint64_t	alignment;
+	bool		isValid;
 };
 
 template< class AllocatorType >
@@ -435,7 +442,7 @@ public:
 
 	void Free() {
 		if ( IsValid() ) {
-			allocator->DestroyAllocation( handle );
+			allocator->Free( handle );
 		}
 	}
 

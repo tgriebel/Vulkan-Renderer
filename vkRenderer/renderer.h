@@ -52,6 +52,9 @@ public:
 	{
 		Commit( scene );
 		SubmitFrame();
+
+		localMemory.Pack();
+		sharedMemory.Pack();
 	}
 
 	void Destroy()
@@ -1054,7 +1057,7 @@ private:
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
-		if ( bufferMemory.CreateAllocation( memRequirements.alignment, memRequirements.size, buffer.alloc ) ) {
+		if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, buffer.alloc ) ) {
 			vkBindBufferMemory( context.device, buffer.GetVkObject(), bufferMemory.GetMemoryResource(), buffer.alloc.GetOffset() );
 		} else {
 			throw std::runtime_error( "Buffer could not allocate!" );
@@ -1887,7 +1890,7 @@ private:
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
 		allocVk_t alloc;
-		if ( memory.CreateAllocation( memRequirements.alignment, memRequirements.size, alloc ) ) {
+		if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
 			vkBindImageMemory( context.device, image.vk_image, memory.GetMemoryResource(), alloc.GetOffset() );
 		} else {
 			throw std::runtime_error( "Buffer could not be allocated!" );

@@ -76,7 +76,7 @@ public:
 		return ( ( nextOffset + allocSize ) < size );
 	}
 
-	bool CreateAllocation( uint64_t alignment, uint64_t allocSize, alloc_t& handle )
+	bool Allocate( uint64_t alignment, uint64_t allocSize, alloc_t& handle )
 	{
 		if ( !CanAllocate( alignment, allocSize ) ) {
 			return false;
@@ -86,11 +86,12 @@ public:
 
 		const int index = static_cast<int>( allocations.size() );
 
-		allocRecord_t subAlloc;
-		subAlloc.offset = nextOffset;
-		subAlloc.size = allocSize;
-		subAlloc.alignment = alignment;
-		allocations.push_back( subAlloc );
+		allocRecord_t alloc;
+		alloc.offset = nextOffset;
+		alloc.size = allocSize;
+		alloc.alignment = alignment;
+		alloc.isValid = true;
+		allocations.push_back( alloc );
 
 		handle.handle = hdl_t( index );
 		handle.allocator = this;
@@ -101,18 +102,22 @@ public:
 		return true;
 	}
 
-	void DestroyAllocation( hdl_t& handle )
+	void Free( hdl_t& handle )
 	{
 		if ( IsValidIndex( handle.Get() ) ) {
-			freeList.push_back( handle );
+			allocations[ handle.Get() ].isValid = false;
 		}
+		handle.Reset();
 	}
 
 	void Pack()
 	{
-		const int numPendingFreeRecords = static_cast<int>( freeList.size() );
-		for ( int i = 0; i < numPendingFreeRecords; ++i ) {
-		//	freeList[ i ].index;
+
+	}
+
+	void ReassignHandles() {
+		for( int i = 0; i < static_cast< int >( handles.size() ); ++i ) {
+			handles[ i ].Reassign( i );
 		}
 	}
 
@@ -139,7 +144,6 @@ private:
 	void*							ptr;
 	std::vector< allocRecord_t >	allocations;
 	std::vector< hdl_t >			handles;
-	std::vector< hdl_t >			freeList;
 
 	friend alloc_t;
 };
