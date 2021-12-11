@@ -13,15 +13,9 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  deviceContext.cpp
-  io.cpp
-  pipeline.cpp
   renderer.cpp
   scene.cpp
   util.cpp
   vulkinTestApp.cpp
-  window.cpp
   Generating Code...
-  LINK : C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe not found or not built by the last incremental link; performing full link
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
