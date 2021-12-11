@@ -347,7 +347,7 @@ struct globalUboConstants_t
 
 struct materialBufferObject_t
 {
-	uint32_t textures[ 8 ];
+	uint32_t textures[ Material::MaxMaterialTextures ];
 	uint32_t pad[ 8 ]; // minUniformBufferOffsetAlignment
 };
 
