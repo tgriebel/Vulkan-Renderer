@@ -49,7 +49,7 @@ hdl_t AssetLib< Asset >::RetrieveHdl( const char* name )
 	if( id >= 0 )
 	{
 		hdl_t handle( id );
-		handles.push_back( handle );
+		handles.push_back( handle ); // FIXME: only need 1 handle per item
 		return handle;
 	}
 	return INVALID_HDL;
