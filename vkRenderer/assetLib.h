@@ -12,7 +12,7 @@ public:
 	void					Create();
 	const Asset*			GetDefault() const { return ( assets.size() > 0 ) ? &assets[ 0 ] : nullptr; };
 	uint32_t				Count() { return static_cast<uint32_t>( assets.size() ); }
-	void					Add( const char* name, const Asset& asset );
+	int						Add( const char* name, const Asset& asset );
 	Asset*					Find( const char* name );
 	hdl_t					RetrieveHdl( const char* name );
 	inline Asset*			Find( const int id ) { return ( id < assets.size() && id >= 0 ) ? &assets[ id ] : nullptr; }
@@ -21,11 +21,13 @@ public:
 };
 
 template< class Asset >
-void AssetLib< Asset >::Add( const char* name, const Asset& asset )
+int AssetLib< Asset >::Add( const char* name, const Asset& asset )
 {
-	handles.push_back( hdl_t( static_cast< int >( assets.size() ) ) );
+	const int id = static_cast<int>( assets.size() );
+	handles.push_back( hdl_t( id ) );
 	assets.push_back( asset );
 	tags.push_back( name );
+	return id;
 }
 
 template< class Asset >

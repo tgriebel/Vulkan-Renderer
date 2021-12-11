@@ -62,5 +62,4 @@ bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject );
 void CreateDescriptorSetLayout( GpuProgram& program );
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
 void CreatePostProcessDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
-bool IsPipelineCached( const pipelineState_t& state, pipelineHdl_t& hdl );
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, pipelineHdl_t& pipelineObject );

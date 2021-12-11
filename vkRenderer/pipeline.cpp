@@ -2,8 +2,9 @@
 
 #include "pipeline.h"
 #include "deviceContext.h"
+#include "assetLib.h"
 
-static std::vector<pipelineObject_t> pipelineCache;
+static AssetLib< pipelineObject_t > pipelineLib;
 
 void CreateDescriptorSetLayout( GpuProgram& program )
 {
@@ -117,28 +118,12 @@ void CreateDescriptorSets( GpuProgram& program )
 }
 */
 
-
-bool IsPipelineCached( const pipelineState_t& state, pipelineHdl_t& hdl )
-{
-	for ( uint32_t i = 0; i < pipelineCache.size(); ++i )
-	{
-		pipelineObject_t& object = pipelineCache[ i ];
-		if ( object.state == state )
-		{
-			hdl = i;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
 bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject )
 {
-	if ( ( hdl < pipelineCache.size() ) && ( pipelineObject != nullptr ) )
+	pipelineObject_t* object = pipelineLib.Find( hdl );
+	if( object != nullptr )
 	{
-		*pipelineObject = &pipelineCache[ hdl ];
+		*pipelineObject = object;
 		return true;
 	}
 	return false;
@@ -154,10 +139,9 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	//	return;
 	//}
 
-	pipelineHdl = static_cast<uint32_t>( pipelineCache.size() );
-	pipelineCache.push_back( pipelineObject_t() );
+	pipelineHdl = pipelineLib.Add( "", pipelineObject_t() );
 
-	pipelineObject_t& pipelineObject = pipelineCache.back();
+	pipelineObject_t& pipelineObject = *pipelineLib.Find( pipelineHdl );
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
