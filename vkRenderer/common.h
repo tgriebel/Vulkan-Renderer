@@ -293,26 +293,14 @@ struct pipelineObject_t;
 
 struct material_t
 {
-	uint32_t				texture0;
-	uint32_t				texture1;
-	uint32_t				texture2;
-	uint32_t				texture3;
-	uint32_t				texture4;
-	uint32_t				texture5;
-	uint32_t				texture6;
-	uint32_t				texture7;
+	hdl_t					textures[ 8 ];
 	hdl_t					shaders[ DRAWPASS_COUNT ];
 
 	material_t()
 	{
-		texture0 = 0;
-		texture1 = 0;
-		texture2 = 0;
-		texture3 = 0;
-		texture4 = 0;
-		texture5 = 0;
-		texture6 = 0;
-		texture7 = 0;
+		for ( int i = 0; i < 8; ++i ) {
+			textures[ i ] = 0;
+		}
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
 			shaders[ i ] = INVALID_HDL;
 		}

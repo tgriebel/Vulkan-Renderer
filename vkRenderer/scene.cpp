@@ -65,16 +65,16 @@ void AssetLib< material_t >::Create()
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_TERRAIN ] = gpuPrograms.RetrieveHdl( "Terrain" );
 		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		material.texture0 = textureLib.FindId( "heightmap.png" );
-		material.texture1 = textureLib.FindId( "grass.jpg" );
-		material.texture2 = textureLib.FindId( "desert.jpg" );
+		material.textures[ 0 ] = textureLib.FindId( "heightmap.png" );
+		material.textures[ 1 ] = textureLib.FindId( "grass.jpg" );
+		material.textures[ 2 ] = textureLib.FindId( "desert.jpg" );
 		Add( "TERRAIN", material );
 	}
 
 	{
 		material_t material;
 		material.shaders[ DRAWPASS_SKYBOX ] = gpuPrograms.RetrieveHdl( "Sky" );
-		material.texture0 = textureLib.FindId( "skybox.jpg" );
+		material.textures[ 0 ] = textureLib.FindId( "skybox.jpg" );
 		Add( "SKY", material );
 	}
 
@@ -84,7 +84,7 @@ void AssetLib< material_t >::Create()
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
 		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		material.texture0 = textureLib.FindId( "viking_room.png" );
+		material.textures[ 0 ] = textureLib.FindId( "viking_room.png" );
 		Add( "VIKING", material );
 	}
 
@@ -92,22 +92,22 @@ void AssetLib< material_t >::Create()
 		material_t material;
 		material.shaders[ DRAWPASS_TRANS ] = gpuPrograms.RetrieveHdl( "LitTrans" );
 		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		material.texture0 = 0;
+		material.textures[ 0 ] = 0;
 		Add( "WATER", material );
 	}
 
 	{
 		material_t material;
 		material.shaders[ DRAWPASS_POST_2D ] = gpuPrograms.RetrieveHdl( "PostProcess" );
-		material.texture0 = 0;
-		material.texture1 = 1;
+		material.textures[ 0 ] = 0;
+		material.textures[ 1 ] = 1;
 		Add( "TONEMAP", material );
 	}
 
 	{
 		material_t material;
 		material.shaders[ DRAWPASS_POST_2D ] = gpuPrograms.RetrieveHdl( "Image2D" );
-		material.texture0 = 2;
+		material.textures[ 0 ] = 2;
 		Add( "IMAGE2D", material );
 	}
 
@@ -117,7 +117,7 @@ void AssetLib< material_t >::Create()
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
 		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		material.texture0 = textureLib.FindId( "palm_tree_diffuse.jpg" );
+		material.textures[ 0 ] = textureLib.FindId( "palm_tree_diffuse.jpg" );
 		Add( "PALM", material );
 	}
 }
@@ -210,7 +210,7 @@ void UpdateScene( const float dt )
 	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	scene.entities[ 0 ].matrix = skyBoxMatrix;
 
-	materialLib.Find( "IMAGE2D" )->texture0 = ( imguiControls.dbgImageId % textureLib.Count() );
+	materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % textureLib.Count() );
 }
 
 void MakeBeachScene()

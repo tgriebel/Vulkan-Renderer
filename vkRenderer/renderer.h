@@ -2326,14 +2326,14 @@ private:
 			const material_t* m = materialLib.Find( i );
 
 			materialBufferObject_t ubo;
-			ubo.texture0 = m->texture0;
-			ubo.texture1 = m->texture1;
-			ubo.texture2 = m->texture2;
-			ubo.texture3 = m->texture3;
-			ubo.texture4 = m->texture4;
-			ubo.texture5 = m->texture5;
-			ubo.texture6 = m->texture6;
-			ubo.texture7 = m->texture7;
+			ubo.texture0 = m->textures[ 0 ].Get();
+			ubo.texture1 = m->textures[ 1 ].Get();
+			ubo.texture2 = m->textures[ 2 ].Get();
+			ubo.texture3 = m->textures[ 3 ].Get();
+			ubo.texture4 = m->textures[ 4 ].Get();
+			ubo.texture5 = m->textures[ 5 ].Get();
+			ubo.texture6 = m->textures[ 6 ].Get();
+			ubo.texture7 = m->textures[ 7 ].Get();
 			materialBuffer.push_back( ubo );
 		}
 
