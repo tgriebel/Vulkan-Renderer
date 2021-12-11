@@ -21,12 +21,12 @@ struct Scene
 		camera.aspect = 16.0f / 9.0f;
 	}
 
-	void CreateEntity( const uint32_t modelId, entity_t& instance )
+	void CreateEntity( const uint32_t modelId, entity_t& entity )
 	{
 		const modelSource_t* model = modelLib.Find( modelId );
 
-		instance.modelId = modelId;
-		instance.materialId = model->materialId;
-		instance.matrix = glm::identity<glm::mat4>();
+		entity.modelId = modelId;
+		entity.materialId = model->materialId;
+		entity.matrix = glm::identity<glm::mat4>();
 	}
 };
