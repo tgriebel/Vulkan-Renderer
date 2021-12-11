@@ -2090,10 +2090,10 @@ private:
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 0 ].lightDir = glm::vec4( lightDir0[ 0 ], lightDir0[ 1 ], lightDir0[ 2 ], 0.0f );
 		renderView.lights[ 1 ].lightPos = glm::vec4( 0.0f, glm::cos( time ), -1.0f, 0.0 );
-		renderView.lights[ 1 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		renderView.lights[ 1 ].intensity = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 		renderView.lights[ 1 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 		renderView.lights[ 2 ].lightPos = glm::vec4( glm::sin( time ), 0.0f, -1.0f, 0.0f );
-		renderView.lights[ 2 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		renderView.lights[ 2 ].intensity = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
 		renderView.lights[ 2 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 
 		const glm::vec3 shadowLightPos = lightPos0;

@@ -1,0 +1,150 @@
+# 
+# Wavefront material file
+# Converted by the DEEP Exploration  Deep Exploration 5 5.0.5.1846 Release
+# Right Hemisphere, LTD
+# http://www.righthemisphere.com/
+# 
+
+newmtl BARK4
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13brk4.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl BARK3
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13brk3.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl BARK5
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13brk5.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl BARK2
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13brk2.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl LEAF1
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13lef1.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl BARK7
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13brk7.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl LEAF3
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13lef3.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl FLOWER1
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13flw1.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 
+
+newmtl FRUIT1
+Ka 0.1 0.1 0.1
+Kd 1 1 1
+Ks 0 0 0
+illum 2
+Ns 2
+map_Kd OC13frt1.tif
+map_bump 
+bump 
+map_opacity 
+map_d 
+refl 
+map_kS 
+map_kA 
+map_Ns 

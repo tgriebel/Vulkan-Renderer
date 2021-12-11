@@ -135,7 +135,7 @@ void AssetLib< modelSource_t >::Create()
 	}
 	{
 		modelSource_t model;
-		CreateStaticModel( "sphere.obj", "PALM", model );
+		CreateStaticModel( "palm_tree.obj", "PALM", model );
 		modelLib.Add( "palmTree", model );
 	}
 	{
@@ -214,7 +214,7 @@ void UpdateScene( const float dt )
 
 void MakeBeachScene()
 {
-	const int palmTreesNum = 300;
+	const int palmTreesNum = 30;
 
 	int entId = 0;
 	scene.entities.resize( 5 + palmTreesNum );
