@@ -7,7 +7,7 @@
 extern Scene scene;
 
 typedef AssetLib< texture_t > AssetLibImages;
-typedef AssetLib< material_t > AssetLibMaterials;
+typedef AssetLib< Material > AssetLibMaterials;
 
 extern AssetLib< GpuProgram >	gpuPrograms;
 extern AssetLibImages			textureLib;
@@ -57,10 +57,10 @@ void AssetLib< texture_t >::Create()
 	}
 }
 
-void AssetLib< material_t >::Create()
+void AssetLib< Material >::Create()
 {
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "TerrainShadow" );
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_TERRAIN ] = gpuPrograms.RetrieveHdl( "Terrain" );
@@ -72,14 +72,14 @@ void AssetLib< material_t >::Create()
 	}
 
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_SKYBOX ] = gpuPrograms.RetrieveHdl( "Sky" );
 		material.textures[ 0 ] = textureLib.FindId( "skybox.jpg" );
 		Add( "SKY", material );
 	}
 
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
@@ -89,7 +89,7 @@ void AssetLib< material_t >::Create()
 	}
 
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_TRANS ] = gpuPrograms.RetrieveHdl( "LitTrans" );
 		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.textures[ 0 ] = 0;
@@ -97,7 +97,7 @@ void AssetLib< material_t >::Create()
 	}
 
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_POST_2D ] = gpuPrograms.RetrieveHdl( "PostProcess" );
 		material.textures[ 0 ] = 0;
 		material.textures[ 1 ] = 1;
@@ -105,14 +105,14 @@ void AssetLib< material_t >::Create()
 	}
 
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_POST_2D ] = gpuPrograms.RetrieveHdl( "Image2D" );
 		material.textures[ 0 ] = 2;
 		Add( "IMAGE2D", material );
 	}
 
 	{
-		material_t material;
+		Material material;
 		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );

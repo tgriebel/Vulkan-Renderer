@@ -291,14 +291,16 @@ private:
 
 struct pipelineObject_t;
 
-struct material_t
+struct Material
 {
-	hdl_t					textures[ 8 ];
+	static const uint32_t MaxMaterialTextures = 8;
+
+	hdl_t					textures[ MaxMaterialTextures ];
 	hdl_t					shaders[ DRAWPASS_COUNT ];
 
-	material_t()
+	Material()
 	{
-		for ( int i = 0; i < 8; ++i ) {
+		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
 			textures[ i ] = 0;
 		}
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
@@ -345,14 +347,7 @@ struct globalUboConstants_t
 
 struct materialBufferObject_t
 {
-	uint32_t texture0;
-	uint32_t texture1;
-	uint32_t texture2;
-	uint32_t texture3;
-	uint32_t texture4;
-	uint32_t texture5;
-	uint32_t texture6;
-	uint32_t texture7;
+	uint32_t textures[ 8 ];
 	uint32_t pad[ 8 ]; // minUniformBufferOffsetAlignment
 };
 
@@ -525,7 +520,7 @@ public:
 
 struct modelSource_t
 {
-	material_t*					material;
+	Material*					material;
 	uint32_t					materialId;
 	std::vector<VertexInput>	vertices;
 	std::vector<uint32_t>		indices;

@@ -28,7 +28,7 @@ extern imguiControls_t imguiControls;
 #endif
 
 typedef AssetLib< texture_t >		AssetLibImages;
-typedef AssetLib< material_t >		AssetLibMaterials;
+typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< modelSource_t >	AssetLibModels;
 
@@ -445,7 +445,7 @@ private:
 	{
 		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
 		{
-			const material_t* m = materialLib.Find( i );
+			const Material* m = materialLib.Find( i );
 
 			for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
 				GpuProgram* prog = gpuPrograms.Find( m->shaders[ i ].Get() );
@@ -2323,17 +2323,12 @@ private:
 		const uint32_t materialCount = materialLib.Count();
 		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
 		{
-			const material_t* m = materialLib.Find( i );
+			const Material* m = materialLib.Find( i );
 
 			materialBufferObject_t ubo;
-			ubo.texture0 = m->textures[ 0 ].Get();
-			ubo.texture1 = m->textures[ 1 ].Get();
-			ubo.texture2 = m->textures[ 2 ].Get();
-			ubo.texture3 = m->textures[ 3 ].Get();
-			ubo.texture4 = m->textures[ 4 ].Get();
-			ubo.texture5 = m->textures[ 5 ].Get();
-			ubo.texture6 = m->textures[ 6 ].Get();
-			ubo.texture7 = m->textures[ 7 ].Get();
+			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
+				ubo.textures[ t ] = m->textures[ t ].Get();
+			}
 			materialBuffer.push_back( ubo );
 		}
 

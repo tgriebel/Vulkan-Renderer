@@ -21,7 +21,7 @@
 #include "gpuResources.h"
 
 typedef AssetLib< texture_t >		AssetLibImages;
-typedef AssetLib< material_t >		AssetLibMaterials;
+typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< modelSource_t >	AssetLibModels;
 

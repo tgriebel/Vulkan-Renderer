@@ -4,7 +4,7 @@
 #include "GeoBuilder.h"
 #include "assetLib.h"
 
-extern AssetLib< material_t > materialLib;
+extern AssetLib< Material > materialLib;
 
 #define STB_IMAGE_IMPLEMENTATION // includes func defs
 #include "stb_image.h"
