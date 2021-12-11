@@ -290,7 +290,6 @@ struct pipelineObject_t;
 
 struct material_t
 {
-	uint32_t				id; // TODO: remove?
 	uint32_t				texture0;
 	uint32_t				texture1;
 	uint32_t				texture2;
@@ -303,7 +302,6 @@ struct material_t
 
 	material_t()
 	{
-		id = 0;
 		texture0 = 0;
 		texture1 = 0;
 		texture2 = 0;
