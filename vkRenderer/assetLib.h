@@ -6,7 +6,7 @@ template< class Asset >
 class AssetLib {
 private:
 	std::vector< Asset >		assets;
-	std::vector< std::string >	names;
+	std::vector< std::string >	tags;
 	std::vector< hdl_t >		handles;
 public:
 	void					Create();
@@ -17,22 +17,23 @@ public:
 	hdl_t					RetrieveHdl( const char* name );
 	inline Asset*			Find( const int id ) { return ( id < assets.size() && id >= 0 ) ? &assets[ id ] : nullptr; }
 	int						FindId( const char* name );
-	const char*				FindName( const int id ) { return ( id < names.size() && id >= 0 ) ? names[ id ].c_str() : ""; }
+	const char*				FindName( const int id ) { return ( id < tags.size() && id >= 0 ) ? tags[ id ].c_str() : ""; }
 };
 
 template< class Asset >
 void AssetLib< Asset >::Add( const char* name, const Asset& asset )
 {
+	handles.push_back( hdl_t( static_cast< int >( assets.size() ) ) );
 	assets.push_back( asset );
-	names.push_back( name );
+	tags.push_back( name );
 }
 
 template< class Asset >
 int AssetLib< Asset >::FindId( const char* name )
 {
-	auto it = find( names.begin(), names.end(), name );
-	const int idx = static_cast<int>( std::distance( names.begin(), it ) );
-	return ( it != names.end() ) ? idx : -1;
+	auto it = find( tags.begin(), tags.end(), name );
+	const int idx = static_cast<int>( std::distance( tags.begin(), it ) );
+	return ( it != tags.end() ) ? idx : -1;
 }
 
 template< class Asset >
@@ -46,11 +47,5 @@ template< class Asset >
 hdl_t AssetLib< Asset >::RetrieveHdl( const char* name )
 {
 	const int id = FindId( name );
-	if( id >= 0 )
-	{
-		hdl_t handle( id );
-		handles.push_back( handle ); // FIXME: only need 1 handle per item
-		return handle;
-	}
-	return INVALID_HDL;
+	return ( id >= 0 ) ? handles[ id ] : INVALID_HDL;
 }
