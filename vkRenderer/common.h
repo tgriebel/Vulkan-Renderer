@@ -31,9 +31,13 @@
 
 #define USE_IMGUI
 
-const uint32_t KB = 1024;
-const uint32_t MB = 1024 * KB;
-const uint32_t GB = 1024 * MB;
+const uint32_t KB_1 = 1024;
+const uint32_t MB_1 = 1024 * KB_1;
+const uint32_t GB_1 = 1024 * MB_1;
+
+#define KB( N ) ( N * KB_1 )
+#define MB( N ) ( N * MB_1 )
+#define GB( N ) ( N * GB_1 )
 
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1000;
 const uint32_t	DescriptorPoolMaxSamplers		= 3;
@@ -51,9 +55,9 @@ const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
 const uint32_t	MaxMaterialDescriptors			= 12;
 const uint32_t	MaxLights						= 3;
 const uint32_t	MaxCodeImages					= 1;
-const uint64_t	MaxSharedMemory					= 256 * MB;
-const uint64_t	MaxLocalMemory					= 256 * MB;
-const uint64_t	MaxFrameBufferMemory			= 128 * MB;
+const uint64_t	MaxSharedMemory					= MB( 256 );
+const uint64_t	MaxLocalMemory					= MB( 256 );
+const uint64_t	MaxFrameBufferMemory			= MB( 128 );
 
 const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
 const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;
