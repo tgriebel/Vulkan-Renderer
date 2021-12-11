@@ -476,6 +476,7 @@ struct drawSurf_t
 	uint32_t			vertexCount;
 	uint32_t			firstIndex;
 	uint32_t			indicesCnt;
+	uint32_t			instanceCnt;
 	uint32_t			objectId;
 	uint32_t			materialId;
 	renderFlags			flags;

@@ -231,6 +231,7 @@ private:
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
 		surf.indicesCnt = static_cast<uint32_t>( source->indices.size() );
+		surf.instanceCnt = 1;
 		surf.materialId = model.materialId;
 		surf.modelMatrix = model.matrix;
 		surf.objectId = view.committedModelCnt + objectOffset;
@@ -1696,7 +1697,7 @@ private:
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, surface.instanceCnt, surface.firstIndex, surface.vertexOffset, 0 );
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 		}
@@ -1754,7 +1755,7 @@ private:
 					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, surface.instanceCnt, surface.firstIndex, surface.vertexOffset, 0 );
 				}
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
@@ -1791,7 +1792,7 @@ private:
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, surface.instanceCnt, surface.firstIndex, surface.vertexOffset, 0 );
 			}
 
 #if defined( USE_IMGUI )
