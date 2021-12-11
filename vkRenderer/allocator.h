@@ -102,6 +102,16 @@ public:
 		return true;
 	}
 
+	void Reset()
+	{
+		for ( int i = 0; i < static_cast<int>( handles.size() ); ++i ) {
+			handles[ i ].Reassign( -1 );
+		}
+		offset = 0;
+		allocations.resize( 0 );
+		handles.resize( 0 );
+	}
+
 	void Free( hdl_t& handle )
 	{
 		if ( IsValidIndex( handle.Get() ) ) {

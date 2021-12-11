@@ -51,8 +51,9 @@ const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
 const uint32_t	MaxMaterialDescriptors			= 12;
 const uint32_t	MaxLights						= 3;
 const uint32_t	MaxCodeImages					= 1;
-const uint64_t	MaxSharedMemory					= 512 * MB;
-const uint64_t	MaxLocalMemory					= 512 * MB;
+const uint64_t	MaxSharedMemory					= 256 * MB;
+const uint64_t	MaxLocalMemory					= 256 * MB;
+const uint64_t	MaxFrameBufferMemory			= 128 * MB;
 
 const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
 const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;

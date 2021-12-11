@@ -109,6 +109,7 @@ private:
 	GpuBuffer						ib;
 
 	AllocatorVkMemory				localMemory;
+	AllocatorVkMemory				frameBufferMemory;
 	AllocatorVkMemory				sharedMemory;
 
 	VkSampler						vk_bilinearSampler;
@@ -276,6 +277,7 @@ private:
 			AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
 			type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
 			AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
+			AllocateDeviceMemory( MaxFrameBufferMemory, type, frameBufferMemory );
 		}
 
 		CreateResourceBuffers();
@@ -597,6 +599,7 @@ private:
 
 		DestroyFrameResources();
 		swapChain.Destroy();
+		frameBufferMemory.Reset();
 		swapChain.Create( &window, width, height );
 		CreateRenderPasses();
 		CreateFramebuffers();
@@ -1370,7 +1373,7 @@ private:
 		const VkFormat depthFormat = FindDepthFormat();
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
-			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, localMemory );
+			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
 			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
@@ -1400,11 +1403,11 @@ private:
 		/////////////////////////////////
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
-			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, localMemory );
+			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
 			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
-			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, localMemory );
+			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
 			frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
@@ -2202,8 +2205,10 @@ private:
 
 		vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
 		vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
+		vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
 		localMemory.Unbind();
 		sharedMemory.Unbind();
+		frameBufferMemory.Unbind();
 		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
 		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );

@@ -80,7 +80,8 @@ public:
 	void Destroy()
 	{
 		for ( size_t i = 0; i < vk_framebuffers.size(); i++ ) {
-			vkDestroyFramebuffer( context.device, vk_framebuffers[ i ], nullptr );
+		//	Destroyed by render pass right now
+		//	vkDestroyFramebuffer( context.device, vk_framebuffers[ i ], nullptr );
 		}
 
 		for ( size_t i = 0; i < vk_swapChainImageViews.size(); i++ ) {
