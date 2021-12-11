@@ -28,5 +28,6 @@ struct Scene
 		entity.modelId = modelId;
 		entity.materialId = model->materialId;
 		entity.matrix = glm::identity<glm::mat4>();
+		entity.flags = renderFlags_t::NONE;
 	}
 };

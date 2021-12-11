@@ -234,7 +234,7 @@ private:
 		surf.instanceCnt = 1;
 		surf.materialId = model.materialId;
 		surf.modelMatrix = model.matrix;
-		surf.objectId = view.committedModelCnt + objectOffset;
+		surf.objectId = objectOffset;
 		surf.flags = model.flags;
 
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
@@ -1827,13 +1827,13 @@ private:
 					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities[ entityIx ].modelId ) );
 					if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
 						imguiControls.selectedModelId = entityIx;
-						scene.entities[ entityIx ].flags = WIREFRAME;
+						scene.entities[ entityIx ].flags = renderFlags_t::WIREFRAME;
 						tempOrigin.x = scene.entities[ entityIx ].matrix[ 3 ][ 0 ];
 						tempOrigin.y = scene.entities[ entityIx ].matrix[ 3 ][ 1 ];
 						tempOrigin.z = scene.entities[ entityIx ].matrix[ 3 ][ 2 ];
 					}
 					else {
-						scene.entities[ entityIx ].flags = (renderFlags)( scene.entities[ entityIx ].flags & ~WIREFRAME );
+						scene.entities[ entityIx ].flags = (renderFlags_t)( scene.entities[ entityIx ].flags & ~renderFlags_t::WIREFRAME );
 					}
 				}
 				ImGui::EndCombo();

@@ -1,21 +1,40 @@
+#include <algorithm>
+#include <iterator>
 #include "renderer.h"
+
+static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
+{
+	if( surf0.materialId == surf1.materialId ) {
+		return ( surf0.objectId < surf1.objectId );
+	} else {
+		return ( surf0.materialId < surf1.materialId );
+	}
+}
 
 void Renderer::Commit( const Scene& scene )
 {
 	renderView.committedModelCnt = 0;
-	for ( uint32_t i = 0; i < scene.entities.size(); ++i )
-	{
+	for ( uint32_t i = 0; i < scene.entities.size(); ++i ) {
 		CommitModel( renderView, scene.entities[ i ], 0 );
+	}
+	std::sort( std::begin( renderView.surfaces ), std::begin( renderView.surfaces ) + renderView.committedModelCnt, CompareSortKey ); // TODO: Look at perf
+	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i ) {
+		renderView.surfaces[ i ].objectId += i;
 	}
 
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < scene.entities.size(); ++i )
 	{
-		if ( scene.entities[ i ].flags == NO_SHADOWS ) {
+		if ( scene.entities[ i ].flags == renderFlags_t::NO_SHADOWS ) {
 			continue;
 		}
 		CommitModel( shadowView, scene.entities[ i ], MaxModels );
 	}
+	std::sort( std::begin( shadowView.surfaces ), std::begin( shadowView.surfaces ) + shadowView.committedModelCnt, CompareSortKey );
+	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i ) {
+		shadowView.surfaces[ i ].objectId += i;
+	}
+
 	renderView.viewMatrix = scene.camera.GetViewMatrix();
 	renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
 

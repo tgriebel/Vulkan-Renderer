@@ -165,11 +165,12 @@ enum drawPassFlags_t : uint32_t
 	DRAWPASS_FLAG_POST_2D	= ( 1 << DRAWPASS_POST_2D ),
 };
 
-enum renderFlags : uint32_t
+enum renderFlags_t : uint32_t
 {
 	NONE		= 0,
 	NO_SHADOWS	= ( 1 << 0 ),
 	WIREFRAME	= ( 1 << 1 ),
+	COMMITTED	= ( 1 << 2 ),
 };
 
 struct GpuProgram
@@ -468,6 +469,7 @@ struct texture_t
 	GpuImage		image;
 };
 
+
 struct drawSurf_t
 {
 	glm::mat4			modelMatrix;
@@ -479,7 +481,7 @@ struct drawSurf_t
 	uint32_t			instanceCnt;
 	uint32_t			objectId;
 	uint32_t			materialId;
-	renderFlags			flags;
+	renderFlags_t		flags;
 
 	pipelineHdl_t		pipelineObject[ DRAWPASS_COUNT ];
 };
@@ -490,7 +492,7 @@ struct entity_t
 	glm::mat4					matrix;
 	uint32_t					materialId;
 	uint32_t					modelId;
-	renderFlags					flags;
+	renderFlags_t				flags;
 };
 
 
