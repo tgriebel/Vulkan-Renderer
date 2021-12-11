@@ -258,7 +258,9 @@ public:
 			this->~hdl_t();
 			this->value = handle.value;
 			this->instances = handle.instances;
-			this->instances->Add();
+			if( handle.IsValid() ) {
+				this->instances->Add();
+			}
 		}
 		return *this;
 	}
@@ -285,6 +287,7 @@ private:
 	int*		value;
 	refCount_t*	instances;
 };
+#define INVALID_HDL hdl_t()
 
 struct pipelineObject_t;
 
@@ -298,7 +301,7 @@ struct material_t
 	uint32_t				texture5;
 	uint32_t				texture6;
 	uint32_t				texture7;
-	GpuProgram*				shaders[ DRAWPASS_COUNT ]; // TODO: use handle
+	hdl_t					shaders[ DRAWPASS_COUNT ];
 
 	material_t()
 	{
@@ -310,9 +313,8 @@ struct material_t
 		texture5 = 0;
 		texture6 = 0;
 		texture7 = 0;
-		for ( int i = 0; i < DRAWPASS_COUNT; ++i )
-		{
-			shaders[ i ] = nullptr;
+		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
+			shaders[ i ] = INVALID_HDL;
 		}
 	}
 };

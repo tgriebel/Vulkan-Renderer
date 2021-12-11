@@ -7,12 +7,14 @@ class AssetLib {
 private:
 	std::vector< Asset >		assets;
 	std::vector< std::string >	names;
+	std::vector< hdl_t >		handles;
 public:
 	void					Create();
 	const Asset*			GetDefault() const { return ( assets.size() > 0 ) ? &assets[ 0 ] : nullptr; };
 	uint32_t				Count() { return static_cast<uint32_t>( assets.size() ); }
 	void					Add( const char* name, const Asset& asset );
 	Asset*					Find( const char* name );
+	hdl_t					RetrieveHdl( const char* name );
 	inline Asset*			Find( const int id ) { return ( id < assets.size() && id >= 0 ) ? &assets[ id ] : nullptr; }
 	int						FindId( const char* name );
 	const char*				FindName( const int id ) { return ( id < names.size() && id >= 0 ) ? names[ id ].c_str() : ""; }
@@ -38,4 +40,17 @@ Asset* AssetLib< Asset >::Find( const char* name )
 {
 	const int id = FindId( name );
 	return ( id >= 0 ) ? &assets[ id ] : nullptr;
+}
+
+template< class Asset >
+hdl_t AssetLib< Asset >::RetrieveHdl( const char* name )
+{
+	const int id = FindId( name );
+	if( id >= 0 )
+	{
+		hdl_t handle( id );
+		handles.push_back( handle );
+		return handle;
+	}
+	return INVALID_HDL;
 }

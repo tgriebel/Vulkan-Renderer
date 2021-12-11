@@ -237,8 +237,12 @@ private:
 		surf.flags = model.flags;
 
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-			if ( source->material->shaders[ i ] != nullptr ) {
-				surf.pipelineObject[ i ] = source->material->shaders[ i ]->pipeline;
+			if ( source->material->shaders[ i ].IsValid() ) {
+				GpuProgram * prog = gpuPrograms.Find( source->material->shaders[ i ].Get() );
+				if( prog == nullptr ) {
+					continue;
+				}
+				surf.pipelineObject[ i ] = prog->pipeline;
 			}
 			else {
 				surf.pipelineObject[ i ] = INVALID_HANDLE;
@@ -444,14 +448,15 @@ private:
 			const material_t* m = materialLib.Find( i );
 
 			for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-				if ( m->shaders[ i ] == nullptr ) {
+				GpuProgram* prog = gpuPrograms.Find( m->shaders[ i ].Get() );
+				if ( prog == nullptr ) {
 					continue;
 				}
 
 				pipelineState_t state;
 				state.viewport = GetDrawPassViewport( (drawPass_t)i );
 				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)i );
-				state.shaders = m->shaders[ i ];
+				state.shaders = prog;
 
 				VkRenderPass pass;
 				VkDescriptorSetLayout layout;
@@ -468,7 +473,7 @@ private:
 					layout = globalLayout;
 				}
 
-				CreateGraphicsPipeline( layout, pass, state, m->shaders[ i ]->pipeline );
+				CreateGraphicsPipeline( layout, pass, state, prog->pipeline );
 			}
 		}
 	}
