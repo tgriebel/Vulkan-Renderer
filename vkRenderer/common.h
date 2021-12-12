@@ -71,6 +71,8 @@ const std::string TexturePath = "textures/";
 using pipelineHdl_t = uint32_t;
 const uint32_t INVALID_HANDLE = ~0;
 
+uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
+
 class Renderer;
 
 struct VertexInput
@@ -473,19 +475,57 @@ struct texture_t
 struct drawSurf_t
 {
 	glm::mat4			modelMatrix;
+	uint32_t			instanceCnt;
 
 	uint32_t			vertexOffset;
 	uint32_t			vertexCount;
 	uint32_t			firstIndex;
 	uint32_t			indicesCnt;
-	uint32_t			instanceCnt;
 	uint32_t			objectId;
 	uint32_t			materialId;
 	renderFlags_t		flags;
 
 	pipelineHdl_t		pipelineObject[ DRAWPASS_COUNT ];
+
+	inline bool operator()( const drawSurf_t& surf ) {
+		return Hash( reinterpret_cast<const uint8_t*>( &surf ), sizeof( surf ) );
+	}
 };
 
+
+struct drawSurfInstance_t
+{
+	glm::mat4			modelMatrix;
+	uint32_t			instanceCnt;
+	drawSurf_t			surf;
+};
+
+inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
+{
+	bool isEqual = true;
+	const uint32_t sizeBytes = sizeof( drawSurf_t );
+	const uint8_t* lhsBytes = reinterpret_cast< const uint8_t* >( &lhs );
+	const uint8_t* rhsBytes = reinterpret_cast< const uint8_t* >( &rhs );
+	for( int i = 0; i < sizeBytes; ++i ) {
+		isEqual = isEqual && ( lhsBytes[ i ] == rhsBytes[ i ] );
+	}
+	return isEqual;
+}
+
+inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
+{
+	if ( surf0.materialId == surf1.materialId ) {
+		return ( surf0.objectId < surf1.objectId );
+	} else {
+		return ( surf0.materialId < surf1.materialId );
+	}
+}
+
+template<> struct std::hash<drawSurf_t> {
+	size_t operator()( drawSurf_t const& surf ) const {
+		return Hash( reinterpret_cast<const uint8_t*>( &surf ), sizeof( surf ) );
+	}
+};
 
 struct entity_t
 {
@@ -730,4 +770,15 @@ static inline void RandPlanePoint( glm::vec2& outPoint )
 {
 	outPoint.x = ( (float) rand() / ( RAND_MAX ) );
 	outPoint.y = ( (float) rand() / ( RAND_MAX ) );
+}
+
+// Fowler–Noll–Vo_hash_function - fnv1a - 32bits
+// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
+	uint32_t result = 2166136261;
+	const uint32_t prime = 16777619;
+	for ( uint32_t i = 0; i < sizeBytes; ++i ) {
+		result = ( result ^ bytes[ i ] ) * prime;
+	}
+	return result;
 }

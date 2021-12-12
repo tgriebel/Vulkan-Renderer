@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include "renderer.h"
 
 static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
@@ -21,6 +22,11 @@ void Renderer::Commit( const Scene& scene )
 	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i ) {
 		renderView.surfaces[ i ].objectId += i;
 	}
+	//std::unordered_map< drawSurf_t, uint32_t > uniqueSurfs;
+	//for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i ) {
+	//	renderView.surfaces[ i ].objectId += i;
+	//	uniqueSurfs[ renderView.surfaces[ i ] ] = 0;
+	//}
 
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < scene.entities.size(); ++i )

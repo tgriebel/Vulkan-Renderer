@@ -223,17 +223,19 @@ private:
 
 	void CommitModel( RenderView& view, const entity_t& model, const uint32_t objectOffset )
 	{
+		//drawSurfInstance_t& instance = view.surfaces[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		modelSource_t* source = modelLib.Find( model.modelId );
 		surfUpload_t& upload = modelUpload[ model.modelId ];
 
+		//instance.instanceCnt = 1;
+		//instance.modelMatrix = model.matrix;
+		surf.modelMatrix = model.matrix;
 		surf.vertexCount = upload.vertexCount;
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
 		surf.indicesCnt = static_cast<uint32_t>( source->indices.size() );
-		surf.instanceCnt = 1;
 		surf.materialId = model.materialId;
-		surf.modelMatrix = model.matrix;
 		surf.objectId = objectOffset;
 		surf.flags = model.flags;
 
@@ -1697,7 +1699,7 @@ private:
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, surface.instanceCnt, surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 		}
@@ -1755,7 +1757,7 @@ private:
 					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, surface.instanceCnt, surface.firstIndex, surface.vertexOffset, 0 );
+					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 				}
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
@@ -1792,7 +1794,7 @@ private:
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, surface.instanceCnt, surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
 			}
 
 #if defined( USE_IMGUI )
