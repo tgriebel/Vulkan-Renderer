@@ -259,6 +259,7 @@ private:
 	void MergeSurfaces( RenderView& view )
 	{
 		view.mergedModelCnt = 0;
+		view.uniqueSurfs.clear();
 		for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
 			auto it = view.uniqueSurfs.find( view.surfaces[ i ] );
 			if ( it == view.uniqueSurfs.end() ) {
@@ -267,10 +268,10 @@ private:
 			else {
 				it->second++;
 			}
-			view.surfaces[ i ].objectId += i;
 		}
 		for ( auto it = view.uniqueSurfs.begin(); it != view.uniqueSurfs.end(); ++it ) {
 			view.merged[ view.mergedModelCnt ] = it->first;
+			view.merged[ view.mergedModelCnt ].objectId += view.mergedModelCnt;
 			view.instanceCounts[ view.mergedModelCnt ] = it->second;
 			++view.mergedModelCnt;
 		}
@@ -1689,9 +1690,9 @@ private:
 			// TODO: how to handle views better?
 			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-			for ( size_t surfIx = 0; surfIx < shadowView.committedModelCnt; surfIx++ )
+			for ( size_t surfIx = 0; surfIx < shadowView.mergedModelCnt; surfIx++ )
 			{
-				drawSurf_t& surface = *shadowView.instances[ surfIx ].surf;
+				drawSurf_t& surface = shadowView.merged[ surfIx ];
 
 				pipelineObject_t* pipelineObject;
 				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HANDLE ) {
@@ -1720,7 +1721,7 @@ private:
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 		}
@@ -1759,9 +1760,9 @@ private:
 
 			for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
 			{
-				for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
+				for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 				{
-					drawSurf_t& surface = *view.instances[ surfIx ].surf;
+					drawSurf_t& surface = view.merged[ surfIx ];
 
 					pipelineObject_t* pipelineObject;
 					if ( surface.pipelineObject[ pass ] == INVALID_HANDLE ) {
@@ -1778,7 +1779,7 @@ private:
 					pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 					vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+					vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 				}
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
@@ -1801,9 +1802,9 @@ private:
 			postProcessPassInfo.pClearValues = postProcessClearValues.data();
 
 			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-			for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
+			for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 			{
-				drawSurf_t& surface = *shadowView.instances[ surfIx ].surf;
+				drawSurf_t& surface = shadowView.merged[ surfIx ];
 				if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HANDLE ) {
 					continue;
 				}
@@ -1815,7 +1816,7 @@ private:
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, 1, surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 			}
 
 #if defined( USE_IMGUI )
