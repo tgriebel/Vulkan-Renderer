@@ -18,15 +18,7 @@ void Renderer::Commit( const Scene& scene )
 	for ( uint32_t i = 0; i < scene.entities.size(); ++i ) {
 		CommitModel( renderView, scene.entities[ i ], 0 );
 	}
-	std::sort( std::begin( renderView.surfaces ), std::begin( renderView.surfaces ) + renderView.committedModelCnt, CompareSortKey ); // TODO: Look at perf
-	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i ) {
-		renderView.surfaces[ i ].objectId += i;
-	}
-	//std::unordered_map< drawSurf_t, uint32_t > uniqueSurfs;
-	//for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i ) {
-	//	renderView.surfaces[ i ].objectId += i;
-	//	uniqueSurfs[ renderView.surfaces[ i ] ] = 0;
-	//}
+	MergeSurfaces( renderView );
 
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < scene.entities.size(); ++i )
@@ -36,10 +28,7 @@ void Renderer::Commit( const Scene& scene )
 		}
 		CommitModel( shadowView, scene.entities[ i ], MaxModels );
 	}
-	std::sort( std::begin( shadowView.surfaces ), std::begin( shadowView.surfaces ) + shadowView.committedModelCnt, CompareSortKey );
-	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i ) {
-		shadowView.surfaces[ i ].objectId += i;
-	}
+	MergeSurfaces( shadowView );
 
 	renderView.viewMatrix = scene.camera.GetViewMatrix();
 	renderView.projMatrix = scene.camera.GetPerspectiveMatrix();

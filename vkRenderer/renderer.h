@@ -203,7 +203,8 @@ private:
 			vbCopyRegion.dstOffset = vb.GetSize();
 			CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
 
-			vbBufElements += static_cast<uint32_t>( modelLib.Find( m )->vertices.size() );
+			modelUpload[ m ].indexCount = static_cast<uint32_t>( modelLib.Find( m )->vertices.size() );
+			vbBufElements += modelUpload[ m ].indexCount;
 
 			// IB Copy
 			modelUpload[ m ].firstIndex = ibBufElements;
@@ -217,24 +218,24 @@ private:
 			ibCopyRegion.dstOffset = ib.GetSize();
 			CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
 
-			ibBufElements += static_cast<uint32_t>( modelLib.Find( m )->indices.size() );
+			modelUpload[ m ].indexCount = static_cast<uint32_t>( modelLib.Find( m )->indices.size() );
+			ibBufElements += modelUpload[ m ].indexCount;
 		}
 	}
 
 	void CommitModel( RenderView& view, const entity_t& model, const uint32_t objectOffset )
 	{
-		//drawSurfInstance_t& instance = view.surfaces[ view.committedModelCnt ];
+		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		modelSource_t* source = modelLib.Find( model.modelId );
 		surfUpload_t& upload = modelUpload[ model.modelId ];
 
-		//instance.instanceCnt = 1;
-		//instance.modelMatrix = model.matrix;
-		surf.modelMatrix = model.matrix;
+		instance.modelMatrix = model.matrix;
+		instance.surf = &surf;
 		surf.vertexCount = upload.vertexCount;
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
-		surf.indicesCnt = static_cast<uint32_t>( source->indices.size() );
+		surf.indicesCnt = upload.indexCount;
 		surf.materialId = model.materialId;
 		surf.objectId = objectOffset;
 		surf.flags = model.flags;
@@ -253,6 +254,25 @@ private:
 		}
 
 		++view.committedModelCnt;
+	}
+
+	void MergeSurfaces( RenderView& view )
+	{
+		for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
+			auto it = view.uniqueSurfs.find( renderView.surfaces[ i ] );
+			if ( it == view.uniqueSurfs.end() ) {
+				view.uniqueSurfs[ view.surfaces[ i ] ] = 1;
+			}
+			else {
+				it->second++;
+			}
+			view.surfaces[ i ].objectId += i;
+		}
+		for ( auto it = view.uniqueSurfs.begin(); it != view.uniqueSurfs.end(); ++it ) {
+			view.merged[ view.mergedModelCnt ] = it->first;
+			view.instanceCounts[ view.mergedModelCnt ] = it->second;
+			++view.mergedModelCnt;
+		}
 	}
 
 	void InitVulkan()
@@ -1670,7 +1690,7 @@ private:
 
 			for ( size_t surfIx = 0; surfIx < shadowView.committedModelCnt; surfIx++ )
 			{
-				drawSurf_t& surface = shadowView.surfaces[ surfIx ];
+				drawSurf_t& surface = *shadowView.instances[ surfIx ].surf;
 
 				pipelineObject_t* pipelineObject;
 				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HANDLE ) {
@@ -1740,7 +1760,7 @@ private:
 			{
 				for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
 				{
-					drawSurf_t& surface = view.surfaces[ surfIx ];
+					drawSurf_t& surface = *view.instances[ surfIx ].surf;
 
 					pipelineObject_t* pipelineObject;
 					if ( surface.pipelineObject[ pass ] == INVALID_HANDLE ) {
@@ -1782,7 +1802,7 @@ private:
 			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 			for ( size_t surfIx = 0; surfIx < view.committedModelCnt; surfIx++ )
 			{
-				drawSurf_t& surface = shadowView.surfaces[ surfIx ];
+				drawSurf_t& surface = *shadowView.instances[ surfIx ].surf;
 				if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HANDLE ) {
 					continue;
 				}
@@ -2304,7 +2324,7 @@ private:
 		for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
 		{
 			uniformBufferObject_t ubo;
-			ubo.model = renderView.surfaces[ i ].modelMatrix;
+			ubo.model = renderView.instances[ i ].modelMatrix;
 			ubo.view = renderView.viewMatrix;
 			ubo.proj = renderView.projMatrix;
 			uboBuffer.push_back( ubo );
@@ -2314,7 +2334,7 @@ private:
 		for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
 		{
 			uniformBufferObject_t ubo;
-			ubo.model = shadowView.surfaces[ i ].modelMatrix;
+			ubo.model = shadowView.instances[ i ].modelMatrix;
 			ubo.view = shadowView.viewMatrix;
 			ubo.proj = shadowView.projMatrix;
 			uboBuffer.push_back( ubo );

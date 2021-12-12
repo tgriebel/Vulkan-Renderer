@@ -474,9 +474,6 @@ struct texture_t
 
 struct drawSurf_t
 {
-	glm::mat4			modelMatrix;
-	uint32_t			instanceCnt;
-
 	uint32_t			vertexOffset;
 	uint32_t			vertexCount;
 	uint32_t			firstIndex;
@@ -496,8 +493,7 @@ struct drawSurf_t
 struct drawSurfInstance_t
 {
 	glm::mat4			modelMatrix;
-	uint32_t			instanceCnt;
-	drawSurf_t			surf;
+	drawSurf_t*			surf;
 };
 
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
@@ -549,15 +545,23 @@ public:
 		viewport.far = 0.0f;
 
 		committedModelCnt = 0;
+		mergedModelCnt = 0;
+		uniqueSurfs.reserve( MaxModels );
 	}
 
-	glm::mat4					viewMatrix;
-	glm::mat4					projMatrix;
-	viewport_t					viewport;
-	light_t						lights[ MaxLights ];
+	glm::mat4									viewMatrix;
+	glm::mat4									projMatrix;
+	viewport_t									viewport;
+	light_t										lights[ MaxLights ];
 
-	uint32_t					committedModelCnt;
-	drawSurf_t					surfaces[ MaxModels ];
+	uint32_t									committedModelCnt;
+	uint32_t									mergedModelCnt;
+	drawSurf_t									surfaces[ MaxModels ];
+	drawSurf_t									merged[ MaxModels ];
+	drawSurfInstance_t							instances[ MaxModels ];
+	uint32_t									instanceCounts[ MaxModels ];
+	std::unordered_map< drawSurf_t, uint32_t >	uniqueSurfs;
+
 };
 
 
