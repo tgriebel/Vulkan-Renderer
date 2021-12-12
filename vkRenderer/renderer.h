@@ -231,7 +231,7 @@ private:
 		surfUpload_t& upload = modelUpload[ model.modelId ];
 
 		instance.modelMatrix = model.matrix;
-		instance.surf = &surf;
+		instance.surf = &view.surfaces[ view.committedModelCnt ];
 		surf.vertexCount = upload.vertexCount;
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
@@ -258,8 +258,9 @@ private:
 
 	void MergeSurfaces( RenderView& view )
 	{
+		view.mergedModelCnt = 0;
 		for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
-			auto it = view.uniqueSurfs.find( renderView.surfaces[ i ] );
+			auto it = view.uniqueSurfs.find( view.surfaces[ i ] );
 			if ( it == view.uniqueSurfs.end() ) {
 				view.uniqueSurfs[ view.surfaces[ i ] ] = 1;
 			}
