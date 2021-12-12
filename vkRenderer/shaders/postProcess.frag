@@ -9,7 +9,6 @@ PS_LAYOUT_STANDARD
 
 void main()
 {
-	const uint objectId = pushConstants.objectId;
     const uint materialId = pushConstants.materialId;
 
 	const uint textureId0 = materials[ materialId ].textureId0;

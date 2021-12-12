@@ -9,7 +9,6 @@ PS_LAYOUT_STANDARD
 
 void main()
 {
-	const uint objectId = pushConstants.objectId;
     const uint materialId = pushConstants.materialId;
 
 	outColor = vec4( 1.0, 0.0, 0.0, 1.0 );
