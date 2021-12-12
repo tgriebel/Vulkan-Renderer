@@ -48,6 +48,7 @@ const uint32_t	MaxImageDescriptors				= 100;
 const uint32_t	MaxUboDescriptors				= 4;
 const uint32_t	MaxViews						= 2;
 const uint32_t	MaxModels						= 1000;
+const uint32_t	ShadowObjectOffset				= MaxModels;
 const uint32_t	MaxVertices						= 0x000FFFFF;
 const uint32_t	MaxIndices						= 0x000FFFFF;
 const uint32_t	MaxSurfaces						= MaxModels * MaxViews;
@@ -345,7 +346,8 @@ struct globalUboConstants_t
 	glm::vec4	time;
 	glm::vec4	heightmap;
 	glm::vec4	tonemap;
-	uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
+	uint32_t	shadowBaseId;
+	uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
 };
 
 struct materialBufferObject_t

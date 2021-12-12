@@ -2317,6 +2317,7 @@ private:
 			globals.time = glm::vec4( time, intPart, fracPart, 1.0f );
 			globals.heightmap = glm::vec4( imguiControls.heightMapHeight, 0.0f, 0.0f, 0.0f );
 			globals.tonemap = glm::vec4( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
+			globals.shadowBaseId = ShadowObjectOffset;
 			globalsBuffer.push_back( globals );
 		}
 
@@ -2331,7 +2332,7 @@ private:
 			ubo.proj = renderView.projMatrix;
 			uboBuffer.push_back( ubo );
 		}
-		uboBuffer.resize( MaxModels );
+		uboBuffer.resize( ShadowObjectOffset );
 		assert( shadowView.committedModelCnt < MaxModels );
 		for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
 		{
