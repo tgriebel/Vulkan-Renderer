@@ -2051,7 +2051,9 @@ private:
 		for ( uint32_t i = 0; i < programCount; ++i )
 		{
 			GpuProgram* prog = gpuPrograms.Find( i );
-			CreateShaders( *prog );
+			for ( int i = 0; i < GpuProgram::MaxShaders; ++i ) {
+				prog->vk_shaders[ i ] = CreateShaderModule( prog->shaders[ i ].blob );
+			}
 		}
 	}
 

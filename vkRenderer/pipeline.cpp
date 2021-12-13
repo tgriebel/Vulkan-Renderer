@@ -21,7 +21,7 @@ void CreateDescriptorSetLayout( GpuProgram& program )
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
 	layoutInfo.pBindings = bindings.data();
 
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &program.descSetLayout ) != VK_SUCCESS ) {
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &program.vk_descSetLayout ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create descriptor set layout!" );
 	}
 }
@@ -146,13 +146,13 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = state.shaders->vs;
+	vertShaderStageInfo.module = state.shaders->vk_shaders[ 0 ];
 	vertShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{ };
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = state.shaders->ps;
+	fragShaderStageInfo.module = state.shaders->vk_shaders[ 1 ];
 	fragShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -263,7 +263,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = 2;
 
-	VkDescriptorSetLayout layouts[] = { layout, state.shaders->descSetLayout };
+	VkDescriptorSetLayout layouts[] = { layout, state.shaders->vk_descSetLayout };
 	pipelineLayoutInfo.pSetLayouts = layouts;
 	
 	pipelineLayoutInfo.pushConstantRangeCount = 1;

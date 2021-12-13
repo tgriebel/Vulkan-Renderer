@@ -176,16 +176,31 @@ enum renderFlags_t : uint32_t
 	COMMITTED	= ( 1 << 2 ),
 };
 
+enum shaderType_t : uint32_t
+{
+	UNSPECIFIED = 0,
+	VERTEX,
+	PIXEL,
+	COMPUTE,
+};
+
+struct shaderSource_t
+{
+	std::string			name;
+	std::vector<char>	blob;
+	shaderType_t		type;
+};
+
 struct GpuProgram
 {
-	std::string				vsName;
-	std::string				psName;
-	std::vector<char>		vsBlob;
-	std::vector<char>		psBlob;
-	VkShaderModule			vs;
-	VkShaderModule			ps;
-	VkDescriptorSetLayout	descSetLayout;
+	static const uint32_t MaxShaders = 2;
+
+	shaderSource_t			shaders[ MaxShaders ];
+	VkShaderModule			vk_shaders[ MaxShaders ];
+	VkDescriptorSetLayout	vk_descSetLayout;
 	pipelineHdl_t			pipeline;
+	uint32_t				shaderCount;
+	bool					isCompute;
 };
 
 class refCount_t

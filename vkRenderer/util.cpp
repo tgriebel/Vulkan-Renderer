@@ -52,8 +52,7 @@ bool LoadTextureImage( const char * texturePath, texture_t& texture )
 
 void CreateShaders( GpuProgram& prog )
 {
-	prog.vs = CreateShaderModule( prog.vsBlob );
-	prog.ps = CreateShaderModule( prog.psBlob );
+
 }
 
 void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib )
