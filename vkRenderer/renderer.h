@@ -2282,25 +2282,6 @@ private:
 		window.~Window();
 	}
 
-	void UpdatePostProcessBuffers( uint32_t currentImage )
-	{
-		std::vector< uniformBufferObject_t > uboBuffer;
-		uboBuffer.reserve( MaxSurfaces );
-		for ( uint32_t i = 0; i < MaxSurfaces; ++i )
-		{
-			uniformBufferObject_t ubo;
-			ubo.model = glm::identity<glm::mat4>();
-			ubo.view = glm::identity<glm::mat4>();
-			ubo.proj = glm::identity<glm::mat4>();
-			uboBuffer.push_back( ubo );
-		}
-
-		void* uboMemoryMap = frameState[ currentImage ].surfParms.alloc.GetPtr();
-		if ( uboMemoryMap != nullptr ) {
-			memcpy( uboMemoryMap, uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
-		}
-	}
-
 	void UpdateBufferContents( uint32_t currentImage )
 	{
 		std::vector< globalUboConstants_t > globalsBuffer;
