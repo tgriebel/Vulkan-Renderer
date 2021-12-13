@@ -138,7 +138,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	//	return;
 	//}
 
-	pipelineHdl = pipelineLib.Add( "", pipelineObject_t() );
+	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
 
 	pipelineObject_t& pipelineObject = *pipelineLib.Find( pipelineHdl );
 	pipelineObject.state = state;

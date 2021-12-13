@@ -22,8 +22,9 @@ enum gfxStateBits_t : uint64_t
 
 struct pipelineState_t
 {
+	const char*		tag;
 	gfxStateBits_t	stateBits;
-	GpuProgram*	shaders;
+	GpuProgram*		shaders;
 	viewport_t		viewport;
 };
 

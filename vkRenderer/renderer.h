@@ -483,6 +483,7 @@ private:
 				state.viewport = GetDrawPassViewport( (drawPass_t)i );
 				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)i );
 				state.shaders = prog;
+				state.tag = gpuPrograms.FindName( m->shaders[ i ].Get() );
 
 				VkRenderPass pass;
 				VkDescriptorSetLayout layout;
