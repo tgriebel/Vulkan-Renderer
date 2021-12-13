@@ -753,6 +753,14 @@ struct graphicsQueue_t
 	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
 };
 
+struct computeQueue_t
+{
+	VkQueue						queue;
+	VkCommandPool				commandPool;
+	VkCommandBuffer				commandBuffer;
+	VkSemaphore					semaphore;
+};
+
 static inline void RandSphere( float& theta, float& phi )
 {
 	const float u = ( (float)rand() / ( RAND_MAX ) );

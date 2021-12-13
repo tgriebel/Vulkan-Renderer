@@ -93,6 +93,7 @@ private:
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
 	graphicsQueue_t					graphicsQueue;
+	computeQueue_t					computeQueue;
 	DrawPassState					shadowPassState;
 	DrawPassState					mainPassState;
 	DrawPassState					postPassState;
@@ -297,7 +298,7 @@ private:
 		{
 			// Pool Creation
 			CreateDescriptorPool();
-			CreateCommandPool();
+			CreateCommandPools();
 		}
 
 		{
@@ -1484,15 +1485,19 @@ private:
 		}
 	}
 
-	void CreateCommandPool()
+	void CreateCommandPools()
 	{
 		VkCommandPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
 		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &graphicsQueue.commandPool ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create command pool!" );
+			throw std::runtime_error( "Failed to create graphics command pool!" );
+		}
+
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_COMPUTE ];
+		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &computeQueue.commandPool ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create compute command pool!" );
 		}
 	}
 
@@ -1635,16 +1640,31 @@ private:
 	{
 		VkCommandBufferAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = graphicsQueue.commandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+		// Graphics
+		{
+			allocInfo.commandPool = graphicsQueue.commandPool;
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, graphicsQueue.commandBuffers ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to allocate command buffers!" );
+			if ( vkAllocateCommandBuffers( context.device, &allocInfo, graphicsQueue.commandBuffers ) != VK_SUCCESS ) {
+				throw std::runtime_error( "Failed to allocate graphics command buffers!" );
+			}
+
+			for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+				vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+			}
 		}
 
-		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-			vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+		// Compute
+		{
+			allocInfo.commandPool = computeQueue.commandPool;
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			allocInfo.commandBufferCount = 1;
+
+			if ( vkAllocateCommandBuffers( context.device, &allocInfo, &computeQueue.commandBuffer ) != VK_SUCCESS ) {
+				throw std::runtime_error( "Failed to allocate compute command buffers!" );
+			}
+			vkResetCommandBuffer( computeQueue.commandBuffer, 0 );
 		}
 	}
 
@@ -2093,6 +2113,10 @@ private:
 				throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 			}
 		}
+
+		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &computeQueue.semaphore ) ) {
+			throw std::runtime_error( "Failed to create compute semaphore!" );
+		}
 	}
 
 	void UpdateView()
@@ -2242,6 +2266,7 @@ private:
 		vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
 		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
+		vkFreeCommandBuffers( context.device, computeQueue.commandPool, 1, &computeQueue.commandBuffer );
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
 			vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
@@ -2267,8 +2292,10 @@ private:
 			vkDestroySemaphore( context.device, graphicsQueue.imageAvailableSemaphores[ i ], nullptr );
 			vkDestroyFence( context.device, graphicsQueue.inFlightFences[ i ], nullptr );
 		}
+		vkDestroySemaphore( context.device, computeQueue.semaphore, nullptr );
 
 		vkDestroyCommandPool( context.device, graphicsQueue.commandPool, nullptr );
+		vkDestroyCommandPool( context.device, computeQueue.commandPool, nullptr );
 		vkDestroyDevice( context.device, nullptr );
 
 		if ( enableValidationLayers )
