@@ -27,18 +27,18 @@ static GpuProgram LoadProgram( const std::string& vsFile, const std::string& psF
 
 void AssetLib< GpuProgram >::Create()
 {
-	Add( "Basic", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/simplePS.spv" ) );
-	Add( "Shadow",LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/shadowPS.spv" ) );
-	Add( "Prepass", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
-	Add( "Terrain", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/terrainPS.spv" ) );
-	Add( "TerrainDepth", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/depthPS.spv" ) );
-	Add( "TerrainShadow", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/shadowPS.spv" ) );
-	Add( "Sky", LoadProgram( "shaders_bin/skyboxVS.spv", "shaders_bin/skyboxPS.spv" ) );
-	Add( "LitOpaque", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
-	Add( "LitTree", LoadProgram( "shaders_bin/treeVS.spv", "shaders_bin/litPS.spv" ) ); // TODO: vert motion
-	Add( "LitTrans",  LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/emissivePS.spv" ) );
-	Add( "PostProcess", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/postProcessPS.spv" ) );
-	Add( "Image2D",	LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/simplePS.spv" ) );
+	Add( "Basic",			LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/simplePS.spv" ) );
+	Add( "Shadow",			LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/shadowPS.spv" ) );
+	Add( "Prepass",			LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
+	Add( "Terrain",			LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/terrainPS.spv" ) );
+	Add( "TerrainDepth",	LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/depthPS.spv" ) );
+	Add( "TerrainShadow",	LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/shadowPS.spv" ) );
+	Add( "Sky",				LoadProgram( "shaders_bin/skyboxVS.spv", "shaders_bin/skyboxPS.spv" ) );
+	Add( "LitOpaque",		LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
+	Add( "LitTree",			LoadProgram( "shaders_bin/treeVS.spv", "shaders_bin/litPS.spv" ) ); // TODO: vert motion
+	Add( "LitTrans",		LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/emissivePS.spv" ) );
+	Add( "PostProcess",		LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/postProcessPS.spv" ) );
+	Add( "Image2D",			LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/simplePS.spv" ) );
 }
 
 void AssetLib< texture_t >::Create()
