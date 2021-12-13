@@ -21,8 +21,7 @@ void CreateDescriptorSetLayout( GpuProgram& program )
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
 	layoutInfo.pBindings = bindings.data();
 
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &program.descSetLayout ) != VK_SUCCESS )
-	{
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &program.descSetLayout ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create descriptor set layout!" );
 	}
 }
@@ -313,4 +312,8 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	{
 		throw std::runtime_error( "Failed to create graphics pipeline!" );
 	}
+}
+
+void CreateComputePipeline( VkDescriptorSetLayout layout, pipelineHdl_t& pipelineHdl )
+{
 }

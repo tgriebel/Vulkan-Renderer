@@ -645,8 +645,7 @@ private:
 		allocInfo.descriptorSetCount = MAX_FRAMES_STATES;
 		allocInfo.pSetLayouts = layouts.data();
 
-		if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets ) != VK_SUCCESS )
-		{
+		if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to allocate descriptor sets!" );
 		}
 	}
