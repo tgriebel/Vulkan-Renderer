@@ -78,8 +78,12 @@
     <ClInclude Include="renderer.h" />
     <ClInclude Include="allocator.h" />
     <ClInclude Include="gpuResources.h" />
-    <ClInclude Include="beachScene.h" />
-    <ClInclude Include="chessScene.h" />
+    <ClInclude Include="scenes\chessScene.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\beachScene.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
@@ -131,6 +135,9 @@
     </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{90cea79c-20c6-4910-b690-2955a612a086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scenes">
+      <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -39,7 +39,7 @@ static SpinLock						acquireNextFrame;
 imguiControls_t imguiControls;
 #endif
 
-void MakeBeachScene();
+void MakeScene();
 void UpdateScene( const float dt );
 
 static float AdvanceTime()
@@ -65,7 +65,7 @@ int main()
 		materialLib.Create();
 		modelLib.Create();
 	}
-	MakeBeachScene();
+	MakeScene();
 
 	std::thread renderThread( RenderThread );
 

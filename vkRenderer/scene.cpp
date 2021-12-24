@@ -4,11 +4,11 @@
 #include "io.h"
 #include "window.h"
 
-#define BEACH
+//#define BEACH
 #if defined( BEACH )
-#include "beachScene.h"
+#include ""scenes/beachScene.h"
 #else
-#include "chessScene.h"
+#include "scenes/chessScene.h"
 #endif
 
 extern Scene scene;
