@@ -22,6 +22,29 @@ std::vector<char> ReadFile( const std::string& filename )
 	return buffer;
 }
 
+GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile )
+{
+	GpuProgram program;
+	program.shaders[ 0 ].name = vsFile;
+	program.shaders[ 0 ].blob = ReadFile( vsFile );
+	program.shaders[ 1 ].name = psFile;
+	program.shaders[ 1 ].blob = ReadFile( psFile );
+	program.shaderCount = 2;
+	program.isCompute = false;
+	return program;
+}
+
+
+GpuProgram LoadProgram( const std::string& csFile )
+{
+	GpuProgram program;
+	program.shaders[ 0 ].name = csFile;
+	program.shaders[ 0 ].blob = ReadFile( csFile );
+	program.shaderCount = 1;
+	program.isCompute = true;
+	return program;
+}
+
 
 void LoadModel( const std::string& fileName, modelSource_t& model )
 {

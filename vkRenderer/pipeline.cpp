@@ -274,8 +274,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
 	pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 
-	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS )
-	{
+	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS )	{
 		throw std::runtime_error( "Failed to create pipeline layout!" );
 	}
 
@@ -308,12 +307,56 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pipelineInfo.basePipelineIndex = -1; // Optional
 	pipelineInfo.pDepthStencilState = &depthStencil;
 
-	if ( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS )
-	{
+	if ( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create graphics pipeline!" );
 	}
 }
 
-void CreateComputePipeline( VkDescriptorSetLayout layout, pipelineHdl_t& pipelineHdl )
+void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, pipelineHdl_t& pipelineHdl )
 {
+	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
+
+	pipelineObject_t& pipelineObject = *pipelineLib.Find( pipelineHdl );
+	pipelineObject.state = state;
+
+	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};
+	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+	computeShaderStageInfo.module = state.shaders->vk_shaders[ 0 ];
+	computeShaderStageInfo.pName = "main";
+	computeShaderStageInfo.pNext = nullptr;
+
+	// TODO: think about details
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
+	{
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = 2;
+
+		VkDescriptorSetLayout layouts[] = { layout, state.shaders->vk_descSetLayout };
+		pipelineLayoutInfo.pSetLayouts = layouts;
+
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+
+		VkPushConstantRange pushRanges;
+		pushRanges.offset = 0;
+		pushRanges.size = sizeof( pushConstants_t );
+		pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
+		pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
+	}
+	//
+
+	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create pipeline layout!" );
+	}
+
+	VkComputePipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	pipelineInfo.flags = 0;
+	pipelineInfo.layout = pipelineObject.pipelineLayout;
+	pipelineInfo.stage = computeShaderStageInfo;
+	pipelineInfo.pNext = nullptr;
+
+	if ( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create compute pipeline!" );
+	}
 }
