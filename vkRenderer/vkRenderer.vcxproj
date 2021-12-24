@@ -168,6 +168,8 @@
   <ItemGroup>
     <ClInclude Include="allocator.h" />
     <ClInclude Include="assetLib.h" />
+    <ClInclude Include="beachScene.h" />
+    <ClInclude Include="chessScene.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="gpuResources.h" />
     <ClInclude Include="renderConstants.h" />
