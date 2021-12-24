@@ -1,9 +1,9 @@
 #pragma once
-#include "common.h"
-#include "scene.h"
-#include "util.h"
-#include "io.h"
-#include "window.h"
+#include "../common.h"
+#include "../scene.h"
+#include "../util.h"
+#include "../io.h"
+#include "../window.h"
 
 extern Scene scene;
 
