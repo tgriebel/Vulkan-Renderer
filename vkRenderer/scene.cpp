@@ -4,9 +4,9 @@
 #include "io.h"
 #include "window.h"
 
-//#define BEACH
+#define BEACH
 #if defined( BEACH )
-#include ""scenes/beachScene.h"
+#include "scenes/beachScene.h"
 #else
 #include "scenes/chessScene.h"
 #endif

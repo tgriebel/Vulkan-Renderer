@@ -31,7 +31,7 @@ void AssetLib< GpuProgram >::Create()
 
 void AssetLib< texture_t >::Create()
 {
-	const std::vector<std::string> texturePaths = { "Chessboard.jpg", "marble.jpg" };
+	const std::vector<std::string> texturePaths = { "Chessboard.jpg", "marble.jpg", "skybox.jpg" };
 
 	for ( const std::string& texturePath : texturePaths )
 	{
