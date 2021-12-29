@@ -1,0 +1,13 @@
+# Blender MTL File: 'knight6.blend'
+# Material Count: 1
+
+newmtl Material
+Ns 43.747293
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.309667 0.026018
+Ks 0.570866 0.570866 0.570866
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\uploads_files_652817_textures\\textures\\cadyou.com_Sapeli.jpg
