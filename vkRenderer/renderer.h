@@ -242,8 +242,9 @@ private:
 		surf.flags = model.flags;
 
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-			if ( source->material->shaders[ i ].IsValid() ) {
-				GpuProgram * prog = gpuPrograms.Find( source->material->shaders[ i ].Get() );
+			const Material* material = materialLib.Find( model.materialId );
+			if ( material->shaders[ i ].IsValid() ) {
+				GpuProgram * prog = gpuPrograms.Find( material->shaders[ i ].Get() );
 				if( prog == nullptr ) {
 					continue;
 				}

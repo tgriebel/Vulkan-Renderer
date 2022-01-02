@@ -586,7 +586,6 @@ public:
 
 struct modelSource_t
 {
-	Material*					material;
 	uint32_t					materialId;
 	AABB						bounds;
 	std::vector<VertexInput>	vertices;

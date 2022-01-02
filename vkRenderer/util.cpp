@@ -4,7 +4,9 @@
 #include "GeoBuilder.h"
 #include "assetLib.h"
 
-extern AssetLib< Material > materialLib;
+extern AssetLib< Material >			materialLib;
+extern AssetLib< modelSource_t >	modelLib;
+extern AssetLib< GpuProgram >		gpuPrograms;
 
 #define STB_IMAGE_IMPLEMENTATION // includes func defs
 #include "stb_image.h"
@@ -148,7 +150,6 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.material = materialLib.Find( "SKY" );
 	outModel.materialId = materialLib.FindId( "SKY" );
 }
 
@@ -169,7 +170,6 @@ void CreateTerrainSurface( modelSource_t& outModel )
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.material = materialLib.Find( "TERRAIN" );
 	outModel.materialId = materialLib.FindId( "TERRAIN" );
 }
 
@@ -195,7 +195,6 @@ void CreateWaterSurface( modelSource_t& outModel )
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.material = materialLib.Find( "WATER" );
 	outModel.materialId = materialLib.FindId( "WATER" );
 }
 
@@ -215,14 +214,14 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 
 	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
 
-	outModel.material = materialLib.Find( materialName.c_str() );
 	outModel.materialId = materialLib.FindId( materialName.c_str() );
 }
 
-void CreateStaticModel( const std::string& modelName, const std::string& materialName, modelSource_t& outModel )
+void CreateStaticModel( const std::string& modelName, const std::string& objectName, const std::string& materialName )
 {
-	LoadModel( modelName, outModel );
+	LoadModel( modelName, objectName );
 
-	outModel.material = materialLib.Find( materialName.c_str() );
-	outModel.materialId = materialLib.FindId( materialName.c_str() );
+	modelSource_t* model = modelLib.Find( objectName.c_str() );
+
+	model->materialId = materialLib.FindId( materialName.c_str() );
 }

@@ -1,7 +1,14 @@
 #include "io.h"
+#include "assetLib.h"
+#include "util.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
+
+extern AssetLib< Material >			materialLib;
+extern AssetLib< texture_t >		textureLib;
+extern AssetLib< modelSource_t >	modelLib;
+extern AssetLib< GpuProgram >		gpuPrograms;
 
 std::vector<char> ReadFile( const std::string& filename )
 {
@@ -46,19 +53,39 @@ GpuProgram LoadProgram( const std::string& csFile )
 }
 
 
-void LoadModel( const std::string& fileName, modelSource_t& model )
+void LoadModel( const std::string& fileName, const std::string& objectName )
 {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 
-	if ( !tinyobj::LoadObj( &attrib, &shapes, &materials, &warn, &err, ( ModelPath + fileName ).c_str() ) )
+	if ( !tinyobj::LoadObj( &attrib, &shapes, &materials, &warn, &err, ( ModelPath + fileName ).c_str(), ModelPath.c_str() ) )
 	{
 		throw std::runtime_error( warn + err );
 	}
 
+	for ( const auto& material : materials )
+	{
+		texture_t texture;
+		if ( LoadTextureImage( material.diffuse_texname.c_str(), texture ) ) {
+			texture.uploaded = false;
+			texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
+			textureLib.Add( material.diffuse_texname.c_str(), texture );
+		}
+
+		Material mat;
+		mat.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
+		mat.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
+		mat.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
+		mat.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
+		mat.textures[ 0 ] = textureLib.RetrieveHdl( material.diffuse_texname.c_str() );
+		materialLib.Add( material.name.c_str(), mat );
+	}
+
 	std::unordered_map<VertexInput, uint32_t> uniqueVertices{};
+
+	modelSource_t model;
 
 	uint32_t vertexCnt = 0;
 	model.vertices.reserve( attrib.vertices.size() );
@@ -93,4 +120,6 @@ void LoadModel( const std::string& fileName, modelSource_t& model )
 			model.indices.push_back( uniqueVertices[ vertex ] );
 		}
 	}
+
+	modelLib.Add( objectName.c_str(), model );
 }

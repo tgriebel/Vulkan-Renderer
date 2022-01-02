@@ -33,4 +33,4 @@ void CreateSkyBoxSurf( modelSource_t& outModel );
 void CreateTerrainSurface( modelSource_t& outModel );
 void CreateWaterSurface( modelSource_t& outModel );
 void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, glm::vec2& origin, glm::vec2& size );
-void CreateStaticModel( const std::string& modelName, const std::string& materialName, modelSource_t& outModel );
+void CreateStaticModel( const std::string& modelName, const std::string& objectName, const std::string& materialName );
