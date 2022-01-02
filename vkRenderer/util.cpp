@@ -216,12 +216,3 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 
 	outModel.materialId = materialLib.FindId( materialName.c_str() );
 }
-
-void CreateStaticModel( const std::string& modelName, const std::string& objectName, const std::string& materialName )
-{
-	LoadModel( modelName, objectName );
-
-	modelSource_t* model = modelLib.Find( objectName.c_str() );
-
-	model->materialId = materialLib.FindId( materialName.c_str() );
-}

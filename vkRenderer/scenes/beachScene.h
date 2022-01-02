@@ -126,7 +126,9 @@ void AssetLib< modelSource_t >::Create()
 		modelLib.Add( "_terrain", model );
 	}
 	{
-		CreateStaticModel( "palm_tree.obj", "palmTree", "PALM" );
+		LoadModel( "palm_tree.obj", "palmTree" );
+		modelSource_t* model = modelLib.Find( "palmTree" );
+		model->materialId = materialLib.FindId( "PALM" );
 	}
 	{
 		modelSource_t model;
