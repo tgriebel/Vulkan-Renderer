@@ -10,6 +10,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
 
+#include <aabb.h>
+
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
@@ -586,6 +588,7 @@ struct modelSource_t
 {
 	Material*					material;
 	uint32_t					materialId;
+	AABB						bounds;
 	std::vector<VertexInput>	vertices;
 	std::vector<uint32_t>		indices;
 };
