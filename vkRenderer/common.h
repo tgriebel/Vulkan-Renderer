@@ -571,7 +571,7 @@ struct entity_t
 {
 	glm::mat4					matrix;
 	uint32_t					materialId;
-	uint32_t					modelId;
+	uint32_t					modelIds[ 10 ];
 	renderFlags_t				flags;
 };
 

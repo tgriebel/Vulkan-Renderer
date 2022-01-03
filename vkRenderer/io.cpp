@@ -129,15 +129,16 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 
 			model.indices.push_back( uniqueVertices[ vertex ] );
 		}
-	}
 
-	model.materialId = 0;
+		model.materialId = 0;
 
-	if ( materials.size() > 0 ) {
-		const int materialId = materialLib.FindId( materials[ 0 ].name.c_str() );
-		if ( materialId >= 0 ) {
-			model.materialId = materialId;
+		if ( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) ) {
+			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
+			const int materialId = materialLib.FindId( materials[ shapeMaterial ].name.c_str() );
+			if ( materialId >= 0 ) {
+				model.materialId = materialId;
+			}
 		}
+		modelLib.Add( ( objectName + shape.name ).c_str(), model );
 	}
-	modelLib.Add( objectName.c_str(), model );
 }

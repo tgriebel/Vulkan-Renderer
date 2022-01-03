@@ -228,8 +228,8 @@ private:
 	{
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
-		modelSource_t* source = modelLib.Find( model.modelId );
-		surfUpload_t& upload = modelUpload[ model.modelId ];
+		modelSource_t* source = modelLib.Find( model.modelIds[ 0 ] );
+		surfUpload_t& upload = modelUpload[ model.modelIds[ 0 ] ];
 
 		instance.modelMatrix = model.matrix;
 		instance.surf = &view.surfaces[ view.committedModelCnt ];
@@ -1857,7 +1857,7 @@ private:
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / width, 1.0f / height ) - 1.0f;
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
-				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities[ imguiControls.selectedModelId ].modelId ) );
+				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities[ imguiControls.selectedModelId ].modelIds[ 0 ] ) );
 			}
 			else {
 				memset( &entityName[ 0 ], 0, 256 );
@@ -1868,8 +1868,8 @@ private:
 			if ( ImGui::BeginCombo( "Models", entityName ) )
 			{
 				for ( int entityIx = 0; entityIx < scene.entities.size(); ++entityIx ) {
-					const modelSource_t* model = modelLib.Find( scene.entities[ entityIx ].modelId );
-					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities[ entityIx ].modelId ) );
+					const modelSource_t* model = modelLib.Find( scene.entities[ entityIx ].modelIds[ 0 ] );
+					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities[ entityIx ].modelIds[ 0 ] ) );
 					if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
 						imguiControls.selectedModelId = entityIx;
 						scene.entities[ entityIx ].flags = renderFlags_t::WIREFRAME;

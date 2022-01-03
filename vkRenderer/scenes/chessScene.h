@@ -122,13 +122,9 @@ void AssetLib< modelSource_t >::Create()
 	}
 	{
 		LoadModel( "axis.obj", "pawn" );
-	//	modelSource_t* model = modelLib.Find( "pawn" );
-	//	model->materialId = materialLib.FindId( "WHITE_WOOD" );
 	}
 	{
 		LoadModel( "chess_board.obj", "board" );
-		modelSource_t* model = modelLib.Find( "board" );
-		model->materialId = materialLib.FindId( "WHITE_WOOD" );
 	}
 	{
 		modelSource_t model;
@@ -153,41 +149,26 @@ void MakeScene()
 	const int piecesNum = 16;
 
 	int entId = 0;
-	scene.entities.resize( 5 + piecesNum );
-	scene.CreateEntity( modelLib.FindId( "_skybox" ), scene.entities[ entId ] );
-	++entId;
-	scene.CreateEntity( modelLib.FindId( "board" ), scene.entities[ entId ] );
-	++entId;
-	scene.CreateEntity( modelLib.FindId( "_water" ), scene.entities[ entId ] );
-	++entId;
-	scene.CreateEntity( modelLib.FindId( "_postProcessQuad" ), scene.entities[ entId ] );
-	++entId;
-	scene.CreateEntity( modelLib.FindId( "_quadTexDebug" ), scene.entities[ entId ] );
-	++entId;
-
-	for ( int i = 0; i < piecesNum; ++i )
-	{
-		const int palmModelId = modelLib.FindId( "pawn" );
-		scene.CreateEntity( palmModelId, scene.entities[ entId ] );
+	const int modelNum = modelLib.Count();
+	scene.entities.resize( modelNum );
+	for ( int i = 0; i < modelNum; ++i ) {
+		scene.CreateEntity( i, scene.entities[ entId ] );
 		++entId;
 	}
 
-	// Board
-	scene.entities[ 1 ].matrix = glm::identity<glm::mat4>();
-
-	// Pieces
-	const float scale = 1.0f;// 0.0025f;
-	{
-		for ( int i = 5; i < ( 5 + piecesNum ); ++i )
-		{
-			glm::vec2 randPoint;
-			RandPlanePoint( randPoint );
-			randPoint = 10.0f * ( randPoint - 0.5f );
-			scene.entities[ i ].matrix = scale * glm::identity<glm::mat4>();
-			scene.entities[ i ].matrix[ 3 ][ 0 ] = randPoint.x;
-			scene.entities[ i ].matrix[ 3 ][ 1 ] = randPoint.y;
-			scene.entities[ i ].matrix[ 3 ][ 2 ] = 0.0f;
-			scene.entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
-		}
-	}
+	//// Pieces
+	//const float scale = 1.0f;// 0.0025f;
+	//{
+	//	for ( int i = entId; i < ( entId + piecesNum ); ++i )
+	//	{
+	//		glm::vec2 randPoint;
+	//		RandPlanePoint( randPoint );
+	//		randPoint = 10.0f * ( randPoint - 0.5f );
+	//		scene.entities[ i ].matrix = scale * glm::identity<glm::mat4>();
+	//		scene.entities[ i ].matrix[ 3 ][ 0 ] = randPoint.x;
+	//		scene.entities[ i ].matrix[ 3 ][ 1 ] = randPoint.y;
+	//		scene.entities[ i ].matrix[ 3 ][ 2 ] = 0.0f;
+	//		scene.entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
+	//	}
+	//}
 }

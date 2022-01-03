@@ -25,7 +25,7 @@ struct Scene
 	{
 		const modelSource_t* model = modelLib.Find( modelId );
 
-		entity.modelId = modelId;
+		entity.modelIds[ 0 ] = modelId;
 		entity.materialId = model->materialId;
 		entity.matrix = glm::identity<glm::mat4>();
 		entity.flags = renderFlags_t::NONE;
