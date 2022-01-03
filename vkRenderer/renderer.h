@@ -2365,7 +2365,17 @@ private:
 			materialBufferObject_t ubo;
 			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 				ubo.textures[ t ] = m->textures[ t ].Get();
-			}
+			}	
+			ubo.Kd = glm::vec4( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
+			ubo.Ks = glm::vec4( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );		
+			ubo.Ka = glm::vec4( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
+			ubo.Ke = glm::vec4( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
+			ubo.Tf = glm::vec4( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
+			ubo.Tr = m->Tr;
+			ubo.Ni = m->Ni;
+			ubo.Ns = m->Ns;
+			ubo.illum = m->illum;
+			ubo.d = m->d;
 			materialBuffer.push_back( ubo );
 		}
 

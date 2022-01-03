@@ -80,6 +80,16 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 		mat.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
 		mat.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
 		mat.textures[ 0 ] = textureLib.RetrieveHdl( material.diffuse_texname.c_str() );
+		mat.Kd = rgbTuplef_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
+		mat.Ks = rgbTuplef_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
+		mat.Ka = rgbTuplef_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
+		mat.Ke = rgbTuplef_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] );
+		mat.Tf = rgbTuplef_t( material.transmittance[ 0 ], material.transmittance[ 1 ], material.transmittance[ 2 ] );
+		mat.Ni = material.ior;
+		mat.Ns = material.shininess;
+		mat.d = material.dissolve;
+		mat.Tr = ( 1.0f - material.dissolve );
+		mat.illum = static_cast<float>( material.illum );
 		materialLib.Add( material.name.c_str(), mat );
 	}
 
@@ -121,5 +131,13 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 		}
 	}
 
+	model.materialId = 0;
+
+	if ( materials.size() > 0 ) {
+		const int materialId = materialLib.FindId( materials[ 0 ].name.c_str() );
+		if ( materialId >= 0 ) {
+			model.materialId = materialId;
+		}
+	}
 	modelLib.Add( objectName.c_str(), model );
 }

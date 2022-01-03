@@ -22,6 +22,7 @@ void main()
         vec4 color = texColor;
         // color.rgb *= lights[ i ].intensity * max( 0.0f, dot( lightDist, normalize( fragNormal ) ) );
 	    color.rgb *= lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
+    //    color.rgb *= materials[ materialId ].Kd.rgb;
         outColor += color;
     }
 

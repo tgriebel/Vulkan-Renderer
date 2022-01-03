@@ -31,6 +31,8 @@
 #include <math.h>
 #include <atomic>
 
+#include <color.h>
+
 #define USE_IMGUI
 
 const uint32_t KB_1 = 1024;
@@ -319,6 +321,19 @@ struct Material
 	hdl_t					textures[ MaxMaterialTextures ];
 	hdl_t					shaders[ DRAWPASS_COUNT ];
 
+	rgbTuplef_t				Ka;
+	rgbTuplef_t				Ke;
+	rgbTuplef_t				Kd;
+	rgbTuplef_t				Ks;
+	rgbTuplef_t				Tf;
+	float					Tr;
+	float					Ns;
+	float					Ni;
+	float					d;
+	float					illum;
+
+	bool					textured;
+
 	Material()
 	{
 		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
@@ -369,8 +384,18 @@ struct globalUboConstants_t
 
 struct materialBufferObject_t
 {
-	uint32_t textures[ Material::MaxMaterialTextures ];
-	uint32_t pad[ 8 ]; // minUniformBufferOffsetAlignment
+	uint32_t				textures[ Material::MaxMaterialTextures ];
+	glm::vec4				Ka;
+	glm::vec4				Ke;
+	glm::vec4				Kd;
+	glm::vec4				Ks;
+	glm::vec4				Tf;
+	float					Tr;
+	float					Ns;
+	float					Ni;
+	float					d;
+	float					illum;
+	uint8_t					pad[ 60 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
 };
 
 struct light_t

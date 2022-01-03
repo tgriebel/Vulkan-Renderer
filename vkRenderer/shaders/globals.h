@@ -30,6 +30,17 @@
 										uint        textureId4;													\
 										uint        textureId5;													\
 										uint        textureId6;													\
+										uint        textureId7;													\
+										vec4		Ka;															\
+										vec4		Ke;															\
+										vec4		Kd;															\
+										vec4		Ks;															\
+										vec4		Tf;															\
+										float		Tr;															\
+										float		Ns;															\
+										float		Ni;															\
+										float		d;															\
+										float		illum;														\
 									} materials[];
 
 #define LIGHT_LAYOUT( S, N )		layout( set = S, binding = N ) uniform LightBuffer							\

@@ -121,9 +121,9 @@ void AssetLib< modelSource_t >::Create()
 		modelLib.Add( "_skybox", model );
 	}
 	{
-		LoadModel( "pawn.obj", "pawn" );
-		modelSource_t* model = modelLib.Find( "pawn"  );
-		model->materialId = materialLib.FindId( "WHITE_WOOD" );
+		LoadModel( "axis.obj", "pawn" );
+	//	modelSource_t* model = modelLib.Find( "pawn" );
+	//	model->materialId = materialLib.FindId( "WHITE_WOOD" );
 	}
 	{
 		LoadModel( "chess_board.obj", "board" );
