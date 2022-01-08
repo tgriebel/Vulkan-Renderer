@@ -121,9 +121,9 @@ void AssetLib< modelSource_t >::Create()
 		modelLib.Add( "_skybox", model );
 	}
 	{
-		LoadModel( "axis.obj", "pawn" );
-	}
-	{
+		LoadModel( "axis.obj", "axis" );
+		LoadModel( "cube.obj", "cube" );
+		LoadModel( "pawn.obj", "pawn" );
 		LoadModel( "chess_board.obj", "board" );
 	}
 	{
@@ -148,12 +148,35 @@ void MakeScene()
 {
 	const int piecesNum = 16;
 
-	int entId = 0;
-	const int modelNum = modelLib.Count();
-	scene.entities.resize( modelNum );
-	for ( int i = 0; i < modelNum; ++i ) {
-		scene.CreateEntity( i, scene.entities[ entId ] );
-		++entId;
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "_skybox" ), ent );
+		scene.entities.Add( "_skybox", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		scene.entities.Add( "white_pawn_0", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "cube" ), ent );
+		ent.flags = static_cast< renderFlags_t >( WIREFRAME | SKIP_OPAQUE );
+		scene.entities.Add( "white_pawn_0_cube", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "_postProcessQuad" ), ent );
+		scene.entities.Add( "_postProcessQuad", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "_quadTexDebug" ), ent );
+		scene.entities.Add( "_quadTexDebug", ent );
 	}
 
 	//// Pieces

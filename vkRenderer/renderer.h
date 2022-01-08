@@ -77,7 +77,6 @@ private:
 	static const bool					ValidateErrors = true;
 
 	renderConstants_t					rc;
-	std::vector<surfUpload_t>			modelUpload;
 	RenderView							renderView;
 	RenderView							shadowView;
 
@@ -182,7 +181,6 @@ private:
 		const VkDeviceSize vbSize = sizeof( VertexInput ) * MaxVertices;
 		const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
 		const uint32_t modelCount = modelLib.Count();
-		modelUpload.resize( modelCount );
 		CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
 		CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
 
@@ -190,72 +188,82 @@ private:
 		static uint32_t ibBufElements = 0;
 		for ( uint32_t m = 0; m < modelCount; ++m )
 		{
-			VkDeviceSize vbCopySize = sizeof( modelLib.Find( m )->vertices[ 0 ] ) * modelLib.Find( m )->vertices.size();
-			VkDeviceSize ibCopySize = sizeof( modelLib.Find( m )->indices[ 0 ] ) * modelLib.Find( m )->indices.size();
+			modelSource_t* model = modelLib.Find( m );	
+			for ( uint32_t s = 0; s < model->surfCount; ++s )
+			{
+				surface_t& surf = model->surfs[ s ];
+				surfUpload_t& upload = model->upload[ s ];
+				VkDeviceSize vbCopySize = sizeof( surf.vertices[ 0 ] ) * surf.vertices.size();
+				VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
 
-			// VB Copy
-			modelUpload[ m ].vertexOffset = vbBufElements;
-			stagingBuffer.Reset();
-			stagingBuffer.CopyData( modelLib.Find( m )->vertices.data(), static_cast<size_t>( vbCopySize ) );
+				upload.vertexOffset = vbBufElements;
+				upload.firstIndex = ibBufElements;
 
-			VkBufferCopy vbCopyRegion{ };
-			vbCopyRegion.size = vbCopySize;
-			vbCopyRegion.srcOffset = 0;
-			vbCopyRegion.dstOffset = vb.GetSize();
-			CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
+				// VB Copy
+				stagingBuffer.Reset();
+				stagingBuffer.CopyData( surf.vertices.data(), static_cast<size_t>( vbCopySize ) );
 
-			modelUpload[ m ].indexCount = static_cast<uint32_t>( modelLib.Find( m )->vertices.size() );
-			vbBufElements += modelUpload[ m ].indexCount;
+				VkBufferCopy vbCopyRegion{ };
+				vbCopyRegion.size = vbCopySize;
+				vbCopyRegion.srcOffset = 0;
+				vbCopyRegion.dstOffset = vb.GetSize();
+				CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
 
-			// IB Copy
-			modelUpload[ m ].firstIndex = ibBufElements;
+				const uint32_t vertexCount = static_cast<uint32_t>( surf.vertices.size() );
+				upload.vertexCount = vertexCount;
+				vbBufElements += vertexCount;
 
-			stagingBuffer.Reset();
-			stagingBuffer.CopyData( modelLib.Find( m )->indices.data(), static_cast<size_t>( ibCopySize ) );
+				// IB Copy
+				stagingBuffer.Reset();
+				stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
-			VkBufferCopy ibCopyRegion{ };
-			ibCopyRegion.size = ibCopySize;
-			ibCopyRegion.srcOffset = 0;
-			ibCopyRegion.dstOffset = ib.GetSize();
-			CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
+				VkBufferCopy ibCopyRegion{ };
+				ibCopyRegion.size = ibCopySize;
+				ibCopyRegion.srcOffset = 0;
+				ibCopyRegion.dstOffset = ib.GetSize();
+				CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
 
-			modelUpload[ m ].indexCount = static_cast<uint32_t>( modelLib.Find( m )->indices.size() );
-			ibBufElements += modelUpload[ m ].indexCount;
+				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
+				upload.indexCount = indexCount;
+				ibBufElements += indexCount;
+			}
 		}
 	}
 
-	void CommitModel( RenderView& view, const entity_t& model, const uint32_t objectOffset )
+	void CommitModel( RenderView& view, const entity_t& ent, const uint32_t objectOffset )
 	{
-		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
-		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
-		modelSource_t* source = modelLib.Find( model.modelIds[ 0 ] );
-		surfUpload_t& upload = modelUpload[ model.modelIds[ 0 ] ];
+		modelSource_t* source = modelLib.Find( ent.modelId );
+		for ( uint32_t i = 0; i < source->surfCount; ++i ) {
+			drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
+			drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
+			surfUpload_t& upload = source->upload[ i ];
 
-		instance.modelMatrix = model.matrix;
-		instance.surf = &view.surfaces[ view.committedModelCnt ];
-		surf.vertexCount = upload.vertexCount;
-		surf.vertexOffset = upload.vertexOffset;
-		surf.firstIndex = upload.firstIndex;
-		surf.indicesCnt = upload.indexCount;
-		surf.materialId = model.materialId;
-		surf.objectId = objectOffset;
-		surf.flags = model.flags;
+			instance.modelMatrix = ent.matrix;
+			instance.surf = &view.surfaces[ view.committedModelCnt ];
+			surf.vertexCount = upload.vertexCount;
+			surf.vertexOffset = upload.vertexOffset;
+			surf.firstIndex = upload.firstIndex;
+			surf.indicesCnt = upload.indexCount;
+			surf.materialId = source->surfs[ i ].materialId;
+			surf.objectId = objectOffset;
+			surf.flags = ent.flags;
 
-		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-			const Material* material = materialLib.Find( model.materialId );
-			if ( material->shaders[ i ].IsValid() ) {
-				GpuProgram * prog = gpuPrograms.Find( material->shaders[ i ].Get() );
-				if( prog == nullptr ) {
-					continue;
+			for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
+				const Material* material = materialLib.Find( surf.materialId );
+				if ( material->shaders[ pass ].IsValid() ) {
+					GpuProgram* prog = gpuPrograms.Find( material->shaders[ pass ].Get() );
+					if ( prog == nullptr ) {
+						continue;
+					}
+					surf.pipelineObject[ pass ] = prog->pipeline;
 				}
-				surf.pipelineObject[ i ] = prog->pipeline;
+				else {
+					surf.pipelineObject[ pass ] = INVALID_HANDLE;
+				}
 			}
-			else {
-				surf.pipelineObject[ i ] = INVALID_HANDLE;
-			}
-		}
 
-		++view.committedModelCnt;
+			++view.committedModelCnt;
+		}
 	}
 
 	void MergeSurfaces( RenderView& view )
@@ -1792,6 +1800,9 @@ private:
 					if ( ( pass == DRAWPASS_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
 						continue;
 					}
+					if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
+						continue;
+					}
 					GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
 
 					vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
@@ -1857,7 +1868,7 @@ private:
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / width, 1.0f / height ) - 1.0f;
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
-				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities[ imguiControls.selectedModelId ].modelIds[ 0 ] ) );
+				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities.Find( imguiControls.selectedModelId )->modelId ) );
 			}
 			else {
 				memset( &entityName[ 0 ], 0, 256 );
@@ -1867,18 +1878,18 @@ private:
 			ImGui::Text( "Camera Origin: (%f, %f, %f)", scene.camera.GetOrigin().x, scene.camera.GetOrigin().y, scene.camera.GetOrigin().z );
 			if ( ImGui::BeginCombo( "Models", entityName ) )
 			{
-				for ( int entityIx = 0; entityIx < scene.entities.size(); ++entityIx ) {
-					const modelSource_t* model = modelLib.Find( scene.entities[ entityIx ].modelIds[ 0 ] );
-					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities[ entityIx ].modelIds[ 0 ] ) );
+				for ( uint32_t entityIx = 0; entityIx < scene.entities.Count(); ++entityIx ) {
+					const modelSource_t* model = modelLib.Find( scene.entities.Find( entityIx )->modelId );
+					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities.Find( entityIx )->modelId ) );
 					if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
 						imguiControls.selectedModelId = entityIx;
-						scene.entities[ entityIx ].flags = renderFlags_t::WIREFRAME;
-						tempOrigin.x = scene.entities[ entityIx ].matrix[ 3 ][ 0 ];
-						tempOrigin.y = scene.entities[ entityIx ].matrix[ 3 ][ 1 ];
-						tempOrigin.z = scene.entities[ entityIx ].matrix[ 3 ][ 2 ];
+						scene.entities.Find( entityIx )->flags = renderFlags_t::WIREFRAME;
+						tempOrigin.x = scene.entities.Find( entityIx )->matrix[ 3 ][ 0 ];
+						tempOrigin.y = scene.entities.Find( entityIx )->matrix[ 3 ][ 1 ];
+						tempOrigin.z = scene.entities.Find( entityIx )->matrix[ 3 ][ 2 ];
 					}
 					else {
-						scene.entities[ entityIx ].flags = (renderFlags_t)( scene.entities[ entityIx ].flags & ~renderFlags_t::WIREFRAME );
+						scene.entities.Find( entityIx )->flags = (renderFlags_t)( scene.entities.Find( entityIx )->flags & ~renderFlags_t::WIREFRAME );
 					}
 				}
 				ImGui::EndCombo();
@@ -1888,10 +1899,10 @@ private:
 			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin.z, 0.1f, 1.0f );
 
 			if ( imguiControls.selectedModelId >= 0 ) {
-				entity_t& entity = scene.entities[ imguiControls.selectedModelId ];
-				entity.matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin.x;
-				entity.matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
-				entity.matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
+				entity_t* entity = scene.entities.Find( imguiControls.selectedModelId );
+				entity->matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin.x;
+				entity->matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
+				entity->matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
 			}
 			ImGui::Text( "Frame Number: %d", frameNumber );
 			ImGui::SameLine();

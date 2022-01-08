@@ -177,7 +177,8 @@ enum renderFlags_t : uint32_t
 	NONE		= 0,
 	NO_SHADOWS	= ( 1 << 0 ),
 	WIREFRAME	= ( 1 << 1 ),
-	COMMITTED	= ( 1 << 2 ),
+	SKIP_OPAQUE	= ( 1 << 2 ),
+	COMMITTED	= ( 1 << 3 ),
 };
 
 enum shaderType_t : uint32_t
@@ -567,12 +568,41 @@ template<> struct std::hash<drawSurf_t> {
 	}
 };
 
+struct surface_t {
+	uint32_t					materialId;
+	std::vector<VertexInput>	vertices;
+	std::vector<uint32_t>		indices;
+};
+
+
+struct surfUpload_t
+{
+	uint32_t					vertexCount;
+	uint32_t					indexCount;
+	uint32_t					vertexOffset;
+	uint32_t					firstIndex;
+};
+
+
+struct modelSource_t
+{
+	static const uint32_t		MaxSurfaces = 10;
+	AABB						bounds;
+	surface_t					surfs[ MaxSurfaces ];
+	surfUpload_t				upload[ MaxSurfaces ];
+	uint32_t					surfCount;
+};
+
 struct entity_t
 {
 	glm::mat4					matrix;
-	uint32_t					materialId;
-	uint32_t					modelIds[ 10 ];
+	uint32_t					modelId;
 	renderFlags_t				flags;
+
+	AABB GetBounds() const;
+	glm::vec3 GetOrigin() const;
+	void SetOrigin( const glm::vec3& origin );
+	void SetScale( const glm::vec3& scale );
 };
 
 
@@ -608,23 +638,6 @@ public:
 
 };
 
-
-struct modelSource_t
-{
-	uint32_t					materialId;
-	AABB						bounds;
-	std::vector<VertexInput>	vertices;
-	std::vector<uint32_t>		indices;
-};
-
-
-struct surfUpload_t
-{
-	uint32_t					vertexCount;
-	uint32_t					indexCount;
-	uint32_t					vertexOffset;
-	uint32_t					firstIndex;
-};
 
 struct DrawPassState
 {

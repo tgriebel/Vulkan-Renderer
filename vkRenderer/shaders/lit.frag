@@ -14,17 +14,18 @@ void main()
     const uint textureId = materials[ materialId ].textureId0;
 
     const vec4 texColor = SrgbTolinear( texture( texSampler[ textureId ], fragTexCoord ) );
-    outColor = AMBIENT * texColor;
+    const vec3 ambient = materials[ materialId ].Ka.rgb;
+    const vec3 diffuse = materials[ materialId ].Kd.rgb;
+    outColor.rgb = diffuse;
+    vec3 color = vec3( 0.0f, 0.0f, 0.0f );
     for( int i = 0; i < 3; ++i ) {
 	    const vec3 lightDist = -normalize( lights[ i ].lightPos - worldPosition.xyz );
         const float spotAngle = dot( lightDist, lights[ i ].lightDir );
         const float spotFov = 0.5f;
-        vec4 color = texColor;
-        // color.rgb *= lights[ i ].intensity * max( 0.0f, dot( lightDist, normalize( fragNormal ) ) );
-	    color.rgb *= lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
-    //    color.rgb *= materials[ materialId ].Kd.rgb;
-        outColor += color;
+        // color += lights[ i ].intensity * max( 0.0f, dot( lightDist, normalize( fragNormal ) ) );
+	    color += lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
     }
+    outColor.a = 1.0f;
 
     float visibility = 1.0f;
     const uint shadowMapTexId = 0;

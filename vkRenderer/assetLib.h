@@ -11,13 +11,15 @@ private:
 public:
 	void					Create();
 	const Asset*			GetDefault() const { return ( assets.size() > 0 ) ? &assets[ 0 ] : nullptr; };
-	uint32_t				Count() { return static_cast<uint32_t>( assets.size() ); }
+	uint32_t				Count() const { return static_cast<uint32_t>( assets.size() ); }
 	int						Add( const char* name, const Asset& asset );
 	Asset*					Find( const char* name );
-	hdl_t					RetrieveHdl( const char* name );
+	const Asset*			Find( const char* name ) const;
+	hdl_t					RetrieveHdl( const char* name ) const;
 	inline Asset*			Find( const int id ) { return ( id < assets.size() && id >= 0 ) ? &assets[ id ] : nullptr; }
-	int						FindId( const char* name );
-	const char*				FindName( const int id ) { return ( id < tags.size() && id >= 0 ) ? tags[ id ].c_str() : ""; }
+	inline const Asset*		Find( const int id ) const { return ( id < assets.size() && id >= 0 ) ? &assets[ id ] : nullptr; }
+	int						FindId( const char* name ) const;
+	const char*				FindName( const int id ) const { return ( id < tags.size() && id >= 0 ) ? tags[ id ].c_str() : ""; }
 };
 
 template< class Asset >
@@ -31,7 +33,7 @@ int AssetLib< Asset >::Add( const char* name, const Asset& asset )
 }
 
 template< class Asset >
-int AssetLib< Asset >::FindId( const char* name )
+int AssetLib< Asset >::FindId( const char* name ) const
 {
 	auto it = find( tags.begin(), tags.end(), name );
 	const int idx = static_cast<int>( std::distance( tags.begin(), it ) );
@@ -46,7 +48,14 @@ Asset* AssetLib< Asset >::Find( const char* name )
 }
 
 template< class Asset >
-hdl_t AssetLib< Asset >::RetrieveHdl( const char* name )
+const Asset* AssetLib< Asset >::Find( const char* name ) const
+{
+	const int id = FindId( name );
+	return ( id >= 0 ) ? &assets[ id ] : nullptr;
+}
+
+template< class Asset >
+hdl_t AssetLib< Asset >::RetrieveHdl( const char* name ) const
 {
 	const int id = FindId( name );
 	return ( id >= 0 ) ? handles[ id ] : INVALID_HDL;

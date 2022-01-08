@@ -98,7 +98,8 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 	modelSource_t model;
 
 	uint32_t vertexCnt = 0;
-	model.vertices.reserve( attrib.vertices.size() );
+	//model.surfs[ 0 ].vertices.reserve( attrib.vertices.size() );
+	model.surfCount = 0;
 
 	for ( const auto& shape : shapes )
 	{
@@ -123,22 +124,22 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 
 			if ( uniqueVertices.count( vertex ) == 0 )
 			{
-				model.vertices.push_back( vertex );
-				uniqueVertices[ vertex ] = static_cast<uint32_t>( model.vertices.size() - 1 );
+				model.surfs[ model.surfCount ].vertices.push_back( vertex );
+				uniqueVertices[ vertex ] = static_cast<uint32_t>( model.surfs[ model.surfCount ].vertices.size() - 1 );
 			}
 
-			model.indices.push_back( uniqueVertices[ vertex ] );
+			model.surfs[ model.surfCount ].indices.push_back( uniqueVertices[ vertex ] );
 		}
 
-		model.materialId = 0;
-
+		model.surfs[ model.surfCount ].materialId = 0;
 		if ( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) ) {
 			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
 			const int materialId = materialLib.FindId( materials[ shapeMaterial ].name.c_str() );
 			if ( materialId >= 0 ) {
-				model.materialId = materialId;
+				model.surfs[ model.surfCount ].materialId = materialId;
 			}
 		}
-		modelLib.Add( ( objectName + shape.name ).c_str(), model );
+		++model.surfCount;
 	}
+	modelLib.Add( objectName.c_str(), model );
 }

@@ -8,7 +8,7 @@ extern AssetLib< modelSource_t > modelLib;
 struct Scene
 {
 	Camera						camera;
-	std::vector<entity_t>		entities;
+	AssetLib< entity_t >		entities;
 	float						defaultNear = 1000.0f;
 	float						defaultFar = 0.1f;
 
@@ -25,8 +25,7 @@ struct Scene
 	{
 		const modelSource_t* model = modelLib.Find( modelId );
 
-		entity.modelIds[ 0 ] = modelId;
-		entity.materialId = model->materialId;
+		entity.modelId = modelId;
 		entity.matrix = glm::identity<glm::mat4>();
 		entity.flags = renderFlags_t::NONE;
 	}

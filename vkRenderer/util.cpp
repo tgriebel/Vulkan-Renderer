@@ -148,9 +148,10 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 		gb.AddPlaneSurf( info[ i ] );
 	}
 
-	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
-	outModel.materialId = materialLib.FindId( "SKY" );
+	outModel.surfCount = 1;
+	outModel.surfs[ 0 ].materialId = materialLib.FindId( "SKY" );
 }
 
 void CreateTerrainSurface( modelSource_t& outModel )
@@ -168,9 +169,10 @@ void CreateTerrainSurface( modelSource_t& outModel )
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
-	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
-	outModel.materialId = materialLib.FindId( "TERRAIN" );
+	outModel.surfCount = 1;
+	outModel.surfs[ 0 ].materialId = materialLib.FindId( "TERRAIN" );
 }
 
 void CreateWaterSurface( modelSource_t& outModel )
@@ -193,9 +195,10 @@ void CreateWaterSurface( modelSource_t& outModel )
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
-	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
-	outModel.materialId = materialLib.FindId( "WATER" );
+	outModel.surfCount = 1;
+	outModel.surfs[ 0 ].materialId = materialLib.FindId( "WATER" );
 }
 
 void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, glm::vec2& origin, glm::vec2& size )
@@ -212,7 +215,8 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
-	CopyGeoBuilderResult( gb, outModel.vertices, outModel.indices );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
-	outModel.materialId = materialLib.FindId( materialName.c_str() );
+	outModel.surfCount = 1;
+	outModel.surfs[ 0 ].materialId = materialLib.FindId( materialName.c_str() );
 }
