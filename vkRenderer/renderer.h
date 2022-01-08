@@ -2373,7 +2373,7 @@ private:
 		{
 			const Material* m = materialLib.Find( i );
 
-			materialBufferObject_t ubo;
+			materialBufferObject_t ubo{};
 			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 				ubo.textures[ t ] = m->textures[ t ].Get();
 			}	
@@ -2398,14 +2398,17 @@ private:
 		}
 
 		frameState[ currentImage ].globalConstants.Reset();
-		frameState[ currentImage ].globalConstants.CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) * globalsBuffer.size() );
+		frameState[ currentImage ].globalConstants.CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) );
 
+		assert( uboBuffer.size() <= MaxSurfaces );
 		frameState[ currentImage ].surfParms.Reset();
 		frameState[ currentImage ].surfParms.CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
 
+		assert( materialBuffer.size() <= MaxMaterialDescriptors );
 		frameState[ currentImage ].materialBuffers.Reset();
 		frameState[ currentImage ].materialBuffers.CopyData( materialBuffer.data(), sizeof( materialBufferObject_t ) * materialBuffer.size() );
 
+		assert( lightBuffer.size() <= MaxLights );
 		frameState[ currentImage ].lightParms.Reset();
 		frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
 	}

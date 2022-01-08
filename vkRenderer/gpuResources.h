@@ -28,6 +28,7 @@ struct GpuBuffer
 
 	void CopyData( void* data, const size_t sizeInBytes )
 	{
+		assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
 		void* mappedData = alloc.GetPtr();
 		if ( mappedData != nullptr )
 		{

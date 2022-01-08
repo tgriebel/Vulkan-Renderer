@@ -41,6 +41,7 @@
 										float		Ni;															\
 										float		d;															\
 										float		illum;														\
+										uint		pad[ 15 ];													\
 									} materials[];
 
 #define LIGHT_LAYOUT( S, N )		layout( set = S, binding = N ) uniform LightBuffer							\
