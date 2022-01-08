@@ -13,6 +13,6 @@ void main()
     gl_Position		= worldPosition;
     fragColor		= inColor;
     fragTexCoord	= inTexCoord;
-	fragNormal		= normalize( cross( inTangent, inBinorm ) );
+	fragNormal		= inNormal;
 	clipPosition	= gl_Position;
 }

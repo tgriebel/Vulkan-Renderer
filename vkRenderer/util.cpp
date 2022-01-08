@@ -65,8 +65,7 @@ void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, s
 		VertexInput vert;
 		vert.pos = v.pos;
 		vert.color = v.color;
-		vert.tangent = v.tangent;
-		vert.bitangent = v.bitangent;
+		vert.normal = v.normal;
 		vert.texCoord = v.texCoord;
 
 		vb.push_back( vert );

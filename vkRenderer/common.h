@@ -84,9 +84,7 @@ struct VertexInput
 {
 	glm::vec3 pos;
 	glm::vec4 color;
-	//glm::vec3 normal;
-	glm::vec3 bitangent;
-	glm::vec3 tangent;
+	glm::vec3 normal;
 	glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription GetBindingDescription()
@@ -99,7 +97,7 @@ struct VertexInput
 		return bindingDescription;
 	}
 
-	static const uint32_t attribMax = 5;
+	static const uint32_t attribMax = 4;
 	static std::array<VkVertexInputAttributeDescription, attribMax> GetAttributeDescriptions()
 	{
 		uint32_t attribId = 0;
@@ -120,13 +118,7 @@ struct VertexInput
 		attributeDescriptions[ attribId ].binding = 0;
 		attributeDescriptions[ attribId ].location = attribId;
 		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, tangent );
-		++attribId;
-
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, bitangent );      
+		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, normal );
 		++attribId;
 
 		attributeDescriptions[ attribId ].binding = 0;
@@ -142,7 +134,7 @@ struct VertexInput
 
 	bool operator==( const VertexInput& other ) const
 	{
-		return pos == other.pos && color == other.color && tangent == other.tangent && texCoord == other.texCoord;
+		return pos == other.pos && color == other.color && normal == other.normal && texCoord == other.texCoord;
 	}
 };
 
@@ -351,7 +343,7 @@ template<> struct std::hash<VertexInput>
 {
 	size_t operator()( VertexInput const& vertex ) const
 	{
-		return ( ( hash<glm::vec3>()( vertex.pos ) ^ ( hash<glm::vec3>()( vertex.color ) << 1 ) ) >> 1 ) ^ ( hash<glm::vec2>()( vertex.texCoord ) << 1 ) ^ ( hash<glm::vec2>()( vertex.tangent ) << 1 );
+		return ( ( hash<glm::vec3>()( vertex.pos ) ^ ( hash<glm::vec3>()( vertex.color ) << 1 ) ) >> 1 ) ^ ( hash<glm::vec2>()( vertex.texCoord ) << 1 ) ^ ( hash<glm::vec2>()( vertex.normal ) << 1 );
 	}
 };
 

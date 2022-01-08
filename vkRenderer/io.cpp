@@ -116,9 +116,9 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 			vertex.texCoord[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
 			vertex.texCoord[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
 
-			// vertex.normal[0] = attrib.normals[3 * index.normal_index + 0];
-			// vertex.normal[1] = attrib.normals[3 * index.normal_index + 1];
-			// vertex.normal[2] = attrib.normals[3 * index.normal_index + 2];
+			vertex.normal[0] = attrib.normals[3 * index.normal_index + 0];
+			vertex.normal[1] = attrib.normals[3 * index.normal_index + 1];
+			vertex.normal[2] = attrib.normals[3 * index.normal_index + 2];
 
 			vertex.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 

@@ -59,9 +59,8 @@
 
 #define VS_IN		layout( set = 0, location = 0 ) in vec3 inPosition;											\
 					layout( set = 0, location = 1 ) in vec4 inColor;											\
-					layout( set = 0, location = 2 ) in vec3 inTangent;											\
-					layout( set = 0, location = 3 ) in vec3 inBinorm;											\
-					layout( set = 0, location = 4 ) in vec2 inTexCoord;
+					layout( set = 0, location = 2 ) in vec3 inNormal;											\
+					layout( set = 0, location = 3 ) in vec2 inTexCoord;
 
 #define VS_OUT		layout( set = 0, location = 0 ) out vec4 fragColor;											\
 					layout( set = 0, location = 1 ) out vec3 fragNormal;										\
