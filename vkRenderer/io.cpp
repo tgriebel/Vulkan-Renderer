@@ -68,7 +68,7 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 	for ( const auto& material : materials )
 	{
 		texture_t texture;
-		if ( LoadTextureImage( material.diffuse_texname.c_str(), texture ) ) {
+		if ( LoadTextureImage( ( TexturePath + material.diffuse_texname ).c_str(), texture ) ) {
 			texture.uploaded = false;
 			texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
 			textureLib.Add( material.diffuse_texname.c_str(), texture );
