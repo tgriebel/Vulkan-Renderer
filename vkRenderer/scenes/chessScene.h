@@ -124,7 +124,7 @@ void AssetLib< modelSource_t >::Create()
 		LoadModel( "axis.obj", "axis" );
 		LoadModel( "cube.obj", "cube" );
 		LoadModel( "pawn.obj", "pawn" );
-		LoadModel( "chess_board.obj", "board" );
+		LoadModel( "chess_board.obj", "chess_board" );
 	}
 	{
 		modelSource_t model;
@@ -152,6 +152,12 @@ void MakeScene()
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "_skybox" ), ent );
 		scene.entities.Add( "_skybox", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "chess_board" ), ent );
+		scene.entities.Add( "chess_board", ent );
 	}
 
 	{

@@ -1727,6 +1727,9 @@ private:
 				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HANDLE ) {
 					continue;
 				}
+				if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
+					continue;
+				}
 				GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
 
 				// vkCmdSetDepthBias
@@ -2140,7 +2143,7 @@ private:
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
 
-		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, -6.0f, 0.0f );
+		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, 6.0f, 0.0f );
 		const glm::vec3 lightDir0 = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 
 		int width;
@@ -2152,10 +2155,10 @@ private:
 		renderView.lights[ 0 ].lightPos = glm::vec4( lightPos0[ 0 ], lightPos0[ 1 ], lightPos0[ 2 ], 0.0f );
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 0 ].lightDir = glm::vec4( lightDir0[ 0 ], lightDir0[ 1 ], lightDir0[ 2 ], 0.0f );
-		renderView.lights[ 1 ].lightPos = glm::vec4( 0.0f, glm::cos( time ), -1.0f, 0.0 );
+		renderView.lights[ 1 ].lightPos = glm::vec4( 0.0f, glm::cos( time ), 1.0f, 0.0 );
 		renderView.lights[ 1 ].intensity = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 		renderView.lights[ 1 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
-		renderView.lights[ 2 ].lightPos = glm::vec4( glm::sin( time ), 0.0f, -1.0f, 0.0f );
+		renderView.lights[ 2 ].lightPos = glm::vec4( glm::sin( time ), 0.0f, 1.0f, 0.0f );
 		renderView.lights[ 2 ].intensity = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
 		renderView.lights[ 2 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 

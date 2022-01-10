@@ -66,7 +66,8 @@
 					layout( set = 0, location = 1 ) out vec3 fragNormal;										\
 					layout( set = 0, location = 2 ) out vec2 fragTexCoord;										\
 					layout( set = 0, location = 3 ) out vec4 clipPosition;										\
-					layout( set = 0, location = 4 ) out vec4 worldPosition;
+					layout( set = 0, location = 4 ) out vec4 worldPosition;										\
+					layout( set = 0, location = 5 ) out flat int objectId;
 
 #define VS_LAYOUT_BASIC_IO	VS_IN																				\
 							VS_OUT
@@ -85,7 +86,8 @@
 					layout( set = 0, location = 1 ) in vec3 fragNormal;											\
 					layout( set = 0, location = 2 ) in vec2 fragTexCoord;										\
 					layout( set = 0, location = 3 ) in vec4 clipPosition;										\
-					layout( set = 0, location = 4 ) in vec4 worldPosition;
+					layout( set = 0, location = 4 ) in vec4 worldPosition;										\
+					layout( set = 0, location = 5 ) in flat int objectId;
 
 #define PS_OUT		layout( set = 0, location = 0 ) out vec4 outColor;
 

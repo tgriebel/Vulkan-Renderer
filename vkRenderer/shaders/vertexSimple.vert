@@ -17,6 +17,6 @@ void main()
     gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	fragNormal = inNormal;
+	fragNormal = ( ubo[ objectId ].model * vec4( inNormal, 1.0f ) ).xyz;
 	clipPosition = gl_Position;
 }
