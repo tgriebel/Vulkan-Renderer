@@ -35,7 +35,7 @@ void AssetLib< GpuProgram >::Create()
 
 void AssetLib< texture_t >::Create()
 {
-	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox.jpg", "sapeli.jpg",
+	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox2.jpg", "sapeli.jpg",
 													"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
 
 	for ( const std::string& texturePath : texturePaths )
@@ -66,7 +66,7 @@ void AssetLib< Material >::Create()
 	{
 		Material material;
 		material.shaders[ DRAWPASS_SKYBOX ] = gpuPrograms.RetrieveHdl( "Sky" );
-		material.textures[ 0 ] = textureLib.RetrieveHdl( "skybox.jpg" );
+		material.textures[ 0 ] = textureLib.RetrieveHdl( "skybox2.jpg" );
 		Add( "SKY", material );
 	}
 
