@@ -112,7 +112,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float SrgbTolinear( float value ) {
-	return pow( value, 2.2f );
+	return( value <= 0.04045f ) ? value / 12.92f : pow( ( value + 0.055f ) / 1.055f, 2.4f );
 }
 
 vec3 SrgbTolinear( vec3 sRGB ) {
@@ -124,7 +124,7 @@ vec4 SrgbTolinear( vec4 sRGBA ) {
 }
 
 float LinearToSrgb( float value ) {
-	return pow( value, 1.0f / 2.2f );
+	return( value < 0.0031308f ? value * 12.92f : 1.055f * pow( value, 0.41666f ) - 0.055f );
 }
 
 vec3 LinearToSrgb( vec3 inLinear ) {
