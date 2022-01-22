@@ -495,6 +495,13 @@ struct GpuImage
 	allocVk_t		allocation;
 };
 
+enum textureType_t
+{
+	TEXTURE_TYPE_2D,
+	TEXTURE_TYPE_3D,
+	TEXTURE_TYPE_CUBE,
+};
+
 struct texture_t
 {
 	uint8_t*		bytes;
@@ -503,6 +510,7 @@ struct texture_t
 	uint32_t		height;
 	uint32_t		channels;
 	uint32_t		mipLevels;
+	textureType_t	type;
 	bool			uploaded;
 
 	GpuImage		image;

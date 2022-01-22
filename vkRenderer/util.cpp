@@ -45,6 +45,7 @@ bool LoadTextureImage( const char * texturePath, texture_t& texture )
 	texture.height		= texHeight;
 	texture.channels	= texChannels;
 	texture.sizeBytes	= ( texWidth * texHeight * 4 );
+	texture.type		= TEXTURE_TYPE_2D;
 
 	texture.bytes = new uint8_t[ texture.sizeBytes ];
 	memcpy( texture.bytes, pixels, texture.sizeBytes );
