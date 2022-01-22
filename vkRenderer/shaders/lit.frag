@@ -22,7 +22,7 @@ void main()
     const vec4 texColor = SrgbTolinear( texture( texSampler[ textureId ], fragTexCoord ) );
     const vec3 ambient = materials[ materialId ].Ka.rgb;
     const vec3 diffuse = materials[ materialId ].Kd.rgb;
-    const vec3 specular = materials[ materialId ].Ks.rgb;
+    const vec3 specularColor = materials[ materialId ].Ks.rgb;
     const float specularPower = materials[ materialId ].Ns;
 
     vec3 color = vec3( 0.0f, 0.0f, 0.0f );
@@ -33,7 +33,8 @@ void main()
         const float spotAngle = dot( lightVector, lights[ i ].lightDir );
         const float spotFov = 0.5f;
 
-        const vec3 specularIntensity = specular * pow( max( 0.0f, dot( fragNormal, halfVector ) ), specularPower );
+        const float specular = max( 0.0f, dot( fragNormal, halfVector ) );
+        const vec3 specularIntensity = specularColor * pow( specular, max( 1.0f, specularPower ) );
 
         vec3 diffuse = texColor.rgb;
         diffuse *= lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
