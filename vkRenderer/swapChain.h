@@ -73,7 +73,7 @@ public:
 
 		for ( size_t i = 0; i < vk_swapChainImages.size(); i++ )
 		{
-			vk_swapChainImageViews[ i ] = CreateImageView( vk_swapChainImages[ i ], vk_swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			vk_swapChainImageViews[ i ] = CreateImageView( vk_swapChainImages[ i ], vk_swapChainImageFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 		}
 	}
 

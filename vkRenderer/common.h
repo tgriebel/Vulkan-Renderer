@@ -497,23 +497,38 @@ struct GpuImage
 
 enum textureType_t
 {
+	TEXTURE_TYPE_UNKNOWN,
 	TEXTURE_TYPE_2D,
-	TEXTURE_TYPE_3D,
 	TEXTURE_TYPE_CUBE,
+};
+
+struct textureInfo_t {
+	uint32_t		width;
+	uint32_t		height;
+	uint32_t		channels;
+	uint32_t		mipLevels;
+	uint32_t		layers;
+	textureType_t	type;
 };
 
 struct texture_t
 {
 	uint8_t*		bytes;
 	uint32_t		sizeBytes;
-	uint32_t		width;
-	uint32_t		height;
-	uint32_t		channels;
-	uint32_t		mipLevels;
-	textureType_t	type;
+	textureInfo_t	info;
 	bool			uploaded;
 
 	GpuImage		image;
+
+	texture_t() {
+		info.width = 0;
+		info.height = 0;
+		info.channels = 0;
+		info.mipLevels = 0;
+		info.type = TEXTURE_TYPE_UNKNOWN;
+		uploaded = false;
+		bytes = nullptr;
+	}
 };
 
 

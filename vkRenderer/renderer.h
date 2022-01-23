@@ -691,8 +691,10 @@ private:
 			bufferInfo.push_back( info );
 		}
 
-		std::vector<VkDescriptorImageInfo> imageInfo;
-		imageInfo.reserve( MaxImageDescriptors );
+		std::vector<VkDescriptorImageInfo> image2DInfo;
+		std::vector<VkDescriptorImageInfo> imageCubeInfo;
+		image2DInfo.reserve( MaxImageDescriptors );
+		imageCubeInfo.reserve( MaxImageDescriptors );
 		const uint32_t textureCount = textureLib.Count();
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
@@ -702,18 +704,34 @@ private:
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
 			info.sampler = vk_bilinearSampler;
-			imageInfo.push_back( info );
+
+			if ( texture->info.type == TEXTURE_TYPE_CUBE ) {
+				imageCubeInfo.push_back( info );
+			} else {
+				image2DInfo.push_back( info );
+			}
 		}
 		// Defaults
-		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			const texture_t* texture = textureLib.GetDefault();
-			const VkImageView& imageView = texture->image.vk_view;
-			VkDescriptorImageInfo info{ };
-			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info.imageView = imageView;
-			info.sampler = vk_bilinearSampler;
-			imageInfo.push_back( info );
+			const texture_t* default2DTexture = textureLib.GetDefault();
+			for ( size_t j = image2DInfo.size(); j < MaxImageDescriptors; ++j )
+			{
+				const VkImageView& imageView = default2DTexture->image.vk_view;
+				VkDescriptorImageInfo info{ };
+				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				info.imageView = imageView;
+				info.sampler = vk_bilinearSampler;
+				image2DInfo.push_back( info );
+			}
+			for ( size_t j = imageCubeInfo.size(); j < MaxImageDescriptors; ++j )
+			{
+				const VkImageView& imageView = imageCubeInfo[ 0 ].imageView;
+				VkDescriptorImageInfo info{ };
+				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				info.imageView = imageView;
+				info.sampler = vk_bilinearSampler;
+				imageCubeInfo.push_back( info );
+			}
 		}
 
 		std::vector<VkDescriptorBufferInfo> materialBufferInfo;
@@ -750,7 +768,7 @@ private:
 			codeImageInfo.push_back( info );
 		}
 
-		const uint32_t descriptorSetCnt = 6;
+		const uint32_t descriptorSetCnt = 7;
 		std::array<VkWriteDescriptorSet, descriptorSetCnt> descriptorWrites{ };
 
 		uint32_t descriptorId = 0;
@@ -778,12 +796,21 @@ private:
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-		descriptorWrites[ descriptorId ].pImageInfo = &imageInfo[ 0 ];
+		descriptorWrites[ descriptorId ].pImageInfo = &image2DInfo[ 0 ];
 		++descriptorId;
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 		descriptorWrites[ descriptorId ].dstBinding = 3;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		descriptorWrites[ descriptorId ].pImageInfo = &imageCubeInfo[ 0 ];
+		++descriptorId;
+
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 4;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		descriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
@@ -792,7 +819,7 @@ private:
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-		descriptorWrites[ descriptorId ].dstBinding = 4;
+		descriptorWrites[ descriptorId ].dstBinding = 5;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		descriptorWrites[ descriptorId ].descriptorCount = MaxLights;
@@ -801,7 +828,7 @@ private:
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-		descriptorWrites[ descriptorId ].dstBinding = 5;
+		descriptorWrites[ descriptorId ].dstBinding = 6;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
@@ -889,6 +916,15 @@ private:
 		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 		shadowDescriptorWrites[ descriptorId ].dstBinding = 3;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowImageInfo[ 0 ];
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 4;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
 		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &materialBufferInfo[ 0 ];
@@ -896,7 +932,7 @@ private:
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-		shadowDescriptorWrites[ descriptorId ].dstBinding = 4;
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxLights;
@@ -905,13 +941,14 @@ private:
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-		shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 6;
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
 		shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowCodeImageInfo[ 0 ];
 		++descriptorId;
 
+		assert( descriptorId == descriptorSetCnt );
 		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( shadowDescriptorWrites.size() ), shadowDescriptorWrites.data(), 0, nullptr );
 
 		//////////////////////////////////////////////////////
@@ -940,7 +977,7 @@ private:
 			postImageInfo.push_back( info );
 		}
 
-		std::array<VkWriteDescriptorSet, 6> postDescriptorWrites{ };
+		std::array<VkWriteDescriptorSet, 7> postDescriptorWrites{ };
 
 		descriptorId = 0;
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -967,12 +1004,21 @@ private:
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-		postDescriptorWrites[ descriptorId ].pImageInfo = &imageInfo[ 0 ];
+		postDescriptorWrites[ descriptorId ].pImageInfo = &image2DInfo[ 0 ];
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 		postDescriptorWrites[ descriptorId ].dstBinding = 3;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		postDescriptorWrites[ descriptorId ].pImageInfo = &imageCubeInfo[ 0 ];
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 4;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		postDescriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
@@ -981,7 +1027,7 @@ private:
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-		postDescriptorWrites[ descriptorId ].dstBinding = 4;
+		postDescriptorWrites[ descriptorId ].dstBinding = 5;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		postDescriptorWrites[ descriptorId ].descriptorCount = MaxLights;
@@ -990,7 +1036,7 @@ private:
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-		postDescriptorWrites[ descriptorId ].dstBinding = 5;
+		postDescriptorWrites[ descriptorId ].dstBinding = 6;
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		postDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
@@ -1413,8 +1459,13 @@ private:
 		const VkFormat depthFormat = FindDepthFormat();
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
-			CreateImage( ShadowMapWidth, ShadowMapHeight, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
-			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			textureInfo_t info{};
+			info.width = ShadowMapWidth;
+			info.height = ShadowMapHeight;
+			info.mipLevels = 1;
+			info.layers = 1;
+			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
+			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
@@ -1443,12 +1494,18 @@ private:
 		/////////////////////////////////
 		for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 		{
-			CreateImage( width, height, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
-			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			textureInfo_t info{};
+			info.width = width;
+			info.height = height;
+			info.mipLevels = 1;
+			info.layers = 1;
+
+			CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
+			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
-			CreateImage( width, height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
-			frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
+			frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 
 			std::array<VkImageView, 2> attachments = {
 				frameState[ i ].viewColorImage.vk_view,
@@ -1567,7 +1624,7 @@ private:
 		vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, 1, &commandBuffer );
 	}
 
-	void TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels )
+	void TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info )
 	{
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
@@ -1580,9 +1637,9 @@ private:
 		barrier.image = image;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = mipLevels;
+		barrier.subresourceRange.levelCount = info.mipLevels;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = info.layers;
 
 		VkPipelineStageFlags sourceStage;
 		VkPipelineStageFlags destinationStage;
@@ -1617,7 +1674,7 @@ private:
 		EndSingleTimeCommands( commandBuffer );
 	}
 
-	void CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height )
+	void CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers )
 	{
 		VkBufferImageCopy region{ };
 		memset( &region, 0, sizeof( region ) );
@@ -1626,7 +1683,7 @@ private:
 		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		region.imageSubresource.mipLevel = 0;
 		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
+		region.imageSubresource.layerCount = layers;
 
 		region.imageOffset = { 0, 0, 0 };
 		region.imageExtent = {
@@ -1927,23 +1984,23 @@ private:
 		}
 	}
 
-	void CreateImage( uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory )
+	void CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory )
 	{
 		VkImageCreateInfo imageInfo{ };
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = static_cast<uint32_t>( width );
-		imageInfo.extent.height = static_cast<uint32_t>( height );
+		imageInfo.extent.width = static_cast<uint32_t>( info.width );
+		imageInfo.extent.height = static_cast<uint32_t>( info.height );
 		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = mipLevels;
-		imageInfo.arrayLayers = 1;
+		imageInfo.mipLevels = info.mipLevels;
+		imageInfo.arrayLayers = info.layers;
 		imageInfo.format = format;
 		imageInfo.tiling = tiling;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage = usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.flags = 0; // Optional
+		imageInfo.flags = ( info.type == TEXTURE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 
 		if ( vkCreateImage( context.device, &imageInfo, nullptr, &image.vk_image ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create image!" );
@@ -1965,7 +2022,7 @@ private:
 		}
 	}
 
-	void GenerateMipmaps( VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels )
+	void GenerateMipmaps( VkImage image, VkFormat imageFormat, const textureInfo_t& info )
 	{
 		VkFormatProperties formatProperties;
 		vkGetPhysicalDeviceFormatProperties( context.physicalDevice, imageFormat, &formatProperties );
@@ -1987,10 +2044,10 @@ private:
 		barrier.subresourceRange.layerCount = 1;
 		barrier.subresourceRange.levelCount = 1;
 
-		int32_t mipWidth = texWidth;
-		int32_t mipHeight = texHeight;
+		int32_t mipWidth = info.width;
+		int32_t mipHeight = info.height;
 
-		for ( uint32_t i = 1; i < mipLevels; i++ )
+		for ( uint32_t i = 1; i < info.mipLevels; i++ )
 		{
 			barrier.subresourceRange.baseMipLevel = i - 1;
 			barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -2039,7 +2096,7 @@ private:
 			if ( mipHeight > 1 ) mipHeight /= 2;
 		}
 
-		barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+		barrier.subresourceRange.baseMipLevel = info.mipLevels - 1;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -2080,14 +2137,19 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			CreateImage( texture->width, texture->height, texture->mipLevels, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
+			// VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+			VkImageUsageFlags flags =	VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+										VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+										VK_IMAGE_USAGE_SAMPLED_BIT;
+			CreateImage( texture->info, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, flags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
 
-			TransitionImageLayout( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->mipLevels );
+			TransitionImageLayout( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->info );
 
 			const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 			stagingBuffer.CopyData( texture->bytes, texture->sizeBytes );
 
-			CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->width ), static_cast<uint32_t>( texture->height ) );
+			const uint32_t layers = texture->info.layers;
+			CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->info.width ), static_cast<uint32_t>( texture->info.height ), layers );
 			texture->uploaded = true;
 		}
 		EndSingleTimeCommands( commandBuffer );
@@ -2095,21 +2157,37 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->width, texture->height, texture->mipLevels );
+			if ( texture->info.mipLevels == 1 ) {
+				continue;
+			}
+			assert( texture->info.type == TEXTURE_TYPE_2D );
+			GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->info );
 		}
 
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, texture->mipLevels );
+			VkImageViewType type;
+			switch ( texture->info.type ) {
+				default:
+				case TEXTURE_TYPE_2D:	type = VK_IMAGE_VIEW_TYPE_2D;		break;
+				case TEXTURE_TYPE_CUBE:	type = VK_IMAGE_VIEW_TYPE_CUBE;		break;
+			}
+			texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture->info.mipLevels );
 		}
 
-		// Default Images
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
-		rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		textureInfo_t info{};
+		info.width = ShadowMapWidth;
+		info.height = ShadowMapHeight;
+		info.mipLevels = 1;
+		info.layers = 1;
 
-		CreateImage( ShadowMapWidth, ShadowMapHeight, 1, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
-		rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		// Default Images
+		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
+		rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+
+		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
+		rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateSyncObjects()

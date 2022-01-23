@@ -35,7 +35,7 @@ void AssetLib< GpuProgram >::Create()
 
 void AssetLib< texture_t >::Create()
 {
-	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "skybox2.jpg", "sapeli.jpg",
+	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "sapeli.jpg",
 													"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
 
 	for ( const std::string& texturePath : texturePaths )
@@ -43,9 +43,16 @@ void AssetLib< texture_t >::Create()
 		texture_t texture;
 		if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
 			texture.uploaded = false;
-			texture.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.width, texture.height ) ) ) ) + 1;
+			texture.info.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 			textureLib.Add( texturePath.c_str(), texture );
 		}
+	}
+	texture_t cubeMap;
+	const std::string cubeMapPath = ( TexturePath + "chapel" );
+	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {
+		cubeMap.uploaded = false;
+		cubeMap.info.mipLevels = 1;
+		textureLib.Add( cubeMapPath.c_str(), cubeMap );
 	}
 }
 
