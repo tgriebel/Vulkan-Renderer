@@ -282,7 +282,7 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
 	info.uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info.uv[ 1 ] = glm::vec2( -1.0f, 1.0f );
+	info.uv[ 1 ] = glm::vec2( -1.0f, 1.0f ); // FIXME: results in [-1,1] corrds
 	info.origin = glm::vec3( origin.x, origin.y, 0.0f );
 	info.normalDirection = NORMAL_Z_NEG;
 
