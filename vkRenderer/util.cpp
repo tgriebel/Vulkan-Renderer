@@ -45,6 +45,8 @@ bool LoadTextureImage( const char * texturePath, texture_t& texture )
 	texture.info.channels	= texChannels;
 	texture.info.layers		= 1;
 	texture.info.type		= TEXTURE_TYPE_2D;
+	texture.uploaded		= false;
+	texture.info.mipLevels	= static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 	texture.sizeBytes		= ( texWidth * texHeight * 4 );
 	texture.bytes = new uint8_t[ texture.sizeBytes ];
 	memcpy( texture.bytes, pixels, texture.sizeBytes );
@@ -118,6 +120,8 @@ bool LoadTextureCubeMapImage( const char* textureBasePath, const char* ext, text
 	texture.info.channels	= texChannels;
 	texture.info.layers		= 6;
 	texture.info.type		= TEXTURE_TYPE_CUBE;
+	texture.uploaded		= false;
+	texture.info.mipLevels	= static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 	texture.bytes			= bytes;
 	texture.sizeBytes		= sizeBytes;
 	return true;

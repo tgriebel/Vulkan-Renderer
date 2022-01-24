@@ -42,16 +42,12 @@ void AssetLib< texture_t >::Create()
 	{
 		texture_t texture;
 		if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
-			texture.uploaded = false;
-			texture.info.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 			textureLib.Add( texturePath.c_str(), texture );
 		}
 	}
 	texture_t cubeMap;
 	const std::string cubeMapPath = ( TexturePath + "chapel" );
 	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {
-		cubeMap.uploaded = false;
-		cubeMap.info.mipLevels = 1;
 		textureLib.Add( cubeMapPath.c_str(), cubeMap );
 	}
 }
@@ -106,6 +102,7 @@ void AssetLib< Material >::Create()
 		Material material;
 		material.shaders[ DRAWPASS_POST_2D ] = gpuPrograms.RetrieveHdl( "Image2D" );
 		material.textures[ 0 ] = 0;
+		material.textures[ 1 ] = 1;
 		Add( "IMAGE2D", material );
 	}
 

@@ -759,6 +759,7 @@ private:
 		std::vector<VkDescriptorImageInfo> codeImageInfo;
 		codeImageInfo.reserve( MaxCodeImages );
 		// Shadow Map
+		for ( int j = 0; j < MaxCodeImages; ++j )
 		{
 			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.vk_view;
 			VkDescriptorImageInfo info{ };
@@ -1772,6 +1773,15 @@ private:
 
 			shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
 			shadowPassInfo.pClearValues = shadowClearValues.data();
+	
+			//VkDebugUtilsLabelEXT markerInfo = {};
+			//markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+			//markerInfo.pLabelName = "Begin Section";
+			//vkCmdBeginDebugUtilsLabelEXT( graphicsQueue.commandBuffers[ i ], &markerInfo );
+
+			//// contents of section here
+
+			//vkCmdEndDebugUtilsLabelEXT( graphicsQueue.commandBuffers[ i ] );
 
 			// TODO: how to handle views better?
 			vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -2041,7 +2051,7 @@ private:
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.layerCount = info.layers;
 		barrier.subresourceRange.levelCount = 1;
 
 		int32_t mipWidth = info.width;
@@ -2067,13 +2077,13 @@ private:
 			blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			blit.srcSubresource.mipLevel = i - 1;
 			blit.srcSubresource.baseArrayLayer = 0;
-			blit.srcSubresource.layerCount = 1;
+			blit.srcSubresource.layerCount = info.layers;
 			blit.dstOffsets[ 0 ] = { 0, 0, 0 };
 			blit.dstOffsets[ 1 ] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
 			blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			blit.dstSubresource.mipLevel = i;
 			blit.dstSubresource.baseArrayLayer = 0;
-			blit.dstSubresource.layerCount = 1;
+			blit.dstSubresource.layerCount = info.layers;
 
 			vkCmdBlitImage( commandBuffer,
 				image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -2157,10 +2167,6 @@ private:
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			texture_t* texture = textureLib.Find( i );
-			if ( texture->info.mipLevels == 1 ) {
-				continue;
-			}
-			assert( texture->info.type == TEXTURE_TYPE_2D );
 			GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->info );
 		}
 
