@@ -2228,7 +2228,7 @@ private:
 		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
 
 		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, 6.0f, 0.0f );
-		const glm::vec3 lightDir0 = glm::vec4( 0.0f, 0.0f, 5.0f, 0.0f );
+		const glm::vec3 lightDir0 = normalize( glm::vec4( 0.0f, 0.0f, -1.0f, 0.0f ) );
 
 		int width;
 		int height;
