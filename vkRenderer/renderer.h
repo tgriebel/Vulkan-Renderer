@@ -974,7 +974,7 @@ private:
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
-			info.sampler = vk_depthShadowSampler;
+			info.sampler = vk_bilinearSampler;
 			postImageInfo.push_back( info );
 		}
 
