@@ -31,5 +31,5 @@ void main()
 	outColor = mix( skyColor, sceneColor, skyMask );
 	//outColor = uvColor;
 	//outColor = globals.toneMap.rgba * LinearToSrgb( sceneColor );
-	//outColor = vec4( 10.0f * sceneDepth, 10.0f * sceneDepth, 10.0f * sceneDepth, 1.0 );
+	outColor = vec4( globals.toneMap.r * 1000.0f * sceneDepth, 0.0f, 0.0f, 1.0 );
 }
