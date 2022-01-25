@@ -244,7 +244,7 @@ private:
 			surf.vertexOffset = upload.vertexOffset;
 			surf.firstIndex = upload.firstIndex;
 			surf.indicesCnt = upload.indexCount;
-			surf.materialId = source->surfs[ i ].materialId;
+			surf.materialId = ( ent.materialId >= 0 ) ? ent.materialId : source->surfs[ i ].materialId;
 			surf.objectId = objectOffset;
 			surf.flags = ent.flags;
 
@@ -482,25 +482,25 @@ private:
 		{
 			const Material* m = materialLib.Find( i );
 
-			for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-				GpuProgram* prog = gpuPrograms.Find( m->shaders[ i ].Get() );
+			for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
+				GpuProgram* prog = gpuPrograms.Find( m->shaders[ passIx ].Get() );
 				if ( prog == nullptr ) {
 					continue;
 				}
 
 				pipelineState_t state;
-				state.viewport = GetDrawPassViewport( (drawPass_t)i );
-				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)i );
+				state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
+				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
 				state.shaders = prog;
-				state.tag = gpuPrograms.FindName( m->shaders[ i ].Get() );
+				state.tag = gpuPrograms.FindName( m->shaders[ passIx ].Get() );
 
 				VkRenderPass pass;
 				VkDescriptorSetLayout layout;
-				if ( i == DRAWPASS_SHADOW ) {
+				if ( passIx == DRAWPASS_SHADOW ) {
 					pass = shadowPassState.pass;
 					layout = globalLayout;
 				}
-				else if ( i == DRAWPASS_POST_2D ) {
+				else if ( passIx == DRAWPASS_POST_2D ) {
 					pass = postPassState.pass;
 					layout = postProcessLayout;
 				}
