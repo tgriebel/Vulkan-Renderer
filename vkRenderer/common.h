@@ -85,7 +85,7 @@ struct VertexInput
 	glm::vec3 pos;
 	glm::vec4 color;
 	glm::vec3 normal;
-	glm::vec2 texCoord;
+	glm::vec4 texCoord;
 
 	static VkVertexInputBindingDescription GetBindingDescription()
 	{
@@ -123,7 +123,7 @@ struct VertexInput
 
 		attributeDescriptions[ attribId ].binding = 0;
 		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, texCoord );
 		++attribId;
 
@@ -343,7 +343,7 @@ template<> struct std::hash<VertexInput>
 {
 	size_t operator()( VertexInput const& vertex ) const
 	{
-		return ( ( hash<glm::vec3>()( vertex.pos ) ^ ( hash<glm::vec3>()( vertex.color ) << 1 ) ) >> 1 ) ^ ( hash<glm::vec2>()( vertex.texCoord ) << 1 ) ^ ( hash<glm::vec2>()( vertex.normal ) << 1 );
+		return ( ( hash<glm::vec3>()( vertex.pos ) ^ ( hash<glm::vec3>()( vertex.color ) << 1 ) ) >> 1 ) ^ ( hash<glm::vec4>()( vertex.texCoord ) << 1 ) ^ ( hash<glm::vec2>()( vertex.normal ) << 1 );
 	}
 };
 
@@ -612,6 +612,7 @@ struct entity_t
 {
 	glm::mat4					matrix;
 	uint32_t					modelId;
+	int							materialId;
 	renderFlags_t				flags;
 
 	AABB GetBounds() const;

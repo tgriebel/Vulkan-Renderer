@@ -38,7 +38,7 @@ void main()
 	const uint materialId = pushConstants.materialId;
 
 	const uint heightMapId = materials[ materialId ].textureId0;
-	const float heightMapValue = texture( texSampler[ heightMapId ], inTexCoord ).r;
+	const float heightMapValue = texture( texSampler[ heightMapId ], inTexCoord.xy ).r;
 
 	const float maxHeight = globals.heightMap.x;
 	vec3 position = inPosition;
@@ -47,7 +47,7 @@ void main()
     gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	mat3 worldTangent = ( mat3( ubo[ objectId ].model ) * GetTerrainTangent( inTexCoord ) );
+	mat3 worldTangent = ( mat3( ubo[ objectId ].model ) * GetTerrainTangent( inTexCoord.xy ) );
 	fragNormal = normalize( cross( worldTangent[0], worldTangent[1] ) );
 	clipPosition = gl_Position;
 }

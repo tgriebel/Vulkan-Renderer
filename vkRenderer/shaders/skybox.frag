@@ -13,5 +13,5 @@ void main()
     
     const uint textureId = materials[ materialId ].textureId0;
 
-	outColor = SrgbTolinear( texture( texSampler[textureId], fragTexCoord ) );
+	outColor = SrgbTolinear( texture( texSampler[textureId], fragTexCoord.xy ) );
 }

@@ -12,5 +12,5 @@ void main()
     const uint materialId = pushConstants.materialId;
 	const uint textureId0 = materials[ materialId ].textureId0;
 
-	outColor = texture( texSampler[ textureId0 ], fragTexCoord );
+	outColor = texture( texSampler[ textureId0 ], fragTexCoord.xy );
 }

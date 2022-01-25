@@ -19,7 +19,7 @@ void main()
     const vec3 viewVector = normalize( cameraOrigin.xyz - worldPosition.xyz );
     const vec3 viewDiffuse = dot( viewVector, fragNormal.xyz ).xxx;
 
-    const vec4 texColor = SrgbTolinear( texture( texSampler[ textureId ], fragTexCoord ) );
+    const vec4 texColor = SrgbTolinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
     const vec3 ambient = materials[ materialId ].Ka.rgb;
     const vec3 diffuse = materials[ materialId ].Kd.rgb;
     const vec3 specularColor = materials[ materialId ].Ks.rgb;
@@ -37,7 +37,7 @@ void main()
         const vec3 specularIntensity = specularColor * pow( specular, max( 1.0f, specularPower ) );
 
         vec3 diffuse = texColor.rgb;
-        diffuse *= lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
+        diffuse *= lights[ i ].intensity;// * smoothstep( 0.5f, 0.8f, spotAngle );
         diffuse *= max( 0.0f, dot( lightVector, normalize( fragNormal ) ) );
         color += diffuse + specularIntensity;
     }
