@@ -141,7 +141,7 @@ void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, s
 		vert.pos = v.pos;
 		vert.color = v.color;
 		vert.normal = v.normal;
-		vert.texCoord = v.texCoord;
+		vert.texCoord = glm::vec4( v.texCoord.x, v.texCoord.y, 0.0f, 0.0f );
 
 		vb.push_back( vert );
 	}
@@ -290,6 +290,11 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 	gb.AddPlaneSurf( info );
 
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
+
+	outModel.surfs[ 0 ].vertices[ 0 ].texCoord = glm::vec4( 0.0f, 0.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].texCoord = glm::vec4( 1.0f, 0.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].texCoord = glm::vec4( 0.0f, 1.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].texCoord = glm::vec4( 1.0f, 1.0f, 0.0f, 0.0f );
 
 	outModel.surfCount = 1;
 	outModel.surfs[ 0 ].materialId = materialLib.FindId( materialName.c_str() );
