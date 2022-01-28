@@ -12,12 +12,18 @@ void main()
     const uint materialId = pushConstants.materialId;
     const uint textureId = materials[ materialId ].textureId0;
 
+    const mat4 modelMat = ubo[ objectId ].model;
     const mat4 viewMat = ubo[ objectId ].view;
     const mat3 invViewMat = mat3( transpose( viewMat ) );
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
+    const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
     const vec3 viewVector = normalize( cameraOrigin.xyz - worldPosition.xyz );
     const vec3 viewDiffuse = dot( viewVector, fragNormal.xyz ).xxx;
+
+    const vec3 R = reflect( -viewVector, normalize( fragNormal ) );
+    const vec3 N = normalize( worldPosition.xyz - modelOrigin );
+    const vec4 envColor = vec4( texture( cubeSamplers[ 0 ], vec3( R.x, R.z, R.y ) ).rgb, 1.0f );
 
     const vec4 texColor = SrgbTolinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
     const vec3 ambient = materials[ materialId ].Ka.rgb;
@@ -41,7 +47,7 @@ void main()
         diffuse *= max( 0.0f, dot( lightVector, normalize( fragNormal ) ) );
         color += diffuse + specularIntensity;
     }
-    outColor.rgb = color;
+    outColor.rgb = envColor.rgb;
     outColor.a = 1.0f;
 
     float visibility = 1.0f;

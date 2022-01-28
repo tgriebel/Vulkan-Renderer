@@ -34,7 +34,7 @@ mat3 GetTerrainTangent( vec2 uv )
 
 void main()
 {
-	const uint objectId = pushConstants.objectId + gl_InstanceIndex;
+	objectId = pushConstants.objectId + gl_InstanceIndex;
 	const uint materialId = pushConstants.materialId;
 
 	const uint heightMapId = materials[ materialId ].textureId0;

@@ -239,7 +239,8 @@ private:
 			surfUpload_t& upload = source->upload[ i ];
 
 			instance.modelMatrix = ent.matrix;
-			instance.surf = &view.surfaces[ view.committedModelCnt ];
+			instance.surfId = 0;
+			instance.id = 0;
 			surf.vertexCount = upload.vertexCount;
 			surf.vertexOffset = upload.vertexOffset;
 			surf.firstIndex = upload.firstIndex;
@@ -269,21 +270,32 @@ private:
 	void MergeSurfaces( RenderView& view )
 	{
 		view.mergedModelCnt = 0;
-		view.uniqueSurfs.clear();
+		std::unordered_map< drawSurf_t, uint32_t > uniqueSurfs;
+		uniqueSurfs.reserve( view.committedModelCnt );
 		for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
-			auto it = view.uniqueSurfs.find( view.surfaces[ i ] );
-			if ( it == view.uniqueSurfs.end() ) {
-				view.uniqueSurfs[ view.surfaces[ i ] ] = 1;
-			}
-			else {
-				it->second++;
+			drawSurfInstance_t& instance = view.instances[ i ];
+			auto it = uniqueSurfs.find( view.surfaces[ i ] );
+			if ( it == uniqueSurfs.end() ) {	
+				const uint32_t surfId = view.mergedModelCnt;
+				uniqueSurfs[ view.surfaces[ i ] ] = surfId;
+
+				view.instanceCounts[ surfId ] = 1;
+				view.merged[ surfId ] = view.surfaces[ i ];
+
+				instance.id = 0;
+				instance.surfId = surfId;
+
+				++view.mergedModelCnt;
+			} else {
+				instance.id = view.instanceCounts[ it->second ];
+				instance.surfId = it->second;
+				view.instanceCounts[ it->second ]++;
 			}
 		}
-		for ( auto it = view.uniqueSurfs.begin(); it != view.uniqueSurfs.end(); ++it ) {
-			view.merged[ view.mergedModelCnt ] = it->first;
-			view.merged[ view.mergedModelCnt ].objectId += view.mergedModelCnt;
-			view.instanceCounts[ view.mergedModelCnt ] = it->second;
-			++view.mergedModelCnt;
+		uint32_t totalCount = 0;
+		for ( uint32_t i = 0; i < view.mergedModelCnt; ++i ) {
+			view.merged[ i ].objectId += totalCount;
+			totalCount += view.instanceCounts[ i ];
 		}
 	}
 
@@ -2431,7 +2443,7 @@ private:
 		}
 
 		std::vector< uniformBufferObject_t > uboBuffer;
-		uboBuffer.reserve( MaxSurfaces );
+		uboBuffer.resize( MaxSurfaces );
 		assert( renderView.committedModelCnt < MaxModels );
 		for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
 		{
@@ -2439,9 +2451,10 @@ private:
 			ubo.model = renderView.instances[ i ].modelMatrix;
 			ubo.view = renderView.viewMatrix;
 			ubo.proj = renderView.projMatrix;
-			uboBuffer.push_back( ubo );
+			const drawSurf_t& surf = renderView.merged[ renderView.instances[ i ].surfId ];
+			const uint32_t objectId = ( renderView.instances[ i ].id + surf.objectId );
+			uboBuffer[ objectId ] = ubo;
 		}
-		uboBuffer.resize( ShadowObjectOffset );
 		assert( shadowView.committedModelCnt < MaxModels );
 		for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
 		{
@@ -2449,7 +2462,9 @@ private:
 			ubo.model = shadowView.instances[ i ].modelMatrix;
 			ubo.view = shadowView.viewMatrix;
 			ubo.proj = shadowView.projMatrix;
-			uboBuffer.push_back( ubo );
+			const drawSurf_t& surf = shadowView.merged[ shadowView.instances[ i ].surfId ];
+			const uint32_t objectId = ( shadowView.instances[ i ].id + surf.objectId );
+			uboBuffer[ objectId ] = ubo;
 		}
 
 		std::vector< materialBufferObject_t > materialBuffer;

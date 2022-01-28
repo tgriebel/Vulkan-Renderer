@@ -35,8 +35,8 @@ void AssetLib< GpuProgram >::Create()
 
 void AssetLib< texture_t >::Create()
 {
-	const std::vector<std::string> texturePaths = { "heightmap.png", "grass.jpg", "checker.png", "sapeli.jpg",
-													"checker.png", "desert.jpg", "palm_tree_diffuse.jpg", "checker.png", "checker.png", };
+	const std::vector<std::string> texturePaths = { "checker.png", "sapeli.jpg",
+													"chapel_right.jpg", "chapel_left.jpg", "chapel_top.jpg", "chapel_bottom.jpg", "chapel_front.jpg", "chapel_back.jpg" };
 
 	for ( const std::string& texturePath : texturePaths )
 	{
@@ -46,7 +46,7 @@ void AssetLib< texture_t >::Create()
 		}
 	}
 	texture_t cubeMap;
-	const std::string cubeMapPath = ( TexturePath + "chapel" );
+	const std::string cubeMapPath = ( TexturePath + "chapel_low" );
 	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {
 		textureLib.Add( cubeMapPath.c_str(), cubeMap );
 	}
@@ -59,7 +59,7 @@ void AssetLib< Material >::Create()
 		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "TerrainShadow" );
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.shaders[ DRAWPASS_TERRAIN ] = gpuPrograms.RetrieveHdl( "Terrain" );
-		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
+		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		material.textures[ 0 ] = textureLib.RetrieveHdl( "heightmap.png" );
 		material.textures[ 1 ] = textureLib.RetrieveHdl( "grass.jpg" );
 		material.textures[ 2 ] = textureLib.RetrieveHdl( "desert.jpg" );
@@ -69,7 +69,12 @@ void AssetLib< Material >::Create()
 	{
 		Material material;
 		material.shaders[ DRAWPASS_SKYBOX ] = gpuPrograms.RetrieveHdl( "Sky" );
-		material.textures[ 0 ] = textureLib.RetrieveHdl( "skybox2.jpg" );
+		material.textures[ 0 ] = textureLib.RetrieveHdl( "chapel_right.jpg" );
+		material.textures[ 1 ] = textureLib.RetrieveHdl( "chapel_left.jpg" );
+		material.textures[ 2 ] = textureLib.RetrieveHdl( "chapel_top.jpg" );
+		material.textures[ 3 ] = textureLib.RetrieveHdl( "chapel_bottom.jpg" );
+		material.textures[ 4 ] = textureLib.RetrieveHdl( "chapel_front.jpg" );
+		material.textures[ 5 ] = textureLib.RetrieveHdl( "chapel_back.jpg" );
 		Add( "SKY", material );
 	}
 
@@ -78,7 +83,7 @@ void AssetLib< Material >::Create()
 		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
 		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
-		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
+		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
 		material.textures[ 0 ] = textureLib.RetrieveHdl( "sapeli.jpg" );
 		Add( "WHITE_WOOD", material );
 	}
@@ -86,7 +91,7 @@ void AssetLib< Material >::Create()
 	{
 		Material material;
 		material.shaders[ DRAWPASS_TRANS ] = gpuPrograms.RetrieveHdl( "LitTrans" );
-		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
+		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
 		Add( "WATER", material );
 	}
 
@@ -111,9 +116,16 @@ void AssetLib< Material >::Create()
 		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
 		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
 		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
-		material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
+		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
 		material.textures[ 0 ] = textureLib.RetrieveHdl( "palm_tree_diffuse.jpg" );
 		Add( "PALM", material );
+	}
+
+	{
+		Material material;
+		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
+		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
+		Add( "WIRE", material );
 	}
 }
 
@@ -127,6 +139,7 @@ void AssetLib< modelSource_t >::Create()
 	{
 		LoadModel( "axis.obj", "axis" );
 		LoadModel( "cube.obj", "cube" );
+		LoadModel( "sphere.obj", "sphere" );
 		LoadModel( "pawn.obj", "pawn" );
 		LoadModel( "chess_board.obj", "chess_board" );
 	}
@@ -172,9 +185,31 @@ void MakeScene()
 
 	{
 		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( glm::vec3( 1.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_1", ent );
+	}
+
+	{
+		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "cube" ), ent );
+		ent.materialId = materialLib.FindId( "WIRE" );
 		ent.flags = static_cast< renderFlags_t >( WIREFRAME | SKIP_OPAQUE );
 		scene.entities.Add( "white_pawn_0_cube", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "sphere" ), ent );
+		ent.SetOrigin( glm::vec3( 0.0f, 0.0f, 5.0f ) );
+		scene.entities.Add( "sphere", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( glm::vec3( 5.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_2", ent );
 	}
 
 	{

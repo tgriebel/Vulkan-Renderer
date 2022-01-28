@@ -9,7 +9,7 @@ VS_LAYOUT_STANDARD
 
 void main()
 {
-	const uint objectId = pushConstants.objectId + gl_InstanceIndex;
+	objectId = pushConstants.objectId + gl_InstanceIndex;
 	const uint materialId = pushConstants.materialId;
 
 	vec3 position = inPosition;
@@ -17,6 +17,6 @@ void main()
     gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	fragNormal = ( ubo[ objectId ].model * vec4( inNormal, 1.0f ) ).xyz;
+	fragNormal = normalize( ( vec4( inNormal, 1.0f ) * ubo[ objectId ].model ).xyz );
 	clipPosition = gl_Position;
 }

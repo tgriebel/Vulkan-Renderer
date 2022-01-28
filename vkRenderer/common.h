@@ -553,7 +553,8 @@ struct drawSurf_t
 struct drawSurfInstance_t
 {
 	glm::mat4			modelMatrix;
-	drawSurf_t*			surf;
+	uint32_t			surfId;
+	uint32_t			id;
 };
 
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
@@ -636,7 +637,6 @@ public:
 
 		committedModelCnt = 0;
 		mergedModelCnt = 0;
-		uniqueSurfs.reserve( MaxModels );
 	}
 
 	glm::mat4									viewMatrix;
@@ -650,8 +650,6 @@ public:
 	drawSurf_t									merged[ MaxModels ];
 	drawSurfInstance_t							instances[ MaxModels ];
 	uint32_t									instanceCounts[ MaxModels ];
-	std::unordered_map< drawSurf_t, uint32_t >	uniqueSurfs;
-
 };
 
 

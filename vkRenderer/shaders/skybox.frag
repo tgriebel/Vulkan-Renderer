@@ -11,7 +11,19 @@ void main()
 {
     const uint materialId = pushConstants.materialId;
     
-    const uint textureId = materials[ materialId ].textureId0;
+    uint textureId = 0;
 
+    const float xm = abs( fragNormal.x );
+    const float ym = abs( fragNormal.y );
+    const float zm = abs( fragNormal.z );
+    const float majorAxis = max( max( xm, ym ), zm );
+
+    if( majorAxis == xm ) {
+        textureId = ( sign( fragNormal.x ) > 0.0f ) ? materials[ materialId ].textureId0 : materials[ materialId ].textureId1;
+    } else if( majorAxis == ym ) {
+        textureId = ( sign( fragNormal.y ) > 0.0f ) ? materials[ materialId ].textureId5 : materials[ materialId ].textureId4;
+    } else if( majorAxis == zm ) {
+        textureId = ( sign( fragNormal.z ) > 0.0f ) ? materials[ materialId ].textureId2 : materials[ materialId ].textureId3;
+    }
 	outColor = SrgbTolinear( texture( texSampler[textureId], fragTexCoord.xy ) );
 }
