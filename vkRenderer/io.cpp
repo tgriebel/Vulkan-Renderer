@@ -93,8 +93,6 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 		materialLib.Add( material.name.c_str(), mat );
 	}
 
-	std::unordered_map<VertexInput, uint32_t> uniqueVertices{};
-
 	modelSource_t model;
 
 	uint32_t vertexCnt = 0;
@@ -103,6 +101,7 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 
 	for ( const auto& shape : shapes )
 	{
+		std::unordered_map<VertexInput, uint32_t> uniqueVertices{};
 		for ( const auto& index : shape.mesh.indices )
 		{
 			VertexInput vertex{ };
@@ -118,11 +117,13 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 			vertex.texCoord[ 2 ] = 0.0f;
 			vertex.texCoord[ 3 ] = 0.0f;
 
-			vertex.normal[0] = attrib.normals[3 * index.normal_index + 0];
-			vertex.normal[1] = attrib.normals[3 * index.normal_index + 1];
-			vertex.normal[2] = attrib.normals[3 * index.normal_index + 2];
+			vertex.normal[0] = attrib.normals[ 3 * index.normal_index + 0 ];
+			vertex.normal[1] = attrib.normals[ 3 * index.normal_index + 1 ];
+			vertex.normal[2] = attrib.normals[ 3 * index.normal_index + 2 ];
 
-			vertex.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+			vertex.color[ 0 ] = attrib.colors[ 3 * index.vertex_index + 0 ];
+			vertex.color[ 1 ] = attrib.colors[ 3 * index.vertex_index + 1 ];
+			vertex.color[ 2 ] = attrib.colors[ 3 * index.vertex_index + 2 ];
 
 			if ( uniqueVertices.count( vertex ) == 0 )
 			{
