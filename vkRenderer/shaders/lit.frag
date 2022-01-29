@@ -43,11 +43,11 @@ void main()
         const vec3 specularIntensity = specularColor * pow( specular, max( 1.0f, specularPower ) );
 
         vec3 diffuse = texColor.rgb;
-        diffuse *= lights[ i ].intensity;// * smoothstep( 0.5f, 0.8f, spotAngle );
+        diffuse *= lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
         diffuse *= max( 0.0f, dot( lightVector, normalize( fragNormal ) ) );
         color += diffuse + specularIntensity;
     }
-    outColor.rgb = envColor.rgb;
+    outColor.rgb = diffuse.rgb;
     outColor.a = 1.0f;
 
     float visibility = 1.0f;

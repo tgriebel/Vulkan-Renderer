@@ -1,20 +1,17 @@
 # Blender MTL File: 'chess_board.blend'
 # Material Count: 2
 
-newmtl Artificial_Marble_4
+newmtl Material.001
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
+Kd 0.000000 0.000000 0.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\Marble09_nrm.jpg
-map_Kd C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\Marble09_col.jpg
-map_Ns C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\Marble09_rgh.jpg
 
-newmtl white_marble
+newmtl Material.002
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -23,7 +20,3 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\white_marble_normal.jpg
-map_Kd C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\white_marble_albedo.jpg
-map_Ns C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\white_marble_roughness.jpg
-refl C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\chess\\assets\\models\\checkers_marble_1e857258-ef3f-456c-8c6d-512989f1fc8c\\textures_1k\\white_marble_metallic.jpg

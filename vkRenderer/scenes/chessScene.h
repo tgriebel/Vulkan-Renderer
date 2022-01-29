@@ -177,17 +177,62 @@ void MakeScene()
 		scene.entities.Add( "chess_board", ent );
 	}
 
+	glm::vec3 whiteCorner = glm::vec3( -7.0f, -7.0f, 0.0f );
+
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 0.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_0", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( glm::vec3( 1.0f, 0.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + glm::vec3( 2.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_1", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 4.0f, 2.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_2", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 6.0f, 2.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_3", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 8.0f, 2.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_4", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 10.0f, 2.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_5", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 12.0f, 2.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_6", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
+		ent.SetOrigin( whiteCorner + glm::vec3( 14.0f, 2.0f, 0.0f ) );
+		scene.entities.Add( "white_pawn_7", ent );
 	}
 
 	{
@@ -203,13 +248,6 @@ void MakeScene()
 		scene.CreateEntity( modelLib.FindId( "sphere" ), ent );
 		ent.SetOrigin( glm::vec3( 0.0f, 0.0f, 5.0f ) );
 		scene.entities.Add( "sphere", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( glm::vec3( 5.0f, 0.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_2", ent );
 	}
 
 	{
