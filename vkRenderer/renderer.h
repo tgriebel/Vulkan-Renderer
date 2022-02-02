@@ -69,8 +69,8 @@ public:
 
 private:
 
-	static const uint32_t				ShadowMapWidth = 1280;
-	static const uint32_t				ShadowMapHeight = 720;
+	static const uint32_t				ShadowMapWidth = 1024;
+	static const uint32_t				ShadowMapHeight = 1024;
 
 	static const bool					ValidateVerbose = false;
 	static const bool					ValidateWarnings = false;
@@ -465,9 +465,14 @@ private:
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
 			stateBits |= GFX_STATE_BLEND_ENABLE;
 		}
-		else if ( pass == DRAWPASS_WIREFRAME )
+		else if ( pass == DRAWPASS_DEBUG_WIREFRAME )
 		{
 			stateBits |= GFX_STATE_WIREFRAME_ENABLE;
+		}
+		else if ( pass == DRAWPASS_DEBUG_SOLID )
+		{
+			stateBits |= GFX_STATE_CULL_MODE_BACK;
+			stateBits |= GFX_STATE_BLEND_ENABLE;
 		}
 		else if ( pass == DRAWPASS_POST_2D )
 		{
@@ -485,7 +490,11 @@ private:
 
 	viewport_t GetDrawPassViewport( const drawPass_t pass )
 	{
-		return renderView.viewport;
+		if ( pass == DRAWPASS_SHADOW ) {
+			return shadowView.viewport;
+		} else {
+			return renderView.viewport;
+		}
 	}
 
 	void CreatePipelineObjects()
@@ -1816,23 +1825,23 @@ private:
 				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
 
 				VkViewport viewport{ };
-				viewport.x = view.viewport.x;
-				viewport.y = view.viewport.y;
-				viewport.width = view.viewport.width;
-				viewport.height = view.viewport.height;
+				viewport.x = shadowView.viewport.x;
+				viewport.y = shadowView.viewport.y;
+				viewport.width = shadowView.viewport.width;
+				viewport.height = shadowView.viewport.height;
 				viewport.minDepth = 0.0f;
 				viewport.maxDepth = 1.0f;
 				vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
 
 				VkRect2D rect{ };
-				rect.extent.width = static_cast< uint32_t >( view.viewport.width );
-				rect.extent.height = static_cast<uint32_t>( view.viewport.height );
+				rect.extent.width = static_cast< uint32_t >( shadowView.viewport.width );
+				rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
 				vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
 
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, shadowView.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 			}
 			vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 		}
@@ -1879,10 +1888,13 @@ private:
 					if ( surface.pipelineObject[ pass ] == INVALID_HANDLE ) {
 						continue;
 					}
-					if ( ( pass == DRAWPASS_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
+					if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
 						continue;
 					}
-					if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
+					if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
+						continue;
+					}
+					if ( ( pass == DRAWPASS_DEBUG_SOLID ) && ( ( surface.flags & DEBUG_SOLID ) == 0 ) ) {
 						continue;
 					}
 					GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
@@ -2252,22 +2264,27 @@ private:
 		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 0 ].lightDir = glm::vec4( lightDir0[ 0 ], lightDir0[ 1 ], lightDir0[ 2 ], 0.0f );
 		renderView.lights[ 1 ].lightPos = glm::vec4( 0.0f, glm::cos( time ), 1.0f, 0.0 );
-		renderView.lights[ 1 ].intensity = glm::vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+		renderView.lights[ 1 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 1 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 		renderView.lights[ 2 ].lightPos = glm::vec4( glm::sin( time ), 0.0f, 1.0f, 0.0f );
-		renderView.lights[ 2 ].intensity = glm::vec4( 0.0f, 1.0f, 0.0f, 1.0f );
+		renderView.lights[ 2 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		renderView.lights[ 2 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
 
-		const glm::vec3 shadowLightPos = lightPos0;
-		const glm::vec3 shadowLightDir = lightDir0;
+		const glm::vec3 shadowLightDir = -lightDir0;
 
 		// Temp shadow map set-up
-		shadowView.viewport = renderView.viewport;
+		shadowView.viewport.x = 0.0f;
+		shadowView.viewport.y = 0.0f;
+		shadowView.viewport.near = 0.0f;
+		shadowView.viewport.far = 1.0f;
+		shadowView.viewport.width = ShadowMapWidth;
+		shadowView.viewport.height = ShadowMapHeight;
 		shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
 		shadowView.viewMatrix = glm::transpose( shadowView.viewMatrix );
-		shadowView.viewMatrix[ 3 ][ 0 ] = shadowLightPos[ 0 ];
-		shadowView.viewMatrix[ 3 ][ 1 ] = shadowLightPos[ 1 ];
-		shadowView.viewMatrix[ 3 ][ 2 ] = shadowLightPos[ 2 ];
+		const glm::vec4 shadowLightPos = shadowView.viewMatrix * glm::vec4( lightPos0, 0.0f );
+		shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
+		shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
+		shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
 
 		Camera shadowCam;
 		shadowCam = Camera( glm::vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );

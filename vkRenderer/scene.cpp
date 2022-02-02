@@ -100,13 +100,13 @@ void UpdateScene( const float dt )
 	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	scene.entities.Find( 0 )->matrix = skyBoxMatrix;
 
-	entity_t* pawn = scene.entities.Find( "white_pawn_0" );
-	entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
-	AABB bounds = pawn->GetBounds();
-	vec3d size = bounds.GetSize();
-	vec3d center = bounds.GetCenter();
-	debugBox->SetOrigin( glm::vec3( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-	debugBox->SetScale( 0.5f * glm::vec3( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+	//entity_t* pawn = scene.entities.Find( "white_pawn_0" );
+	//entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
+	//AABB bounds = pawn->GetBounds();
+	//vec3d size = bounds.GetSize();
+	//vec3d center = bounds.GetCenter();
+	//debugBox->SetOrigin( glm::vec3( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+	//debugBox->SetScale( 0.5f * glm::vec3( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	//GetCenter
 
 	materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % textureLib.Count() );

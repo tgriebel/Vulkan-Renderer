@@ -29,6 +29,8 @@ void AssetLib< GpuProgram >::Create()
 	Add( "LitOpaque", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
 	Add( "LitTree", LoadProgram( "shaders_bin/treeVS.spv", "shaders_bin/litPS.spv" ) ); // TODO: vert motion
 	Add( "LitTrans", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/emissivePS.spv" ) );
+	Add( "Debug", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
+	Add( "Debug_Solid", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
 	Add( "PostProcess", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/postProcessPS.spv" ) );
 	Add( "Image2D", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/simplePS.spv" ) );
 }
@@ -123,9 +125,14 @@ void AssetLib< Material >::Create()
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
-		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
-		Add( "WIRE", material );
+		material.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = gpuPrograms.RetrieveHdl( "Debug" );
+		Add( "DEBUG_WIRE", material );
+	}
+
+	{
+		Material material;
+		material.shaders[ DRAWPASS_DEBUG_SOLID ] = gpuPrograms.RetrieveHdl( "Debug_Solid" );
+		Add( "DEBUG_SOLID", material );
 	}
 }
 
@@ -238,15 +245,33 @@ void MakeScene()
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "cube" ), ent );
-		ent.materialId = materialLib.FindId( "WIRE" );
+		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
 		ent.flags = static_cast< renderFlags_t >( WIREFRAME | SKIP_OPAQUE );
-		scene.entities.Add( "white_pawn_0_cube", ent );
+	//	scene.entities.Add( "white_pawn_0_cube", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "axis" ), ent );
+		entity_t* pawn = scene.entities.Find( "white_pawn_0" );
+		ent.SetOrigin( pawn->GetOrigin() );
+		ent.flags = static_cast<renderFlags_t>( DEBUG_SOLID | SKIP_OPAQUE );
+		scene.entities.Add( "white_pawn_0_axis", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "axis" ), ent );
+		entity_t* pawn = scene.entities.Find( "white_pawn_1" );
+		ent.SetOrigin( pawn->GetOrigin() );
+		ent.flags = static_cast<renderFlags_t>( DEBUG_SOLID | SKIP_OPAQUE );
+		scene.entities.Add( "white_pawn_1_axis", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "sphere" ), ent );
-		ent.SetOrigin( glm::vec3( 0.0f, 0.0f, 5.0f ) );
+		ent.SetOrigin( glm::vec3( 0.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "sphere", ent );
 	}
 

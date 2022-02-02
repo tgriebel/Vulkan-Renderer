@@ -147,30 +147,20 @@ enum drawPass_t : uint32_t
 	DRAWPASS_OPAQUE,
 	DRAWPASS_TRANS,
 	DRAWPASS_SKYBOX,
-	DRAWPASS_WIREFRAME,
+	DRAWPASS_DEBUG_SOLID,
+	DRAWPASS_DEBUG_WIREFRAME,
 	DRAWPASS_POST_2D,
 	DRAWPASS_COUNT
-};
-
-enum drawPassFlags_t : uint32_t
-{
-	DRAWPASS_FLAG_SHADOW	= ( 1 << DRAWPASS_SHADOW ),
-	DRAWPASS_FLAG_DEPTH		= ( 1 << DRAWPASS_DEPTH ),
-	DRAWPASS_FLAG_TERRAIN	= ( 1 << DRAWPASS_TERRAIN ),
-	DRAWPASS_FLAG_OPAQUE	= ( 1 << DRAWPASS_OPAQUE ),
-	DRAWPASS_FLAG_TRANS		= ( 1 << DRAWPASS_TRANS ),
-	DRAWPASS_FLAG_SKYBOX	= ( 1 << DRAWPASS_SKYBOX ),
-	DRAWPASS_FLAG_WIRE		= ( 1 << DRAWPASS_WIREFRAME ),
-	DRAWPASS_FLAG_POST_2D	= ( 1 << DRAWPASS_POST_2D ),
 };
 
 enum renderFlags_t : uint32_t
 {
 	NONE		= 0,
 	NO_SHADOWS	= ( 1 << 0 ),
-	WIREFRAME	= ( 1 << 1 ),
-	SKIP_OPAQUE	= ( 1 << 2 ),
-	COMMITTED	= ( 1 << 3 ),
+	WIREFRAME	= ( 1 << 1 ),	// FIXME: this needs to make a unique pipeline object if checked
+	DEBUG_SOLID	= ( 1 << 2 ),	// "
+	SKIP_OPAQUE	= ( 1 << 3 ),
+	COMMITTED	= ( 1 << 4 ),
 };
 
 enum shaderType_t : uint32_t
