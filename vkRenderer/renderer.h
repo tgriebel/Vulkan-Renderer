@@ -2246,31 +2246,13 @@ private:
 
 	void UpdateView()
 	{
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
-
-		const glm::vec3 lightPos0 = glm::vec4( glm::cos( time ), 0.0f, 6.0f, 0.0f );
-		const glm::vec3 lightDir0 = normalize( glm::vec4( 0.0f, 0.0f, -1.0f, 0.0f ) );
-
 		int width;
 		int height;
 		window.GetWindowSize( width, height );
 		renderView.viewport.width = static_cast<float>( width );
 		renderView.viewport.height = static_cast<float>( height );
 
-		renderView.lights[ 0 ].lightPos = glm::vec4( lightPos0[ 0 ], lightPos0[ 1 ], lightPos0[ 2 ], 0.0f );
-		renderView.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		renderView.lights[ 0 ].lightDir = glm::vec4( lightDir0[ 0 ], lightDir0[ 1 ], lightDir0[ 2 ], 0.0f );
-		renderView.lights[ 1 ].lightPos = glm::vec4( 0.0f, glm::cos( time ), 1.0f, 0.0 );
-		renderView.lights[ 1 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		renderView.lights[ 1 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
-		renderView.lights[ 2 ].lightPos = glm::vec4( glm::sin( time ), 0.0f, 1.0f, 0.0f );
-		renderView.lights[ 2 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		renderView.lights[ 2 ].lightDir = glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f );
-
-		const glm::vec3 shadowLightDir = -lightDir0;
+		const glm::vec3 shadowLightDir = -renderView.lights[ 0 ].lightDir;
 
 		// Temp shadow map set-up
 		shadowView.viewport.x = 0.0f;
@@ -2281,7 +2263,7 @@ private:
 		shadowView.viewport.height = ShadowMapHeight;
 		shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
 		shadowView.viewMatrix = glm::transpose( shadowView.viewMatrix );
-		const glm::vec4 shadowLightPos = shadowView.viewMatrix * glm::vec4( lightPos0, 0.0f );
+		const glm::vec4 shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
 		shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
 		shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
 		shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];

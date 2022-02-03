@@ -33,6 +33,10 @@ void Renderer::Commit( const Scene& scene )
 	renderView.viewMatrix = scene.camera.GetViewMatrix();
 	renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
 
+	for ( int i = 0; i < MaxLights; ++i ) {
+		renderView.lights[ i ] = scene.lights[ i ];
+	}
+
 	UpdateView();
 }
 

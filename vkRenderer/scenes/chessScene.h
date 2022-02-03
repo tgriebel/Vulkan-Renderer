@@ -146,6 +146,7 @@ void AssetLib< modelSource_t >::Create()
 	{
 		LoadModel( "axis.obj", "axis" );
 		LoadModel( "cube.obj", "cube" );
+		LoadModel( "diamond.obj", "diamond" );
 		LoadModel( "sphere.obj", "sphere" );
 		LoadModel( "pawn.obj", "pawn" );
 		LoadModel( "chess_board.obj", "chess_board" );
@@ -277,6 +278,30 @@ void MakeScene()
 
 	{
 		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
+		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
+		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+		scene.entities.Add( "light0_dbg", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
+		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
+		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+		scene.entities.Add( "light1_dbg", ent );
+	}
+
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
+		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
+		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+		scene.entities.Add( "light2_dbg", ent );
+	}
+
+	{
+		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "_postProcessQuad" ), ent );
 		scene.entities.Add( "_postProcessQuad", ent );
 	}
@@ -285,6 +310,20 @@ void MakeScene()
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "_quadTexDebug" ), ent );
 		scene.entities.Add( "_quadTexDebug", ent );
+	}
+
+	{
+		scene.lights[ 0 ].lightPos = glm::vec4( 0.0f, 0.0f, 6.0f, 0.0f );
+		scene.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 0 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, -1.0f, 0.0f ) );
+
+		scene.lights[ 1 ].lightPos = glm::vec4( 0.0f, 0.0f, 5.0f, 0.0f );
+		scene.lights[ 1 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 1 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f ) );
+
+		scene.lights[ 2 ].lightPos = glm::vec4( 0.0f, 1.0f, 1.0f, 0.0f );
+		scene.lights[ 2 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 2 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f ) );
 	}
 
 	//// Pieces
@@ -302,4 +341,41 @@ void MakeScene()
 	//		scene.entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
 	//	}
 	//}
+}
+
+void UpdateSceneLocal()
+{
+	static auto startTime = std::chrono::high_resolution_clock::now();
+
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
+
+	scene.lights[ 0 ].lightPos = glm::vec4( 5.0f * cos( time ), 5.0f * sin( time ), 0.0f, 0.0f );
+
+	//entity_t* pawn = scene.entities.Find( "white_pawn_0" );
+	//entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
+	//AABB bounds = pawn->GetBounds();
+	//vec3d size = bounds.GetSize();
+	//vec3d center = bounds.GetCenter();
+	//debugBox->SetOrigin( glm::vec3( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+	//debugBox->SetScale( 0.5f * glm::vec3( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+	//GetCenter
+
+	{
+		entity_t* debugLight = scene.entities.Find( "light0_dbg" );
+		debugLight->SetOrigin( scene.lights[ 0 ].lightPos );
+		debugLight->SetScale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
+	}
+
+	{
+		entity_t* debugLight = scene.entities.Find( "light1_dbg" );
+		debugLight->SetOrigin( scene.lights[ 1 ].lightPos );
+		debugLight->SetScale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
+	}
+
+	{
+		entity_t* debugLight = scene.entities.Find( "light2_dbg" );
+		debugLight->SetOrigin( scene.lights[ 2 ].lightPos );
+		debugLight->SetScale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
+	}
 }

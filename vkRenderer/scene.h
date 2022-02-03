@@ -9,6 +9,7 @@ struct Scene
 {
 	Camera						camera;
 	AssetLib< entity_t >		entities;
+	light_t						lights[ MaxLights ];
 	float						defaultNear = 1000.0f;
 	float						defaultFar = 0.1f;
 
