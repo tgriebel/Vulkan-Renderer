@@ -29,6 +29,6 @@ void main()
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 	//outColor = mix( skyColor, sceneColor, skyMask );
 	//outColor = uvColor;
-	outColor = globals.toneMap.rgba * LinearToSrgb( sceneColor );
+	outColor = globals.toneMap.rgba * ( sceneColor );
 	//outColor = vec4( 10.0f * vec3( skyMask ).xyz, 1.0 );
 }

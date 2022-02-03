@@ -17,8 +17,8 @@ void main()
 
     const float maxHeight = globals.heightMap.x;
     const vec4 blendValue = maxHeight * texture( texSampler[ blendId ], fragTexCoord.xy );
-    const vec4 texColor0 = SrgbTolinear( texture( texSampler[ textureId0 ], fragTexCoord.xy ) );
-    const vec4 texColor1 = SrgbTolinear( texture( texSampler[ textureId1 ], fragTexCoord.xy ) );
+    const vec4 texColor0 = SrgbToLinear( texture( texSampler[ textureId0 ], fragTexCoord.xy ) );
+    const vec4 texColor1 = SrgbToLinear( texture( texSampler[ textureId1 ], fragTexCoord.xy ) );
     const vec4 texColor = mix( texColor1, texColor0, smoothstep( 0.0f, 0.4f, blendValue ) );
     outColor = AMBIENT * texColor;
     for( int i = 0; i < 3; ++i ) {

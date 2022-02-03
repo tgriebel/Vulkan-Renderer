@@ -115,16 +115,16 @@
 //																																					//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float SrgbTolinear( float value ) {
+float SrgbToLinear( float value ) {
 	return( value <= 0.04045f ) ? value / 12.92f : pow( ( value + 0.055f ) / 1.055f, 2.4f );
 }
 
-vec3 SrgbTolinear( vec3 sRGB ) {
-	return vec3( SrgbTolinear( sRGB.r ), SrgbTolinear( sRGB.g ), SrgbTolinear( sRGB.b ) );
+vec3 SrgbToLinear( vec3 sRGB ) {
+	return vec3( SrgbToLinear( sRGB.r ), SrgbToLinear( sRGB.g ), SrgbToLinear( sRGB.b ) );
 }
 
-vec4 SrgbTolinear( vec4 sRGBA ) {
-	return vec4( SrgbTolinear( sRGBA.rgb ), sRGBA.a );
+vec4 SrgbToLinear( vec4 sRGBA ) {
+	return vec4( SrgbToLinear( sRGBA.rgb ), sRGBA.a );
 }
 
 float LinearToSrgb( float value ) {

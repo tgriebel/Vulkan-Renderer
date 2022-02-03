@@ -8,16 +8,17 @@
 PS_LAYOUT_STANDARD
 
 #define PI 3.14159
-float D_GGX( const float NoH, const float a )
+float D_GGX( const float NoH, const float roughness )
 {
-    float a2     = a * a;
-    float NoH2   = NoH * NoH;
+    float a       = roughness * roughness;
+    float a2      = a * a;
+    float NoH2    = NoH * NoH;
 	
-    float nom    = a2;
-    float denom  = ( NoH2 * ( a2 - 1.0 ) + 1.0 );
-    denom        = PI * denom * denom;
+    float num     = a2;
+    float denom = ( NoH2 * ( a2 - 1.0 ) + 1.0 );
+    denom = PI * denom * denom;
 	
-    return nom / denom;
+    return num / denom;
 }
 
 vec3 F_Schlick( float cosTheta, vec3 f0 ) {
@@ -39,7 +40,7 @@ void main()
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
-    const float perceptualRoughness = 0.1f;
+    const float perceptualRoughness = 0.7f;
     const float a = perceptualRoughness * perceptualRoughness;
 
     const vec3 v = normalize( cameraOrigin.xyz - worldPosition.xyz );
@@ -49,34 +50,41 @@ void main()
     const vec3 r = reflect( -v, normalize( fragNormal ) );
     const vec4 envColor = vec4( texture( cubeSamplers[ 0 ], vec3( r.x, r.z, r.y ) ).rgb, 1.0f );
 
-    float NoV = abs( dot( n, v ) ) + 1e-5;
+    float NoV = abs( dot( n, v ) );
 
-    const vec4 texColor = SrgbTolinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
+    // Note: Only albedo needs linear conversion
+    const vec4 texColor = SrgbToLinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
     const vec3 ambient = materials[ materialId ].Ka.rgb;
     const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
     const vec3 specularColor = materials[ materialId ].Ks.rgb;
     const float specularPower = materials[ materialId ].Ns;
 
     vec3 color = vec3( 0.0f, 0.0f, 0.0f );
-    //for( int i = 0; i < 3; ++i ) {
-	    const vec3 l = normalize( lights[ 0 ].lightPos - worldPosition.xyz );
+    for( int i = 0; i < 3; ++i ) {
+	    const vec3 l = normalize( lights[ i ].lightPos - worldPosition.xyz );
         const vec3 h = normalize( v + l );
 
         const float NoL = clamp( dot( n, l ), 0.0f, 1.0f );
         const float NoH = clamp( dot( n, h ), 0.0f, 1.0f );
         const float LoH = clamp( dot( l, h ), 0.0f, 1.0f );
 
-        const float spotAngle = dot( l, lights[ 0 ].lightDir );
+        const float D = D_GGX( NoH, perceptualRoughness );
+
+        const float spotAngle = dot( l, lights[ i ].lightDir );
         const float spotFov = 0.5f;
 
         const float specular = NoH;
         const vec3 specularIntensity = specularColor * pow( specular, max( 1.0f, 64.0f ) );
 
+        vec3 numerator      = D.xxx;
+        float denominator   = 4.0f * NoV * NoL + 0.0001;
+        vec3 Fr             = numerator / denominator;
+
         vec3 diffuse = diffuseColor * texColor.rgb;
-        diffuse *= lights[ 0 ].intensity;// * smoothstep( 0.5f, 0.8f, spotAngle );
-        diffuse = ( D_GGX( NoH, a ) * NoL ).xxx;
+        diffuse *= lights[ i ].intensity;// * smoothstep( 0.5f, 0.8f, spotAngle );
+        diffuse = ( Fr * NoL );
         color += diffuse;
-    //}
+    }
     outColor.rgb = color.rgb * Fd_Lambert();
     outColor.a = 1.0f;
 

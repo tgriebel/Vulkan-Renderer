@@ -25,5 +25,5 @@ void main()
     } else if( majorAxis == zm ) {
         textureId = ( sign( fragNormal.z ) > 0.0f ) ? materials[ materialId ].textureId2 : materials[ materialId ].textureId3;
     }
-	outColor = SrgbTolinear( texture( texSampler[textureId], fragTexCoord.xy ) );
+	outColor = SrgbToLinear( texture( texSampler[textureId], fragTexCoord.xy ) );
 }
