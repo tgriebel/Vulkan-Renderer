@@ -102,19 +102,19 @@ public:
 	glm::vec4 GetForward() const
 	{
 		glm::mat4 view = GetAxis();
+		return -view[ 2 ];
+	}
+
+	glm::vec4 GetRight() const
+	{
+		glm::mat4 view = GetAxis();
 		return view[ 0 ];
 	}
 
-	glm::vec4 GetHorizontal() const
+	glm::vec4 GetUp() const
 	{
 		glm::mat4 view = GetAxis();
 		return view[ 1 ];
-	}
-
-	glm::vec4 GetVertical() const
-	{
-		glm::mat4 view = GetAxis();
-		return view[ 2 ];
 	}
 
 	void Translate( glm::vec4 offset )
@@ -137,13 +137,13 @@ public:
 		origin += delta * GetForward();
 	}
 
-	void MoveHorizontal( const float delta )
+	void MoveRight( const float delta )
 	{
-		origin += delta * GetForward();
+		origin += delta * GetRight();
 	}
 
-	void MoveVertical( const float delta )
+	void MoveUp( const float delta )
 	{
-		origin += delta * GetVertical();
+		origin += delta * GetUp();
 	}
 };
