@@ -7,7 +7,7 @@
 
 PS_LAYOUT_STANDARD
 
-#define PI 3.14159
+#define PI 3.14159265359f
 float D_GGX( const float NoH, const float roughness )
 {
     float a       = roughness * roughness;
@@ -19,6 +19,24 @@ float D_GGX( const float NoH, const float roughness )
     denom = PI * denom * denom;
 	
     return num / denom;
+}
+
+float G_SchlickGGX( const float cosAngle, const float roughness )
+{
+    const float r = ( roughness + 1.0 );
+    const float k = ( r * r ) / 8.0f;
+
+    const float num   = cosAngle;
+    const float denom = cosAngle * ( 1.0f - k ) + k;
+	
+    return ( num / denom );
+}
+
+float G_Smith( const float NoV, const float NoL, const float roughness )
+{
+    const float ggx2 = G_SchlickGGX( NoV, roughness );
+    const float ggx1 = G_SchlickGGX( NoL, roughness );	
+    return ( ggx1 * ggx2 );
 }
 
 vec3 F_Schlick( float cosTheta, vec3 f0 ) {
@@ -40,7 +58,7 @@ void main()
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
-    const float perceptualRoughness = 0.7f;
+    const float perceptualRoughness = globals.generic.y;
     const float a = perceptualRoughness * perceptualRoughness;
 
     const vec3 v = normalize( cameraOrigin.xyz - worldPosition.xyz );
@@ -53,39 +71,51 @@ void main()
     float NoV = abs( dot( n, v ) );
 
     // Note: Only albedo needs linear conversion
-    const vec4 texColor = SrgbToLinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
+    const vec4 albedo = SrgbToLinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
+
+    float metallic = 0.0f;
+
+    vec3 F0 = vec3( 0.04f ); 
+    F0 = albedo.rgb;//mix( F0, albedo, metallic );
+
     const vec3 ambient = materials[ materialId ].Ka.rgb;
     const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
     const vec3 specularColor = materials[ materialId ].Ks.rgb;
     const float specularPower = materials[ materialId ].Ns;
 
     vec3 color = vec3( 0.0f, 0.0f, 0.0f );
-    for( int i = 0; i < 3; ++i ) {
+    for( int i = 0; i < 1; ++i ) {
 	    const vec3 l = normalize( lights[ i ].lightPos - worldPosition.xyz );
         const vec3 h = normalize( v + l );
 
-        const float NoL = clamp( dot( n, l ), 0.0f, 1.0f );
-        const float NoH = clamp( dot( n, h ), 0.0f, 1.0f );
-        const float LoH = clamp( dot( l, h ), 0.0f, 1.0f );
+        const float NoL = max( dot( n, l ), 0.0f );
+        const float NoH = max( dot( n, h ), 0.0f );
+        const float LoH = max( dot( l, h ), 0.0f );
 
-        const float D = D_GGX( NoH, perceptualRoughness );
+        const float D   = D_GGX( NoH, perceptualRoughness );
+        const float G   = G_Smith( NoV, NoL, perceptualRoughness );      
+        const vec3 F    = F_Schlick( NoH, F0 ); 
+
+        const vec3 kS = F;
+        vec3 kD = vec3( 1.0f ) - kS;
+        kD *= 1.0f - metallic;
 
         const float spotAngle = dot( l, lights[ i ].lightDir );
         const float spotFov = 0.5f;
 
-        const float specular = NoH;
-        const vec3 specularIntensity = specularColor * pow( specular, max( 1.0f, 64.0f ) );
-
-        vec3 numerator      = D.xxx;
+        vec3 numerator      = D * G * F;
         float denominator   = 4.0f * NoV * NoL + 0.0001;
         vec3 Fr             = numerator / denominator;
+               
+        const float distance    = length( l );
+        const float attenuation = 1.0f / ( distance * distance );
+        const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
+        const vec3 radiance     = attenuation * spotFalloff * lights[ i ].intensity;
 
-        vec3 diffuse = diffuseColor * texColor.rgb;
-        diffuse *= lights[ i ].intensity;// * smoothstep( 0.5f, 0.8f, spotAngle );
-        diffuse = ( Fr * NoL );
+        vec3 diffuse = ( ( kD * albedo.rgb ) / PI + Fr ) * radiance * NoL;
         color += diffuse;
     }
-    outColor.rgb = color.rgb * Fd_Lambert();
+    outColor.rgb = color.rgb; // * Fd_Lambert();
     outColor.a = 1.0f;
 
     float visibility = 1.0f;
@@ -100,7 +130,7 @@ void main()
     const float shadowValue = texture( codeSamplers[ shadowMapTexId ], ndc ).r;
     if( shadowValue < ( depth - bias ) ) // shadowed
     {
-   //     visibility = 0.1f;
+    //    visibility = 0.0f;
     }
     outColor.rgb *= visibility;
 }
