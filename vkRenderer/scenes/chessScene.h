@@ -248,7 +248,7 @@ void MakeScene()
 		scene.CreateEntity( modelLib.FindId( "cube" ), ent );
 		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
 		ent.flags = static_cast< renderFlags_t >( WIREFRAME | SKIP_OPAQUE );
-	//	scene.entities.Add( "white_pawn_0_cube", ent );
+		scene.entities.Add( "white_pawn_0_cube", ent );
 	}
 
 	{
@@ -325,22 +325,6 @@ void MakeScene()
 		scene.lights[ 2 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
 		scene.lights[ 2 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f ) );
 	}
-
-	//// Pieces
-	//const float scale = 1.0f;// 0.0025f;
-	//{
-	//	for ( int i = entId; i < ( entId + piecesNum ); ++i )
-	//	{
-	//		glm::vec2 randPoint;
-	//		RandPlanePoint( randPoint );
-	//		randPoint = 10.0f * ( randPoint - 0.5f );
-	//		scene.entities[ i ].matrix = scale * glm::identity<glm::mat4>();
-	//		scene.entities[ i ].matrix[ 3 ][ 0 ] = randPoint.x;
-	//		scene.entities[ i ].matrix[ 3 ][ 1 ] = randPoint.y;
-	//		scene.entities[ i ].matrix[ 3 ][ 2 ] = 0.0f;
-	//		scene.entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
-	//	}
-	//}
 }
 
 void UpdateSceneLocal()
@@ -350,15 +334,15 @@ void UpdateSceneLocal()
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
 
-	scene.lights[ 0 ].lightPos = glm::vec4( 5.0f * cos( time ), 5.0f * sin( time ), 0.0f, 0.0f );
+	scene.lights[ 0 ].lightPos = glm::vec4( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	//entity_t* pawn = scene.entities.Find( "white_pawn_0" );
-	//entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
-	//AABB bounds = pawn->GetBounds();
-	//vec3d size = bounds.GetSize();
-	//vec3d center = bounds.GetCenter();
-	//debugBox->SetOrigin( glm::vec3( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-	//debugBox->SetScale( 0.5f * glm::vec3( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+	entity_t* pawn = scene.entities.Find( "white_pawn_0" );
+	entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
+	AABB bounds = pawn->GetBounds();
+	vec3d size = bounds.GetSize();
+	vec3d center = bounds.GetCenter();
+	debugBox->SetOrigin( glm::vec3( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+	debugBox->SetScale( 0.5f * glm::vec3( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	//GetCenter
 
 	{

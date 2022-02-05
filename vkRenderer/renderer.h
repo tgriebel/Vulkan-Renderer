@@ -390,6 +390,7 @@ private:
 		ImGui_ImplGlfw_NewFrame();
 #endif
 		imguiControls.heightMapHeight = 1.0f;
+		imguiControls.roughness = 0.9f;
 		imguiControls.toneMapColor[ 0 ] = 1.0f;
 		imguiControls.toneMapColor[ 1 ] = 1.0f;
 		imguiControls.toneMapColor[ 2 ] = 1.0f;
@@ -1951,6 +1952,7 @@ private:
 
 			ImGui::Begin( "Control Panel" );
 			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
@@ -1960,6 +1962,18 @@ private:
 			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
 			const glm::vec2 screenPoint = glm::vec2( (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / width, 1.0f / height ) - 1.0f;
+			
+			glm::vec3 cameraForward = scene.camera.GetForward();
+			glm::vec3 cameraRight = scene.camera.GetRight();
+			glm::vec3 cameraUp = scene.camera.GetUp();
+			glm::vec4 cameraOrigin = scene.camera.GetOrigin();
+			glm::vec3 rayOrigin =	ndc.x * scene.camera.GetRight() +
+									ndc.y * scene.camera.GetUp();
+			rayOrigin += glm::vec3( cameraOrigin.x, cameraOrigin.y, cameraOrigin.z );
+			glm::vec3 rayDirection = 1000.0f * scene.camera.GetForward();
+			
+			Ray ray = Ray( vec3d( cameraOrigin.x, cameraOrigin.y, cameraOrigin.z ), vec3d( rayDirection.x, rayDirection.y, rayDirection.z ) );
+
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
 				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities.Find( imguiControls.selectedModelId )->modelId ) );
@@ -1969,25 +1983,28 @@ private:
 			}
 			static glm::vec3 tempOrigin;
 			ImGui::Text( "NDC: (%f, %f )", (float)ndc.x, (float)ndc.y );
-			ImGui::Text( "Camera Origin: (%f, %f, %f)", scene.camera.GetOrigin().x, scene.camera.GetOrigin().y, scene.camera.GetOrigin().z );
-			if ( ImGui::BeginCombo( "Models", entityName ) )
+			ImGui::Text( "Ray Origin: (%4.2f, %4.2f, %4.2f )", (float)rayOrigin.x, (float)rayOrigin.y, (float)rayOrigin.z );
+			ImGui::Text( "Ray Direction: (%4.2f, %4.2f, %4.2f )", (float)rayDirection.x, (float)rayDirection.y, (float)rayDirection.z );
+			ImGui::Text( "Camera Origin: (%f, %f, %f)", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z );
+			ImGui::Text( "Camera X: (%f, %f, %f)", cameraForward.x, cameraForward.y, cameraForward.z );
+			ImGui::Text( "Camera Y: (%f, %f, %f)", cameraRight.x, cameraRight.y, cameraRight.z );
+			ImGui::Text( "Camera Z: (%f, %f, %f)", cameraUp.x, cameraUp.y, cameraUp.z );
+
 			{
-				for ( uint32_t entityIx = 0; entityIx < scene.entities.Count(); ++entityIx ) {
-					const modelSource_t* model = modelLib.Find( scene.entities.Find( entityIx )->modelId );
-					sprintf_s( entityName, "%i: %s", entityIx, modelLib.FindName( scene.entities.Find( entityIx )->modelId ) );
-					if ( ImGui::Selectable( entityName, ( imguiControls.selectedModelId == entityIx ) ) ) {
-						imguiControls.selectedModelId = entityIx;
-						scene.entities.Find( entityIx )->flags = renderFlags_t::WIREFRAME;
-						tempOrigin.x = scene.entities.Find( entityIx )->matrix[ 3 ][ 0 ];
-						tempOrigin.y = scene.entities.Find( entityIx )->matrix[ 3 ][ 1 ];
-						tempOrigin.z = scene.entities.Find( entityIx )->matrix[ 3 ][ 2 ];
-					}
-					else {
-						scene.entities.Find( entityIx )->flags = (renderFlags_t)( scene.entities.Find( entityIx )->flags & ~renderFlags_t::WIREFRAME );
-					}
+				entity_t* ent = scene.entities.Find( "white_pawn_0" );
+				const modelSource_t* model = modelLib.Find( ent->modelId );
+
+				double t0, t1;
+				if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
+					const vec3d outPt = ray.GetOrigin() + t1 * ray.GetVector();
+					ImGui::Text( "Hit white_pawn_0 @ (%4.2f, %4.2f, %4.2f )", outPt[ 0 ], outPt[ 1 ], outPt[ 2 ] );
+				//	imguiControls.selectedModelId = scene.entities.FindId( "white_pawn_0" );
+					ent->flags = renderFlags_t::WIREFRAME;
+				} else {
+					ent->flags = (renderFlags_t)( ent->flags & ~renderFlags_t::WIREFRAME );
 				}
-				ImGui::EndCombo();
 			}
+
 			ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin.x, 0.1f, 1.0f );
 			ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin.y, 0.1f, 1.0f );
 			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin.z, 0.1f, 1.0f );
@@ -2435,7 +2452,7 @@ private:
 			const float fracPart = modf( time, &intPart );
 
 			globals.time = glm::vec4( time, intPart, fracPart, 1.0f );
-			globals.heightmap = glm::vec4( imguiControls.heightMapHeight, 0.0f, 0.0f, 0.0f );
+			globals.generic = glm::vec4( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
 			globals.tonemap = glm::vec4( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
 			globals.shadowBaseId = ShadowObjectOffset;
 			globalsBuffer.push_back( globals );

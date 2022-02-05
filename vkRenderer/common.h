@@ -156,11 +156,12 @@ enum drawPass_t : uint32_t
 enum renderFlags_t : uint32_t
 {
 	NONE		= 0,
-	NO_SHADOWS	= ( 1 << 0 ),
-	WIREFRAME	= ( 1 << 1 ),	// FIXME: this needs to make a unique pipeline object if checked
-	DEBUG_SOLID	= ( 1 << 2 ),	// "
-	SKIP_OPAQUE	= ( 1 << 3 ),
-	COMMITTED	= ( 1 << 4 ),
+	HIDDEN		= ( 1 << 0 ),
+	NO_SHADOWS	= ( 1 << 1 ),
+	WIREFRAME	= ( 1 << 2 ),	// FIXME: this needs to make a unique pipeline object if checked
+	DEBUG_SOLID	= ( 1 << 3 ),	// "
+	SKIP_OPAQUE	= ( 1 << 4 ),
+	COMMITTED	= ( 1 << 5 ),
 };
 
 enum shaderType_t : uint32_t
@@ -359,7 +360,7 @@ struct uniformBufferObject_t
 struct globalUboConstants_t
 {
 	glm::vec4	time;
-	glm::vec4	heightmap;
+	glm::vec4	generic;
 	glm::vec4	tonemap;
 	uint32_t	shadowBaseId;
 	uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
@@ -744,6 +745,7 @@ private:
 struct imguiControls_t
 {
 	float		heightMapHeight;
+	float		roughness;
 	float		toneMapColor[ 4 ];
 	int			dbgImageId;
 	int			selectedModelId;
