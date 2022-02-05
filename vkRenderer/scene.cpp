@@ -52,16 +52,16 @@ void UpdateScene( const float dt )
 	// Need to do a ping-pong update
 
 	if ( window.input.IsKeyPressed( 'D' ) ) {
-		scene.camera.MoveForward( dt * 0.01f );
+		scene.camera.MoveRight( dt * 0.01f );
 	}
 	if ( window.input.IsKeyPressed( 'A' ) ) {
-		scene.camera.MoveForward( dt * -0.01f );
+		scene.camera.MoveRight( dt * -0.01f );
 	}
 	if ( window.input.IsKeyPressed( 'W' ) ) {
-		scene.camera.MoveVertical( dt * -0.01f );
+		scene.camera.MoveForward( dt * 0.01f );
 	}
 	if ( window.input.IsKeyPressed( 'S' ) ) {
-		scene.camera.MoveVertical( dt * 0.01f );
+		scene.camera.MoveForward( dt * -0.01f );
 	}
 	if ( window.input.IsKeyPressed( '8' ) ) {
 		scene.camera.SetPitch( -dt * 0.01f );
