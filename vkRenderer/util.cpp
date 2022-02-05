@@ -11,8 +11,6 @@ extern AssetLib< GpuProgram >		gpuPrograms;
 #define STB_IMAGE_IMPLEMENTATION // includes func defs
 #include "stb_image.h"
 
-extern 
-
 glm::mat4 MatrixFromVector( const glm::vec3& v )
 {
 	glm::vec3 up = glm::vec3( 0.0f, 0.0f, 1.0f );

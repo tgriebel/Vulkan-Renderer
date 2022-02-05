@@ -361,6 +361,7 @@ struct globalUboConstants_t
 {
 	glm::vec4	time;
 	glm::vec4	generic;
+	glm::vec4	dimensions;
 	glm::vec4	tonemap;
 	uint32_t	shadowBaseId;
 	uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment

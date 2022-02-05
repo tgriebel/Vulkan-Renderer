@@ -1963,32 +1963,16 @@ private:
 			const glm::vec2 screenPoint = glm::vec2( (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / width, 1.0f / height ) - 1.0f;
 			
-			glm::vec3 cameraForward = scene.camera.GetForward();
-			glm::vec3 cameraRight = scene.camera.GetRight();
-			glm::vec3 cameraUp = scene.camera.GetUp();
-			glm::vec4 cameraOrigin = scene.camera.GetOrigin();
-			glm::vec3 rayOrigin =	ndc.x * scene.camera.GetRight() +
-									ndc.y * scene.camera.GetUp();
-			rayOrigin += glm::vec3( cameraOrigin.x, cameraOrigin.y, cameraOrigin.z );
-			glm::vec3 rayDirection = 1000.0f * scene.camera.GetForward();
-			
-			Ray ray = Ray( vec3d( cameraOrigin.x, cameraOrigin.y, cameraOrigin.z ), vec3d( rayDirection.x, rayDirection.y, rayDirection.z ) );
+			Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc.x + 0.5f, 0.5f * ndc.y + 0.5f ) );
 
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
 				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities.Find( imguiControls.selectedModelId )->modelId ) );
-			}
-			else {
+			} else {
 				memset( &entityName[ 0 ], 0, 256 );
 			}
 			static glm::vec3 tempOrigin;
 			ImGui::Text( "NDC: (%f, %f )", (float)ndc.x, (float)ndc.y );
-			ImGui::Text( "Ray Origin: (%4.2f, %4.2f, %4.2f )", (float)rayOrigin.x, (float)rayOrigin.y, (float)rayOrigin.z );
-			ImGui::Text( "Ray Direction: (%4.2f, %4.2f, %4.2f )", (float)rayDirection.x, (float)rayDirection.y, (float)rayDirection.z );
-			ImGui::Text( "Camera Origin: (%f, %f, %f)", cameraOrigin.x, cameraOrigin.y, cameraOrigin.z );
-			ImGui::Text( "Camera X: (%f, %f, %f)", cameraForward.x, cameraForward.y, cameraForward.z );
-			ImGui::Text( "Camera Y: (%f, %f, %f)", cameraRight.x, cameraRight.y, cameraRight.z );
-			ImGui::Text( "Camera Z: (%f, %f, %f)", cameraUp.x, cameraUp.y, cameraUp.z );
 
 			{
 				entity_t* ent = scene.entities.Find( "white_pawn_0" );
@@ -2451,8 +2435,12 @@ private:
 			float intPart = 0;
 			const float fracPart = modf( time, &intPart );
 
+			const float viewWidth = renderView.viewport.width;
+			const float viewHeight = renderView.viewport.height;
+
 			globals.time = glm::vec4( time, intPart, fracPart, 1.0f );
 			globals.generic = glm::vec4( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
+			globals.dimensions = glm::vec4( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
 			globals.tonemap = glm::vec4( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
 			globals.shadowBaseId = ShadowObjectOffset;
 			globalsBuffer.push_back( globals );

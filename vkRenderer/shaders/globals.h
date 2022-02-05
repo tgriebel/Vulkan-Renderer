@@ -13,6 +13,7 @@
 									{																			\
 										vec4        time;														\
 										vec4        generic;													\
+										vec4        dimensions;													\
 										vec4        toneMap;													\
 										uint		shadowBaseId;												\
 									} globals;

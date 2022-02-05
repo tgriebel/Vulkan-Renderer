@@ -20,6 +20,15 @@ struct Scene
 		camera.far = defaultFar;
 		camera.near = defaultNear;
 		camera.aspect = 16.0f / 9.0f;
+
+		camera.halfFovX = tan( 0.5 * Radians( 90.0f ) );
+		camera.halfFovY = tan( 0.5 * Radians( 90.0f ) ) / camera.aspect;
+		camera.near = camera.near;
+		camera.far = camera.far;
+		camera.aspect = camera.aspect;
+		camera.focalLength = camera.far;
+		camera.viewportWidth = 2.0f * camera.halfFovX;
+		camera.viewportHeight = 2.0f * camera.halfFovY;
 	}
 
 	void CreateEntity( const uint32_t modelId, entity_t& entity )

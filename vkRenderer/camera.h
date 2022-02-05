@@ -10,12 +10,18 @@ private:
 
 public:
 
-	float fov;
-	float near;
-	float far;
-	float aspect;
-	float yaw;
-	float pitch;
+	float	fov;
+	float	near;
+	float	far;
+	float	aspect;
+	float	yaw;
+	float	pitch;
+
+	float	focalLength;
+	float	viewportWidth;
+	float	viewportHeight;
+	float	halfFovX;
+	float	halfFovY;
 
 	void Init( const glm::vec4& _origin, const glm::mat4& _axis, const float _fov = 90.0f, const float _near = 1.0f, const float _far = 1000.0f )
 	{
@@ -46,6 +52,34 @@ public:
 	Camera( const glm::vec4& _origin, const glm::mat4& _axis )
 	{
 		Init( _origin, _axis );
+	}
+
+	struct plane_t
+	{
+		glm::vec4 halfWidth;
+		glm::vec4 halfHeight;
+		glm::vec4 origin;
+	};
+
+	plane_t GetFocalPlane() const
+	{
+		plane_t plane;
+		plane.origin = origin + focalLength * GetForward();
+		plane.halfWidth = 0.5f * focalLength * viewportWidth * GetRight();
+		plane.halfHeight = 0.5f * focalLength * viewportHeight * GetUp();
+		return plane;
+	}
+
+	Ray GetViewRay( const vec2f& uv ) const
+	{
+		// TODO: clip by near plane
+		plane_t plane = GetFocalPlane();
+		glm::vec4 corner = plane.origin - plane.halfWidth - plane.halfHeight;
+		glm::vec4 viewPt = corner + glm::vec4( 2.0f * uv[ 0 ] * plane.halfWidth + 2.0f * uv[ 1 ] * plane.halfHeight );
+
+		vec3d rayOrigin = vec3d( origin.x, origin.y, origin.z );
+		vec3d rayTarget = vec3d( viewPt.x, viewPt.y, viewPt.z );
+		return Ray( rayOrigin, rayTarget );
 	}
 
 	glm::vec4 GetOrigin()
