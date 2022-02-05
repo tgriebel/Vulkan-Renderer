@@ -12,7 +12,7 @@
 #define GLOBALS_LAYOUT( S, N )		layout( set = S, binding = N ) uniform GlobalConstants						\
 									{																			\
 										vec4        time;														\
-										vec4        heightMap;													\
+										vec4        generic;													\
 										vec4        toneMap;													\
 										uint		shadowBaseId;												\
 									} globals;

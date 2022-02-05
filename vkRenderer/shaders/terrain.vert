@@ -40,7 +40,7 @@ void main()
 	const uint heightMapId = materials[ materialId ].textureId0;
 	const float heightMapValue = texture( texSampler[ heightMapId ], inTexCoord.xy ).r;
 
-	const float maxHeight = globals.heightMap.x;
+	const float maxHeight = globals.generic.x;
 	vec3 position = inPosition;
 	position.z += maxHeight * heightMapValue;
 	worldPosition = ubo[ objectId ].model * vec4( position, 1.0f );

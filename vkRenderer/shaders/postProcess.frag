@@ -27,8 +27,10 @@ void main()
 	const float sceneDepth = texture( codeSamplers[ textureId1 ], fragTexCoord.xy ).r;
 	const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
-	//outColor = mix( skyColor, sceneColor, skyMask );
-	//outColor = uvColor;
-	outColor = globals.toneMap.rgba * ( sceneColor );
-	//outColor = vec4( 10.0f * vec3( skyMask ).xyz, 1.0 );
+
+	if( length( fragTexCoord.xy - vec2( 0.5f, 0.5f ) ) < 0.01f ) {
+		outColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	} else {
+		outColor = globals.toneMap.rgba * LinearToSrgb( sceneColor );
+	}
 }

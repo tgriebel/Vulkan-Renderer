@@ -15,7 +15,7 @@ void main()
     const uint textureId0 = materials[ materialId ].textureId1;
     const uint textureId1 = materials[ materialId ].textureId2;
 
-    const float maxHeight = globals.heightMap.x;
+    const float maxHeight = globals.generic.x;
     const vec4 blendValue = maxHeight * texture( texSampler[ blendId ], fragTexCoord.xy );
     const vec4 texColor0 = SrgbToLinear( texture( texSampler[ textureId0 ], fragTexCoord.xy ) );
     const vec4 texColor1 = SrgbToLinear( texture( texSampler[ textureId1 ], fragTexCoord.xy ) );
