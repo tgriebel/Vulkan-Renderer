@@ -6,7 +6,7 @@
 #include <mutex>
 
 #include "common.h"
-#include "util.h"
+#include "render_util.h"
 #include "deviceContext.h"
 #include "camera.h"
 #include "scene.h"

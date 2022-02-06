@@ -11,21 +11,21 @@ extern AssetLib< GpuProgram >		gpuPrograms;
 #define STB_IMAGE_IMPLEMENTATION // includes func defs
 #include "stb_image.h"
 
-glm::mat4 MatrixFromVector( const glm::vec3& v )
+mat4x4f MatrixFromVector( const vec3f& v )
 {
-	glm::vec3 up = glm::vec3( 0.0f, 0.0f, 1.0f );
-	const glm::vec3 u = glm::normalize( v );
-	if ( glm::dot( v, up ) > 0.99999f ) {
-		up = glm::vec3( 0.0f, 1.0f, 0.0f );
+	vec3f up = vec3f( 0.0f, 0.0f, 1.0f );
+	const vec3f u = v.Normalize();
+	if ( Dot( v, up ) > 0.99999f ) {
+		up = vec3f( 0.0f, 1.0f, 0.0f );
 	}
-	const glm::vec3 left = -glm::cross( u, up );
+	const vec3f left = Cross( u, up ).Reverse();
 
-	const glm::mat4 m = glm::mat4( up[ 0 ], up[ 1 ], up[ 2 ], 0.0f,
-		left[ 0 ], left[ 1 ], left[ 2 ], 0.0f,
-		v[ 0 ], v[ 1 ], v[ 2 ], 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f );
+	const float values[ 16 ] = {	up[ 0 ], up[ 1 ], up[ 2 ], 0.0f,
+									left[ 0 ], left[ 1 ], left[ 2 ], 0.0f,
+									v[ 0 ], v[ 1 ], v[ 2 ], 0.0f,
+									0.0f, 0.0f, 0.0f, 1.0f };
 
-	return m;
+	return mat4x4f( values );
 }
 
 bool LoadTextureImage( const char * texturePath, texture_t& texture )
@@ -136,10 +136,10 @@ void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, s
 	for ( const GeoBuilder::vertex_t& v : gb.vb )
 	{
 		VertexInput vert;
-		vert.pos = v.pos;
-		vert.color = v.color;
-		vert.normal = v.normal;
-		vert.texCoord = glm::vec4( v.texCoord.x, v.texCoord.y, 0.0f, 0.0f );
+		vert.pos = glm::vec3( v.pos[ 0 ], v.pos[ 1 ], v.pos[ 2 ] );
+		vert.color = glm::vec4( v.color[ 0 ], v.color[ 1 ], v.color[ 2 ], v.color[ 3 ] );
+		vert.normal = glm::vec3( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
+		vert.texCoord = glm::vec4( v.texCoord[ 0 ], v.texCoord[ 1 ], 0.0f, 0.0f );
 
 		vb.push_back( vert );
 	}
@@ -158,58 +158,58 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 	const uint32_t height = 1;
 
 	GeoBuilder::planeInfo_t info[ 6 ];
-	info[ 0 ].gridSize = glm::vec2( gridSize );
+	info[ 0 ].gridSize = vec2f( gridSize );
 	info[ 0 ].widthInQuads = width;
 	info[ 0 ].heightInQuads = height;
-	info[ 0 ].uv[ 0 ] = glm::vec2( 1.0f, 1.0f );
-	info[ 0 ].uv[ 1 ] = glm::vec2( -1.0f, -1.0f );
-	info[ 0 ].origin = glm::vec3( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
-	info[ 0 ].color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info[ 0 ].uv[ 0 ] = vec2f( 1.0f, 1.0f );
+	info[ 0 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
+	info[ 0 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 0 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info[ 0 ].normalDirection = NORMAL_Z_NEG;
 
-	info[ 1 ].gridSize = glm::vec2( gridSize );
+	info[ 1 ].gridSize = vec2f( gridSize );
 	info[ 1 ].widthInQuads = width;
 	info[ 1 ].heightInQuads = height;
-	info[ 1 ].uv[ 0 ] = glm::vec2( 1.0f, 1.0f );
-	info[ 1 ].uv[ 1 ] = glm::vec2( -1.0f, -1.0f );
-	info[ 1 ].origin = glm::vec3( 0.5f * gridSize * width, 0.5f * gridSize * height, -gridSize );
-	info[ 1 ].color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info[ 1 ].uv[ 0 ] = vec2f( 1.0f, 1.0f );
+	info[ 1 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
+	info[ 1 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, -gridSize );
+	info[ 1 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info[ 1 ].normalDirection = NORMAL_Z_POS;
 
-	info[ 2 ].gridSize = glm::vec2( gridSize );
+	info[ 2 ].gridSize = vec2f( gridSize );
 	info[ 2 ].widthInQuads = width;
 	info[ 2 ].heightInQuads = height;
-	info[ 2 ].uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info[ 2 ].uv[ 1 ] = glm::vec2( 1.0f, 1.0f );
-	info[ 2 ].origin = glm::vec3( -0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
-	info[ 2 ].color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info[ 2 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
+	info[ 2 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
+	info[ 2 ].origin = vec3f( -0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 2 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info[ 2 ].normalDirection = NORMAL_X_POS;
 
-	info[ 3 ].gridSize = glm::vec2( gridSize );
+	info[ 3 ].gridSize = vec2f( gridSize );
 	info[ 3 ].widthInQuads = width;
 	info[ 3 ].heightInQuads = height;
-	info[ 3 ].uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info[ 3 ].uv[ 1 ] = glm::vec2( 1.0f, 1.0f );
-	info[ 3 ].origin = glm::vec3( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
-	info[ 3 ].color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info[ 3 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
+	info[ 3 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
+	info[ 3 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 3 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info[ 3 ].normalDirection = NORMAL_X_NEG;
 
-	info[ 4 ].gridSize = glm::vec2( gridSize );
+	info[ 4 ].gridSize = vec2f( gridSize );
 	info[ 4 ].widthInQuads = width;
 	info[ 4 ].heightInQuads = height;
-	info[ 4 ].uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info[ 4 ].uv[ 1 ] = glm::vec2( 1.0f, 1.0f );
-	info[ 4 ].origin = glm::vec3( 0.5f * gridSize * width, -0.5f * gridSize * height, 0.0f );
-	info[ 4 ].color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info[ 4 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
+	info[ 4 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
+	info[ 4 ].origin = vec3f( 0.5f * gridSize * width, -0.5f * gridSize * height, 0.0f );
+	info[ 4 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info[ 4 ].normalDirection = NORMAL_Y_NEG;
 
-	info[ 5 ].gridSize = glm::vec2( gridSize );
+	info[ 5 ].gridSize = vec2f( gridSize );
 	info[ 5 ].widthInQuads = width;
 	info[ 5 ].heightInQuads = height;
-	info[ 5 ].uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info[ 5 ].uv[ 1 ] = glm::vec2( 1.0f, 1.0f );
-	info[ 5 ].origin = glm::vec3( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
-	info[ 5 ].color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info[ 5 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
+	info[ 5 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
+	info[ 5 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 5 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info[ 5 ].normalDirection = NORMAL_Y_POS;
 
 	GeoBuilder gb;
@@ -226,13 +226,13 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 void CreateTerrainSurface( modelSource_t& outModel )
 {
 	GeoBuilder::planeInfo_t info;
-	info.gridSize = glm::vec2( 0.1f );
+	info.gridSize = vec2f( 0.1f );
 	info.widthInQuads = 100;
 	info.heightInQuads = 100;
-	info.uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info.uv[ 1 ] = glm::vec2( 1.0f, 1.0f );
-	info.origin = glm::vec3( 0.5f * info.gridSize.x * info.widthInQuads, 0.5f * info.gridSize.y * info.heightInQuads, 0.0f );
-	info.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	info.uv[ 0 ] = vec2f( 0.0f, 0.0f );
+	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
+	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, 0.0f );
+	info.color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info.normalDirection = NORMAL_Z_NEG;
 
 	GeoBuilder gb;
@@ -249,16 +249,16 @@ void CreateWaterSurface( modelSource_t& outModel )
 	const float gridSize = 10.f;
 	const uint32_t width = 1;
 	const uint32_t height = 1;
-	const glm::vec2 uvs[] = { glm::vec2( 0.0f, 0.0f ), glm::vec2( 1.0f, 1.0f ) };
+	const vec2f uvs[] = { vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) };
 
 	GeoBuilder::planeInfo_t info;
-	info.gridSize = glm::vec2( 10.0f );
+	info.gridSize = vec2f( 10.0f );
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
-	info.uv[ 0 ] = glm::vec2( 0.0f, 0.0f );
-	info.uv[ 1 ] = glm::vec2( 1.0f, 1.0f );
-	info.origin = glm::vec3( 0.5f * info.gridSize.x * info.widthInQuads, 0.5f * info.gridSize.y * info.heightInQuads, -0.15f );
-	info.color = glm::vec4( 0.0f, 0.0f, 1.0f, 0.2f );
+	info.uv[ 0 ] = vec2f( 0.0f, 0.0f );
+	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
+	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, -0.15f );
+	info.color = vec4f( 0.0f, 0.0f, 1.0f, 0.2f );
 	info.normalDirection = NORMAL_Z_NEG;
 
 	GeoBuilder gb;
@@ -270,15 +270,15 @@ void CreateWaterSurface( modelSource_t& outModel )
 	outModel.surfs[ 0 ].materialId = materialLib.FindId( "WATER" );
 }
 
-void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, glm::vec2& origin, glm::vec2& size )
+void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, vec2f& origin, vec2f& size )
 {
 	GeoBuilder::planeInfo_t info;
 	info.gridSize = size;
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
-	info.uv[ 0 ] = glm::vec2( 1.0f, 0.0f );
-	info.uv[ 1 ] = glm::vec2( -1.0f, 1.0f );
-	info.origin = glm::vec3( origin.x, origin.y, 0.0f );
+	info.uv[ 0 ] = vec2f( 1.0f, 0.0f );
+	info.uv[ 1 ] = vec2f( -1.0f, 1.0f );
+	info.origin = vec3f( origin[ 0 ], origin[ 1 ], 0.0f );
 	info.normalDirection = NORMAL_Z_NEG;
 
 	GeoBuilder gb;

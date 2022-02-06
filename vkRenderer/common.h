@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <atomic>
+#include <mathVector.h>
 
 #include <color.h>
 
@@ -352,17 +353,17 @@ struct viewport_t
 
 struct uniformBufferObject_t
 {
-	glm::mat4 model;
-	glm::mat4 view;
-	glm::mat4 proj;
+	mat4x4f model;
+	mat4x4f view;
+	mat4x4f proj;
 };
 
 struct globalUboConstants_t
 {
-	glm::vec4	time;
-	glm::vec4	generic;
-	glm::vec4	dimensions;
-	glm::vec4	tonemap;
+	vec4f		time;
+	vec4f		generic;
+	vec4f		dimensions;
+	vec4f		tonemap;
 	uint32_t	shadowBaseId;
 	uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
 };
@@ -370,11 +371,11 @@ struct globalUboConstants_t
 struct materialBufferObject_t
 {
 	uint32_t				textures[ Material::MaxMaterialTextures ];
-	glm::vec4				Ka;
-	glm::vec4				Ke;
-	glm::vec4				Kd;
-	glm::vec4				Ks;
-	glm::vec4				Tf;
+	vec4f					Ka;
+	vec4f					Ke;
+	vec4f					Kd;
+	vec4f					Ks;
+	vec4f					Tf;
 	float					Tr;
 	float					Ns;
 	float					Ni;
@@ -385,9 +386,9 @@ struct materialBufferObject_t
 
 struct light_t
 {
-	glm::vec4	lightPos;
-	glm::vec4	intensity;
-	glm::vec4	lightDir;
+	vec4f		lightPos;
+	vec4f		intensity;
+	vec4f		lightDir;
 	uint32_t	pad[ 4 ];
 };
 
@@ -544,9 +545,9 @@ struct drawSurf_t
 
 struct drawSurfInstance_t
 {
-	glm::mat4			modelMatrix;
-	uint32_t			surfId;
-	uint32_t			id;
+	mat4x4f		modelMatrix;
+	uint32_t	surfId;
+	uint32_t	id;
 };
 
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
@@ -603,15 +604,15 @@ struct modelSource_t
 
 struct entity_t
 {
-	glm::mat4					matrix;
-	uint32_t					modelId;
-	int							materialId;
-	renderFlags_t				flags;
+	mat4x4f			matrix;
+	uint32_t		modelId;
+	int				materialId;
+	renderFlags_t	flags;
 
 	AABB GetBounds() const;
-	glm::vec3 GetOrigin() const;
-	void SetOrigin( const glm::vec3& origin );
-	void SetScale( const glm::vec3& scale );
+	vec3f GetOrigin() const;
+	void SetOrigin( const vec3f& origin );
+	void SetScale( const vec3f& scale );
 };
 
 
@@ -631,8 +632,8 @@ public:
 		mergedModelCnt = 0;
 	}
 
-	glm::mat4									viewMatrix;
-	glm::mat4									projMatrix;
+	mat4x4f										viewMatrix;
+	mat4x4f										projMatrix;
 	viewport_t									viewport;
 	light_t										lights[ MaxLights ];
 
@@ -750,7 +751,7 @@ struct imguiControls_t
 	float		toneMapColor[ 4 ];
 	int			dbgImageId;
 	int			selectedModelId;
-	glm::vec3	selectedModelOrigin;
+	vec3f		selectedModelOrigin;
 };
 #endif
 
@@ -831,7 +832,7 @@ static inline void RandSphere( float& theta, float& phi )
 	phi = acos( 2.0f * v - 1.0f );
 }
 
-static inline void RandSpherePoint( const float radius, glm::vec3& outPoint )
+static inline void RandSpherePoint( const float radius, vec3f& outPoint )
 {
 	float theta;
 	float phi;
@@ -842,10 +843,10 @@ static inline void RandSpherePoint( const float radius, glm::vec3& outPoint )
 	outPoint[ 2 ] = radius * cos( phi );
 }
 
-static inline void RandPlanePoint( glm::vec2& outPoint )
+static inline void RandPlanePoint( vec2f& outPoint )
 {
-	outPoint.x = ( (float) rand() / ( RAND_MAX ) );
-	outPoint.y = ( (float) rand() / ( RAND_MAX ) );
+	outPoint[ 0 ] = ( (float) rand() / ( RAND_MAX ) );
+	outPoint[ 1 ] = ( (float) rand() / ( RAND_MAX ) );
 }
 
 // Fowler–Noll–Vo_hash_function - fnv1a - 32bits
@@ -857,4 +858,20 @@ static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
 		result = ( result ^ bytes[ i ] ) * prime;
 	}
 	return result;
+}
+
+static inline vec4f glmToVec4( const glm::vec4& glmVec ) {
+	return vec4f( glmVec.x, glmVec.y, glmVec.z, glmVec.w );
+}
+
+static inline glm::vec4 vecToGlm4( const vec4f& vec ) {
+	return glm::vec4( vec[ 0 ], vec[ 1 ], vec[ 2 ], vec[ 3 ] );
+}
+
+static inline vec3f glmToVec3( const glm::vec3& glmVec ) {
+	return vec3f( glmVec.x, glmVec.y, glmVec.z );
+}
+
+static inline glm::vec3 vecToGlm3( const vec3f& vec ) {
+	return glm::vec3( vec[ 0 ], vec[ 1 ], vec[ 2 ] );
 }

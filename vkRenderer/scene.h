@@ -15,14 +15,14 @@ struct Scene
 
 	Scene()
 	{
-		camera = Camera( glm::vec4( 0.0f, 1.66f, 1.0f, 0.0f ) );
+		camera = Camera( vec4f( 0.0f, 1.66f, 1.0f, 0.0f ) );
 		camera.fov = glm::radians( 90.0f );
 		camera.far = defaultFar;
 		camera.near = defaultNear;
 		camera.aspect = 16.0f / 9.0f;
 
-		camera.halfFovX = tan( 0.5 * Radians( 90.0f ) );
-		camera.halfFovY = tan( 0.5 * Radians( 90.0f ) ) / camera.aspect;
+		camera.halfFovX = tan( 0.5f * Radians( 90.0f ) );
+		camera.halfFovY = tan( 0.5f * Radians( 90.0f ) ) / camera.aspect;
 		camera.near = camera.near;
 		camera.far = camera.far;
 		camera.aspect = camera.aspect;
@@ -36,7 +36,7 @@ struct Scene
 		const modelSource_t* model = modelLib.Find( modelId );
 
 		entity.modelId = modelId;
-		entity.matrix = glm::identity<glm::mat4>();
+		entity.matrix = mat4x4f( 1.0f );
 		entity.flags = renderFlags_t::NONE;
 		entity.materialId = -1;
 	}

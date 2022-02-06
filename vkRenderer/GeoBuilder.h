@@ -11,23 +11,23 @@ public:
 
 	struct vertex_t
 	{
-		glm::vec3 pos;
-		glm::vec4 color;
-		glm::vec3 normal;
-		glm::vec3 bitangent;
-		glm::vec3 tangent;
-		glm::vec2 texCoord;
+		vec3f	pos;
+		vec4f	color;
+		vec3f	normal;
+		vec3f	bitangent;
+		vec3f	tangent;
+		vec2f	texCoord;
 	};
 
 	struct planeInfo_t
 	{
-		glm::vec3			origin;
-		glm::vec4			color;
+		vec3f				origin;
+		vec4f				color;
 		uint32_t			widthInQuads;
 		uint32_t			heightInQuads;
-		glm::vec2			gridSize;
+		vec2f				gridSize;
 		normalDirection_t	normalDirection;
-		glm::vec2			uv[ 2 ];
+		vec2f				uv[ 2 ];
 	};
 
 	std::vector<vertex_t>	vb;
@@ -61,56 +61,56 @@ public:
 				switch ( info.normalDirection )
 				{
 				default:
-				case NORMAL_X_POS:	vert.pos			= { 0.0f, i * info.gridSize.x, j * info.gridSize.y };
+				case NORMAL_X_POS:	vert.pos			= { 0.0f, i * info.gridSize[ 0 ], j * info.gridSize[ 1 ] };
 									vert.color			= info.color;
-									vert.tangent		= glm::vec3( 0.0f, 1.0f, 0.0f );
-									vert.bitangent		= glm::vec3( 0.0f, 0.0f, 1.0f );
-									vert.normal			= glm::vec3( 1.0f, 0.0f, 0.0f );
+									vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
+									vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
+									vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );
 									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
 									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
 								 break;
 
-				case NORMAL_X_NEG:	vert.pos			= { 0.0f, i * info.gridSize.x, j * info.gridSize.y };
+				case NORMAL_X_NEG:	vert.pos			= { 0.0f, i * info.gridSize[ 0 ], j * info.gridSize[ 1 ] };
 									vert.color			= info.color;
-									vert.tangent		= glm::vec3( 0.0f, -1.0f, 0.0f );
-									vert.bitangent		= glm::vec3( 0.0f, 0.0f, 1.0f );
-									vert.normal			= glm::vec3( -1.0f, 0.0f, 0.0f );
+									vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
+									vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
+									vert.normal			= vec3f( -1.0f, 0.0f, 0.0f );
 									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + u * info.uv[ 1 ][ 0 ];
 									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
 								 break;
 
-				case NORMAL_Y_POS:	vert.pos			= { i * info.gridSize.x, 0.0f, j * info.gridSize.y };
+				case NORMAL_Y_POS:	vert.pos			= { i * info.gridSize[ 0 ], 0.0f, j * info.gridSize[ 1 ] };
 									vert.color			= info.color;
-									vert.tangent		= glm::vec3( -1.0f, 0.0f, 0.0f );
-									vert.bitangent		= glm::vec3( 0.0f, 0.0f,1.0f );
-									vert.normal			= glm::vec3( 0.0f, 1.0f, 0.0f );
+									vert.tangent		= vec3f( -1.0f, 0.0f, 0.0f );
+									vert.bitangent		= vec3f( 0.0f, 0.0f,1.0f );
+									vert.normal			= vec3f( 0.0f, 1.0f, 0.0f );
 									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
 									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
 								 break;
 
-				case NORMAL_Y_NEG:	vert.pos			= { i * info.gridSize.x, 0.0f, j * info.gridSize.y };
+				case NORMAL_Y_NEG:	vert.pos			= { i * info.gridSize[ 0 ], 0.0f, j * info.gridSize[ 1 ] };
 									vert.color			= info.color;
-									vert.tangent		= glm::vec3( 0.0f, 0.0f, 1.0f );
-									vert.bitangent		= glm::vec3( -1.0f, 0.0f, 0.0f );
-									vert.normal			= glm::vec3( 0.0f, -1.0f, 0.0f );
+									vert.tangent		= vec3f( 0.0f, 0.0f, 1.0f );
+									vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
+									vert.normal			= vec3f( 0.0f, -1.0f, 0.0f );
 									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + u * info.uv[ 1 ][ 0 ];
 									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
 								 break;
 
-				case NORMAL_Z_POS:	vert.pos			= { i * info.gridSize.x, j * info.gridSize.y, 0.0f };
+				case NORMAL_Z_POS:	vert.pos			= { i * info.gridSize[ 0 ], j * info.gridSize[ 1 ], 0.0f };
 									vert.color			= info.color;
-									vert.tangent		= glm::vec3( 0.0f, 1.0f, 0.0f );
-									vert.bitangent		= glm::vec3( -1.0f, 0.0f, 0.0f );
-									vert.normal			= glm::vec3( 0.0f, 0.0f, 1.0f );
+									vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
+									vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
+									vert.normal			= vec3f( 0.0f, 0.0f, 1.0f );
 									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
 									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
 								 break;
 
-				case NORMAL_Z_NEG:	vert.pos			= { i * info.gridSize.x,	j * info.gridSize.y,	0.0f };
+				case NORMAL_Z_NEG:	vert.pos			= { i * info.gridSize[ 0 ],	j * info.gridSize[ 1 ],	0.0f };
 									vert.color			= info.color;
-									vert.tangent		= glm::vec3( 0.0f, -1.0f, 0.0f );
-									vert.bitangent		= glm::vec3( 1.0f, 0.0f, 0.0f );
-									vert.normal			= glm::vec3( 0.0f, 0.0f, -1.0f );
+									vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
+									vert.bitangent		= vec3f( 1.0f, 0.0f, 0.0f );
+									vert.normal			= vec3f( 0.0f, 0.0f, -1.0f );
 									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
 									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + v * info.uv[ 1 ][ 1 ];
 								 break;
@@ -161,7 +161,7 @@ public:
 		}
 	}
 
-	void AddBoxSurf( const glm::vec3 origin, const float size )
+	void AddBoxSurf( const vec3f origin, const float size )
 	{
 		const size_t verticesCnt = 8;
 		const size_t triPerSide = 2;
@@ -171,15 +171,15 @@ public:
 		vb.resize( vb.size() + verticesCnt );
 		ib.resize( ib.size() + 3 * triPerSide * sideCnt );
 
-		glm::vec3 positions[ verticesCnt ] =
-		{ glm::vec3( 0.0f,	0.0f,	0.0f ),
-			glm::vec3( size,	0.0f,	0.0f ),
-			glm::vec3( 0.0f,	size,	0.0f ),
-			glm::vec3( size,	size,	0.0f ),
-			glm::vec3( 0.0f,	0.0f,	size ),
-			glm::vec3( size,	0.0f,	size ),
-			glm::vec3( 0.0f,	size,	size ),
-			glm::vec3( size,	size,	size ),
+		vec3f positions[ verticesCnt ] =
+		{ vec3f( 0.0f,	0.0f,	0.0f ),
+			vec3f( size,	0.0f,	0.0f ),
+			vec3f( 0.0f,	size,	0.0f ),
+			vec3f( size,	size,	0.0f ),
+			vec3f( 0.0f,	0.0f,	size ),
+			vec3f( size,	0.0f,	size ),
+			vec3f( 0.0f,	size,	size ),
+			vec3f( size,	size,	size ),
 		};
 
 		for ( size_t i = 0; i < verticesCnt; ++i )
@@ -187,7 +187,7 @@ public:
 			vertex_t& vert = vb[ vbIx ];
 			vert.pos = positions[ i ];
 			vert.pos -= origin;
-			vert.color = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+			vert.color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 			vert.tangent = { 1.0f, 0.0f, 0.0f };
 			vert.bitangent = { 0.0f, 1.0f, 0.0f };
 			vert.texCoord = { 0.0f, 0.0f };

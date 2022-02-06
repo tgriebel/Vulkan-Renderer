@@ -176,7 +176,7 @@
     <ClInclude Include="scene.h" />
     <ClInclude Include="scenes\beachScene.h" />
     <ClInclude Include="scenes\chessScene.h" />
-    <ClInclude Include="util.h" />
+    <ClInclude Include="render_util.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="common.h" />
@@ -204,7 +204,7 @@
     <ClCompile Include="io.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="scene.cpp" />
-    <ClCompile Include="util.cpp" />
+    <ClCompile Include="render_util.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_vulkan.cpp" />

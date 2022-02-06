@@ -3,7 +3,7 @@
 #include "common.h"
 #include "window.h"
 #include "common.h"
-#include "util.h"
+#include "render_util.h"
 #include "deviceContext.h"
 #include "camera.h"
 #include "scene.h"
@@ -396,7 +396,7 @@ private:
 		imguiControls.toneMapColor[ 2 ] = 1.0f;
 		imguiControls.toneMapColor[ 3 ] = 1.0f;
 		imguiControls.selectedModelId = -1;
-		imguiControls.selectedModelOrigin = glm::vec3( 0.0f );
+		imguiControls.selectedModelOrigin = vec3f( 0.0f );
 	}
 
 	void ShutdownImGui()
@@ -1978,9 +1978,9 @@ private:
 				entity_t* ent = scene.entities.Find( "white_pawn_0" );
 				const modelSource_t* model = modelLib.Find( ent->modelId );
 
-				double t0, t1;
+				float t0, t1;
 				if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
-					const vec3d outPt = ray.GetOrigin() + t1 * ray.GetVector();
+					const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
 					ImGui::Text( "Hit white_pawn_0 @ (%4.2f, %4.2f, %4.2f )", outPt[ 0 ], outPt[ 1 ], outPt[ 2 ] );
 				//	imguiControls.selectedModelId = scene.entities.FindId( "white_pawn_0" );
 					ent->flags = renderFlags_t::WIREFRAME;
@@ -1989,15 +1989,15 @@ private:
 				}
 			}
 
-			ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin.x, 0.1f, 1.0f );
-			ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin.y, 0.1f, 1.0f );
-			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin.z, 0.1f, 1.0f );
+			ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin[ 0 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin[ 1 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin[ 2 ], 0.1f, 1.0f );
 
 			if ( imguiControls.selectedModelId >= 0 ) {
 				entity_t* entity = scene.entities.Find( imguiControls.selectedModelId );
-				entity->matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin.x;
-				entity->matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin.y;
-				entity->matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin.z;
+				entity->matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin[ 0 ];
+				entity->matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin[ 1 ];
+				entity->matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin[ 2 ];
 			}
 			ImGui::Text( "Frame Number: %d", frameNumber );
 			ImGui::SameLine();
@@ -2253,7 +2253,10 @@ private:
 		renderView.viewport.width = static_cast<float>( width );
 		renderView.viewport.height = static_cast<float>( height );
 
-		const glm::vec3 shadowLightDir = -renderView.lights[ 0 ].lightDir;
+		vec3f shadowLightDir;
+		shadowLightDir[ 0 ] = -renderView.lights[ 0 ].lightDir[ 0 ];
+		shadowLightDir[ 1 ] = -renderView.lights[ 0 ].lightDir[ 1 ];
+		shadowLightDir[ 2 ] = -renderView.lights[ 0 ].lightDir[ 2 ];
 
 		// Temp shadow map set-up
 		shadowView.viewport.x = 0.0f;
@@ -2263,14 +2266,14 @@ private:
 		shadowView.viewport.width = ShadowMapWidth;
 		shadowView.viewport.height = ShadowMapHeight;
 		shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
-		shadowView.viewMatrix = glm::transpose( shadowView.viewMatrix );
-		const glm::vec4 shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
+		shadowView.viewMatrix = shadowView.viewMatrix.Transpose();
+		const vec4f shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
 		shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
 		shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
 		shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
 
 		Camera shadowCam;
-		shadowCam = Camera( glm::vec4( 0.0f, 0.0f, 0.0f, 0.0f ) );
+		shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
 		shadowCam.fov = glm::radians( 90.0f );
 		shadowCam.far = nearPlane;
 		shadowCam.near = farPlane;
@@ -2438,10 +2441,10 @@ private:
 			const float viewWidth = renderView.viewport.width;
 			const float viewHeight = renderView.viewport.height;
 
-			globals.time = glm::vec4( time, intPart, fracPart, 1.0f );
-			globals.generic = glm::vec4( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
-			globals.dimensions = glm::vec4( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
-			globals.tonemap = glm::vec4( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
+			globals.time = vec4f( time, intPart, fracPart, 1.0f );
+			globals.generic = vec4f( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
+			globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
+			globals.tonemap = vec4f( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
 			globals.shadowBaseId = ShadowObjectOffset;
 			globalsBuffer.push_back( globals );
 		}
@@ -2483,11 +2486,11 @@ private:
 			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 				ubo.textures[ t ] = m->textures[ t ].Get();
 			}	
-			ubo.Kd = glm::vec4( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
-			ubo.Ks = glm::vec4( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );		
-			ubo.Ka = glm::vec4( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
-			ubo.Ke = glm::vec4( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
-			ubo.Tf = glm::vec4( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
+			ubo.Kd = vec4f( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
+			ubo.Ks = vec4f( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );
+			ubo.Ka = vec4f( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
+			ubo.Ke = vec4f( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
+			ubo.Tf = vec4f( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
 			ubo.Tr = m->Tr;
 			ubo.Ni = m->Ni;
 			ubo.Ns = m->Ns;

@@ -1,7 +1,7 @@
 #pragma once
 #include "../common.h"
 #include "../scene.h"
-#include "../util.h"
+#include "../render_util.h"
 #include "../io.h"
 #include "../window.h"
 
@@ -158,12 +158,12 @@ void AssetLib< modelSource_t >::Create()
 	}
 	{
 		modelSource_t model;
-		CreateQuadSurface2D( "TONEMAP", model, glm::vec2( 1.0f, 1.0f ), glm::vec2( 2.0f ) );
+		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
 		modelLib.Add( "_postProcessQuad", model );
 	}
 	{
 		modelSource_t model;
-		CreateQuadSurface2D( "IMAGE2D", model, glm::vec2( 1.0f, 1.0f ), glm::vec2( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
+		CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 		modelLib.Add( "_quadTexDebug", model );
 	}
 }
@@ -185,61 +185,61 @@ void MakeScene()
 		scene.entities.Add( "chess_board", ent );
 	}
 
-	glm::vec3 whiteCorner = glm::vec3( -7.0f, -7.0f, 0.0f );
+	vec3f whiteCorner = vec3f( -7.0f, -7.0f, 0.0f );
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 0.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 0.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_0", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 2.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 2.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_1", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 4.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 4.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_2", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 6.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 6.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_3", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 8.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 8.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_4", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 10.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 10.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_5", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 12.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 12.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_6", ent );
 	}
 
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + glm::vec3( 14.0f, 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 14.0f, 2.0f, 0.0f ) );
 		scene.entities.Add( "white_pawn_7", ent );
 	}
 
@@ -272,7 +272,7 @@ void MakeScene()
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "sphere" ), ent );
-		ent.SetOrigin( glm::vec3( 0.0f, 0.0f, 0.0f ) );
+		ent.SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "sphere", ent );
 	}
 
@@ -313,17 +313,17 @@ void MakeScene()
 	}
 
 	{
-		scene.lights[ 0 ].lightPos = glm::vec4( 0.0f, 0.0f, 6.0f, 0.0f );
-		scene.lights[ 0 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		scene.lights[ 0 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, -1.0f, 0.0f ) );
+		scene.lights[ 0 ].lightPos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
+		scene.lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 
-		scene.lights[ 1 ].lightPos = glm::vec4( 0.0f, 0.0f, 5.0f, 0.0f );
-		scene.lights[ 1 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		scene.lights[ 1 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f ) );
+		scene.lights[ 1 ].lightPos = vec4f( 0.0f, 0.0f, 5.0f, 0.0f );
+		scene.lights[ 1 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 
-		scene.lights[ 2 ].lightPos = glm::vec4( 0.0f, 1.0f, 1.0f, 0.0f );
-		scene.lights[ 2 ].intensity = glm::vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-		scene.lights[ 2 ].lightDir = normalize( glm::vec4( 0.0f, 0.0f, 1.0f, 0.0f ) );
+		scene.lights[ 2 ].lightPos = vec4f( 0.0f, 1.0f, 1.0f, 0.0f );
+		scene.lights[ 2 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 	}
 }
 
@@ -334,32 +334,35 @@ void UpdateSceneLocal()
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
 
-	scene.lights[ 0 ].lightPos = glm::vec4( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
+	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
 	entity_t* pawn = scene.entities.Find( "white_pawn_0" );
 	entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
 	AABB bounds = pawn->GetBounds();
-	vec3d size = bounds.GetSize();
-	vec3d center = bounds.GetCenter();
-	debugBox->SetOrigin( glm::vec3( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-	debugBox->SetScale( 0.5f * glm::vec3( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+	vec3f size = bounds.GetSize();
+	vec3f center = bounds.GetCenter();
+	debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+	debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	//GetCenter
 
 	{
 		entity_t* debugLight = scene.entities.Find( "light0_dbg" );
-		debugLight->SetOrigin( scene.lights[ 0 ].lightPos );
-		debugLight->SetScale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
+		vec3f origin = vec3f( scene.lights[ 0 ].lightPos[ 0 ], scene.lights[ 0 ].lightPos[ 1 ], scene.lights[ 0 ].lightPos[ 2 ] );
+		debugLight->SetOrigin( origin );
+		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
 	}
 
 	{
 		entity_t* debugLight = scene.entities.Find( "light1_dbg" );
-		debugLight->SetOrigin( scene.lights[ 1 ].lightPos );
-		debugLight->SetScale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
+		vec3f origin = vec3f( scene.lights[ 1 ].lightPos[ 0 ], scene.lights[ 1 ].lightPos[ 1 ], scene.lights[ 1 ].lightPos[ 2 ] );
+		debugLight->SetOrigin( origin );
+		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
 	}
 
 	{
 		entity_t* debugLight = scene.entities.Find( "light2_dbg" );
-		debugLight->SetOrigin( scene.lights[ 2 ].lightPos );
-		debugLight->SetScale( glm::vec3( 0.25f, 0.25f, 0.25f ) );
+		vec3f origin = vec3f( scene.lights[ 2 ].lightPos[ 0 ], scene.lights[ 2 ].lightPos[ 1 ], scene.lights[ 2 ].lightPos[ 2 ] );
+		debugLight->SetOrigin( origin );
+		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
 	}
 }

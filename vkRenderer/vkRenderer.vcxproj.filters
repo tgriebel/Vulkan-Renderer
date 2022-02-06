@@ -27,10 +27,10 @@
     </ClCompile>
     <ClCompile Include="window.cpp" />
     <ClCompile Include="deviceContext.cpp" />
-    <ClCompile Include="util.cpp" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="render_util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -74,7 +74,6 @@
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="assetLib.h" />
-    <ClInclude Include="util.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="allocator.h" />
     <ClInclude Include="gpuResources.h" />
@@ -84,6 +83,7 @@
     <ClInclude Include="scenes\beachScene.h">
       <Filter>scenes</Filter>
     </ClInclude>
+    <ClInclude Include="render_util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

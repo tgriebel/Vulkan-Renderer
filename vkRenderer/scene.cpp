@@ -25,25 +25,24 @@ extern Window					window;
 AABB entity_t::GetBounds() const {
 	const modelSource_t* model = modelLib.Find( modelId );
 	const AABB& bounds = model->bounds;
-	glm::vec3 origin = GetOrigin();
-	const vec3d entOrigin = vec3d( origin.x, origin.y, origin.z );
-	return AABB( bounds.GetMin() + entOrigin, bounds.GetMax() + entOrigin );
+	vec3f origin = GetOrigin();
+	return AABB( bounds.GetMin() + origin, bounds.GetMax() + origin );
 }
 
-glm::vec3 entity_t::GetOrigin() const {
-	return glm::vec3( matrix[ 3 ][ 0 ], matrix[ 3 ][ 1 ], matrix[ 3 ][ 2 ] );
+vec3f entity_t::GetOrigin() const {
+	return vec3f( matrix[ 3 ][ 0 ], matrix[ 3 ][ 1 ], matrix[ 3 ][ 2 ] );
 }
 
-void entity_t::SetOrigin( const glm::vec3& origin ) {
-	matrix[ 3 ][ 0 ] = origin.x;
-	matrix[ 3 ][ 1 ] = origin.y;
-	matrix[ 3 ][ 2 ] = origin.z;
+void entity_t::SetOrigin( const vec3f& origin ) {
+	matrix[ 3 ][ 0 ] = origin[ 0 ];
+	matrix[ 3 ][ 1 ] = origin[ 1 ];
+	matrix[ 3 ][ 2 ] = origin[ 2 ];
 }
 
-void entity_t::SetScale( const glm::vec3& scale ) {
-	matrix[ 0 ][ 0 ] = scale.x;
-	matrix[ 1 ][ 1 ] = scale.y;
-	matrix[ 2 ][ 2 ] = scale.z;
+void entity_t::SetScale( const vec3f& scale ) {
+	matrix[ 0 ][ 0 ] = scale[ 0 ];
+	matrix[ 1 ][ 1 ] = scale[ 1 ];
+	matrix[ 2 ][ 2 ] = scale[ 2 ];
 }
 
 void UpdateScene( const float dt )
@@ -93,11 +92,11 @@ void UpdateScene( const float dt )
 	}
 
 	// Skybox
-	glm::mat4 skyBoxMatrix = glm::identity<glm::mat4>();
-	skyBoxMatrix = glm::identity<glm::mat4>();
+	mat4x4f skyBoxMatrix = mat4x4f( 1.0f );
 	skyBoxMatrix[ 3 ][ 0 ] = scene.camera.GetOrigin()[ 0 ];
 	skyBoxMatrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
 	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
+	//skyBoxMatrix[ 3 ][ 3 ] = 0.0f;
 	scene.entities.Find( 0 )->matrix = skyBoxMatrix;
 
 	UpdateSceneLocal();

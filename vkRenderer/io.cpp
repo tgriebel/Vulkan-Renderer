@@ -1,6 +1,6 @@
 #include "io.h"
 #include "assetLib.h"
-#include "util.h"
+#include "render_util.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -111,7 +111,7 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 			vertex.pos[ 1 ] = attrib.vertices[ 3 * index.vertex_index + 1 ];
 			vertex.pos[ 2 ] = attrib.vertices[ 3 * index.vertex_index + 2 ];
 
-			model.bounds.Expand( vec3d( vertex.pos[ 0 ], vertex.pos[ 1 ], vertex.pos[ 2 ] ) );
+			model.bounds.Expand( vec3f( vertex.pos[ 0 ], vertex.pos[ 1 ], vertex.pos[ 2 ] ) );
 
 			vertex.texCoord[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
 			vertex.texCoord[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
