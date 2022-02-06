@@ -299,7 +299,15 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	depthStencil.depthBoundsTestEnable = VK_FALSE;
 	depthStencil.minDepthBounds = 0.0f; // Optional
 	depthStencil.maxDepthBounds = 1.0f; // Optional
-	depthStencil.stencilTestEnable = VK_FALSE;
+	depthStencil.stencilTestEnable = VK_TRUE;
+	depthStencil.back.compareOp = VK_COMPARE_OP_ALWAYS;
+	depthStencil.back.failOp = VK_STENCIL_OP_REPLACE;
+	depthStencil.back.depthFailOp = VK_STENCIL_OP_REPLACE;
+	depthStencil.back.passOp = VK_STENCIL_OP_REPLACE;
+	depthStencil.back.compareMask = 0xFF;
+	depthStencil.back.writeMask = 0xFF;
+	depthStencil.back.reference = 1;
+	depthStencil.front = depthStencil.back;
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{ };
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
