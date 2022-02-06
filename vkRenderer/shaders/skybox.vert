@@ -9,7 +9,7 @@ VS_LAYOUT_STANDARD
 
 void main()
 {
-	objectId = pushConstants.objectId + gl_InstanceIndex;
+	objectId = pushConstants.objectId;
 
 	const float maxHeight = 1.0f;
 	vec3 position = inPosition;
