@@ -232,6 +232,10 @@ private:
 
 	void CommitModel( RenderView& view, const entity_t& ent, const uint32_t objectOffset )
 	{
+		if ( ( ent.flags & HIDDEN ) != 0 ) {
+			return;
+		}
+
 		modelSource_t* source = modelLib.Find( ent.modelId );
 		for ( uint32_t i = 0; i < source->surfCount; ++i ) {
 			drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];

@@ -97,7 +97,7 @@ void UpdateScene( const float dt )
 	skyBoxMatrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
 	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	//skyBoxMatrix[ 3 ][ 3 ] = 0.0f;
-	scene.entities.Find( 0 )->matrix = skyBoxMatrix;
+	scene.entities.Find( "_skybox" )->matrix = skyBoxMatrix;
 
 	UpdateSceneLocal();
 

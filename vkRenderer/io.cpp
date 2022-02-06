@@ -53,7 +53,7 @@ GpuProgram LoadProgram( const std::string& csFile )
 }
 
 
-void LoadModel( const std::string& fileName, const std::string& objectName )
+int LoadModel( const std::string& fileName, const std::string& objectName )
 {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -145,5 +145,5 @@ void LoadModel( const std::string& fileName, const std::string& objectName )
 		}
 		++model.surfCount;
 	}
-	modelLib.Add( objectName.c_str(), model );
+	return modelLib.Add( objectName.c_str(), model );
 }

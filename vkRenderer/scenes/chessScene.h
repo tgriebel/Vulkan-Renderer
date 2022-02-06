@@ -16,6 +16,17 @@ extern AssetLibMaterials		materialLib;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
+static std::string pieceNames[ 8 ] = {
+	"white_pawn_0",
+	"white_pawn_1",
+	"white_pawn_2",
+	"white_pawn_3",
+	"white_pawn_4",
+	"white_pawn_5",
+	"white_pawn_6",
+	"white_pawn_7",
+};
+
 void AssetLib< GpuProgram >::Create()
 {
 	Add( "Basic", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/simplePS.spv" ) );
@@ -187,86 +198,19 @@ void MakeScene()
 
 	vec3f whiteCorner = vec3f( -7.0f, -7.0f, 0.0f );
 
+	for ( int i = 0; i < 8; ++i )
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 0.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_0", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 2.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_1", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 4.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_2", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 6.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_3", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 8.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_4", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 10.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_5", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 12.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_6", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 14.0f, 2.0f, 0.0f ) );
-		scene.entities.Add( "white_pawn_7", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "cube" ), ent );
-		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
-		ent.flags = static_cast< renderFlags_t >( WIREFRAME | SKIP_OPAQUE );
-		scene.entities.Add( "white_pawn_0_cube", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "axis" ), ent );
-		entity_t* pawn = scene.entities.Find( "white_pawn_0" );
-		ent.SetOrigin( pawn->GetOrigin() );
-		ent.flags = static_cast<renderFlags_t>( DEBUG_SOLID | SKIP_OPAQUE );
-		scene.entities.Add( "white_pawn_0_axis", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "axis" ), ent );
-		entity_t* pawn = scene.entities.Find( "white_pawn_1" );
-		ent.SetOrigin( pawn->GetOrigin() );
-		ent.flags = static_cast<renderFlags_t>( DEBUG_SOLID | SKIP_OPAQUE );
-		scene.entities.Add( "white_pawn_1_axis", ent );
+		ent.SetOrigin( whiteCorner + vec3f( 2.0f * i , 2.0f, 0.0f ) );
+		scene.entities.Add( pieceNames[ i ].c_str(), ent );
+		{
+			entity_t cubeEnt;
+			scene.CreateEntity( modelLib.FindId( "cube" ), cubeEnt );
+			cubeEnt.materialId = materialLib.FindId( "DEBUG_WIRE" );
+			cubeEnt.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+			scene.entities.Add( ( pieceNames[ i ] + "_cube" ).c_str(), cubeEnt );
+		}
 	}
 
 	{
@@ -276,28 +220,13 @@ void MakeScene()
 		scene.entities.Add( "sphere", ent );
 	}
 
+	for ( int i = 0; i < MaxLights; ++i )
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
 		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
 		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
-		scene.entities.Add( "light0_dbg", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
-		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
-		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
-		scene.entities.Add( "light1_dbg", ent );
-	}
-
-	{
-		entity_t ent;
-		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
-		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
-		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
-		scene.entities.Add( "light2_dbg", ent );
+		scene.entities.Add( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str(), ent );
 	}
 
 	{
@@ -336,32 +265,21 @@ void UpdateSceneLocal()
 
 	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	entity_t* pawn = scene.entities.Find( "white_pawn_0" );
-	entity_t* debugBox = scene.entities.Find( "white_pawn_0_cube" );
-	AABB bounds = pawn->GetBounds();
-	vec3f size = bounds.GetSize();
-	vec3f center = bounds.GetCenter();
-	debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-	debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
-	//GetCenter
-
+	for ( int i = 0; i < 8; ++i )
 	{
-		entity_t* debugLight = scene.entities.Find( "light0_dbg" );
-		vec3f origin = vec3f( scene.lights[ 0 ].lightPos[ 0 ], scene.lights[ 0 ].lightPos[ 1 ], scene.lights[ 0 ].lightPos[ 2 ] );
-		debugLight->SetOrigin( origin );
-		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
+		entity_t* pawn = scene.entities.Find( pieceNames[ i ].c_str() );
+		entity_t* debugBox = scene.entities.Find( ( pieceNames[ i ] + "_cube" ).c_str() );
+		AABB bounds = pawn->GetBounds();
+		vec3f size = bounds.GetSize();
+		vec3f center = bounds.GetCenter();
+		debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+		debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	}
 
+	for ( int i = 0; i < MaxLights; ++i )
 	{
-		entity_t* debugLight = scene.entities.Find( "light1_dbg" );
-		vec3f origin = vec3f( scene.lights[ 1 ].lightPos[ 0 ], scene.lights[ 1 ].lightPos[ 1 ], scene.lights[ 1 ].lightPos[ 2 ] );
-		debugLight->SetOrigin( origin );
-		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
-	}
-
-	{
-		entity_t* debugLight = scene.entities.Find( "light2_dbg" );
-		vec3f origin = vec3f( scene.lights[ 2 ].lightPos[ 0 ], scene.lights[ 2 ].lightPos[ 1 ], scene.lights[ 2 ].lightPos[ 2 ] );
+		entity_t* debugLight = scene.entities.Find( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
+		vec3f origin = vec3f( scene.lights[ i ].lightPos[ 0 ], scene.lights[ i ].lightPos[ 1 ], scene.lights[ i ].lightPos[ 2 ] );
 		debugLight->SetOrigin( origin );
 		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
 	}
