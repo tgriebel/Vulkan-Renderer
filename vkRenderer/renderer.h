@@ -1967,8 +1967,6 @@ private:
 			const glm::vec2 screenPoint = glm::vec2( (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			const glm::vec2 ndc = 2.0f * screenPoint * glm::vec2( 1.0f / width, 1.0f / height ) - 1.0f;
 			
-			Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc.x + 0.5f, 0.5f * ndc.y + 0.5f ) );
-
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
 				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities.Find( imguiControls.selectedModelId )->modelId ) );
@@ -1977,21 +1975,6 @@ private:
 			}
 			static glm::vec3 tempOrigin;
 			ImGui::Text( "NDC: (%f, %f )", (float)ndc.x, (float)ndc.y );
-
-			{
-				entity_t* ent = scene.entities.Find( "white_pawn_0" );
-				const modelSource_t* model = modelLib.Find( ent->modelId );
-
-				float t0, t1;
-				if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
-					const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
-					ImGui::Text( "Hit white_pawn_0 @ (%4.2f, %4.2f, %4.2f )", outPt[ 0 ], outPt[ 1 ], outPt[ 2 ] );
-				//	imguiControls.selectedModelId = scene.entities.FindId( "white_pawn_0" );
-					ent->flags = renderFlags_t::WIREFRAME;
-				} else {
-					ent->flags = (renderFlags_t)( ent->flags & ~renderFlags_t::WIREFRAME );
-				}
-			}
 
 			ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin[ 0 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin[ 1 ], 0.1f, 1.0f );

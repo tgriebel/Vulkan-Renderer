@@ -49,7 +49,6 @@ void UpdateScene( const float dt )
 {
 	// FIXME: race conditions
 	// Need to do a ping-pong update
-
 	if ( window.input.IsKeyPressed( 'D' ) ) {
 		scene.camera.MoveRight( dt * 0.01f );
 	}
@@ -89,6 +88,27 @@ void UpdateScene( const float dt )
 		const float pitchDelta = -maxSpeed * mouse.dy;
 		scene.camera.SetYaw( yawDelta );
 		scene.camera.SetPitch( pitchDelta );
+	} else {
+		const vec2f screenPoint = vec2f( mouse.x, mouse.y );
+		int width, height;
+		window.GetWindowSize( width, height );
+		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
+
+		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
+
+		for ( int i = 0; i < scene.entities.Count(); ++i )
+		{
+			entity_t* ent = scene.entities.Find( i );
+			const modelSource_t* model = modelLib.Find( ent->modelId );
+
+			float t0, t1;
+			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
+				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
+				ent->flags = renderFlags_t::WIREFRAME;
+			} else {
+				ent->flags = (renderFlags_t)( ent->flags & ~renderFlags_t::WIREFRAME );
+			}
+		}
 	}
 
 	// Skybox
