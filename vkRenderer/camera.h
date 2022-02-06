@@ -121,7 +121,7 @@ public:
 		const float halfFovX = glm::tan( 0.5f * fov );
 		const float halfFovY = glm::tan( 0.5f * ( fov / aspect ) );
 
-		mat4x4f proj = mat4x4f( 1.0f );
+		mat4x4f proj = mat4x4f( 0.0f );
 		proj[ 0 ][ 0 ] = 1.0f / halfFovX;
 		proj[ 1 ][ 1 ] = 1.0f / halfFovY;
 		proj[ 2 ][ 2 ] = far / ( near - far );
