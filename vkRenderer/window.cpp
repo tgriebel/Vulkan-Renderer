@@ -148,6 +148,13 @@ void Window::GetWindowFrameBufferSize( int& width, int& height, const bool wait 
 	}
 }
 
+float Window::GetWindowFrameBufferAspect( const bool wait )
+{
+	int width, height;
+	GetWindowFrameBufferSize( width, height, wait );
+	return width / static_cast<float>( height );
+}
+
 void Window::CreateSurface()
 {
 	if ( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) != VK_SUCCESS ) {

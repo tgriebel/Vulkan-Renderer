@@ -79,6 +79,7 @@ void UpdateScene( const float dt )
 	if ( window.input.IsKeyPressed( '-' ) ) {
 		scene.camera.fov -= dt;
 	}
+	scene.camera.aspect = window.GetWindowFrameBufferAspect();
 
 	const mouse_t& mouse = window.input.GetMouse();
 	if ( mouse.centered )
@@ -91,7 +92,7 @@ void UpdateScene( const float dt )
 	} else {
 		const vec2f screenPoint = vec2f( mouse.x, mouse.y );
 		int width, height;
-		window.GetWindowSize( width, height );
+		window.GetWindowFrameBufferSize( width, height );
 		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
 
 		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );

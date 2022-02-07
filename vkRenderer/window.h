@@ -21,6 +21,7 @@ public:
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );
 	void					GetWindowFrameBufferSize( int & width, int & height, const bool wait = false );
+	float					GetWindowFrameBufferAspect( const bool wait = false );
 	bool					IsResizeRequested() const { return needsImageResize; }
 	void					AcceptImageResize() { needsImageResize = false; }
 

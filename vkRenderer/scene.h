@@ -2,8 +2,10 @@
 #include "common.h"
 #include "camera.h"
 #include "assetLib.h"
+#include "window.h"
 
 extern AssetLib< modelSource_t > modelLib;
+extern Window window;
 
 struct Scene
 {
@@ -19,7 +21,7 @@ struct Scene
 		camera.fov = glm::radians( 90.0f );
 		camera.far = defaultFar;
 		camera.near = defaultNear;
-		camera.aspect = 16.0f / 9.0f;
+		camera.aspect = DEFAULT_DISPLAY_WIDTH / static_cast< float >( DEFAULT_DISPLAY_HEIGHT );
 
 		camera.halfFovX = tan( 0.5f * Radians( 90.0f ) );
 		camera.halfFovY = tan( 0.5f * Radians( 90.0f ) ) / camera.aspect;
