@@ -452,6 +452,7 @@ private:
 			stateBits |= GFX_STATE_DEPTH_WRITE;
 			stateBits |= GFX_STATE_COLOR_MASK;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
+			stateBits |= GFX_STATE_STENCIL_ENABLE;
 		}
 		else if ( pass == DRAWPASS_TERRAIN )
 		{
