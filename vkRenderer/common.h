@@ -534,6 +534,7 @@ struct drawSurf_t
 	uint32_t			objectId;
 	uint32_t			materialId;
 	renderFlags_t		flags;
+	uint8_t				stencilBit;
 
 	pipelineHdl_t		pipelineObject[ DRAWPASS_COUNT ];
 
@@ -608,6 +609,7 @@ struct entity_t
 	uint32_t		modelId;
 	int				materialId;
 	renderFlags_t	flags;
+	bool			outline;
 
 	AABB GetBounds() const;
 	vec3f GetOrigin() const;

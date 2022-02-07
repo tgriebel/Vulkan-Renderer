@@ -252,6 +252,7 @@ private:
 			surf.materialId = ( ent.materialId >= 0 ) ? ent.materialId : source->surfs[ i ].materialId;
 			surf.objectId = objectOffset;
 			surf.flags = ent.flags;
+			surf.stencilBit = ent.outline ? 0x04 : 0;
 
 			for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
 				const Material* material = materialLib.Find( surf.materialId );
@@ -1904,6 +1905,10 @@ private:
 						continue;
 					}
 					GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
+
+					if ( pass == DRAWPASS_DEPTH ) {
+						vkCmdSetStencilReference( graphicsQueue.commandBuffers[ i ], VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+					}
 
 					vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 					vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );

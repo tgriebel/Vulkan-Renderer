@@ -41,5 +41,6 @@ struct Scene
 		entity.matrix = mat4x4f( 1.0f );
 		entity.flags = renderFlags_t::NONE;
 		entity.materialId = -1;
+		entity.outline = false;
 	}
 };
