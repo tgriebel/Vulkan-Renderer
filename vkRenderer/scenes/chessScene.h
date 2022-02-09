@@ -160,6 +160,11 @@ void AssetLib< modelSource_t >::Create()
 		LoadModel( "diamond.obj", "diamond" );
 		LoadModel( "sphere.obj", "sphere" );
 		LoadModel( "pawn.obj", "pawn" );
+		LoadModel( "rook.obj", "rook" );
+		LoadModel( "knight.obj", "knight" );
+		LoadModel( "bishop.obj", "bishop" );
+		LoadModel( "king.obj", "king" );
+		LoadModel( "queen.obj", "queen" );
 		LoadModel( "chess_board.obj", "chess_board" );
 	}
 	{
@@ -202,8 +207,59 @@ void MakeScene()
 	{
 		entity_t ent;
 		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 2.0f * i , 2.0f, 0.0f ) );
+		ent.SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
 		scene.entities.Add( pieceNames[ i ].c_str(), ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "rook" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "rook0", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "knight" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "knight0", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "bishop" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "bishop0", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "queen" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "queen", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "king" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "king", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "bishop" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "bishop1", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "knight" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "knight1", ent );
+	}
+	{
+		entity_t ent;
+		scene.CreateEntity( modelLib.FindId( "rook" ), ent );
+		ent.SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
+		scene.entities.Add( "rook1", ent );
+	}
+	for ( int i = 0; i < 8; ++i )
+	{
 		{
 			entity_t cubeEnt;
 			scene.CreateEntity( modelLib.FindId( "cube" ), cubeEnt );
