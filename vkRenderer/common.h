@@ -862,6 +862,20 @@ static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
 	return result;
 }
 
+static inline uint64_t Hash( const std::string& s ) {
+	const int p = 31;
+	const int m = 1e9 + 9;
+	uint64_t hash = 0;
+	uint64_t pN = 1;
+	const int stringLen = s.size();
+	for ( int i = 0; i < stringLen; ++i )
+	{
+		hash = ( hash + ( s[ i ] - (uint64_t)'a' + 1ull ) * pN ) % m;
+		pN = ( pN * p ) % m;
+	}
+	return hash;
+}
+
 static inline vec4f glmToVec4( const glm::vec4& glmVec ) {
 	return vec4f( glmVec.x, glmVec.y, glmVec.z, glmVec.w );
 }
