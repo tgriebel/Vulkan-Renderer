@@ -13,5 +13,8 @@
   shaders\tree.vert
   shaders\pixelSimple.frag
   Press any key to continue . . . 
-  scene.cpp
+  io.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(867,20): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(870,32): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\common.h(870,32): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

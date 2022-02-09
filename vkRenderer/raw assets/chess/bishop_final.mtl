@@ -1,11 +1,11 @@
-# Blender MTL File: 'knight6.blend'
+# Blender MTL File: 'chess_board.blend'
 # Material Count: 1
 
-newmtl Material
-Ns 43.747293
+newmtl White.005
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.309667 0.026018
-Ks 0.570866 0.570866 0.570866
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
