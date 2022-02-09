@@ -80,7 +80,12 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 		mat.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
 		mat.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = gpuPrograms.RetrieveHdl( "Debug" ); // FIXME: do this with an override
 		mat.shaders[ DRAWPASS_DEBUG_SOLID ] = gpuPrograms.RetrieveHdl( "Debug_Solid" );
-		mat.textures[ 0 ] = textureLib.RetrieveHdl( material.diffuse_texname.c_str() );
+		const hdl_t texHandle = textureLib.RetrieveHdl( material.diffuse_texname.c_str() );
+		if ( texHandle.IsValid() ) {
+			mat.textures[ 0 ] = texHandle.Get();
+		} else {
+			mat.textures[ 0 ] = 0;
+		}
 		mat.Kd = rgbTuplef_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
 		mat.Ks = rgbTuplef_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
 		mat.Ka = rgbTuplef_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
