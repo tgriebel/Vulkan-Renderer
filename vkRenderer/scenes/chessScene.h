@@ -70,9 +70,10 @@ void AssetLib< texture_t >::Create()
 		}
 	}
 	texture_t cubeMap;
-	const std::string cubeMapPath = ( TexturePath + "chapel_low" );
+	const std::string envMapName = "chapel_low";
+	const std::string cubeMapPath = ( TexturePath + envMapName );
 	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {
-		textureLib.Add( cubeMapPath.c_str(), cubeMap );
+		textureLib.Add( envMapName.c_str(), cubeMap );
 	}
 }
 
