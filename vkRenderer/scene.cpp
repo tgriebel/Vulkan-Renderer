@@ -97,7 +97,8 @@ void UpdateScene( const float dt )
 
 		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
 
-		for ( int i = 0; i < scene.entities.Count(); ++i )
+		const int entityNum = static_cast<int>( scene.entities.Count() );
+		for ( int i = 0; i < entityNum; ++i )
 		{
 			Entity* ent = scene.entities.Find( i );
 			const modelSource_t* model = modelLib.Find( ent->modelId );

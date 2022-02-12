@@ -870,10 +870,10 @@ static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
 
 static inline uint64_t Hash( const std::string& s ) {
 	const int p = 31;
-	const int m = 1e9 + 9;
+	const int m = static_cast<int>( 1e9 + 9 );
 	uint64_t hash = 0;
 	uint64_t pN = 1;
-	const int stringLen = s.size();
+	const int stringLen = static_cast<int>( s.size() );
 	for ( int i = 0; i < stringLen; ++i )
 	{
 		hash = ( hash + ( s[ i ] - (uint64_t)'a' + 1ull ) * pN ) % m;
