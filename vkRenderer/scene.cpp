@@ -49,20 +49,32 @@ mat4x4f Entity::GetMatrix() const {
 	return matrix;
 }
 
-void Entity::SetRenderFlag( const renderFlags_t flag ) {
-	flags = static_cast<renderFlags_t>( flags | flag );
+void Entity::SetFlag( const entityFlags_t flag ) {
+	flags = static_cast<entityFlags_t>( flags | flag );
 }
 
-void Entity::ClearRenderFlag( const renderFlags_t flag ) {
-	flags = static_cast<renderFlags_t>( flags & ~flag );
+void Entity::ClearFlag( const entityFlags_t flag ) {
+	flags = static_cast<entityFlags_t>( flags & ~flag );
 }
 
-bool Entity::HasRenderFlag( const renderFlags_t flag ) const {
+bool Entity::HasFlag( const entityFlags_t flag ) const {
 	return ( ( flags & flag ) != 0 );
 }
 
+void Entity::SetRenderFlag( const renderFlags_t flag ) {
+	renderFlags = static_cast<renderFlags_t>( renderFlags | flag );
+}
+
+void Entity::ClearRenderFlag( const renderFlags_t flag ) {
+	renderFlags = static_cast<renderFlags_t>( renderFlags & ~flag );
+}
+
+bool Entity::HasRenderFlag( const renderFlags_t flag ) const {
+	return ( ( renderFlags & flag ) != 0 );
+}
+
 renderFlags_t Entity::GetRenderFlags() const {
-	return flags;
+	return renderFlags;
 }
 
 void UpdateScene( const float dt )
@@ -121,6 +133,9 @@ void UpdateScene( const float dt )
 		for ( int i = 0; i < entityNum; ++i )
 		{
 			Entity* ent = scene.FindEntity( i );
+			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
+				continue;
+			}
 			const modelSource_t* model = modelLib.Find( ent->modelId );
 
 			float t0, t1;

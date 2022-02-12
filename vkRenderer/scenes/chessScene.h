@@ -115,6 +115,7 @@ void AssetLib< Material >::Create()
 	{
 		Material material;
 		material.shaders[ DRAWPASS_TRANS ] = gpuPrograms.RetrieveHdl( "LitTrans" );
+		material.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = gpuPrograms.RetrieveHdl( "Debug" );
 		Add( "GlowSquare", material );
 	}
 
@@ -132,16 +133,6 @@ void AssetLib< Material >::Create()
 		material.textures[ 0 ] = 0;
 		material.textures[ 1 ] = 1;
 		Add( "IMAGE2D", material );
-	}
-
-	{
-		Material material;
-		material.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
-		material.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
-		material.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
-		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
-		material.textures[ 0 ] = textureLib.RetrieveHdl( "palm_tree_diffuse.jpg" );
-		Add( "PALM", material );
 	}
 
 	{
@@ -222,54 +213,63 @@ void MakeScene()
 		PieceEntity* ent = new PieceEntity( 1, i );
 		scene.CreateEntity( modelLib.FindId( "pawn" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( pieceNames[ i ].c_str(), ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 0 );
 		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "rook0", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 1 );
 		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "knight0", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 2 );
 		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "bishop0", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 3 );
 		scene.CreateEntity( modelLib.FindId( "queen" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "queen", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 4 );
 		scene.CreateEntity( modelLib.FindId( "king" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "king", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 5 );
 		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "bishop1", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 6 );
 		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "knight1", ent );
 	}
 	{
 		PieceEntity* ent = new PieceEntity( 0, 7 );
 		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
+		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "rook1", ent );
 	}
 	//for ( int i = 0; i < 8; ++i )
@@ -278,7 +278,7 @@ void MakeScene()
 	//		Entity cubeEnt;
 	//		scene.CreateEntity( modelLib.FindId( "cube" ), cubeEnt );
 	//		cubeEnt.materialId = materialLib.FindId( "DEBUG_WIRE" );
-	//		cubeEnt.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+	//		cubeEnt.renderFlags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
 	//		scene.entities.Add( ( pieceNames[ i ] + "_cube" ).c_str(), cubeEnt );
 	//	}
 	//}
@@ -289,6 +289,7 @@ void MakeScene()
 			PieceEntity* ent = new PieceEntity( j, i );
 			scene.CreateEntity( modelLib.FindId( "plane" ), *ent );
 			ent->SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
+			ent->SetFlag( ENT_FLAG_SELECTABLE );
 			std::string name = "plane_";
 			name += std::string( { (char)( (int)'0' + i ) } );
 			name += "_";

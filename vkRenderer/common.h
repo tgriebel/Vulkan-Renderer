@@ -608,6 +608,11 @@ struct modelSource_t
 	uint32_t					surfCount;
 };
 
+enum entityFlags_t {
+	ENT_FLAG_NONE,
+	ENT_FLAG_SELECTABLE,
+};
+
 class Entity
 {
 public:
@@ -615,7 +620,8 @@ public:
 		matrix = mat4x4f( 1.0f );
 		modelId = -1;
 		materialId = -1;
-		flags = renderFlags_t::NONE;
+		flags = ENT_FLAG_NONE;
+		renderFlags = renderFlags_t::NONE;
 		outline = false;
 	}
 
@@ -628,13 +634,17 @@ public:
 	void			SetOrigin( const vec3f& origin );
 	void			SetScale( const vec3f& scale );
 	mat4x4f			GetMatrix() const;
+	void			SetFlag( const entityFlags_t flag );
+	void			ClearFlag( const entityFlags_t flag );
+	bool			HasFlag( const entityFlags_t flag ) const;
 	void			SetRenderFlag( const renderFlags_t flag );
 	void			ClearRenderFlag( const renderFlags_t flag );
 	bool			HasRenderFlag( const renderFlags_t flag ) const;
 	renderFlags_t	GetRenderFlags() const;
 
 private:
-	renderFlags_t	flags;
+	renderFlags_t	renderFlags;
+	entityFlags_t	flags;
 	mat4x4f			matrix;
 };
 
