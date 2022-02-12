@@ -38,4 +38,12 @@ struct Scene
 		const modelSource_t* model = modelLib.Find( modelId );
 		entity.modelId = modelId;
 	}
+
+	Entity* FindEntity( const int entityId ) {
+		return *entities.Find( entityId );
+	}
+
+	Entity* FindEntity( const char* name ) {
+		return *entities.Find( name );
+	}
 };

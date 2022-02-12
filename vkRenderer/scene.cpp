@@ -120,7 +120,7 @@ void UpdateScene( const float dt )
 		const int entityNum = static_cast<int>( scene.entities.Count() );
 		for ( int i = 0; i < entityNum; ++i )
 		{
-			Entity* ent = *scene.entities.Find( i );
+			Entity* ent = scene.FindEntity( i );
 			const modelSource_t* model = modelLib.Find( ent->modelId );
 
 			float t0, t1;
@@ -138,7 +138,7 @@ void UpdateScene( const float dt )
 	skyBoxOrigin[ 0 ] = scene.camera.GetOrigin()[ 0 ];
 	skyBoxOrigin[ 1 ] = scene.camera.GetOrigin()[ 1 ];
 	skyBoxOrigin[ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
-	( *scene.entities.Find( "_skybox" ) )->SetOrigin( skyBoxOrigin );
+	( scene.FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
 	UpdateSceneLocal();
 

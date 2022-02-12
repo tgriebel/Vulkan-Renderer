@@ -352,7 +352,7 @@ void UpdateSceneLocal()
 
 	for ( int i = 0; i < glowEntities.size(); ++i ) {
 		const int hdl = glowEntities[ i ];
-		Entity* ent = *scene.entities.Find( hdl );
+		Entity* ent = scene.FindEntity( hdl );
 		const vec3f origin = ent->GetOrigin();
 		const int x = static_cast< int >( 0.5 * origin[ 0 ] ); // TODO: store game coordinate too. This isn't reliable
 		const int y = static_cast< int >( 0.5 * origin[ 1 ] );
@@ -373,11 +373,11 @@ void UpdateSceneLocal()
 	//	debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
 	//	debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	//}
-	( *scene.entities.Find( pieceNames[ 0 ].c_str() ) )->outline = true;
+	( scene.FindEntity( pieceNames[ 0 ].c_str() ) )->outline = true;
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{
-		Entity* debugLight = *scene.entities.Find( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
+		Entity* debugLight = scene.FindEntity( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
 		vec3f origin = vec3f( scene.lights[ i ].lightPos[ 0 ], scene.lights[ i ].lightPos[ 1 ], scene.lights[ i ].lightPos[ 2 ] );
 		debugLight->SetOrigin( origin );
 		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
