@@ -35,6 +35,7 @@ public:
 		aspect = 1.0f;
 		yaw = 0.0f;
 		pitch = 0.0f;
+		focalLength = _far;
 	}
 
 	Camera()
