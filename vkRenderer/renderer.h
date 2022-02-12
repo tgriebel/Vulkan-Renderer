@@ -396,6 +396,7 @@ private:
 #endif
 		imguiControls.heightMapHeight = 1.0f;
 		imguiControls.roughness = 0.9f;
+		imguiControls.shadowStrength = 0.99f;
 		imguiControls.toneMapColor[ 0 ] = 1.0f;
 		imguiControls.toneMapColor[ 1 ] = 1.0f;
 		imguiControls.toneMapColor[ 2 ] = 1.0f;
@@ -1973,6 +1974,7 @@ private:
 			ImGui::Begin( "Control Panel" );
 			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
 			ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
@@ -2448,7 +2450,7 @@ private:
 			globals.generic = vec4f( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
 			globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
 			globals.tonemap = vec4f( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
-			globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, 0.1f );
+			globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, imguiControls.shadowStrength );
 			globalsBuffer.push_back( globals );
 		}
 

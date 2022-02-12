@@ -781,6 +781,7 @@ struct imguiControls_t
 {
 	float		heightMapHeight;
 	float		roughness;
+	float		shadowStrength;
 	float		toneMapColor[ 4 ];
 	int			dbgImageId;
 	int			selectedModelId;
