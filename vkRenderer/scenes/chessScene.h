@@ -133,6 +133,7 @@ void AssetLib< Material >::Create()
 		material.shaders[ DRAWPASS_POST_2D ] = gpuPrograms.RetrieveHdl( "Image2D" );
 		material.textures[ 0 ] = 0;
 		material.textures[ 1 ] = 1;
+		material.textures[ 2 ] = 2;
 		Add( "IMAGE2D", material );
 	}
 

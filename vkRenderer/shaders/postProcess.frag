@@ -13,6 +13,7 @@ void main()
 
 	const uint textureId0 = materials[ materialId ].textureId0;
     const uint textureId1 = materials[ materialId ].textureId1;
+    const uint textureId2 = materials[ materialId ].textureId2;
 
 	const mat4 viewMat = ubo[ 0 ].view;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
@@ -27,12 +28,17 @@ void main()
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const vec4 sceneColor = vec4( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;
+	const uint sceneStencil = floatBitsToUint( texelFetch( stencilImage, pixelLocation, 0 ).r );
 	const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
 	if( length( fragTexCoord.xy - vec2( 0.5f, 0.5f ) ) < 0.01f ) {
 		outColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	} else {
-		outColor = globals.toneMap.rgba * LinearToSrgb( sceneColor );
+		if( sceneStencil != 0x04 ) {
+			outColor = globals.toneMap.rgba * LinearToSrgb( sceneColor );
+		} else {
+			outColor = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+		}
 	}
 }

@@ -78,13 +78,21 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 	codeImageBinding.pImmutableSamplers = nullptr;
 	codeImageBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
-	std::array<VkDescriptorSetLayoutBinding, 7> bindings = {	globalsLayoutBinding,
+	VkDescriptorSetLayoutBinding stencilBinding{ };
+	stencilBinding.binding = 7;
+	stencilBinding.descriptorCount = 1;
+	stencilBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	stencilBinding.pImmutableSamplers = nullptr;
+	stencilBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	std::array<VkDescriptorSetLayoutBinding, 8> bindings = {	globalsLayoutBinding,
 																uboLayoutBinding,
 																sampler2dLayoutBinding,
 																samplerCubeLayoutBinding,
 																materialBinding,
 																lightBinding,
-																codeImageBinding };
+																codeImageBinding,
+																stencilBinding };
 	VkDescriptorSetLayoutCreateInfo layoutInfo{ };
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );

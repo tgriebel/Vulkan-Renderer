@@ -9,6 +9,7 @@ public:
 	GpuImage		viewColorImage;
 	GpuImage		shadowMapImage;
 	GpuImage		depthImage;
+	GpuImage		stencilImage;
 	GpuBuffer		globalConstants;
 	GpuBuffer		surfParms;
 	GpuBuffer		materialBuffers;

@@ -24,6 +24,8 @@
 
 #define CODE_IMAGE_LAYOUT( S, N )	layout( set = S, binding = N ) uniform sampler2D codeSamplers[];
 
+#define STENCIL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform sampler2D stencilImage;
+
 #define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform MaterialBuffer						\
 									{																			\
 										uint        textureId0;													\
@@ -82,6 +84,7 @@
 							MATERIAL_LAYOUT( 0, 4 )																\
 							LIGHT_LAYOUT( 0, 5 )																\
 							CODE_IMAGE_LAYOUT( 0, 6 )															\
+							STENCIL_LAYOUT( 0, 7 )																\
 							PUSH_CONSTANTS																		\
 							VS_IN																				\
 							VS_OUT
@@ -105,6 +108,7 @@
 							MATERIAL_LAYOUT( 0, 4 )																\
 							LIGHT_LAYOUT( 0, 5 )																\
 							CODE_IMAGE_LAYOUT( 0, 6 )															\
+							STENCIL_LAYOUT( 0, 7 )																\
 							PUSH_CONSTANTS																		\
 							PS_IN																				\
 							PS_OUT

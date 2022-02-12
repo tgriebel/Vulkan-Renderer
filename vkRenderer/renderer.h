@@ -798,7 +798,7 @@ private:
 			codeImageInfo.push_back( info );
 		}
 
-		const uint32_t descriptorSetCnt = 7;
+		const uint32_t descriptorSetCnt = 8;
 		std::array<VkWriteDescriptorSet, descriptorSetCnt> descriptorWrites{ };
 
 		uint32_t descriptorId = 0;
@@ -862,6 +862,15 @@ private:
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		descriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
+		descriptorWrites[ descriptorId ].pImageInfo = &codeImageInfo[ 0 ];
+		++descriptorId;
+
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 7;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
 		descriptorWrites[ descriptorId ].pImageInfo = &codeImageInfo[ 0 ];
 		++descriptorId;
 
@@ -978,6 +987,15 @@ private:
 		shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowCodeImageInfo[ 0 ];
 		++descriptorId;
 
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 7;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowCodeImageInfo[ 0 ];
+		++descriptorId;
+
 		assert( descriptorId == descriptorSetCnt );
 		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( shadowDescriptorWrites.size() ), shadowDescriptorWrites.data(), 0, nullptr );
 
@@ -987,7 +1005,7 @@ private:
 		//													//
 		//////////////////////////////////////////////////////
 		std::vector<VkDescriptorImageInfo> postImageInfo;
-		postImageInfo.reserve( 2 );
+		postImageInfo.reserve( 3 );
 		// View Color Map
 		{
 			VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
@@ -1008,7 +1026,7 @@ private:
 		}
 		// View Stencil Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
+			VkImageView& imageView = frameState[ currentImage ].stencilImage.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1016,7 +1034,7 @@ private:
 			postImageInfo.push_back( info );
 		}
 
-		std::array<VkWriteDescriptorSet, 7> postDescriptorWrites{ };
+		std::array<VkWriteDescriptorSet, 8> postDescriptorWrites{ };
 
 		descriptorId = 0;
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1080,6 +1098,15 @@ private:
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		postDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
 		postDescriptorWrites[ descriptorId ].pImageInfo = &postImageInfo[ 0 ];
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 7;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pImageInfo = &postImageInfo[ 2 ];
 		++descriptorId;
 
 		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( postDescriptorWrites.size() ), postDescriptorWrites.data(), 0, nullptr );
@@ -1320,6 +1347,20 @@ private:
 			depthAttachmentRef.attachment = 1;
 			depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+			VkAttachmentDescription stencilAttachment{ };
+			stencilAttachment.format = FindDepthFormat();
+			stencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			stencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			stencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+			stencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+			stencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			stencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
+			VkAttachmentReference stencilAttachmentRef{ };
+			stencilAttachmentRef.attachment = 1;
+			stencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
 			VkSubpassDescription subpass{ };
 			subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 			subpass.colorAttachmentCount = 1;
@@ -1343,7 +1384,7 @@ private:
 			dependencies[ 1 ].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 			dependencies[ 1 ].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-			std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
+			std::array<VkAttachmentDescription, 3> attachments = { colorAttachment, depthAttachment, stencilAttachment };
 			VkRenderPassCreateInfo renderPassInfo{ };
 			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			renderPassInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
@@ -1376,7 +1417,7 @@ private:
 			colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 			VkAttachmentDescription depthAttachment{ };
-			depthAttachment.format = FindDepthFormat();
+			depthAttachment.format = VK_FORMAT_D32_SFLOAT;
 			depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 			depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -1495,7 +1536,6 @@ private:
 		/////////////////////////////////
 		//       Shadow Map Render     //
 		/////////////////////////////////
-		const VkFormat depthFormat = FindDepthFormat();
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
 			textureInfo_t info{};
@@ -1503,8 +1543,8 @@ private:
 			info.height = ShadowMapHeight;
 			info.mipLevels = 1;
 			info.layers = 1;
-			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
-			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			CreateImage( info, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
+			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
@@ -1545,10 +1585,12 @@ private:
 			VkFormat depthFormat = FindDepthFormat();
 			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
 			frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+			frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
-			std::array<VkImageView, 2> attachments = {
+			std::array<VkImageView, 3> attachments = {
 				frameState[ i ].viewColorImage.vk_view,
-				frameState[ i ].depthImage.vk_view
+				frameState[ i ].depthImage.vk_view,
+				frameState[ i ].stencilImage.vk_view,
 			};
 
 			VkFramebufferCreateInfo framebufferInfo{ };
@@ -2039,8 +2081,17 @@ private:
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage = usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.flags = ( info.type == TEXTURE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;	
+		if ( format == FindDepthFormat() )
+		{
+			VkImageStencilUsageCreateInfo stencilUsage{}; 
+			stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
+			stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			imageInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+			imageInfo.pNext = &stencilUsage;
+		} else {
+			imageInfo.flags = ( info.type == TEXTURE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+		}
 
 		if ( vkCreateImage( context.device, &imageInfo, nullptr, &image.vk_image ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create image!" );
