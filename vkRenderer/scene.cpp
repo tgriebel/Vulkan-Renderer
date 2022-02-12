@@ -22,24 +22,24 @@ extern AssetLibMaterials		materialLib;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
-AABB entity_t::GetBounds() const {
+AABB Entity::GetBounds() const {
 	const modelSource_t* model = modelLib.Find( modelId );
 	const AABB& bounds = model->bounds;
 	vec3f origin = GetOrigin();
 	return AABB( bounds.GetMin() + origin, bounds.GetMax() + origin );
 }
 
-vec3f entity_t::GetOrigin() const {
+vec3f Entity::GetOrigin() const {
 	return vec3f( matrix[ 3 ][ 0 ], matrix[ 3 ][ 1 ], matrix[ 3 ][ 2 ] );
 }
 
-void entity_t::SetOrigin( const vec3f& origin ) {
+void Entity::SetOrigin( const vec3f& origin ) {
 	matrix[ 3 ][ 0 ] = origin[ 0 ];
 	matrix[ 3 ][ 1 ] = origin[ 1 ];
 	matrix[ 3 ][ 2 ] = origin[ 2 ];
 }
 
-void entity_t::SetScale( const vec3f& scale ) {
+void Entity::SetScale( const vec3f& scale ) {
 	matrix[ 0 ][ 0 ] = scale[ 0 ];
 	matrix[ 1 ][ 1 ] = scale[ 1 ];
 	matrix[ 2 ][ 2 ] = scale[ 2 ];
@@ -99,7 +99,7 @@ void UpdateScene( const float dt )
 
 		for ( int i = 0; i < scene.entities.Count(); ++i )
 		{
-			entity_t* ent = scene.entities.Find( i );
+			Entity* ent = scene.entities.Find( i );
 			const modelSource_t* model = modelLib.Find( ent->modelId );
 
 			float t0, t1;

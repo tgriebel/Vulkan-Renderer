@@ -230,7 +230,7 @@ private:
 		}
 	}
 
-	void CommitModel( RenderView& view, const entity_t& ent, const uint32_t objectOffset )
+	void CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset )
 	{
 		if ( ( ent.flags & HIDDEN ) != 0 ) {
 			return;
@@ -1988,7 +1988,7 @@ private:
 			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin[ 2 ], 0.1f, 1.0f );
 
 			if ( imguiControls.selectedModelId >= 0 ) {
-				entity_t* entity = scene.entities.Find( imguiControls.selectedModelId );
+				Entity* entity = scene.entities.Find( imguiControls.selectedModelId );
 				entity->matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin[ 0 ];
 				entity->matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin[ 1 ];
 				entity->matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin[ 2 ];

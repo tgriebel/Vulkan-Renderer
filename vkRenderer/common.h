@@ -608,8 +608,9 @@ struct modelSource_t
 	uint32_t					surfCount;
 };
 
-struct entity_t
+class Entity
 {
+public:
 	mat4x4f			matrix;
 	uint32_t		modelId;
 	int				materialId;

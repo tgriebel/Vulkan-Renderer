@@ -10,7 +10,7 @@ extern Window window;
 struct Scene
 {
 	Camera						camera;
-	AssetLib< entity_t >		entities;
+	AssetLib< Entity >		entities;
 	light_t						lights[ MaxLights ];
 	float						defaultNear = 1000.0f;
 	float						defaultFar = 0.1f;
@@ -33,7 +33,7 @@ struct Scene
 		camera.viewportHeight = 2.0f * camera.halfFovY;
 	}
 
-	void CreateEntity( const uint32_t modelId, entity_t& entity )
+	void CreateEntity( const uint32_t modelId, Entity& entity )
 	{
 		const modelSource_t* model = modelLib.Find( modelId );
 
