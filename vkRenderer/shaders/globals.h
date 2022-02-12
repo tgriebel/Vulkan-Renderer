@@ -14,8 +14,8 @@
 										vec4        time;														\
 										vec4        generic;													\
 										vec4        dimensions;													\
+										vec4        shadowParms;												\
 										vec4        toneMap;													\
-										uint		shadowBaseId;												\
 									} globals;
 
 #define SAMPLER_2D_LAYOUT( S, N )	layout( set = S, binding = N ) uniform sampler2D texSampler[];

@@ -22,9 +22,11 @@ void main()
 
 	//ubo[ objectId ].view;
 
+	const ivec2 pixelLocation = ivec2( globals.dimensions.xy * fragTexCoord.xy );
+
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
-	const vec4 sceneColor = vec4( texture( codeSamplers[ textureId0 ], fragTexCoord.xy ).rgb, 1.0f );
-	const float sceneDepth = texture( codeSamplers[ textureId1 ], fragTexCoord.xy ).r;
+	const vec4 sceneColor = vec4( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb, 1.0f );
+	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;
 	const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 

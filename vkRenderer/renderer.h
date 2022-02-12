@@ -1005,6 +1005,15 @@ private:
 			info.sampler = vk_bilinearSampler;
 			postImageInfo.push_back( info );
 		}
+		// View Stencil Map
+		{
+			VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			postImageInfo.push_back( info );
+		}
 
 		std::array<VkWriteDescriptorSet, 7> postDescriptorWrites{ };
 
@@ -2439,7 +2448,7 @@ private:
 			globals.generic = vec4f( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
 			globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
 			globals.tonemap = vec4f( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
-			globals.shadowBaseId = ShadowObjectOffset;
+			globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, 0.1f );
 			globalsBuffer.push_back( globals );
 		}
 

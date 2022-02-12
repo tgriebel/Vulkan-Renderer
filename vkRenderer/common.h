@@ -60,7 +60,7 @@ const uint32_t	MaxSurfaces						= MaxModels * MaxViews;
 const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
 const uint32_t	MaxMaterialDescriptors			= 64;
 const uint32_t	MaxLights						= 3;
-const uint32_t	MaxCodeImages					= 2;
+const uint32_t	MaxCodeImages					= 3;
 const uint64_t	MaxSharedMemory					= MB( 256 );
 const uint64_t	MaxLocalMemory					= MB( 256 );
 const uint64_t	MaxFrameBufferMemory			= MB( 128 );
@@ -368,9 +368,9 @@ struct globalUboConstants_t
 	vec4f		time;
 	vec4f		generic;
 	vec4f		dimensions;
+	vec4f		shadowParms;
 	vec4f		tonemap;
-	uint32_t	shadowBaseId;
-	uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
+	// uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
 };
 
 struct materialBufferObject_t
