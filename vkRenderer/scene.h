@@ -10,7 +10,7 @@ extern Window window;
 struct Scene
 {
 	Camera						camera;
-	AssetLib< Entity >		entities;
+	AssetLib< Entity* >			entities;
 	light_t						lights[ MaxLights ];
 	float						defaultNear = 1000.0f;
 	float						defaultFar = 0.1f;

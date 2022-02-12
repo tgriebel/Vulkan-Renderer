@@ -1976,7 +1976,7 @@ private:
 			
 			char entityName[ 256 ];
 			if ( imguiControls.selectedModelId >= 0 ) {
-				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( scene.entities.Find( imguiControls.selectedModelId )->modelId ) );
+				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, modelLib.FindName( ( *scene.entities.Find( imguiControls.selectedModelId ) )->modelId ) );
 			} else {
 				memset( &entityName[ 0 ], 0, 256 );
 			}
@@ -1988,7 +1988,7 @@ private:
 			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin[ 2 ], 0.1f, 1.0f );
 
 			if ( imguiControls.selectedModelId >= 0 ) {
-				Entity* entity = scene.entities.Find( imguiControls.selectedModelId );
+				Entity* entity = *scene.entities.Find( imguiControls.selectedModelId );
 				entity->SetOrigin( vec3f(	tempOrigin.x + imguiControls.selectedModelOrigin[ 0 ],
 											tempOrigin.y + imguiControls.selectedModelOrigin[ 1 ],
 											tempOrigin.z + imguiControls.selectedModelOrigin[ 2 ] ) );

@@ -16,6 +16,14 @@ extern AssetLibMaterials		materialLib;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
+class PieceEntity : public Entity {
+	PieceEntity() {
+
+	}
+	int	row;
+	int	rank;
+};
+
 static std::string pieceNames[ 8 ] = {
 	"white_pawn_0",
 	"white_pawn_1",
@@ -195,14 +203,14 @@ void MakeScene()
 	const int piecesNum = 16;
 
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "_skybox" ), ent );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "_skybox" ), *ent );
 		scene.entities.Add( "_skybox", ent );
 	}
 
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "chess_board" ), ent );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "chess_board" ), *ent );
 		scene.entities.Add( "chess_board", ent );
 	}
 
@@ -210,57 +218,57 @@ void MakeScene()
 
 	for ( int i = 0; i < 8; ++i )
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "pawn" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "pawn" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
 		scene.entities.Add( pieceNames[ i ].c_str(), ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "rook" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "rook0", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "knight" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "knight0", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "bishop" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "bishop0", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "queen" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "queen" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "queen", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "king" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "king" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "king", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "bishop" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "bishop1", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "knight" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "knight1", ent );
 	}
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "rook" ), ent );
-		ent.SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
+		ent->SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "rook1", ent );
 	}
 	//for ( int i = 0; i < 8; ++i )
@@ -277,9 +285,9 @@ void MakeScene()
 	{
 		for ( int j = 0; j < 8; ++j )
 		{
-			Entity ent;
-			scene.CreateEntity( modelLib.FindId( "plane" ), ent );
-			ent.SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
+			Entity* ent = new Entity();
+			scene.CreateEntity( modelLib.FindId( "plane" ), *ent );
+			ent->SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
 			std::string name = "plane_";
 			name += std::string( { (char)( (int)'0' + i ) } );
 			name += "_";
@@ -290,31 +298,31 @@ void MakeScene()
 	}
 
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "sphere" ), ent );
-		ent.SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "sphere" ), *ent );
+		ent->SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "sphere", ent );
 	}
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
-		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
-		ent.SetRenderFlag( WIREFRAME );
-		ent.SetRenderFlag( SKIP_OPAQUE );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "diamond" ), *ent );
+		ent->materialId = materialLib.FindId( "DEBUG_WIRE" );
+		ent->SetRenderFlag( WIREFRAME );
+		ent->SetRenderFlag( SKIP_OPAQUE );
 		scene.entities.Add( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str(), ent );
 	}
 
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "_postProcessQuad" ), ent );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "_postProcessQuad" ), *ent );
 		scene.entities.Add( "_postProcessQuad", ent );
 	}
 
 	{
-		Entity ent;
-		scene.CreateEntity( modelLib.FindId( "_quadTexDebug" ), ent );
+		Entity* ent = new Entity();
+		scene.CreateEntity( modelLib.FindId( "_quadTexDebug" ), *ent );
 		scene.entities.Add( "_quadTexDebug", ent );
 	}
 
@@ -344,7 +352,7 @@ void UpdateSceneLocal()
 
 	for ( int i = 0; i < glowEntities.size(); ++i ) {
 		const int hdl = glowEntities[ i ];
-		Entity* ent = scene.entities.Find( hdl );
+		Entity* ent = *scene.entities.Find( hdl );
 		const vec3f origin = ent->GetOrigin();
 		const int x = static_cast< int >( 0.5 * origin[ 0 ] ); // TODO: store game coordinate too. This isn't reliable
 		const int y = static_cast< int >( 0.5 * origin[ 1 ] );
@@ -365,11 +373,11 @@ void UpdateSceneLocal()
 	//	debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
 	//	debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	//}
-	scene.entities.Find( pieceNames[ 0 ].c_str() )->outline = true;
+	( *scene.entities.Find( pieceNames[ 0 ].c_str() ) )->outline = true;
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{
-		Entity* debugLight = scene.entities.Find( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
+		Entity* debugLight = *scene.entities.Find( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
 		vec3f origin = vec3f( scene.lights[ i ].lightPos[ 0 ], scene.lights[ i ].lightPos[ 1 ], scene.lights[ i ].lightPos[ 2 ] );
 		debugLight->SetOrigin( origin );
 		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );

@@ -16,17 +16,17 @@ void Renderer::Commit( const Scene& scene )
 {
 	renderView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < scene.entities.Count(); ++i ) {
-		CommitModel( renderView, *scene.entities.Find( i ), 0 );
+		CommitModel( renderView, **scene.entities.Find( i ), 0 );
 	}
 	MergeSurfaces( renderView );
 
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < scene.entities.Count(); ++i )
 	{
-		if ( scene.entities.Find( i )->HasRenderFlag( NO_SHADOWS ) ) {
+		if ( ( *scene.entities.Find( i ) )->HasRenderFlag( NO_SHADOWS ) ) {
 			continue;
 		}
-		CommitModel( shadowView, *scene.entities.Find( i ), MaxModels );
+		CommitModel( shadowView, **scene.entities.Find( i ), MaxModels );
 	}
 	MergeSurfaces( shadowView );
 
