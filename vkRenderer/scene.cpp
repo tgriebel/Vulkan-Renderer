@@ -136,14 +136,21 @@ void UpdateScene( const float dt )
 			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
 				continue;
 			}
+			ent->ClearRenderFlag( WIREFRAME );
+		}
+		for ( int i = 0; i < entityNum; ++i )
+		{
+			Entity* ent = scene.FindEntity( i );
+			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
+				continue;
+			}
 			const modelSource_t* model = modelLib.Find( ent->modelId );
 
 			float t0, t1;
 			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
 				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
 				ent->SetRenderFlag( WIREFRAME );
-			} else {
-				ent->ClearRenderFlag( WIREFRAME );
+				break;
 			}
 		}
 	}

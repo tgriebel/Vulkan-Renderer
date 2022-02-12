@@ -360,7 +360,7 @@ void UpdateSceneLocal()
 		}
 	}
 	Material* glowMat = materialLib.Find( "GlowSquare" );
-	glowMat->Kd = rgbTuplef_t( 1.0f, 0.0f, 0.0f );
+	glowMat->Kd = rgbTuplef_t( 0.1f, 0.0f, 1.0f );
 	glowMat->d = 0.5f * cos( 3.0f * time ) + 0.5f;
 	//for ( int i = 0; i < 8; ++i )
 	//{
