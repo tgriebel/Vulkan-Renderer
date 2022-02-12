@@ -17,10 +17,11 @@ extern imguiControls_t			imguiControls;
 extern Window					window;
 
 class PieceEntity : public Entity {
-	PieceEntity() {
-
-	}
-	int	row;
+public:
+	PieceEntity( const int row, const int rank ) : Entity(),
+		file( row ),
+		rank( rank ) {}
+	int	file;
 	int	rank;
 };
 
@@ -218,55 +219,55 @@ void MakeScene()
 
 	for ( int i = 0; i < 8; ++i )
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 1, i );
 		scene.CreateEntity( modelLib.FindId( "pawn" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
 		scene.entities.Add( pieceNames[ i ].c_str(), ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 0 );
 		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "rook0", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 1 );
 		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "knight0", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 2 );
 		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "bishop0", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 3 );
 		scene.CreateEntity( modelLib.FindId( "queen" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "queen", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 4 );
 		scene.CreateEntity( modelLib.FindId( "king" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "king", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 5 );
 		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "bishop1", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 6 );
 		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "knight1", ent );
 	}
 	{
-		Entity* ent = new Entity();
+		PieceEntity* ent = new PieceEntity( 0, 7 );
 		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "rook1", ent );
@@ -285,7 +286,7 @@ void MakeScene()
 	{
 		for ( int j = 0; j < 8; ++j )
 		{
-			Entity* ent = new Entity();
+			PieceEntity* ent = new PieceEntity( j, i );
 			scene.CreateEntity( modelLib.FindId( "plane" ), *ent );
 			ent->SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
 			std::string name = "plane_";
@@ -352,11 +353,8 @@ void UpdateSceneLocal()
 
 	for ( int i = 0; i < glowEntities.size(); ++i ) {
 		const int hdl = glowEntities[ i ];
-		Entity* ent = scene.FindEntity( hdl );
-		const vec3f origin = ent->GetOrigin();
-		const int x = static_cast< int >( 0.5 * origin[ 0 ] ); // TODO: store game coordinate too. This isn't reliable
-		const int y = static_cast< int >( 0.5 * origin[ 1 ] );
-		if ( ( x % 2 ) == ( y % 2 ) ) {
+		PieceEntity* ent = reinterpret_cast< PieceEntity* >( scene.FindEntity( hdl ) );
+		if ( ( ent->file % 2 ) == ( ent->rank % 2 ) ) {
 			ent->SetRenderFlag( HIDDEN );
 		}
 	}
