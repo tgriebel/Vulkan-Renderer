@@ -9,5 +9,6 @@ PS_LAYOUT_STANDARD
 
 void main()
 {
-    outColor = fragColor;
+    const uint materialId = pushConstants.materialId;
+    outColor = vec4( materials[ materialId ].Kd.rgb, materials[ materialId ].d );
 }

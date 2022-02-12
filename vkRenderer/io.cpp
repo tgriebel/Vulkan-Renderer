@@ -130,6 +130,7 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			vertex.color[ 0 ] = attrib.colors[ 3 * index.vertex_index + 0 ];
 			vertex.color[ 1 ] = attrib.colors[ 3 * index.vertex_index + 1 ];
 			vertex.color[ 2 ] = attrib.colors[ 3 * index.vertex_index + 2 ];
+			vertex.color[ 3 ] = 1.0f;
 
 			if ( uniqueVertices.count( vertex ) == 0 )
 			{

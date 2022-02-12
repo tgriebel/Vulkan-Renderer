@@ -27,6 +27,8 @@ static std::string pieceNames[ 8 ] = {
 	"white_pawn_7",
 };
 
+std::vector< int > glowEntities;
+
 void AssetLib< GpuProgram >::Create()
 {
 	Add( "Basic", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/simplePS.spv" ) );
@@ -104,8 +106,7 @@ void AssetLib< Material >::Create()
 	{
 		Material material;
 		material.shaders[ DRAWPASS_TRANS ] = gpuPrograms.RetrieveHdl( "LitTrans" );
-		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		Add( "WATER", material );
+		Add( "GlowSquare", material );
 	}
 
 	{
@@ -166,6 +167,10 @@ void AssetLib< modelSource_t >::Create()
 		LoadModel( "king.obj", "king" );
 		LoadModel( "queen.obj", "queen" );
 		LoadModel( "chess_board.obj", "chess_board" );
+	}
+	{
+		const int planeId = LoadModel( "plane.obj", "plane" );
+		modelLib.Find( planeId )->surfs[ 0 ].materialId = materialLib.FindId( "GlowSquare" );
 	}
 	{
 		modelSource_t model;
@@ -258,14 +263,29 @@ void MakeScene()
 		ent.SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
 		scene.entities.Add( "rook1", ent );
 	}
+	//for ( int i = 0; i < 8; ++i )
+	//{
+	//	{
+	//		entity_t cubeEnt;
+	//		scene.CreateEntity( modelLib.FindId( "cube" ), cubeEnt );
+	//		cubeEnt.materialId = materialLib.FindId( "DEBUG_WIRE" );
+	//		cubeEnt.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+	//		scene.entities.Add( ( pieceNames[ i ] + "_cube" ).c_str(), cubeEnt );
+	//	}
+	//}
 	for ( int i = 0; i < 8; ++i )
 	{
+		for ( int j = 0; j < 8; ++j )
 		{
-			entity_t cubeEnt;
-			scene.CreateEntity( modelLib.FindId( "cube" ), cubeEnt );
-			cubeEnt.materialId = materialLib.FindId( "DEBUG_WIRE" );
-			cubeEnt.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
-			scene.entities.Add( ( pieceNames[ i ] + "_cube" ).c_str(), cubeEnt );
+			entity_t ent;
+			scene.CreateEntity( modelLib.FindId( "plane" ), ent );
+			ent.SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
+			std::string name = "plane_";
+			name += std::string( { (char)( (int)'0' + i ) } );
+			name += "_";
+			name += std::string( { (char)( (int)'0' + j ) } );
+			const int index = scene.entities.Add( name.c_str(), ent );
+			glowEntities.push_back( index );
 		}
 	}
 
@@ -321,16 +341,29 @@ void UpdateSceneLocal()
 
 	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	for ( int i = 0; i < 8; ++i )
-	{
-		entity_t* pawn = scene.entities.Find( pieceNames[ i ].c_str() );
-		entity_t* debugBox = scene.entities.Find( ( pieceNames[ i ] + "_cube" ).c_str() );
-		AABB bounds = pawn->GetBounds();
-		vec3f size = bounds.GetSize();
-		vec3f center = bounds.GetCenter();
-		debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-		debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+	for ( int i = 0; i < glowEntities.size(); ++i ) {
+		const int hdl = glowEntities[ i ];
+		entity_t* ent = scene.entities.Find( hdl );
+		const vec3f origin = ent->GetOrigin();
+		const int x = static_cast< int >( 0.5 * origin[ 0 ] ); // TODO: store game coordinate too. This isn't reliable
+		const int y = static_cast< int >( 0.5 * origin[ 1 ] );
+		if ( ( x % 2 ) == ( y % 2 ) ) {
+			ent->flags = static_cast<renderFlags_t>( ent->flags | HIDDEN );
+		}
 	}
+	Material* glowMat = materialLib.Find( "GlowSquare" );
+	glowMat->Kd = rgbTuplef_t( 1.0f, 0.0f, 0.0f );
+	glowMat->d = 0.5f * cos( 3.0f * time ) + 0.5f;
+	//for ( int i = 0; i < 8; ++i )
+	//{
+	//	entity_t* pawn = scene.entities.Find( pieceNames[ i ].c_str() );
+	//	entity_t* debugBox = scene.entities.Find( ( pieceNames[ i ] + "_cube" ).c_str() );
+	//	AABB bounds = pawn->GetBounds();
+	//	vec3f size = bounds.GetSize();
+	//	vec3f center = bounds.GetCenter();
+	//	debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+	//	debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+	//}
 	scene.entities.Find( pieceNames[ 0 ].c_str() )->outline = true;
 
 	for ( int i = 0; i < MaxLights; ++i )

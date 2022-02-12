@@ -146,8 +146,8 @@ enum drawPass_t : uint32_t
 	DRAWPASS_DEPTH,
 	DRAWPASS_TERRAIN,
 	DRAWPASS_OPAQUE,
-	DRAWPASS_TRANS,
 	DRAWPASS_SKYBOX,
+	DRAWPASS_TRANS,
 	DRAWPASS_DEBUG_SOLID,
 	DRAWPASS_DEBUG_WIREFRAME,
 	DRAWPASS_POST_2D,
@@ -319,7 +319,12 @@ struct Material
 
 	bool					textured;
 
-	Material()
+	Material() :
+		Tr( 0.0f ),
+		Ns( 0.0f ),
+		Ni( 0.0f ),
+		d( 1.0f ),
+		illum( 0.0f )
 	{
 		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
 			textures[ i ] = 0;
