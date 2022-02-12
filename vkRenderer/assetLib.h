@@ -25,11 +25,16 @@ public:
 template< class Asset >
 int AssetLib< Asset >::Add( const char* name, const Asset& asset )
 {
-	const int id = static_cast<int>( assets.size() );
-	handles.push_back( hdl_t( id ) );
-	assets.push_back( asset );
-	tags.push_back( name );
-	return id;
+	const int searchId = FindId( name );
+	if ( searchId < 0 ) {
+		const int id = static_cast<int>( assets.size() );
+		handles.push_back( hdl_t( id ) );
+		assets.push_back( asset );
+		tags.push_back( name );
+		return id;
+	} else {
+		return searchId;
+	}
 }
 
 template< class Asset >
