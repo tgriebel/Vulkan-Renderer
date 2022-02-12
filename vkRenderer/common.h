@@ -611,16 +611,31 @@ struct modelSource_t
 class Entity
 {
 public:
-	mat4x4f			matrix;
-	uint32_t		modelId;
-	int				materialId;
-	renderFlags_t	flags;
-	bool			outline;
+	Entity() {
+		matrix = mat4x4f( 1.0f );
+		modelId = -1;
+		materialId = -1;
+		flags = renderFlags_t::NONE;
+		outline = false;
+	}
 
-	AABB GetBounds() const;
-	vec3f GetOrigin() const;
-	void SetOrigin( const vec3f& origin );
-	void SetScale( const vec3f& scale );
+	bool			outline;
+	int				modelId;
+	int				materialId;
+
+	AABB			GetBounds() const;
+	vec3f			GetOrigin() const;
+	void			SetOrigin( const vec3f& origin );
+	void			SetScale( const vec3f& scale );
+	mat4x4f			GetMatrix() const;
+	void			SetRenderFlag( const renderFlags_t flag );
+	void			ClearRenderFlag( const renderFlags_t flag );
+	bool			HasRenderFlag( const renderFlags_t flag ) const;
+	renderFlags_t	GetRenderFlags() const;
+
+private:
+	renderFlags_t	flags;
+	mat4x4f			matrix;
 };
 
 

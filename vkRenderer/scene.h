@@ -33,14 +33,9 @@ struct Scene
 		camera.viewportHeight = 2.0f * camera.halfFovY;
 	}
 
-	void CreateEntity( const uint32_t modelId, Entity& entity )
+	void CreateEntity( const int32_t modelId, Entity& entity )
 	{
 		const modelSource_t* model = modelLib.Find( modelId );
-
 		entity.modelId = modelId;
-		entity.matrix = mat4x4f( 1.0f );
-		entity.flags = renderFlags_t::NONE;
-		entity.materialId = -1;
-		entity.outline = false;
 	}
 };

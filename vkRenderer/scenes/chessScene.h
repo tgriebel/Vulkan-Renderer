@@ -301,7 +301,8 @@ void MakeScene()
 		Entity ent;
 		scene.CreateEntity( modelLib.FindId( "diamond" ), ent );
 		ent.materialId = materialLib.FindId( "DEBUG_WIRE" );
-		ent.flags = static_cast<renderFlags_t>( WIREFRAME | SKIP_OPAQUE );
+		ent.SetRenderFlag( WIREFRAME );
+		ent.SetRenderFlag( SKIP_OPAQUE );
 		scene.entities.Add( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str(), ent );
 	}
 
@@ -348,7 +349,7 @@ void UpdateSceneLocal()
 		const int x = static_cast< int >( 0.5 * origin[ 0 ] ); // TODO: store game coordinate too. This isn't reliable
 		const int y = static_cast< int >( 0.5 * origin[ 1 ] );
 		if ( ( x % 2 ) == ( y % 2 ) ) {
-			ent->flags = static_cast<renderFlags_t>( ent->flags | HIDDEN );
+			ent->SetRenderFlag( HIDDEN );
 		}
 	}
 	Material* glowMat = materialLib.Find( "GlowSquare" );

@@ -23,7 +23,7 @@ void Renderer::Commit( const Scene& scene )
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < scene.entities.Count(); ++i )
 	{
-		if ( scene.entities.Find( i )->flags == renderFlags_t::NO_SHADOWS ) {
+		if ( scene.entities.Find( i )->HasRenderFlag( NO_SHADOWS ) ) {
 			continue;
 		}
 		CommitModel( shadowView, *scene.entities.Find( i ), MaxModels );

@@ -45,6 +45,26 @@ void Entity::SetScale( const vec3f& scale ) {
 	matrix[ 2 ][ 2 ] = scale[ 2 ];
 }
 
+mat4x4f Entity::GetMatrix() const {
+	return matrix;
+}
+
+void Entity::SetRenderFlag( const renderFlags_t flag ) {
+	flags = static_cast<renderFlags_t>( flags | flag );
+}
+
+void Entity::ClearRenderFlag( const renderFlags_t flag ) {
+	flags = static_cast<renderFlags_t>( flags & ~flag );
+}
+
+bool Entity::HasRenderFlag( const renderFlags_t flag ) const {
+	return ( ( flags & flag ) != 0 );
+}
+
+renderFlags_t Entity::GetRenderFlags() const {
+	return flags;
+}
+
 void UpdateScene( const float dt )
 {
 	// FIXME: race conditions
@@ -106,20 +126,19 @@ void UpdateScene( const float dt )
 			float t0, t1;
 			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
 				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
-				ent->flags = renderFlags_t::WIREFRAME;
+				ent->SetRenderFlag( WIREFRAME );
 			} else {
-				ent->flags = (renderFlags_t)( ent->flags & ~renderFlags_t::WIREFRAME );
+				ent->ClearRenderFlag( WIREFRAME );
 			}
 		}
 	}
 
 	// Skybox
-	mat4x4f skyBoxMatrix = mat4x4f( 1.0f );
-	skyBoxMatrix[ 3 ][ 0 ] = scene.camera.GetOrigin()[ 0 ];
-	skyBoxMatrix[ 3 ][ 1 ] = scene.camera.GetOrigin()[ 1 ];
-	skyBoxMatrix[ 3 ][ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
-	//skyBoxMatrix[ 3 ][ 3 ] = 0.0f;
-	scene.entities.Find( "_skybox" )->matrix = skyBoxMatrix;
+	vec3f skyBoxOrigin;
+	skyBoxOrigin[ 0 ] = scene.camera.GetOrigin()[ 0 ];
+	skyBoxOrigin[ 1 ] = scene.camera.GetOrigin()[ 1 ];
+	skyBoxOrigin[ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
+	scene.entities.Find( "_skybox" )->SetOrigin( skyBoxOrigin );
 
 	UpdateSceneLocal();
 

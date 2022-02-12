@@ -232,7 +232,7 @@ private:
 
 	void CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset )
 	{
-		if ( ( ent.flags & HIDDEN ) != 0 ) {
+		if ( ent.HasRenderFlag( HIDDEN ) ) {
 			return;
 		}
 
@@ -242,7 +242,7 @@ private:
 			drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 			surfUpload_t& upload = source->upload[ i ];
 
-			instance.modelMatrix = ent.matrix;
+			instance.modelMatrix = ent.GetMatrix();
 			instance.surfId = 0;
 			instance.id = 0;
 			surf.vertexCount = upload.vertexCount;
@@ -251,7 +251,7 @@ private:
 			surf.indicesCnt = upload.indexCount;
 			surf.materialId = ( ent.materialId >= 0 ) ? ent.materialId : source->surfs[ i ].materialId;
 			surf.objectId = objectOffset;
-			surf.flags = ent.flags;
+			surf.flags = ent.GetRenderFlags();
 			surf.stencilBit = ent.outline ? 0x04 : 0;
 
 			for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
@@ -1989,9 +1989,9 @@ private:
 
 			if ( imguiControls.selectedModelId >= 0 ) {
 				Entity* entity = scene.entities.Find( imguiControls.selectedModelId );
-				entity->matrix[ 3 ][ 0 ] = tempOrigin.x + imguiControls.selectedModelOrigin[ 0 ];
-				entity->matrix[ 3 ][ 1 ] = tempOrigin.y + imguiControls.selectedModelOrigin[ 1 ];
-				entity->matrix[ 3 ][ 2 ] = tempOrigin.z + imguiControls.selectedModelOrigin[ 2 ];
+				entity->SetOrigin( vec3f(	tempOrigin.x + imguiControls.selectedModelOrigin[ 0 ],
+											tempOrigin.y + imguiControls.selectedModelOrigin[ 1 ],
+											tempOrigin.z + imguiControls.selectedModelOrigin[ 2 ] ) );
 			}
 			ImGui::Text( "Frame Number: %d", frameNumber );
 			ImGui::SameLine();
