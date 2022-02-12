@@ -59,7 +59,7 @@ void AssetLib< GpuProgram >::Create()
 
 void AssetLib< texture_t >::Create()
 {
-	const std::vector<std::string> texturePaths = { "checker.png", "sapeli.jpg",
+	const std::vector<std::string> texturePaths = { "checker.png", "sapeli.jpg", "white.png", "black.jpg",
 													"chapel_right.jpg", "chapel_left.jpg", "chapel_top.jpg", "chapel_bottom.jpg", "chapel_front.jpg", "chapel_back.jpg" };
 
 	for ( const std::string& texturePath : texturePaths )
