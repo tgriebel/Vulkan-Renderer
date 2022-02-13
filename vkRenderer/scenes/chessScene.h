@@ -5,6 +5,7 @@
 #include "../io.h"
 #include "../window.h"
 #include <chess.h>
+#include <commands.h>
 
 extern Scene scene;
 
@@ -22,11 +23,11 @@ Chess							chessEngine;
 
 class PieceEntity : public Entity {
 public:
-	PieceEntity( const int row, const int rank ) : Entity(),
-		file( row ),
+	PieceEntity( const char file, const char rank ) : Entity(),
+		file( file ),
 		rank( rank ) {}
-	int	file;
-	int	rank;
+	char	file;
+	char	rank;
 };
 
 static std::string pieceNames[ 8 ] = {
@@ -216,63 +217,63 @@ void MakeScene()
 
 	for ( int i = 0; i < 8; ++i )
 	{
-		PieceEntity* ent = new PieceEntity( 1, i );
+		PieceEntity* ent = new PieceEntity( i + 'a', '2' );
 		scene.CreateEntity( modelLib.FindId( "pawn" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( pieceNames[ i ].c_str(), ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 0 );
+		PieceEntity* ent = new PieceEntity( 'a', '1' );
 		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "rook0", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 1 );
+		PieceEntity* ent = new PieceEntity( 'b', '1' );
 		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "knight0", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 2 );
+		PieceEntity* ent = new PieceEntity( 'c', '1' );
 		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "bishop0", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 3 );
+		PieceEntity* ent = new PieceEntity( 'd', '1' );
 		scene.CreateEntity( modelLib.FindId( "queen" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "queen", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 4 );
+		PieceEntity* ent = new PieceEntity( 'e', '1' );
 		scene.CreateEntity( modelLib.FindId( "king" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "king", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 5 );
+		PieceEntity* ent = new PieceEntity( 'f', '1' );
 		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "bishop1", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 6 );
+		PieceEntity* ent = new PieceEntity( 'g', '1' );
 		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
 		scene.entities.Add( "knight1", ent );
 	}
 	{
-		PieceEntity* ent = new PieceEntity( 0, 7 );
+		PieceEntity* ent = new PieceEntity( 'h', '1' );
 		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
 		ent->SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
 		ent->SetFlag( ENT_FLAG_SELECTABLE );
@@ -292,7 +293,7 @@ void MakeScene()
 	{
 		for ( int j = 0; j < 8; ++j )
 		{
-			PieceEntity* ent = new PieceEntity( j, i );
+			PieceEntity* ent = new PieceEntity( i + 'a', j + '1' );
 			scene.CreateEntity( modelLib.FindId( "plane" ), *ent );
 			ent->SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
 			ent->SetFlag( ENT_FLAG_SELECTABLE );
@@ -354,7 +355,7 @@ void MakeScene()
 	//board.SetEventCallback( &ProcessEvent );
 }
 
-void UpdateSceneLocal()
+void UpdateSceneLocal( const float dt )
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -363,25 +364,84 @@ void UpdateSceneLocal()
 
 	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	const pieceHandle_t pieceHdl = chessEngine.FindPiece( teamCode_t::WHITE, pieceType_t::KNIGHT, 0 );
-	std::vector< moveAction_t > actions;
-	chessEngine.EnumerateActions( pieceHdl, actions );
+	int selectedPieceId = -1;
+	const mouse_t& mouse = window.input.GetMouse();
+	if ( mouse.centered )
+	{
+		const float maxSpeed = mouse.speed;
+		const float yawDelta = maxSpeed * mouse.dx;
+		const float pitchDelta = -maxSpeed * mouse.dy;
+		scene.camera.SetYaw( yawDelta );
+		scene.camera.SetPitch( pitchDelta );
+	}
+	else 
+	{
+		const vec2f screenPoint = vec2f( mouse.x, mouse.y );
+		int width, height;
+		window.GetWindowFrameBufferSize( width, height );
+		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
 
-	for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
-		const int hdl = glowEntities[ entityIx ];
-		PieceEntity* ent = reinterpret_cast< PieceEntity* >( scene.FindEntity( hdl ) );
-		bool validTile = false;
-		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
-			const moveAction_t& action = actions[ actionIx ];
-			if ( ( action.y == ent->rank ) && ( action.x == ent->file ) ) {
-				validTile = true;
+		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
+
+		const int entityNum = static_cast<int>( scene.entities.Count() );
+		for ( int i = 0; i < entityNum; ++i )
+		{
+			Entity* ent = scene.FindEntity( i );
+			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
+				continue;
+			}
+			ent->outline = false;
+			//	ent->ClearRenderFlag( WIREFRAME );
+		}
+		for ( int i = 0; i < entityNum; ++i )
+		{
+			Entity* ent = scene.FindEntity( i );
+			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
+				continue;
+			}
+			const modelSource_t* model = modelLib.Find( ent->modelId );
+
+			float t0, t1;
+			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
+				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
+				ent->outline = true;
+				selectedPieceId = i;
+				//ent->SetRenderFlag( WIREFRAME );
 				break;
 			}
 		}
-		if ( validTile ) {
-			ent->ClearRenderFlag( HIDDEN );
-		} else {
-			ent->SetRenderFlag( HIDDEN );
+	}
+
+	for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
+		const int hdl = glowEntities[ entityIx ];
+		Entity* ent = scene.FindEntity( hdl );
+		ent->SetRenderFlag( HIDDEN );
+	}
+
+	if ( selectedPieceId >= 0 )
+	{
+		const PieceEntity* selectedPiece = reinterpret_cast<PieceEntity*>( scene.FindEntity( selectedPieceId ) );
+
+		const pieceInfo_t info = chessEngine.GetInfo( GetFileNum( selectedPiece->file ), GetRankNum( selectedPiece->rank ) );
+
+		const pieceHandle_t pieceHdl = chessEngine.FindPiece( info.team, info.piece, info.instance );
+		std::vector< moveAction_t > actions;
+		chessEngine.EnumerateActions( pieceHdl, actions );
+
+		for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
+			const int hdl = glowEntities[ entityIx ];
+			PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
+			bool validTile = false;
+			for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
+				const moveAction_t& action = actions[ actionIx ];
+				if ( ( action.y == GetRankNum( ent->rank ) ) && ( action.x == GetFileNum( ent->file ) ) ) {
+					validTile = true;
+					break;
+				}
+			}
+			if ( validTile ) {
+				ent->ClearRenderFlag( HIDDEN );
+			}
 		}
 	}
 	Material* glowMat = materialLib.Find( "GlowSquare" );

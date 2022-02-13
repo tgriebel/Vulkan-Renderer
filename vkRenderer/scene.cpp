@@ -113,50 +113,6 @@ void UpdateScene( const float dt )
 	}
 	scene.camera.aspect = window.GetWindowFrameBufferAspect();
 
-	const mouse_t& mouse = window.input.GetMouse();
-	if ( mouse.centered )
-	{
-		const float maxSpeed = mouse.speed;
-		const float yawDelta = maxSpeed * mouse.dx;
-		const float pitchDelta = -maxSpeed * mouse.dy;
-		scene.camera.SetYaw( yawDelta );
-		scene.camera.SetPitch( pitchDelta );
-	} else {
-		const vec2f screenPoint = vec2f( mouse.x, mouse.y );
-		int width, height;
-		window.GetWindowFrameBufferSize( width, height );
-		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
-
-		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
-
-		const int entityNum = static_cast<int>( scene.entities.Count() );
-		for ( int i = 0; i < entityNum; ++i )
-		{
-			Entity* ent = scene.FindEntity( i );
-			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
-				continue;
-			}
-			ent->outline = false;
-		//	ent->ClearRenderFlag( WIREFRAME );
-		}
-		for ( int i = 0; i < entityNum; ++i )
-		{
-			Entity* ent = scene.FindEntity( i );
-			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
-				continue;
-			}
-			const modelSource_t* model = modelLib.Find( ent->modelId );
-
-			float t0, t1;
-			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
-				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
-				ent->outline = true;
-				//ent->SetRenderFlag( WIREFRAME );
-				break;
-			}
-		}
-	}
-
 	// Skybox
 	vec3f skyBoxOrigin;
 	skyBoxOrigin[ 0 ] = scene.camera.GetOrigin()[ 0 ];
@@ -164,7 +120,7 @@ void UpdateScene( const float dt )
 	skyBoxOrigin[ 2 ] = scene.camera.GetOrigin()[ 2 ] - 0.5f;
 	( scene.FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
-	UpdateSceneLocal();
+	UpdateSceneLocal( dt );
 
 	if ( imguiControls.dbgImageId >= 0 )
 	{
