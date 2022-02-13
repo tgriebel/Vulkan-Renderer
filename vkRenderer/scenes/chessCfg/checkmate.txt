@@ -1,0 +1,8 @@
+CL, WQ, CL, CL, CL, CL, CL, WK
+CL, CL, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL
+BK, CL, CL, CL, CL, CL, CL, CL
+CL, WQ, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL

@@ -1,0 +1,8 @@
+BR, BN, BB, BQ, BK, BB, BN, BR
+BP, BP, BP, BP, BP, BP, BP, BP
+CL, CL, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL
+CL, CL, CL, CL, CL, CL, CL, CL
+WP, WP, WP, WP, WP, WP, WP, WP
+WR, CL, CL, CL, WK, WB, WN, WR

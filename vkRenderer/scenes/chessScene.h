@@ -4,6 +4,7 @@
 #include "../render_util.h"
 #include "../io.h"
 #include "../window.h"
+#include <chess.h>
 
 extern Scene scene;
 
@@ -15,6 +16,9 @@ extern AssetLibImages			textureLib;
 extern AssetLibMaterials		materialLib;
 extern imguiControls_t			imguiControls;
 extern Window					window;
+
+gameConfig_t					cfg;
+Chess							chessEngine;
 
 class PieceEntity : public Entity {
 public:
@@ -343,6 +347,11 @@ void MakeScene()
 		scene.lights[ 2 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		scene.lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 	}
+
+	gameConfig_t cfg;
+	LoadConfig( "scenes/chessCfg/default_board.txt", cfg );
+	chessEngine.Init( cfg );
+	//board.SetEventCallback( &ProcessEvent );
 }
 
 void UpdateSceneLocal()
@@ -354,10 +363,24 @@ void UpdateSceneLocal()
 
 	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	for ( int i = 0; i < glowEntities.size(); ++i ) {
-		const int hdl = glowEntities[ i ];
+	const pieceHandle_t pieceHdl = chessEngine.FindPiece( teamCode_t::WHITE, pieceType_t::PAWN, 0 );
+	std::vector< moveAction_t > actions;
+	chessEngine.EnumerateActions( pieceHdl, actions );
+
+	for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
+		const int hdl = glowEntities[ entityIx ];
 		PieceEntity* ent = reinterpret_cast< PieceEntity* >( scene.FindEntity( hdl ) );
-		if ( ( ent->file % 2 ) == ( ent->rank % 2 ) ) {
+		bool validTile = false;
+		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
+			const moveAction_t& action = actions[ actionIx ];
+			if ( ( action.y == ent->file ) && ( action.x == ent->rank ) ) {
+				validTile = true;
+				break;
+			}
+		}
+		if ( validTile ) {
+			ent->ClearRenderFlag( HIDDEN );
+		} else {
 			ent->SetRenderFlag( HIDDEN );
 		}
 	}

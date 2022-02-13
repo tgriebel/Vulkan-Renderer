@@ -1,0 +1,17 @@
+p0a3
+p0a5
+p0a4
+p1b5
+p1b4
+p2c5
+p2c4
+p3d5
+p3d4
+p4e5
+p4e4
+p5f5
+p5f4
+p6g5
+p6g4
+p7h5
+p7h4
