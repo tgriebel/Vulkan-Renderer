@@ -252,7 +252,7 @@ private:
 			surf.materialId = ( ent.materialId >= 0 ) ? ent.materialId : source->surfs[ i ].materialId;
 			surf.objectId = objectOffset;
 			surf.flags = ent.GetRenderFlags();
-			surf.stencilBit = ent.outline ? 0x04 : 0;
+			surf.stencilBit = ent.outline ? 0x01 : 0;
 
 			for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
 				const Material* material = materialLib.Find( surf.materialId );

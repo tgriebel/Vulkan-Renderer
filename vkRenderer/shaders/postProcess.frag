@@ -26,17 +26,12 @@ void main()
 	const ivec2 pixelLocation = ivec2( globals.dimensions.xy * fragTexCoord.xy );
 
 	float stencilCoverage = 0;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 0, -1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, -1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, 0 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 0, 0 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, 0 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, 1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 0, 1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, 1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, 1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, 1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
 
-	stencilCoverage /= 9.0f;
+	stencilCoverage /= 4.0f;
 
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const vec4 sceneColor = vec4( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb, 1.0f );

@@ -374,7 +374,6 @@ void UpdateSceneLocal()
 	//	debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
 	//	debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	//}
-	( scene.FindEntity( pieceNames[ 0 ].c_str() ) )->outline = true;
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{

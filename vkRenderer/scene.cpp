@@ -136,7 +136,8 @@ void UpdateScene( const float dt )
 			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
 				continue;
 			}
-			ent->ClearRenderFlag( WIREFRAME );
+			ent->outline = false;
+		//	ent->ClearRenderFlag( WIREFRAME );
 		}
 		for ( int i = 0; i < entityNum; ++i )
 		{
@@ -149,7 +150,8 @@ void UpdateScene( const float dt )
 			float t0, t1;
 			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
 				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
-				ent->SetRenderFlag( WIREFRAME );
+				ent->outline = true;
+				//ent->SetRenderFlag( WIREFRAME );
 				break;
 			}
 		}

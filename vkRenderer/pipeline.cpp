@@ -312,7 +312,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 		depthStencil.stencilTestEnable = VK_TRUE;
 		depthStencil.back.compareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
 		depthStencil.back.failOp = VK_STENCIL_OP_KEEP;
-		depthStencil.back.depthFailOp = VK_STENCIL_OP_KEEP;
+		depthStencil.back.depthFailOp = VK_STENCIL_OP_REPLACE;
 		depthStencil.back.passOp = VK_STENCIL_OP_REPLACE;
 		depthStencil.back.compareMask = 0xFF;
 		depthStencil.back.writeMask = 0xFF;
