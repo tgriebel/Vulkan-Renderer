@@ -401,6 +401,7 @@ private:
 		imguiControls.toneMapColor[ 1 ] = 1.0f;
 		imguiControls.toneMapColor[ 2 ] = 1.0f;
 		imguiControls.toneMapColor[ 3 ] = 1.0f;
+		imguiControls.dbgImageId = -1;
 		imguiControls.selectedModelId = -1;
 		imguiControls.selectedModelOrigin = vec3f( 0.0f );
 	}

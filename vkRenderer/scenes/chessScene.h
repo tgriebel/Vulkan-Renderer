@@ -363,7 +363,7 @@ void UpdateSceneLocal()
 
 	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	const pieceHandle_t pieceHdl = chessEngine.FindPiece( teamCode_t::WHITE, pieceType_t::PAWN, 0 );
+	const pieceHandle_t pieceHdl = chessEngine.FindPiece( teamCode_t::WHITE, pieceType_t::KNIGHT, 0 );
 	std::vector< moveAction_t > actions;
 	chessEngine.EnumerateActions( pieceHdl, actions );
 
@@ -373,7 +373,7 @@ void UpdateSceneLocal()
 		bool validTile = false;
 		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
 			const moveAction_t& action = actions[ actionIx ];
-			if ( ( action.y == ent->file ) && ( action.x == ent->rank ) ) {
+			if ( ( action.y == ent->rank ) && ( action.x == ent->file ) ) {
 				validTile = true;
 				break;
 			}

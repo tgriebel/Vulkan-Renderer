@@ -166,5 +166,12 @@ void UpdateScene( const float dt )
 
 	UpdateSceneLocal();
 
-	materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % textureLib.Count() );
+	if ( imguiControls.dbgImageId >= 0 )
+	{
+		scene.FindEntity( "_quadTexDebug" )->ClearRenderFlag( HIDDEN );
+		materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % textureLib.Count() );
+	}
+	else {
+		scene.FindEntity( "_quadTexDebug" )->SetRenderFlag( HIDDEN );
+	}
 }
