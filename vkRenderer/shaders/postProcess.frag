@@ -25,20 +25,31 @@ void main()
 
 	const ivec2 pixelLocation = ivec2( globals.dimensions.xy * fragTexCoord.xy );
 
+	float stencilCoverage = 0;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 0, -1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, -1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, 0 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 0, 0 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, 0 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, 1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 0, 1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, 1 ), 0 ).r ) == 0x04 ? 1.0f : 0.0f;
+
+	stencilCoverage /= 9.0f;
+
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const vec4 sceneColor = vec4( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;
-	const uint sceneStencil = floatBitsToUint( texelFetch( stencilImage, pixelLocation, 0 ).r );
 	const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
+	outColor.a = 1.0f;
 	if( length( fragTexCoord.xy - vec2( 0.5f, 0.5f ) ) < 0.01f ) {
-		outColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+		outColor.rgb = vec3( 0.0f, 0.0f, 0.0f );
+	} else if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
+		outColor.rgb = globals.toneMap.rgb * mix( LinearToSrgb( sceneColor ).rgb, vec3( 1.0f, 0.0f, 0.0f ), stencilCoverage );
 	} else {
-		if( sceneStencil != 0x04 ) {
-			outColor = globals.toneMap.rgba * LinearToSrgb( sceneColor );
-		} else {
-			outColor = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
-		}
+		outColor.rgb = globals.toneMap.rgb * LinearToSrgb( sceneColor ).rgb;
 	}
 }

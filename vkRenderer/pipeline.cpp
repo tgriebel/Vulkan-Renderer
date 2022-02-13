@@ -310,9 +310,9 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	if ( ( state.stateBits & GFX_STATE_STENCIL_ENABLE ) != 0 )
 	{
 		depthStencil.stencilTestEnable = VK_TRUE;
-		depthStencil.back.compareOp = VK_COMPARE_OP_ALWAYS;
-		depthStencil.back.failOp = VK_STENCIL_OP_REPLACE;
-		depthStencil.back.depthFailOp = VK_STENCIL_OP_REPLACE;
+		depthStencil.back.compareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+		depthStencil.back.failOp = VK_STENCIL_OP_KEEP;
+		depthStencil.back.depthFailOp = VK_STENCIL_OP_KEEP;
 		depthStencil.back.passOp = VK_STENCIL_OP_REPLACE;
 		depthStencil.back.compareMask = 0xFF;
 		depthStencil.back.writeMask = 0xFF;
@@ -321,7 +321,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	}
 	else
 	{
-		depthStencil.back.compareOp = VK_COMPARE_OP_NOT_EQUAL;
+		depthStencil.back.compareOp = VK_COMPARE_OP_NEVER;
 		depthStencil.back.failOp = VK_STENCIL_OP_KEEP;
 		depthStencil.back.depthFailOp = VK_STENCIL_OP_KEEP;
 		depthStencil.back.passOp = VK_STENCIL_OP_REPLACE;
