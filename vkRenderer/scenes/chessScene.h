@@ -20,6 +20,7 @@ extern Window					window;
 
 gameConfig_t					cfg;
 Chess							chessEngine;
+int								selectedPieceId = -1;
 
 class PieceEntity : public Entity {
 public:
@@ -351,7 +352,6 @@ void UpdateSceneLocal( const float dt )
 
 	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	int selectedPieceId = -1;
 	const mouse_t& mouse = window.input.GetMouse();
 	if ( mouse.centered )
 	{
