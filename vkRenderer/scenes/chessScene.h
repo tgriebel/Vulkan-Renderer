@@ -30,6 +30,10 @@ public:
 	char	rank;
 };
 
+struct pieceMappingInfo_t {
+	const char* name;
+};
+
 static std::string pieceNames[ 8 ] = {
 	"white_pawn_0",
 	"white_pawn_1",
@@ -40,6 +44,48 @@ static std::string pieceNames[ 8 ] = {
 	"white_pawn_6",
 	"white_pawn_7",
 };
+
+static std::string GetModelName( const pieceType_t type ) {
+	switch ( type ) {
+	case pieceType_t::PAWN:
+		return "pawn";
+		break;
+	case pieceType_t::ROOK:
+		return "rook";
+		break;
+	case pieceType_t::KNIGHT:
+		return "knight";
+		break;
+	case pieceType_t::BISHOP:
+		return "bishop";
+		break;
+	case pieceType_t::QUEEN:
+		return "queen";
+		break;
+	case pieceType_t::KING:
+		return "king";
+		break;
+	}
+}
+
+static std::string GetName( pieceInfo_t& pieceInfo ) {
+	std::string name;
+	if ( pieceInfo.team == teamCode_t::WHITE ) {
+		name += "white";
+	} else {
+		name += "black";
+	}
+	name += "_" + GetModelName( pieceInfo.piece );
+	name += "_" + std::to_string( pieceInfo.instance );
+	return name;
+}
+
+static vec3f GetSquareCenterForLocation( const char file, const char rank ) {
+	const vec3f whiteCorner = vec3f( -7.0f, -7.0f, 0.0f );
+	const int x = GetFileNum( file );
+	const int y = GetRankNum( rank );
+	return whiteCorner + vec3f( 2.0f * x, 2.0f * ( 7 - y ), 0.0f );
+}
 
 std::vector< int > glowEntities;
 
@@ -201,6 +247,11 @@ void MakeScene()
 {
 	const int piecesNum = 16;
 
+	gameConfig_t cfg;
+	LoadConfig( "scenes/chessCfg/default_board.txt", cfg );
+	chessEngine.Init( cfg );
+	//board.SetEventCallback( &ProcessEvent );
+
 	{
 		Entity* ent = new Entity();
 		scene.CreateEntity( modelLib.FindId( "_skybox" ), *ent );
@@ -213,71 +264,29 @@ void MakeScene()
 		scene.entities.Add( "chess_board", ent );
 	}
 
-	vec3f whiteCorner = vec3f( -7.0f, -7.0f, 0.0f );
-
 	for ( int i = 0; i < 8; ++i )
 	{
-		PieceEntity* ent = new PieceEntity( i + 'a', '2' );
-		scene.CreateEntity( modelLib.FindId( "pawn" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 2.0f * i, 2.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( pieceNames[ i ].c_str(), ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'a', '1' );
-		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 0.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "rook0", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'b', '1' );
-		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 2.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "knight0", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'c', '1' );
-		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 4.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "bishop0", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'd', '1' );
-		scene.CreateEntity( modelLib.FindId( "queen" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 6.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "queen", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'e', '1' );
-		scene.CreateEntity( modelLib.FindId( "king" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 8.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "king", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'f', '1' );
-		scene.CreateEntity( modelLib.FindId( "bishop" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 10.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "bishop1", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'g', '1' );
-		scene.CreateEntity( modelLib.FindId( "knight" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 12.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "knight1", ent );
-	}
-	{
-		PieceEntity* ent = new PieceEntity( 'h', '1' );
-		scene.CreateEntity( modelLib.FindId( "rook" ), *ent );
-		ent->SetOrigin( whiteCorner + vec3f( 14.0f, 0.0f, 0.0f ) );
-		ent->SetFlag( ENT_FLAG_SELECTABLE );
-		scene.entities.Add( "rook1", ent );
+		for ( int j = 0; j < 8; ++j )
+		{
+			PieceEntity* squareEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
+			scene.CreateEntity( modelLib.FindId( "plane" ), *squareEnt );
+			squareEnt->SetOrigin( GetSquareCenterForLocation( squareEnt->file, squareEnt->rank ) + vec3f( 0.0f, 0.0f, 0.01f ) );
+			squareEnt->SetFlag( ENT_FLAG_SELECTABLE );
+			std::string name = "plane_";
+			name += std::to_string( i ) + "_" + std::to_string( j );
+			const int index = scene.entities.Add( name.c_str(), squareEnt );
+			glowEntities.push_back( index );
+
+			pieceInfo_t pieceInfo = chessEngine.GetInfo( j, i );
+			if ( pieceInfo.onBoard == false ) {
+				continue;
+			}
+			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
+			scene.CreateEntity( modelLib.FindId( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
+			pieceEnt->SetOrigin( GetSquareCenterForLocation( pieceEnt->file, pieceEnt->rank ) );
+			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
+			scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
+		}
 	}
 	//for ( int i = 0; i < 8; ++i )
 	//{
@@ -289,23 +298,6 @@ void MakeScene()
 	//		scene.entities.Add( ( pieceNames[ i ] + "_cube" ).c_str(), cubeEnt );
 	//	}
 	//}
-	for ( int i = 0; i < 8; ++i )
-	{
-		for ( int j = 0; j < 8; ++j )
-		{
-			PieceEntity* ent = new PieceEntity( i + 'a', j + '1' );
-			scene.CreateEntity( modelLib.FindId( "plane" ), *ent );
-			ent->SetOrigin( whiteCorner + vec3f( i * 2.0f, j * 2.0f, 0.01f ) );
-			ent->SetFlag( ENT_FLAG_SELECTABLE );
-			std::string name = "plane_";
-			name += std::string( { (char)( (int)'0' + i ) } );
-			name += "_";
-			name += std::string( { (char)( (int)'0' + j ) } );
-			const int index = scene.entities.Add( name.c_str(), ent );
-			glowEntities.push_back( index );
-		}
-	}
-
 	{
 		Entity* ent = new Entity();
 		scene.CreateEntity( modelLib.FindId( "sphere" ), *ent );
@@ -348,11 +340,6 @@ void MakeScene()
 		scene.lights[ 2 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		scene.lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 	}
-
-	gameConfig_t cfg;
-	LoadConfig( "scenes/chessCfg/default_board.txt", cfg );
-	chessEngine.Init( cfg );
-	//board.SetEventCallback( &ProcessEvent );
 }
 
 void UpdateSceneLocal( const float dt )

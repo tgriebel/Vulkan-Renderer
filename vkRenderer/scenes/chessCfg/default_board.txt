@@ -3,6 +3,6 @@ BP, BP, BP, BP, BP, BP, BP, BP
 CL, CL, CL, CL, CL, CL, CL, CL
 CL, CL, CL, CL, CL, CL, CL, CL
 CL, CL, CL, CL, CL, CL, CL, CL
-CL, CL, CL, CL, CL, CL, CL, CL
-WP, WP, WP, WP, WP, WP, WP, WP
-WR, WN, WB, WQ, WK, WB, WN, WR
+CL, CL, CL, WP, CL, CL, CL, CL
+WP, WP, WP, WQ, WP, WP, WP, WP
+WR, WN, WB, CL, WK, WB, WN, WR
