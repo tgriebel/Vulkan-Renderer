@@ -44,15 +44,11 @@ void MousePressCallback( GLFWwindow* window, int button, int action, int mods )
 	mouse_t& mouse = app->input.GetMouseRef();
 
 	if ( button == GLFW_MOUSE_BUTTON_LEFT ) {
-		mouse.leftDown = true;
-	} else {
-		mouse.leftDown = false;
+		mouse.leftDown = ( action == GLFW_RELEASE ) ? false : true;
 	}
 
 	if ( button == GLFW_MOUSE_BUTTON_RIGHT ) {
-		mouse.rightDown = true;
-	} else {
-		mouse.rightDown = false;
+		mouse.rightDown = ( action == GLFW_RELEASE ) ? false : true;;
 	}
 }
 

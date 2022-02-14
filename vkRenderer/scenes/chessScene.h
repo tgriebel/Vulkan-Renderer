@@ -361,7 +361,7 @@ void UpdateSceneLocal( const float dt )
 		scene.camera.SetYaw( yawDelta );
 		scene.camera.SetPitch( pitchDelta );
 	}
-	else 
+	else if( mouse.leftDown )
 	{
 		const vec2f screenPoint = vec2f( mouse.x, mouse.y );
 		int width, height;

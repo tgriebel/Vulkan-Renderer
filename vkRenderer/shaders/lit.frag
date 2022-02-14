@@ -133,5 +133,6 @@ void main()
     {
         visibility = globals.shadowParms.w;
     }
+    //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
 }
