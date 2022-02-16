@@ -29,7 +29,7 @@ public:
 		origin = _origin;
 		axis = _axis;
 
-		fov = glm::radians( _fov );
+		fov = Radians( _fov );
 		near = _near;
 		far = _far;
 		aspect = 1.0f;
@@ -119,9 +119,6 @@ public:
 
 	mat4x4f GetPerspectiveMatrix() const
 	{
-		const float halfFovX = glm::tan( 0.5f * fov );
-		const float halfFovY = glm::tan( 0.5f * ( fov / aspect ) );
-
 		mat4x4f proj = mat4x4f( 0.0f );
 		proj[ 0 ][ 0 ] = 1.0f / halfFovX;
 		proj[ 1 ][ 1 ] = 1.0f / halfFovY;
