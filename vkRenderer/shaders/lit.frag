@@ -84,7 +84,7 @@ void main()
     const float specularPower = materials[ materialId ].Ns;
 
     vec3 color = vec3( 0.0f, 0.0f, 0.0f );
-    for( int i = 0; i < 1; ++i ) {
+    for( int i = 0; i < 3; ++i ) {
 	    const vec3 l = normalize( lights[ i ].lightPos - worldPosition.xyz );
         const vec3 h = normalize( v + l );
 
