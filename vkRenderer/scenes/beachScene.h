@@ -138,12 +138,12 @@ void AssetLib< modelSource_t >::Create()
 	}
 	{
 		modelSource_t model;
-		CreateQuadSurface2D( "TONEMAP", model, glm::vec2( 1.0f, 1.0f ), glm::vec2( 2.0f ) );
+		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
 		modelLib.Add( "_postProcessQuad", model );
 	}
 	{
 		modelSource_t model;
-		CreateQuadSurface2D( "IMAGE2D", model, glm::vec2( 1.0f, 1.0f ), glm::vec2( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
+		CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 		modelLib.Add( "_quadTexDebug", model );
 	}
 }
@@ -174,19 +174,19 @@ void MakeScene()
 	}
 
 	// Terrain
-	scene.entities[ 1 ].matrix = glm::identity<glm::mat4>();
+	scene.entities[ 1 ].matrix = mat4x4f();
 
 	// Model
 	const float scale = 0.0025f;
 	{
 		for ( int i = 5; i < ( 5 + palmTreesNum ); ++i )
 		{
-			glm::vec2 randPoint;
+			vec2f randPoint;
 			RandPlanePoint( randPoint );
-			randPoint = 10.0f * ( randPoint - 0.5f );
-			scene.entities[ i ].matrix = scale * glm::identity<glm::mat4>();
-			scene.entities[ i ].matrix[ 3 ][ 0 ] = randPoint.x;
-			scene.entities[ i ].matrix[ 3 ][ 1 ] = randPoint.y;
+			randPoint = 10.0f * ( randPoint - vec2f( 0.5f ) );
+			scene.entities[ i ].matrix = scale * mat4x4f();
+			scene.entities[ i ].matrix[ 3 ][ 0 ] = randPoint[ 0 ];
+			scene.entities[ i ].matrix[ 3 ][ 1 ] = randPoint[ 1 ];
 			scene.entities[ i ].matrix[ 3 ][ 2 ] = 0.0f;
 			scene.entities[ i ].matrix[ 3 ][ 3 ] = 1.0f;
 		}

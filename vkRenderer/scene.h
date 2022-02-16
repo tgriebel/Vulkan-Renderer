@@ -18,7 +18,7 @@ struct Scene
 	Scene()
 	{
 		camera = Camera( vec4f( 0.0f, 1.66f, 1.0f, 0.0f ) );
-		camera.fov = glm::radians( 90.0f );
+		camera.fov = Radians( 90.0f );
 		camera.far = defaultFar;
 		camera.near = defaultNear;
 		camera.aspect = DEFAULT_DISPLAY_WIDTH / static_cast< float >( DEFAULT_DISPLAY_HEIGHT );
