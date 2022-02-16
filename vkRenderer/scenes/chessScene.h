@@ -21,15 +21,43 @@ extern Window					window;
 gameConfig_t					cfg;
 Chess							chessEngine;
 int								selectedPieceId = -1;
+int								movePieceId = -1;
+std::vector< moveAction_t >		actions;
+std::vector< int >				pieceEntities;
+std::vector< int >				glowEntities;
 
 class PieceEntity : public Entity {
 public:
 	PieceEntity( const char file, const char rank ) : Entity(),
 		file( file ),
-		rank( rank ) {}
-	char	file;
-	char	rank;
+		rank( rank ),
+		handle( NoPiece ) { }
+	char			file;	// TODO: remove
+	char			rank;	// TODO: remove
+	pieceHandle_t	handle;
 };
+
+int GetTracedEntity( const Ray& ray )
+{
+	int closestId = -1;
+	float closestT = FLT_MAX;
+	const int entityNum = static_cast<int>( scene.entities.Count() );
+	for ( int i = 0; i < entityNum; ++i )
+	{
+		Entity* ent = scene.FindEntity( i );
+		if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
+			continue;
+		}
+		float t0, t1;
+		if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
+			if ( t0 < closestT ) {
+				closestT = t0;
+				closestId = i;
+			}
+		}
+	}
+	return closestId;
+}
 
 struct pieceMappingInfo_t {
 	const char* name;
@@ -87,8 +115,6 @@ static vec3f GetSquareCenterForLocation( const char file, const char rank ) {
 	const int y = GetRankNum( rank );
 	return whiteCorner + vec3f( 2.0f * x, 2.0f * ( 7 - y ), 0.0f );
 }
-
-std::vector< int > glowEntities;
 
 void AssetLib< GpuProgram >::Create()
 {
@@ -273,9 +299,10 @@ void MakeScene()
 			scene.CreateEntity( modelLib.FindId( "plane" ), *squareEnt );
 			squareEnt->SetOrigin( GetSquareCenterForLocation( squareEnt->file, squareEnt->rank ) + vec3f( 0.0f, 0.0f, 0.01f ) );
 			squareEnt->SetFlag( ENT_FLAG_SELECTABLE );
+			squareEnt->handle = -1;
 			std::string name = "plane_";
 			name += std::to_string( i ) + "_" + std::to_string( j );
-			const int index = scene.entities.Add( name.c_str(), squareEnt );
+			int index = scene.entities.Add( name.c_str(), squareEnt );
 			glowEntities.push_back( index );
 
 			pieceInfo_t pieceInfo = chessEngine.GetInfo( j, i );
@@ -284,9 +311,10 @@ void MakeScene()
 			}
 			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
 			scene.CreateEntity( modelLib.FindId( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
-			pieceEnt->SetOrigin( GetSquareCenterForLocation( pieceEnt->file, pieceEnt->rank ) );
+			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
-			scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
+			index = scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
+			pieceEntities.push_back( index );
 		}
 	}
 	//for ( int i = 0; i < 8; ++i )
@@ -333,12 +361,12 @@ void MakeScene()
 		scene.lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		scene.lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 
-		scene.lights[ 1 ].lightPos = vec4f( 0.0f, 0.0f, 5.0f, 0.0f );
-		scene.lights[ 1 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 1 ].lightPos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
+		scene.lights[ 1 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
 		scene.lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 
-		scene.lights[ 2 ].lightPos = vec4f( 0.0f, 1.0f, 1.0f, 0.0f );
-		scene.lights[ 2 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene.lights[ 2 ].lightPos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
+		scene.lights[ 2 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
 		scene.lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 	}
 }
@@ -369,68 +397,86 @@ void UpdateSceneLocal( const float dt )
 		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
 
 		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
-
-		const int entityNum = static_cast<int>( scene.entities.Count() );
-		for ( int i = 0; i < entityNum; ++i )
-		{
-			Entity* ent = scene.FindEntity( i );
-			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
-				continue;
-			}
-			ent->outline = false;
-			//	ent->ClearRenderFlag( WIREFRAME );
-		}
-		for ( int i = 0; i < entityNum; ++i )
-		{
-			Entity* ent = scene.FindEntity( i );
-			if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
-				continue;
-			}
-			const modelSource_t* model = modelLib.Find( ent->modelId );
-
-			float t0, t1;
-			if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
-				const vec3f outPt = ray.GetOrigin() + t1 * ray.GetVector();
-				ent->outline = true;
-				selectedPieceId = i;
-				//ent->SetRenderFlag( WIREFRAME );
-				break;
-			}
-		}
-	}
-
-	for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
-		const int hdl = glowEntities[ entityIx ];
-		Entity* ent = scene.FindEntity( hdl );
-		ent->SetRenderFlag( HIDDEN );
+		selectedPieceId = GetTracedEntity( ray );
 	}
 
 	if ( selectedPieceId >= 0 )
 	{
-		const PieceEntity* selectedPiece = reinterpret_cast<PieceEntity*>( scene.FindEntity( selectedPieceId ) );
+		PieceEntity* selectedPiece = reinterpret_cast<PieceEntity*>( scene.FindEntity( selectedPieceId ) );
 
-		const pieceInfo_t info = chessEngine.GetInfo( GetFileNum( selectedPiece->file ), GetRankNum( selectedPiece->rank ) );
-
-		const pieceHandle_t pieceHdl = chessEngine.FindPiece( info.team, info.piece, info.instance );
-		std::vector< moveAction_t > actions;
-		chessEngine.EnumerateActions( pieceHdl, actions );
-
-		for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
-			const int hdl = glowEntities[ entityIx ];
-			PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
-			bool validTile = false;
-			for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
-				const moveAction_t& action = actions[ actionIx ];
-				if ( ( action.y == GetRankNum( ent->rank ) ) && ( action.x == GetFileNum( ent->file ) ) ) {
-					validTile = true;
-					break;
-				}
-			}
-			if ( validTile ) {
-				ent->ClearRenderFlag( HIDDEN );
+		int selectedActionIx = -1;
+		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
+			const moveAction_t& action = actions[ actionIx ];
+			if ( ( action.y == GetRankNum( selectedPiece->rank ) ) && ( action.x == GetFileNum( selectedPiece->file ) ) ) {
+				selectedActionIx = actionIx;
+				break;
 			}
 		}
+
+		if ( ( selectedActionIx >= 0 ) && ( movePieceId >= 0 ) )
+		{
+			PieceEntity* movedPiece = reinterpret_cast<PieceEntity*>( scene.FindEntity( movePieceId ) );
+			const pieceInfo_t movedPieceInfo = chessEngine.GetInfo( GetFileNum( movedPiece->file ), GetRankNum( movedPiece->rank ) );
+			const moveAction_t& action = actions[ selectedActionIx ];
+			
+			command_t cmd;
+			cmd.instance = movedPieceInfo.instance;
+			cmd.team = movedPieceInfo.team;
+			cmd.pieceType = movedPieceInfo.piece;
+			cmd.x = action.x;
+			cmd.y = action.y;
+	
+			const resultCode_t result = chessEngine.Execute( cmd );
+			actions.resize( 0 );
+		}
+		else if( selectedPiece->handle >= 0 )
+		{
+			actions.resize( 0 );
+			chessEngine.EnumerateActions( selectedPiece->handle, actions );
+			movePieceId = selectedPieceId;
+		}
+		else
+		{
+			selectedActionIx = -1;
+			selectedPieceId = -1;
+			movePieceId = -1;
+		}
 	}
+
+	for ( int entityIx = 0; entityIx < pieceEntities.size(); ++entityIx ) {
+		const int hdl = pieceEntities[ entityIx ];
+		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
+		if ( hdl == selectedPieceId ) {
+			ent->outline = true;
+			ent->SetRenderFlag( WIREFRAME );
+		} else {
+			ent->outline = false;
+			ent->ClearRenderFlag( WIREFRAME );
+		}
+		const pieceInfo_t info = chessEngine.GetInfo( ent->handle );
+		int x, y;
+		if ( chessEngine.GetLocation( ent->handle, x, y ) ) {
+			ent->SetOrigin( GetSquareCenterForLocation( GetFile( x ), GetRank( y ) ) );
+		}
+	}
+	for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
+		const int hdl = glowEntities[ entityIx ];
+		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
+		bool validTile = false;
+		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
+			const moveAction_t& action = actions[ actionIx ];
+			if ( ( action.y == GetRankNum( ent->rank ) ) && ( action.x == GetFileNum( ent->file ) ) ) {
+				validTile = true;
+				break;
+			}
+		}
+		if ( validTile ) {
+			ent->ClearRenderFlag( HIDDEN );
+		} else {
+			ent->SetRenderFlag( HIDDEN );
+		}
+	}
+
 	Material* glowMat = materialLib.Find( "GlowSquare" );
 	glowMat->Kd = rgbTuplef_t( 0.1f, 0.0f, 1.0f );
 	glowMat->d = 0.5f * cos( 3.0f * time ) + 0.5f;
