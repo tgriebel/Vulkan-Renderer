@@ -12,4 +12,4 @@ d 1.000000
 illum 2
 map_Kd NORUS-Diffuse.jpg
 map_bump NORUS-Normal.jpg
-map_Ks NORUS-Specular.jpg
+map_Ks NORUS-Bump.jpg

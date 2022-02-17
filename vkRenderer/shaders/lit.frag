@@ -50,16 +50,15 @@ float Fd_Lambert() {
 void main()
 {
     const uint materialId = pushConstants.materialId;
-    const uint textureId = materials[ materialId ].textureId0;
+    const uint albedoTexId = materials[ materialId ].textureId0;
+    const uint normalTexId = materials[ materialId ].textureId1;
+    const uint roughnessTexId = materials[ materialId ].textureId2;
 
     const mat4 modelMat = ubo[ objectId ].model;
     const mat4 viewMat = ubo[ objectId ].view;
     const mat3 invViewMat = mat3( transpose( viewMat ) );
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
-
-    const float perceptualRoughness = globals.generic.y;
-    const float a = perceptualRoughness * perceptualRoughness;
 
     const vec3 v = normalize( cameraOrigin.xyz - worldPosition.xyz );
     const vec3 n = normalize( fragNormal ); // normalize( worldPosition.xyz - modelOrigin );
@@ -71,7 +70,11 @@ void main()
     float NoV = abs( dot( n, v ) );
 
     // Note: Only albedo needs linear conversion
-    const vec4 albedo = SrgbToLinear( texture( texSampler[ textureId ], fragTexCoord.xy ) );
+    const vec4 albedo = ( albedoTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4 ( 1.0f );
+    const vec3 normalTex = ( normalTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ normalTexId ], fragTexCoord.xy ) ).rgb : fragNormal;
+    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) ) : vec4 ( 1.0f );
+
+    const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 
     float metallic = 0.0f;
 
