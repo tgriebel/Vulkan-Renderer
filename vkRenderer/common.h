@@ -61,8 +61,8 @@ const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
 const uint32_t	MaxMaterialDescriptors			= 64;
 const uint32_t	MaxLights						= 3;
 const uint32_t	MaxCodeImages					= 2;
-const uint64_t	MaxSharedMemory					= MB( 256 );
-const uint64_t	MaxLocalMemory					= MB( 256 );
+const uint64_t	MaxSharedMemory					= MB( 512 );
+const uint64_t	MaxLocalMemory					= MB( 512 );
 const uint64_t	MaxFrameBufferMemory			= MB( 128 );
 
 const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
@@ -375,7 +375,7 @@ struct globalUboConstants_t
 
 struct materialBufferObject_t
 {
-	uint32_t				textures[ Material::MaxMaterialTextures ];
+	int						textures[ Material::MaxMaterialTextures ];
 	vec4f					Ka;
 	vec4f					Ke;
 	vec4f					Kd;

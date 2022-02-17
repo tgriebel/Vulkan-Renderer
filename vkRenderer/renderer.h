@@ -737,6 +737,14 @@ private:
 
 			if ( texture->info.type == TEXTURE_TYPE_CUBE ) {
 				imageCubeInfo.push_back( info );
+
+				// FIXME: HACK: the id from the texture lib won't match the id in the desc set unless this contains a stub
+				// otherwise the ids shift. There needs to be a remapping somewhere
+				VkDescriptorImageInfo info2d{ };
+				info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				info2d.imageView = textureLib.GetDefault()->image.vk_view;
+				info2d.sampler = vk_bilinearSampler;
+				image2DInfo.push_back( info2d );
 			} else {
 				image2DInfo.push_back( info );
 			}
@@ -2206,7 +2214,7 @@ private:
 	void CreateResourceBuffers()
 	{
 		stagingBuffer.Reset();
-		const uint64_t size = 128 * MB_1;
+		const uint64_t size = 256 * MB_1;
 		CreateBuffer( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, sharedMemory );
 	}
 

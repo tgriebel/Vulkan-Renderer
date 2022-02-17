@@ -1,0 +1,36 @@
+# Blender MTL File: 'chess_board_mat.blend'
+# Material Count: 3
+
+newmtl Artificial_Marble_4
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump assets\\materials\\artificial_marbl_b9adbe5d-fba0-4b89-a4c9-a8ae70997fcf\\textures\\Marble09_nrm.jpg
+map_Kd assets\\materials\\artificial_marbl_b9adbe5d-fba0-4b89-a4c9-a8ae70997fcf\\textures\\Marble09_col.jpg
+map_Ns assets\\materials\\artificial_marbl_b9adbe5d-fba0-4b89-a4c9-a8ae70997fcf\\textures\\Marble09_rgh.jpg
+
+newmtl Black_Painted_Wood
+Ns 452.528899
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.340000 0.340000 0.340000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd assets\\materials\\black_painted_wo_96b5381a-4c14-420d-9aaa-9d8d6d9ffbd0\\textures\\86_white wood grain texture-seamless Wenge.png
+
+newmtl Carrara_Marble
+Ns 728.999998
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2

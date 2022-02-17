@@ -39,6 +39,15 @@ void main()
 	const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
+	outColor.rgb = vec3( 0.0f );
+	//const float focalDepth = 0.01f;
+	//const float focalRange = 0.25f;
+	//float coc = ( sceneDepth - focalDepth ) / focalRange;
+	//coc = clamp( coc, -1.0, 1.0f );
+	//if ( coc < 0.0f ) {
+	//	outColor.rgb = coc * -vec3( 1.0f, 0.0f, 0.0f );
+	//}
+
 	outColor.a = 1.0f;
 	if( length( fragTexCoord.xy - vec2( 0.5f, 0.5f ) ) < 0.01f ) {
 		outColor.rgb = vec3( 0.0f, 0.0f, 0.0f );

@@ -28,14 +28,14 @@
 
 #define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform MaterialBuffer						\
 									{																			\
-										uint        textureId0;													\
-										uint        textureId1;													\
-										uint        textureId2;													\
-										uint        textureId3;													\
-										uint        textureId4;													\
-										uint        textureId5;													\
-										uint        textureId6;													\
-										uint        textureId7;													\
+										int			textureId0;													\
+										int			textureId1;													\
+										int			textureId2;													\
+										int			textureId3;													\
+										int			textureId4;													\
+										int			textureId5;													\
+										int			textureId6;													\
+										int			textureId7;													\
 										vec4		Ka;															\
 										vec4		Ke;															\
 										vec4		Kd;															\

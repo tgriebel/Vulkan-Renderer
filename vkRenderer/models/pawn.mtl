@@ -10,4 +10,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd sapeli.jpg
+map_Kd NORUS-Diffuse.jpg
+map_bump NORUS-Normal.jpg
+map_Ks NORUS-Specular.jpg

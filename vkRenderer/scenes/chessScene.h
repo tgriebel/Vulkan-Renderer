@@ -448,10 +448,10 @@ void UpdateSceneLocal( const float dt )
 		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
 		if ( hdl == selectedPieceId ) {
 			ent->outline = true;
-			ent->SetRenderFlag( WIREFRAME );
+		//	ent->SetRenderFlag( WIREFRAME );
 		} else {
 			ent->outline = false;
-			ent->ClearRenderFlag( WIREFRAME );
+		//	ent->ClearRenderFlag( WIREFRAME );
 		}
 		const pieceInfo_t info = chessEngine.GetInfo( ent->handle );
 		int x, y;

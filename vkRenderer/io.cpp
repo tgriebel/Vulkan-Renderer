@@ -68,10 +68,18 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 	for ( const auto& material : materials )
 	{
 		texture_t texture;
-		if ( LoadTextureImage( ( TexturePath + material.diffuse_texname ).c_str(), texture ) ) {
-			texture.uploaded = false;
-			texture.info.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
-			textureLib.Add( material.diffuse_texname.c_str(), texture );
+		const std::string supportedTextures[ 3 ] = {
+			TexturePath + material.diffuse_texname,
+			TexturePath + material.bump_texname,
+			TexturePath + material.specular_texname,
+		};
+		for ( int i = 0; i < 3; ++i )
+		{
+			if ( LoadTextureImage( supportedTextures[ i ].c_str(), texture ) ) {
+				texture.uploaded = false;
+				texture.info.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
+				textureLib.Add( supportedTextures[ i ].c_str(), texture );
+			}
 		}
 
 		Material mat;
@@ -80,12 +88,10 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 		mat.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
 		mat.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = gpuPrograms.RetrieveHdl( "Debug" ); // FIXME: do this with an override
 		mat.shaders[ DRAWPASS_DEBUG_SOLID ] = gpuPrograms.RetrieveHdl( "Debug_Solid" );
-		const hdl_t texHandle = textureLib.RetrieveHdl( material.diffuse_texname.c_str() );
-		if ( texHandle.IsValid() ) {
-			mat.textures[ 0 ] = texHandle.Get();
-		} else {
-			mat.textures[ 0 ] = 0;
-		}
+		mat.textures[ 0 ] = textureLib.RetrieveHdl( supportedTextures[ 0 ].c_str() ).Get();
+		mat.textures[ 1 ] = textureLib.RetrieveHdl( supportedTextures[ 1 ].c_str() ).Get();
+		mat.textures[ 2 ] = textureLib.RetrieveHdl( supportedTextures[ 2 ].c_str() ).Get();
+
 		mat.Kd = rgbTuplef_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
 		mat.Ks = rgbTuplef_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
 		mat.Ka = rgbTuplef_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );

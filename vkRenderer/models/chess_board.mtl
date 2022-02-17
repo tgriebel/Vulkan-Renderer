@@ -10,9 +10,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump sapeli_normal.jpg
-map_Kd mahony.jpg
-map_Ns white.jpg
+map_Bump Marble09_nrm.jpg
+map_Kd Marble09_col.jpg
+map_Ks Marble09_rgh.jpg
 
 newmtl Material.001
 Ns 225.000000
@@ -25,7 +25,7 @@ d 1.000000
 illum 2
 map_Bump sapeli_normal.jpg
 map_Kd mahony.jpg
-map_Ns white.jpg
+map_Ks white.jpg
 
 newmtl Material.002
 Ns 225.000000
@@ -38,4 +38,4 @@ d 1.000000
 illum 2
 map_Bump sapeli_normal.jpg
 map_Kd sapeli.jpg
-map_Ns white.jpg
+map_Ks white.jpg
