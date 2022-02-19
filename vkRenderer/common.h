@@ -83,10 +83,12 @@ class Renderer;
 
 struct VertexInput
 {
-	glm::vec3 pos;
-	glm::vec4 color;
-	glm::vec3 normal;
-	glm::vec4 texCoord;
+	vec3f pos;
+	vec4f color;
+	vec3f normal;
+	vec3f tangent;
+	vec3f bitangent;
+	vec4f texCoord;
 
 	static VkVertexInputBindingDescription GetBindingDescription()
 	{
@@ -98,7 +100,7 @@ struct VertexInput
 		return bindingDescription;
 	}
 
-	static const uint32_t attribMax = 4;
+	static const uint32_t attribMax = 6;
 	static std::array<VkVertexInputAttributeDescription, attribMax> GetAttributeDescriptions()
 	{
 		uint32_t attribId = 0;
@@ -124,6 +126,18 @@ struct VertexInput
 
 		attributeDescriptions[ attribId ].binding = 0;
 		attributeDescriptions[ attribId ].location = attribId;
+		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, tangent );
+		++attribId;
+
+		attributeDescriptions[ attribId ].binding = 0;
+		attributeDescriptions[ attribId ].location = attribId;
+		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, bitangent );
+		++attribId;
+
+		attributeDescriptions[ attribId ].binding = 0;
+		attributeDescriptions[ attribId ].location = attribId;
 		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
 		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, texCoord );
 		++attribId;
@@ -135,7 +149,12 @@ struct VertexInput
 
 	bool operator==( const VertexInput& other ) const
 	{
-		return pos == other.pos && color == other.color && normal == other.normal && texCoord == other.texCoord;
+		return	( pos == other.pos ) && 
+				( color == other.color ) &&
+				( normal == other.normal ) &&
+				( tangent == other.tangent ) &&
+				( bitangent == other.bitangent ) &&
+				( texCoord == other.texCoord );
 	}
 };
 
@@ -340,7 +359,7 @@ template<> struct std::hash<VertexInput>
 {
 	size_t operator()( VertexInput const& vertex ) const
 	{
-		return ( ( hash<glm::vec3>()( vertex.pos ) ^ ( hash<glm::vec3>()( vertex.color ) << 1 ) ) >> 1 ) ^ ( hash<glm::vec4>()( vertex.texCoord ) << 1 ) ^ ( hash<glm::vec2>()( vertex.normal ) << 1 );
+		return Hash( reinterpret_cast< const uint8_t* >( &vertex ), sizeof( VertexInput ) );
 	}
 };
 

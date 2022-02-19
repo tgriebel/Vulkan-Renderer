@@ -114,6 +114,7 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 	for ( const auto& shape : shapes )
 	{
 		std::unordered_map<VertexInput, uint32_t> uniqueVertices{};
+		std::unordered_map< uint32_t, uint32_t > indexFaceCount{};
 		for ( const auto& index : shape.mesh.indices )
 		{
 			VertexInput vertex{ };
@@ -145,6 +146,54 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			}
 
 			model.surfs[ model.surfCount ].indices.push_back( uniqueVertices[ vertex ] );
+			indexFaceCount[ uniqueVertices[ vertex ] ]++;
+		}
+
+		const int indexCount = static_cast<int>( model.surfs[ model.surfCount ].indices.size() );
+		assert( ( indexCount % 3 ) == 0 );
+
+		for ( int i = 0; i < indexCount; i += 3 ) {
+			int indices[ 3 ];
+			float weights[ 3 ];
+			indices[ 0 ] = model.surfs[ model.surfCount ].indices[ i + 0 ];
+			indices[ 1 ] = model.surfs[ model.surfCount ].indices[ i + 1 ];
+			indices[ 2 ] = model.surfs[ model.surfCount ].indices[ i + 2 ];
+
+			assert( indexFaceCount[ indices[ 0 ] ] > 0 );
+			assert( indexFaceCount[ indices[ 1 ] ] > 0 );
+			assert( indexFaceCount[ indices[ 2 ] ] > 0 );
+
+			weights[ 0 ] = ( 1.0f / indexFaceCount[ indices[ 0 ] ] );
+			weights[ 1 ] = ( 1.0f / indexFaceCount[ indices[ 1 ] ] );
+			weights[ 2 ] = ( 1.0f / indexFaceCount[ indices[ 2 ] ] );
+
+			VertexInput& v0 = model.surfs[ model.surfCount ].vertices[ indices[ 0 ] ];
+			VertexInput& v1 = model.surfs[ model.surfCount ].vertices[ indices[ 1 ] ];
+			VertexInput& v2 = model.surfs[ model.surfCount ].vertices[ indices[ 2 ] ];
+
+			const vec3f faceTangent = ( v1.pos - v0.pos ).Normalize();
+			const vec3f faceBitangent = ( v2.pos - v0.pos ).Normalize();
+
+			assert( faceTangent.Length() > 0.00001 );
+			assert( faceBitangent.Length() > 0.00001 );
+
+			v0.tangent += weights[ 0 ] * faceTangent;
+			v0.bitangent += weights[ 0 ] * faceBitangent;
+
+			v1.tangent += weights[ 1 ] * faceTangent;
+			v1.bitangent += weights[ 1 ] * faceBitangent;
+
+			v2.tangent += weights[ 2 ] * faceTangent;
+			v2.bitangent += weights[ 2 ] * faceBitangent;
+		}
+
+		const int vertexCount = static_cast<int>( model.surfs[ model.surfCount ].vertices.size() );
+		for ( int i = 0; i < vertexCount; ++i ) {
+			VertexInput& v = model.surfs[ model.surfCount ].vertices[ i ];
+			v.tangent = v.tangent.Normalize();
+			v.bitangent = v.bitangent.Normalize();
+			vec3f normal = Cross( v.tangent, v.bitangent ).Normalize();
+		//	assert( ( v.normal - normal ).Length() < 0.001 );
 		}
 
 		model.surfs[ model.surfCount ].materialId = 0;

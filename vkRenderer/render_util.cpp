@@ -136,10 +136,10 @@ void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, s
 	for ( const GeoBuilder::vertex_t& v : gb.vb )
 	{
 		VertexInput vert;
-		vert.pos = glm::vec3( v.pos[ 0 ], v.pos[ 1 ], v.pos[ 2 ] );
-		vert.color = glm::vec4( v.color[ 0 ], v.color[ 1 ], v.color[ 2 ], v.color[ 3 ] );
-		vert.normal = glm::vec3( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
-		vert.texCoord = glm::vec4( v.texCoord[ 0 ], v.texCoord[ 1 ], 0.0f, 0.0f );
+		vert.pos = vec3f( v.pos[ 0 ], v.pos[ 1 ], v.pos[ 2 ] );
+		vert.color = vec4f( v.color[ 0 ], v.color[ 1 ], v.color[ 2 ], v.color[ 3 ] );
+		vert.normal = vec3f( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
+		vert.texCoord = vec4f( v.texCoord[ 0 ], v.texCoord[ 1 ], 0.0f, 0.0f );
 
 		vb.push_back( vert );
 	}
@@ -286,10 +286,10 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
-	outModel.surfs[ 0 ].vertices[ 0 ].texCoord = glm::vec4( 0.0f, 0.0f, 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 1 ].texCoord = glm::vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 2 ].texCoord = glm::vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 3 ].texCoord = glm::vec4( 1.0f, 1.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].texCoord = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].texCoord = vec4f( 1.0f, 0.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].texCoord = vec4f( 0.0f, 1.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].texCoord = vec4f( 1.0f, 1.0f, 0.0f, 0.0f );
 
 	outModel.surfCount = 1;
 	outModel.surfs[ 0 ].materialId = materialLib.FindId( materialName.c_str() );
