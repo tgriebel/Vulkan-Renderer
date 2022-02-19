@@ -189,21 +189,35 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 
 			v0.tangent += weights[ 0 ] * faceTangent;
 			v0.bitangent += weights[ 0 ] * faceBitangent;
+			v0.normal += weights[ 0 ] * faceNormal;
 
 			v1.tangent += weights[ 1 ] * faceTangent;
 			v1.bitangent += weights[ 1 ] * faceBitangent;
+			v1.normal += weights[ 1 ] * faceNormal;
 
 			v2.tangent += weights[ 2 ] * faceTangent;
 			v2.bitangent += weights[ 2 ] * faceBitangent;
+			v2.normal += weights[ 2 ] * faceNormal;
 		}
 
 		const int vertexCount = static_cast<int>( model.surfs[ model.surfCount ].vertices.size() );
 		for ( int i = 0; i < vertexCount; ++i ) {
 			VertexInput& v = model.surfs[ model.surfCount ].vertices[ i ];
+			v.tangent.FlushDenorms();
+			v.bitangent.FlushDenorms();
+			v.normal.FlushDenorms();
 			v.tangent = v.tangent.Normalize();
 			v.bitangent = v.bitangent.Normalize();
-			vec3f normal = Cross( v.tangent, v.bitangent ).Normalize();
-		//	assert( ( v.normal - normal ).Length() < 0.001 );
+			v.normal = v.normal.Normalize();
+
+			float tsValues[ 9 ] = { v.tangent[ 0 ], v.tangent[ 1 ], v.tangent[ 2 ],
+									v.bitangent[ 0 ], v.bitangent[ 1 ], v.bitangent[ 2 ],
+									v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] };
+			mat3x3f tsMatrix = mat3x3f( tsValues );
+			//assert( Dot( v.normal, v.tangent ) < 0.0001f );
+			//assert( Dot( v.normal, v.bitangent ) < 0.0001f );
+			//assert( Dot( v.tangent, v.bitangent ) < 0.0001f );
+			//assert( tsMatrix.IsOrthonormal( 0.01f ) );
 		}
 
 		model.surfs[ model.surfCount ].materialId = 0;
