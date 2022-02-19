@@ -171,11 +171,21 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			VertexInput& v1 = model.surfs[ model.surfCount ].vertices[ indices[ 1 ] ];
 			VertexInput& v2 = model.surfs[ model.surfCount ].vertices[ indices[ 2 ] ];
 
-			const vec3f faceTangent = ( v1.pos - v0.pos ).Normalize();
-			const vec3f faceBitangent = ( v2.pos - v0.pos ).Normalize();
+			float uDt = ( v1.texCoord[ 0 ] - v0.texCoord[ 0 ] );
+			if ( ( uDt < 0.00001f ) && ( uDt >= 0.0f ) ) {
+				uDt = 0.00001f;
+			} else if ( ( uDt >= -0.00001f ) && ( uDt < 0.0f ) ) {
+				uDt = -0.00001f;
+			}
+			const vec3f edge0 = ( v1.pos - v0.pos );
+			const vec3f edge1 = ( v2.pos - v0.pos );
 
-			assert( faceTangent.Length() > 0.00001 );
-			assert( faceBitangent.Length() > 0.00001 );
+			const vec3f faceNormal = Cross( edge0, edge1 ).Normalize();
+			const vec3f faceTangent = ( edge0 / uDt  ).Normalize();
+			const vec3f faceBitangent = Cross( faceTangent, faceNormal ).Normalize();
+
+			///assert( faceTangent.Length() > 0.00001 );
+			//assert( faceBitangent.Length() > 0.00001 );
 
 			v0.tangent += weights[ 0 ] * faceTangent;
 			v0.bitangent += weights[ 0 ] * faceBitangent;
