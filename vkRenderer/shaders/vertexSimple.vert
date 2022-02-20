@@ -17,7 +17,9 @@ void main()
     gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	//fragNormal = normalize( ubo[ objectId ].model * vec4( cross( inTangent, inBitangent ), 0.0f ) ).xyz;
-	fragNormal = normalize( ubo[ objectId ].model * vec4( inNormal, 0.0f ) ).xyz;
+	const float normalSign = ( ( floatBitsToUint( inTangent.x ) & 0x1 ) == 0 ) ? 1.0f : -1.0f;
+	const float tangent = uintBitsToFloat( floatBitsToUint( inTangent.x ) & ~0x1 );
+	fragNormal = normalSign * normalize( ubo[ objectId ].model * vec4( cross( inTangent, inBitangent ), 0.0f ) ).xyz;
+	//fragNormal = normalize( ubo[ objectId ].model * vec4( inTangent, 0.0f ) ).xyz;
 	clipPosition = gl_Position;
 }

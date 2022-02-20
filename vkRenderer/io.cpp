@@ -163,15 +163,18 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			assert( indexFaceCount[ indices[ 1 ] ] > 0 );
 			assert( indexFaceCount[ indices[ 2 ] ] > 0 );
 
-			weights[ 0 ] = ( 1.0f / indexFaceCount[ indices[ 0 ] ] );
-			weights[ 1 ] = ( 1.0f / indexFaceCount[ indices[ 1 ] ] );
-			weights[ 2 ] = ( 1.0f / indexFaceCount[ indices[ 2 ] ] );
+			weights[ 0 ] = 1.0f;// ( 1.0f / indexFaceCount[ indices[ 0 ] ] );
+			weights[ 1 ] = 1.0f;//( 1.0f / indexFaceCount[ indices[ 1 ] ] );
+			weights[ 2 ] = 1.0f;//( 1.0f / indexFaceCount[ indices[ 2 ] ] );
 
 			VertexInput& v0 = model.surfs[ model.surfCount ].vertices[ indices[ 0 ] ];
 			VertexInput& v1 = model.surfs[ model.surfCount ].vertices[ indices[ 1 ] ];
 			VertexInput& v2 = model.surfs[ model.surfCount ].vertices[ indices[ 2 ] ];
 
+			const vec4f uvEdgeDt0 = ( v1.texCoord - v0.texCoord );
+			const vec4f uvEdgeDt1 = ( v2.texCoord - v0.texCoord );
 			float uDt = ( v1.texCoord[ 0 ] - v0.texCoord[ 0 ] );
+
 			if ( ( uDt < 0.00001f ) && ( uDt >= 0.0f ) ) {
 				uDt = 0.00001f;
 			} else if ( ( uDt >= -0.00001f ) && ( uDt < 0.0f ) ) {
@@ -181,11 +184,18 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			const vec3f edge1 = ( v2.pos - v0.pos );
 
 			const vec3f faceNormal = Cross( edge0, edge1 ).Normalize();
+			if ( faceNormal.Length() < 0.001f ) {
+				continue; // TODO: remove?
+			}
+
 			const vec3f faceTangent = ( edge0 / uDt  ).Normalize();
 			const vec3f faceBitangent = Cross( faceTangent, faceNormal ).Normalize();
 
-			///assert( faceTangent.Length() > 0.00001 );
-			//assert( faceBitangent.Length() > 0.00001 );
+			assert( Dot( faceNormal, faceTangent ) < 0.001f );
+			assert( Dot( faceNormal, faceBitangent ) < 0.001f );
+			assert( Dot( faceTangent, faceBitangent ) < 0.001f );
+			assert( faceTangent.Length() > 0.001 );
+			assert( faceBitangent.Length() > 0.001 );
 
 			v0.tangent += weights[ 0 ] * faceTangent;
 			v0.bitangent += weights[ 0 ] * faceBitangent;
@@ -206,17 +216,32 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			v.tangent.FlushDenorms();
 			v.bitangent.FlushDenorms();
 			v.normal.FlushDenorms();
+			// Re-orthonormalize
 			v.tangent = v.tangent.Normalize();
-			v.bitangent = v.bitangent.Normalize();
-			v.normal = v.normal.Normalize();
+			v.bitangent = Cross( v.tangent, v.normal ).Normalize();
+			v.normal = Cross( v.tangent, v.bitangent ).Normalize();
+
+			const uint32_t signBit = ( Dot( Cross( v.tangent, v.bitangent ), v.normal ) > 0.0f ) ? 1 : 0;
+			union tangentBitPack_t {
+				struct {
+					uint32_t signBit : 1;
+					uint32_t vecBits : 31;
+				};
+				float value;
+			};
+			tangentBitPack_t packed;
+			packed.value = v.tangent[ 0 ];
+			packed.signBit = signBit;
+			v.tangent[ 0 ] = packed.value;
+
+			//assert( fabs( v.normal.Length() - 1.0f ) < 0.001f );
+			//assert( fabs( v.tangent.Length() - 1.0f ) < 0.001f );
+			//assert( fabs( v.bitangent.Length() - 1.0f ) < 0.001f );
 
 			float tsValues[ 9 ] = { v.tangent[ 0 ], v.tangent[ 1 ], v.tangent[ 2 ],
 									v.bitangent[ 0 ], v.bitangent[ 1 ], v.bitangent[ 2 ],
 									v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] };
 			mat3x3f tsMatrix = mat3x3f( tsValues );
-			//assert( Dot( v.normal, v.tangent ) < 0.0001f );
-			//assert( Dot( v.normal, v.bitangent ) < 0.0001f );
-			//assert( Dot( v.tangent, v.bitangent ) < 0.0001f );
 			//assert( tsMatrix.IsOrthonormal( 0.01f ) );
 		}
 
