@@ -175,11 +175,8 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			const vec4f uvEdgeDt1 = ( v2.texCoord - v0.texCoord );
 			float uDt = ( v1.texCoord[ 0 ] - v0.texCoord[ 0 ] );
 
-			if ( ( uDt < 0.00001f ) && ( uDt >= 0.0f ) ) {
-				uDt = 0.00001f;
-			} else if ( ( uDt >= -0.00001f ) && ( uDt < 0.0f ) ) {
-				uDt = -0.00001f;
-			}
+			const float r = 1.0f / ( uvEdgeDt0[ 0 ] * uvEdgeDt1[ 1 ] - uvEdgeDt1[ 0 ] * uvEdgeDt0[ 1 ] );
+
 			const vec3f edge0 = ( v1.pos - v0.pos );
 			const vec3f edge1 = ( v2.pos - v0.pos );
 
@@ -188,14 +185,14 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 				continue; // TODO: remove?
 			}
 
-			const vec3f faceTangent = ( edge0 / uDt  ).Normalize();
-			const vec3f faceBitangent = Cross( faceTangent, faceNormal ).Normalize();
+			const vec3f faceTangent = ( edge0 * uvEdgeDt1[ 1 ] - edge1 * uvEdgeDt0[ 1 ] ) * r;
+			const vec3f faceBitangent = ( edge1 * uvEdgeDt0[ 0 ] - edge0 * uvEdgeDt1[ 0 ] ) * r;
 
-			assert( Dot( faceNormal, faceTangent ) < 0.001f );
-			assert( Dot( faceNormal, faceBitangent ) < 0.001f );
-			assert( Dot( faceTangent, faceBitangent ) < 0.001f );
-			assert( faceTangent.Length() > 0.001 );
-			assert( faceBitangent.Length() > 0.001 );
+			//assert( Dot( faceNormal, faceTangent ) < 0.001f );
+			//assert( Dot( faceNormal, faceBitangent ) < 0.001f );
+			//assert( Dot( faceTangent, faceBitangent ) < 0.001f );
+			//assert( faceTangent.Length() > 0.001 );
+			//assert( faceBitangent.Length() > 0.001 );
 
 			v0.tangent += weights[ 0 ] * faceTangent;
 			v0.bitangent += weights[ 0 ] * faceBitangent;
@@ -217,6 +214,7 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			v.bitangent.FlushDenorms();
 			v.normal.FlushDenorms();
 			// Re-orthonormalize
+			// TODO: use graham-schmidt?
 			v.tangent = v.tangent.Normalize();
 			v.bitangent = Cross( v.tangent, v.normal ).Normalize();
 			v.normal = Cross( v.tangent, v.bitangent ).Normalize();
