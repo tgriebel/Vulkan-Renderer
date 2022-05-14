@@ -79,7 +79,7 @@ void main()
     float metallic = 0.0f;
 
     vec3 F0 = vec3( 0.04f ); 
-    F0 = albedo.rgb;//mix( F0, albedo, metallic );
+    F0 = mix( F0, albedo.rgb, metallic );
 
     const vec3 ambient = materials[ materialId ].Ka.rgb;
     const vec3 diffuseColor = materials[ materialId ].Kd.rgb;

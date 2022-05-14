@@ -313,6 +313,11 @@ void MakeScene()
 			scene.CreateEntity( modelLib.FindId( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
 			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
+			if ( pieceInfo.team == teamCode_t::WHITE ) {
+				pieceEnt->materialId = materialLib.FindId( "White.001" );
+			} else {
+				pieceEnt->materialId = materialLib.FindId( "Chess_Black.001" );
+			}
 			index = scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
 			pieceEntities.push_back( index );
 		}
@@ -327,12 +332,12 @@ void MakeScene()
 	//		scene.entities.Add( ( pieceNames[ i ] + "_cube" ).c_str(), cubeEnt );
 	//	}
 	//}
-	{
-		Entity* ent = new Entity();
-		scene.CreateEntity( modelLib.FindId( "sphere" ), *ent );
-		ent->SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
-		scene.entities.Add( "sphere", ent );
-	}
+	//{
+	//	Entity* ent = new Entity();
+	//	scene.CreateEntity( modelLib.FindId( "sphere" ), *ent );
+	//	ent->SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
+	//	scene.entities.Add( "sphere", ent );
+	//}
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{
@@ -478,7 +483,7 @@ void UpdateSceneLocal( const float dt )
 	}
 
 	Material* glowMat = materialLib.Find( "GlowSquare" );
-	glowMat->Kd = rgbTuplef_t( 0.1f, 0.0f, 1.0f );
+	glowMat->Kd = rgbTuplef_t( 0.1f, 0.1f, 1.0f );
 	glowMat->d = 0.5f * cos( 3.0f * time ) + 0.5f;
 	//for ( int i = 0; i < 8; ++i )
 	//{

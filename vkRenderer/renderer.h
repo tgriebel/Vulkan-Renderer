@@ -2343,6 +2343,11 @@ private:
 		shadowCam.far = nearPlane;
 		shadowCam.near = farPlane;
 		shadowCam.aspect = ( ShadowMapWidth / (float)ShadowMapHeight );
+		shadowCam.halfFovX = tan( 0.5f * Radians( 90.0f ) );
+		shadowCam.halfFovY = tan( 0.5f * Radians( 90.0f ) ) / shadowCam.aspect;
+		shadowCam.focalLength = shadowCam.far;
+		shadowCam.viewportWidth = 2.0f * shadowCam.halfFovX;
+		shadowCam.viewportHeight = 2.0f * shadowCam.halfFovY;
 		shadowView.projMatrix = shadowCam.GetPerspectiveMatrix();
 	}
 
