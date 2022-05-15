@@ -132,12 +132,11 @@ bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject )
 
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, pipelineHdl_t& pipelineHdl )
 {
-	//pipelineHdl_t hdl;
-	//if ( IsPipelineCached( state, hdl ) )
-	//{
-	//	pipelineHdl = ~0;
-	//	return;
-	//}
+	hdl_t assetHdl = pipelineLib.RetrieveHdl( state.tag );
+	if ( assetHdl.IsValid() ) {
+		pipelineHdl = assetHdl.Get();
+		return;
+	}
 
 	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
 
