@@ -205,7 +205,6 @@ struct GpuProgram
 
 	shaderSource_t			shaders[ MaxShaders ];
 	VkShaderModule			vk_shaders[ MaxShaders ];
-	VkDescriptorSetLayout	vk_descSetLayout;
 	pipelineHdl_t			pipeline;
 	uint32_t				shaderCount;
 	bool					isCompute;
@@ -804,6 +803,7 @@ struct imguiControls_t
 	float		toneMapColor[ 4 ];
 	int			dbgImageId;
 	int			selectedModelId;
+	bool		rebuildShaders;
 	vec3f		selectedModelOrigin;
 };
 #endif

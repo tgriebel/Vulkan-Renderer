@@ -55,6 +55,18 @@ void RenderThread()
 {
 }
 
+void CheckReloadAssets() {
+	if ( imguiControls.rebuildShaders ) {
+		system( "glsl_compile.bat" );
+		gpuPrograms.Destroy();
+		gpuPrograms.Create();
+		Renderer::GenerateGpuPrograms( gpuPrograms );
+		renderer.CreatePipelineObjects();
+
+		imguiControls.rebuildShaders = false;
+	}
+}
+
 int main()
 {
 	{
@@ -76,6 +88,8 @@ int main()
 		renderer.Init();
 		while ( window.IsOpen() )
 		{
+			CheckReloadAssets();
+
 			window.PumpMessages();
 			UpdateScene( AdvanceTime() );
 			window.input.NewFrame();

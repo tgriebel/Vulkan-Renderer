@@ -10,6 +10,7 @@ private:
 	std::vector< hdl_t >		handles;
 public:
 	void					Create();
+	void					Destroy();
 	const Asset*			GetDefault() const { return ( assets.size() > 0 ) ? &assets[ 0 ] : nullptr; };
 	uint32_t				Count() const { return static_cast<uint32_t>( assets.size() ); }
 	int						Add( const char* name, const Asset& asset );
@@ -21,6 +22,13 @@ public:
 	int						FindId( const char* name ) const;
 	const char*				FindName( const int id ) const { return ( id < tags.size() && id >= 0 ) ? tags[ id ].c_str() : ""; }
 };
+
+template< class Asset >
+void AssetLib< Asset >::Destroy() {
+	assets.clear();
+	tags.clear();
+	handles.clear();
+}
 
 template< class Asset >
 int AssetLib< Asset >::Add( const char* name, const Asset& asset )

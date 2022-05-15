@@ -67,6 +67,58 @@ public:
 		return ( frameNumber > 0 );
 	}
 
+	// TODO: move this function
+	static void GenerateGpuPrograms( AssetLibGpuProgram& lib )
+	{
+		const uint32_t programCount = lib.Count();
+		for ( uint32_t i = 0; i < programCount; ++i )
+		{
+			GpuProgram* prog = lib.Find( i );
+			for ( int i = 0; i < GpuProgram::MaxShaders; ++i ) {
+				prog->vk_shaders[ i ] = CreateShaderModule( prog->shaders[ i ].blob );
+			}
+		}
+	}
+
+	// TODO: move
+	void CreatePipelineObjects()
+	{
+		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
+		{
+			const Material* m = materialLib.Find( i );
+
+			for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
+				GpuProgram* prog = gpuPrograms.Find( m->shaders[ passIx ].Get() );
+				if ( prog == nullptr ) {
+					continue;
+				}
+
+				pipelineState_t state;
+				state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
+				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
+				state.shaders = prog;
+				state.tag = gpuPrograms.FindName( m->shaders[ passIx ].Get() );
+
+				VkRenderPass pass;
+				VkDescriptorSetLayout layout;
+				if ( passIx == DRAWPASS_SHADOW ) {
+					pass = shadowPassState.pass;
+					layout = globalLayout;
+				}
+				else if ( passIx == DRAWPASS_POST_2D ) {
+					pass = postPassState.pass;
+					layout = postProcessLayout;
+				}
+				else {
+					pass = mainPassState.pass;
+					layout = globalLayout;
+				}
+
+				CreateGraphicsPipeline( layout, pass, state, prog->pipeline );
+			}
+		}
+	}
+
 private:
 
 	static const uint32_t				ShadowMapWidth = 1024;
@@ -339,7 +391,7 @@ private:
 		CreateResourceBuffers();
 		CreateTextureSamplers();
 
-		GenerateGpuPrograms();
+		GenerateGpuPrograms( gpuPrograms );
 		UploadTextures();
 		CreateDescSetLayouts();
 		CreatePipelineObjects();
@@ -417,13 +469,6 @@ private:
 
 	void CreateDescSetLayouts()
 	{
-		const uint32_t gpuProgramCount = gpuPrograms.Count();
-		for ( uint32_t i = 0; i < gpuProgramCount; ++i )
-		{
-			GpuProgram* program = gpuPrograms.Find( i );
-			CreateDescriptorSetLayout( *program );
-		}
-
 		CreateSceneRenderDescriptorSetLayout( globalLayout );
 		CreateSceneRenderDescriptorSetLayout( postProcessLayout );
 		CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
@@ -503,44 +548,6 @@ private:
 			return shadowView.viewport;
 		} else {
 			return renderView.viewport;
-		}
-	}
-
-	void CreatePipelineObjects()
-	{
-		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
-		{
-			const Material* m = materialLib.Find( i );
-
-			for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-				GpuProgram* prog = gpuPrograms.Find( m->shaders[ passIx ].Get() );
-				if ( prog == nullptr ) {
-					continue;
-				}
-
-				pipelineState_t state;
-				state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
-				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
-				state.shaders = prog;
-				state.tag = gpuPrograms.FindName( m->shaders[ passIx ].Get() );
-
-				VkRenderPass pass;
-				VkDescriptorSetLayout layout;
-				if ( passIx == DRAWPASS_SHADOW ) {
-					pass = shadowPassState.pass;
-					layout = globalLayout;
-				}
-				else if ( passIx == DRAWPASS_POST_2D ) {
-					pass = postPassState.pass;
-					layout = postProcessLayout;
-				}
-				else {
-					pass = mainPassState.pass;
-					layout = globalLayout;
-				}
-
-				CreateGraphicsPipeline( layout, pass, state, prog->pipeline );
-			}
 		}
 	}
 
@@ -2023,6 +2030,7 @@ private:
 			ImGui::NewFrame();
 
 			ImGui::Begin( "Control Panel" );
+			ImGui::Checkbox( "Reload Shaders", &imguiControls.rebuildShaders );
 			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
@@ -2216,18 +2224,6 @@ private:
 		stagingBuffer.Reset();
 		const uint64_t size = 256 * MB_1;
 		CreateBuffer( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, sharedMemory );
-	}
-
-	void GenerateGpuPrograms()
-	{
-		const uint32_t programCount = gpuPrograms.Count();
-		for ( uint32_t i = 0; i < programCount; ++i )
-		{
-			GpuProgram* prog = gpuPrograms.Find( i );
-			for ( int i = 0; i < GpuProgram::MaxShaders; ++i ) {
-				prog->vk_shaders[ i ] = CreateShaderModule( prog->shaders[ i ].blob );
-			}
-		}
 	}
 
 	void UploadTextures()

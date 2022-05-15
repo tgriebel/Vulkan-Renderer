@@ -6,26 +6,6 @@
 
 static AssetLib< pipelineObject_t > pipelineLib;
 
-void CreateDescriptorSetLayout( GpuProgram& program )
-{
-	VkDescriptorSetLayoutBinding uboLayoutBinding{ };
-	uboLayoutBinding.binding = 0;
-	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount = MaxUboDescriptors;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
-
-	std::array<VkDescriptorSetLayoutBinding, 1> bindings = { uboLayoutBinding };
-	VkDescriptorSetLayoutCreateInfo layoutInfo{ };
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
-	layoutInfo.pBindings = bindings.data();
-
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &program.vk_descSetLayout ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create descriptor set layout!" );
-	}
-}
-
 
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 {
@@ -282,9 +262,9 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 2;
+	pipelineLayoutInfo.setLayoutCount = 1;
 
-	VkDescriptorSetLayout layouts[] = { layout, state.shaders->vk_descSetLayout };
+	VkDescriptorSetLayout layouts[] = { layout };
 	pipelineLayoutInfo.pSetLayouts = layouts;
 	
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
@@ -370,9 +350,9 @@ void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t&
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	{
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 2;
+		pipelineLayoutInfo.setLayoutCount = 1;
 
-		VkDescriptorSetLayout layouts[] = { layout, state.shaders->vk_descSetLayout };
+		VkDescriptorSetLayout layouts[] = { layout };
 		pipelineLayoutInfo.pSetLayouts = layouts;
 
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
