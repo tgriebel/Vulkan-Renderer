@@ -69,10 +69,9 @@ void main()
 
     float NoV = abs( dot( n, v ) );
 
-    // Note: Only albedo needs linear conversion
     const vec4 albedo = ( albedoTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4 ( 1.0f );
-    const vec3 normalTex = ( normalTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ normalTexId ], fragTexCoord.xy ) ).rgb : fragNormal;
-    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) ) : vec4 ( 1.0f );
+    const vec3 normalTex = ( normalTexId >= 0 ) ? texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb : fragNormal;
+    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4 ( 1.0f );
 
     const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 
@@ -130,14 +129,17 @@ void main()
     float bias = 0.001f;
     float depth = ( lsPosition.z );
 
-    const ivec2 pixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
-    const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], pixelLocation, 0 ).r;
-    if( shadowValue < ( depth - bias ) ) // shadowed
-    {
+    if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f ) {
+        const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
+        const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], shadowPixelLocation, 0 ).r;
+        if ( shadowValue < ( depth - bias ) ) {
+            visibility = globals.shadowParms.w;
+        }
+    } else {
         visibility = globals.shadowParms.w;
     }
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
-    outColor.rgb = fragNormal;
+//    outColor.rgb = fragNormal;
 //    outColor.rg = fragTexCoord.rb;
 }
