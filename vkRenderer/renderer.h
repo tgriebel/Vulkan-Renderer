@@ -31,8 +31,10 @@ typedef AssetLib< texture_t >		AssetLibImages;
 typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< modelSource_t >	AssetLibModels;
+typedef AssetLib< pipelineObject_t> AssetLibPipelines;
 
 extern AssetLibGpuProgram			gpuPrograms;
+extern AssetLibPipelines			pipelineLib;
 extern AssetLibMaterials			materialLib;
 extern AssetLibImages				textureLib;
 extern AssetLibModels				modelLib;
@@ -83,6 +85,7 @@ public:
 	// TODO: move
 	void CreatePipelineObjects()
 	{
+		pipelineLib.Destroy();
 		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
 		{
 			const Material* m = materialLib.Find( i );

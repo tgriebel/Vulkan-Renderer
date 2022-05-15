@@ -4,7 +4,7 @@
 #include "deviceContext.h"
 #include "assetLib.h"
 
-static AssetLib< pipelineObject_t > pipelineLib;
+AssetLib< pipelineObject_t > pipelineLib;
 
 
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
