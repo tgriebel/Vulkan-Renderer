@@ -151,6 +151,7 @@ private:
 	VkDescriptorSetLayout			globalLayout;
 	VkDescriptorSetLayout			postProcessLayout;
 	VkDescriptorPool				descriptorPool;
+	VkSampleCountFlagBits			msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 	FrameState						frameState[ MAX_FRAMES_STATES ];
 	size_t							frameId = 0;
 	uint32_t						bufferId = 0;
@@ -587,6 +588,7 @@ private:
 				vkGetPhysicalDeviceProperties( device, &deviceProperties );
 				context.physicalDevice = device;
 				context.limits = deviceProperties.limits;
+				msaaSamples = GetMaxUsableSampleCount();
 				break;
 			}
 		}
