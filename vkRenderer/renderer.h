@@ -274,7 +274,8 @@ private:
 		CreateTextureSamplers();
 
 		GenerateGpuPrograms( gpuPrograms );
-		UploadTextures();
+
+		CreateCodeTextures();
 		CreateDescSetLayouts();
 		CreatePipelineObjects();
 
@@ -289,8 +290,9 @@ private:
 			CreateCommandBuffers();
 		}
 
-		UpdateDescriptorSets();
+		UploadTextures();
 		UploadModelsToGPU();
+		UpdateDescriptorSets();
 	}
 
 	void InitImGui()
@@ -1039,6 +1041,21 @@ private:
 				throw std::runtime_error( "Failed to create depth sampler!" );
 			}
 		}
+	}
+
+	void CreateCodeTextures() {
+		textureInfo_t info{};
+		info.width = ShadowMapWidth;
+		info.height = ShadowMapHeight;
+		info.mipLevels = 1;
+		info.layers = 1;
+
+		// Default Images
+		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
+		rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+
+		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
+		rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateUniformBuffers()
@@ -2011,19 +2028,6 @@ private:
 			}
 			texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture->info.mipLevels );
 		}
-
-		textureInfo_t info{};
-		info.width = ShadowMapWidth;
-		info.height = ShadowMapHeight;
-		info.mipLevels = 1;
-		info.layers = 1;
-
-		// Default Images
-		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
-		rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
-
-		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
-		rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 
 	void CreateSyncObjects()
