@@ -22,9 +22,9 @@
 
 #define SAMPLER_CUBE_LAYOUT( S, N )	layout( set = S, binding = N ) uniform samplerCube cubeSamplers[];
 
-#define CODE_IMAGE_LAYOUT( S, N )	layout( set = S, binding = N ) uniform sampler2D codeSamplers[];
+#define CODE_IMAGE_LAYOUT( S, N, SAMPLER )	layout( set = S, binding = N ) uniform SAMPLER codeSamplers[];
 
-#define STENCIL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform sampler2D stencilImage;
+#define STENCIL_LAYOUT( S, N, SAMPLER )		layout( set = S, binding = N ) uniform SAMPLER stencilImage;
 
 #define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform MaterialBuffer						\
 									{																			\
@@ -80,17 +80,17 @@
 #define VS_LAYOUT_BASIC_IO	VS_IN																				\
 							VS_OUT
 
-#define VS_LAYOUT_STANDARD	GLOBALS_LAYOUT( 0, 0 )																\
-							MODEL_LAYOUT( 0, 1 )																\
-							SAMPLER_2D_LAYOUT( 0, 2 )															\
-							SAMPLER_CUBE_LAYOUT( 0, 3 )															\
-							MATERIAL_LAYOUT( 0, 4 )																\
-							LIGHT_LAYOUT( 0, 5 )																\
-							CODE_IMAGE_LAYOUT( 0, 6 )															\
-							STENCIL_LAYOUT( 0, 7 )																\
-							PUSH_CONSTANTS																		\
-							VS_IN																				\
-							VS_OUT
+#define VS_LAYOUT_STANDARD( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
+										MODEL_LAYOUT( 0, 1 )													\
+										SAMPLER_2D_LAYOUT( 0, 2 )												\
+										SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+										MATERIAL_LAYOUT( 0, 4 )													\
+										LIGHT_LAYOUT( 0, 5 )													\
+										CODE_IMAGE_LAYOUT( 0, 6, SAMPLER )										\
+										STENCIL_LAYOUT( 0, 7, SAMPLER )											\
+										PUSH_CONSTANTS															\
+										VS_IN																	\
+										VS_OUT
 
 #define PS_IN		layout( set = 0, location = 0 ) in vec4 fragColor;											\
 					layout( set = 0, location = 1 ) in vec3 fragNormal;											\
@@ -105,17 +105,17 @@
 #define PS_LAYOUT_BASIC_IO	PS_IN																				\
 							PS_OUT
 
-#define PS_LAYOUT_STANDARD	GLOBALS_LAYOUT( 0, 0 )																\
-							MODEL_LAYOUT( 0, 1 )																\
-							SAMPLER_2D_LAYOUT( 0, 2 )															\
-							SAMPLER_CUBE_LAYOUT( 0, 3 )															\
-							MATERIAL_LAYOUT( 0, 4 )																\
-							LIGHT_LAYOUT( 0, 5 )																\
-							CODE_IMAGE_LAYOUT( 0, 6 )															\
-							STENCIL_LAYOUT( 0, 7 )																\
-							PUSH_CONSTANTS																		\
-							PS_IN																				\
-							PS_OUT
+#define PS_LAYOUT_STANDARD( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
+										MODEL_LAYOUT( 0, 1 )													\
+										SAMPLER_2D_LAYOUT( 0, 2 )												\
+										SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+										MATERIAL_LAYOUT( 0, 4 )													\
+										LIGHT_LAYOUT( 0, 5 )													\
+										CODE_IMAGE_LAYOUT( 0, 6, SAMPLER )										\
+										STENCIL_LAYOUT( 0, 7, SAMPLER )											\
+										PUSH_CONSTANTS															\
+										PS_IN																	\
+										PS_OUT
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

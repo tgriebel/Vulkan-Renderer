@@ -5,7 +5,7 @@
 
 #include "globals.h"
 
-PS_LAYOUT_STANDARD
+PS_LAYOUT_STANDARD( sampler2D )
 
 #define PI 3.14159265359f
 float D_GGX( const float NoH, const float roughness )

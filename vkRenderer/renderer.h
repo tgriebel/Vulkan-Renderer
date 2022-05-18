@@ -488,6 +488,7 @@ private:
 			stateBits |= GFX_STATE_DEPTH_TEST;
 			stateBits |= GFX_STATE_DEPTH_WRITE;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 		}
 		else if ( pass == DRAWPASS_SHADOW )
 		{
@@ -502,6 +503,7 @@ private:
 			stateBits |= GFX_STATE_DEPTH_TEST;
 			stateBits |= GFX_STATE_DEPTH_WRITE;
 			stateBits |= GFX_STATE_COLOR_MASK;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
 			stateBits |= GFX_STATE_STENCIL_ENABLE;
 		}
@@ -510,27 +512,32 @@ private:
 			stateBits |= GFX_STATE_DEPTH_TEST;
 			stateBits |= GFX_STATE_DEPTH_WRITE;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 		}
 		else if ( pass == DRAWPASS_OPAQUE )
 		{
 			stateBits |= GFX_STATE_DEPTH_TEST;
 			stateBits |= GFX_STATE_DEPTH_WRITE;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
 		}
 		else if ( pass == DRAWPASS_TRANS )
 		{
 			stateBits |= GFX_STATE_DEPTH_TEST;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 			stateBits |= GFX_STATE_BLEND_ENABLE;
 		}
 		else if ( pass == DRAWPASS_DEBUG_WIREFRAME )
 		{
 			stateBits |= GFX_STATE_WIREFRAME_ENABLE;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 		}
 		else if ( pass == DRAWPASS_DEBUG_SOLID )
 		{
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
 			stateBits |= GFX_STATE_BLEND_ENABLE;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 		}
 		else if ( pass == DRAWPASS_POST_2D )
 		{
@@ -541,6 +548,7 @@ private:
 			stateBits |= GFX_STATE_DEPTH_TEST;
 			stateBits |= GFX_STATE_DEPTH_WRITE;
 			stateBits |= GFX_STATE_CULL_MODE_BACK;
+			stateBits |= GFX_STATE_MSAA_ENABLE;
 		}
 
 		return static_cast<gfxStateBits_t>( stateBits );
@@ -557,6 +565,7 @@ private:
 
 	VkSampleCountFlagBits GetMaxUsableSampleCount()
 	{
+		/*
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		vkGetPhysicalDeviceProperties( context.physicalDevice, &physicalDeviceProperties );
 
@@ -567,7 +576,7 @@ private:
 		if ( counts & VK_SAMPLE_COUNT_8_BIT ) { return VK_SAMPLE_COUNT_8_BIT; }
 		if ( counts & VK_SAMPLE_COUNT_4_BIT ) { return VK_SAMPLE_COUNT_4_BIT; }
 		if ( counts & VK_SAMPLE_COUNT_2_BIT ) { return VK_SAMPLE_COUNT_2_BIT; }
-
+		*/
 		return VK_SAMPLE_COUNT_1_BIT;
 	}
 
@@ -630,6 +639,7 @@ private:
 		VkPhysicalDeviceFeatures deviceFeatures{ };
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 		deviceFeatures.fillModeNonSolid = VK_TRUE;
+		deviceFeatures.sampleRateShading = VK_TRUE;
 		createInfo.pEnabledFeatures = &deviceFeatures;
 
 		createInfo.enabledExtensionCount = static_cast<uint32_t>( deviceExtensions.size() );
@@ -1358,7 +1368,7 @@ private:
 			// Main View Pass
 			VkAttachmentDescription colorAttachment{ };
 			colorAttachment.format = swapChain.GetBackBufferFormat();
-			colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			colorAttachment.samples = msaaSamples;
 			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -1372,7 +1382,7 @@ private:
 
 			VkAttachmentDescription depthAttachment{ };
 			depthAttachment.format = FindDepthFormat();
-			depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			depthAttachment.samples = msaaSamples;
 			depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -1386,7 +1396,7 @@ private:
 
 			VkAttachmentDescription stencilAttachment{ };
 			stencilAttachment.format = FindDepthFormat();
-			stencilAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+			stencilAttachment.samples = msaaSamples;
 			stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			stencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 			stencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -1580,7 +1590,7 @@ private:
 			info.height = ShadowMapHeight;
 			info.mipLevels = 1;
 			info.layers = 1;
-			CreateImage( info, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
+			CreateImage( info, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
 			frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		}
 
@@ -1616,11 +1626,11 @@ private:
 			info.mipLevels = 1;
 			info.layers = 1;
 
-			CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
+			CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
 			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
-			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
+			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
 			frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 			frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
@@ -2104,7 +2114,7 @@ private:
 		}
 	}
 
-	void CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory )
+	void CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory )
 	{
 		VkImageCreateInfo imageInfo{ };
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -2119,7 +2129,7 @@ private:
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage = usage;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;	
+		imageInfo.samples = numSamples;
 		if ( format == FindDepthFormat() )
 		{
 			VkImageStencilUsageCreateInfo stencilUsage{}; 
@@ -2258,7 +2268,7 @@ private:
 			VkImageUsageFlags flags =	VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 										VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 										VK_IMAGE_USAGE_SAMPLED_BIT;
-			CreateImage( texture->info, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, flags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
+			CreateImage( texture->info, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, flags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
 
 			TransitionImageLayout( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->info );
 
@@ -2296,10 +2306,10 @@ private:
 		info.layers = 1;
 
 		// Default Images
-		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
+		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
 		rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
+		CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
 		rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 	}
 

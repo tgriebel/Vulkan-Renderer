@@ -5,7 +5,7 @@
 
 #include "globals.h"
 
-VS_LAYOUT_STANDARD
+VS_LAYOUT_STANDARD( sampler2D )
 
 void main()
 {

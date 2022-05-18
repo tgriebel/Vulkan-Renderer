@@ -5,7 +5,7 @@
 
 #include "globals.h"
 
-PS_LAYOUT_STANDARD
+PS_LAYOUT_STANDARD( sampler2D )
 
 void main()
 {
