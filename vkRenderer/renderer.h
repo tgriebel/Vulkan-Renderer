@@ -899,6 +899,15 @@ private:
 		throw std::runtime_error( "Failed to find suitable memory type!" );
 	}
 
+	VkFormat FindColorFormat()
+	{
+		return FindSupportedFormat(
+			{ VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
+		);
+	}
+
 	VkFormat FindDepthFormat()
 	{
 		return FindSupportedFormat(
@@ -1097,7 +1106,7 @@ private:
 		{
 			// Main View Pass
 			VkAttachmentDescription colorAttachment{ };
-			colorAttachment.format = swapChain.GetBackBufferFormat();
+			colorAttachment.format = FindColorFormat();
 			colorAttachment.samples = msaaSamples;
 			colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -1356,8 +1365,10 @@ private:
 			info.mipLevels = 1;
 			info.layers = 1;
 
-			CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
-			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			VkFormat colorFormat = FindColorFormat();
+
+			CreateImage( info, colorFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
+			frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 			VkFormat depthFormat = FindDepthFormat();
 			CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
