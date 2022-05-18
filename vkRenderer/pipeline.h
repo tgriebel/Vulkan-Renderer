@@ -63,5 +63,4 @@ struct pushConstants_t
 
 bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject );
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
-void CreatePostProcessDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, pipelineHdl_t& pipelineObject );
