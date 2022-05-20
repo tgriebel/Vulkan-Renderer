@@ -254,11 +254,6 @@ void AssetLib< modelSource_t >::Create()
 	}
 	{
 		modelSource_t model;
-		CreateWaterSurface( model );
-		modelLib.Add( "_water", model );
-	}
-	{
-		modelSource_t model;
 		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
 		modelLib.Add( "_postProcessQuad", model );
 	}
@@ -316,6 +311,7 @@ void MakeScene()
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
 				pieceEnt->materialId = materialLib.FindId( "White.001" );
 			} else {
+				pieceEnt->SetRotation( vec3f( 0.0f, 0.0f, 180.0f ) );
 				pieceEnt->materialId = materialLib.FindId( "Chess_Black.001" );
 			}
 			index = scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );

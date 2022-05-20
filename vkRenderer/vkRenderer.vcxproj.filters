@@ -31,6 +31,7 @@
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="render_util.cpp" />
+    <ClCompile Include="gpuTransfer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />

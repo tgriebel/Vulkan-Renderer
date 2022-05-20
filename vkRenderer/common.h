@@ -651,6 +651,7 @@ public:
 	vec3f			GetOrigin() const;
 	void			SetOrigin( const vec3f& origin );
 	void			SetScale( const vec3f& scale );
+	void			SetRotation( const vec3f& xyzDegrees );
 	mat4x4f			GetMatrix() const;
 	void			SetFlag( const entityFlags_t flag );
 	void			ClearFlag( const entityFlags_t flag );

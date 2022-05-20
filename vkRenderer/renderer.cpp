@@ -40,60 +40,6 @@ void Renderer::Commit( const Scene& scene )
 	UpdateView();
 }
 
-void Renderer::UploadModelsToGPU()
-{
-	const VkDeviceSize vbSize = sizeof( VertexInput ) * MaxVertices;
-	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-	const uint32_t modelCount = modelLib.Count();
-	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
-	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
-
-	static uint32_t vbBufElements = 0;
-	static uint32_t ibBufElements = 0;
-	for ( uint32_t m = 0; m < modelCount; ++m )
-	{
-		modelSource_t* model = modelLib.Find( m );
-		for ( uint32_t s = 0; s < model->surfCount; ++s )
-		{
-			surface_t& surf = model->surfs[ s ];
-			surfUpload_t& upload = model->upload[ s ];
-			VkDeviceSize vbCopySize = sizeof( surf.vertices[ 0 ] ) * surf.vertices.size();
-			VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
-
-			upload.vertexOffset = vbBufElements;
-			upload.firstIndex = ibBufElements;
-
-			// VB Copy
-			stagingBuffer.Reset();
-			stagingBuffer.CopyData( surf.vertices.data(), static_cast<size_t>( vbCopySize ) );
-
-			VkBufferCopy vbCopyRegion{ };
-			vbCopyRegion.size = vbCopySize;
-			vbCopyRegion.srcOffset = 0;
-			vbCopyRegion.dstOffset = vb.GetSize();
-			CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
-
-			const uint32_t vertexCount = static_cast<uint32_t>( surf.vertices.size() );
-			upload.vertexCount = vertexCount;
-			vbBufElements += vertexCount;
-
-			// IB Copy
-			stagingBuffer.Reset();
-			stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
-
-			VkBufferCopy ibCopyRegion{ };
-			ibCopyRegion.size = ibCopySize;
-			ibCopyRegion.srcOffset = 0;
-			ibCopyRegion.dstOffset = ib.GetSize();
-			CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
-
-			const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
-			upload.indexCount = indexCount;
-			ibBufElements += indexCount;
-		}
-	}
-}
-
 void Renderer::MergeSurfaces( RenderView& view )
 {
 	view.mergedModelCnt = 0;
@@ -250,6 +196,156 @@ viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 	}
 	else {
 		return renderView.viewport;
+	}
+}
+
+void Renderer::UpdateBufferContents( uint32_t currentImage )
+{
+	std::vector< globalUboConstants_t > globalsBuffer;
+	globalsBuffer.reserve( 1 );
+	{
+		globalUboConstants_t globals;
+		static auto startTime = std::chrono::high_resolution_clock::now();
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
+
+		float intPart = 0;
+		const float fracPart = modf( time, &intPart );
+
+		const float viewWidth = renderView.viewport.width;
+		const float viewHeight = renderView.viewport.height;
+
+		globals.time = vec4f( time, intPart, fracPart, 1.0f );
+		globals.generic = vec4f( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
+		globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
+		globals.tonemap = vec4f( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
+		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, imguiControls.shadowStrength );
+		globalsBuffer.push_back( globals );
+	}
+
+	std::vector< uniformBufferObject_t > uboBuffer;
+	uboBuffer.resize( renderView.committedModelCnt );
+	assert( renderView.committedModelCnt < MaxModels );
+	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
+	{
+		uniformBufferObject_t ubo;
+		ubo.model = renderView.instances[ i ].modelMatrix;
+		ubo.view = renderView.viewMatrix;
+		ubo.proj = renderView.projMatrix;
+		const drawSurf_t& surf = renderView.merged[ renderView.instances[ i ].surfId ];
+		const uint32_t objectId = ( renderView.instances[ i ].id + surf.objectId );
+		uboBuffer[ objectId ] = ubo;
+	}
+	assert( shadowView.committedModelCnt < MaxModels );
+	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
+	{
+		uniformBufferObject_t ubo;
+		ubo.model = shadowView.instances[ i ].modelMatrix;
+		ubo.view = shadowView.viewMatrix;
+		ubo.proj = shadowView.projMatrix;
+		const drawSurf_t& surf = shadowView.merged[ shadowView.instances[ i ].surfId ];
+		const uint32_t objectId = ( shadowView.instances[ i ].id + surf.objectId );
+		uboBuffer[ objectId ] = ubo;
+	}
+
+	std::vector< materialBufferObject_t > materialBuffer;
+	materialBuffer.reserve( materialLib.Count() );
+	int materialAllocIx = 0;
+	const uint32_t materialCount = materialLib.Count();
+	for ( uint32_t i = 0; i < materialLib.Count(); ++i )
+	{
+		const Material* m = materialLib.Find( i );
+
+		materialBufferObject_t ubo{};
+		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
+			ubo.textures[ t ] = m->textures[ t ].Get();
+		}
+		ubo.Kd = vec4f( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
+		ubo.Ks = vec4f( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );
+		ubo.Ka = vec4f( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
+		ubo.Ke = vec4f( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
+		ubo.Tf = vec4f( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
+		ubo.Tr = m->Tr;
+		ubo.Ni = m->Ni;
+		ubo.Ns = m->Ns;
+		ubo.illum = m->illum;
+		ubo.d = m->d;
+		materialBuffer.push_back( ubo );
+	}
+
+	std::vector< light_t > lightBuffer;
+	lightBuffer.reserve( MaxLights );
+	for ( int i = 0; i < MaxLights; ++i )
+	{
+		lightBuffer.push_back( renderView.lights[ i ] );
+	}
+
+	frameState[ currentImage ].globalConstants.Reset();
+	frameState[ currentImage ].globalConstants.CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) );
+
+	assert( uboBuffer.size() <= MaxSurfaces );
+	frameState[ currentImage ].surfParms.Reset();
+	frameState[ currentImage ].surfParms.CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
+
+	assert( materialBuffer.size() <= MaxMaterialDescriptors );
+	frameState[ currentImage ].materialBuffers.Reset();
+	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer.data(), sizeof( materialBufferObject_t ) * materialBuffer.size() );
+
+	assert( lightBuffer.size() <= MaxLights );
+	frameState[ currentImage ].lightParms.Reset();
+	frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
+}
+
+void Renderer::CreateTextureSamplers()
+{
+	{
+		// Default Bilinear Sampler
+		VkSamplerCreateInfo samplerInfo{ };
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.anisotropyEnable = VK_TRUE;
+		samplerInfo.maxAnisotropy = 16.0f;
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 16.0f;
+		samplerInfo.mipLodBias = 0.0f;
+
+		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_bilinearSampler ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create texture sampler!" );
+		}
+	}
+
+	{
+		// Depth sampler
+		VkSamplerCreateInfo samplerInfo{ };
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		samplerInfo.anisotropyEnable = VK_FALSE;
+		samplerInfo.maxAnisotropy = 0.0f;
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_WHITE;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 16.0f;
+		samplerInfo.mipLodBias = 0.0f;
+
+		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_depthShadowSampler ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create depth sampler!" );
+		}
 	}
 }
 

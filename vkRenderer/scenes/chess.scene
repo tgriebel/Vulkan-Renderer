@@ -1,0 +1,16 @@
+axis.obj, axis
+cube.obj, cube
+diamond.obj, diamond
+sphere.obj, sphere
+pawn.obj, pawn
+rook.obj, rook
+knight.obj, knight
+bishop.obj, bishop
+king.obj, king
+queen.obj, queen
+chess_board.obj, chess_board
+plane.obj, plane
+
+skybox, _skybox
+quad, _postProcessQuad
+quad, _quadTexDebug

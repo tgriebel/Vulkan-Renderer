@@ -45,6 +45,11 @@ void Entity::SetScale( const vec3f& scale ) {
 	matrix[ 2 ][ 2 ] = scale[ 2 ];
 }
 
+void Entity::SetRotation( const vec3f& xyzDegrees ) {
+	const mat4x4f rotationMatrix = ComputeRotationZYX( xyzDegrees[ 0 ], xyzDegrees[ 1 ], xyzDegrees[ 2 ] );
+	matrix = rotationMatrix * matrix;
+}
+
 mat4x4f Entity::GetMatrix() const {
 	return matrix;
 }

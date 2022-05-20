@@ -990,67 +990,9 @@ private:
 		}
 	}
 
-	void CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
-	{
-		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-		vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
-		EndSingleTimeCommands( commandBuffer );
+	void CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
-		dstBuffer.Allocate( copyRegion.size );
-	}
-
-	void CreateTextureSamplers()
-	{
-		{
-			// Default Bilinear Sampler
-			VkSamplerCreateInfo samplerInfo{ };
-			samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-			samplerInfo.magFilter = VK_FILTER_LINEAR;
-			samplerInfo.minFilter = VK_FILTER_LINEAR;
-			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerInfo.anisotropyEnable = VK_TRUE;
-			samplerInfo.maxAnisotropy = 16.0f;
-			samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-			samplerInfo.unnormalizedCoordinates = VK_FALSE;
-			samplerInfo.compareEnable = VK_FALSE;
-			samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-			samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-			samplerInfo.minLod = 0.0f;
-			samplerInfo.maxLod = 16.0f;
-			samplerInfo.mipLodBias = 0.0f;
-
-			if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_bilinearSampler ) != VK_SUCCESS ) {
-				throw std::runtime_error( "Failed to create texture sampler!" );
-			}
-		}
-
-		{
-			// Depth sampler
-			VkSamplerCreateInfo samplerInfo{ };
-			samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-			samplerInfo.magFilter = VK_FILTER_LINEAR;
-			samplerInfo.minFilter = VK_FILTER_LINEAR;
-			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-			samplerInfo.anisotropyEnable = VK_FALSE;
-			samplerInfo.maxAnisotropy = 0.0f;
-			samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_WHITE;
-			samplerInfo.unnormalizedCoordinates = VK_FALSE;
-			samplerInfo.compareEnable = VK_FALSE;
-			samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-			samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-			samplerInfo.minLod = 0.0f;
-			samplerInfo.maxLod = 16.0f;
-			samplerInfo.mipLodBias = 0.0f;
-
-			if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_depthShadowSampler ) != VK_SUCCESS ) {
-				throw std::runtime_error( "Failed to create depth sampler!" );
-			}
-		}
-	}
+	void CreateTextureSamplers();
 
 	void CreateCodeTextures() {
 		textureInfo_t info{};
@@ -1543,33 +1485,7 @@ private:
 		EndSingleTimeCommands( commandBuffer );
 	}
 
-	void CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers )
-	{
-		VkBufferImageCopy region{ };
-		memset( &region, 0, sizeof( region ) );
-		region.bufferOffset = bufferOffset;
-
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = layers;
-
-		region.imageOffset = { 0, 0, 0 };
-		region.imageExtent = {
-			width,
-			height,
-			1
-		};
-
-		vkCmdCopyBufferToImage(
-			commandBuffer,
-			buffer,
-			image,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			1,
-			&region
-		);
-	}
+	void CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers );
 
 	void CreateCommandBuffers()
 	{
@@ -1998,48 +1914,7 @@ private:
 		CreateBuffer( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, sharedMemory );
 	}
 
-	void UploadTextures()
-	{
-		const uint32_t textureCount = textureLib.Count();
-		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-		for ( uint32_t i = 0; i < textureCount; ++i )
-		{
-			texture_t* texture = textureLib.Find( i );
-			// VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
-			VkImageUsageFlags flags =	VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-										VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-										VK_IMAGE_USAGE_SAMPLED_BIT;
-			CreateImage( texture->info, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, flags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
-
-			TransitionImageLayout( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->info );
-
-			const VkDeviceSize currentOffset = stagingBuffer.GetSize();
-			stagingBuffer.CopyData( texture->bytes, texture->sizeBytes );
-
-			const uint32_t layers = texture->info.layers;
-			CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->info.width ), static_cast<uint32_t>( texture->info.height ), layers );
-			texture->uploaded = true;
-		}
-		EndSingleTimeCommands( commandBuffer );
-
-		for ( uint32_t i = 0; i < textureCount; ++i )
-		{
-			texture_t* texture = textureLib.Find( i );
-			GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->info );
-		}
-
-		for ( uint32_t i = 0; i < textureCount; ++i )
-		{
-			texture_t* texture = textureLib.Find( i );
-			VkImageViewType type;
-			switch ( texture->info.type ) {
-				default:
-				case TEXTURE_TYPE_2D:	type = VK_IMAGE_VIEW_TYPE_2D;		break;
-				case TEXTURE_TYPE_CUBE:	type = VK_IMAGE_VIEW_TYPE_CUBE;		break;
-			}
-			texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture->info.mipLevels );
-		}
-	}
+	void UploadTextures();
 
 	void CreateSyncObjects()
 	{
@@ -2250,102 +2125,7 @@ private:
 		window.~Window();
 	}
 
-	void UpdateBufferContents( uint32_t currentImage )
-	{
-		std::vector< globalUboConstants_t > globalsBuffer;
-		globalsBuffer.reserve( 1 );
-		{
-			globalUboConstants_t globals;
-			static auto startTime = std::chrono::high_resolution_clock::now();
-			auto currentTime = std::chrono::high_resolution_clock::now();
-			float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
-
-			float intPart = 0;
-			const float fracPart = modf( time, &intPart );
-
-			const float viewWidth = renderView.viewport.width;
-			const float viewHeight = renderView.viewport.height;
-
-			globals.time = vec4f( time, intPart, fracPart, 1.0f );
-			globals.generic = vec4f( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
-			globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
-			globals.tonemap = vec4f( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
-			globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, imguiControls.shadowStrength );
-			globalsBuffer.push_back( globals );
-		}
-
-		std::vector< uniformBufferObject_t > uboBuffer;
-		uboBuffer.resize( MaxSurfaces );
-		assert( renderView.committedModelCnt < MaxModels );
-		for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
-		{
-			uniformBufferObject_t ubo;
-			ubo.model = renderView.instances[ i ].modelMatrix;
-			ubo.view = renderView.viewMatrix;
-			ubo.proj = renderView.projMatrix;
-			const drawSurf_t& surf = renderView.merged[ renderView.instances[ i ].surfId ];
-			const uint32_t objectId = ( renderView.instances[ i ].id + surf.objectId );
-			uboBuffer[ objectId ] = ubo;
-		}
-		assert( shadowView.committedModelCnt < MaxModels );
-		for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
-		{
-			uniformBufferObject_t ubo;
-			ubo.model = shadowView.instances[ i ].modelMatrix;
-			ubo.view = shadowView.viewMatrix;
-			ubo.proj = shadowView.projMatrix;
-			const drawSurf_t& surf = shadowView.merged[ shadowView.instances[ i ].surfId ];
-			const uint32_t objectId = ( shadowView.instances[ i ].id + surf.objectId );
-			uboBuffer[ objectId ] = ubo;
-		}
-
-		std::vector< materialBufferObject_t > materialBuffer;
-		materialBuffer.reserve( materialLib.Count() );
-		int materialAllocIx = 0;
-		const uint32_t materialCount = materialLib.Count();
-		for ( uint32_t i = 0; i < materialLib.Count(); ++i )
-		{
-			const Material* m = materialLib.Find( i );
-
-			materialBufferObject_t ubo{};
-			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
-				ubo.textures[ t ] = m->textures[ t ].Get();
-			}	
-			ubo.Kd = vec4f( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
-			ubo.Ks = vec4f( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );
-			ubo.Ka = vec4f( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
-			ubo.Ke = vec4f( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
-			ubo.Tf = vec4f( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
-			ubo.Tr = m->Tr;
-			ubo.Ni = m->Ni;
-			ubo.Ns = m->Ns;
-			ubo.illum = m->illum;
-			ubo.d = m->d;
-			materialBuffer.push_back( ubo );
-		}
-
-		std::vector< light_t > lightBuffer;
-		lightBuffer.reserve( MaxLights );
-		for ( int i = 0; i < MaxLights; ++i )
-		{
-			lightBuffer.push_back( renderView.lights[ i ] );
-		}
-
-		frameState[ currentImage ].globalConstants.Reset();
-		frameState[ currentImage ].globalConstants.CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) );
-
-		assert( uboBuffer.size() <= MaxSurfaces );
-		frameState[ currentImage ].surfParms.Reset();
-		frameState[ currentImage ].surfParms.CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
-
-		assert( materialBuffer.size() <= MaxMaterialDescriptors );
-		frameState[ currentImage ].materialBuffers.Reset();
-		frameState[ currentImage ].materialBuffers.CopyData( materialBuffer.data(), sizeof( materialBufferObject_t ) * materialBuffer.size() );
-
-		assert( lightBuffer.size() <= MaxLights );
-		frameState[ currentImage ].lightParms.Reset();
-		frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
-	}
+	void UpdateBufferContents( uint32_t currentImage );
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
