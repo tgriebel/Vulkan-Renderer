@@ -224,7 +224,7 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	}
 
 	std::vector< uniformBufferObject_t > uboBuffer;
-	uboBuffer.resize( renderView.committedModelCnt );
+	uboBuffer.resize( MaxSurfacesDescriptors );
 	assert( renderView.committedModelCnt < MaxModels );
 	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
 	{
