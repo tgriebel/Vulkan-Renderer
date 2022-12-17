@@ -3,10 +3,9 @@
 #include "io.h"
 #include "GeoBuilder.h"
 #include "assetLib.h"
+#include "scene.h"
 
-extern AssetLib< Material >			materialLib;
-extern AssetLib< modelSource_t >	modelLib;
-extern AssetLib< GpuProgram >		gpuPrograms;
+extern Scene						scene;
 
 #define STB_IMAGE_IMPLEMENTATION // includes func defs
 #include "stb_image.h"
@@ -220,7 +219,7 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = materialLib.FindId( "SKY" );
+	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( "SKY" );
 }
 
 void CreateTerrainSurface( modelSource_t& outModel )
@@ -241,7 +240,7 @@ void CreateTerrainSurface( modelSource_t& outModel )
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = materialLib.FindId( "TERRAIN" );
+	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( "TERRAIN" );
 }
 
 void CreateWaterSurface( modelSource_t& outModel )
@@ -267,7 +266,7 @@ void CreateWaterSurface( modelSource_t& outModel )
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = materialLib.FindId( "WATER" );
+	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( "WATER" );
 }
 
 void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, vec2f& origin, vec2f& size )
@@ -292,5 +291,5 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 	outModel.surfs[ 0 ].vertices[ 3 ].texCoord = vec4f( 1.0f, 1.0f, 0.0f, 0.0f );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = materialLib.FindId( materialName.c_str() );
+	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( materialName.c_str() );
 }

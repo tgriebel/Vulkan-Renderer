@@ -13,17 +13,11 @@
 
 extern Scene scene;
 
-typedef AssetLib< texture_t > AssetLibImages;
-typedef AssetLib< Material > AssetLibMaterials;
-
-extern AssetLib< GpuProgram >	gpuPrograms;
-extern AssetLibImages			textureLib;
-extern AssetLibMaterials		materialLib;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
 AABB Entity::GetBounds() const {
-	const modelSource_t* model = modelLib.Find( modelId );
+	const modelSource_t* model = scene.modelLib.Find( modelId );
 	const AABB& bounds = model->bounds;
 	vec3f origin = GetOrigin();
 	return AABB( bounds.GetMin() + origin, bounds.GetMax() + origin );
@@ -130,7 +124,7 @@ void UpdateScene( const float dt )
 	if ( imguiControls.dbgImageId >= 0 )
 	{
 		scene.FindEntity( "_quadTexDebug" )->ClearRenderFlag( HIDDEN );
-		materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % textureLib.Count() );
+		scene.materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % scene.textureLib.Count() );
 	}
 	else {
 		scene.FindEntity( "_quadTexDebug" )->SetRenderFlag( HIDDEN );

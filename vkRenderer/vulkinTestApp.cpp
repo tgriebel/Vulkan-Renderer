@@ -25,10 +25,6 @@ typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< modelSource_t >	AssetLibModels;
 
-AssetLibGpuProgram					gpuPrograms;
-AssetLibMaterials					materialLib;
-AssetLibImages						textureLib;
-AssetLibModels						modelLib;
 Scene								scene;
 Renderer							renderer;
 Window								window;
@@ -58,9 +54,9 @@ void RenderThread()
 void CheckReloadAssets() {
 	if ( imguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
-		gpuPrograms.Destroy();
-		gpuPrograms.Create();
-		Renderer::GenerateGpuPrograms( gpuPrograms );
+		scene.gpuPrograms.Destroy();
+		scene.gpuPrograms.Create();
+		Renderer::GenerateGpuPrograms( scene.gpuPrograms );
 		renderer.CreatePipelineObjects();
 
 		imguiControls.rebuildShaders = false;
@@ -72,10 +68,10 @@ int main()
 	{
 		// Create assets
 		// TODO: enforce ordering somehow. This comes after programs and textures
-		gpuPrograms.Create();
-		textureLib.Create();
-		materialLib.Create();
-		modelLib.Create();
+		scene.gpuPrograms.Create();
+		scene.textureLib.Create();
+		scene.materialLib.Create();
+		scene.modelLib.Create();
 	}
 	MakeScene();
 

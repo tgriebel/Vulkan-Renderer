@@ -4,13 +4,20 @@
 #include "assetLib.h"
 #include "window.h"
 
-extern AssetLib< modelSource_t > modelLib;
+typedef AssetLib< modelSource_t >	AssetLibModels;
+typedef AssetLib< texture_t >		AssetLibImages;
+typedef AssetLib< Material >		AssetLibMaterials;
+typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 extern Window window;
 
 struct Scene
 {
 	Camera						camera;
 	AssetLib< Entity* >			entities;
+	AssetLibModels				modelLib;
+	AssetLibImages				textureLib;
+	AssetLibMaterials			materialLib;
+	AssetLibGpuProgram			gpuPrograms;
 	light_t						lights[ MaxLights ];
 	float						defaultNear = 1000.0f;
 	float						defaultFar = 0.1f;

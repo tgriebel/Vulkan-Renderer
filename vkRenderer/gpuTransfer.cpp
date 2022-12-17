@@ -3,6 +3,8 @@
 #include <map>
 #include "renderer.h"
 
+extern Scene scene;
+
 void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers )
 {
 	VkBufferImageCopy region{ };
@@ -33,11 +35,11 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 
 void Renderer::UploadTextures()
 {
-	const uint32_t textureCount = textureLib.Count();
+	const uint32_t textureCount = scene.textureLib.Count();
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = textureLib.Find( i );
+		texture_t* texture = scene.textureLib.Find( i );
 		// VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
 		VkImageUsageFlags flags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
@@ -57,13 +59,13 @@ void Renderer::UploadTextures()
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = textureLib.Find( i );
+		texture_t* texture = scene.textureLib.Find( i );
 		GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->info );
 	}
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = textureLib.Find( i );
+		texture_t* texture = scene.textureLib.Find( i );
 		VkImageViewType type;
 		switch ( texture->info.type ) {
 		default:
@@ -87,7 +89,7 @@ void Renderer::UploadModelsToGPU()
 {
 	const VkDeviceSize vbSize = sizeof( VertexInput ) * MaxVertices;
 	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-	const uint32_t modelCount = modelLib.Count();
+	const uint32_t modelCount = scene.modelLib.Count();
 	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
 	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
 
@@ -95,7 +97,7 @@ void Renderer::UploadModelsToGPU()
 	static uint32_t ibBufElements = 0;
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
-		modelSource_t* model = modelLib.Find( m );
+		modelSource_t* model = scene.modelLib.Find( m );
 		for ( uint32_t s = 0; s < model->surfCount; ++s )
 		{
 			surface_t& surf = model->surfs[ s ];

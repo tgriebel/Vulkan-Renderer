@@ -1,14 +1,12 @@
 #include "io.h"
 #include "assetLib.h"
 #include "render_util.h"
+#include "scene.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-extern AssetLib< Material >			materialLib;
-extern AssetLib< texture_t >		textureLib;
-extern AssetLib< modelSource_t >	modelLib;
-extern AssetLib< GpuProgram >		gpuPrograms;
+extern Scene						scene;
 
 std::vector<char> ReadFile( const std::string& filename )
 {
@@ -78,19 +76,19 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			if ( LoadTextureImage( supportedTextures[ i ].c_str(), texture ) ) {
 				texture.uploaded = false;
 				texture.info.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
-				textureLib.Add( supportedTextures[ i ].c_str(), texture );
+				scene.textureLib.Add( supportedTextures[ i ].c_str(), texture );
 			}
 		}
 
 		Material mat;
-		mat.shaders[ DRAWPASS_SHADOW ] = gpuPrograms.RetrieveHdl( "Shadow" );
-		mat.shaders[ DRAWPASS_DEPTH ] = gpuPrograms.RetrieveHdl( "LitDepth" );
-		mat.shaders[ DRAWPASS_OPAQUE ] = gpuPrograms.RetrieveHdl( "LitOpaque" );
-		mat.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = gpuPrograms.RetrieveHdl( "Debug" ); // FIXME: do this with an override
-		mat.shaders[ DRAWPASS_DEBUG_SOLID ] = gpuPrograms.RetrieveHdl( "Debug_Solid" );
-		mat.textures[ 0 ] = textureLib.RetrieveHdl( supportedTextures[ 0 ].c_str() ).Get();
-		mat.textures[ 1 ] = textureLib.RetrieveHdl( supportedTextures[ 1 ].c_str() ).Get();
-		mat.textures[ 2 ] = textureLib.RetrieveHdl( supportedTextures[ 2 ].c_str() ).Get();
+		mat.shaders[ DRAWPASS_SHADOW ] = scene.gpuPrograms.RetrieveHdl( "Shadow" );
+		mat.shaders[ DRAWPASS_DEPTH ] = scene.gpuPrograms.RetrieveHdl( "LitDepth" );
+		mat.shaders[ DRAWPASS_OPAQUE ] = scene.gpuPrograms.RetrieveHdl( "LitOpaque" );
+		mat.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = scene.gpuPrograms.RetrieveHdl( "Debug" ); // FIXME: do this with an override
+		mat.shaders[ DRAWPASS_DEBUG_SOLID ] = scene.gpuPrograms.RetrieveHdl( "Debug_Solid" );
+		mat.textures[ 0 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 0 ].c_str() ).Get();
+		mat.textures[ 1 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 1 ].c_str() ).Get();
+		mat.textures[ 2 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 2 ].c_str() ).Get();
 
 		mat.Kd = rgbTuplef_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
 		mat.Ks = rgbTuplef_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
@@ -102,7 +100,7 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 		mat.d = material.dissolve;
 		mat.Tr = ( 1.0f - material.dissolve );
 		mat.illum = static_cast<float>( material.illum );
-		materialLib.Add( material.name.c_str(), mat );
+		scene.materialLib.Add( material.name.c_str(), mat );
 	}
 
 	modelSource_t model;
@@ -246,12 +244,12 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 		model.surfs[ model.surfCount ].materialId = 0;
 		if ( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) ) {
 			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
-			const int materialId = materialLib.FindId( materials[ shapeMaterial ].name.c_str() );
+			const int materialId = scene.materialLib.FindId( materials[ shapeMaterial ].name.c_str() );
 			if ( materialId >= 0 ) {
 				model.surfs[ model.surfCount ].materialId = materialId;
 			}
 		}
 		++model.surfCount;
 	}
-	return modelLib.Add( objectName.c_str(), model );
+	return scene.modelLib.Add( objectName.c_str(), model );
 }
