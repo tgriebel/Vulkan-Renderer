@@ -108,35 +108,35 @@ void AssetLib< Material >::Create()
 	}
 }
 
-void AssetLib< modelSource_t >::Create()
+void AssetLib< Model >::Create()
 {
 	{
-		modelSource_t model;
+		Model model;
 		CreateSkyBoxSurf( model );
 		scene.modelLib.Add( "_skybox", model );
 	}
 	{
-		modelSource_t model;
+		Model model;
 		CreateTerrainSurface( model );
 		scene.modelLib.Add( "_terrain", model );
 	}
 	{
 		LoadModel( "palm_tree.obj", "palmTree" );
-		modelSource_t* model = scene.modelLib.Find( "palmTree" );
+		Model* model = scene.modelLib.Find( "palmTree" );
 		model->materialId = scene.materialLib.RetrieveHdl( "PALM" ).Get();
 	}
 	{
-		modelSource_t model;
+		Model model;
 		CreateWaterSurface( model );
 		scene.modelLib.Add( "_water", model );
 	}
 	{
-		modelSource_t model;
+		Model model;
 		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
 		scene.modelLib.Add( "_postProcessQuad", model );
 	}
 	{
-		modelSource_t model;
+		Model model;
 		CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 		scene.modelLib.Add( "_quadTexDebug", model );
 	}

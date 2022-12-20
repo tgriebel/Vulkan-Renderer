@@ -79,7 +79,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		return;
 	}
 
-	modelSource_t* source = scene.modelLib.Find( ent.modelHdl );
+	Model* source = scene.modelLib.Find( ent.modelHdl );
 	for ( uint32_t i = 0; i < source->surfCount; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];

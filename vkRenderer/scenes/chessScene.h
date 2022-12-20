@@ -223,10 +223,10 @@ void AssetLib< Material >::Create()
 	}
 }
 
-void AssetLib< modelSource_t >::Create()
+void AssetLib< Model >::Create()
 {
 	{
-		modelSource_t model;
+		Model model;
 		CreateSkyBoxSurf( model );
 		scene.modelLib.Add( "_skybox", model );
 	}
@@ -248,12 +248,12 @@ void AssetLib< modelSource_t >::Create()
 		scene.modelLib.Find( planeHdl )->surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
 	}
 	{
-		modelSource_t model;
+		Model model;
 		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
 		scene.modelLib.Add( "_postProcessQuad", model );
 	}
 	{
-		modelSource_t model;
+		Model model;
 		CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 		scene.modelLib.Add( "_quadTexDebug", model );
 	}

@@ -17,7 +17,7 @@ extern imguiControls_t			imguiControls;
 extern Window					window;
 
 AABB Entity::GetBounds() const {
-	const modelSource_t* model = scene.modelLib.Find( modelHdl );
+	const Model* model = scene.modelLib.Find( modelHdl );
 	const AABB& bounds = model->bounds;
 	vec3f origin = GetOrigin();
 	return AABB( bounds.GetMin() + origin, bounds.GetMax() + origin );

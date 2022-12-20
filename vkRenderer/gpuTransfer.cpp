@@ -83,6 +83,9 @@ void Renderer::UpdateGpuMaterials()
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
 		Material* m = scene.materialLib.Find( i );
+		if( m->uploadId >= 0 ) {
+			continue;
+		}
 		m->uploadId = i;
 
 		materialBufferObject_t& ubo = materialBuffer[i];
@@ -131,11 +134,16 @@ void Renderer::UploadModelsToGPU()
 	static uint32_t ibBufElements = 0;
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
-		modelSource_t* model = scene.modelLib.Find( m );
+		Model* model = scene.modelLib.Find( m );
+		if ( model->uploaded ) {
+			continue;
+		}
+
 		for ( uint32_t s = 0; s < model->surfCount; ++s )
 		{
 			surface_t& surf = model->surfs[ s ];
 			surfUpload_t& upload = model->upload[ s ];
+
 			VkDeviceSize vbCopySize = sizeof( surf.vertices[ 0 ] ) * surf.vertices.size();
 			VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
 
@@ -170,5 +178,6 @@ void Renderer::UploadModelsToGPU()
 			upload.indexCount = indexCount;
 			ibBufElements += indexCount;
 		}
+		model->uploaded = true;
 	}
 }

@@ -150,7 +150,7 @@ void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, s
 	}
 }
 
-void CreateSkyBoxSurf( modelSource_t& outModel )
+void CreateSkyBoxSurf( Model& outModel )
 {
 	const float gridSize = 1.0f;
 	const uint32_t width = 1;
@@ -222,7 +222,7 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "SKY" );
 }
 
-void CreateTerrainSurface( modelSource_t& outModel )
+void CreateTerrainSurface( Model& outModel )
 {
 	GeoBuilder::planeInfo_t info;
 	info.gridSize = vec2f( 0.1f );
@@ -243,7 +243,7 @@ void CreateTerrainSurface( modelSource_t& outModel )
 	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "TERRAIN" );
 }
 
-void CreateWaterSurface( modelSource_t& outModel )
+void CreateWaterSurface( Model& outModel )
 {
 	const float gridSize = 10.f;
 	const uint32_t width = 1;
@@ -269,7 +269,7 @@ void CreateWaterSurface( modelSource_t& outModel )
 	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "WATER" );
 }
 
-void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, vec2f& origin, vec2f& size )
+void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size )
 {
 	GeoBuilder::planeInfo_t info;
 	info.gridSize = size;

@@ -23,7 +23,7 @@
 typedef AssetLib< texture_t >		AssetLibImages;
 typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
-typedef AssetLib< modelSource_t >	AssetLibModels;
+typedef AssetLib< Model >	AssetLibModels;
 
 Scene								scene;
 Renderer							renderer;

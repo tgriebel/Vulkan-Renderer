@@ -103,7 +103,7 @@ hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 		scene.materialLib.Add( material.name.c_str(), mat );
 	}
 
-	modelSource_t model;
+	Model model;
 
 	uint32_t vertexCnt = 0;
 	//model.surfs[ 0 ].vertices.reserve( attrib.vertices.size() );

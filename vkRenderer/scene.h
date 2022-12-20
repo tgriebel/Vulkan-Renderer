@@ -4,7 +4,7 @@
 #include "assetLib.h"
 #include "window.h"
 
-typedef AssetLib< modelSource_t >	AssetLibModels;
+typedef AssetLib< Model >	AssetLibModels;
 typedef AssetLib< texture_t >		AssetLibImages;
 typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
@@ -42,7 +42,7 @@ struct Scene
 
 	void CreateEntity( const hdl_t modelHdl, Entity& entity )
 	{
-		const modelSource_t* model = modelLib.Find( modelHdl );
+		const Model* model = modelLib.Find( modelHdl );
 		entity.modelHdl = modelHdl.Get();
 	}
 

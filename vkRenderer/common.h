@@ -505,6 +505,8 @@ struct surface_t {
 
 struct surfUpload_t
 {
+	surfUpload_t() : vertexCount(0), indexCount(0), vertexOffset(0), firstIndex(0) {}
+
 	uint32_t					vertexCount;
 	uint32_t					indexCount;
 	uint32_t					vertexOffset;
@@ -512,13 +514,17 @@ struct surfUpload_t
 };
 
 
-struct modelSource_t
+class Model
 {
+public:
+	Model() : surfCount( 0 ), uploaded(false) {}
+
 	static const uint32_t		MaxSurfaces = 10;
 	AABB						bounds;
 	surface_t					surfs[ MaxSurfaces ];
 	surfUpload_t				upload[ MaxSurfaces ];
 	uint32_t					surfCount;
+	bool						uploaded;
 };
 
 enum entityFlags_t {
