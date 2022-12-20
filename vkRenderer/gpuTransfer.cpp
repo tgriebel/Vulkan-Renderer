@@ -53,7 +53,7 @@ void Renderer::UploadTextures()
 
 		const uint32_t layers = texture->info.layers;
 		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->info.width ), static_cast<uint32_t>( texture->info.height ), layers );
-		texture->uploaded = true;
+		texture->uploadId = i;
 	}
 	EndSingleTimeCommands( commandBuffer );
 
@@ -73,6 +73,40 @@ void Renderer::UploadTextures()
 		case TEXTURE_TYPE_CUBE:	type = VK_IMAGE_VIEW_TYPE_CUBE;		break;
 		}
 		texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture->info.mipLevels );
+	}
+}
+
+void Renderer::UpdateGpuMaterials()
+{
+	const uint32_t materialCount = scene.materialLib.Count();
+	materialBuffer.resize( materialCount );
+	for ( uint32_t i = 0; i < materialCount; ++i )
+	{
+		Material* m = scene.materialLib.Find( i );
+		m->uploadId = i;
+
+		materialBufferObject_t& ubo = materialBuffer[i];
+		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
+			const hdl_t handle = m->textures[ t ];
+			if ( handle.IsValid() ) {
+				const int uploadId = scene.textureLib.Find( m->textures[ t ] )->uploadId;
+				assert( uploadId >= 0 );
+				ubo.textures[ t ] = uploadId;
+			}
+			else {
+				ubo.textures[ t ] = 0;
+			}
+		}
+		ubo.Kd = vec4f( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
+		ubo.Ks = vec4f( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );
+		ubo.Ka = vec4f( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
+		ubo.Ke = vec4f( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
+		ubo.Tf = vec4f( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
+		ubo.Tr = m->Tr;
+		ubo.Ni = m->Ni;
+		ubo.Ns = m->Ns;
+		ubo.illum = m->illum;
+		ubo.d = m->d;
 	}
 }
 

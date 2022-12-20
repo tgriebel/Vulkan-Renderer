@@ -40,14 +40,14 @@ struct Scene
 		camera.viewportHeight = 2.0f * camera.halfFovY;
 	}
 
-	void CreateEntity( const int32_t modelId, Entity& entity )
+	void CreateEntity( const hdl_t modelHdl, Entity& entity )
 	{
-		const modelSource_t* model = modelLib.Find( modelId );
-		entity.modelId = modelId;
+		const modelSource_t* model = modelLib.Find( modelHdl );
+		entity.modelHdl = modelHdl.Get();
 	}
 
-	Entity* FindEntity( const int entityId ) {
-		return *entities.Find( entityId );
+	Entity* FindEntity( const hdl_t entityHdl ) {
+		return *entities.Find( entityHdl );
 	}
 
 	Entity* FindEntity( const char* name ) {

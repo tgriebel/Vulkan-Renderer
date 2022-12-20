@@ -133,14 +133,14 @@ public:
 
 private:
 	[[nodiscard]]
-	bool IsValidIndex( const int index ) const {
+	bool IsValidIndex( const uint64_t index ) const {
 		return ( index >= 0 ) && ( index < allocations.size() );
 	}
 
 	[[nodiscard]]
 	const allocRecord_t* GetRecord( const hdl_t& handle ) const
 	{
-		const int index = handle.Get();
+		const uint64_t index = handle.Get();
 		if ( IsValidIndex( index ) ) {
 			return &allocations[ index ];
 		}

@@ -9,4 +9,4 @@
 std::vector<char> ReadFile( const std::string& filename );
 GpuProgram LoadProgram( const std::string& csFile );
 GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile );
-int LoadModel( const std::string& fileName, const std::string& objectName );
+hdl_t LoadModel( const std::string& fileName, const std::string& objectName );

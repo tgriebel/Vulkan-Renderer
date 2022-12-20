@@ -44,6 +44,7 @@ public:
 
 	void RenderScene( Scene& scene )
 	{
+		UpdateGpuMaterials();
 		Commit( scene );
 		SubmitFrame();
 
@@ -83,7 +84,7 @@ public:
 			const Material* m = scene.materialLib.Find( i );
 
 			for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-				GpuProgram* prog = scene.gpuPrograms.Find( m->shaders[ passIx ].Get() );
+				GpuProgram* prog = scene.gpuPrograms.Find( m->shaders[ passIx ] );
 				if ( prog == nullptr ) {
 					continue;
 				}
@@ -92,7 +93,7 @@ public:
 				state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
 				state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
 				state.shaders = prog;
-				state.tag = scene.gpuPrograms.FindName( m->shaders[ passIx ].Get() );
+				state.tag = scene.gpuPrograms.FindName( m->shaders[ passIx ] );
 
 				VkRenderPass pass;
 				VkDescriptorSetLayout layout;
@@ -135,6 +136,8 @@ private:
 #else
 	const bool enableValidationLayers = true;
 #endif
+
+	std::vector< materialBufferObject_t > materialBuffer;
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
@@ -330,7 +333,7 @@ private:
 		imguiControls.toneMapColor[ 2 ] = 1.0f;
 		imguiControls.toneMapColor[ 3 ] = 1.0f;
 		imguiControls.dbgImageId = -1;
-		imguiControls.selectedModelId = -1;
+		imguiControls.selectedEntityId = -1;
 		imguiControls.selectedModelOrigin = vec3f( 0.0f );
 	}
 
@@ -1102,7 +1105,7 @@ private:
 				drawSurf_t& surface = shadowView.merged[ surfIx ];
 
 				pipelineObject_t* pipelineObject;
-				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HANDLE ) {
+				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) {
 					continue;
 				}
 				if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
@@ -1176,7 +1179,7 @@ private:
 					drawSurf_t& surface = view.merged[ surfIx ];
 
 					pipelineObject_t* pipelineObject;
-					if ( surface.pipelineObject[ pass ] == INVALID_HANDLE ) {
+					if ( surface.pipelineObject[ pass ] == INVALID_HDL ) {
 						continue;
 					}
 					if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
@@ -1226,7 +1229,7 @@ private:
 			for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 			{
 				drawSurf_t& surface = shadowView.merged[ surfIx ];
-				if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HANDLE ) {
+				if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HDL ) {
 					continue;
 				}
 				pipelineObject_t* pipelineObject;
@@ -1260,8 +1263,8 @@ private:
 			const vec2f ndc = 2.0f * Multiply( screenPoint, vec2f( 1.0f / width, 1.0f / height ) ) - vec2f( 1.0f );
 			
 			char entityName[ 256 ];
-			if ( imguiControls.selectedModelId >= 0 ) {
-				sprintf_s( entityName, "%i: %s", imguiControls.selectedModelId, scene.modelLib.FindName( ( *scene.entities.Find( imguiControls.selectedModelId ) )->modelId ) );
+			if ( imguiControls.selectedEntityId >= 0 ) {
+				sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, scene.modelLib.FindName( ( *scene.entities.Find( imguiControls.selectedEntityId ) )->modelHdl ) );
 			} else {
 				memset( &entityName[ 0 ], 0, 256 );
 			}
@@ -1272,8 +1275,8 @@ private:
 			ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin[ 1 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin[ 2 ], 0.1f, 1.0f );
 
-			if ( imguiControls.selectedModelId >= 0 ) {
-				Entity* entity = scene.FindEntity( imguiControls.selectedModelId );
+			if ( imguiControls.selectedEntityId >= 0 ) {
+				Entity* entity = scene.FindEntity( imguiControls.selectedEntityId );
 				entity->SetOrigin( vec3f(	tempOrigin[ 0 ] + imguiControls.selectedModelOrigin[ 0 ],
 											tempOrigin[ 1 ] + imguiControls.selectedModelOrigin[ 1 ],
 											tempOrigin[ 2 ] + imguiControls.selectedModelOrigin[ 2 ] ) );
@@ -1442,6 +1445,7 @@ private:
 	}
 
 	void UploadTextures();
+	void UpdateGpuMaterials();
 
 	void CreateSyncObjects()
 	{

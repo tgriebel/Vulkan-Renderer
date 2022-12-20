@@ -53,3 +53,4 @@ vkTestProj/shaders_bin/vert.spv
 *.db-shm
 .vs/vkRenderer/v16/.suo
 vkRenderer/x64/Debug/vkRenderer.log
+vkRenderer/x64/Debug/vkRenderer.log

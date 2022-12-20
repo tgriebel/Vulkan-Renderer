@@ -123,7 +123,7 @@ void AssetLib< modelSource_t >::Create()
 	{
 		LoadModel( "palm_tree.obj", "palmTree" );
 		modelSource_t* model = scene.modelLib.Find( "palmTree" );
-		model->materialId = scene.materialLib.FindId( "PALM" );
+		model->materialId = scene.materialLib.RetrieveHdl( "PALM" ).Get();
 	}
 	{
 		modelSource_t model;
@@ -162,7 +162,7 @@ void MakeScene()
 
 	for ( int i = 0; i < palmTreesNum; ++i )
 	{
-		const int palmModelId = scene.modelLib.FindId( "palmTree" );
+		const int palmModelId = scene.modelLib.RetrieveHdl( "palmTree" );
 		scene.CreateEntity( palmModelId, scene.entities[ entId ] );
 		++entId;
 	}

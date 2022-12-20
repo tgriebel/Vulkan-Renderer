@@ -14,11 +14,11 @@ extern Window					window;
 
 gameConfig_t					cfg;
 Chess							chessEngine;
-int								selectedPieceId = -1;
-int								movePieceId = -1;
+Entity*							selectedEntity = nullptr;
+Entity*							movePieceId = nullptr;
 std::vector< moveAction_t >		actions;
-std::vector< int >				pieceEntities;
-std::vector< int >				glowEntities;
+std::vector< hdl_t >			pieceEntities;
+std::vector< hdl_t >			glowEntities;
 
 class PieceEntity : public Entity {
 public:
@@ -31,14 +31,14 @@ public:
 	pieceHandle_t	handle;
 };
 
-int GetTracedEntity( const Ray& ray )
+Entity* GetTracedEntity( const Ray& ray )
 {
-	int closestId = -1;
+	Entity* closestEnt = nullptr;
 	float closestT = FLT_MAX;
-	const int entityNum = static_cast<int>( scene.entities.Count() );
-	for ( int i = 0; i < entityNum; ++i )
+	const uint32_t entityNum = scene.entities.Count();
+	for ( uint32_t i = 0; i < entityNum; ++i )
 	{
-		Entity* ent = scene.FindEntity( i );
+		Entity* ent = *scene.entities.Find( i );
 		if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
 			continue;
 		}
@@ -46,11 +46,11 @@ int GetTracedEntity( const Ray& ray )
 		if ( ent->GetBounds().Intersect( ray, t0, t1 ) ) {
 			if ( t0 < closestT ) {
 				closestT = t0;
-				closestId = i;
+				closestEnt = ent;
 			}
 		}
 	}
-	return closestId;
+	return closestEnt;
 }
 
 struct pieceMappingInfo_t {
@@ -196,17 +196,17 @@ void AssetLib< Material >::Create()
 	{
 		Material material;
 		material.shaders[ DRAWPASS_POST_2D ] = scene.gpuPrograms.RetrieveHdl( "PostProcess" );
-		material.textures[ 0 ] = 0;
-		material.textures[ 1 ] = 1;
+	//	material.textures[ 0 ] = 0;
+	//	material.textures[ 1 ] = 1;
 		Add( "TONEMAP", material );
 	}
 
 	{
 		Material material;
 		material.shaders[ DRAWPASS_POST_2D ] = scene.gpuPrograms.RetrieveHdl( "Image2D" );
-		material.textures[ 0 ] = 0;
-		material.textures[ 1 ] = 1;
-		material.textures[ 2 ] = 2;
+	//	material.textures[ 0 ] = 0;
+	//	material.textures[ 1 ] = 1;
+	//	material.textures[ 2 ] = 2;
 		Add( "IMAGE2D", material );
 	}
 
@@ -244,8 +244,8 @@ void AssetLib< modelSource_t >::Create()
 		LoadModel( "chess_board.obj", "chess_board" );
 	}
 	{
-		const int planeId = LoadModel( "plane.obj", "plane" );
-		scene.modelLib.Find( planeId )->surfs[ 0 ].materialId = scene.materialLib.FindId( "GlowSquare" );
+		const hdl_t planeHdl = LoadModel( "plane.obj", "plane" );
+		scene.modelLib.Find( planeHdl )->surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
 	}
 	{
 		modelSource_t model;
@@ -271,13 +271,13 @@ void MakeScene()
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntity( scene.modelLib.FindId( "_skybox" ), *ent );
+		scene.CreateEntity( scene.modelLib.RetrieveHdl( "_skybox" ), *ent );
 		scene.entities.Add( "_skybox", ent );
 	}
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntity( scene.modelLib.FindId( "chess_board" ), *ent );
+		scene.CreateEntity( scene.modelLib.RetrieveHdl( "chess_board" ), *ent );
 		scene.entities.Add( "chess_board", ent );
 	}
 
@@ -286,33 +286,34 @@ void MakeScene()
 		for ( int j = 0; j < 8; ++j )
 		{
 			PieceEntity* squareEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			scene.CreateEntity( scene.modelLib.FindId( "plane" ), *squareEnt );
+			scene.CreateEntity( scene.modelLib.RetrieveHdl( "plane" ), *squareEnt );
 			squareEnt->SetOrigin( GetSquareCenterForLocation( squareEnt->file, squareEnt->rank ) + vec3f( 0.0f, 0.0f, 0.01f ) );
 			squareEnt->SetFlag( ENT_FLAG_SELECTABLE );
 			squareEnt->handle = -1;
 			std::string name = "plane_";
 			name += std::to_string( i ) + "_" + std::to_string( j );
-			int index = scene.entities.Add( name.c_str(), squareEnt );
-			glowEntities.push_back( index );
+			hdl_t hdl = scene.entities.Add( name.c_str(), squareEnt );
+			glowEntities.push_back( hdl );
 
 			pieceInfo_t pieceInfo = chessEngine.GetInfo( j, i );
 			if ( pieceInfo.onBoard == false ) {
 				continue;
 			}
 			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			scene.CreateEntity( scene.modelLib.FindId( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
+			scene.CreateEntity( scene.modelLib.RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
 			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
-				pieceEnt->materialId = scene.materialLib.FindId( "White.001" );
+				pieceEnt->materialHdl = scene.materialLib.RetrieveHdl( "White.001" );
 			} else {
 				pieceEnt->SetRotation( vec3f( 0.0f, 0.0f, 180.0f ) );
-				pieceEnt->materialId = scene.materialLib.FindId( "Chess_Black.001" );
+				pieceEnt->materialHdl = scene.materialLib.RetrieveHdl( "Chess_Black.001" );
 			}
-			index = scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
-			pieceEntities.push_back( index );
+			hdl = scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
+			pieceEntities.push_back( hdl );
 		}
 	}
+
 	//for ( int i = 0; i < 8; ++i )
 	//{
 	//	{
@@ -333,8 +334,8 @@ void MakeScene()
 	for ( int i = 0; i < MaxLights; ++i )
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntity( scene.modelLib.FindId( "diamond" ), *ent );
-		ent->materialId = scene.materialLib.FindId( "DEBUG_WIRE" );
+		scene.CreateEntity( scene.modelLib.RetrieveHdl( "diamond" ), *ent );
+		ent->materialHdl = scene.materialLib.RetrieveHdl( "DEBUG_WIRE" );
 		ent->SetRenderFlag( WIREFRAME );
 		ent->SetRenderFlag( SKIP_OPAQUE );
 		scene.entities.Add( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str(), ent );
@@ -342,13 +343,13 @@ void MakeScene()
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntity( scene.modelLib.FindId( "_postProcessQuad" ), *ent );
+		scene.CreateEntity( scene.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
 		scene.entities.Add( "_postProcessQuad", ent );
 	}
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntity( scene.modelLib.FindId( "_quadTexDebug" ), *ent );
+		scene.CreateEntity( scene.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
 		scene.entities.Add( "_quadTexDebug", ent );
 	}
 
@@ -393,12 +394,12 @@ void UpdateSceneLocal( const float dt )
 		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
 
 		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
-		selectedPieceId = GetTracedEntity( ray );
+		selectedEntity = GetTracedEntity( ray );
 	}
 
-	if ( selectedPieceId >= 0 )
+	if ( selectedEntity != nullptr )
 	{
-		PieceEntity* selectedPiece = reinterpret_cast<PieceEntity*>( scene.FindEntity( selectedPieceId ) );
+		PieceEntity* selectedPiece = reinterpret_cast<PieceEntity*>( selectedEntity );
 
 		int selectedActionIx = -1;
 		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
@@ -409,9 +410,9 @@ void UpdateSceneLocal( const float dt )
 			}
 		}
 
-		if ( ( selectedActionIx >= 0 ) && ( movePieceId >= 0 ) )
+		if ( ( selectedActionIx > 0 ) && ( movePieceId != nullptr ) )
 		{
-			PieceEntity* movedPiece = reinterpret_cast<PieceEntity*>( scene.FindEntity( movePieceId ) );
+			PieceEntity* movedPiece = reinterpret_cast<PieceEntity*>( movePieceId );
 			const pieceInfo_t movedPieceInfo = chessEngine.GetInfo( GetFileNum( movedPiece->file ), GetRankNum( movedPiece->rank ) );
 			const moveAction_t& action = actions[ selectedActionIx ];
 			
@@ -429,25 +430,23 @@ void UpdateSceneLocal( const float dt )
 		{
 			actions.resize( 0 );
 			chessEngine.EnumerateActions( selectedPiece->handle, actions );
-			movePieceId = selectedPieceId;
+			movePieceId = selectedEntity;
 		}
 		else
 		{
 			selectedActionIx = -1;
-			selectedPieceId = -1;
-			movePieceId = -1;
+			selectedEntity = nullptr;
+			movePieceId = nullptr;
 		}
 	}
 
-	for ( int entityIx = 0; entityIx < pieceEntities.size(); ++entityIx ) {
-		const int hdl = pieceEntities[ entityIx ];
+	for ( uint32_t entityIx = 0; entityIx < pieceEntities.size(); ++entityIx ) {
+		const hdl_t hdl = pieceEntities[ entityIx ];
 		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
-		if ( hdl == selectedPieceId ) {
+		if ( ent == selectedEntity ) {
 			ent->outline = true;
-		//	ent->SetRenderFlag( WIREFRAME );
 		} else {
 			ent->outline = false;
-		//	ent->ClearRenderFlag( WIREFRAME );
 		}
 		const pieceInfo_t info = chessEngine.GetInfo( ent->handle );
 		int x, y;
@@ -455,8 +454,9 @@ void UpdateSceneLocal( const float dt )
 			ent->SetOrigin( GetSquareCenterForLocation( GetFile( x ), GetRank( y ) ) );
 		}
 	}
-	for ( int entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
-		const int hdl = glowEntities[ entityIx ];
+
+	for ( uint32_t entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
+		const hdl_t hdl = glowEntities[ entityIx ];
 		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
 		bool validTile = false;
 		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {

@@ -51,7 +51,7 @@ GpuProgram LoadProgram( const std::string& csFile )
 }
 
 
-int LoadModel( const std::string& fileName, const std::string& objectName )
+hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -74,7 +74,7 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 		for ( int i = 0; i < 3; ++i )
 		{
 			if ( LoadTextureImage( supportedTextures[ i ].c_str(), texture ) ) {
-				texture.uploaded = false;
+				texture.uploadId = -1;
 				texture.info.mipLevels = static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 				scene.textureLib.Add( supportedTextures[ i ].c_str(), texture );
 			}
@@ -86,9 +86,9 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 		mat.shaders[ DRAWPASS_OPAQUE ] = scene.gpuPrograms.RetrieveHdl( "LitOpaque" );
 		mat.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = scene.gpuPrograms.RetrieveHdl( "Debug" ); // FIXME: do this with an override
 		mat.shaders[ DRAWPASS_DEBUG_SOLID ] = scene.gpuPrograms.RetrieveHdl( "Debug_Solid" );
-		mat.textures[ 0 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 0 ].c_str() ).Get();
-		mat.textures[ 1 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 1 ].c_str() ).Get();
-		mat.textures[ 2 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 2 ].c_str() ).Get();
+		mat.textures[ 0 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 0 ].c_str() );
+		mat.textures[ 1 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 1 ].c_str() );
+		mat.textures[ 2 ] = scene.textureLib.RetrieveHdl( supportedTextures[ 2 ].c_str() );
 
 		mat.Kd = rgbTuplef_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
 		mat.Ks = rgbTuplef_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
@@ -241,12 +241,12 @@ int LoadModel( const std::string& fileName, const std::string& objectName )
 			//assert( tsMatrix.IsOrthonormal( 0.01f ) );
 		}
 
-		model.surfs[ model.surfCount ].materialId = 0;
+		model.surfs[ model.surfCount ].materialHdl = INVALID_HDL;
 		if ( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) ) {
 			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
-			const int materialId = scene.materialLib.FindId( materials[ shapeMaterial ].name.c_str() );
-			if ( materialId >= 0 ) {
-				model.surfs[ model.surfCount ].materialId = materialId;
+			const hdl_t materialHdl = scene.materialLib.RetrieveHdl( materials[ shapeMaterial ].name.c_str() );
+			if ( materialHdl.IsValid() ) {
+				model.surfs[ model.surfCount ].materialHdl = materialHdl;
 			}
 		}
 		++model.surfCount;

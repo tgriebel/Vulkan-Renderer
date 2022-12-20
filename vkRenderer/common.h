@@ -75,9 +75,6 @@ const int MAX_FRAMES_STATES = ( MAX_FRAMES_IN_FLIGHT + 1 );
 const std::string ModelPath = "models/";
 const std::string TexturePath = "textures/";
 
-using pipelineHdl_t = uint32_t;
-const uint32_t INVALID_HANDLE = ~0;
-
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 
 class Renderer;
@@ -206,7 +203,7 @@ struct GpuProgram
 
 	shaderSource_t			shaders[ MaxShaders ];
 	VkShaderModule			vk_shaders[ MaxShaders ];
-	pipelineHdl_t			pipeline;
+	hdl_t					pipeline;
 	uint32_t				shaderCount;
 	bool					isCompute;
 };
@@ -219,6 +216,7 @@ struct Material
 
 	hdl_t					textures[ MaxMaterialTextures ];
 	hdl_t					shaders[ DRAWPASS_COUNT ];
+	int32_t					uploadId;
 
 	rgbTuplef_t				Ka;
 	rgbTuplef_t				Ke;
@@ -241,11 +239,12 @@ struct Material
 		illum( 0.0f )
 	{
 		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
-			textures[ i ] = 0;
+			textures[ i ] = INVALID_HDL;
 		}
 		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
 			shaders[ i ] = INVALID_HDL;
 		}
+		uploadId = -1;
 	}
 };
 
@@ -428,7 +427,7 @@ struct texture_t
 	uint8_t*		bytes;
 	uint32_t		sizeBytes;
 	textureInfo_t	info;
-	bool			uploaded;
+	int				uploadId;
 
 	GpuImage		image;
 
@@ -438,7 +437,7 @@ struct texture_t
 		info.channels = 0;
 		info.mipLevels = 0;
 		info.type = TEXTURE_TYPE_UNKNOWN;
-		uploaded = false;
+		uploadId = -1;
 		bytes = nullptr;
 	}
 };
@@ -455,7 +454,7 @@ struct drawSurf_t
 	renderFlags_t		flags;
 	uint8_t				stencilBit;
 
-	pipelineHdl_t		pipelineObject[ DRAWPASS_COUNT ];
+	hdl_t				pipelineObject[ DRAWPASS_COUNT ];
 
 	inline bool operator()( const drawSurf_t& surf ) {
 		return Hash( reinterpret_cast<const uint8_t*>( &surf ), sizeof( surf ) );
@@ -498,7 +497,7 @@ template<> struct std::hash<drawSurf_t> {
 };
 
 struct surface_t {
-	uint32_t					materialId;
+	hdl_t						materialHdl;
 	std::vector<VertexInput>	vertices;
 	std::vector<uint32_t>		indices;
 };
@@ -532,16 +531,16 @@ class Entity
 public:
 	Entity() {
 		matrix = mat4x4f( 1.0f );
-		modelId = -1;
-		materialId = -1;
+		modelHdl = INVALID_HDL;
+		materialHdl = INVALID_HDL;
 		flags = ENT_FLAG_NONE;
 		renderFlags = renderFlags_t::NONE;
 		outline = false;
 	}
 
 	bool			outline;
-	int				modelId;
-	int				materialId;
+	hdl_t			modelHdl;
+	hdl_t			materialHdl;
 
 	AABB			GetBounds() const;
 	vec3f			GetOrigin() const;
@@ -699,7 +698,7 @@ struct imguiControls_t
 	float		shadowStrength;
 	float		toneMapColor[ 4 ];
 	int			dbgImageId;
-	int			selectedModelId;
+	int			selectedEntityId;
 	bool		rebuildShaders;
 	vec3f		selectedModelOrigin;
 };
@@ -773,56 +772,6 @@ struct computeQueue_t
 	VkCommandBuffer				commandBuffer;
 	VkSemaphore					semaphore;
 };
-
-static inline void RandSphere( float& theta, float& phi )
-{
-	const float u = ( (float)rand() / ( RAND_MAX ) );
-	const float v = ( (float)rand() / ( RAND_MAX ) );
-	theta = 2.0f * 3.14159f * u;
-	phi = acos( 2.0f * v - 1.0f );
-}
-
-static inline void RandSpherePoint( const float radius, vec3f& outPoint )
-{
-	float theta;
-	float phi;
-	RandSphere( theta, phi );
-
-	outPoint[ 0 ] = radius * sin( phi ) * cos( theta );
-	outPoint[ 1 ] = radius * sin( phi ) * sin( theta );
-	outPoint[ 2 ] = radius * cos( phi );
-}
-
-static inline void RandPlanePoint( vec2f& outPoint )
-{
-	outPoint[ 0 ] = ( (float) rand() / ( RAND_MAX ) );
-	outPoint[ 1 ] = ( (float) rand() / ( RAND_MAX ) );
-}
-
-// Fowler–Noll–Vo_hash_function - fnv1a - 32bits
-// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-static inline uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes ) {
-	uint32_t result = 2166136261;
-	const uint32_t prime = 16777619;
-	for ( uint32_t i = 0; i < sizeBytes; ++i ) {
-		result = ( result ^ bytes[ i ] ) * prime;
-	}
-	return result;
-}
-
-static inline uint64_t Hash( const std::string& s ) {
-	const int p = 31;
-	const int m = static_cast<int>( 1e9 + 9 );
-	uint64_t hash = 0;
-	uint64_t pN = 1;
-	const int stringLen = static_cast<int>( s.size() );
-	for ( int i = 0; i < stringLen; ++i )
-	{
-		hash = ( hash + ( s[ i ] - (uint64_t)'a' + 1ull ) * pN ) % m;
-		pN = ( pN * p ) % m;
-	}
-	return hash;
-}
 
 static inline vec4f glmToVec4( const glm::vec4& glmVec ) {
 	return vec4f( glmVec.x, glmVec.y, glmVec.z, glmVec.w );

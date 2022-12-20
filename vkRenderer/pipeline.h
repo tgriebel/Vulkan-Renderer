@@ -61,6 +61,6 @@ struct pushConstants_t
 	uint32_t materialId;
 };
 
-bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject );
+bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
-void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, pipelineHdl_t& pipelineObject );
+void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineObject );

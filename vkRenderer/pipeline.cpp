@@ -90,7 +90,7 @@ void CreateDescriptorSets( GpuProgram& program )
 }
 */
 
-bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject )
+bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 {
 	pipelineObject_t* object = pipelineLib.Find( hdl );
 	if( object != nullptr )
@@ -102,11 +102,11 @@ bool GetPipelineObject( pipelineHdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
-void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, pipelineHdl_t& pipelineHdl )
+void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
 	hdl_t assetHdl = pipelineLib.RetrieveHdl( state.tag );
 	if ( assetHdl.IsValid() ) {
-		pipelineHdl = assetHdl.Get();
+		pipelineHdl = assetHdl;
 		return;
 	}
 
@@ -308,7 +308,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	}
 }
 
-void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, pipelineHdl_t& pipelineHdl )
+void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
 	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
 

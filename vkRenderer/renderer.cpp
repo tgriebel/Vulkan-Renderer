@@ -79,11 +79,14 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		return;
 	}
 
-	modelSource_t* source = scene.modelLib.Find( ent.modelId );
+	modelSource_t* source = scene.modelLib.Find( ent.modelHdl );
 	for ( uint32_t i = 0; i < source->surfCount; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		surfUpload_t& upload = source->upload[ i ];
+
+		const Material* material = scene.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source->surfs[ i ].materialHdl );
+		assert( material->uploadId >= 0 );
 
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
@@ -92,22 +95,21 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
 		surf.indicesCnt = upload.indexCount;
-		surf.materialId = ( ent.materialId >= 0 ) ? ent.materialId : source->surfs[ i ].materialId;
+		surf.materialId = material->uploadId;
 		surf.objectId = objectOffset;
 		surf.flags = ent.GetRenderFlags();
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
-			const Material* material = scene.materialLib.Find( surf.materialId );
 			if ( material->shaders[ pass ].IsValid() ) {
-				GpuProgram* prog = scene.gpuPrograms.Find( material->shaders[ pass ].Get() );
+				GpuProgram* prog = scene.gpuPrograms.Find( material->shaders[ pass ] );
 				if ( prog == nullptr ) {
 					continue;
 				}
 				surf.pipelineObject[ pass ] = prog->pipeline;
 			}
 			else {
-				surf.pipelineObject[ pass ] = INVALID_HANDLE;
+				surf.pipelineObject[ pass ] = INVALID_HDL;
 			}
 		}
 
@@ -247,8 +249,6 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		if ( texture->info.type == TEXTURE_TYPE_CUBE ) {
 			imageCubeInfo.push_back( info );
 
-			// FIXME: HACK: the id from the texture lib won't match the id in the desc set unless this contains a stub
-			// otherwise the ids shift. There needs to be a remapping somewhere
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info2d.imageView = scene.textureLib.GetDefault()->image.vk_view;
@@ -678,31 +678,6 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		const drawSurf_t& surf = shadowView.merged[ shadowView.instances[ i ].surfId ];
 		const uint32_t objectId = ( shadowView.instances[ i ].id + surf.objectId );
 		uboBuffer[ objectId ] = ubo;
-	}
-
-	std::vector< materialBufferObject_t > materialBuffer;
-	materialBuffer.reserve( scene.materialLib.Count() );
-	int materialAllocIx = 0;
-	const uint32_t materialCount = scene.materialLib.Count();
-	for ( uint32_t i = 0; i < scene.materialLib.Count(); ++i )
-	{
-		const Material* m = scene.materialLib.Find( i );
-
-		materialBufferObject_t ubo{};
-		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
-			ubo.textures[ t ] = m->textures[ t ].Get();
-		}
-		ubo.Kd = vec4f( m->Kd.r, m->Kd.g, m->Kd.b, 1.0f );
-		ubo.Ks = vec4f( m->Ks.r, m->Ks.g, m->Ks.b, 1.0f );
-		ubo.Ka = vec4f( m->Ka.r, m->Ka.g, m->Ka.b, 1.0f );
-		ubo.Ke = vec4f( m->Ke.r, m->Ke.g, m->Ke.b, 1.0f );
-		ubo.Tf = vec4f( m->Tf.r, m->Tf.g, m->Tf.b, 1.0f );
-		ubo.Tr = m->Tr;
-		ubo.Ni = m->Ni;
-		ubo.Ns = m->Ns;
-		ubo.illum = m->illum;
-		ubo.d = m->d;
-		materialBuffer.push_back( ubo );
 	}
 
 	std::vector< light_t > lightBuffer;

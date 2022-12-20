@@ -42,7 +42,7 @@ bool LoadTextureImage( const char * texturePath, texture_t& texture )
 	texture.info.channels	= texChannels;
 	texture.info.layers		= 1;
 	texture.info.type		= TEXTURE_TYPE_2D;
-	texture.uploaded		= false;
+	texture.uploadId		= -1;
 	texture.info.mipLevels	= static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 	texture.sizeBytes		= ( texWidth * texHeight * 4 );
 	texture.bytes = new uint8_t[ texture.sizeBytes ];
@@ -117,7 +117,7 @@ bool LoadTextureCubeMapImage( const char* textureBasePath, const char* ext, text
 	texture.info.channels	= texChannels;
 	texture.info.layers		= 6;
 	texture.info.type		= TEXTURE_TYPE_CUBE;
-	texture.uploaded		= false;
+	texture.uploadId		= -1;
 	texture.info.mipLevels	= static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
 	texture.bytes			= bytes;
 	texture.sizeBytes		= sizeBytes;
@@ -219,7 +219,7 @@ void CreateSkyBoxSurf( modelSource_t& outModel )
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( "SKY" );
+	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "SKY" );
 }
 
 void CreateTerrainSurface( modelSource_t& outModel )
@@ -240,7 +240,7 @@ void CreateTerrainSurface( modelSource_t& outModel )
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( "TERRAIN" );
+	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "TERRAIN" );
 }
 
 void CreateWaterSurface( modelSource_t& outModel )
@@ -266,7 +266,7 @@ void CreateWaterSurface( modelSource_t& outModel )
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( "WATER" );
+	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "WATER" );
 }
 
 void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outModel, vec2f& origin, vec2f& size )
@@ -291,5 +291,5 @@ void CreateQuadSurface2D( const std::string& materialName, modelSource_t& outMod
 	outModel.surfs[ 0 ].vertices[ 3 ].texCoord = vec4f( 1.0f, 1.0f, 0.0f, 0.0f );
 
 	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialId = scene.materialLib.FindId( materialName.c_str() );
+	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( materialName.c_str() );
 }
