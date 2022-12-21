@@ -34,6 +34,7 @@
 #include <handle.h>
 
 #include <color.h>
+#include <material.h>
 
 #define USE_IMGUI
 
@@ -209,45 +210,6 @@ struct GpuProgram
 };
 
 struct pipelineObject_t;
-
-struct Material
-{
-	static const uint32_t MaxMaterialTextures = 8;
-
-	hdl_t					textures[ MaxMaterialTextures ];
-	hdl_t					shaders[ DRAWPASS_COUNT ];
-	int32_t					uploadId;
-
-	rgbTuplef_t				Ka;
-	rgbTuplef_t				Ke;
-	rgbTuplef_t				Kd;
-	rgbTuplef_t				Ks;
-	rgbTuplef_t				Tf;
-	float					Tr;
-	float					Ns;
-	float					Ni;
-	float					d;
-	float					illum;
-
-	bool					textured;
-
-	Material() :
-		Tr( 0.0f ),
-		Ns( 0.0f ),
-		Ni( 0.0f ),
-		d( 1.0f ),
-		illum( 0.0f )
-	{
-		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
-			textures[ i ] = INVALID_HDL;
-		}
-		for ( int i = 0; i < DRAWPASS_COUNT; ++i ) {
-			shaders[ i ] = INVALID_HDL;
-		}
-		uploadId = -1;
-	}
-};
-
 
 template<> struct std::hash<VertexInput>
 {
@@ -496,16 +458,16 @@ template<> struct std::hash<drawSurf_t> {
 	}
 };
 
-struct surface_t {
+struct modelSurface_t {
 	hdl_t						materialHdl;
 	std::vector<VertexInput>	vertices;
 	std::vector<uint32_t>		indices;
 };
 
 
-struct surfUpload_t
+struct surfaceUpload_t
 {
-	surfUpload_t() : vertexCount(0), indexCount(0), vertexOffset(0), firstIndex(0) {}
+	surfaceUpload_t() : vertexCount(0), indexCount(0), vertexOffset(0), firstIndex(0) {}
 
 	uint32_t					vertexCount;
 	uint32_t					indexCount;
@@ -521,8 +483,8 @@ public:
 
 	static const uint32_t		MaxSurfaces = 10;
 	AABB						bounds;
-	surface_t					surfs[ MaxSurfaces ];
-	surfUpload_t				upload[ MaxSurfaces ];
+	modelSurface_t				surfs[ MaxSurfaces ];
+	surfaceUpload_t				upload[ MaxSurfaces ];
 	uint32_t					surfCount;
 	bool						uploaded;
 };

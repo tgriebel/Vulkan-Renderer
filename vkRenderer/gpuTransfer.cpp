@@ -141,8 +141,8 @@ void Renderer::UploadModelsToGPU()
 
 		for ( uint32_t s = 0; s < model->surfCount; ++s )
 		{
-			surface_t& surf = model->surfs[ s ];
-			surfUpload_t& upload = model->upload[ s ];
+			modelSurface_t& surf = model->surfs[ s ];
+			surfaceUpload_t& upload = model->upload[ s ];
 
 			VkDeviceSize vbCopySize = sizeof( surf.vertices[ 0 ] ) * surf.vertices.size();
 			VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
