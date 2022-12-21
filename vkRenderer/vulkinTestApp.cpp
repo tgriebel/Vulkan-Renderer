@@ -8,7 +8,7 @@
 #include "common.h"
 #include "render_util.h"
 #include "deviceContext.h"
-#include "camera.h"
+#include <camera.h>
 #include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"

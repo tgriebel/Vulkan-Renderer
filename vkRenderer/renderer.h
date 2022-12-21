@@ -1,11 +1,12 @@
 #pragma once
 
+#include <camera.h>
+
 #include "common.h"
 #include "window.h"
 #include "common.h"
 #include "render_util.h"
 #include "deviceContext.h"
-#include "camera.h"
 #include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"

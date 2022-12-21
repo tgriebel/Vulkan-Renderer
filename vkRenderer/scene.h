@@ -1,6 +1,8 @@
 #pragma once
+
+#include <camera.h>
+
 #include "common.h"
-#include "camera.h"
 #include "assetLib.h"
 #include "window.h"
 

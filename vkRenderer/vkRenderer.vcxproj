@@ -177,7 +177,6 @@
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="render_util.h" />
     <ClInclude Include="window.h" />
-    <ClInclude Include="camera.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="deviceContext.h" />
