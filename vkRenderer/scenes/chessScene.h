@@ -231,7 +231,9 @@ void AssetLib< Model >::Create()
 		scene.modelLib.Add( "_skybox", model );
 	}
 	{
-		LoadModel( "axis.obj", "axis" );
+		// FIXME: TEMP
+		WriteModel( "axis.obj", LoadModel( "axis.obj", "axis" ) );
+
 		LoadModel( "cube.obj", "cube" );
 		LoadModel( "diamond.obj", "diamond" );
 		LoadModel( "sphere.obj", "sphere" );

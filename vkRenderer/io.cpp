@@ -6,7 +6,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-extern Scene						scene;
+extern Scene	scene;
 
 std::vector<char> ReadFile( const std::string& filename )
 {
@@ -252,4 +252,17 @@ hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 		++model.surfCount;
 	}
 	return scene.modelLib.Add( objectName.c_str(), model );
+}
+
+bool WriteModel( const std::string& fileName, hdl_t modelHdl ) {
+	Model* model = scene.modelLib.Find( modelHdl );
+	if( model == nullptr ) {
+		return false;
+	}
+	
+	Serializer* s = new Serializer( MB( 8 ), serializeMode_t::STORE );
+	s->Next( Ref( model->bounds.max[0] ) );
+	s->Next( Ref( model->bounds.max[1] ) );
+	s->Next( Ref( model->bounds.max[2] ) );
+	return true;
 }

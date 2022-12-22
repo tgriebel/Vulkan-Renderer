@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\thoma\source\repos\GfxCore;C:\Users\thoma\source\repos\Chess\Chess;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\thoma\source\repos\GfxCore\;C:\Users\thoma\source\repos\Chess\Chess;C:\Users\thoma\source\repos\SysCore\SysCore;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -243,6 +243,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\GfxCore\GfxCore.vcxproj">
       <Project>{3de9a00c-b04b-43ab-943d-1973c47dece3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\SysCore\SysCore\SysCore.vcxproj">
+      <Project>{01728a43-da97-4bc6-8edf-f17cb75e7967}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
