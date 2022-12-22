@@ -124,7 +124,7 @@ void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBuff
 
 void Renderer::UploadModelsToGPU()
 {
-	const VkDeviceSize vbSize = sizeof( VertexInput ) * MaxVertices;
+	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
 	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
 	const uint32_t modelCount = scene.modelLib.Count();
 	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
@@ -144,39 +144,60 @@ void Renderer::UploadModelsToGPU()
 			modelSurface_t& surf = model->surfs[ s ];
 			surfaceUpload_t& upload = model->upload[ s ];
 
-			VkDeviceSize vbCopySize = sizeof( surf.vertices[ 0 ] ) * surf.vertices.size();
-			VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
-
 			upload.vertexOffset = vbBufElements;
 			upload.firstIndex = ibBufElements;
 
-			// VB Copy
-			stagingBuffer.Reset();
-			stagingBuffer.CopyData( surf.vertices.data(), static_cast<size_t>( vbCopySize ) );
+			// Upload Vertex Buffer
+			{
+				// Create vertex stream data
+				std::vector<vsInput_t> vertexStream;
+				const uint32_t vertexCount = static_cast<uint32_t>( surf.vertices.size() );
+				vertexStream.resize( vertexCount );
+				for ( uint32_t vIx = 0; vIx < vertexCount; ++vIx )
+				{
+					vertexStream[vIx].pos = Trunc<4,1>( surf.vertices[vIx].pos );
+					vertexStream[vIx].color = ColorToVector( surf.vertices[vIx].color );
+					vertexStream[vIx].normal = surf.vertices[vIx].normal;
+					vertexStream[vIx].tangent = surf.vertices[vIx].tangent;
+					vertexStream[vIx].bitangent = surf.vertices[vIx].bitangent;
+					vertexStream[vIx].texCoord[0] = surf.vertices[vIx].uv[0];
+					vertexStream[vIx].texCoord[1] = surf.vertices[vIx].uv[1];
+					vertexStream[vIx].texCoord[2] = surf.vertices[vIx].uv2[0];
+					vertexStream[vIx].texCoord[3] = surf.vertices[vIx].uv2[1];
+				}
 
-			VkBufferCopy vbCopyRegion{ };
-			vbCopyRegion.size = vbCopySize;
-			vbCopyRegion.srcOffset = 0;
-			vbCopyRegion.dstOffset = vb.GetSize();
-			CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
+				// Copy stream to staging buffer
+				VkDeviceSize vbCopySize = sizeof( vertexStream[0] ) * vertexCount;
+				stagingBuffer.Reset();
+				stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
 
-			const uint32_t vertexCount = static_cast<uint32_t>( surf.vertices.size() );
-			upload.vertexCount = vertexCount;
-			vbBufElements += vertexCount;
+				VkBufferCopy vbCopyRegion{ };
+				vbCopyRegion.size = vbCopySize;
+				vbCopyRegion.srcOffset = 0;
+				vbCopyRegion.dstOffset = vb.GetSize();
+				CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
 
-			// IB Copy
-			stagingBuffer.Reset();
-			stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
+				upload.vertexCount = vertexCount;
+				vbBufElements += vertexCount;
+			}
 
-			VkBufferCopy ibCopyRegion{ };
-			ibCopyRegion.size = ibCopySize;
-			ibCopyRegion.srcOffset = 0;
-			ibCopyRegion.dstOffset = ib.GetSize();
-			CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
+			// Upload Index Buffer
+			{
+				// IB Copy
+				VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
+				stagingBuffer.Reset();
+				stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
-			const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
-			upload.indexCount = indexCount;
-			ibBufElements += indexCount;
+				VkBufferCopy ibCopyRegion{ };
+				ibCopyRegion.size = ibCopySize;
+				ibCopyRegion.srcOffset = 0;
+				ibCopyRegion.dstOffset = ib.GetSize();
+				CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
+
+				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
+				upload.indexCount = indexCount;
+				ibBufElements += indexCount;
+			}
 		}
 		model->uploaded = true;
 	}

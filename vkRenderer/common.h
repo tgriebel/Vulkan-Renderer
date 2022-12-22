@@ -35,6 +35,7 @@
 
 #include <color.h>
 #include <material.h>
+#include <geom.h>
 
 #define USE_IMGUI
 
@@ -80,7 +81,7 @@ uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 
 class Renderer;
 
-struct VertexInput
+struct vsInput_t
 {
 	vec3f pos;
 	vec4f color;
@@ -88,73 +89,6 @@ struct VertexInput
 	vec3f tangent;
 	vec3f bitangent;
 	vec4f texCoord;
-
-	static VkVertexInputBindingDescription GetBindingDescription()
-	{
-		VkVertexInputBindingDescription bindingDescription{ };
-		bindingDescription.binding = 0;
-		bindingDescription.stride = sizeof( VertexInput );
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-		return bindingDescription;
-	}
-
-	static const uint32_t attribMax = 6;
-	static std::array<VkVertexInputAttributeDescription, attribMax> GetAttributeDescriptions()
-	{
-		uint32_t attribId = 0;
-
-		std::array<VkVertexInputAttributeDescription, attribMax> attributeDescriptions{ };
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, pos );
-		++attribId;
-
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, color );
-		++attribId;
-
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, normal );
-		++attribId;
-
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, tangent );
-		++attribId;
-
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, bitangent );
-		++attribId;
-
-		attributeDescriptions[ attribId ].binding = 0;
-		attributeDescriptions[ attribId ].location = attribId;
-		attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-		attributeDescriptions[ attribId ].offset = offsetof( VertexInput, texCoord );
-		++attribId;
-
-		assert( attribId == attribMax );
-
-		return attributeDescriptions;
-	}
-
-	bool operator==( const VertexInput& other ) const
-	{
-		return	( pos == other.pos ) && 
-				( color == other.color ) &&
-				( normal == other.normal ) &&
-				( tangent == other.tangent ) &&
-				( bitangent == other.bitangent ) &&
-				( texCoord == other.texCoord );
-	}
 };
 
 
@@ -211,11 +145,11 @@ struct GpuProgram
 
 struct pipelineObject_t;
 
-template<> struct std::hash<VertexInput>
+template<> struct std::hash<vertex_t>
 {
-	size_t operator()( VertexInput const& vertex ) const
+	size_t operator()( vertex_t const& vertex ) const
 	{
-		return Hash( reinterpret_cast< const uint8_t* >( &vertex ), sizeof( VertexInput ) );
+		return Hash( reinterpret_cast< const uint8_t* >( &vertex ), sizeof( vertex_t ) );
 	}
 };
 
@@ -460,7 +394,7 @@ template<> struct std::hash<drawSurf_t> {
 
 struct modelSurface_t {
 	hdl_t						materialHdl;
-	std::vector<VertexInput>	vertices;
+	std::vector<vertex_t>		vertices;
 	std::vector<uint32_t>		indices;
 };
 

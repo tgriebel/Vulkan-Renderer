@@ -111,11 +111,11 @@ hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 
 	for ( const auto& shape : shapes )
 	{
-		std::unordered_map<VertexInput, uint32_t> uniqueVertices{};
+		std::unordered_map<vertex_t, uint32_t> uniqueVertices{};
 		std::unordered_map< uint32_t, uint32_t > indexFaceCount{};
 		for ( const auto& index : shape.mesh.indices )
 		{
-			VertexInput vertex{ };
+			vertex_t vertex{ };
 
 			vertex.pos[ 0 ] = attrib.vertices[ 3 * index.vertex_index + 0 ];
 			vertex.pos[ 1 ] = attrib.vertices[ 3 * index.vertex_index + 1 ];
@@ -123,10 +123,10 @@ hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 
 			model.bounds.Expand( vec3f( vertex.pos[ 0 ], vertex.pos[ 1 ], vertex.pos[ 2 ] ) );
 
-			vertex.texCoord[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
-			vertex.texCoord[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
-			vertex.texCoord[ 2 ] = 0.0f;
-			vertex.texCoord[ 3 ] = 0.0f;
+			vertex.uv[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
+			vertex.uv[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
+			vertex.uv2[ 0 ] = 0.0f;
+			vertex.uv2[ 1 ] = 0.0f;
 
 			vertex.normal[0] = attrib.normals[ 3 * index.normal_index + 0 ];
 			vertex.normal[1] = attrib.normals[ 3 * index.normal_index + 1 ];
@@ -165,18 +165,18 @@ hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 			weights[ 1 ] = 1.0f;//( 1.0f / indexFaceCount[ indices[ 1 ] ] );
 			weights[ 2 ] = 1.0f;//( 1.0f / indexFaceCount[ indices[ 2 ] ] );
 
-			VertexInput& v0 = model.surfs[ model.surfCount ].vertices[ indices[ 0 ] ];
-			VertexInput& v1 = model.surfs[ model.surfCount ].vertices[ indices[ 1 ] ];
-			VertexInput& v2 = model.surfs[ model.surfCount ].vertices[ indices[ 2 ] ];
+			vertex_t& v0 = model.surfs[ model.surfCount ].vertices[ indices[ 0 ] ];
+			vertex_t& v1 = model.surfs[ model.surfCount ].vertices[ indices[ 1 ] ];
+			vertex_t& v2 = model.surfs[ model.surfCount ].vertices[ indices[ 2 ] ];
 
-			const vec4f uvEdgeDt0 = ( v1.texCoord - v0.texCoord );
-			const vec4f uvEdgeDt1 = ( v2.texCoord - v0.texCoord );
-			float uDt = ( v1.texCoord[ 0 ] - v0.texCoord[ 0 ] );
+			const vec2f uvEdgeDt0 = ( v1.uv - v0.uv );
+			const vec2f uvEdgeDt1 = ( v2.uv - v0.uv );
+			float uDt = ( v1.uv[ 0 ] - v0.uv[ 0 ] );
 
 			const float r = 1.0f / ( uvEdgeDt0[ 0 ] * uvEdgeDt1[ 1 ] - uvEdgeDt1[ 0 ] * uvEdgeDt0[ 1 ] );
 
-			const vec3f edge0 = ( v1.pos - v0.pos );
-			const vec3f edge1 = ( v2.pos - v0.pos );
+			const vec3f edge0 = Trunc<4, 1>( v1.pos - v0.pos );
+			const vec3f edge1 = Trunc<4, 1>( v2.pos - v0.pos );
 
 			const vec3f faceNormal = Cross( edge0, edge1 ).Normalize();
 			if ( faceNormal.Length() < 0.001f ) {
@@ -207,7 +207,7 @@ hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
 
 		const int vertexCount = static_cast<int>( model.surfs[ model.surfCount ].vertices.size() );
 		for ( int i = 0; i < vertexCount; ++i ) {
-			VertexInput& v = model.surfs[ model.surfCount ].vertices[ i ];
+			vertex_t& v = model.surfs[ model.surfCount ].vertices[ i ];
 			v.tangent.FlushDenorms();
 			v.bitangent.FlushDenorms();
 			v.normal.FlushDenorms();

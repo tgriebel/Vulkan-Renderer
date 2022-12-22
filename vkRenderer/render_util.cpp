@@ -129,16 +129,17 @@ void CreateShaders( GpuProgram& prog )
 
 }
 
-void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<VertexInput>& vb, std::vector<uint32_t>& ib )
+void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vertex_t>& vb, std::vector<uint32_t>& ib )
 {
 	vb.reserve( gb.vb.size() );
 	for ( const GeoBuilder::vertex_t& v : gb.vb )
 	{
-		VertexInput vert;
-		vert.pos = vec3f( v.pos[ 0 ], v.pos[ 1 ], v.pos[ 2 ] );
-		vert.color = vec4f( v.color[ 0 ], v.color[ 1 ], v.color[ 2 ], v.color[ 3 ] );
+		vertex_t vert;
+		vert.pos = vec4f( v.pos[ 0 ], v.pos[ 1 ], v.pos[ 2 ], 0.0f );
+		vert.color = Color( v.color[ 0 ], v.color[ 1 ], v.color[ 2 ], v.color[ 3 ] );
 		vert.normal = vec3f( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
-		vert.texCoord = vec4f( v.texCoord[ 0 ], v.texCoord[ 1 ], 0.0f, 0.0f );
+		vert.uv = vec2f( v.texCoord[ 0 ], v.texCoord[ 1 ] );
+		vert.uv2 = vec2f( 0.0f, 0.0f );
 
 		vb.push_back( vert );
 	}
@@ -285,10 +286,14 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
-	outModel.surfs[ 0 ].vertices[ 0 ].texCoord = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 1 ].texCoord = vec4f( 1.0f, 0.0f, 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 2 ].texCoord = vec4f( 0.0f, 1.0f, 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 3 ].texCoord = vec4f( 1.0f, 1.0f, 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].uv2 = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].uv2 = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].uv2 = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].uv2 = vec2f( 0.0f, 0.0f );
 
 	outModel.surfCount = 1;
 	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( materialName.c_str() );
