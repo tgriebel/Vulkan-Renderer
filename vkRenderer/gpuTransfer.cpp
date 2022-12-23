@@ -141,7 +141,7 @@ void Renderer::UploadModelsToGPU()
 
 		for ( uint32_t s = 0; s < model->surfCount; ++s )
 		{
-			modelSurface_t& surf = model->surfs[ s ];
+			Surface& surf = model->surfs[ s ];
 			surfaceUpload_t& upload = model->upload[ s ];
 
 			upload.vertexOffset = vbBufElements;

@@ -105,7 +105,7 @@ public:
 	void Reset()
 	{
 		for ( int i = 0; i < static_cast<int>( handles.size() ); ++i ) {
-			handles[ i ].Reassign( -1 );
+			handles[ i ] = INVALID_HDL;
 		}
 		offset = 0;
 		allocations.resize( 0 );

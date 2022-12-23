@@ -4,7 +4,7 @@
 
 struct GpuBuffer
 {
-	allocVk_t alloc;
+	AllocationVk alloc;
 
 	void Reset() {
 		offset = 0;

@@ -80,6 +80,7 @@ const std::string TexturePath = "textures/";
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 
 class Renderer;
+class Serializer;
 
 struct vsInput_t
 {
@@ -293,13 +294,13 @@ private:
 };
 
 using AllocatorVkMemory = Allocator< VkDeviceMemory >;
-using allocVk_t = alloc_t< AllocatorVkMemory >;
+using AllocationVk = alloc_t< AllocatorVkMemory >;
 
 struct GpuImage
 {
 	VkImage			vk_image;
 	VkImageView		vk_view;
-	allocVk_t		allocation;
+	AllocationVk	allocation;
 };
 
 enum textureType_t
@@ -392,10 +393,13 @@ template<> struct std::hash<drawSurf_t> {
 	}
 };
 
-struct modelSurface_t {
+class Surface {
+public:
 	hdl_t						materialHdl;
 	std::vector<vertex_t>		vertices;
 	std::vector<uint32_t>		indices;
+
+	void Serialize( Serializer* serializer );
 };
 
 
@@ -412,15 +416,18 @@ struct surfaceUpload_t
 
 class Model
 {
+	static const uint32_t Version = 1;
 public:
 	Model() : surfCount( 0 ), uploaded(false) {}
 
 	static const uint32_t		MaxSurfaces = 10;
 	AABB						bounds;
-	modelSurface_t				surfs[ MaxSurfaces ];
+	Surface						surfs[ MaxSurfaces ];
 	surfaceUpload_t				upload[ MaxSurfaces ];
 	uint32_t					surfCount;
 	bool						uploaded;
+
+	void Serialize( Serializer* serializer );
 };
 
 enum entityFlags_t {

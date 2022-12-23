@@ -1341,7 +1341,7 @@ private:
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
 
-		allocVk_t alloc;
+		AllocationVk alloc;
 		if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
 			vkBindImageMemory( context.device, image.vk_image, memory.GetMemoryResource(), alloc.GetOffset() );
 		} else {
