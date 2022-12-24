@@ -15,18 +15,19 @@ static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
 void Renderer::Commit( const Scene& scene )
 {
 	renderView.committedModelCnt = 0;
-	for ( uint32_t i = 0; i < scene.entities.Count(); ++i ) {
-		CommitModel( renderView, **scene.entities.Find( i ), 0 );
+	const uint32_t entCount = static_cast<uint32_t>( scene.entities.size() );
+	for ( uint32_t i = 0; i < entCount; ++i ) {
+		CommitModel( renderView, *scene.entities[i], 0 );
 	}
 	MergeSurfaces( renderView );
 
 	shadowView.committedModelCnt = 0;
-	for ( uint32_t i = 0; i < scene.entities.Count(); ++i )
+	for ( uint32_t i = 0; i < entCount; ++i )
 	{
-		if ( ( *scene.entities.Find( i ) )->HasRenderFlag( NO_SHADOWS ) ) {
+		if ( ( scene.entities[i] )->HasRenderFlag( NO_SHADOWS ) ) {
 			continue;
 		}
-		CommitModel( shadowView, **scene.entities.Find( i ), MaxModels );
+		CommitModel( shadowView, *scene.entities[i], MaxModels );
 	}
 	MergeSurfaces( shadowView );
 

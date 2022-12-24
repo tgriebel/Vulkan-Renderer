@@ -449,6 +449,7 @@ public:
 		outline = false;
 	}
 
+	std::string		dbgName;
 	bool			outline;
 	hdl_t			modelHdl;
 	hdl_t			materialHdl;

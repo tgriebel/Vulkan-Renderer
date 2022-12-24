@@ -18,8 +18,8 @@ Chess							chessEngine;
 Entity*							selectedEntity = nullptr;
 Entity*							movePieceId = nullptr;
 std::vector< moveAction_t >		actions;
-std::vector< hdl_t >			pieceEntities;
-std::vector< hdl_t >			glowEntities;
+std::vector< uint32_t >			pieceEntities;
+std::vector< uint32_t >			glowEntities;
 
 class PieceEntity : public Entity {
 public:
@@ -36,10 +36,10 @@ Entity* GetTracedEntity( const Ray& ray )
 {
 	Entity* closestEnt = nullptr;
 	float closestT = FLT_MAX;
-	const uint32_t entityNum = scene.entities.Count();
+	const uint32_t entityNum = static_cast<uint32_t>( scene.entities.size() );
 	for ( uint32_t i = 0; i < entityNum; ++i )
 	{
-		Entity* ent = *scene.entities.Find( i );
+		Entity* ent = scene.entities[i];
 		if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
 			continue;
 		}
@@ -292,13 +292,15 @@ void MakeScene()
 	{
 		Entity* ent = new Entity();
 		scene.CreateEntity( scene.modelLib.RetrieveHdl( "_skybox" ), *ent );
-		scene.entities.Add( "_skybox", ent );
+		ent->dbgName = "_skybox";
+		scene.entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
 		scene.CreateEntity( scene.modelLib.RetrieveHdl( "chess_board" ), *ent );
-		scene.entities.Add( "chess_board", ent );
+		ent->dbgName = "chess_board";
+		scene.entities.push_back( ent );
 	}
 
 	for ( int i = 0; i < 8; ++i )
@@ -312,8 +314,10 @@ void MakeScene()
 			squareEnt->handle = -1;
 			std::string name = "plane_";
 			name += std::to_string( i ) + "_" + std::to_string( j );
-			hdl_t hdl = scene.entities.Add( name.c_str(), squareEnt );
-			glowEntities.push_back( hdl );
+
+			squareEnt->dbgName = name.c_str();
+			glowEntities.push_back( static_cast<uint32_t>( scene.entities.size() ) );
+			scene.entities.push_back( squareEnt );
 
 			pieceInfo_t pieceInfo = chessEngine.GetInfo( j, i );
 			if ( pieceInfo.onBoard == false ) {
@@ -329,8 +333,9 @@ void MakeScene()
 				pieceEnt->SetRotation( vec3f( 0.0f, 0.0f, 180.0f ) );
 				pieceEnt->materialHdl = scene.materialLib.RetrieveHdl( "Chess_Black.001" );
 			}
-			hdl = scene.entities.Add( GetName( pieceInfo ).c_str(), pieceEnt );
-			pieceEntities.push_back( hdl );
+			pieceEnt->dbgName = GetName( pieceInfo ).c_str();
+			pieceEntities.push_back( static_cast<uint32_t>( scene.entities.size() ) );
+			scene.entities.push_back( pieceEnt );
 		}
 	}
 
@@ -358,19 +363,22 @@ void MakeScene()
 		ent->materialHdl = scene.materialLib.RetrieveHdl( "DEBUG_WIRE" );
 		ent->SetRenderFlag( WIREFRAME );
 		ent->SetRenderFlag( SKIP_OPAQUE );
-		scene.entities.Add( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str(), ent );
+		ent->dbgName = ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str();
+		scene.entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
 		scene.CreateEntity( scene.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
-		scene.entities.Add( "_postProcessQuad", ent );
+		ent->dbgName = "_postProcessQuad";
+		scene.entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
 		scene.CreateEntity( scene.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
-		scene.entities.Add( "_quadTexDebug", ent );
+		ent->dbgName = "_quadTexDebug";
+		scene.entities.push_back( ent );
 	}
 
 	{
@@ -460,9 +468,9 @@ void UpdateSceneLocal( const float dt )
 		}
 	}
 
-	for ( uint32_t entityIx = 0; entityIx < pieceEntities.size(); ++entityIx ) {
-		const hdl_t hdl = pieceEntities[ entityIx ];
-		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
+	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( pieceEntities.size() ); ++entityIx ) {
+		const uint32_t pieceIx = pieceEntities[ entityIx ];
+		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.entities[ pieceIx ] );
 		if ( ent == selectedEntity ) {
 			ent->outline = true;
 		} else {
@@ -475,9 +483,9 @@ void UpdateSceneLocal( const float dt )
 		}
 	}
 
-	for ( uint32_t entityIx = 0; entityIx < glowEntities.size(); ++entityIx ) {
-		const hdl_t hdl = glowEntities[ entityIx ];
-		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( hdl ) );
+	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( glowEntities.size() ); ++entityIx ) {
+		const uint32_t glowIx = glowEntities[ entityIx ];
+		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( glowIx ) );
 		bool validTile = false;
 		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
 			const moveAction_t& action = actions[ actionIx ];

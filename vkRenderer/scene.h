@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <camera.h>
 
 #include "common.h"
@@ -15,7 +17,7 @@ extern Window window;
 struct Scene
 {
 	Camera						camera;
-	AssetLib< Entity* >			entities;
+	std::vector<Entity*>		entities;
 	AssetLibModels				modelLib;
 	AssetLibImages				textureLib;
 	AssetLibMaterials			materialLib;
@@ -48,11 +50,17 @@ struct Scene
 		entity.modelHdl = modelHdl.Get();
 	}
 
-	Entity* FindEntity( const hdl_t entityHdl ) {
-		return *entities.Find( entityHdl );
+	Entity* FindEntity( const uint32_t entityIx ) {
+		return entities[ entityIx ];
 	}
 
 	Entity* FindEntity( const char* name ) {
-		return *entities.Find( name );
+		const uint32_t entCount = static_cast<uint32_t>( entities.size() );
+		for ( uint32_t i = 0; i < entCount; ++i ) {
+			if ( entities[ i ]->dbgName == name ) {
+				return entities[ i ];
+			}
+		}
+		return nullptr;
 	}
 };
