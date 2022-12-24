@@ -53,7 +53,7 @@ GpuProgram LoadProgram( const std::string& csFile )
 }
 
 
-hdl_t LoadModel( const std::string& fileName, const std::string& objectName )
+hdl_t LoadRawModel( const std::string& fileName, const std::string& objectName )
 {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -303,10 +303,38 @@ void Model::Serialize( Serializer* s )
 	if ( version != Version ) {
 		throw std::runtime_error( "Wrong version number." );
 	}
+	bounds.Serialize( s );
+
 	s->Next( surfCount );
 	for( uint32_t i = 0; i < surfCount; ++i ) {
 		surfs[ i ].Serialize( s );
 	}
+}
+
+
+bool LoadModel( const hdl_t& hdl )
+{
+	Serializer* s = new Serializer( MB( 8 ), serializeMode_t::LOAD );
+	std::string fileName = BakePath + ModelPath + HashString( hdl ) + BakedModelExtension;
+
+	if( !s->ReadFile( fileName ) ) { 
+		return false;
+	}
+
+	uint8_t name[ 256 ];
+	uint32_t nameLength = 0;
+	memset( name, 0, 256 );
+	s->Next( nameLength );
+	assert( nameLength < 256 );
+	s->NextArray( name, nameLength );
+
+	name[ nameLength ] = '2'; // FIXME: test
+
+	hdl_t modelHdl = scene.modelLib.Add( reinterpret_cast<char*>( &name[0] ), Model() );
+	Model* model = scene.modelLib.Find( modelHdl );
+
+	model->Serialize( s );
+	return true;
 }
 
 
@@ -316,7 +344,17 @@ bool WriteModel( const std::string& fileName, hdl_t modelHdl )
 	if( model == nullptr ) {
 		return false;
 	}
+	std::string name = scene.modelLib.FindName( modelHdl );
 	Serializer* s = new Serializer( MB( 8 ), serializeMode_t::STORE );
+
+	uint8_t buffer[ 256 ];
+	assert( name.length() < 256 );
+	uint32_t nameLength = static_cast<uint32_t>( name.length() );
+	memcpy( buffer, name.c_str(), nameLength );
+	s->Next( nameLength );
+	s->NextArray( buffer, nameLength );
+
 	model->Serialize( s );
+	s->WriteFile( fileName );
 	return true;
 }

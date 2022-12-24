@@ -30,9 +30,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <atomic>
+
 #include <mathVector.h>
 #include <handle.h>
-
 #include <color.h>
 #include <material.h>
 #include <geom.h>
@@ -74,8 +74,10 @@ const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;
 const int MAX_FRAMES_IN_FLIGHT = 2;
 const int MAX_FRAMES_STATES = ( MAX_FRAMES_IN_FLIGHT + 1 );
 
-const std::string ModelPath = "models/";
-const std::string TexturePath = "textures/";
+const std::string ModelPath = ".\\models\\";
+const std::string TexturePath = ".\\textures\\";
+const std::string BakePath = ".\\baked\\";
+const std::string BakedModelExtension = ".mdl";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 

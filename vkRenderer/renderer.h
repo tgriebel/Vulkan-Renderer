@@ -79,7 +79,7 @@ public:
 	// TODO: move
 	void CreatePipelineObjects()
 	{
-		pipelineLib.Destroy();
+		pipelineLib.Clear();
 		for ( uint32_t i = 0; i < scene.materialLib.Count(); ++i )
 		{
 			const Material* m = scene.materialLib.Find( i );

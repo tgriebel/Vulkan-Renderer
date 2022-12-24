@@ -36,6 +36,7 @@ imguiControls_t imguiControls;
 #endif
 
 void MakeScene();
+void LoadShaders( AssetLibGpuProgram& progs );
 void UpdateScene( const float dt );
 
 static float AdvanceTime()
@@ -54,8 +55,8 @@ void RenderThread()
 void CheckReloadAssets() {
 	if ( imguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
-		scene.gpuPrograms.Destroy();
-		scene.gpuPrograms.Create();
+		scene.gpuPrograms.Clear();
+		LoadShaders( scene.gpuPrograms );
 		Renderer::GenerateGpuPrograms( scene.gpuPrograms );
 		renderer.CreatePipelineObjects();
 
@@ -65,14 +66,6 @@ void CheckReloadAssets() {
 
 int main()
 {
-	{
-		// Create assets
-		// TODO: enforce ordering somehow. This comes after programs and textures
-		scene.gpuPrograms.Create();
-		scene.textureLib.Create();
-		scene.materialLib.Create();
-		scene.modelLib.Create();
-	}
 	MakeScene();
 
 	std::thread renderThread( RenderThread );

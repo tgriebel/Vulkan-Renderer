@@ -6,6 +6,7 @@
 #include "../window.h"
 #include <chess.h>
 #include <commands.h>
+#include <timer.h>
 
 extern Scene scene;
 
@@ -111,26 +112,26 @@ static vec3f GetSquareCenterForLocation( const char file, const char rank ) {
 	return whiteCorner + vec3f( 2.0f * x, 2.0f * ( 7 - y ), 0.0f );
 }
 
-void AssetLib< GpuProgram >::Create()
+void LoadShaders( AssetLibGpuProgram& progs )
 {
-	Add( "Basic", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/simplePS.spv" ) );
-	Add( "Shadow", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/shadowPS.spv" ) );
-	Add( "Prepass", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
-	Add( "Terrain", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/terrainPS.spv" ) );
-	Add( "TerrainDepth", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/depthPS.spv" ) );
-	Add( "TerrainShadow", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/shadowPS.spv" ) );
-	Add( "Sky", LoadProgram( "shaders_bin/skyboxVS.spv", "shaders_bin/skyboxPS.spv" ) );
-	Add( "LitDepth", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
-	Add( "LitOpaque", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
-	Add( "LitTree", LoadProgram( "shaders_bin/treeVS.spv", "shaders_bin/litPS.spv" ) ); // TODO: vert motion
-	Add( "LitTrans", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/emissivePS.spv" ) );
-	Add( "Debug", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
-	Add( "Debug_Solid", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
-	Add( "PostProcess", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/postProcessPS.spv" ) );
-	Add( "Image2D", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/simplePS.spv" ) );
+	progs.Add( "Basic", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/simplePS.spv" ) );
+	progs.Add( "Shadow", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/shadowPS.spv" ) );
+	progs.Add( "Prepass", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
+	progs.Add( "Terrain", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/terrainPS.spv" ) );
+	progs.Add( "TerrainDepth", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/depthPS.spv" ) );
+	progs.Add( "TerrainShadow", LoadProgram( "shaders_bin/terrainVS.spv", "shaders_bin/shadowPS.spv" ) );
+	progs.Add( "Sky", LoadProgram( "shaders_bin/skyboxVS.spv", "shaders_bin/skyboxPS.spv" ) );
+	progs.Add( "LitDepth", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
+	progs.Add( "LitOpaque", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
+	progs.Add( "LitTree", LoadProgram( "shaders_bin/treeVS.spv", "shaders_bin/litPS.spv" ) ); // TODO: vert motion
+	progs.Add( "LitTrans", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/emissivePS.spv" ) );
+	progs.Add( "Debug", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/depthPS.spv" ) );
+	progs.Add( "Debug_Solid", LoadProgram( "shaders_bin/simpleVS.spv", "shaders_bin/litPS.spv" ) );
+	progs.Add( "PostProcess", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/postProcessPS.spv" ) );
+	progs.Add( "Image2D", LoadProgram( "shaders_bin/defaultVS.spv", "shaders_bin/simplePS.spv" ) );
 }
 
-void AssetLib< texture_t >::Create()
+void LoadImages( AssetLibImages& images )
 {
 	const std::vector<std::string> texturePaths = { "checker.png", "sapeli.jpg", "white.png", "black.jpg",
 													"chapel_right.jpg", "chapel_left.jpg", "chapel_top.jpg", "chapel_bottom.jpg", "chapel_front.jpg", "chapel_back.jpg" };
@@ -139,18 +140,18 @@ void AssetLib< texture_t >::Create()
 	{
 		texture_t texture;
 		if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
-			scene.textureLib.Add( texturePath.c_str(), texture );
+			images.Add( texturePath.c_str(), texture );
 		}
 	}
 	texture_t cubeMap;
 	const std::string envMapName = "chapel_low";
 	const std::string cubeMapPath = ( TexturePath + envMapName );
 	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {
-		scene.textureLib.Add( envMapName.c_str(), cubeMap );
+		images.Add( envMapName.c_str(), cubeMap );
 	}
 }
 
-void AssetLib< Material >::Create()
+void LoadMaterials( AssetLibMaterials& materials )
 {
 	{
 		Material material;
@@ -161,7 +162,7 @@ void AssetLib< Material >::Create()
 		material.textures[ 0 ] = scene.textureLib.RetrieveHdl( "heightmap.png" );
 		material.textures[ 1 ] = scene.textureLib.RetrieveHdl( "grass.jpg" );
 		material.textures[ 2 ] = scene.textureLib.RetrieveHdl( "desert.jpg" );
-		Add( "TERRAIN", material );
+		materials.Add( "TERRAIN", material );
 	}
 
 	{
@@ -173,7 +174,7 @@ void AssetLib< Material >::Create()
 		material.textures[ 3 ] = scene.textureLib.RetrieveHdl( "chapel_bottom.jpg" );
 		material.textures[ 4 ] = scene.textureLib.RetrieveHdl( "chapel_front.jpg" );
 		material.textures[ 5 ] = scene.textureLib.RetrieveHdl( "chapel_back.jpg" );
-		Add( "SKY", material );
+		materials.Add( "SKY", material );
 	}
 
 	{
@@ -183,14 +184,14 @@ void AssetLib< Material >::Create()
 		material.shaders[ DRAWPASS_OPAQUE ] = scene.gpuPrograms.RetrieveHdl( "LitOpaque" );
 		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
 		material.textures[ 0 ] = scene.textureLib.RetrieveHdl( "sapeli.jpg" );
-		Add( "WHITE_WOOD", material );
+		materials.Add( "WHITE_WOOD", material );
 	}
 
 	{
 		Material material;
 		material.shaders[ DRAWPASS_TRANS ] = scene.gpuPrograms.RetrieveHdl( "LitTrans" );
 		material.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = scene.gpuPrograms.RetrieveHdl( "Debug" );
-		Add( "GlowSquare", material );
+		materials.Add( "GlowSquare", material );
 	}
 
 	{
@@ -198,7 +199,7 @@ void AssetLib< Material >::Create()
 		material.shaders[ DRAWPASS_POST_2D ] = scene.gpuPrograms.RetrieveHdl( "PostProcess" );
 	//	material.textures[ 0 ] = 0;
 	//	material.textures[ 1 ] = 1;
-		Add( "TONEMAP", material );
+		materials.Add( "TONEMAP", material );
 	}
 
 	{
@@ -207,56 +208,69 @@ void AssetLib< Material >::Create()
 	//	material.textures[ 0 ] = 0;
 	//	material.textures[ 1 ] = 1;
 	//	material.textures[ 2 ] = 2;
-		Add( "IMAGE2D", material );
+		materials.Add( "IMAGE2D", material );
 	}
 
 	{
 		Material material;
 		material.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = scene.gpuPrograms.RetrieveHdl( "Debug" );
-		Add( "DEBUG_WIRE", material );
+		materials.Add( "DEBUG_WIRE", material );
 	}
 
 	{
 		Material material;
 		material.shaders[ DRAWPASS_DEBUG_SOLID ] = scene.gpuPrograms.RetrieveHdl( "Debug_Solid" );
-		Add( "DEBUG_SOLID", material );
+		materials.Add( "DEBUG_SOLID", material );
 	}
 }
 
-void AssetLib< Model >::Create()
+void LoadModels( AssetLibModels& models )
 {
 	{
 		Model model;
 		CreateSkyBoxSurf( model );
-		scene.modelLib.Add( "_skybox", model );
+		models.Add( "_skybox", model );
 	}
 	{
-		WriteModel( "axis.mdl", LoadModel( "axis.obj", "axis" ) ); // FIXME
+		Timer t;
+		t.Start();
+		hdl_t handle = LoadRawModel( "axis.obj", "axis" );
+		t.Stop();
+		std::cout << t.GetElapsed() << std::endl;
+		t.Start();
+		WriteModel( BakePath + ModelPath + HashString( handle ) + BakedModelExtension, handle ); // FIXME
+		t.Stop();
+		std::cout << t.GetElapsed() << std::endl;
+		t.Start();
+		LoadModel( handle );
+		t.Stop();
+		std::cout << t.GetElapsed() << std::endl;
 
-		LoadModel( "cube.obj", "cube" );
-		LoadModel( "diamond.obj", "diamond" );
-		LoadModel( "sphere.obj", "sphere" );
-		LoadModel( "pawn.obj", "pawn" );
-		LoadModel( "rook.obj", "rook" );
-		LoadModel( "knight.obj", "knight" );
-		LoadModel( "bishop.obj", "bishop" );
-		LoadModel( "king.obj", "king" );
-		LoadModel( "queen.obj", "queen" );
-		LoadModel( "chess_board.obj", "chess_board" );
+
+		LoadRawModel( "cube.obj", "cube" );
+		LoadRawModel( "diamond.obj", "diamond" );
+		LoadRawModel( "sphere.obj", "sphere" );
+		LoadRawModel( "pawn.obj", "pawn" );
+		LoadRawModel( "rook.obj", "rook" );
+		LoadRawModel( "knight.obj", "knight" );
+		LoadRawModel( "bishop.obj", "bishop" );
+		LoadRawModel( "king.obj", "king" );
+		LoadRawModel( "queen.obj", "queen" );
+		LoadRawModel( "chess_board.obj", "chess_board" );
 	}
 	{
-		const hdl_t planeHdl = LoadModel( "plane.obj", "plane" );
-		scene.modelLib.Find( planeHdl )->surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
+		const hdl_t planeHdl = LoadRawModel( "plane.obj", "plane" );
+		models.Find( planeHdl )->surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
 	}
 	{
 		Model model;
 		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
-		scene.modelLib.Add( "_postProcessQuad", model );
+		models.Add( "_postProcessQuad", model );
 	}
 	{
 		Model model;
 		CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
-		scene.modelLib.Add( "_quadTexDebug", model );
+		models.Add( "_quadTexDebug", model );
 	}
 }
 
@@ -264,6 +278,11 @@ void AssetLib< Model >::Create()
 void MakeScene()
 {
 	const int piecesNum = 16;
+
+	LoadShaders( scene.gpuPrograms );
+	LoadImages( scene.textureLib );
+	LoadMaterials( scene.materialLib );
+	LoadModels( scene.modelLib );
 
 	gameConfig_t cfg;
 	LoadConfig( "scenes/chessCfg/default_board.txt", cfg );

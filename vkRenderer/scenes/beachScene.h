@@ -121,7 +121,7 @@ void AssetLib< Model >::Create()
 		scene.modelLib.Add( "_terrain", model );
 	}
 	{
-		LoadModel( "palm_tree.obj", "palmTree" );
+		LoadRawModel( "palm_tree.obj", "palmTree" );
 		Model* model = scene.modelLib.Find( "palmTree" );
 		model->materialId = scene.materialLib.RetrieveHdl( "PALM" ).Get();
 	}
