@@ -17,9 +17,10 @@ void main()
     gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	const float normalSign = ( ( floatBitsToUint( inTangent.x ) & 0x1 ) == 0 ) ? 1.0f : -1.0f;
-	const float tangent = uintBitsToFloat( floatBitsToUint( inTangent.x ) & ~0x1 );
-	fragNormal = normalSign * normalize( ubo[ objectId ].model * vec4( cross( inTangent, inBitangent ), 0.0f ) ).xyz;
-	//fragNormal = normalize( ubo[ objectId ].model * vec4( inTangent, 0.0f ) ).xyz;
+	fragTangent.x = uintBitsToFloat( floatBitsToUint( inTangent.x ) & ~0x1 );
+	fragTangent.yz = inTangent.yz;
+	fragBitangent = inBitangent;
+	fragNormal = inNormal;
+	fragFlags = floatBitsToUint( inTangent.x ) & 0x1; // FIXME: how to interpolate across surface?
 	clipPosition = gl_Position;
 }

@@ -60,18 +60,22 @@ void main()
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
+    const float normalSign = ( fragFlags & 0x1 ) == 0 ? 1.0f : -1.0f;
+    const float tangent = uintBitsToFloat( floatBitsToUint( fragTangent.x ) & ~0x1 );
+    const vec3 normal = normalSign * normalize( modelMat * vec4( cross( fragTangent, fragBitangent ), 0.0f ) ).xyz;
+
+    const vec4 albedo = ( albedoTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4( 1.0f );
+    const vec3 normalTex = ( normalTexId >= 0 ) ? texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb : normal;
+    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( 1.0f );
+
     const vec3 v = normalize( cameraOrigin.xyz - worldPosition.xyz );
-    const vec3 n = normalize( fragNormal ); // normalize( worldPosition.xyz - modelOrigin );
+    const vec3 n = normalize( normalTex.rgb + normal ); // normalize( worldPosition.xyz - modelOrigin );
     const vec3 viewDiffuse = dot( v, n ).xxx;
 
-    const vec3 r = reflect( -v, normalize( fragNormal ) );
+    const vec3 r = reflect( -v, n );
     const vec4 envColor = vec4( texture( cubeSamplers[ 0 ], vec3( r.x, r.z, r.y ) ).rgb, 1.0f );
 
     float NoV = abs( dot( n, v ) );
-
-    const vec4 albedo = ( albedoTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4 ( 1.0f );
-    const vec3 normalTex = ( normalTexId >= 0 ) ? texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb : fragNormal;
-    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4 ( 1.0f );
 
     const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 
@@ -140,6 +144,6 @@ void main()
     }
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
-//    outColor.rgb = fragNormal;
+//    outColor.rgb = normal;
 //    outColor.rg = fragTexCoord.rb;
 }
