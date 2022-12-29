@@ -64,6 +64,8 @@ void main()
     const vec3 normalTex = ( normalTexId >= 0 ) ? 2.0f * texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb - vec3( 1.0f, 1.0f, 1.0f ) : vec3( 0.0f, 0.0f, 1.0f );
     const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( 1.0f );
 
+    const float perceptualRoughness = globals.generic.y * roughnessTex.r;
+
     const float blendFactor = 0.5f; // Hack: Hardcode blend b/c the normal map color for test assets seems a bit off
     const vec3 normal = fragTangentBasis * mix( vec3( 0.0f, 0.0f, 1.0f ), normalTex, blendFactor );
 
@@ -72,11 +74,10 @@ void main()
     const vec3 viewDiffuse = dot( v, n ).xxx;
 
     const vec3 r = reflect( -v, n );
-    const vec4 irradiance = vec4( texture( cubeSamplers[ 0 ], vec3( r.x, r.z, r.y ) ).rgb, 1.0f );
+    const int MAX_MIP_LEVELS = 12;
+    const vec4 envMap = vec4( SrgbToLinear( textureLod( cubeSamplers[0], vec3( r.x, r.z, r.y ), perceptualRoughness * MAX_MIP_LEVELS ).rgb ), 1.0f ); // FIXME: HACK
 
     float NoV = abs( dot( n, v ) );
-
-    const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 
     float metallic = 0.0f;
 
@@ -120,7 +121,7 @@ void main()
         vec3 diffuse = ( ( kD * albedo.rgb ) / PI + Fr ) * radiance * NoL;
         color += diffuse;
     }
-    outColor.rgb = color.rgb; // * Fd_Lambert();
+    outColor.rgb = color.rgb * Fd_Lambert();
     outColor.a = 1.0f;
 
     float visibility = 1.0f;
