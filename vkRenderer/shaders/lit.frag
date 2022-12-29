@@ -84,7 +84,8 @@ void main()
     vec3 F0 = vec3( 0.04f ); 
     F0 = mix( F0, albedo.rgb, metallic );
 
-    const vec3 ambient = materials[ materialId ].Ka.rgb;
+    const float AMBIENT_LIGHT_FACTOR = 0.05f;
+    const vec3 ambient = albedo.rgb * AMBIENT_LIGHT_FACTOR * materials[ materialId ].Ka.rgb;
     const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
     const vec3 specularColor = materials[ materialId ].Ks.rgb;
     const float specularPower = materials[ materialId ].Ns;
