@@ -352,13 +352,21 @@ struct drawSurf_t
 	uint32_t			materialId;
 	renderFlags_t		flags;
 	uint8_t				stencilBit;
+	uint32_t			hash;
 
 	hdl_t				pipelineObject[ DRAWPASS_COUNT ];
-
-	inline bool operator()( const drawSurf_t& surf ) {
-		return Hash( reinterpret_cast<const uint8_t*>( &surf ), sizeof( surf ) );
-	}
 };
+
+
+inline uint32_t Hash( const drawSurf_t& surf ) {
+	uint64_t shaderIds[ DRAWPASS_COUNT ];
+	for ( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
+		shaderIds[ i ] = surf.pipelineObject[ i ].Get();
+	}
+	uint32_t shaderHash = Hash( reinterpret_cast<const uint8_t*>( &shaderIds ), sizeof( shaderIds[ 0 ] ) * DRAWPASS_COUNT );
+	uint32_t stateHash = Hash( reinterpret_cast<const uint8_t*>( &surf ), offsetof( drawSurf_t, hash ) );
+	return ( shaderHash ^ stateHash );
+}
 
 
 struct drawSurfInstance_t

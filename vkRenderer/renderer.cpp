@@ -44,14 +44,14 @@ void Renderer::Commit( const Scene& scene )
 void Renderer::MergeSurfaces( RenderView& view )
 {
 	view.mergedModelCnt = 0;
-	std::unordered_map< drawSurf_t, uint32_t > uniqueSurfs;
+	std::unordered_map< uint32_t, uint32_t > uniqueSurfs;
 	uniqueSurfs.reserve( view.committedModelCnt );
 	for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ i ];
-		auto it = uniqueSurfs.find( view.surfaces[ i ] );
+		auto it = uniqueSurfs.find( view.surfaces[ i ].hash );
 		if ( it == uniqueSurfs.end() ) {
 			const uint32_t surfId = view.mergedModelCnt;
-			uniqueSurfs[ view.surfaces[ i ] ] = surfId;
+			uniqueSurfs[ view.surfaces[ i ].hash ] = surfId;
 
 			view.instanceCounts[ surfId ] = 1;
 			view.merged[ surfId ] = view.surfaces[ i ];
@@ -102,6 +102,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.objectId = objectOffset;
 		surf.flags = ent.GetRenderFlags();
 		surf.stencilBit = ent.outline ? 0x01 : 0;
+		surf.hash = Hash( surf );
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
 			if ( material->shaders[ pass ].IsValid() ) {
