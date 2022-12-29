@@ -163,9 +163,9 @@ hdl_t LoadRawModel( const std::string& fileName, const std::string& objectName )
 			assert( indexFaceCount[ indices[ 1 ] ] > 0 );
 			assert( indexFaceCount[ indices[ 2 ] ] > 0 );
 
-			weights[ 0 ] = 1.0f;// ( 1.0f / indexFaceCount[ indices[ 0 ] ] );
-			weights[ 1 ] = 1.0f;//( 1.0f / indexFaceCount[ indices[ 1 ] ] );
-			weights[ 2 ] = 1.0f;//( 1.0f / indexFaceCount[ indices[ 2 ] ] );
+			weights[ 0 ] = ( 1.0f / indexFaceCount[ indices[ 0 ] ] );
+			weights[ 1 ] = ( 1.0f / indexFaceCount[ indices[ 1 ] ] );
+			weights[ 2 ] = ( 1.0f / indexFaceCount[ indices[ 2 ] ] );
 
 			vertex_t& v0 = model.surfs[ model.surfCount ].vertices[ indices[ 0 ] ];
 			vertex_t& v1 = model.surfs[ model.surfCount ].vertices[ indices[ 1 ] ];
@@ -187,12 +187,6 @@ hdl_t LoadRawModel( const std::string& fileName, const std::string& objectName )
 
 			const vec3f faceTangent = ( edge0 * uvEdgeDt1[ 1 ] - edge1 * uvEdgeDt0[ 1 ] ) * r;
 			const vec3f faceBitangent = ( edge1 * uvEdgeDt0[ 0 ] - edge0 * uvEdgeDt1[ 0 ] ) * r;
-
-			//assert( Dot( faceNormal, faceTangent ) < 0.001f );
-			//assert( Dot( faceNormal, faceBitangent ) < 0.001f );
-			//assert( Dot( faceTangent, faceBitangent ) < 0.001f );
-			//assert( faceTangent.Length() > 0.001 );
-			//assert( faceBitangent.Length() > 0.001 );
 
 			v0.tangent += weights[ 0 ] * faceTangent;
 			v0.bitangent += weights[ 0 ] * faceBitangent;
