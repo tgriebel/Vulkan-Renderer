@@ -1260,8 +1260,7 @@ private:
 			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
 			ImGui::Text( "Mouse: (%f, %f )", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
-			const vec2f screenPoint = vec2f( (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
-			const vec2f ndc = 2.0f * Multiply( screenPoint, vec2f( 1.0f / width, 1.0f / height ) ) - vec2f( 1.0f );
+			const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
 			
 			char entityName[ 256 ];
 			if ( imguiControls.selectedEntityId >= 0 ) {

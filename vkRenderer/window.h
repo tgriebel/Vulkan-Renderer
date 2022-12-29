@@ -18,6 +18,7 @@ public:
 	bool					IsFocused() const;
 	void					PumpMessages();
 	void					CreateSurface();
+	vec2f					GetNdc( const float x, const float y );
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );
 	void					GetWindowFrameBufferSize( int & width, int & height, const bool wait = false );

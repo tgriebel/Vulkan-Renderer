@@ -58,24 +58,31 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 	mouse_t& mouse = app->input.GetMouseRef();
 
+	int w, h;
+	app->GetWindowSize( w, h );
+	//const vec2f prevNdc = app->GetNdc( mouse.x, mouse.y );
+	//const vec2f ndc = app->GetNdc( static_cast<float>( xpos ), static_cast<float>( ypos ) );
+
 	static float lastTime = 0.0f;
 	const float time = static_cast<float>( glfwGetTime() );
 	const float deltaTime = ( time - lastTime );
 	lastTime = time;
 	const float x = static_cast<float>( xpos );
 	const float y = static_cast<float>( ypos );
-	if( ( fabs( mouse.x - x ) < 1.0f ) || ( fabs( mouse.x - x ) > 100.0f ) ) {
+	if ( ( fabs( mouse.x - x ) < 1.0f ) || ( fabs( mouse.x - x ) > 100.0f ) ) {
 		mouse.dx = 0.0f;
-	} else {
+	}
+	else {
 		mouse.dx = ( mouse.x - x );
 	}
 	if ( ( fabs( mouse.y - y ) < 1.0f ) || ( fabs( mouse.y - y ) > 100.0f ) ) {
 		mouse.dy = 0.0f;
-	} else {
+	}
+	else {
 		mouse.dy = ( mouse.y - y );
 	}
-	mouse.dx = std::max( -10.0f, std::min( 10.0f, deltaTime * mouse.dx ) );
-	mouse.dy = std::max( -10.0f, std::min( 10.0f, deltaTime * mouse.dy ) );
+	mouse.dx = std::max( -100.0f, std::min( 100.0f, deltaTime * mouse.dx ) );
+	mouse.dy = std::max( -100.0f, std::min( 100.0f, deltaTime * mouse.dy ) );
 	mouse.xPrev = mouse.x;
 	mouse.yPrev = mouse.y;
 	mouse.x = x;
@@ -119,6 +126,15 @@ void Window::Init()
 	glfwSetKeyCallback( window, KeyCallback );
 	glfwSetMouseButtonCallback( window, MousePressCallback );
 	glfwSetCursorPosCallback( window, MouseMoveCallback );
+}
+
+vec2f Window::GetNdc( const float x, const float y )
+{
+	const vec2f screenPoint = vec2f( x, y );
+	int w, h;
+	GetWindowSize( w, h );
+	const vec2f ndc = 2.0f * Multiply( screenPoint, vec2f( 1.0f / w, 1.0f / h ) ) - vec2f( 1.0f );
+	return ndc;
 }
 
 void Window::GetWindowPosition( int& x, int& y )
