@@ -15,12 +15,20 @@ void main()
 	vec3 position = inPosition;
 	worldPosition = ubo[ objectId ].model * vec4( position, 1.0f );
     gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
+
+	// Tangent-space matrix
+	{
+		const float normalSign = ( floatBitsToUint( inTangent.x ) & 0x1 ) > 0 ? -1.0f : 1.0f;
+		vec3 T = normalize( vec3( uintBitsToFloat( floatBitsToUint( inTangent.x ) & ~0x1 ), inTangent.yz ) );
+		vec3 N = normalize( normalSign * cross( inTangent, inBitangent ) );
+		vec3 B = normalize( inBitangent );
+		T = ( ubo[ objectId ].model * vec4( T, 0.0f ) ).xyz;
+		N = ( ubo[ objectId ].model * vec4( N, 0.0f ) ).xyz;
+		B = ( ubo[ objectId ].model * vec4( B, 0.0f ) ).xyz;
+		fragTangentBasis = mat3( T, B, N );
+	}
+
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	fragTangent.x = uintBitsToFloat( floatBitsToUint( inTangent.x ) & ~0x1 );
-	fragTangent.yz = inTangent.yz;
-	fragBitangent = inBitangent;
-	fragNormal = inNormal;
-	fragFlags = floatBitsToUint( inTangent.x ) & 0x1; // FIXME: how to interpolate across surface?
 	clipPosition = gl_Position;
 }

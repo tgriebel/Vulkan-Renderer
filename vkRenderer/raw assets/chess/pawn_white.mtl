@@ -1,7 +1,7 @@
 # Blender MTL File: 'pawn.blend'
-# Material Count: 1
+# Material Count: 2
 
-newmtl Material.001
+newmtl Chess_Black
 Ns 650.249991
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.256638 0.000000
@@ -10,4 +10,15 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\uploads_files_652817_textures\\textures\\cadyou.com_Sapeli.jpg
+map_Kd C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer\\raw assets\\uploads_files_652817_textures\\textures\\Dark_Mahony.jpg
+
+newmtl Natural_Oak_Lacquered
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd assets\\materials\\natural_oak_lacq_384e3c34-2adf-47b5-ae06-dbe67bb96a30\\textures_1k\\HighRes Natural Oak.jpg
