@@ -1258,8 +1258,10 @@ private:
 			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-			ImGui::Text( "Mouse: (%f, %f )", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
-			ImGui::Text( "Mouse Dt: (%f, %f )", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
+			ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
+			ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
+			const vec4f cameraOrigin = scene.camera.GetOrigin();
+			ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[0], cameraOrigin[1], cameraOrigin[2] );
 			const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
 			
 			char entityName[ 256 ];
