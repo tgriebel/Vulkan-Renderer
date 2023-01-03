@@ -245,8 +245,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	std::vector<VkDescriptorImageInfo> image2DInfo;
 	std::vector<VkDescriptorImageInfo> imageCubeInfo;
-	image2DInfo.reserve( MaxImageDescriptors );
-	imageCubeInfo.reserve( MaxImageDescriptors );
+	image2DInfo.resize( MaxImageDescriptors );
+	imageCubeInfo.resize( MaxImageDescriptors );
+	int firstCube = -1;
 	const uint32_t textureCount = scene.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
@@ -258,38 +259,43 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.sampler = vk_bilinearSampler;
 
 		if ( texture->info.type == TEXTURE_TYPE_CUBE ) {
-			imageCubeInfo.push_back( info );
+			imageCubeInfo[ texture->uploadId ] = info;
+			firstCube = texture->uploadId;
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info2d.imageView = scene.textureLib.GetDefault()->image.vk_view;
 			info2d.sampler = vk_bilinearSampler;
-			image2DInfo.push_back( info2d );
+			image2DInfo[ texture->uploadId ] = info2d;
 		}
-		else {
-			image2DInfo.push_back( info );
+		else 
+		{
+			image2DInfo[ texture->uploadId ] = info;
 		}
 	}
 	// Defaults
 	{
 		const texture_t* default2DTexture = scene.textureLib.GetDefault();
-		for ( size_t j = image2DInfo.size(); j < MaxImageDescriptors; ++j )
+		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
 			const VkImageView& imageView = default2DTexture->image.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
 			info.sampler = vk_bilinearSampler;
-			image2DInfo.push_back( info );
+			image2DInfo[j] = info;
 		}
-		for ( size_t j = imageCubeInfo.size(); j < MaxImageDescriptors; ++j )
+		assert( firstCube >= 0 ); // Hack: need a default
+		for ( size_t i = 0; i < MaxImageDescriptors; ++i )
 		{
-			const VkImageView& imageView = imageCubeInfo[ 0 ].imageView;
-			VkDescriptorImageInfo info{ };
-			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info.imageView = imageView;
-			info.sampler = vk_bilinearSampler;
-			imageCubeInfo.push_back( info );
+			if( imageCubeInfo[i].imageView == nullptr ) {
+				const VkImageView& imageView = imageCubeInfo[ firstCube ].imageView;
+				VkDescriptorImageInfo info{ };
+				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				info.imageView = imageView;
+				info.sampler = vk_bilinearSampler;
+				imageCubeInfo[i] = info;
+			}
 		}
 	}
 
