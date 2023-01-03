@@ -36,6 +36,7 @@
 #include <color.h>
 #include <material.h>
 #include <geom.h>
+#include <camera.h>
 
 #define USE_IMGUI
 
@@ -109,7 +110,7 @@ enum drawPass_t : uint32_t
 	DRAWPASS_COUNT
 };
 
-enum renderFlags_t : uint32_t
+enum renderFlags_t
 {
 	NONE		= 0,
 	HIDDEN		= ( 1 << 0 ),
@@ -157,17 +158,6 @@ template<> struct std::hash<vertex_t>
 };
 
 
-struct viewport_t
-{
-	float x;
-	float y;
-	float width;
-	float height;
-	float near;
-	float far;
-};
-
-
 struct uniformBufferObject_t
 {
 	mat4x4f model;
@@ -202,6 +192,14 @@ struct materialBufferObject_t
 };
 
 struct light_t
+{
+	vec4f		lightPos;
+	vec4f		intensity;
+	vec4f		lightDir;
+	uint32_t	pad[ 4 ];
+};
+
+struct lightBufferObject_t
 {
 	vec4f		lightPos;
 	vec4f		intensity;
@@ -403,85 +401,6 @@ template<> struct std::hash<drawSurf_t> {
 	}
 };
 
-class Surface {
-public:
-	hdl_t						materialHdl;
-	std::vector<vertex_t>		vertices;
-	std::vector<uint32_t>		indices;
-
-	void Serialize( Serializer* serializer );
-};
-
-
-struct surfaceUpload_t
-{
-	surfaceUpload_t() : vertexCount(0), indexCount(0), vertexOffset(0), firstIndex(0) {}
-
-	uint32_t					vertexCount;
-	uint32_t					indexCount;
-	uint32_t					vertexOffset;
-	uint32_t					firstIndex;
-};
-
-
-class Model
-{
-	static const uint32_t Version = 1;
-public:
-	Model() : surfCount( 0 ), uploaded(false) {}
-
-	static const uint32_t		MaxSurfaces = 10;
-	AABB						bounds;
-	Surface						surfs[ MaxSurfaces ];
-	surfaceUpload_t				upload[ MaxSurfaces ];
-	uint32_t					surfCount;
-	bool						uploaded;
-
-	void Serialize( Serializer* serializer );
-};
-
-enum entityFlags_t {
-	ENT_FLAG_NONE,
-	ENT_FLAG_SELECTABLE,
-};
-
-class Entity
-{
-public:
-	Entity() {
-		matrix = mat4x4f( 1.0f );
-		modelHdl = INVALID_HDL;
-		materialHdl = INVALID_HDL;
-		flags = ENT_FLAG_NONE;
-		renderFlags = renderFlags_t::NONE;
-		outline = false;
-	}
-
-	std::string		dbgName;
-	bool			outline;
-	hdl_t			modelHdl;
-	hdl_t			materialHdl;
-
-	AABB			GetBounds() const;
-	vec3f			GetOrigin() const;
-	void			SetOrigin( const vec3f& origin );
-	void			SetScale( const vec3f& scale );
-	void			SetRotation( const vec3f& xyzDegrees );
-	mat4x4f			GetMatrix() const;
-	void			SetFlag( const entityFlags_t flag );
-	void			ClearFlag( const entityFlags_t flag );
-	bool			HasFlag( const entityFlags_t flag ) const;
-	void			SetRenderFlag( const renderFlags_t flag );
-	void			ClearRenderFlag( const renderFlags_t flag );
-	bool			HasRenderFlag( const renderFlags_t flag ) const;
-	renderFlags_t	GetRenderFlags() const;
-
-private:
-	renderFlags_t	renderFlags;
-	entityFlags_t	flags;
-	mat4x4f			matrix;
-};
-
 
 class RenderView
 {
@@ -501,6 +420,7 @@ public:
 
 	mat4x4f										viewMatrix;
 	mat4x4f										projMatrix;
+	mat4x4f										viewprojMatrix;
 	viewport_t									viewport;
 	light_t										lights[ MaxLights ];
 

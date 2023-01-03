@@ -2,6 +2,7 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
+#include <entity.h>
 
 static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
 {
@@ -24,7 +25,7 @@ void Renderer::Commit( const Scene& scene )
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
-		if ( ( scene.entities[i] )->HasRenderFlag( NO_SHADOWS ) ) {
+		if ( ( scene.entities[i] )->HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
 			continue;
 		}
 		CommitModel( shadowView, *scene.entities[i], MaxModels );
@@ -33,6 +34,7 @@ void Renderer::Commit( const Scene& scene )
 
 	renderView.viewMatrix = scene.camera.GetViewMatrix();
 	renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
+	renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
 
 	for ( int i = 0; i < MaxLights; ++i ) {
 		renderView.lights[ i ] = scene.lights[ i ];
@@ -76,7 +78,7 @@ void Renderer::MergeSurfaces( RenderView& view )
 
 void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset )
 {
-	if ( ent.HasRenderFlag( HIDDEN ) ) {
+	if ( ent.HasFlag( ENT_FLAG_NO_DRAW ) ) {
 		return;
 	}
 
@@ -91,6 +93,11 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		const Material* material = scene.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source->surfs[ i ].materialHdl );
 		assert( material->uploadId >= 0 );
 
+		renderFlags_t renderFlags = NONE;
+		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_NO_DRAW ) ? HIDDEN : NONE ) );
+		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_NO_SHADOWS ) ? NO_SHADOWS : NONE ) );
+		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_WIREFRAME ) ? WIREFRAME | SKIP_OPAQUE : NONE ) );
+
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
@@ -100,7 +107,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.indicesCnt = upload.indexCount;
 		surf.materialId = material->uploadId;
 		surf.objectId = objectOffset;
-		surf.flags = ent.GetRenderFlags();
+		surf.flags = renderFlags;
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 		surf.hash = Hash( surf );
 
@@ -303,8 +310,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	{
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].lightParms.GetVkObject();
-		info.offset = j * sizeof( light_t );
-		info.range = sizeof( light_t );
+		info.offset = j * sizeof( lightBufferObject_t );
+		info.range = sizeof( lightBufferObject_t );
 		lightBufferInfo.push_back( info );
 	}
 
@@ -684,11 +691,15 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		uboBuffer[ objectId ] = ubo;
 	}
 
-	std::vector< light_t > lightBuffer;
+	std::vector< lightBufferObject_t > lightBuffer;
 	lightBuffer.reserve( MaxLights );
 	for ( int i = 0; i < MaxLights; ++i )
 	{
-		lightBuffer.push_back( renderView.lights[ i ] );
+		lightBufferObject_t light;
+		light.intensity = renderView.lights[ i ].intensity;
+		light.lightDir = renderView.lights[ i ].lightDir;
+		light.lightPos = renderView.lights[ i ].lightPos;
+		lightBuffer.push_back( light );
 	}
 
 	frameState[ currentImage ].globalConstants.Reset();
@@ -704,7 +715,7 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 
 	assert( lightBuffer.size() <= MaxLights );
 	frameState[ currentImage ].lightParms.Reset();
-	frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( light_t ) * lightBuffer.size() );
+	frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( lightBufferObject_t ) * lightBuffer.size() );
 }
 
 void Renderer::CreateTextureSamplers()

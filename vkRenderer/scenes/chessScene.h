@@ -7,6 +7,7 @@
 #include <chess.h>
 #include <commands.h>
 #include <timer.h>
+#include <entity.h>
 
 extern Scene scene;
 
@@ -361,8 +362,7 @@ void MakeScene()
 		Entity* ent = new Entity();
 		scene.CreateEntity( scene.modelLib.RetrieveHdl( "diamond" ), *ent );
 		ent->materialHdl = scene.materialLib.RetrieveHdl( "DEBUG_WIRE" );
-		ent->SetRenderFlag( WIREFRAME );
-		ent->SetRenderFlag( SKIP_OPAQUE );
+		ent->SetFlag( ENT_FLAG_WIREFRAME );
 		ent->dbgName = ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str();
 		scene.entities.push_back( ent );
 	}
@@ -495,9 +495,9 @@ void UpdateSceneLocal( const float dt )
 			}
 		}
 		if ( validTile ) {
-			ent->ClearRenderFlag( HIDDEN );
+			ent->ClearFlag( ENT_FLAG_NO_DRAW );
 		} else {
-			ent->SetRenderFlag( HIDDEN );
+			ent->SetFlag( ENT_FLAG_NO_DRAW );
 		}
 	}
 

@@ -3,6 +3,7 @@
 #include "util.h"
 #include "io.h"
 #include "window.h"
+#include "entity.h"
 
 //#define BEACH
 #if defined( BEACH )
@@ -16,64 +17,12 @@ extern Scene scene;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
+// FIXME: move. here due to a compile dependency
 AABB Entity::GetBounds() const {
 	const Model* model = scene.modelLib.Find( modelHdl );
 	const AABB& bounds = model->bounds;
 	vec3f origin = GetOrigin();
 	return AABB( bounds.GetMin() + origin, bounds.GetMax() + origin );
-}
-
-vec3f Entity::GetOrigin() const {
-	return vec3f( matrix[ 3 ][ 0 ], matrix[ 3 ][ 1 ], matrix[ 3 ][ 2 ] );
-}
-
-void Entity::SetOrigin( const vec3f& origin ) {
-	matrix[ 3 ][ 0 ] = origin[ 0 ];
-	matrix[ 3 ][ 1 ] = origin[ 1 ];
-	matrix[ 3 ][ 2 ] = origin[ 2 ];
-}
-
-void Entity::SetScale( const vec3f& scale ) {
-	matrix[ 0 ][ 0 ] = scale[ 0 ];
-	matrix[ 1 ][ 1 ] = scale[ 1 ];
-	matrix[ 2 ][ 2 ] = scale[ 2 ];
-}
-
-void Entity::SetRotation( const vec3f& xyzDegrees ) {
-	const mat4x4f rotationMatrix = ComputeRotationZYX( xyzDegrees[ 0 ], xyzDegrees[ 1 ], xyzDegrees[ 2 ] );
-	matrix = rotationMatrix * matrix;
-}
-
-mat4x4f Entity::GetMatrix() const {
-	return matrix;
-}
-
-void Entity::SetFlag( const entityFlags_t flag ) {
-	flags = static_cast<entityFlags_t>( flags | flag );
-}
-
-void Entity::ClearFlag( const entityFlags_t flag ) {
-	flags = static_cast<entityFlags_t>( flags & ~flag );
-}
-
-bool Entity::HasFlag( const entityFlags_t flag ) const {
-	return ( ( flags & flag ) != 0 );
-}
-
-void Entity::SetRenderFlag( const renderFlags_t flag ) {
-	renderFlags = static_cast<renderFlags_t>( renderFlags | flag );
-}
-
-void Entity::ClearRenderFlag( const renderFlags_t flag ) {
-	renderFlags = static_cast<renderFlags_t>( renderFlags & ~flag );
-}
-
-bool Entity::HasRenderFlag( const renderFlags_t flag ) const {
-	return ( ( renderFlags & flag ) != 0 );
-}
-
-renderFlags_t Entity::GetRenderFlags() const {
-	return renderFlags;
 }
 
 void UpdateScene( const float dt )
@@ -123,10 +72,10 @@ void UpdateScene( const float dt )
 
 	if ( imguiControls.dbgImageId >= 0 )
 	{
-		scene.FindEntity( "_quadTexDebug" )->ClearRenderFlag( HIDDEN );
+		scene.FindEntity( "_quadTexDebug" )->ClearFlag( ENT_FLAG_NO_DRAW );
 		scene.materialLib.Find( "IMAGE2D" )->textures[ 0 ] = ( imguiControls.dbgImageId % scene.textureLib.Count() );
 	}
 	else {
-		scene.FindEntity( "_quadTexDebug" )->SetRenderFlag( HIDDEN );
+		scene.FindEntity( "_quadTexDebug" )->SetFlag( ENT_FLAG_NO_DRAW );
 	}
 }

@@ -54,6 +54,7 @@ void Renderer::UploadTextures()
 		const uint32_t layers = texture->info.layers;
 		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->info.width ), static_cast<uint32_t>( texture->info.height ), layers );
 		texture->uploadId = i;
+		gpuImages[texture->uploadId];
 	}
 	EndSingleTimeCommands( commandBuffer );
 

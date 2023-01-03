@@ -23,12 +23,15 @@
 #include "imgui/backends/imgui_impl_vulkan.h"
 #endif
 
+#include <entity.h>
+
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
 extern imguiControls_t imguiControls;
 #endif
 
-typedef AssetLib< pipelineObject_t> AssetLibPipelines;
+typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
+typedef AssetLib<GpuImage>			AssetLibGpuImages;
 
 extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
@@ -159,6 +162,7 @@ private:
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
+	GpuImage						gpuImages[ MaxImageDescriptors ];
 
 	AllocatorVkMemory				localMemory;
 	AllocatorVkMemory				frameBufferMemory;
@@ -567,7 +571,7 @@ private:
 
 			// Light Buffer
 			{
-				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( light_t ) );
+				const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( lightBufferObject_t ) );
 				const VkDeviceSize lightBufferSize = MaxLights * stride;
 				CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].lightParms, sharedMemory );
 			}

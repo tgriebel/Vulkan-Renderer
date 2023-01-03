@@ -7,6 +7,7 @@
 #include "common.h"
 #include "assetLib.h"
 #include "window.h"
+#include <entity.h>
 
 typedef AssetLib< Model >	AssetLibModels;
 typedef AssetLib< texture_t >		AssetLibImages;
