@@ -2,7 +2,7 @@
 
 #include "pipeline.h"
 #include "deviceContext.h"
-#include "assetLib.h"
+#include <core/assetLib.h>
 
 AssetLib< pipelineObject_t > pipelineLib;
 

@@ -1,7 +1,8 @@
 #include "io.h"
-#include "assetLib.h"
+#include <core/assetlib.h>
 #include "render_util.h"
 #include "scene.h"
+#include <resource_types/gpuProgram.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"

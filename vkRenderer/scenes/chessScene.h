@@ -7,7 +7,8 @@
 #include <chess.h>
 #include <commands.h>
 #include <timer.h>
-#include <entity.h>
+#include <scene/entity.h>
+#include <resource_types/gpuProgram.h>
 
 extern Scene scene;
 

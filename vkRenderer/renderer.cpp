@@ -2,7 +2,7 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
-#include <entity.h>
+#include <scene/entity.h>
 
 static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
 {

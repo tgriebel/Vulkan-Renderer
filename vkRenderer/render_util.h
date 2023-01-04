@@ -3,6 +3,7 @@
 #include <chrono>
 #include "common.h"
 #include "GeoBuilder.h"
+#include <resource_types/texture.h>
 
 class SpinLock
 {

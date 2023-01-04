@@ -2,14 +2,16 @@
 
 #include <vector>
 
-#include <camera.h>
+#include <scene/camera.h>
 
 #include "common.h"
-#include "assetLib.h"
+#include <core/assetLib.h>
 #include "window.h"
-#include <entity.h>
+#include <scene/entity.h>
+#include <resource_types/texture.h>
+#include <resource_types/gpuProgram.h>
 
-typedef AssetLib< Model >	AssetLibModels;
+typedef AssetLib< Model >			AssetLibModels;
 typedef AssetLib< texture_t >		AssetLibImages;
 typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;

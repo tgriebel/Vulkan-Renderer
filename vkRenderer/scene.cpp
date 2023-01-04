@@ -1,9 +1,9 @@
 #include "common.h"
 #include "scene.h"
-#include "util.h"
+#include <core/util.h>
 #include "io.h"
 #include "window.h"
-#include "entity.h"
+#include <scene/entity.h>
 
 //#define BEACH
 #if defined( BEACH )

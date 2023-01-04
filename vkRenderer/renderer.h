@@ -1,6 +1,6 @@
 #pragma once
 
-#include <camera.h>
+#include <scene/camera.h>
 
 #include "common.h"
 #include "window.h"
@@ -10,12 +10,14 @@
 #include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"
-#include "assetLib.h"
+#include "core/assetLib.h"
 #include "FrameState.h"
 #include "renderConstants.h"
 
 #include "io.h"
 #include "GeoBuilder.h"
+#include <resource_types/texture.h>
+#include <resource_types/gpuProgram.h>
 
 #if defined( USE_IMGUI )
 #include "imgui/imgui.h"
@@ -23,7 +25,7 @@
 #include "imgui/backends/imgui_impl_vulkan.h"
 #endif
 
-#include <entity.h>
+#include <scene/entity.h>
 
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;

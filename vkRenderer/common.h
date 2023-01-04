@@ -3,6 +3,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#define USE_VULKAN
+#define USE_IMGUI
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_ENABLE_EXPERIMENTAL
@@ -10,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
 
-#include <aabb.h>
+#include <acceleration/aabb.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -31,14 +34,13 @@
 #include <math.h>
 #include <atomic>
 
-#include <mathVector.h>
-#include <handle.h>
-#include <color.h>
-#include <material.h>
-#include <geom.h>
-#include <camera.h>
-
-#define USE_IMGUI
+#include <math/mathVector.h>
+#include <core/handle.h>
+#include <image/color.h>
+#include <resource_types/material.h>
+#include <primitives/geom.h>
+#include <scene/camera.h>
+#include <resource_types/gpuProgram.h>
 
 const uint32_t KB_1 = 1024;
 const uint32_t MB_1 = 1024 * KB_1;
@@ -121,31 +123,6 @@ enum renderFlags_t
 	COMMITTED	= ( 1 << 5 ),
 };
 
-enum shaderType_t : uint32_t
-{
-	UNSPECIFIED = 0,
-	VERTEX,
-	PIXEL,
-	COMPUTE,
-};
-
-struct shaderSource_t
-{
-	std::string			name;
-	std::vector<char>	blob;
-	shaderType_t		type;
-};
-
-struct GpuProgram
-{
-	static const uint32_t MaxShaders = 2;
-
-	shaderSource_t			shaders[ MaxShaders ];
-	VkShaderModule			vk_shaders[ MaxShaders ];
-	hdl_t					pipeline;
-	uint32_t				shaderCount;
-	bool					isCompute;
-};
 
 struct pipelineObject_t;
 
@@ -295,49 +272,6 @@ private:
 
 using AllocatorVkMemory = Allocator< VkDeviceMemory >;
 using AllocationVk = alloc_t< AllocatorVkMemory >;
-
-struct GpuImage
-{
-	VkImage			vk_image;
-	VkImageView		vk_view;
-	AllocationVk	allocation;
-};
-
-enum textureType_t
-{
-	TEXTURE_TYPE_UNKNOWN,
-	TEXTURE_TYPE_2D,
-	TEXTURE_TYPE_CUBE,
-};
-
-struct textureInfo_t {
-	uint32_t		width;
-	uint32_t		height;
-	uint32_t		channels;
-	uint32_t		mipLevels;
-	uint32_t		layers;
-	textureType_t	type;
-};
-
-struct texture_t
-{
-	uint8_t*		bytes;
-	uint32_t		sizeBytes;
-	textureInfo_t	info;
-	int				uploadId;
-
-	GpuImage		image;
-
-	texture_t() {
-		info.width = 0;
-		info.height = 0;
-		info.channels = 0;
-		info.mipLevels = 0;
-		info.type = TEXTURE_TYPE_UNKNOWN;
-		uploadId = -1;
-		bytes = nullptr;
-	}
-};
 
 
 struct drawSurf_t

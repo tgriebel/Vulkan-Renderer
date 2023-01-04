@@ -8,17 +8,18 @@
 #include "common.h"
 #include "render_util.h"
 #include "deviceContext.h"
-#include <camera.h>
+#include <scene/camera.h>
 #include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"
-#include "assetLib.h"
+#include <core/assetLib.h>
 #include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"
 #include "renderer.h"
 #include "allocator.h"
 #include "gpuResources.h"
+#include <resource_types/gpuProgram.h>
 
 typedef AssetLib< texture_t >		AssetLibImages;
 typedef AssetLib< Material >		AssetLibMaterials;

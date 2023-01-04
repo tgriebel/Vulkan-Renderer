@@ -2,8 +2,9 @@
 #include "deviceContext.h"
 #include "io.h"
 #include "GeoBuilder.h"
-#include "assetLib.h"
+#include <core/assetLib.h>
 #include "scene.h"
+#include <resource_types/gpuProgram.h>
 
 extern Scene						scene;
 
