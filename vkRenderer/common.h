@@ -34,7 +34,7 @@
 #include <math.h>
 #include <atomic>
 
-#include <math/mathVector.h>
+#include <math/vector.h>
 #include <core/handle.h>
 #include <image/color.h>
 #include <resource_types/material.h>
