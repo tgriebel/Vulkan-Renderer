@@ -6,13 +6,6 @@
 #define USE_VULKAN
 #define USE_IMGUI
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/hash.hpp>
-
 #include <acceleration/aabb.h>
 
 #include <iostream>
@@ -546,19 +539,3 @@ struct computeQueue_t
 	VkCommandBuffer				commandBuffer;
 	VkSemaphore					semaphore;
 };
-
-static inline vec4f glmToVec4( const glm::vec4& glmVec ) {
-	return vec4f( glmVec.x, glmVec.y, glmVec.z, glmVec.w );
-}
-
-static inline glm::vec4 vecToGlm4( const vec4f& vec ) {
-	return glm::vec4( vec[ 0 ], vec[ 1 ], vec[ 2 ], vec[ 3 ] );
-}
-
-static inline vec3f glmToVec3( const glm::vec3& glmVec ) {
-	return vec3f( glmVec.x, glmVec.y, glmVec.z );
-}
-
-static inline glm::vec3 vecToGlm3( const vec3f& vec ) {
-	return glm::vec3( vec[ 0 ], vec[ 1 ], vec[ 2 ] );
-}
