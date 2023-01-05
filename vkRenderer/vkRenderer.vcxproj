@@ -75,13 +75,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\thoma\source\repos\GfxCore\src;C:\Users\thoma\source\repos\Chess\Chess;C:\Users\thoma\source\repos\SysCore\SysCore;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore\SysCore;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\SysCore;..\..\..\Chess\Chess;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
