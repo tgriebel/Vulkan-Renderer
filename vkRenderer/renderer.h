@@ -1111,7 +1111,7 @@ private:
 			{
 				drawSurf_t& surface = shadowView.merged[ surfIx ];
 
-				pipelineObject_t* pipelineObject;
+				pipelineObject_t* pipelineObject = nullptr;
 				if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) {
 					continue;
 				}
@@ -1119,6 +1119,9 @@ private:
 					continue;
 				}
 				GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
+				if( pipelineObject == nullptr ) {
+					continue;
+				}
 
 				// vkCmdSetDepthBias
 				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
@@ -1185,7 +1188,7 @@ private:
 				{
 					drawSurf_t& surface = view.merged[ surfIx ];
 
-					pipelineObject_t* pipelineObject;
+					pipelineObject_t* pipelineObject = nullptr;
 					if ( surface.pipelineObject[ pass ] == INVALID_HDL ) {
 						continue;
 					}
@@ -1199,6 +1202,9 @@ private:
 						continue;
 					}
 					GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
+					if ( pipelineObject == nullptr ) {
+						continue;
+					}
 
 					if ( pass == DRAWPASS_DEPTH ) {
 						vkCmdSetStencilReference( graphicsQueue.commandBuffers[ i ], VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
@@ -1239,8 +1245,11 @@ private:
 				if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HDL ) {
 					continue;
 				}
-				pipelineObject_t* pipelineObject;
+				pipelineObject_t* pipelineObject = nullptr;
 				GetPipelineObject( surface.pipelineObject[ DRAWPASS_POST_2D ], &pipelineObject );
+				if ( pipelineObject == nullptr ) {
+					continue;
+				}
 				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
 
