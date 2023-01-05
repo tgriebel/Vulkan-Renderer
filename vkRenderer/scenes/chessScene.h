@@ -4,6 +4,7 @@
 #include "../render_util.h"
 #include "../io.h"
 #include "../window.h"
+#include "../input.h"
 #include <chess.h>
 #include <commands.h>
 #include <timer.h>

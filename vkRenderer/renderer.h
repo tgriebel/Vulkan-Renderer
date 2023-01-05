@@ -4,6 +4,7 @@
 
 #include "common.h"
 #include "window.h"
+#include "input.h"
 #include "common.h"
 #include "render_util.h"
 #include "deviceContext.h"

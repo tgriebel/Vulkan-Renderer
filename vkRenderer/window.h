@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "input.h"
 
 class Window {
 public:
