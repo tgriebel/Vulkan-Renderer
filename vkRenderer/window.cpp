@@ -60,33 +60,21 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 
 	int w, h;
 	app->GetWindowSize( w, h );
-	//const vec2f prevNdc = app->GetNdc( mouse.x, mouse.y );
-	//const vec2f ndc = app->GetNdc( static_cast<float>( xpos ), static_cast<float>( ypos ) );
+	const vec2f prevNdc = app->GetNdc( mouse.x, mouse.y );
+	const vec2f ndc = app->GetNdc( static_cast<float>( xpos ), static_cast<float>( ypos ) );
 
 	static float lastTime = 0.0f;
 	const float time = static_cast<float>( glfwGetTime() );
 	const float deltaTime = ( time - lastTime );
 	lastTime = time;
-	const float x = static_cast<float>( xpos );
-	const float y = static_cast<float>( ypos );
-	if ( ( fabs( mouse.x - x ) < 1.0f ) || ( fabs( mouse.x - x ) > 100.0f ) ) {
-		mouse.dx = 0.0f;
-	}
-	else {
-		mouse.dx = ( mouse.x - x );
-	}
-	if ( ( fabs( mouse.y - y ) < 1.0f ) || ( fabs( mouse.y - y ) > 100.0f ) ) {
-		mouse.dy = 0.0f;
-	}
-	else {
-		mouse.dy = ( mouse.y - y );
-	}
-	mouse.dx = std::max( -100.0f, std::min( 100.0f, deltaTime * mouse.dx ) );
-	mouse.dy = std::max( -100.0f, std::min( 100.0f, deltaTime * mouse.dy ) );
+	mouse.dx = ( mouse.x - ndc[0] );
+	mouse.dy = ( mouse.y - ndc[1] );
+	//mouse.dx = std::max( -1024.0f, std::min( 1024.0f, deltaTime * mouse.dx ) );
+	//mouse.dy = std::max( -1024.0f, std::min( 1024.0f, deltaTime * mouse.dy ) );
 	mouse.xPrev = mouse.x;
 	mouse.yPrev = mouse.y;
-	mouse.x = x;
-	mouse.y = y;
+	mouse.x = ndc[0];
+	mouse.y = ndc[1];
 
 	if ( app->IsFocused() ) {
 		mouse.centered = false;
