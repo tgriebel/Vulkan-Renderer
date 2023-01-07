@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore\SysCore;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -6,11 +6,12 @@
 #include "../input.h"
 #include <chess.h>
 #include <commands.h>
-#include <timer.h>
+#include <syscore/timer.h>
 #include <scene/entity.h>
 #include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
 #include <resource_types/model.h>
+#include <io/io.h>
 
 extern Scene scene;
 
@@ -238,32 +239,32 @@ void LoadModels( AssetLibModels& models )
 	{
 		Timer t;
 		t.Start();
-		hdl_t handle = LoadRawModel( "axis.obj", "axis" );
+		hdl_t handle = LoadRawModel( scene, "axis.obj", "axis", ModelPath, TexturePath );
 		t.Stop();
 		std::cout << t.GetElapsed() << std::endl;
 		t.Start();
-		WriteModel( BakePath + ModelPath + HashString( handle ) + BakedModelExtension, handle ); // FIXME
+		WriteModel( scene, BakePath + ModelPath + handle.String() + BakedModelExtension, handle ); // FIXME
 		t.Stop();
 		std::cout << t.GetElapsed() << std::endl;
 		t.Start();
-		LoadModel( handle );
+		LoadModel( scene, handle, BakePath, ModelPath, BakedModelExtension );
 		t.Stop();
 		std::cout << t.GetElapsed() << std::endl;
 
 
-		LoadRawModel( "cube.obj", "cube" );
-		LoadRawModel( "diamond.obj", "diamond" );
-		LoadRawModel( "sphere.obj", "sphere" );
-		LoadRawModel( "pawn.obj", "pawn" );
-		LoadRawModel( "rook.obj", "rook" );
-		LoadRawModel( "knight.obj", "knight" );
-		LoadRawModel( "bishop.obj", "bishop" );
-		LoadRawModel( "king.obj", "king" );
-		LoadRawModel( "queen.obj", "queen" );
-		LoadRawModel( "chess_board.obj", "chess_board" );
+		LoadRawModel( scene, "cube.obj", "cube", ModelPath, TexturePath );
+		LoadRawModel( scene, "diamond.obj", "diamond", ModelPath, TexturePath );
+		LoadRawModel( scene, "sphere.obj", "sphere", ModelPath, TexturePath );
+		LoadRawModel( scene, "pawn.obj", "pawn", ModelPath, TexturePath );
+		LoadRawModel( scene, "rook.obj", "rook", ModelPath, TexturePath );
+		LoadRawModel( scene, "knight.obj", "knight", ModelPath, TexturePath );
+		LoadRawModel( scene, "bishop.obj", "bishop", ModelPath, TexturePath );
+		LoadRawModel( scene, "king.obj", "king", ModelPath, TexturePath );
+		LoadRawModel( scene, "queen.obj", "queen", ModelPath, TexturePath );
+		LoadRawModel( scene, "chess_board.obj", "chess_board", ModelPath, TexturePath );
 	}
 	{
-		const hdl_t planeHdl = LoadRawModel( "plane.obj", "plane" );
+		const hdl_t planeHdl = LoadRawModel( scene, "plane.obj", "plane", ModelPath, TexturePath );
 		models.Find( planeHdl )->surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
 	}
 	{

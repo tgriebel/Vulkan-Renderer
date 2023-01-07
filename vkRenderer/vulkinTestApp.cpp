@@ -4,15 +4,14 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
-
 #include "common.h"
-#include "render_util.h"
-#include "deviceContext.h"
 #include <scene/camera.h>
 #include <scene/scene.h>
+#include <core/assetLib.h>
+#include "render_util.h"
+#include "deviceContext.h"
 #include "pipeline.h"
 #include "swapChain.h"
-#include <core/assetLib.h>
 #include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"

@@ -34,14 +34,7 @@
 #include <primitives/geom.h>
 #include <scene/camera.h>
 #include <resource_types/gpuProgram.h>
-
-const uint32_t KB_1 = 1024;
-const uint32_t MB_1 = 1024 * KB_1;
-const uint32_t GB_1 = 1024 * MB_1;
-
-#define KB( N ) ( N * KB_1 )
-#define MB( N ) ( N * MB_1 )
-#define GB( N ) ( N * GB_1 )
+#include <syscore/common.h>
 
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1000;
 const uint32_t	DescriptorPoolMaxSamplers		= 3;
@@ -90,20 +83,6 @@ struct vsInput_t
 };
 
 
-enum drawPass_t : uint32_t
-{
-	DRAWPASS_SHADOW,
-	DRAWPASS_DEPTH,
-	DRAWPASS_TERRAIN,
-	DRAWPASS_OPAQUE,
-	DRAWPASS_SKYBOX,
-	DRAWPASS_TRANS,
-	DRAWPASS_DEBUG_SOLID,
-	DRAWPASS_DEBUG_WIREFRAME,
-	DRAWPASS_POST_2D,
-	DRAWPASS_COUNT
-};
-
 enum renderFlags_t
 {
 	NONE		= 0,
@@ -117,14 +96,6 @@ enum renderFlags_t
 
 
 struct pipelineObject_t;
-
-template<> struct std::hash<vertex_t>
-{
-	size_t operator()( vertex_t const& vertex ) const
-	{
-		return Hash( reinterpret_cast< const uint8_t* >( &vertex ), sizeof( vertex_t ) );
-	}
-};
 
 
 struct uniformBufferObject_t

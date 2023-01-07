@@ -8,8 +8,6 @@
 
 extern Scene						scene;
 
-#define STB_IMAGE_IMPLEMENTATION // includes func defs
-#include "stb_image.h"
 
 mat4x4f MatrixFromVector( const vec3f& v )
 {
@@ -28,102 +26,6 @@ mat4x4f MatrixFromVector( const vec3f& v )
 	return mat4x4f( values );
 }
 
-bool LoadTextureImage( const char * texturePath, texture_t& texture )
-{
-	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load( texturePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha );
-
-	if ( !pixels ) {
-		stbi_image_free( pixels );
-		return false;
-	}
-
-	texture.info.width		= texWidth;
-	texture.info.height		= texHeight;
-	texture.info.channels	= texChannels;
-	texture.info.layers		= 1;
-	texture.info.type		= TEXTURE_TYPE_2D;
-	texture.uploadId		= -1;
-	texture.info.mipLevels	= static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
-	texture.sizeBytes		= ( texWidth * texHeight * 4 );
-	texture.bytes = new uint8_t[ texture.sizeBytes ];
-	memcpy( texture.bytes, pixels, texture.sizeBytes );
-	stbi_image_free( pixels );
-	return true;
-}
-
-bool LoadTextureCubeMapImage( const char* textureBasePath, const char* ext, texture_t& texture )
-{
-	std::string paths[ 6 ] = {
-		( std::string( textureBasePath ) + "_right." + ext ),
-		( std::string( textureBasePath ) + "_left." + ext ),			
-		( std::string( textureBasePath ) + "_top." + ext ),
-		( std::string( textureBasePath ) + "_bottom." + ext ),
-		( std::string( textureBasePath ) + "_front." + ext ),
-		( std::string( textureBasePath ) + "_back." + ext ),
-	};
-
-	int sizeBytes = 0;
-	texture_t textures2D[ 6 ];
-	for ( int i = 0; i < 6; ++i )
-	{
-		if ( LoadTextureImage( paths[ i ].c_str(), textures2D[ i ] ) == false ) {
-			sizeBytes = 0;
-			break;
-		}
-		assert( textures2D[ i ].sizeBytes > 0 );
-		sizeBytes += textures2D[ i ].sizeBytes;
-	}
-
-	if ( sizeBytes == 0 ) {
-		for ( int i = 0; i < 6; ++i ) {
-			if ( textures2D[ i ].bytes == nullptr ) {
-				delete[] textures2D[ i ].bytes;
-			}
-		}
-		return false;
-	}
-
-	const int texWidth = textures2D[ 0 ].info.width;
-	const int texHeight = textures2D[ 0 ].info.height;
-	const int texChannels = textures2D[ 0 ].info.channels;
-
-	uint8_t* bytes = new uint8_t[ sizeBytes ];
-
-	int byteOffset = 0;
-	for ( int i = 0; i < 6; ++i )
-	{
-		if( ( texWidth != textures2D[ i ].info.width ) ||
-			( texHeight != textures2D[ i ].info.height ) ||
-			( texChannels != textures2D[ i ].info.channels ) )
-		{
-			if ( bytes != nullptr ) {
-				delete[] bytes;
-			}
-			for ( int j = 0; j < 6; ++j ) {
-				if ( textures2D[ j ].bytes == nullptr ) {
-					delete[] textures2D[ j ].bytes;
-				}
-			}
-			return false;
-		}
-		
-		memcpy( bytes + byteOffset, textures2D[ i ].bytes, textures2D[ i ].sizeBytes );
-		byteOffset += textures2D[ i ].sizeBytes;
-	}
-
-	assert( sizeBytes == byteOffset );
-	texture.info.width		= texWidth;
-	texture.info.height		= texHeight;
-	texture.info.channels	= texChannels;
-	texture.info.layers		= 6;
-	texture.info.type		= TEXTURE_TYPE_CUBE;
-	texture.uploadId		= -1;
-	texture.info.mipLevels	= static_cast<uint32_t>( std::floor( std::log2( std::max( texture.info.width, texture.info.height ) ) ) ) + 1;
-	texture.bytes			= bytes;
-	texture.sizeBytes		= sizeBytes;
-	return true;
-}
 
 void CreateShaders( GpuProgram& prog )
 {
