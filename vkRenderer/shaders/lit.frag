@@ -84,13 +84,14 @@ void main()
     vec3 F0 = vec3( 0.04f ); 
     F0 = mix( F0, albedo.rgb, metallic );
 
-    const float AMBIENT_LIGHT_FACTOR = 0.05f;
-    const vec3 ambient = albedo.rgb * AMBIENT_LIGHT_FACTOR * materials[ materialId ].Ka.rgb;
+    const float AMBIENT_LIGHT_FACTOR = 0.03f;
+    const float ao = 1.0f;
+    const vec3 ambient = albedo.rgb * ao * AMBIENT_LIGHT_FACTOR * materials[ materialId ].Ka.rgb;
     const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
     const vec3 specularColor = materials[ materialId ].Ks.rgb;
     const float specularPower = materials[ materialId ].Ns;
 
-    vec3 color = vec3( 0.0f, 0.0f, 0.0f );
+    vec3 Lo = vec3( 0.0f, 0.0f, 0.0f );
     for( int i = 0; i < 3; ++i ) {
 	    const vec3 l = normalize( lights[ i ].lightPos - worldPosition.xyz );
         const vec3 h = normalize( v + l );
@@ -120,9 +121,9 @@ void main()
         const vec3 radiance     = attenuation * spotFalloff * lights[ i ].intensity;
 
         vec3 diffuse = ( ( kD * albedo.rgb ) / PI + Fr ) * radiance * NoL;
-        color += diffuse;
+        Lo += diffuse;
     }
-    outColor.rgb = color.rgb * Fd_Lambert();
+    outColor.rgb = Lo.rgb + ambient;
     outColor.a = 1.0f;
 
     float visibility = 1.0f;
