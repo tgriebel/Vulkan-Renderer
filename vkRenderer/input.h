@@ -4,7 +4,7 @@
 
 struct mouse_t
 {
-	mouse_t() : speed( 10.0f ),
+	mouse_t() : speed( 2.0f ),
 		x( 0.0f ),
 		y( 0.0f ),
 		xPrev( 0.0f ),

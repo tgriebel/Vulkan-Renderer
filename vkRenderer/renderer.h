@@ -8,7 +8,6 @@
 #include "common.h"
 #include "render_util.h"
 #include "deviceContext.h"
-#include "scene.h"
 #include "pipeline.h"
 #include "swapChain.h"
 #include "core/assetLib.h"
@@ -19,12 +18,17 @@
 #include "GeoBuilder.h"
 #include <resource_types/texture.h>
 #include <resource_types/gpuProgram.h>
+#include <scene/scene.h>
+
+//#include <src/scene.h>
 
 #if defined( USE_IMGUI )
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_vulkan.h"
 #endif
+
+//void TraceScene( const RtView& view, Image<Color>& image );
 
 #include <scene/entity.h>
 
@@ -54,6 +58,10 @@ public:
 		UpdateGpuMaterials();
 		Commit( scene );
 		SubmitFrame();
+
+		//
+		//void TraceScene( const RtView & view, Image<Color>&image );
+		//
 
 		localMemory.Pack();
 		sharedMemory.Pack();
@@ -1518,15 +1526,11 @@ private:
 
 		Camera shadowCam;
 		shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-		shadowCam.fov = Radians( 90.0f );
 		shadowCam.far = nearPlane;
 		shadowCam.near = farPlane;
-		shadowCam.aspect = ( ShadowMapWidth / (float)ShadowMapHeight );
-		shadowCam.halfFovX = tan( 0.5f * Radians( 90.0f ) );
-		shadowCam.halfFovY = tan( 0.5f * Radians( 90.0f ) ) / shadowCam.aspect;
 		shadowCam.focalLength = shadowCam.far;
-		shadowCam.viewportWidth = 2.0f * shadowCam.halfFovX;
-		shadowCam.viewportHeight = 2.0f * shadowCam.halfFovY;
+		shadowCam.SetFov( Radians( 90.0f ) );
+		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
 		shadowView.projMatrix = shadowCam.GetPerspectiveMatrix();
 	}
 

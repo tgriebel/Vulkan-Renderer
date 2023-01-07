@@ -1,6 +1,5 @@
 #pragma once
 #include "../common.h"
-#include "../scene.h"
 #include "../render_util.h"
 #include "../io.h"
 #include "../window.h"
@@ -9,6 +8,7 @@
 #include <commands.h>
 #include <timer.h>
 #include <scene/entity.h>
+#include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
 
 extern Scene scene;
@@ -413,8 +413,8 @@ void UpdateSceneLocal( const float dt )
 		const float maxSpeed = mouse.speed;
 		const float yawDelta = maxSpeed * mouse.dx;
 		const float pitchDelta = -maxSpeed * mouse.dy;
-		scene.camera.SetYaw( yawDelta );
-		scene.camera.SetPitch( pitchDelta );
+		scene.camera.AdjustYaw( yawDelta );
+		scene.camera.AdjustPitch( pitchDelta );
 	}
 	else if( mouse.leftDown )
 	{

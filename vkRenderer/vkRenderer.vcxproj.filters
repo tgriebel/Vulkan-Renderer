@@ -72,7 +72,6 @@
     <ClInclude Include="window.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="renderConstants.h" />
-    <ClInclude Include="scene.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="allocator.h" />
     <ClInclude Include="gpuResources.h" />

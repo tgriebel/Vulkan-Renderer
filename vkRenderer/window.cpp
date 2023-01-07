@@ -69,8 +69,6 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	lastTime = time;
 	mouse.dx = ( mouse.x - ndc[0] );
 	mouse.dy = ( mouse.y - ndc[1] );
-	//mouse.dx = std::max( -1024.0f, std::min( 1024.0f, deltaTime * mouse.dx ) );
-	//mouse.dy = std::max( -1024.0f, std::min( 1024.0f, deltaTime * mouse.dy ) );
 	mouse.xPrev = mouse.x;
 	mouse.yPrev = mouse.y;
 	mouse.x = ndc[0];

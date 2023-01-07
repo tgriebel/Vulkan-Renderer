@@ -1,9 +1,9 @@
 #include "common.h"
-#include "scene.h"
 #include <core/util.h>
 #include "io.h"
 #include "window.h"
 #include <scene/entity.h>
+#include <scene/scene.h>
 
 //#define BEACH
 #if defined( BEACH )
@@ -42,24 +42,24 @@ void UpdateScene( const float dt )
 		scene.camera.MoveForward( dt * -0.01f );
 	}
 	if ( window.input.IsKeyPressed( '8' ) ) {
-		scene.camera.SetPitch( -dt * 0.01f );
+		scene.camera.AdjustPitch( -dt * 0.01f );
 	}
 	if ( window.input.IsKeyPressed( '2' ) ) {
-		scene.camera.SetPitch( dt * 0.01f );
+		scene.camera.AdjustPitch( dt * 0.01f );
 	}
 	if ( window.input.IsKeyPressed( '4' ) ) {
-		scene.camera.SetYaw( dt * 0.01f );
+		scene.camera.AdjustYaw( dt * 0.01f );
 	}
 	if ( window.input.IsKeyPressed( '6' ) ) {
-		scene.camera.SetYaw( -dt * 0.01f );
+		scene.camera.AdjustYaw( -dt * 0.01f );
 	}
 	if ( window.input.IsKeyPressed( '+' ) ) {
-		scene.camera.fov += dt;
+		scene.camera.SetFov( scene.camera.GetFov() + Radians( 0.1f ) );
 	}
 	if ( window.input.IsKeyPressed( '-' ) ) {
-		scene.camera.fov -= dt;
+		scene.camera.SetFov( scene.camera.GetFov() - Radians( 0.1f ) );
 	}
-	scene.camera.aspect = window.GetWindowFrameBufferAspect();
+	scene.camera.SetAspectRatio( window.GetWindowFrameBufferAspect() );
 
 	// Skybox
 	vec3f skyBoxOrigin;

@@ -3,7 +3,7 @@
 #include "io.h"
 #include "GeoBuilder.h"
 #include <core/assetLib.h>
-#include "scene.h"
+#include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
 
 extern Scene						scene;

@@ -9,7 +9,7 @@
 #include "render_util.h"
 #include "deviceContext.h"
 #include <scene/camera.h>
-#include "scene.h"
+#include <scene/scene.h>
 #include "pipeline.h"
 #include "swapChain.h"
 #include <core/assetLib.h>
