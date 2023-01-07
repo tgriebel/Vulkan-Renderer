@@ -418,12 +418,7 @@ void UpdateSceneLocal( const float dt )
 	}
 	else if( mouse.leftDown )
 	{
-		const vec2f screenPoint = vec2f( mouse.x, mouse.y );
-		int width, height;
-		window.GetWindowFrameBufferSize( width, height );
-		const vec2f ndc = vec2f( 2.0f * screenPoint[ 0 ] / width, 2.0f * screenPoint[ 1 ] / height ) - vec2f( 1.0f );
-
-		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * ndc[ 0 ] + 0.5f, 0.5f * ndc[ 1 ] + 0.5f ) );
+		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
 		selectedEntity = GetTracedEntity( ray );
 	}
 
