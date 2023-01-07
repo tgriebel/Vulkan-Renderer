@@ -4,6 +4,7 @@
 #include "common.h"
 #include "GeoBuilder.h"
 #include <resource_types/texture.h>
+#include <resource_types/model.h>
 
 class SpinLock
 {

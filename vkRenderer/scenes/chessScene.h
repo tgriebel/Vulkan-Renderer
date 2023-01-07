@@ -10,6 +10,7 @@
 #include <scene/entity.h>
 #include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
+#include <resource_types/model.h>
 
 extern Scene scene;
 

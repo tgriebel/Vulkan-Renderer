@@ -3,6 +3,7 @@
 #include "render_util.h"
 #include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
+#include <resource_types/model.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
