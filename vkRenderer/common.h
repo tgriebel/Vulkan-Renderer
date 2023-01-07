@@ -58,7 +58,6 @@ const uint32_t	MaxIndices						= 0x000FFFFF;
 const uint32_t	MaxSurfaces						= MaxModels * MaxViews;
 const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
 const uint32_t	MaxMaterialDescriptors			= 64;
-const uint32_t	MaxLights						= 3;
 const uint32_t	MaxCodeImages					= 2;
 const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
@@ -159,14 +158,6 @@ struct materialBufferObject_t
 	float					d;
 	float					illum;
 	uint32_t				pad[ 15 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
-};
-
-struct light_t
-{
-	vec4f		lightPos;
-	vec4f		intensity;
-	vec4f		lightDir;
-	uint32_t	pad[ 4 ];
 };
 
 struct lightBufferObject_t
@@ -326,37 +317,6 @@ template<> struct std::hash<drawSurf_t> {
 	size_t operator()( drawSurf_t const& surf ) const {
 		return Hash( reinterpret_cast<const uint8_t*>( &surf ), sizeof( surf ) );
 	}
-};
-
-
-class RenderView
-{
-public:
-	RenderView()
-	{
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = (float)DEFAULT_DISPLAY_WIDTH;
-		viewport.height = (float)DEFAULT_DISPLAY_HEIGHT;
-		viewport.near = 1.0f;
-		viewport.far = 0.0f;
-
-		committedModelCnt = 0;
-		mergedModelCnt = 0;
-	}
-
-	mat4x4f										viewMatrix;
-	mat4x4f										projMatrix;
-	mat4x4f										viewprojMatrix;
-	viewport_t									viewport;
-	light_t										lights[ MaxLights ];
-
-	uint32_t									committedModelCnt;
-	uint32_t									mergedModelCnt;
-	drawSurf_t									surfaces[ MaxModels ];
-	drawSurf_t									merged[ MaxModels ];
-	drawSurfInstance_t							instances[ MaxModels ];
-	uint32_t									instanceCounts[ MaxModels ];
 };
 
 

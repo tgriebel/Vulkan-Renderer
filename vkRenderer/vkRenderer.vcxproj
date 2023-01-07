@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\SysCore;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\SysCore;..\..\..\Chess\Chess;C:\Users\thoma\source\repos\Raytracer-Graphic-Pipeline-master\src;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup>
@@ -173,6 +173,7 @@
     <ClInclude Include="allocator.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="gpuResources.h" />
+    <ClInclude Include="renderview.h" />
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="scenes\beachScene.h" />

@@ -82,6 +82,7 @@
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="render_util.h" />
+    <ClInclude Include="renderview.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

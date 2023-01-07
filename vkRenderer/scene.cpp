@@ -17,14 +17,6 @@ extern Scene scene;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
-// FIXME: move. here due to a compile dependency
-AABB Entity::GetBounds() const {
-	const Model* model = scene.modelLib.Find( modelHdl );
-	const AABB& bounds = model->bounds;
-	vec3f origin = GetOrigin();
-	return AABB( bounds.GetMin() + origin, bounds.GetMax() + origin );
-}
-
 void UpdateScene( const float dt )
 {
 	// FIXME: race conditions

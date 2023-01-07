@@ -3,6 +3,7 @@
 #include "pipeline.h"
 #include "deviceContext.h"
 #include <core/assetLib.h>
+#include <scene/scene.h>
 
 AssetLib< pipelineObject_t > pipelineLib;
 

@@ -13,14 +13,14 @@
 #include "core/assetLib.h"
 #include "FrameState.h"
 #include "renderConstants.h"
-
+#include "renderview.h"
 #include "io.h"
 #include "GeoBuilder.h"
 #include <resource_types/texture.h>
 #include <resource_types/gpuProgram.h>
 #include <scene/scene.h>
 
-//#include <src/scene.h>
+//#include <scene.h>
 
 #if defined( USE_IMGUI )
 #include "imgui/imgui.h"
