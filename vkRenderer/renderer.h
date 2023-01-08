@@ -16,19 +16,19 @@
 #include "renderview.h"
 #include "io.h"
 #include "GeoBuilder.h"
+#include <primitives/geom.h>
 #include <resource_types/texture.h>
 #include <resource_types/gpuProgram.h>
 #include <scene/scene.h>
 
-//#include <scene.h>
+#include <raytracer/scene.h>
+#include <raytracer/raytrace.h>
 
 #if defined( USE_IMGUI )
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_vulkan.h"
 #endif
-
-//void TraceScene( const RtView& view, Image<Color>& image );
 
 #include <scene/entity.h>
 
@@ -43,6 +43,8 @@ typedef AssetLib<GpuImage>			AssetLibGpuImages;
 extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						window;
+
+extern std::vector< uint32_t > pieceEntities;
 
 class Renderer
 {
@@ -59,9 +61,89 @@ public:
 		Commit( scene );
 		SubmitFrame();
 
-		//
-		//void TraceScene( const RtView & view, Image<Color>&image );
-		//
+		static RtView rtview;
+		static RtScene rtScene;
+
+		static bool buildscene = true;
+		if( buildscene )
+		{
+			buildscene = false;
+		
+			const uint32_t entCount = 10;//static_cast<uint32_t>( scene.entities.size() );
+			for ( uint32_t i = 3; i < 4; ++i ) // black rook
+			{
+				RtModel rtModel;
+				CreateRayTraceModel( scene, scene.entities[i], &rtModel );
+				rtScene.models.push_back( rtModel );
+
+				AABB& aabb = rtModel.octree.GetAABB();
+				rtScene.aabb.Expand( aabb.GetMin() );
+				rtScene.aabb.Expand( aabb.GetMax() );
+			}
+
+			for( uint32_t i = 0; i < MaxLights; ++i )
+			{
+				rtScene.lights.push_back( scene.lights[i] );
+			}
+		}
+
+		if( imguiControls.raytraceScene )
+		{
+			imguiControls.raytraceScene = false;
+
+			rtview.targetSize[ 0 ] = 320;
+			rtview.targetSize[ 1 ] = 180;
+			//window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
+			Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::White, "testRayTrace" );
+			{
+				rtview.camera = scene.camera;
+				rtview.viewTransform = scene.camera.GetViewMatrix();
+				rtview.projTransform = scene.camera.GetPerspectiveMatrix();
+				rtview.projView = rtview.projTransform * rtview.viewTransform;
+			}
+
+			//TraceScene( rtview, rtScene, rtimage );
+			//RasterScene( rtimage, rtview, rtScene, false );
+			{
+				for ( uint32_t y = 0; y < rtimage.GetHeight(); ++y )
+				{
+					for ( uint32_t x = 0; x < rtimage.GetWidth(); ++x )
+					{
+						Ray ray = rtview.camera.GetViewRay( vec2f( x / float( rtimage.GetWidth() - 1 ), y / float( rtimage.GetHeight() - 1 ) ) );
+						const uint32_t entCount = static_cast<uint32_t>( pieceEntities.size() );
+						for ( uint32_t i = 0; i < 1; ++i )
+						{
+							Entity* ent = scene.entities[ pieceEntities[i] ];
+							float t0, t1;
+							if ( ent->GetBounds().Intersect( ray, t0, t1 ) )
+							{
+								rtimage.SetPixel( x, y, Color::Red );
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			{
+				std::stringstream ss;
+				const char* name = rtimage.GetName();
+				if ( ( name == nullptr ) || ( name == "" ) )
+				{
+					ss << reinterpret_cast<uint64_t>( &rtimage );
+				}
+				else
+				{
+					ss << name;
+				}
+
+				ss << ".bmp";
+
+				Bitmap bitmap = Bitmap( rtimage.GetWidth(), rtimage.GetHeight() );
+				ImageToBitmap( rtimage, bitmap );
+				bitmap.Write( ss.str() );
+			}
+		}
 
 		localMemory.Pack();
 		sharedMemory.Pack();
@@ -1273,7 +1355,8 @@ private:
 			ImGui::NewFrame();
 
 			ImGui::Begin( "Control Panel" );
-			ImGui::Checkbox( "Reload Shaders", &imguiControls.rebuildShaders );
+			imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+			imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
 			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );

@@ -320,6 +320,7 @@ struct imguiControls_t
 	int			dbgImageId;
 	int			selectedEntityId;
 	bool		rebuildShaders;
+	bool		raytraceScene;
 	vec3f		selectedModelOrigin;
 };
 #endif

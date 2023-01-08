@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -246,6 +246,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\GfxCore\GfxCore.vcxproj">
       <Project>{3de9a00c-b04b-43ab-943d-1973c47dece3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Raytracer-Graphic-Pipeline-master\RayTracer.vcxproj">
+      <Project>{5a3a1d7e-43f5-41d1-af37-d75dfd0dbc49}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\SysCore\SysCore\SysCore.vcxproj">
       <Project>{01728a43-da97-4bc6-8edf-f17cb75e7967}</Project>
