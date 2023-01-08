@@ -1,0 +1,108 @@
+{
+  "scene": "chess",
+  "shaders": [
+    {
+      "name": "Basic",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/simplePS.spv"
+    },
+    {
+      "name": "Shadow",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/shadowPS.spv"
+    },
+    {
+      "name": "Prepass",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/depthPS.spv"
+    },
+    {
+      "name": "Terrain",
+      "vs": "shaders_bin/terrainVS.spv",
+      "ps": "shaders_bin/terrainPS.spv"
+    },
+    {
+      "name": "TerrainDepth",
+      "vs": "shaders_bin/terrainVS.spv",
+      "ps": "shaders_bin/depthPS.spv"
+    },
+    {
+      "name": "TerrainShadow",
+      "vs": "shaders_bin/terrainVS.spv",
+      "ps": "shaders_bin/shadowPS.spv"
+    },
+    {
+      "name": "Sky",
+      "vs": "shaders_bin/skyboxVS.spv",
+      "ps": "shaders_bin/skyboxPS.spv"
+    },
+    {
+      "name": "LitDepth",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/depthPS.spv"
+    },
+    {
+      "name": "LitOpaque",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/litPS.spv"
+    },
+    {
+      "name": "LitTree",
+      "vs": "shaders_bin/treeVS.spv",
+      "ps": "shaders_bin/litPS.spv"
+    },
+    {
+      "name": "LitTrans",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/emissivePS.spv"
+    },
+    {
+      "name": "Debug",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/depthPS.spv"
+    },
+    {
+      "name": "Debug_Solid",
+      "vs": "shaders_bin/simpleVS.spv",
+      "ps": "shaders_bin/litPS.spv"
+    },
+    {
+      "name": "PostProcess",
+      "vs": "shaders_bin/defaultVS.spv",
+      "ps": "shaders_bin/postProcessPS.spv"
+    },
+    {
+      "name": "Image2D",
+      "vs": "shaders_bin/defaultVS.spv",
+      "ps": "shaders_bin/simplePS.spv"
+    },
+  ],
+  "images": [
+      "checker.png",
+      "sapeli.jpg",
+      "white.png",
+      "black.jpg",
+      "chapel_right.jpg",
+      "chapel_left.jpg",
+      "chapel_top.jpg",
+      "chapel_bottom.jpg",
+      "chapel_front.jpg",
+      "chapel_back.jpg"
+  ],
+  "materials": [
+    {
+      "name": "WHITE_WOOD",
+      "tr": "1.0"
+      "shaders": {
+          "shadow": "Shadow",
+          "depth": "LitDepth",
+          "opaque": "LitOpaque",
+      },
+      "textures": [
+          "heightmap.png",
+          "grass.jpg",
+          "desert.jpg"
+      ]
+    }
+  ]
+}
