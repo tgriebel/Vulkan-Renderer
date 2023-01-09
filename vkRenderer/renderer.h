@@ -44,6 +44,7 @@ extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						window;
 
+extern std::vector< uint32_t > boundEntities;
 extern std::vector< uint32_t > pieceEntities;
 
 class Renderer
@@ -69,11 +70,11 @@ public:
 		{
 			buildscene = false;
 		
-			const uint32_t entCount = 10;//static_cast<uint32_t>( scene.entities.size() );
-			for ( uint32_t i = 3; i < 4; ++i ) // black rook
+			const uint32_t entCount = static_cast<uint32_t>( boundEntities.size() );
+			for ( uint32_t i = 0; i < entCount; ++i )
 			{
 				RtModel rtModel;
-				CreateRayTraceModel( scene, scene.entities[i], &rtModel );
+				CreateRayTraceModel( scene, scene.entities[ pieceEntities[ i ] ], &rtModel );
 				rtScene.models.push_back( rtModel );
 
 				AABB& aabb = rtModel.octree.GetAABB();
@@ -97,30 +98,50 @@ public:
 			Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::White, "testRayTrace" );
 			{
 				rtview.camera = scene.camera;
-				rtview.viewTransform = scene.camera.GetViewMatrix();
-				rtview.projTransform = scene.camera.GetPerspectiveMatrix();
+				rtview.viewTransform = scene.camera.GetViewMatrix().Transpose();
+				rtview.projTransform = scene.camera.GetPerspectiveMatrix().Transpose();
 				rtview.projView = rtview.projTransform * rtview.viewTransform;
 			}
 
 			//TraceScene( rtview, rtScene, rtimage );
 			//RasterScene( rtimage, rtview, rtScene, false );
-			{
+			//std::cout << scene.entities[ pieceEntities[0] ]->GetBounds() << std::endl;
+			//std::cout << rtScene.models[ 0 ].octree.GetAABB() << std::endl;
+			if(1){
 				for ( uint32_t y = 0; y < rtimage.GetHeight(); ++y )
 				{
 					for ( uint32_t x = 0; x < rtimage.GetWidth(); ++x )
 					{
 						Ray ray = rtview.camera.GetViewRay( vec2f( x / float( rtimage.GetWidth() - 1 ), y / float( rtimage.GetHeight() - 1 ) ) );
-						const uint32_t entCount = static_cast<uint32_t>( pieceEntities.size() );
-						for ( uint32_t i = 0; i < 1; ++i )
+						
+						sample_t sample = RayTrace_r( ray, rtScene, 0 );
+						if( sample.hitCode == HIT_AABB ) {
+							rtimage.SetPixel( x, y, Color::Red );
+						} else if ( sample.hitCode == HIT_FRONTFACE ) {
+							rtimage.SetPixel( x, y, Color::Blue );
+						} else if ( sample.hitCode == HIT_BACKFACE ) {
+							rtimage.SetPixel( x, y, Color::Green );
+						} else if ( sample.hitCode == HIT_SKY ) {
+							rtimage.SetPixel( x, y, Color::Brown );
+						} else {
+							rtimage.SetPixel( x, y, Color::White );
+						}
+						
+						/*
+						const uint32_t modelCount = static_cast<uint32_t>( rtScene.models.size() );
+						for ( uint32_t i = 0; i < modelCount; ++i )
 						{
-							Entity* ent = scene.entities[ pieceEntities[i] ];
 							float t0, t1;
-							if ( ent->GetBounds().Intersect( ray, t0, t1 ) )
+							if ( rtScene.models[i].octree.GetAABB().Intersect( ray, t0, t1 ) )
 							{
-								rtimage.SetPixel( x, y, Color::Red );
-								break;
+								std::vector<uint32_t> triIndices;
+								rtScene.models[i].octree.Intersect( ray, triIndices );
+								if( triIndices.size() > 0 ) {
+									rtimage.SetPixel( x, y, Color::Red );
+								}
 							}
 						}
+						*/
 					}
 				}
 			}
@@ -143,6 +164,20 @@ public:
 				ImageToBitmap( rtimage, bitmap );
 				bitmap.Write( ss.str() );
 			}
+		}
+
+		if ( window.input.GetMouse().leftDown ) {
+			rtview.targetSize[ 0 ] = 320;
+			rtview.targetSize[ 1 ] = 180;
+
+			rtview.camera = scene.camera;
+			rtview.viewTransform = scene.camera.GetViewMatrix();
+			rtview.projTransform = scene.camera.GetPerspectiveMatrix();
+			rtview.projView = rtview.projTransform * rtview.viewTransform;
+
+			Ray ray = rtview.camera.GetViewRay( vec2f( 0.5f * window.input.GetMouse().x + 0.5f, 0.5f * window.input.GetMouse().y + 0.5f ) );
+			sample_t sample = RayTrace_r( ray, rtScene, 0 );
+			std::cout << "Hit Code (" << 0.5f * window.input.GetMouse().x + 0.5f << ", " << 0.5f * window.input.GetMouse().y + 0.5f << ")" << sample.hitCode << std::endl;
 		}
 
 		localMemory.Pack();
