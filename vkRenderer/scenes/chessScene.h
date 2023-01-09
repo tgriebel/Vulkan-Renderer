@@ -25,6 +25,7 @@ Entity*							movePieceId = nullptr;
 std::vector< moveAction_t >		actions;
 std::vector< uint32_t >			pieceEntities;
 std::vector< uint32_t >			glowEntities;
+std::vector< uint32_t >			boundEntities;
 
 class PieceEntity : public Entity {
 public:
@@ -35,6 +36,13 @@ public:
 	char			file;	// TODO: remove
 	char			rank;	// TODO: remove
 	pieceHandle_t	handle;
+};
+
+class BoundEntity : public Entity {
+public:
+	BoundEntity() : Entity(),
+		pieceId( ~0x0 ) { }
+	uint32_t	pieceId;
 };
 
 Entity* GetTracedEntity( const Ray& ray )
@@ -346,15 +354,20 @@ void MakeScene()
 
 	const hdl_t cubeHdl = scene.modelLib.RetrieveHdl( "cube" );
 	const uint32_t pieceCount = static_cast<uint32_t>( pieceEntities.size() );
-	for ( int i = 0; i < pieceCount; ++i )
+	bool drawPieceWireframes = true;
+	if( drawPieceWireframes )
 	{
-		Entity* cubeEnt = new Entity();
-		scene.CreateEntity( cubeHdl, *cubeEnt );
-		cubeEnt->materialHdl = scene.materialLib.RetrieveHdl( "White.001" );
-		//cubeEnt->materialHdl = scene.materialLib.RetrieveHdl( "DEBUG_WIRE" );
-		//cubeEnt->SetFlag( ENT_FLAG_WIREFRAME );
-		cubeEnt->dbgName = ( scene.entities[ pieceEntities[ i ] ]->dbgName + "_cube" ).c_str();	
-		scene.entities.push_back( cubeEnt );
+		for ( int i = 0; i < pieceCount; ++i )
+		{
+			BoundEntity* cubeEnt = new BoundEntity();
+			scene.CreateEntity( cubeHdl, *cubeEnt );
+			cubeEnt->materialHdl = scene.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+			cubeEnt->SetFlag( ENT_FLAG_WIREFRAME );
+			cubeEnt->dbgName = ( scene.entities[ pieceEntities[ i ] ]->dbgName + "_cube" ).c_str();
+			cubeEnt->pieceId = pieceEntities[ i ];
+			boundEntities.push_back( static_cast<uint32_t>( scene.entities.size() ) );
+			scene.entities.push_back( cubeEnt );
+		}
 	}
 
 	const hdl_t diamondHdl = scene.modelLib.RetrieveHdl( "diamond" );
@@ -501,19 +514,18 @@ void UpdateSceneLocal( const float dt )
 	glowMat->Kd = rgbTuplef_t( 0.1f, 0.1f, 1.0f );
 	glowMat->d = 0.5f * cos( 3.0f * time ) + 0.5f;
 
-	const uint32_t pieceCount = static_cast<uint32_t>( pieceEntities.size() );
-	for ( int i = 0; i < pieceCount; ++i )
+	const uint32_t pieceBoundCount = static_cast<uint32_t>( boundEntities.size() );
+	for ( int i = 0; i < pieceBoundCount; ++i )
 	{
-		Entity* piece = scene.entities[ pieceEntities[i] ];
-		AABB bounds = piece->GetBounds();
+		BoundEntity* boundEnt = reinterpret_cast<BoundEntity*>( scene.entities[ boundEntities[i] ] );
+		if( boundEnt->pieceId == ~0x0 )
+			continue;
+		Entity* pieceEnt = scene.entities[ boundEnt->pieceId ];
+		AABB bounds = pieceEnt->GetBounds();
 		vec3f size = bounds.GetSize();
 		vec3f center = bounds.GetCenter();
-		Entity* debugBox = scene.FindEntity( ( scene.entities[ pieceEntities[ i ] ]->dbgName + "_cube" ).c_str() );
-		if( debugBox == nullptr ) {
-			continue;
-		}
-		debugBox->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-		debugBox->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
+		boundEnt->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
+		boundEnt->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
 	}
 
 	for ( int i = 0; i < MaxLights; ++i )
