@@ -458,6 +458,8 @@ private:
 		}
 		ImGui_ImplGlfw_NewFrame();
 #endif
+		imguiControls.raytraceScene = false;
+		imguiControls.rebuildShaders = false;
 		imguiControls.heightMapHeight = 1.0f;
 		imguiControls.roughness = 0.9f;
 		imguiControls.shadowStrength = 0.99f;
@@ -1389,16 +1391,55 @@ private:
 			ImGui_ImplVulkan_NewFrame();
 			ImGui::NewFrame();
 
+			if( ImGui::BeginMainMenuBar() )
+			{
+				if ( ImGui::BeginMenu( "File" ) )
+				{
+				//	ShowExampleMenuFile();
+					ImGui::EndMenu();
+				}
+				if ( ImGui::BeginMenu( "Edit" ) )
+				{
+					if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {}
+					if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {}  // Disabled item
+					ImGui::Separator();
+					if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {}
+					if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {}
+					if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {}
+					ImGui::EndMenu();
+				}
+				ImGui::EndMainMenuBar();
+			}
+
+			//ImGui::SetNextWindowPos( ImVec2( 0, 0 ) );
+			if(ImGui::BeginMenuBar())
+			{
+				ImGui::EndMenuBar();
+			}
+
 			ImGui::Begin( "Control Panel" );
-			imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
-			imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
-			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
-			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
-			ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
-			ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+			if(ImGui::BeginTabBar("Tabs"))
+			{
+				if(ImGui::BeginTabItem("Loading"))
+				{
+					imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+					imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );	
+					ImGui::EndTabItem();
+				}
+				if ( ImGui::BeginTabItem( "Other" ) )
+				{
+					ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
+					ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
+					ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
+					ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+					ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+					ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+					ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
+			}
+
 			ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
 			ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 			ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
