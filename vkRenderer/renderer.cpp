@@ -13,6 +13,7 @@ static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
 	}
 }
 
+
 void Renderer::Commit( const Scene& scene )
 {
 	renderView.committedModelCnt = 0;
@@ -42,6 +43,7 @@ void Renderer::Commit( const Scene& scene )
 
 	UpdateView();
 }
+
 
 void Renderer::MergeSurfaces( RenderView& view )
 {
@@ -75,6 +77,7 @@ void Renderer::MergeSurfaces( RenderView& view )
 		totalCount += view.instanceCounts[ i ];
 	}
 }
+
 
 void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset )
 {
@@ -127,6 +130,140 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		++view.committedModelCnt;
 	}
 }
+
+
+void Renderer::RenderScene( Scene& scene )
+{
+	UpdateGpuMaterials();
+	Commit( scene );
+	SubmitFrame();
+
+	static RtView rtview;
+	static RtScene rtScene;
+
+	static bool buildscene = true;
+	if ( buildscene )
+	{
+		buildscene = false;
+
+		const uint32_t entCount = static_cast<uint32_t>( boundEntities.size() );
+		for ( uint32_t i = 0; i < entCount; ++i )
+		{
+			RtModel rtModel;
+			CreateRayTraceModel( scene, scene.entities[ pieceEntities[ i ] ], &rtModel );
+			rtScene.models.push_back( rtModel );
+
+			AABB& aabb = rtModel.octree.GetAABB();
+			rtScene.aabb.Expand( aabb.GetMin() );
+			rtScene.aabb.Expand( aabb.GetMax() );
+		}
+
+		for ( uint32_t i = 0; i < MaxLights; ++i )
+		{
+			rtScene.lights.push_back( scene.lights[ i ] );
+		}
+	}
+
+	if ( imguiControls.raytraceScene )
+	{
+		imguiControls.raytraceScene = false;
+
+		rtview.targetSize[ 0 ] = 320;
+		rtview.targetSize[ 1 ] = 180;
+		//window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
+		Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::White, "testRayTrace" );
+		{
+			rtview.camera = scene.camera;
+			rtview.viewTransform = scene.camera.GetViewMatrix().Transpose();
+			rtview.projTransform = scene.camera.GetPerspectiveMatrix().Transpose();
+			rtview.projView = rtview.projTransform * rtview.viewTransform;
+		}
+
+		//TraceScene( rtview, rtScene, rtimage );
+		//RasterScene( rtimage, rtview, rtScene, false );
+		//std::cout << scene.entities[ pieceEntities[0] ]->GetBounds() << std::endl;
+		//std::cout << rtScene.models[ 0 ].octree.GetAABB() << std::endl;
+		if ( 1 ) {
+			for ( uint32_t y = 0; y < rtimage.GetHeight(); ++y )
+			{
+				for ( uint32_t x = 0; x < rtimage.GetWidth(); ++x )
+				{
+					Ray ray = rtview.camera.GetViewRay( vec2f( x / float( rtimage.GetWidth() - 1 ), y / float( rtimage.GetHeight() - 1 ) ) );
+
+					sample_t sample = RayTrace_r( ray, rtScene, 0 );
+					if ( sample.hitCode == HIT_AABB ) {
+						rtimage.SetPixel( x, y, Color::Red );
+					}
+					else if ( sample.hitCode == HIT_FRONTFACE ) {
+						rtimage.SetPixel( x, y, Color::Blue );
+					}
+					else if ( sample.hitCode == HIT_BACKFACE ) {
+						rtimage.SetPixel( x, y, Color::Green );
+					}
+					else if ( sample.hitCode == HIT_SKY ) {
+						rtimage.SetPixel( x, y, Color::Brown );
+					}
+					else {
+						rtimage.SetPixel( x, y, Color::White );
+					}
+
+					/*
+					const uint32_t modelCount = static_cast<uint32_t>( rtScene.models.size() );
+					for ( uint32_t i = 0; i < modelCount; ++i )
+					{
+						float t0, t1;
+						if ( rtScene.models[i].octree.GetAABB().Intersect( ray, t0, t1 ) )
+						{
+							std::vector<uint32_t> triIndices;
+							rtScene.models[i].octree.Intersect( ray, triIndices );
+							if( triIndices.size() > 0 ) {
+								rtimage.SetPixel( x, y, Color::Red );
+							}
+						}
+					}
+					*/
+				}
+			}
+		}
+
+		{
+			std::stringstream ss;
+			const char* name = rtimage.GetName();
+			if ( ( name == nullptr ) || ( name == "" ) )
+			{
+				ss << reinterpret_cast<uint64_t>( &rtimage );
+			}
+			else
+			{
+				ss << name;
+			}
+
+			ss << ".bmp";
+
+			Bitmap bitmap = Bitmap( rtimage.GetWidth(), rtimage.GetHeight() );
+			ImageToBitmap( rtimage, bitmap );
+			bitmap.Write( ss.str() );
+		}
+	}
+
+	if ( window.input.GetMouse().leftDown ) {
+		rtview.targetSize[ 0 ] = 320;
+		rtview.targetSize[ 1 ] = 180;
+
+		rtview.camera = scene.camera;
+		rtview.viewTransform = scene.camera.GetViewMatrix();
+		rtview.projTransform = scene.camera.GetPerspectiveMatrix();
+		rtview.projView = rtview.projTransform * rtview.viewTransform;
+
+		Ray ray = rtview.camera.GetViewRay( vec2f( 0.5f * window.input.GetMouse().x + 0.5f, 0.5f * window.input.GetMouse().y + 0.5f ) );
+		sample_t sample = RayTrace_r( ray, rtScene, 0 );
+		std::cout << "Hit Code (" << 0.5f * window.input.GetMouse().x + 0.5f << ", " << 0.5f * window.input.GetMouse().y + 0.5f << ")" << sample.hitCode << std::endl;
+	}
+
+	localMemory.Pack();
+	sharedMemory.Pack();
+}
+
 
 gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
 {
@@ -202,6 +339,7 @@ gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
 	return static_cast<gfxStateBits_t>( stateBits );
 }
 
+
 viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 {
 	if ( pass == DRAWPASS_SHADOW ) {
@@ -211,6 +349,136 @@ viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 		return renderView.viewport;
 	}
 }
+
+
+void Renderer::UpdateDescriptorSets()
+{
+	const uint32_t frameBufferCount = static_cast<uint32_t>( swapChain.GetBufferCount() );
+	for ( size_t i = 0; i < frameBufferCount; i++ )
+	{
+		UpdateFrameDescSet( static_cast<uint32_t>( i ) );
+	}
+}
+
+
+void Renderer::SubmitFrame()
+{
+	WaitForEndFrame();
+
+	VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
+	if ( result == VK_ERROR_OUT_OF_DATE_KHR )
+	{
+		RecreateSwapChain();
+		return;
+	}
+	else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
+	{
+		throw std::runtime_error( "Failed to acquire swap chain image!" );
+	}
+
+	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+	if ( graphicsQueue.imagesInFlight[ bufferId ] != VK_NULL_HANDLE ) {
+		vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ bufferId ], VK_TRUE, UINT64_MAX );
+	}
+	// Mark the image as now being in use by this frame
+	graphicsQueue.imagesInFlight[ bufferId ] = graphicsQueue.inFlightFences[ frameId ];
+
+	UpdateBufferContents( bufferId );
+	UpdateFrameDescSet( bufferId );
+	Render( renderView );
+
+	VkSubmitInfo submitInfo{ };
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
+
+	VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
+
+	if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to submit draw command buffer!" );
+	}
+
+	VkPresentInfoKHR presentInfo{ };
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+
+	VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &bufferId;
+	presentInfo.pResults = nullptr; // Optional
+
+	result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
+
+	if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.IsResizeRequested() )
+	{
+		RecreateSwapChain();
+		window.AcceptImageResize();
+		return;
+	}
+	else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
+	{
+		throw std::runtime_error( "Failed to acquire swap chain image!" );
+	}
+
+	frameId = ( frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;
+	++frameNumber;
+	static auto prevTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	renderTime = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
+	prevTime = currentTime;
+}
+
+
+void Renderer::UpdateView()
+{
+	int width;
+	int height;
+	window.GetWindowSize( width, height );
+	renderView.viewport.width = static_cast<float>( width );
+	renderView.viewport.height = static_cast<float>( height );
+
+	vec3f shadowLightDir;
+	shadowLightDir[ 0 ] = -renderView.lights[ 0 ].lightDir[ 0 ];
+	shadowLightDir[ 1 ] = -renderView.lights[ 0 ].lightDir[ 1 ];
+	shadowLightDir[ 2 ] = -renderView.lights[ 0 ].lightDir[ 2 ];
+
+	// Temp shadow map set-up
+	shadowView.viewport.x = 0.0f;
+	shadowView.viewport.y = 0.0f;
+	shadowView.viewport.near = 0.0f;
+	shadowView.viewport.far = 1.0f;
+	shadowView.viewport.width = ShadowMapWidth;
+	shadowView.viewport.height = ShadowMapHeight;
+	shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
+	shadowView.viewMatrix = shadowView.viewMatrix.Transpose();
+	const vec4f shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
+	shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
+	shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
+	shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
+
+	Camera shadowCam;
+	shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+	shadowCam.far = nearPlane;
+	shadowCam.near = farPlane;
+	shadowCam.focalLength = shadowCam.far;
+	shadowCam.SetFov( Radians( 90.0f ) );
+	shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+	shadowView.projMatrix = shadowCam.GetPerspectiveMatrix();
+}
+
 
 void Renderer::UpdateFrameDescSet( const int currentImage )
 {
@@ -648,6 +916,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( postDescriptorWrites.size() ), postDescriptorWrites.data(), 0, nullptr );
 }
 
+
 void Renderer::UpdateBufferContents( uint32_t currentImage )
 {
 	std::vector< globalUboConstants_t > globalsBuffer;
@@ -724,118 +993,6 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( lightBufferObject_t ) * lightBuffer.size() );
 }
 
-void Renderer::CreateTextureSamplers()
-{
-	{
-		// Default Bilinear Sampler
-		VkSamplerCreateInfo samplerInfo{ };
-		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.anisotropyEnable = VK_TRUE;
-		samplerInfo.maxAnisotropy = 16.0f;
-		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-		samplerInfo.compareEnable = VK_FALSE;
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 16.0f;
-		samplerInfo.mipLodBias = 0.0f;
-
-		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_bilinearSampler ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create texture sampler!" );
-		}
-	}
-
-	{
-		// Depth sampler
-		VkSamplerCreateInfo samplerInfo{ };
-		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-		samplerInfo.anisotropyEnable = VK_FALSE;
-		samplerInfo.maxAnisotropy = 0.0f;
-		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_WHITE;
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-		samplerInfo.compareEnable = VK_FALSE;
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 16.0f;
-		samplerInfo.mipLodBias = 0.0f;
-
-		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_depthShadowSampler ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create depth sampler!" );
-		}
-	}
-}
-
-void Renderer::CreateLogicalDevice()
-{
-	QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, window.vk_surface );
-	context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
-	context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
-	context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
-
-	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value(), indices.computeFamily.value() };
-
-	float queuePriority = 1.0f;
-	for ( uint32_t queueFamily : uniqueQueueFamilies )
-	{
-		VkDeviceQueueCreateInfo queueCreateInfo{ };
-		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-		queueCreateInfo.queueCount = 1;
-		queueCreateInfo.pQueuePriorities = &queuePriority;
-		queueCreateInfos.push_back( queueCreateInfo );
-	}
-
-	VkDeviceCreateInfo createInfo{ };
-	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	createInfo.queueCreateInfoCount = static_cast<uint32_t>( queueCreateInfos.size() );
-	createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
-	VkPhysicalDeviceFeatures deviceFeatures{ };
-	deviceFeatures.samplerAnisotropy = VK_TRUE;
-	deviceFeatures.fillModeNonSolid = VK_TRUE;
-	deviceFeatures.sampleRateShading = VK_TRUE;
-	createInfo.pEnabledFeatures = &deviceFeatures;
-
-	createInfo.enabledExtensionCount = static_cast<uint32_t>( deviceExtensions.size() );
-	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-	if ( enableValidationLayers )
-	{
-		createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
-		createInfo.ppEnabledLayerNames = validationLayers.data();
-	}
-	else
-	{
-		createInfo.enabledLayerCount = 0;
-	}
-
-	VkPhysicalDeviceDescriptorIndexingFeatures descIndexing;
-	memset( &descIndexing, 0, sizeof( VkPhysicalDeviceDescriptorIndexingFeatures ) );
-	descIndexing.runtimeDescriptorArray = true;
-	descIndexing.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
-	descIndexing.pNext = NULL;
-	createInfo.pNext = &descIndexing;
-
-	if ( vkCreateDevice( context.physicalDevice, &createInfo, nullptr, &context.device ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create logical context.device!" );
-	}
-
-	vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &context.graphicsQueue );
-	vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &context.presentQueue );
-	vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeQueue );
-}
 
 void Renderer::PickPhysicalDevice()
 {
@@ -867,6 +1024,7 @@ void Renderer::PickPhysicalDevice()
 	}
 }
 
+
 std::vector<const char*> Renderer::GetRequiredExtensions() const
 {
 	uint32_t glfwExtensionCount = 0;
@@ -881,6 +1039,7 @@ std::vector<const char*> Renderer::GetRequiredExtensions() const
 
 	return extensions;
 }
+
 
 bool Renderer::CheckValidationLayerSupport()
 {
@@ -905,6 +1064,7 @@ bool Renderer::CheckValidationLayerSupport()
 	return true;
 }
 
+
 void Renderer::PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo )
 {
 	createInfo = { };
@@ -927,6 +1087,7 @@ void Renderer::PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfo
 	createInfo.pfnUserCallback = DebugCallback;
 }
 
+
 void Renderer::SetupDebugMessenger()
 {
 	if ( !enableValidationLayers ) {
@@ -942,6 +1103,7 @@ void Renderer::SetupDebugMessenger()
 	}
 }
 
+
 VkResult Renderer::CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger )
 {
 	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" );
@@ -953,10 +1115,315 @@ VkResult Renderer::CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDe
 	}
 }
 
+
 void Renderer::DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator )
 {
 	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" );
 	if ( func != nullptr ) {
 		func( instance, debugMessenger, pAllocator );
+	}
+}
+
+
+void Renderer::Render( RenderView& view )
+{
+	const uint32_t i = bufferId;
+	vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+
+	VkCommandBufferBeginInfo beginInfo{ };
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0; // Optional
+	beginInfo.pInheritanceInfo = nullptr; // Optional
+
+	int width = 0;
+	int height = 0;
+	window.GetWindowSize( width, height );
+
+	if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to begin recording command buffer!" );
+	}
+
+	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers( graphicsQueue.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
+	vkCmdBindIndexBuffer( graphicsQueue.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+
+	// Shadow Passes
+	{
+		VkRenderPassBeginInfo shadowPassInfo{ };
+		shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		shadowPassInfo.renderPass = shadowPassState.pass;
+		shadowPassInfo.framebuffer = shadowPassState.fb[ i ];
+		shadowPassInfo.renderArea.offset = { 0, 0 };
+		shadowPassInfo.renderArea.extent = { ShadowMapWidth, ShadowMapHeight };
+
+		std::array<VkClearValue, 2> shadowClearValues{ };
+		shadowClearValues[ 0 ].color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		shadowClearValues[ 1 ].depthStencil = { 1.0f, 0 };
+
+		shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
+		shadowPassInfo.pClearValues = shadowClearValues.data();
+
+		//VkDebugUtilsLabelEXT markerInfo = {};
+		//markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+		//markerInfo.pLabelName = "Begin Section";
+		//vkCmdBeginDebugUtilsLabelEXT( graphicsQueue.commandBuffers[ i ], &markerInfo );
+
+		//// contents of section here
+
+		//vkCmdEndDebugUtilsLabelEXT( graphicsQueue.commandBuffers[ i ] );
+
+		// TODO: how to handle views better?
+		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+		for ( size_t surfIx = 0; surfIx < shadowView.mergedModelCnt; surfIx++ )
+		{
+			drawSurf_t& surface = shadowView.merged[ surfIx ];
+
+			pipelineObject_t* pipelineObject = nullptr;
+			if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) {
+				continue;
+			}
+			if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
+				continue;
+			}
+			GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
+			if ( pipelineObject == nullptr ) {
+				continue;
+			}
+
+			// vkCmdSetDepthBias
+			vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+			vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
+
+			VkViewport viewport{ };
+			viewport.x = shadowView.viewport.x;
+			viewport.y = shadowView.viewport.y;
+			viewport.width = shadowView.viewport.width;
+			viewport.height = shadowView.viewport.height;
+			viewport.minDepth = 0.0f;
+			viewport.maxDepth = 1.0f;
+			vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
+
+			VkRect2D rect{ };
+			rect.extent.width = static_cast<uint32_t>( shadowView.viewport.width );
+			rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
+			vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
+
+			pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, shadowView.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+		}
+		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+	}
+
+	// Main Passes
+	{
+		VkRenderPassBeginInfo renderPassInfo{ };
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = mainPassState.pass;
+		renderPassInfo.framebuffer = mainPassState.fb[ i ];
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
+
+		std::array<VkClearValue, 2> clearValues{ };
+		clearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
+		clearValues[ 1 ].depthStencil = { 0.0f, 0x00 };
+
+		renderPassInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
+		renderPassInfo.pClearValues = clearValues.data();
+		renderPassInfo.clearValueCount = 2;
+
+		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+		VkViewport viewport{ };
+		viewport.x = view.viewport.x;
+		viewport.y = view.viewport.y;
+		viewport.width = view.viewport.width;
+		viewport.height = view.viewport.height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
+
+		VkRect2D rect{ };
+		rect.extent.width = static_cast<uint32_t>( view.viewport.width );
+		rect.extent.height = static_cast<uint32_t>( view.viewport.height );
+		vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
+
+		for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
+		{
+			for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
+			{
+				drawSurf_t& surface = view.merged[ surfIx ];
+
+				pipelineObject_t* pipelineObject = nullptr;
+				if ( surface.pipelineObject[ pass ] == INVALID_HDL ) {
+					continue;
+				}
+				if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
+					continue;
+				}
+				if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
+					continue;
+				}
+				if ( ( pass == DRAWPASS_DEBUG_SOLID ) && ( ( surface.flags & DEBUG_SOLID ) == 0 ) ) {
+					continue;
+				}
+				GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
+				if ( pipelineObject == nullptr ) {
+					continue;
+				}
+
+				if ( pass == DRAWPASS_DEPTH ) {
+					vkCmdSetStencilReference( graphicsQueue.commandBuffers[ i ], VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+				}
+
+				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
+
+				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+			}
+		}
+		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+	}
+
+	// Post Process Passes
+	{
+		VkRenderPassBeginInfo postProcessPassInfo{ };
+		postProcessPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		postProcessPassInfo.renderPass = postPassState.pass;
+		postProcessPassInfo.framebuffer = postPassState.fb[ i ];
+		postProcessPassInfo.renderArea.offset = { 0, 0 };
+		postProcessPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
+
+		std::array<VkClearValue, 2> postProcessClearValues{ };
+		postProcessClearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
+		postProcessClearValues[ 1 ].depthStencil = { 0.0f, 0 };
+
+		postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
+		postProcessPassInfo.pClearValues = postProcessClearValues.data();
+
+		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
+		{
+			drawSurf_t& surface = shadowView.merged[ surfIx ];
+			if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HDL ) {
+				continue;
+			}
+			pipelineObject_t* pipelineObject = nullptr;
+			GetPipelineObject( surface.pipelineObject[ DRAWPASS_POST_2D ], &pipelineObject );
+			if ( pipelineObject == nullptr ) {
+				continue;
+			}
+			vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+			vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
+
+			pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+		}
+
+#if defined( USE_IMGUI )
+		ImGui_ImplVulkan_NewFrame();
+		ImGui::NewFrame();
+
+		if ( ImGui::BeginMainMenuBar() )
+		{
+			if ( ImGui::BeginMenu( "File" ) )
+			{
+				//	ShowExampleMenuFile();
+				ImGui::EndMenu();
+			}
+			if ( ImGui::BeginMenu( "Edit" ) )
+			{
+				if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {}
+				if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {}  // Disabled item
+				ImGui::Separator();
+				if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {}
+				if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {}
+				if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
+
+		//ImGui::SetNextWindowPos( ImVec2( 0, 0 ) );
+		if ( ImGui::BeginMenuBar() )
+		{
+			ImGui::EndMenuBar();
+		}
+
+		ImGui::Begin( "Control Panel" );
+		if ( ImGui::BeginTabBar( "Tabs" ) )
+		{
+			if ( ImGui::BeginTabItem( "Loading" ) )
+			{
+				imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+				imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+				ImGui::EndTabItem();
+			}
+			if ( ImGui::BeginTabItem( "Other" ) )
+			{
+				ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
+				ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
+				ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
+				ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+				ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+				ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+				ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
+		}
+
+		ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
+		ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
+		ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
+		const vec4f cameraOrigin = scene.camera.GetOrigin();
+		ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
+		const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
+
+		char entityName[ 256 ];
+		if ( imguiControls.selectedEntityId >= 0 ) {
+			sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, scene.modelLib.FindName( scene.entities[ imguiControls.selectedEntityId ]->modelHdl ) );
+		}
+		else {
+			memset( &entityName[ 0 ], 0, 256 );
+		}
+		static vec3f tempOrigin;
+		ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
+
+		ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin[ 0 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin[ 1 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin[ 2 ], 0.1f, 1.0f );
+
+		if ( imguiControls.selectedEntityId >= 0 ) {
+			Entity* entity = scene.FindEntity( (uint32_t)imguiControls.selectedEntityId );
+			entity->SetOrigin( vec3f( tempOrigin[ 0 ] + imguiControls.selectedModelOrigin[ 0 ],
+				tempOrigin[ 1 ] + imguiControls.selectedModelOrigin[ 1 ],
+				tempOrigin[ 2 ] + imguiControls.selectedModelOrigin[ 2 ] ) );
+		}
+		ImGui::Text( "Frame Number: %d", frameNumber );
+		ImGui::SameLine();
+		ImGui::Text( "FPS: %f", 1000.0f / renderTime );
+		//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
+		ImGui::End();
+
+		// Render dear imgui into screen
+		ImGui::Render();
+		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
+#endif
+		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+	}
+
+
+	if ( vkEndCommandBuffer( graphicsQueue.commandBuffers[ i ] ) != VK_SUCCESS )
+	{
+		throw std::runtime_error( "Failed to record command buffer!" );
 	}
 }

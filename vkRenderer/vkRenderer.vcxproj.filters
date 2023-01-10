@@ -1,88 +1,145 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="pipeline.cpp" />
-    <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="imgui\imgui.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_tables.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\backends\imgui_impl_vulkan.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\backends\imgui_impl_glfw.cpp">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="window.cpp" />
-    <ClCompile Include="deviceContext.cpp" />
-    <ClCompile Include="io.cpp" />
-    <ClCompile Include="scene.cpp" />
-    <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="render_util.cpp" />
-    <ClCompile Include="gpuTransfer.cpp" />
+    <ClCompile Include="renderCommand.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="renderInit.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="renderShutdown.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="gpuTransfer.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
+    <ClCompile Include="deviceContext.cpp">
+      <Filter>render state</Filter>
+    </ClCompile>
+    <ClCompile Include="render_util.cpp">
+      <Filter>globals</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkinTestApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="io.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="common.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
-    <ClInclude Include="input.h" />
-    <ClInclude Include="io.h" />
-    <ClInclude Include="pipeline.h" />
-    <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="swapChain.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="shaders\globals.h">
       <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imconfig.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="imgui\backends\imgui_impl_vulkan.h">
-      <Filter>imgui</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="deviceContext.h" />
-    <ClInclude Include="window.h" />
-    <ClInclude Include="FrameState.h" />
-    <ClInclude Include="renderConstants.h" />
-    <ClInclude Include="renderer.h" />
-    <ClInclude Include="allocator.h" />
-    <ClInclude Include="gpuResources.h" />
     <ClInclude Include="scenes\chessScene.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="scenes\beachScene.h">
       <Filter>scenes</Filter>
     </ClInclude>
-    <ClInclude Include="render_util.h" />
-    <ClInclude Include="renderview.h" />
+    <ClInclude Include="renderer.h">
+      <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="gpuResources.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="deviceContext.h">
+      <Filter>render state</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameState.h">
+      <Filter>render state</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="render_util.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="renderview.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="renderConstants.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="window.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="allocator.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="io.h">
+      <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="swapChain.h">
+      <Filter>render core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
@@ -132,11 +189,32 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{560cce8d-e0a9-4227-bef7-b0e8ec17db07}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{90cea79c-20c6-4910-b690-2955a612a086}</UniqueIdentifier>
-    </Filter>
     <Filter Include="scenes">
       <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render core">
+      <UniqueIdentifier>{51ec1bcd-b056-4e9a-913c-15fa9ccc8313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render binding">
+      <UniqueIdentifier>{5cf06efa-78fe-44b3-8c91-a428376bb362}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render state">
+      <UniqueIdentifier>{52899a06-18bc-47e8-b7e9-c9bf879dc260}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="globals">
+      <UniqueIdentifier>{21795e6f-c830-4219-add7-37b00412d994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{8422073c-36ab-49db-80da-32a9dbf106f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{f0434c93-6bf0-4283-8d52-4b1fb4cacc39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui">
+      <UniqueIdentifier>{90cea79c-20c6-4910-b690-2955a612a086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{10252c62-08b9-4c28-a3e6-9dc33fa9a25a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

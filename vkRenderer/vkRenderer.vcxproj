@@ -203,7 +203,10 @@
   <ItemGroup>
     <ClCompile Include="deviceContext.cpp" />
     <ClCompile Include="io.cpp" />
+    <ClCompile Include="renderCommand.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="renderInit.cpp" />
+    <ClCompile Include="renderShutdown.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="render_util.cpp" />
     <ClCompile Include="gpuTransfer.cpp" />
