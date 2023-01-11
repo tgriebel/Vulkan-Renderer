@@ -157,6 +157,7 @@ void Renderer::InitImGui()
 	ImGui_ImplGlfw_NewFrame();
 #endif
 	imguiControls.raytraceScene = false;
+	imguiControls.rebuildRaytraceScene = false;
 	imguiControls.rebuildShaders = false;
 	imguiControls.heightMapHeight = 1.0f;
 	imguiControls.roughness = 0.9f;

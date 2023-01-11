@@ -4,6 +4,77 @@
 #include "renderer.h"
 #include <scene/entity.h>
 
+#include <io/io.h>
+static RtView rtview;
+static RtScene rtScene;
+
+static void BuildRayTraceScene()
+{
+	rtScene.scene = &scene;
+
+	const uint32_t entCount = static_cast<uint32_t>( pieceEntities.size() );
+	rtScene.lights.clear();
+	rtScene.models.clear();
+	rtScene.models.reserve( entCount );
+	rtScene.aabb = AABB();
+
+	for ( uint32_t i = 0; i < entCount; ++i )
+	{
+		RtModel rtModel;
+		CreateRayTraceModel( scene, scene.entities[ pieceEntities[ i ] ], &rtModel );
+		rtScene.models.push_back( rtModel );
+
+		AABB& aabb = rtModel.octree.GetAABB();
+		rtScene.aabb.Expand( aabb.GetMin() );
+		rtScene.aabb.Expand( aabb.GetMax() );
+	}
+
+	for ( uint32_t i = 0; i < MaxLights; ++i )
+	{
+		rtScene.lights.push_back( scene.lights[ i ] );
+	}
+}
+
+
+static void TraceScene()
+{
+	imguiControls.raytraceScene = false;
+
+	rtview.targetSize[ 0 ] = 320;
+	rtview.targetSize[ 1 ] = 180;
+	//window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
+	Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::Black, "testRayTrace" );
+	{
+		rtview.camera = scene.camera;
+		rtview.viewTransform = rtview.camera.GetViewMatrix().Transpose();
+		rtview.projTransform = rtview.camera.GetPerspectiveMatrix().Transpose();
+		rtview.projView = rtview.projTransform * rtview.viewTransform;
+	}
+
+	TraceScene( rtview, rtScene, rtimage );
+	//RasterScene( rtimage, rtview, rtScene, true );
+
+	{
+		std::stringstream ss;
+		const char* name = rtimage.GetName();
+		ss << "output/";
+		if ( ( name == nullptr ) || ( name == "" ) )
+		{
+			ss << reinterpret_cast<uint64_t>( &rtimage );
+		}
+		else
+		{
+			ss << name;
+		}
+
+		ss << ".bmp";
+
+		Bitmap bitmap = Bitmap( rtimage.GetWidth(), rtimage.GetHeight() );
+		ImageToBitmap( rtimage, bitmap );
+		bitmap.Write( ss.str() );
+	}
+}
+
 static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
 {
 	if( surf0.materialId == surf1.materialId ) {
@@ -138,126 +209,12 @@ void Renderer::RenderScene( Scene& scene )
 	Commit( scene );
 	SubmitFrame();
 
-	static RtView rtview;
-	static RtScene rtScene;
-
-	static bool buildscene = true;
-	if ( buildscene )
-	{
-		buildscene = false;
-
-		const uint32_t entCount = static_cast<uint32_t>( boundEntities.size() );
-		for ( uint32_t i = 0; i < entCount; ++i )
-		{
-			RtModel rtModel;
-			CreateRayTraceModel( scene, scene.entities[ pieceEntities[ i ] ], &rtModel );
-			rtScene.models.push_back( rtModel );
-
-			AABB& aabb = rtModel.octree.GetAABB();
-			rtScene.aabb.Expand( aabb.GetMin() );
-			rtScene.aabb.Expand( aabb.GetMax() );
-		}
-
-		for ( uint32_t i = 0; i < MaxLights; ++i )
-		{
-			rtScene.lights.push_back( scene.lights[ i ] );
-		}
+	if( imguiControls.rebuildRaytraceScene ) {
+		BuildRayTraceScene();
 	}
 
-	if ( imguiControls.raytraceScene )
-	{
-		imguiControls.raytraceScene = false;
-
-		rtview.targetSize[ 0 ] = 320;
-		rtview.targetSize[ 1 ] = 180;
-		//window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
-		Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::White, "testRayTrace" );
-		{
-			rtview.camera = scene.camera;
-			rtview.viewTransform = scene.camera.GetViewMatrix().Transpose();
-			rtview.projTransform = scene.camera.GetPerspectiveMatrix().Transpose();
-			rtview.projView = rtview.projTransform * rtview.viewTransform;
-		}
-
-		//TraceScene( rtview, rtScene, rtimage );
-		//RasterScene( rtimage, rtview, rtScene, false );
-		//std::cout << scene.entities[ pieceEntities[0] ]->GetBounds() << std::endl;
-		//std::cout << rtScene.models[ 0 ].octree.GetAABB() << std::endl;
-		if ( 1 ) {
-			for ( uint32_t y = 0; y < rtimage.GetHeight(); ++y )
-			{
-				for ( uint32_t x = 0; x < rtimage.GetWidth(); ++x )
-				{
-					Ray ray = rtview.camera.GetViewRay( vec2f( x / float( rtimage.GetWidth() - 1 ), y / float( rtimage.GetHeight() - 1 ) ) );
-
-					sample_t sample = RayTrace_r( ray, rtScene, 0 );
-					if ( sample.hitCode == HIT_AABB ) {
-						rtimage.SetPixel( x, y, Color::Red );
-					}
-					else if ( sample.hitCode == HIT_FRONTFACE ) {
-						rtimage.SetPixel( x, y, Color::Blue );
-					}
-					else if ( sample.hitCode == HIT_BACKFACE ) {
-						rtimage.SetPixel( x, y, Color::Green );
-					}
-					else if ( sample.hitCode == HIT_SKY ) {
-						rtimage.SetPixel( x, y, Color::Brown );
-					}
-					else {
-						rtimage.SetPixel( x, y, Color::White );
-					}
-
-					/*
-					const uint32_t modelCount = static_cast<uint32_t>( rtScene.models.size() );
-					for ( uint32_t i = 0; i < modelCount; ++i )
-					{
-						float t0, t1;
-						if ( rtScene.models[i].octree.GetAABB().Intersect( ray, t0, t1 ) )
-						{
-							std::vector<uint32_t> triIndices;
-							rtScene.models[i].octree.Intersect( ray, triIndices );
-							if( triIndices.size() > 0 ) {
-								rtimage.SetPixel( x, y, Color::Red );
-							}
-						}
-					}
-					*/
-				}
-			}
-		}
-
-		{
-			std::stringstream ss;
-			const char* name = rtimage.GetName();
-			if ( ( name == nullptr ) || ( name == "" ) )
-			{
-				ss << reinterpret_cast<uint64_t>( &rtimage );
-			}
-			else
-			{
-				ss << name;
-			}
-
-			ss << ".bmp";
-
-			Bitmap bitmap = Bitmap( rtimage.GetWidth(), rtimage.GetHeight() );
-			ImageToBitmap( rtimage, bitmap );
-			bitmap.Write( ss.str() );
-		}
-	}
-
-	if ( window.input.GetMouse().leftDown ) {
-		rtview.targetSize[ 0 ] = 320;
-		rtview.targetSize[ 1 ] = 180;
-
-		rtview.camera = scene.camera;
-		rtview.viewTransform = scene.camera.GetViewMatrix();
-		rtview.projTransform = scene.camera.GetPerspectiveMatrix();
-		rtview.projView = rtview.projTransform * rtview.viewTransform;
-
-		Ray ray = rtview.camera.GetViewRay( vec2f( 0.5f * window.input.GetMouse().x + 0.5f, 0.5f * window.input.GetMouse().y + 0.5f ) );
-		sample_t sample = RayTrace_r( ray, rtScene, 0 );
-		std::cout << "Hit Code (" << 0.5f * window.input.GetMouse().x + 0.5f << ", " << 0.5f * window.input.GetMouse().y + 0.5f << ")" << sample.hitCode << std::endl;
+	if ( imguiControls.raytraceScene ) {
+		TraceScene();
 	}
 
 	localMemory.Pack();
@@ -1364,6 +1321,9 @@ void Renderer::Render( RenderView& view )
 			if ( ImGui::BeginTabItem( "Loading" ) )
 			{
 				imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+				ImGui::SameLine();		
+				imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
+				ImGui::SameLine();
 				imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
 				ImGui::EndTabItem();
 			}
