@@ -51,8 +51,8 @@ static void TraceScene()
 		rtview.projView = rtview.projTransform * rtview.viewTransform;
 	}
 
-	TraceScene( rtview, rtScene, rtimage );
-	//RasterScene( rtimage, rtview, rtScene, true );
+	//TraceScene( rtview, rtScene, rtimage );
+	RasterScene( rtimage, rtview, rtScene, false );
 
 	{
 		std::stringstream ss;
@@ -476,8 +476,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	const uint32_t textureCount = scene.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = scene.textureLib.Find( i );
-		VkImageView& imageView = texture->image.vk_view;
+		Texture* texture = scene.textureLib.Find( i );
+		VkImageView& imageView = texture->gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -489,7 +489,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info2d.imageView = scene.textureLib.GetDefault()->image.vk_view;
+			info2d.imageView = scene.textureLib.GetDefault()->gpuImage.vk_view;
 			info2d.sampler = vk_bilinearSampler;
 			image2DInfo[ texture->uploadId ] = info2d;
 		}
@@ -500,10 +500,10 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	}
 	// Defaults
 	{
-		const texture_t* default2DTexture = scene.textureLib.GetDefault();
+		const Texture* default2DTexture = scene.textureLib.GetDefault();
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			const VkImageView& imageView = default2DTexture->image.vk_view;
+			const VkImageView& imageView = default2DTexture->gpuImage.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -649,8 +649,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowImageInfo.reserve( MaxImageDescriptors );
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = scene.textureLib.Find( i );
-		VkImageView& imageView = texture->image.vk_view;
+		Texture* texture = scene.textureLib.Find( i );
+		VkImageView& imageView = texture->gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -660,8 +660,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	// Defaults
 	for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 	{
-		const texture_t* texture = scene.textureLib.GetDefault();
-		const VkImageView& imageView = texture->image.vk_view;
+		const Texture* texture = scene.textureLib.GetDefault();
+		const VkImageView& imageView = texture->gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -673,8 +673,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowCodeImageInfo.reserve( MaxCodeImages );
 	for ( size_t j = 0; j < MaxCodeImages; ++j )
 	{
-		const texture_t* texture = scene.textureLib.GetDefault();
-		const VkImageView& imageView = texture->image.vk_view;
+		const Texture* texture = scene.textureLib.GetDefault();
+		const VkImageView& imageView = texture->gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;

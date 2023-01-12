@@ -32,9 +32,9 @@ void Renderer::Cleanup()
 	const uint32_t textureCount = scene.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		const texture_t* texture = scene.textureLib.Find( i );
-		vkDestroyImageView( context.device, texture->image.vk_view, nullptr );
-		vkDestroyImage( context.device, texture->image.vk_image, nullptr );
+		const Texture* texture = scene.textureLib.Find( i );
+		vkDestroyImageView( context.device, texture->gpuImage.vk_view, nullptr );
+		vkDestroyImage( context.device, texture->gpuImage.vk_image, nullptr );
 	}
 
 	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );

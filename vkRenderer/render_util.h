@@ -29,8 +29,8 @@ private:
 };
 
 mat4x4f MatrixFromVector( const vec3f& v );
-bool LoadTextureImage( const char* texturePath, texture_t& texture );
-bool LoadTextureCubeMapImage( const char* textureBasePath, const char* ext, texture_t& texture );
+bool LoadTextureImage( const char* texturePath, Texture& texture );
+bool LoadTextureCubeMapImage( const char* textureBasePath, const char* ext, Texture& texture );
 void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vsInput_t>& vb, std::vector<uint32_t>& ib );
 void CreateSkyBoxSurf( Model& outModel );
 void CreateTerrainSurface( Model& outModel );

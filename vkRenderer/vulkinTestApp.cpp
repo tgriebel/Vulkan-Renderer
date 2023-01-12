@@ -20,7 +20,7 @@
 #include "gpuResources.h"
 #include <resource_types/gpuProgram.h>
 
-typedef AssetLib< texture_t >		AssetLibImages;
+typedef AssetLib< Texture >			AssetLibImages;
 typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< Model >			AssetLibModels;

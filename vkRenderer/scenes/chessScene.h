@@ -151,12 +151,12 @@ void LoadImages( AssetLibImages& images )
 
 	for ( const std::string& texturePath : texturePaths )
 	{
-		texture_t texture;
+		Texture texture;
 		if ( LoadTextureImage( ( TexturePath + texturePath ).c_str(), texture ) ) {
 			images.Add( texturePath.c_str(), texture );
 		}
 	}
-	texture_t cubeMap;
+	Texture cubeMap;
 	const std::string envMapName = "chapel_low";
 	const std::string cubeMapPath = ( TexturePath + envMapName );
 	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {

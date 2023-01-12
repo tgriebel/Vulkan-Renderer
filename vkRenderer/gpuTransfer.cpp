@@ -39,20 +39,20 @@ void Renderer::UploadTextures()
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = scene.textureLib.Find( i );
+		Texture* texture = scene.textureLib.Find( i );
 		// VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
 		VkImageUsageFlags flags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 			VK_IMAGE_USAGE_SAMPLED_BIT;
-		CreateImage( texture->info, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, flags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->image, localMemory );
+		CreateImage( texture->info, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, flags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture->gpuImage, localMemory );
 
-		TransitionImageLayout( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->info );
+		TransitionImageLayout( texture->gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture->info );
 
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture->bytes, texture->sizeBytes );
 
 		const uint32_t layers = texture->info.layers;
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->image.vk_image, static_cast<uint32_t>( texture->info.width ), static_cast<uint32_t>( texture->info.height ), layers );
+		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture->gpuImage.vk_image, static_cast<uint32_t>( texture->info.width ), static_cast<uint32_t>( texture->info.height ), layers );
 		texture->uploadId = i;
 		gpuImages[texture->uploadId];
 	}
@@ -60,20 +60,20 @@ void Renderer::UploadTextures()
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = scene.textureLib.Find( i );
-		GenerateMipmaps( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->info );
+		Texture* texture = scene.textureLib.Find( i );
+		GenerateMipmaps( texture->gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture->info );
 	}
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		texture_t* texture = scene.textureLib.Find( i );
+		Texture* texture = scene.textureLib.Find( i );
 		VkImageViewType type;
 		switch ( texture->info.type ) {
 		default:
 		case TEXTURE_TYPE_2D:	type = VK_IMAGE_VIEW_TYPE_2D;		break;
 		case TEXTURE_TYPE_CUBE:	type = VK_IMAGE_VIEW_TYPE_CUBE;		break;
 		}
-		texture->image.vk_view = CreateImageView( texture->image.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture->info.mipLevels );
+		texture->gpuImage.vk_view = CreateImageView( texture->gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture->info.mipLevels );
 	}
 }
 
