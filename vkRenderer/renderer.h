@@ -279,6 +279,8 @@ private:
 
 	void						UpdateView();
 
+	void						DrawDebugMenu();
+
 	void WaitForEndFrame()
 	{
 		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );

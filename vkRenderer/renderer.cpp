@@ -3,6 +3,7 @@
 #include <map>
 #include "renderer.h"
 #include <scene/entity.h>
+#include <sstream>
 
 #include <io/io.h>
 static RtView rtview;
@@ -51,8 +52,8 @@ static void TraceScene()
 		rtview.projView = rtview.projTransform * rtview.viewTransform;
 	}
 
-	//TraceScene( rtview, rtScene, rtimage );
-	RasterScene( rtimage, rtview, rtScene, false );
+	TraceScene( rtview, rtScene, rtimage );
+	//RasterScene( rtimage, rtview, rtScene, false );
 
 	{
 		std::stringstream ss;
@@ -186,8 +187,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.hash = Hash( surf );
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
-			if ( material->shaders[ pass ].IsValid() ) {
-				GpuProgram* prog = scene.gpuPrograms.Find( material->shaders[ pass ] );
+			if ( material->GetShader( pass ).IsValid() ) {
+				GpuProgram* prog = scene.gpuPrograms.Find( material->GetShader( pass ) );
 				if ( prog == nullptr ) {
 					continue;
 				}
@@ -1285,99 +1286,17 @@ void Renderer::Render( RenderView& view )
 			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 		}
 
-#if defined( USE_IMGUI )
+#ifdef USE_IMGUI 
 		ImGui_ImplVulkan_NewFrame();
 		ImGui::NewFrame();
 
-		if ( ImGui::BeginMainMenuBar() )
-		{
-			if ( ImGui::BeginMenu( "File" ) )
-			{
-				//	ShowExampleMenuFile();
-				ImGui::EndMenu();
-			}
-			if ( ImGui::BeginMenu( "Edit" ) )
-			{
-				if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {}
-				if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {}  // Disabled item
-				ImGui::Separator();
-				if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {}
-				if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {}
-				if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-
-		//ImGui::SetNextWindowPos( ImVec2( 0, 0 ) );
-		if ( ImGui::BeginMenuBar() )
-		{
-			ImGui::EndMenuBar();
-		}
-
-		ImGui::Begin( "Control Panel" );
-		if ( ImGui::BeginTabBar( "Tabs" ) )
-		{
-			if ( ImGui::BeginTabItem( "Loading" ) )
-			{
-				imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
-				ImGui::SameLine();		
-				imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
-				ImGui::SameLine();
-				imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
-				ImGui::EndTabItem();
-			}
-			if ( ImGui::BeginTabItem( "Other" ) )
-			{
-				ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
-				ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
-				ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
-				ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
-				ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
-				ImGui::EndTabItem();
-			}
-			ImGui::EndTabBar();
-		}
-
-		ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-		ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
-		ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
-		const vec4f cameraOrigin = scene.camera.GetOrigin();
-		ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
-		const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
-
-		char entityName[ 256 ];
-		if ( imguiControls.selectedEntityId >= 0 ) {
-			sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, scene.modelLib.FindName( scene.entities[ imguiControls.selectedEntityId ]->modelHdl ) );
-		}
-		else {
-			memset( &entityName[ 0 ], 0, 256 );
-		}
-		static vec3f tempOrigin;
-		ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
-
-		ImGui::InputFloat( "Selected Model X: ", &imguiControls.selectedModelOrigin[ 0 ], 0.1f, 1.0f );
-		ImGui::InputFloat( "Selected Model Y: ", &imguiControls.selectedModelOrigin[ 1 ], 0.1f, 1.0f );
-		ImGui::InputFloat( "Selected Model Z: ", &imguiControls.selectedModelOrigin[ 2 ], 0.1f, 1.0f );
-
-		if ( imguiControls.selectedEntityId >= 0 ) {
-			Entity* entity = scene.FindEntity( (uint32_t)imguiControls.selectedEntityId );
-			entity->SetOrigin( vec3f( tempOrigin[ 0 ] + imguiControls.selectedModelOrigin[ 0 ],
-				tempOrigin[ 1 ] + imguiControls.selectedModelOrigin[ 1 ],
-				tempOrigin[ 2 ] + imguiControls.selectedModelOrigin[ 2 ] ) );
-		}
-		ImGui::Text( "Frame Number: %d", frameNumber );
-		ImGui::SameLine();
-		ImGui::Text( "FPS: %f", 1000.0f / renderTime );
-		//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
-		ImGui::End();
+		DrawDebugMenu();
 
 		// Render dear imgui into screen
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
 #endif
+
 		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 	}
 
@@ -1386,4 +1305,252 @@ void Renderer::Render( RenderView& view )
 	{
 		throw std::runtime_error( "Failed to record command buffer!" );
 	}
+}
+
+
+void Renderer::DrawDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginMainMenuBar() )
+	{
+		if ( ImGui::BeginMenu( "File" ) )
+		{
+			ImGui::EndMenu();
+		}
+		if ( ImGui::BeginMenu( "Edit" ) )
+		{
+			if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {}
+			if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {}  // Disabled item
+			ImGui::Separator();
+			if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {}
+			if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {}
+			if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	ImGui::Begin( "Control Panel" );
+	if ( ImGui::BeginTabBar( "Tabs" ) )
+	{
+		if ( ImGui::BeginTabItem( "Loading" ) )
+		{
+			imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+			ImGui::SameLine();
+			imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
+			ImGui::SameLine();
+			imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+			ImGui::EndTabItem();
+		}
+		if ( ImGui::BeginTabItem( "Other" ) )
+		{
+			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
+			ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+			ImGui::EndTabItem();
+		}
+		if ( ImGui::BeginTabItem( "Scene" ) )
+		{
+			if( ImGui::TreeNode( "Materials" ) )
+			{
+				const uint32_t matCount = scene.materialLib.Count();
+				for ( uint32_t m = 0; m < matCount; ++m )
+				{		
+					Material* mat = scene.materialLib.Find(m);
+					const char* matName = scene.materialLib.FindName(m);
+
+					if ( ImGui::TreeNode( matName ) )
+					{
+						ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", mat->Kd.r, mat->Kd.g, mat->Kd.b );
+						ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", mat->Ks.r, mat->Ks.g, mat->Ks.b );
+						ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", mat->Ke.r, mat->Ke.g, mat->Ke.b );
+						ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", mat->Ka.r, mat->Ka.g, mat->Ka.b );
+						ImGui::Text( "Ni: %1.2f", mat->Ni );
+						ImGui::Text( "Tf: %1.2f", mat->Tf );
+						ImGui::Text( "Tr: %1.2f", mat->Tr );
+						ImGui::Text( "d: %1.2f", mat->d );
+						ImGui::Text( "illum: %1.2f", mat->illum );
+						ImGui::Separator();
+						for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
+						{
+							hdl_t texHdl = mat->GetTexture( t );
+							if( texHdl.IsValid() == false ) {
+								continue;
+							}
+							const char* texName = scene.textureLib.FindName( texHdl );
+							ImGui::Text( texName );
+						}
+						ImGui::Separator();
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+			if ( ImGui::TreeNode( "Models" ) )
+			{
+				const uint32_t modelCount = scene.modelLib.Count();
+				for ( uint32_t m = 0; m < modelCount; ++m )
+				{
+					Model* model = scene.modelLib.Find( m );
+					const char* modelName = scene.modelLib.FindName( m );
+					if ( ImGui::TreeNode( modelName ) )
+					{
+						const vec3f& min = model->bounds.GetMin();
+						const vec3f& max = model->bounds.GetMax();
+						ImGui::Text( "Bounds: [(%4.3f, %4.3f, %4.3f), (%4.3f, %4.3f, %4.3f)]", min[0], min[1], min[2], max[ 0 ], max[ 1 ], max[ 2 ] );
+						ImGui::Text( "%u", model->surfCount );
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+			if ( ImGui::TreeNode( "Textures" ) )
+			{
+				const uint32_t texCount = scene.textureLib.Count();
+				for ( uint32_t t = 0; t < texCount; ++t )
+				{
+					Texture* texture = scene.textureLib.Find( t );
+					const char* texName = scene.textureLib.FindName( t );
+					if ( ImGui::TreeNode( texName ) )
+					{
+						ImGui::Text("%u", texture->info.channels);
+						ImGui::Text("%ux%u", texture->info.width, texture->info.height );
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+			if ( ImGui::TreeNode( "Shaders" ) )
+			{
+				const uint32_t shaderCount = scene.gpuPrograms.Count();
+				for ( uint32_t s = 0; s < shaderCount; ++s )
+				{
+					GpuProgram* shader = scene.gpuPrograms.Find( s );
+					const char* shaderName = scene.gpuPrograms.FindName( s );
+					ImGui::Text( shaderName );
+				}
+				ImGui::TreePop();
+			}
+			ImGui::EndTabItem();
+		}
+		if ( ImGui::BeginTabItem( "Outliner" ) )
+		{
+			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+
+			if ( ImGui::BeginTable( "3ways", 3, flags ) )
+			{
+				// The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
+				ImGui::TableSetupColumn( "Name", ImGuiTableColumnFlags_WidthFixed, 50.0f );
+				ImGui::TableSetupColumn( "Size", ImGuiTableColumnFlags_WidthFixed, 200.0f );
+				ImGui::TableSetupColumn( "Type", ImGuiTableColumnFlags_WidthFixed, 200.0f );
+				ImGui::TableHeadersRow();
+
+				//const uint32_t entCount = scene.entities.size();
+				//for ( uint32_t i = 0; i < entCount; ++i )
+				//{
+				//	Entity* ent = scene.entities[ i ];
+
+				//	std::stringstream numberStream;
+				//	numberStream << i;
+				//	ImGui::Text( numberStream.str().c_str() );
+				//	ImGui::NextColumn();
+
+				//	ImGui::Text( ent->dbgName.c_str() );
+				//	ImGui::NextColumn();
+				//}
+
+				struct EntityTreeNode
+				{
+					const char*	Name;
+					const char*	Type;
+					int			Size;
+					int			ChildIdx;
+					int			ChildCount;
+					static void DisplayNode( const EntityTreeNode* node, const EntityTreeNode* all_nodes )
+					{
+						ImGui::TableNextRow();
+						ImGui::TableNextColumn();
+						const bool is_folder = ( node->ChildCount > 0 );
+						if ( is_folder )
+						{
+							bool open = ImGui::TreeNodeEx( node->Name, ImGuiTreeNodeFlags_SpanFullWidth );
+							ImGui::TableNextColumn();
+							ImGui::TextDisabled( "--" );
+							ImGui::TableNextColumn();
+							ImGui::TextUnformatted( node->Type );
+							if ( open )
+							{
+								for ( int child_n = 0; child_n < node->ChildCount; child_n++ )
+									DisplayNode( &all_nodes[ node->ChildIdx + child_n ], all_nodes );
+								ImGui::TreePop();
+							}
+						}
+						else
+						{
+							ImGui::TreeNodeEx( node->Name, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%d", node->Size );
+							ImGui::TableNextColumn();
+							ImGui::TextUnformatted( node->Type );
+						}
+					}
+				};
+				static const EntityTreeNode nodes[] =
+				{
+					{ "Root",                         "Folder",       -1,       1, 3    }, // 0
+					{ "Music",                        "Folder",       -1,       4, 2    }, // 1
+					{ "Textures",                     "Folder",       -1,       6, 3    }, // 2
+					{ "desktop.ini",                  "System file",  1024,    -1,-1    }, // 3
+					{ "File1_a.wav",                  "Audio file",   123000,  -1,-1    }, // 4
+					{ "File1_b.wav",                  "Audio file",   456000,  -1,-1    }, // 5
+					{ "Image001.png",                 "Image file",   203128,  -1,-1    }, // 6
+					{ "Copy of Image001.png",         "Image file",   203256,  -1,-1    }, // 7
+					{ "Copy of Image001 (Final2).png","Image file",   203512,  -1,-1    }, // 8
+				};
+
+				EntityTreeNode::DisplayNode( &nodes[ 0 ], nodes );
+
+				ImGui::EndTable();
+			}
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+
+	ImGui::Separator();
+
+	ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
+	ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
+	ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
+	const vec4f cameraOrigin = scene.camera.GetOrigin();
+	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
+	const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
+
+	char entityName[ 256 ];
+	if ( imguiControls.selectedEntityId >= 0 ) {
+		sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, scene.modelLib.FindName( scene.entities[ imguiControls.selectedEntityId ]->modelHdl ) );
+	}
+	else {
+		memset( &entityName[ 0 ], 0, 256 );
+	}
+	static vec3f tempOrigin;
+	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
+
+	if ( imguiControls.selectedEntityId >= 0 ) {
+		Entity* entity = scene.FindEntity( (uint32_t)imguiControls.selectedEntityId );
+		entity->SetOrigin( vec3f( tempOrigin[ 0 ] + imguiControls.selectedModelOrigin[ 0 ],
+			tempOrigin[ 1 ] + imguiControls.selectedModelOrigin[ 1 ],
+			tempOrigin[ 2 ] + imguiControls.selectedModelOrigin[ 2 ] ) );
+	}
+
+	ImGui::Text( "Frame Number: %d", frameNumber );
+	ImGui::SameLine();
+	ImGui::Text( "FPS: %f", 1000.0f / renderTime );
+	//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
+	ImGui::End();
+#endif
 }

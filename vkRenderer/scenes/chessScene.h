@@ -12,6 +12,7 @@
 #include <resource_types/gpuProgram.h>
 #include <resource_types/model.h>
 #include <io/io.h>
+#include <SysCore/jsmn.h>
 
 extern Scene scene;
 
@@ -168,71 +169,68 @@ void LoadMaterials( AssetLibMaterials& materials )
 {
 	{
 		Material material;
-		material.shaders[ DRAWPASS_SHADOW ] = scene.gpuPrograms.RetrieveHdl( "TerrainShadow" );
-		material.shaders[ DRAWPASS_DEPTH ] = scene.gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		material.shaders[ DRAWPASS_TERRAIN ] = scene.gpuPrograms.RetrieveHdl( "Terrain" );
+		material.AddShader( DRAWPASS_SHADOW, scene.gpuPrograms.RetrieveHdl( "TerrainShadow" ) );
+		material.AddShader( DRAWPASS_DEPTH, scene.gpuPrograms.RetrieveHdl( "TerrainDepth" ) );
+		material.AddShader( DRAWPASS_TERRAIN, scene.gpuPrograms.RetrieveHdl( "Terrain" ) );
 		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "TerrainDepth" );
-		material.textures[ 0 ] = scene.textureLib.RetrieveHdl( "heightmap.png" );
-		material.textures[ 1 ] = scene.textureLib.RetrieveHdl( "grass.jpg" );
-		material.textures[ 2 ] = scene.textureLib.RetrieveHdl( "desert.jpg" );
+
+		material.AddTexture( HGT_HEIGHT_MAP_SLOT, scene.textureLib.RetrieveHdl( "heightmap.png" ) );
+		material.AddTexture( HGT_COLOR_MAP_SLOT0, scene.textureLib.RetrieveHdl( "grass.jpg" ) );
+		material.AddTexture( HGT_COLOR_MAP_SLOT1, scene.textureLib.RetrieveHdl( "desert.jpg" ) );
 		materials.Add( "TERRAIN", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_SKYBOX ] = scene.gpuPrograms.RetrieveHdl( "Sky" );
-		material.textures[ 0 ] = scene.textureLib.RetrieveHdl( "chapel_right.jpg" );
-		material.textures[ 1 ] = scene.textureLib.RetrieveHdl( "chapel_left.jpg" );
-		material.textures[ 2 ] = scene.textureLib.RetrieveHdl( "chapel_top.jpg" );
-		material.textures[ 3 ] = scene.textureLib.RetrieveHdl( "chapel_bottom.jpg" );
-		material.textures[ 4 ] = scene.textureLib.RetrieveHdl( "chapel_front.jpg" );
-		material.textures[ 5 ] = scene.textureLib.RetrieveHdl( "chapel_back.jpg" );
+		material.AddShader( DRAWPASS_SKYBOX, scene.gpuPrograms.RetrieveHdl( "Sky" ) );
+
+		material.AddTexture( CUBE_RIGHT_SLOT, scene.textureLib.RetrieveHdl( "chapel_right.jpg" ) );
+		material.AddTexture( CUBE_LEFT_SLOT, scene.textureLib.RetrieveHdl( "chapel_left.jpg" ) );
+		material.AddTexture( CUBE_TOP_SLOT, scene.textureLib.RetrieveHdl( "chapel_top.jpg" ) );
+		material.AddTexture( CUBE_BOTTOM_SLOT, scene.textureLib.RetrieveHdl( "chapel_bottom.jpg" ) );
+		material.AddTexture( CUBE_FRONT_SLOT, scene.textureLib.RetrieveHdl( "chapel_front.jpg" ) );
+		material.AddTexture( CUBE_BACK_SLOT, scene.textureLib.RetrieveHdl( "chapel_back.jpg" ) );
 		materials.Add( "SKY", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_SHADOW ] = scene.gpuPrograms.RetrieveHdl( "Shadow" );
-		material.shaders[ DRAWPASS_DEPTH ] = scene.gpuPrograms.RetrieveHdl( "LitDepth" );
-		material.shaders[ DRAWPASS_OPAQUE ] = scene.gpuPrograms.RetrieveHdl( "LitOpaque" );
-		//material.shaders[ DRAWPASS_WIREFRAME ] = gpuPrograms.RetrieveHdl( "LitDepth" );
-		material.textures[ 0 ] = scene.textureLib.RetrieveHdl( "sapeli.jpg" );
+		material.AddShader( DRAWPASS_SHADOW, scene.gpuPrograms.RetrieveHdl( "Shadow" ) );
+		material.AddShader( DRAWPASS_DEPTH, scene.gpuPrograms.RetrieveHdl( "LitDepth" ) );
+		material.AddShader( DRAWPASS_OPAQUE, scene.gpuPrograms.RetrieveHdl( "LitOpaque" ) );
+
+		material.AddTexture( GGX_COLOR_MAP_SLOT, scene.textureLib.RetrieveHdl( "sapeli.jpg" ) );
 		materials.Add( "WHITE_WOOD", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_TRANS ] = scene.gpuPrograms.RetrieveHdl( "LitTrans" );
-		material.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = scene.gpuPrograms.RetrieveHdl( "Debug" );
+		material.AddShader( DRAWPASS_TRANS, scene.gpuPrograms.RetrieveHdl( "LitTrans" ) );
+		material.AddShader( DRAWPASS_DEBUG_WIREFRAME, scene.gpuPrograms.RetrieveHdl( "Debug" ) );
 		materials.Add( "GlowSquare", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_POST_2D ] = scene.gpuPrograms.RetrieveHdl( "PostProcess" );
-	//	material.textures[ 0 ] = 0;
-	//	material.textures[ 1 ] = 1;
+		material.AddShader( DRAWPASS_POST_2D, scene.gpuPrograms.RetrieveHdl( "PostProcess" ) );
 		materials.Add( "TONEMAP", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_POST_2D ] = scene.gpuPrograms.RetrieveHdl( "Image2D" );
-	//	material.textures[ 0 ] = 0;
-	//	material.textures[ 1 ] = 1;
-	//	material.textures[ 2 ] = 2;
+		material.AddShader( DRAWPASS_POST_2D, scene.gpuPrograms.RetrieveHdl( "Image2D" ) );
 		materials.Add( "IMAGE2D", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_DEBUG_WIREFRAME ] = scene.gpuPrograms.RetrieveHdl( "Debug" );
+		material.AddShader( DRAWPASS_DEBUG_WIREFRAME, scene.gpuPrograms.RetrieveHdl( "Debug" ) );
 		materials.Add( "DEBUG_WIRE", material );
 	}
 
 	{
 		Material material;
-		material.shaders[ DRAWPASS_DEBUG_SOLID ] = scene.gpuPrograms.RetrieveHdl( "Debug_Solid" );
+		material.AddShader( DRAWPASS_DEBUG_SOLID, scene.gpuPrograms.RetrieveHdl( "Debug_Solid" ) );
 		materials.Add( "DEBUG_SOLID", material );
 	}
 }
@@ -287,10 +285,271 @@ void LoadModels( AssetLibModels& models )
 	}
 }
 
+#define USE_JSON_SCENE 0
+
+#if USE_JSON_SCENE
+static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
+	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
+		strncmp( json + tok->start, s, tok->end - tok->start ) == 0 ) {
+		return 0;
+	}
+	return -1;
+}
+
+typedef int ParseObjectFunc( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object );
+template<class T>
+int ParseArray( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, ParseObjectFunc* readFunc, void* object );
+
+int ParseImageString( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+{
+	if ( tokens[ tx ].type != JSMN_STRING ) {
+		return -1;
+	}
+
+	AssetLibImages* textureLib = reinterpret_cast<AssetLibImages*>( object );
+
+	int i = tx + 1;
+
+	const uint32_t valueLen = ( tokens[ i ].end - tokens[ i ].start );
+	std::string s = std::string( file.data() + tokens[ i ].start, valueLen );
+	std::cout << s << std::endl;
+	textureLib->AddDeferred( s.c_str() );
+
+	return i;
+}
+
+int ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+{
+	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+		return -1;
+	}
+
+	AssetLibGpuProgram& shaders = scene.gpuPrograms;
+	Material* material = reinterpret_cast<Material*>( object );
+
+	int i = tx + 1;
+	int itemsFound = 0;
+	int itemsCount = tokens[ tx ].size;
+	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	{
+		if ( jsoneq( file.data(), &tokens[ i ], "shadow" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+
+			material->AddShader( DRAWPASS_SHADOW, shaders.AddDeferred( s.c_str() ) );
+		}
+		else if ( jsoneq( file.data(), &tokens[ i ], "depth" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+
+			material->AddShader( DRAWPASS_DEPTH, shaders.AddDeferred( s.c_str() ) );
+		}
+		else if ( jsoneq( file.data(), &tokens[ i ], "opaque" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+
+			material->AddShader( DRAWPASS_OPAQUE, shaders.AddDeferred( s.c_str() ) );
+		}
+	}
+	return i;
+}
+
+
+int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+{
+	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+		return -1;
+	}
+
+	AssetLibMaterials* materials = reinterpret_cast<AssetLibMaterials*>( object );
+
+	Material m;
+	std::string name;
+
+	int i = tx + 1;
+	int itemsFound = 0;
+	int itemsCount = tokens[ tx ].size;
+	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	{
+		if ( jsoneq( file.data(), &tokens[ i ], "name" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+
+			name = s;
+		}
+		else if ( jsoneq( file.data(), &tokens[ i ], "tr" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			float num = std::stof( s );
+			std::cout << num << std::endl;
+			++itemsFound;
+			i += 2;
+
+			m.Tr = num;
+		}
+		else if ( jsoneq( file.data(), &tokens[ i ], "shaders" ) == 0 )
+		{
+			int ret = ParseMaterialShaderObject( file, tokens, r, i + 1, &m );
+			if ( ret == -1 ) {
+				continue;
+			}
+			++itemsFound;
+			i = ret - 1;
+		}
+	}
+
+	materials->Add( name.c_str(), m );
+
+	return i;
+}
+
+
+int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+{
+	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+		return -1;
+	}
+
+	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
+
+	int i = tx + 1;
+	int itemsFound = 0;
+	int itemsCount = tokens[ tx ].size;
+	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	{
+		if ( jsoneq( file.data(), &tokens[i], "name" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+		}
+		else if ( jsoneq( file.data(), &tokens[i], "vs" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+		}
+		else if ( jsoneq( file.data(), &tokens[i], "ps" ) == 0 )
+		{
+			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
+			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			++itemsFound;
+			i += 2;
+		}
+	}
+
+	//shaders->AddDeferred( s.c_str() );
+
+	return i;
+}
+
+
+int ParseArray( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, ParseObjectFunc* readFunc, void* object )
+{
+	if ( tokens[tx].type != JSMN_ARRAY ) {
+		return -1;
+	}
+
+	int i = tx + 1;
+	int itemsFound = 0;
+	int itemsCount = tokens[ tx ].size;
+	while( ( itemsFound < itemsCount ) && ( i < r ) )
+	{
+		int ret = (*readFunc)( file, tokens, r, i, object );
+		if ( ret > 0 )
+		{
+			i = ret;
+			++itemsFound;
+		}
+	}
+	return i;
+}
+#endif
 
 void MakeScene()
 {
 	const int piecesNum = 16;
+
+#if USE_JSON_SCENE
+	jsmn_parser p;
+	jsmntok_t t[ 1024 ];
+
+	std::vector<char> file = ReadFile( "chess.json" );
+
+	jsmn_init( &p );
+	int r = jsmn_parse( &p, file.data(), static_cast<uint32_t>( file.size() ), t,
+		sizeof( t ) / sizeof( t[ 0 ] ) );
+	if ( r < 0 ) {
+		std::cout << "Failed to parse JSON" << std::endl;
+	}
+
+	if ( r < 1 || t[ 0 ].type != JSMN_OBJECT ) {
+		std::cout << "Object expected" << std::endl;
+	}
+
+	/* Loop over all keys of the root object */
+	for ( int i = 1; i < r; i++ ) {
+		if ( jsoneq( file.data(), &t[ i ], "scene" ) == 0 )
+		{
+			const uint32_t valueLen = ( t[ i + 1 ].end - t[ i + 1 ].start );
+			std::string s = std::string( file.data() + t[ i + 1 ].start, valueLen );
+			std::cout << s << std::endl;
+			i++;
+		}
+		else if ( jsoneq( file.data(), &t[ i ], "shaders" ) == 0 )
+		{
+			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+				continue;
+			}
+			int ret = ParseArray( file, t, r, i + 1, ParseShaderObject, &scene.gpuPrograms );
+			if ( ret == -1 ) {
+				continue;
+			}
+			i = ret - 1;
+		}
+		else if ( jsoneq( file.data(), &t[ i ], "images" ) == 0 )
+		{
+			int ret = ParseArray( file, t, r, i + 1, ParseImageString, &scene.textureLib );
+			if( ret == -1 ) {
+				continue;
+			}
+			i = ret - 1;
+		}
+		else if ( jsoneq( file.data(), &t[ i ], "materials" ) == 0 )
+		{
+			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+				continue;
+			}
+			int ret = ParseArray( file, t, r, i + 1, ParseMaterialObject, &scene.materialLib );
+			if ( ret == -1 ) {
+				continue;
+			}
+			i = ret - 1;
+		}
+	}
+#endif
 
 	LoadShaders( scene.gpuPrograms );
 	LoadImages( scene.textureLib );
@@ -357,7 +616,7 @@ void MakeScene()
 	bool drawPieceWireframes = true;
 	if( drawPieceWireframes )
 	{
-		for ( int i = 0; i < pieceCount; ++i )
+		for ( uint32_t i = 0; i < pieceCount; ++i )
 		{
 			BoundEntity* cubeEnt = new BoundEntity();
 			scene.CreateEntity( cubeHdl, *cubeEnt );
@@ -515,7 +774,7 @@ void UpdateSceneLocal( const float dt )
 	glowMat->d = 0.5f * cos( 3.0f * time ) + 0.5f;
 
 	const uint32_t pieceBoundCount = static_cast<uint32_t>( boundEntities.size() );
-	for ( int i = 0; i < pieceBoundCount; ++i )
+	for ( uint32_t i = 0; i < pieceBoundCount; ++i )
 	{
 		BoundEntity* boundEnt = reinterpret_cast<BoundEntity*>( scene.entities[ boundEntities[i] ] );
 		if( boundEnt->pieceId == ~0x0 )

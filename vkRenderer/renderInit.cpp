@@ -291,7 +291,7 @@ void Renderer::CreatePipelineObjects()
 		const Material* m = scene.materialLib.Find( i );
 
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-			GpuProgram* prog = scene.gpuPrograms.Find( m->shaders[ passIx ] );
+			GpuProgram* prog = scene.gpuPrograms.Find( m->GetShader( passIx ) );
 			if ( prog == nullptr ) {
 				continue;
 			}
@@ -300,7 +300,7 @@ void Renderer::CreatePipelineObjects()
 			state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
 			state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
 			state.shaders = prog;
-			state.tag = scene.gpuPrograms.FindName( m->shaders[ passIx ] );
+			state.tag = scene.gpuPrograms.FindName( m->GetShader( passIx ) );
 
 			VkRenderPass pass;
 			VkDescriptorSetLayout layout;
