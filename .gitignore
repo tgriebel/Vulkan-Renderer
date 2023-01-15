@@ -26,3 +26,8 @@ vkRenderer/x64/Debug/vkRenderer.log
 vkRenderer/x64/Debug/vkRenderer.log
 vkRenderer/baked/
 x64/Debug/RayTracer.lib
+vkRenderer/imgui.ini
+*.lib
+*.log
+*.lib
+*.tmp
