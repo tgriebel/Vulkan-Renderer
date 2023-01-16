@@ -271,7 +271,7 @@ void LoadModels( AssetLibModels& models )
 	}
 	{
 		const hdl_t planeHdl = LoadRawModel( scene, "plane.obj", "plane", ModelPath, TexturePath );
-		models.Find( planeHdl )->surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
+		models.Find( planeHdl )->Get().surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
 	}
 	{
 		Model model;

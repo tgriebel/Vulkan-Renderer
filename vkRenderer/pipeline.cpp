@@ -149,10 +149,10 @@ void CreateDescriptorSets( GpuProgram& program )
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 {
-	pipelineObject_t* object = pipelineLib.Find( hdl );
+	Asset<pipelineObject_t>* object = pipelineLib.Find( hdl );
 	if( object != nullptr )
 	{
-		*pipelineObject = object;
+		*pipelineObject = &object->Get();
 		return true;
 	}
 	return false;
@@ -169,7 +169,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 
 	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
 
-	pipelineObject_t& pipelineObject = *pipelineLib.Find( pipelineHdl );
+	pipelineObject_t& pipelineObject = pipelineLib.Find( pipelineHdl )->Get();
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
@@ -369,7 +369,7 @@ void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t&
 {
 	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
 
-	pipelineObject_t& pipelineObject = *pipelineLib.Find( pipelineHdl );
+	pipelineObject_t& pipelineObject = pipelineLib.Find( pipelineHdl )->Get();
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};

@@ -159,14 +159,14 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 
 	assert( DRAWPASS_COUNT <= Material::MaxMaterialShaders );
 
-	Model* source = scene.modelLib.Find( ent.modelHdl );
-	for ( uint32_t i = 0; i < source->surfCount; ++i ) {
+	Model& source = scene.modelLib.Find( ent.modelHdl )->Get();
+	for ( uint32_t i = 0; i < source.surfCount; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
-		surfaceUpload_t& upload = source->upload[ i ];
+		surfaceUpload_t& upload = source.upload[ i ];
 
-		const Material* material = scene.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source->surfs[ i ].materialHdl );
-		assert( material->uploadId >= 0 );
+		const Material& material = scene.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl )->Get();
+		assert( material.uploadId >= 0 );
 
 		renderFlags_t renderFlags = NONE;
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_NO_DRAW ) ? HIDDEN : NONE ) );
@@ -180,19 +180,19 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
 		surf.indicesCnt = upload.indexCount;
-		surf.materialId = material->uploadId;
+		surf.materialId = material.uploadId;
 		surf.objectId = objectOffset;
 		surf.flags = renderFlags;
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 		surf.hash = Hash( surf );
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
-			if ( material->GetShader( pass ).IsValid() ) {
-				GpuProgram* prog = scene.gpuPrograms.Find( material->GetShader( pass ) );
+			if ( material.GetShader( pass ).IsValid() ) {
+				Asset<GpuProgram>* prog = scene.gpuPrograms.Find( material.GetShader( pass ) );
 				if ( prog == nullptr ) {
 					continue;
 				}
-				surf.pipelineObject[ pass ] = prog->pipeline;
+				surf.pipelineObject[ pass ] = prog->Get().pipeline;
 			}
 			else {
 				surf.pipelineObject[ pass ] = INVALID_HDL;

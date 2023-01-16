@@ -93,7 +93,7 @@ void Renderer::UpdateGpuMaterials()
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t handle = m.GetTexture( t );
 			if ( handle.IsValid() ) {
-				const int uploadId = scene.textureLib.Find( m.GetTexture( t ) )->uploadId;
+				const int uploadId = scene.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
 				assert( uploadId >= 0 );
 				ubo.textures[ t ] = uploadId;
 			}
