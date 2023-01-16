@@ -285,7 +285,7 @@ void LoadModels( AssetLibModels& models )
 	}
 }
 
-#define USE_JSON_SCENE 0
+#define USE_JSON_SCENE 1
 
 #if USE_JSON_SCENE
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
@@ -427,6 +427,9 @@ int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 		return -1;
 	}
 
+	std::string name;
+	std::string vsShader;
+	std::string psShader;
 	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
 
 	int i = tx + 1;
@@ -437,30 +440,36 @@ int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 		if ( jsoneq( file.data(), &tokens[i], "name" ) == 0 )
 		{
 			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
-			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
-			std::cout << s << std::endl;
+			name = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << name << std::endl;
 			++itemsFound;
 			i += 2;
 		}
 		else if ( jsoneq( file.data(), &tokens[i], "vs" ) == 0 )
 		{
 			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
-			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
-			std::cout << s << std::endl;
+			vsShader = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << vsShader << std::endl;
 			++itemsFound;
 			i += 2;
 		}
 		else if ( jsoneq( file.data(), &tokens[i], "ps" ) == 0 )
 		{
 			const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
-			std::string s = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
-			std::cout << s << std::endl;
+			psShader = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+			std::cout << psShader << std::endl;
 			++itemsFound;
 			i += 2;
 		}
 	}
 
-	//shaders->AddDeferred( s.c_str() );
+	GpuProgramLoader* loader = new GpuProgramLoader();
+	loader->SetBathPath( "shaders_bin/" );
+	loader->AddRasterPath( vsShader, psShader );
+
+	const hdl_t assetHandle = shaders->AddDeferred( name.c_str() );
+	Asset<GpuProgram>* prog = shaders->Find( assetHandle );
+	prog->AttachLoader( Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 
 	return i;
 }
