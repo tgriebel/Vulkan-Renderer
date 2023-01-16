@@ -238,9 +238,9 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 	const uint32_t programCount = lib.Count();
 	for ( uint32_t i = 0; i < programCount; ++i )
 	{
-		GpuProgram* prog = lib.Find( i );
+		GpuProgram& prog = lib.Find( i )->Get();
 		for ( int i = 0; i < GpuProgram::MaxShaders; ++i ) {
-			prog->vk_shaders[ i ] = CreateShaderModule( prog->shaders[ i ].blob );
+			prog.vk_shaders[ i ] = CreateShaderModule( prog.shaders[ i ].blob );
 		}
 	}
 }
@@ -288,10 +288,10 @@ void Renderer::CreatePipelineObjects()
 	pipelineLib.Clear();
 	for ( uint32_t i = 0; i < scene.materialLib.Count(); ++i )
 	{
-		const Material* m = scene.materialLib.Find( i );
+		const Material& m = scene.materialLib.Find( i )->Get();
 
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-			GpuProgram* prog = scene.gpuPrograms.Find( m->GetShader( passIx ) );
+			GpuProgram* prog = scene.gpuPrograms.Find( m.GetShader( passIx ) );
 			if ( prog == nullptr ) {
 				continue;
 			}
@@ -300,7 +300,7 @@ void Renderer::CreatePipelineObjects()
 			state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
 			state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
 			state.shaders = prog;
-			state.tag = scene.gpuPrograms.FindName( m->GetShader( passIx ) );
+			state.tag = scene.gpuPrograms.FindName( m.GetShader( passIx ) );
 
 			VkRenderPass pass;
 			VkDescriptorSetLayout layout;

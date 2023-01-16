@@ -477,26 +477,26 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	const uint32_t textureCount = scene.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture* texture = scene.textureLib.Find( i );
-		VkImageView& imageView = texture->gpuImage.vk_view;
+		Texture& texture = scene.textureLib.Find( i )->Get();
+		VkImageView& imageView = texture.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
 
-		if ( texture->info.type == TEXTURE_TYPE_CUBE ) {
-			imageCubeInfo[ texture->uploadId ] = info;
-			firstCube = texture->uploadId;
+		if ( texture.info.type == TEXTURE_TYPE_CUBE ) {
+			imageCubeInfo[ texture.uploadId ] = info;
+			firstCube = texture.uploadId;
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info2d.imageView = scene.textureLib.GetDefault()->gpuImage.vk_view;
 			info2d.sampler = vk_bilinearSampler;
-			image2DInfo[ texture->uploadId ] = info2d;
+			image2DInfo[ texture.uploadId ] = info2d;
 		}
 		else 
 		{
-			image2DInfo[ texture->uploadId ] = info;
+			image2DInfo[ texture.uploadId ] = info;
 		}
 	}
 	// Defaults
@@ -650,8 +650,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowImageInfo.reserve( MaxImageDescriptors );
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture* texture = scene.textureLib.Find( i );
-		VkImageView& imageView = texture->gpuImage.vk_view;
+		Texture& texture = scene.textureLib.Find( i )->Get();
+		VkImageView& imageView = texture.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -1360,24 +1360,24 @@ void Renderer::DrawDebugMenu()
 				const uint32_t matCount = scene.materialLib.Count();
 				for ( uint32_t m = 0; m < matCount; ++m )
 				{		
-					Material* mat = scene.materialLib.Find(m);
+					Material& mat = scene.materialLib.Find(m)->Get();
 					const char* matName = scene.materialLib.FindName(m);
 
 					if ( ImGui::TreeNode( matName ) )
 					{
-						ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", mat->Kd.r, mat->Kd.g, mat->Kd.b );
-						ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", mat->Ks.r, mat->Ks.g, mat->Ks.b );
-						ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", mat->Ke.r, mat->Ke.g, mat->Ke.b );
-						ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", mat->Ka.r, mat->Ka.g, mat->Ka.b );
-						ImGui::Text( "Ni: %1.2f", mat->Ni );
-						ImGui::Text( "Tf: %1.2f", mat->Tf );
-						ImGui::Text( "Tr: %1.2f", mat->Tr );
-						ImGui::Text( "d: %1.2f", mat->d );
-						ImGui::Text( "illum: %1.2f", mat->illum );
+						ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", mat.Kd.r, mat.Kd.g, mat.Kd.b );
+						ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", mat.Ks.r, mat.Ks.g, mat.Ks.b );
+						ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", mat.Ke.r, mat.Ke.g, mat.Ke.b );
+						ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", mat.Ka.r, mat.Ka.g, mat.Ka.b );
+						ImGui::Text( "Ni: %1.2f", mat.Ni );
+						ImGui::Text( "Tf: %1.2f", mat.Tf );
+						ImGui::Text( "Tr: %1.2f", mat.Tr );
+						ImGui::Text( "d: %1.2f", mat.d );
+						ImGui::Text( "illum: %1.2f", mat.illum );
 						ImGui::Separator();
 						for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
 						{
-							hdl_t texHdl = mat->GetTexture( t );
+							hdl_t texHdl = mat.GetTexture( t );
 							if( texHdl.IsValid() == false ) {
 								continue;
 							}
@@ -1395,14 +1395,14 @@ void Renderer::DrawDebugMenu()
 				const uint32_t modelCount = scene.modelLib.Count();
 				for ( uint32_t m = 0; m < modelCount; ++m )
 				{
-					Model* model = scene.modelLib.Find( m );
+					Model& model = scene.modelLib.Find( m )->Get();
 					const char* modelName = scene.modelLib.FindName( m );
 					if ( ImGui::TreeNode( modelName ) )
 					{
-						const vec3f& min = model->bounds.GetMin();
-						const vec3f& max = model->bounds.GetMax();
+						const vec3f& min = model.bounds.GetMin();
+						const vec3f& max = model.bounds.GetMax();
 						ImGui::Text( "Bounds: [(%4.3f, %4.3f, %4.3f), (%4.3f, %4.3f, %4.3f)]", min[0], min[1], min[2], max[ 0 ], max[ 1 ], max[ 2 ] );
-						ImGui::Text( "%u", model->surfCount );
+						ImGui::Text( "%u", model.surfCount );
 						ImGui::TreePop();
 					}
 				}
@@ -1413,12 +1413,12 @@ void Renderer::DrawDebugMenu()
 				const uint32_t texCount = scene.textureLib.Count();
 				for ( uint32_t t = 0; t < texCount; ++t )
 				{
-					Texture* texture = scene.textureLib.Find( t );
+					Texture& texture = scene.textureLib.Find( t )->Get();
 					const char* texName = scene.textureLib.FindName( t );
 					if ( ImGui::TreeNode( texName ) )
 					{
-						ImGui::Text("%u", texture->info.channels);
-						ImGui::Text("%ux%u", texture->info.width, texture->info.height );
+						ImGui::Text("%u", texture.info.channels);
+						ImGui::Text("%ux%u", texture.info.width, texture.info.height );
 						ImGui::TreePop();
 					}
 				}
@@ -1429,7 +1429,7 @@ void Renderer::DrawDebugMenu()
 				const uint32_t shaderCount = scene.gpuPrograms.Count();
 				for ( uint32_t s = 0; s < shaderCount; ++s )
 				{
-					GpuProgram* shader = scene.gpuPrograms.Find( s );
+					GpuProgram& shader = scene.gpuPrograms.Find( s )->Get();
 					const char* shaderName = scene.gpuPrograms.FindName( s );
 					ImGui::Text( shaderName );
 				}

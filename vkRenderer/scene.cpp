@@ -65,7 +65,7 @@ void UpdateScene( const float dt )
 	if ( imguiControls.dbgImageId >= 0 )
 	{
 		scene.FindEntity( "_quadTexDebug" )->ClearFlag( ENT_FLAG_NO_DRAW );
-		scene.materialLib.Find( "IMAGE2D" )->AddTexture( 0, imguiControls.dbgImageId % scene.textureLib.Count() );
+		scene.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, imguiControls.dbgImageId % scene.textureLib.Count() );
 	}
 	else {
 		scene.FindEntity( "_quadTexDebug" )->SetFlag( ENT_FLAG_NO_DRAW );
