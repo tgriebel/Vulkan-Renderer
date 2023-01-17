@@ -31,3 +31,10 @@ vkRenderer/imgui.ini
 *.log
 *.lib
 *.tmp
+vkRenderer/x64/Debug/vkRenderer.log
+vkRenderer/x64/Debug/vkRenderer.vcxproj.FileListAbsolute.txt
+vkRenderer/x64/Release/vkRenderer.vcxproj.FileListAbsolute.txt
+x64/Debug/Chess.lib
+x64/Debug/SysCore.lib
+x64/Debug/Chess.lib
+x64/Debug/SysCore.lib

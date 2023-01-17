@@ -39,7 +39,12 @@ void Renderer::UploadTextures()
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture& texture = scene.textureLib.Find( i )->Get();
+		Asset<Texture>* textureAsset = scene.textureLib.Find( i );
+		if( textureAsset->IsLoaded() == false ) {
+			continue;
+		}
+		Texture& texture = textureAsset->Get();
+
 		// VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
 		VkImageUsageFlags flags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
@@ -60,13 +65,22 @@ void Renderer::UploadTextures()
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture& texture = scene.textureLib.Find( i )->Get();
+		Asset<Texture>* textureAsset = scene.textureLib.Find( i );
+		if ( textureAsset->IsLoaded() == false ) {
+			continue;
+		}
+		Texture& texture = textureAsset->Get();
 		GenerateMipmaps( texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture& texture = scene.textureLib.Find( i )->Get();
+		Asset<Texture>* textureAsset = scene.textureLib.Find( i );
+		if ( textureAsset->IsLoaded() == false ) {
+			continue;
+		}
+		Texture& texture = textureAsset->Get();
+
 		VkImageViewType type;
 		switch ( texture.info.type ) {
 		default:

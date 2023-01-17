@@ -52,7 +52,8 @@ static void TraceScene()
 		rtview.projView = rtview.projTransform * rtview.viewTransform;
 	}
 
-	TraceScene( rtview, rtScene, rtimage );
+	// Need to turn cpu images back on
+	//TraceScene( rtview, rtScene, rtimage );
 	//RasterScene( rtimage, rtview, rtScene, false );
 
 	{
@@ -478,6 +479,10 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
 		Texture& texture = scene.textureLib.Find( i )->Get();
+		if( texture.uploadId == -1 ) {
+			continue;
+		}
+
 		VkImageView& imageView = texture.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

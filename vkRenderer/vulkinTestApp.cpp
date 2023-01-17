@@ -36,7 +36,6 @@ imguiControls_t imguiControls;
 #endif
 
 void MakeScene();
-void LoadShaders( AssetLibGpuProgram& progs );
 void UpdateScene( const float dt );
 
 static float AdvanceTime()
@@ -56,7 +55,8 @@ void CheckReloadAssets() {
 	if ( imguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
 		scene.gpuPrograms.Clear();
-		LoadShaders( scene.gpuPrograms );
+		assert( false ); // FIXME
+		//LoadShaders( scene.gpuPrograms );
 		Renderer::GenerateGpuPrograms( scene.gpuPrograms );
 		renderer.CreatePipelineObjects();
 

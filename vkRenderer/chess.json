@@ -62,7 +62,7 @@
       "ps": "depthPS.spv"
     },
     {
-      "name": "Debug_Solid",
+      "name": "DebugSolid",
       "vs": "simpleVS.spv",
       "ps": "litPS.spv"
     },
@@ -80,7 +80,7 @@
   "images": [
       "checker.png",
       "sapeli.jpg",
-      "white.png",
+      "white.jpg",
       "black.jpg",
       "chapel_right.jpg",
       "chapel_left.jpg",
@@ -92,11 +92,25 @@
   "materials": [
     {
       "name": "WHITE_WOOD",
-      "tr": "1.0",
+      "tr": "0.0",
+      "ns": "0.0",
+      "ni": "0.0",
+      "d": "1.0",
+      "illum": "0.0",
       "shaders": {
           "shadow": "Shadow",
           "depth": "LitDepth",
           "opaque": "LitOpaque",
+      }
+	  "textures": {
+		  "colorMap" : "sapeli.jpg"
+	  }
+    },
+	{
+      "name": "GlowSquare",
+      "shaders": {
+          "trans": "LitTrans",
+          "wireframe": "Debug"
       }
     }
   ]
