@@ -101,7 +101,7 @@
           "shadow": "Shadow",
           "depth": "LitDepth",
           "opaque": "LitOpaque",
-      }
+      },
 	  "textures": {
 		  "colorMap" : "sapeli.jpg"
 	  }
@@ -111,6 +111,20 @@
       "shaders": {
           "trans": "LitTrans",
           "wireframe": "Debug"
+      }
+    },
+	{
+      "name": "SKY",
+      "shaders": {
+          "sky": "Sky"
+      }
+      "textures": {
+          "cubemap_right" : "chapel_right.jpg",
+          "cubemap_left" : "chapel_left.jpg",
+          "cubemap_top" : "chapel_top.jpg",	  
+          "cubemap_bottom" : "chapel_top.jpg",
+          "cubemap_front" : "chapel_front.jpg",
+          "cubemap_back" : "chapel_back.jpg",
       }
     }
   ]

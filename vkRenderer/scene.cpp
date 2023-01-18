@@ -17,6 +17,11 @@ extern Scene scene;
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
+void CreateCodeAssets( Scene& scene )
+{
+	
+}
+
 void UpdateScene( const float dt )
 {
 	// FIXME: race conditions
