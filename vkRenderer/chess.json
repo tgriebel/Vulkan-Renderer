@@ -122,10 +122,25 @@
           "cubemap_right" : "chapel_right.jpg",
           "cubemap_left" : "chapel_left.jpg",
           "cubemap_top" : "chapel_top.jpg",	  
-          "cubemap_bottom" : "chapel_top.jpg",
+          "cubemap_bottom" : "chapel_bottom.jpg",
           "cubemap_front" : "chapel_front.jpg",
           "cubemap_back" : "chapel_back.jpg",
       }
+    }
+  ],
+  "entities": [
+    {
+      "name" : "_skybox",
+      "model" : "_skybox",
+	  "x" : "0.0",
+	  "y" : "0.0",
+	  "z" : "0.0",
+	  "rx" : "0.0",
+	  "ry" : "0.0",
+	  "rz" : "0.0",
+	  "sx" : "1.0",
+	  "sy" : "1.0",
+	  "sz" : "1.0"
     }
   ]
 }

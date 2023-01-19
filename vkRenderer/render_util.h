@@ -28,11 +28,37 @@ private:
 	std::atomic<bool> lock;
 };
 
+
+class SkyBoxLoader : public LoadHandler<Model>
+{
+private:
+	bool Load( Model& model );
+public:
+};
+
+
+class TerrainLoader : public LoadHandler<Model>
+{
+private:
+	bool Load( Model& model );
+public:
+};
+
+
+class WaterLoader : public LoadHandler<Model>
+{
+private:
+	bool Load( Model& model );
+public:
+};
+
+
+class QuadLoader : public LoadHandler<Model>
+{
+private:
+	bool Load( Model& model );
+public:
+};
+
 mat4x4f MatrixFromVector( const vec3f& v );
-bool LoadTextureImage( const char* texturePath, Texture& texture );
-bool LoadTextureCubeMapImage( const char* textureBasePath, const char* ext, Texture& texture );
-void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vsInput_t>& vb, std::vector<uint32_t>& ib );
-void CreateSkyBoxSurf( Model& outModel );
-void CreateTerrainSurface( Model& outModel );
-void CreateWaterSurface( Model& outModel );
 void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size );

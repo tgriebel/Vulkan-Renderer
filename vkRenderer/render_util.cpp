@@ -5,6 +5,7 @@
 #include <core/assetLib.h>
 #include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
+#include "render_util.h"
 
 extern Scene						scene;
 
@@ -27,12 +28,7 @@ mat4x4f MatrixFromVector( const vec3f& v )
 }
 
 
-void CreateShaders( GpuProgram& prog )
-{
-
-}
-
-void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vertex_t>& vb, std::vector<uint32_t>& ib )
+static void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vertex_t>& vb, std::vector<uint32_t>& ib )
 {
 	vb.reserve( gb.vb.size() );
 	for ( const GeoBuilder::vertex_t& v : gb.vb )
@@ -54,7 +50,8 @@ void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vertex_t>& vb, std:
 	}
 }
 
-void CreateSkyBoxSurf( Model& outModel )
+
+bool SkyBoxLoader::Load( Model& model )
 {
 	const float gridSize = 1.0f;
 	const uint32_t width = 1;
@@ -120,13 +117,16 @@ void CreateSkyBoxSurf( Model& outModel )
 		gb.AddPlaneSurf( info[ i ] );
 	}
 
-	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
 
-	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "SKY" );
+	model.surfCount = 1;
+	model.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "SKY" );
+
+	return true;
 }
 
-void CreateTerrainSurface( Model& outModel )
+
+bool TerrainLoader::Load( Model& model )
 {
 	GeoBuilder::planeInfo_t info;
 	info.gridSize = vec2f( 0.1f );
@@ -141,13 +141,16 @@ void CreateTerrainSurface( Model& outModel )
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
-	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
 
-	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "TERRAIN" );
+	model.surfCount = 1;
+	model.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "TERRAIN" );
+
+	return true;
 }
 
-void CreateWaterSurface( Model& outModel )
+
+bool WaterLoader::Load( Model& model )
 {
 	const float gridSize = 10.f;
 	const uint32_t width = 1;
@@ -167,11 +170,14 @@ void CreateWaterSurface( Model& outModel )
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
-	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
 
-	outModel.surfCount = 1;
-	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "WATER" );
+	model.surfCount = 1;
+	model.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "WATER" );
+
+	return true;
 }
+
 
 void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size )
 {
@@ -200,4 +206,11 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 
 	outModel.surfCount = 1;
 	outModel.surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( materialName.c_str() );
+}
+
+
+bool QuadLoader::Load( Model& model )
+{
+	//CreateQuadSurface2D();
+	return false;
 }
