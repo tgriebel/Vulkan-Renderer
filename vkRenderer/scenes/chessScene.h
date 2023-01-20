@@ -168,34 +168,73 @@ void LoadMaterials( AssetLibMaterials& materials )
 void LoadModels( AssetLibModels& models )
 {
 	{
-		Timer t;
-		t.Start();
-		hdl_t handle = LoadRawModel( scene, "axis.obj", "axis", ModelPath, TexturePath );
-		t.Stop();
-		//std::cout << t.GetElapsed() << std::endl;
-		t.Start();
-		//WriteModel( scene, BakePath + ModelPath + handle.String() + BakedModelExtension, handle ); // FIXME
-		t.Stop();
-		//std::cout << t.GetElapsed() << std::endl;
-		t.Start();
-		//LoadModel( scene, handle, BakePath, ModelPath, BakedModelExtension );
-		t.Stop();
-		//std::cout << t.GetElapsed() << std::endl;
-
-		LoadRawModel( scene, "cube.obj", "cube", ModelPath, TexturePath );
-		LoadRawModel( scene, "diamond.obj", "diamond", ModelPath, TexturePath );
-		LoadRawModel( scene, "sphere.obj", "sphere", ModelPath, TexturePath );
-		LoadRawModel( scene, "pawn.obj", "pawn", ModelPath, TexturePath );
-		LoadRawModel( scene, "rook.obj", "rook", ModelPath, TexturePath );
-		LoadRawModel( scene, "knight.obj", "knight", ModelPath, TexturePath );
-		LoadRawModel( scene, "bishop.obj", "bishop", ModelPath, TexturePath );
-		LoadRawModel( scene, "king.obj", "king", ModelPath, TexturePath );
-		LoadRawModel( scene, "queen.obj", "queen", ModelPath, TexturePath );
-		LoadRawModel( scene, "chess_board.obj", "chess_board", ModelPath, TexturePath );
+		{
+			Model model;
+			if( LoadRawModel( scene, "axis.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "axis", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "cube.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "cube", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "diamond.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "diamond", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "sphere.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "sphere", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "pawn.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "pawn", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "rook.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "rook", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "knight.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "knight", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "bishop.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "bishop", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "king.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "king", model );
+			}
+		}
+		{
+			Model model;
+			if ( LoadRawModel( scene, "queen.obj", ModelPath, TexturePath, model ) ) {
+				scene.modelLib.Add( "queen", model );
+			}
+		}
 	}
 	{
-		const hdl_t planeHdl = LoadRawModel( scene, "plane.obj", "plane", ModelPath, TexturePath );
-		models.Find( planeHdl )->Get().surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
+		Model model;
+		if( LoadRawModel( scene, "plane.obj", ModelPath, TexturePath, model ) ) {
+			hdl_t planeHdl = scene.modelLib.Add( "plane", model );
+			models.Find( planeHdl )->Get().surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
+		}
 	}
 	{
 		Model model;
@@ -395,9 +434,9 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 	std::string modelName;
 	std::vector<Entity*>& entities = scene.entities;
 
-	float x, y, z;
-	float rx, ry, rz;
-	float sx, sy, sz;
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+	float rx = 0.0f, ry = 0.0f, rz = 0.0f;
+	float sx = 1.0f, sy = 1.0f, sz = 1.0f;
 
 	struct objectPair_t
 	{
@@ -451,7 +490,12 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 	if( modelName == "_skybox" ) {
 		ent->modelHdl = scene.modelLib.AddDeferred( modelName.c_str(), loader_t( new SkyBoxLoader() ) );
 	} else {
-		ent->modelHdl = scene.modelLib.AddDeferred( modelName.c_str() );
+		ModelLoader* loader = new ModelLoader();
+		loader->SetModelPath( ModelPath );
+		loader->SetTexturePath( TexturePath );
+		loader->SetModelName( modelName );
+		loader->SetSceneRef( &scene );
+		ent->modelHdl = scene.modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
 	}
 	ent->SetOrigin( vec3f( x, y, z ) );
 	ent->SetRotation( vec3f( rx, ry, rz ) );
@@ -674,12 +718,22 @@ void MakeScene()
 
 	LoadMaterials( scene.materialLib );
 
-	scene.gpuPrograms.LoadAll();
-	scene.textureLib.LoadAll();
-	scene.modelLib.LoadAll();
-
 	LoadImages( scene.textureLib );
 	LoadModels( scene.modelLib );
+
+	bool hasItems = scene.gpuPrograms.HasPendingLoads()	||
+					scene.modelLib.HasPendingLoads()	||
+					scene.textureLib.HasPendingLoads();
+	while( hasItems )
+	{
+		scene.gpuPrograms.LoadAll();
+		scene.textureLib.LoadAll();
+		scene.modelLib.LoadAll();
+		
+		hasItems =	scene.gpuPrograms.HasPendingLoads()	||
+					scene.modelLib.HasPendingLoads()	||
+					scene.textureLib.HasPendingLoads();
+	}
 
 	const uint32_t entCount = static_cast<uint32_t>( scene.entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {		
@@ -698,12 +752,12 @@ void MakeScene()
 		scene.entities.push_back( ent );
 	}
 
-	{
-		Entity* ent = new Entity();
-		scene.CreateEntityBounds( scene.modelLib.RetrieveHdl( "chess_board" ), *ent );
-		ent->name = "chess_board";
-		scene.entities.push_back( ent );
-	}
+	//{
+	//	Entity* ent = new Entity();
+	//	scene.CreateEntityBounds( scene.modelLib.RetrieveHdl( "chess_board" ), *ent );
+	//	ent->name = "chess_board";
+	//	scene.entities.push_back( ent );
+	//}
 
 	for ( int i = 0; i < 8; ++i )
 	{

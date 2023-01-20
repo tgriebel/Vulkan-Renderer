@@ -141,6 +141,10 @@
 	  "sx" : "1.0",
 	  "sy" : "1.0",
 	  "sz" : "1.0"
+    },
+	{
+      "name" : "chess_board",
+      "model" : "chess_board",
     }
   ]
 }
