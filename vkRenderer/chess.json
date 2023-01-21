@@ -132,33 +132,33 @@
       "d": "1.0",
       "illum": "0.0",
       "shaders": {
-          "shadow": "Shadow",
-          "depth": "LitDepth",
-          "opaque": "LitOpaque",
+          "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
       },
 	  "textures": {
-		  "colorMap" : "sapeli.jpg"
+		  "GGX_COLOR_MAP_SLOT" : "sapeli.jpg"
 	  }
     },
 	{
       "name": "GlowSquare",
       "shaders": {
-          "trans": "LitTrans",
-          "wireframe": "Debug"
+          "DRAWPASS_TRANS": "LitTrans",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
     },
 	{
       "name": "SKY",
       "shaders": {
-          "sky": "Sky"
+          "DRAWPASS_SKYBOX": "Sky"
       }
       "textures": {
-          "cubemap_right" : "chapel_right.jpg",
-          "cubemap_left" : "chapel_left.jpg",
-          "cubemap_top" : "chapel_top.jpg",	  
-          "cubemap_bottom" : "chapel_bottom.jpg",
-          "cubemap_front" : "chapel_front.jpg",
-          "cubemap_back" : "chapel_back.jpg",
+          "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
+          "CUBE_LEFT_SLOT" : "chapel_left.jpg",
+          "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
+          "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
+          "CUBE_FRONT_SLOT" : "chapel_front.jpg",
+          "CUBE_BACK_SLOT" : "chapel_back.jpg",
       }
     }
   ],

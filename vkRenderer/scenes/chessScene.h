@@ -147,9 +147,15 @@ struct parseState_t
 	int					tx;
 };
 
+struct enumString_t
+{
+	const char* name;
+	int32_t		value;
+};
+
+#define MAKE_ENUM_STRING( e ) enumString_t{ #e, e }
+
 typedef int ParseObjectFunc( parseState_t& st, void* object );
-template<class T>
-void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object );
 
 struct objectTuple_t
 {
@@ -158,14 +164,11 @@ struct objectTuple_t
 	ParseObjectFunc*	func;
 };
 
-enum parseType_t : uint32_t
-{
-	PARSE_TYPE_STRING,
-	PARSE_TYPE_FLOAT,
-	PARSE_TYPE_BOOL,
-	PARSE_TYPE_INT,
-	PARSE_TYPE_UINT,
-};
+
+template<class T>
+void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object );
+void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32_t objectCount );
+
 
 int ParseStringObject( parseState_t& st, void* value )
 {
@@ -249,22 +252,7 @@ int ParseImageObject( parseState_t& st, void* object )
 		{ "type", &type, &ParseStringObject },
 	};
 
-	int itemsFound = 0;
-	int itemsCount = st.tokens[ st.tx ].size;
-
-	st.tx += 1;
-
-	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
-	{
-		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
-		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) != 0 ) {
-				continue;
-			}
-			(*objectMap[ mapIx ].func)( st, objectMap[ mapIx ].ptr );
-			++itemsFound;
-		}
-	}
+	ParseObject( st, objectMap, objectCount );
 
 	TextureLoader* loader = new TextureLoader();
 	loader->SetBasePath( TexturePath );
@@ -279,54 +267,52 @@ int ParseImageObject( parseState_t& st, void* object )
 
 int ParseMaterialShaderObject( parseState_t& st, void* object )
 {
+	st.tx += 1;
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return 0;
 	}
 
-	AssetLibGpuProgram& shaders = scene.gpuPrograms;
 	Material* material = reinterpret_cast<Material*>( object );
 
-	struct objectPair_t
-	{
-		const char* name;
-		drawPass_t	pass;
-	};
-
 	const uint32_t objectCount = 9;
-	static const objectPair_t objectMap[ objectCount ] =
+	std::string s[ objectCount ];
+
+	static const enumString_t enumMap[ objectCount ] =
 	{
-		{ "shadow", DRAWPASS_SHADOW },
-		{ "depth", DRAWPASS_DEPTH },
-		{ "opaque", DRAWPASS_OPAQUE },
-		{ "trans", DRAWPASS_TRANS },
-		{ "terrain", DRAWPASS_TERRAIN },
-		{ "wireframe", DRAWPASS_DEBUG_WIREFRAME },
-		{ "sky", DRAWPASS_SKYBOX },
-		{ "postprocess", DRAWPASS_POST_2D },
-		{ "debugSolid", DRAWPASS_DEBUG_SOLID }
+		MAKE_ENUM_STRING( DRAWPASS_SHADOW ),
+		MAKE_ENUM_STRING( DRAWPASS_DEPTH ),
+		MAKE_ENUM_STRING( DRAWPASS_OPAQUE ),
+		MAKE_ENUM_STRING( DRAWPASS_TRANS ),
+		MAKE_ENUM_STRING( DRAWPASS_TERRAIN ),
+		MAKE_ENUM_STRING( DRAWPASS_DEBUG_WIREFRAME ),
+		MAKE_ENUM_STRING( DRAWPASS_SKYBOX ),
+		MAKE_ENUM_STRING( DRAWPASS_POST_2D ),
+		MAKE_ENUM_STRING( DRAWPASS_DEBUG_SOLID ),
 	};
 
-	int itemsFound = 0;
-	int itemsCount = st.tokens[ st.tx ].size;
-
-	st.tx += 1;
-	
-	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
+	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		for( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
-		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
-			{
-				const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-				std::string shaderName = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
-				++itemsFound;
-				st.tx += 2;
+		{ enumMap[0].name, &s[0], &ParseStringObject },
+		{ enumMap[1].name, &s[1], &ParseStringObject },
+		{ enumMap[2].name, &s[2], &ParseStringObject },
+		{ enumMap[3].name, &s[3], &ParseStringObject },
+		{ enumMap[4].name, &s[4], &ParseStringObject },
+		{ enumMap[5].name, &s[5], &ParseStringObject },
+		{ enumMap[6].name, &s[6], &ParseStringObject },
+		{ enumMap[7].name, &s[7], &ParseStringObject },
+		{ enumMap[8].name, &s[8], &ParseStringObject },
 
-				material->AddShader( objectMap[ mapIx ].pass, shaders.AddDeferred( shaderName.c_str() ) );
-				break;
-			}
+	};
+	static_assert( COUNTARRAY( objectMap ) == DRAWPASS_COUNT, "Size mismatch" );
+
+	ParseObject( st, objectMap, objectCount );
+
+	for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
+	{
+		if ( s[ mapIx ] == "" ) {
+			continue;
 		}
-		//throw std::runtime_error( "ParseMaterialShaderObject: Could not find token!" );
+		material->AddShader( enumMap[ mapIx ].value, AssetLibGpuProgram::Handle( s[ mapIx ].c_str() ) );
 	}
 	return 0;
 }
@@ -334,57 +320,56 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 
 int ParseMaterialTextureObject( parseState_t& st, void* object )
 {
+	st.tx += 1;
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return 0;
 	}
 
-	AssetLibImages& textures = scene.textureLib;
 	Material* material = reinterpret_cast<Material*>( object );
 
-	struct objectPair_t
-	{
-		const char* name;
-		uint32_t	slot;
-	};
-
 	const uint32_t objectCount = 12;
-	static const objectPair_t objectMap[ objectCount ] =
+	std::string s[objectCount];
+
+	static const enumString_t enumMap[ objectCount ] =
 	{
-		{ "colorMap", GGX_COLOR_MAP_SLOT },
-		{ "normalMap", GGX_NORMAL_MAP_SLOT },
-		{ "specMap", GGX_SPEC_MAP_SLOT },
-		{ "colorMap0", HGT_COLOR_MAP_SLOT0 },
-		{ "colorMap1", HGT_COLOR_MAP_SLOT1 },
-		{ "heightmap", HGT_HEIGHT_MAP_SLOT },
-		{ "cubemap_right", CUBE_RIGHT_SLOT },
-		{ "cubemap_left", CUBE_LEFT_SLOT },
-		{ "cubemap_top", CUBE_TOP_SLOT },
-		{ "cubemap_bottom", CUBE_BOTTOM_SLOT },
-		{ "cubemap_front", CUBE_FRONT_SLOT },
-		{ "cubemap_back", CUBE_BACK_SLOT },
+		MAKE_ENUM_STRING( GGX_COLOR_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_NORMAL_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_SPEC_MAP_SLOT ),
+		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT0 ),
+		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT1 ),
+		MAKE_ENUM_STRING( HGT_HEIGHT_MAP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_RIGHT_SLOT ),
+		MAKE_ENUM_STRING( CUBE_LEFT_SLOT ),
+		MAKE_ENUM_STRING( CUBE_TOP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_BOTTOM_SLOT ),
+		MAKE_ENUM_STRING( CUBE_FRONT_SLOT ),
+		MAKE_ENUM_STRING( CUBE_BACK_SLOT ),
 	};
 
-	int itemsFound = 0;
-	int itemsCount = st.tokens[ st.tx ].size;
-
-	st.tx += 1;
-
-	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
+	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
-		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
-			{
-				const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-				std::string textureName = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
-				++itemsFound;
-				st.tx += 2;
+		{ enumMap[0].name, &s[0], &ParseStringObject },
+		{ enumMap[1].name, &s[1],&ParseStringObject },
+		{ enumMap[2].name, &s[2], &ParseStringObject },
+		{ enumMap[3].name, &s[3], &ParseStringObject },
+		{ enumMap[4].name, &s[4], &ParseStringObject },
+		{ enumMap[5].name, &s[5], &ParseStringObject },
+		{ enumMap[6].name, &s[6], &ParseStringObject },
+		{ enumMap[7].name, &s[7], &ParseStringObject },
+		{ enumMap[8].name, &s[8], &ParseStringObject },
+		{ enumMap[9].name, &s[9], &ParseStringObject },
+		{ enumMap[10].name, &s[10], &ParseStringObject },
+		{ enumMap[11].name, &s[11] ,&ParseStringObject },
+	};
 
-				material->AddTexture( objectMap[ mapIx ].slot, textures.AddDeferred( textureName.c_str() ) );
-				break;
-			}
+	ParseObject( st, objectMap, objectCount );
+
+	for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
+	{
+		if( s[mapIx] == "" ) {
+			continue;
 		}
-		//throw std::runtime_error( "ParseMaterialTextureObject: Could not find token!" );
+		material->AddTexture( enumMap[mapIx].value, AssetLibImages::Handle( s[mapIx].c_str() ) );
 	}
 	return 0;
 }
@@ -396,56 +381,29 @@ int ParseModelObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	std::string name;
-	std::string modelName;
-
-	struct objectPair_t
+	struct modelObjectData_t
 	{
-		const char* name;
-		void* ptr;
-		parseType_t	type;
+		std::string name;
+		std::string modelName;
 	};
+
+	modelObjectData_t od;
 
 	const uint32_t objectCount = 2;
-	static const objectPair_t objectMap[ objectCount ] =
+	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, PARSE_TYPE_STRING },
-		{ "model", &modelName, PARSE_TYPE_STRING }
+		{ "name", &od.name, &ParseStringObject },
+		{ "model", &od.modelName, &ParseStringObject }
 	};
 
-	int itemsFound = 0;
-	int itemsCount = st.tokens[ st.tx ].size;
-
-	st.tx += 1;
-
-	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
-	{
-		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
-		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
-			{
-				if ( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ParseFloatObject( st, objectMap[ mapIx ].ptr );
-				}
-				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ParseStringObject( st, objectMap[ mapIx ].ptr );
-				}
-				else if ( objectMap[ mapIx ].type == PARSE_TYPE_BOOL ) {
-					ParseBoolObject( st, objectMap[ mapIx ].ptr );
-				}
-				++itemsFound;
-				break;
-			}
-		}
-		//throw std::runtime_error( "ParseModelObject: Could not find token!" );
-	}
+	ParseObject( st, objectMap, objectCount );
 
 	ModelLoader* loader = new ModelLoader();
 	loader->SetModelPath( ModelPath );
 	loader->SetTexturePath( TexturePath );
-	loader->SetModelName( modelName );
+	loader->SetModelName( od.modelName );
 	loader->SetSceneRef( &scene );
-	scene.modelLib.AddDeferred( name.c_str(), loader_t( loader ) );
+	scene.modelLib.AddDeferred( od.name.c_str(), loader_t( loader ) );
 
 	return st.tx;
 }
@@ -467,58 +425,26 @@ int ParseEntityObject( parseState_t& st, void* object )
 	float sx = 1.0f, sy = 1.0f, sz = 1.0f;
 	bool hidden = false, wireframe = false;
 
-	struct objectPair_t
-	{
-		const char*	name;
-		void*		ptr;
-		parseType_t	type;
-	};
-
 	const uint32_t objectCount = 14;
-	static const objectPair_t objectMap[ objectCount ] =
+	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, PARSE_TYPE_STRING },
-		{ "model", &modelName, PARSE_TYPE_STRING },
-		{ "material", &materialName, PARSE_TYPE_STRING },
-		{ "x", &x, PARSE_TYPE_FLOAT },
-		{ "y", &y, PARSE_TYPE_FLOAT },
-		{ "z", &z, PARSE_TYPE_FLOAT },
-		{ "rx", &rx, PARSE_TYPE_FLOAT },
-		{ "ry", &ry, PARSE_TYPE_FLOAT },
-		{ "rz", &rz, PARSE_TYPE_FLOAT },
-		{ "sx", &sx, PARSE_TYPE_FLOAT },
-		{ "sy", &sy, PARSE_TYPE_FLOAT },
-		{ "sz", &sz, PARSE_TYPE_FLOAT },		
-		{ "hidden", &hidden, PARSE_TYPE_BOOL },
-		{ "wireframe", &wireframe, PARSE_TYPE_BOOL },
+		{ "name", &name, &ParseStringObject },
+		{ "model", &modelName, &ParseStringObject },
+		{ "material", &materialName, &ParseStringObject },
+		{ "x", &x, &ParseFloatObject },
+		{ "y", &y, &ParseFloatObject },
+		{ "z", &z, &ParseFloatObject },
+		{ "rx", &rx, &ParseFloatObject },
+		{ "ry", &ry, &ParseFloatObject },
+		{ "rz", &rz, &ParseFloatObject },
+		{ "sx", &sx, &ParseFloatObject },
+		{ "sy", &sy, &ParseFloatObject },
+		{ "sz", &sz, &ParseFloatObject },
+		{ "hidden", &hidden, &ParseBoolObject },
+		{ "wireframe", &wireframe, &ParseBoolObject },
 	};
 
-	int itemsFound = 0;
-	int itemsCount = st.tokens[ st.tx ].size;
-
-	st.tx += 1;
-
-	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
-	{
-		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
-		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
-			{
-				if ( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ParseFloatObject( st, objectMap[ mapIx ].ptr );
-				}
-				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ParseStringObject( st, objectMap[ mapIx ].ptr );
-				}
-				else if ( objectMap[ mapIx ].type == PARSE_TYPE_BOOL ) {
-					ParseBoolObject( st, objectMap[ mapIx ].ptr );
-				}
-				++itemsFound;
-				break;
-			}
-		}
-		//throw std::runtime_error( "ParseEntityObject: Could not find token!" );
-	}
+	ParseObject( st, objectMap, objectCount );
 
 	Entity* ent = new Entity();
 	ent->name = name;
@@ -558,66 +484,23 @@ int ParseMaterialObject( parseState_t& st, void* object )
 
 	AssetLibMaterials* materials = reinterpret_cast<AssetLibMaterials*>( object );
 
-	struct objectPair_t
-	{
-		const char* name;
-		void*		ptr;
-		parseType_t	type;
-	};
-
 	Material m;
 	std::string name;
 
-	const uint32_t objectCount = 6;
-	static const objectPair_t objectMap[ objectCount ] =
+	const uint32_t objectCount = 8;
+	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, PARSE_TYPE_STRING },
-		{ "tr", &m.Tr, PARSE_TYPE_FLOAT },
-		{ "ns", &m.Ns, PARSE_TYPE_FLOAT },
-		{ "ni", &m.Ni, PARSE_TYPE_FLOAT },
-		{ "d", &m.d, PARSE_TYPE_FLOAT },
-		{ "illum", &m.illum, PARSE_TYPE_FLOAT },
+		{ "name", &name, &ParseStringObject },
+		{ "tr", &m.Tr, &ParseFloatObject },
+		{ "ns", &m.Ns, &ParseFloatObject },
+		{ "ni", &m.Ni, &ParseFloatObject },
+		{ "d", &m.d, &ParseFloatObject },
+		{ "illum", &m.illum, &ParseFloatObject },
+		{ "shaders", &m, &ParseMaterialShaderObject },
+		{ "textures", &m, &ParseMaterialTextureObject },
 	};
 
-	int itemsFound = 0;
-	int itemsCount = st.tokens[ st.tx ].size;
-
-	st.tx += 1;
-
-	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
-	{
-		if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "shaders" ) == 0 )
-		{
-			st.tx += 1;
-			ParseMaterialShaderObject( st, &m );
-			++itemsFound;
-			continue;
-		}
-		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "textures" ) == 0 )
-		{
-			st.tx += 1;
-			ParseMaterialTextureObject( st, &m );
-			++itemsFound;
-			continue;
-		}
-
-		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
-		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
-			{
-				if( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ParseFloatObject( st, objectMap[ mapIx ].ptr );
-				}
-				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ParseStringObject( st, objectMap[ mapIx ].ptr );
-				}
-				++itemsFound;
-				break;
-			}
-		}
-
-	//	throw std::runtime_error( "ParseMaterialObject: Could not find token!" );
-	}
+	ParseObject( st, objectMap, objectCount );
 
 	materials->Add( name.c_str(), m );
 
@@ -636,20 +519,30 @@ int ParseShaderObject( parseState_t& st, void* object )
 	std::string psShader;
 	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
 
-	struct objectPair_t
+	const uint32_t objectCount = 3;
+	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		const char*	name;
-		void*		ptr;
-		parseType_t	type;
+		{ "name", &name, &ParseStringObject },
+		{ "vs", &vsShader, &ParseStringObject },
+		{ "ps", &psShader, &ParseStringObject },
 	};
 
-	const uint32_t objectCount = 3;
-	static const objectPair_t objectMap[ objectCount ] =
-	{
-		{ "name", &name, PARSE_TYPE_STRING },
-		{ "vs", &vsShader, PARSE_TYPE_STRING },
-		{ "ps", &psShader, PARSE_TYPE_STRING },
-	};
+	ParseObject( st, objectMap, objectCount );
+
+	GpuProgramLoader* loader = new GpuProgramLoader();
+	loader->SetBasePath( "shaders_bin/" );
+	loader->AddRasterPath( vsShader, psShader );
+	shaders->AddDeferred( name.c_str(), Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
+
+	return st.tx;
+}
+
+
+void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32_t objectCount )
+{
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
+		return;
+	}
 
 	int itemsFound = 0;
 	int itemsCount = st.tokens[ st.tx ].size;
@@ -660,21 +553,14 @@ int ParseShaderObject( parseState_t& st, void* object )
 	{
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
-			{
-				ParseStringObject( st, objectMap[ mapIx ].ptr );
-				++itemsFound;
-				break;
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) != 0 ) {
+				continue;
 			}
+			( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr );
+			++itemsFound;
+			break;
 		}
 	}
-
-	GpuProgramLoader* loader = new GpuProgramLoader();
-	loader->SetBasePath( "shaders_bin/" );
-	loader->AddRasterPath( vsShader, psShader );
-	shaders->AddDeferred( name.c_str(), Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
-
-	return st.tx;
 }
 
 
@@ -699,7 +585,6 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 	}
 
 	st.tx -= 1;
-	return;
 }
 
 
