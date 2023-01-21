@@ -38,3 +38,16 @@ x64/Debug/Chess.lib
 x64/Debug/SysCore.lib
 x64/Debug/Chess.lib
 x64/Debug/SysCore.lib
+vkRenderer/x64/Debug/gputransfer.new.obj.enc
+vkRenderer/x64/Debug/io.new.obj.enc
+vkRenderer/x64/Debug/pipeline.new.obj.enc
+vkRenderer/x64/Debug/render_util.new.obj.enc
+vkRenderer/x64/Debug/rendercommand.new.obj.enc
+vkRenderer/x64/Debug/renderer.new.obj.enc
+vkRenderer/x64/Debug/renderinit.new.obj.enc
+vkRenderer/x64/Debug/rendershutdown.new.obj.enc
+vkRenderer/x64/Debug/scene.new.obj.enc
+x64/Debug/SysCore.lib
+x64/Debug/Chess.lib
+vkRenderer/x64/Debug/vulkintestapp.new.obj.enc
+vkRenderer/x64/Debug/vkRenderer.log

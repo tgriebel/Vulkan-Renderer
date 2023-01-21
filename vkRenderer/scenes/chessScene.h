@@ -13,6 +13,7 @@
 #include <resource_types/model.h>
 #include <io/io.h>
 #include <SysCore/jsmn.h>
+#include <algorithm>
 
 extern Scene scene;
 
@@ -127,127 +128,6 @@ static vec3f GetSquareCenterForLocation( const char file, const char rank ) {
 }
 
 
-void LoadImages( AssetLibImages& images )
-{
-	Texture cubeMap;
-	const std::string envMapName = "chapel_low";
-	const std::string cubeMapPath = ( TexturePath + envMapName );
-	if ( LoadTextureCubeMapImage( cubeMapPath.c_str(), "jpg", cubeMap ) ) {
-		images.Add( envMapName.c_str(), cubeMap );
-	}
-}
-
-
-void LoadMaterials( AssetLibMaterials& materials )
-{
-	{
-		Material material;
-		material.AddShader( DRAWPASS_POST_2D, scene.gpuPrograms.RetrieveHdl( "PostProcess" ) );
-		materials.Add( "TONEMAP", material );
-	}
-
-	{
-		Material material;
-		material.AddShader( DRAWPASS_POST_2D, scene.gpuPrograms.RetrieveHdl( "Image2D" ) );
-		materials.Add( "IMAGE2D", material );
-	}
-
-	{
-		Material material;
-		material.AddShader( DRAWPASS_DEBUG_WIREFRAME, scene.gpuPrograms.RetrieveHdl( "Debug" ) );
-		materials.Add( "DEBUG_WIRE", material );
-	}
-
-	{
-		Material material;
-		material.AddShader( DRAWPASS_DEBUG_SOLID, scene.gpuPrograms.RetrieveHdl( "Debug_Solid" ) );
-		materials.Add( "DEBUG_SOLID", material );
-	}
-}
-
-void LoadModels( AssetLibModels& models )
-{
-	{
-		{
-			Model model;
-			if( LoadRawModel( scene, "axis.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "axis", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "cube.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "cube", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "diamond.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "diamond", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "sphere.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "sphere", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "pawn.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "pawn", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "rook.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "rook", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "knight.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "knight", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "bishop.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "bishop", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "king.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "king", model );
-			}
-		}
-		{
-			Model model;
-			if ( LoadRawModel( scene, "queen.obj", ModelPath, TexturePath, model ) ) {
-				scene.modelLib.Add( "queen", model );
-			}
-		}
-	}
-	{
-		Model model;
-		if( LoadRawModel( scene, "plane.obj", ModelPath, TexturePath, model ) ) {
-			hdl_t planeHdl = scene.modelLib.Add( "plane", model );
-			models.Find( planeHdl )->Get().surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
-		}
-	}
-	{
-		Model model;
-		CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
-		models.Add( "_postProcessQuad", model );
-	}
-	{
-		Model model;
-		CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
-		models.Add( "_quadTexDebug", model );
-	}
-}
-
 #define USE_JSON_SCENE 1
 
 #if USE_JSON_SCENE
@@ -259,26 +139,37 @@ static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	return -1;
 }
 
-typedef int ParseObjectFunc( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object );
+typedef int ParseObjectFunc( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object );
 template<class T>
-void ParseArray( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, ParseObjectFunc* readFunc, void* object );
+void ParseArray( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, ParseObjectFunc* readFunc, void* object );
 
 enum parseType_t : uint32_t
 {
 	PARSE_TYPE_STRING,
-	PARSE_TYPE_FLOAT
+	PARSE_TYPE_FLOAT,
+	PARSE_TYPE_BOOL,
+	PARSE_TYPE_INT,
+	PARSE_TYPE_UINT,
 };
 
-void ConsumeStringValue( const std::vector<char>& file, const jsmntok_t* tokens, int& tx, void* value )
+struct parseState_t
+{
+	std::vector<char>* file;
+	jsmntok_t* tokens;
+	int r;
+};
+
+int ParseStringObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
 {
 	std::string* s = reinterpret_cast<std::string*>( value );
 	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
 	*s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
 	tx += 2;
+	return 0;
 }
 
 
-void ConsumeFloatValue( const std::vector<char>& file, const jsmntok_t* tokens, int& tx, void* value )
+int ParseFloatObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
 {
 	float* f = reinterpret_cast<float*>( value );
 	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
@@ -286,35 +177,109 @@ void ConsumeFloatValue( const std::vector<char>& file, const jsmntok_t* tokens, 
 	*f = std::stof( s );
 
 	tx += 2;
+	return 0;
 }
 
 
-int ParseImageString( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+int ParseBoolObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
 {
-	if ( tokens[ tx ].type != JSMN_STRING ) {
-		return -1;
+	bool* b = reinterpret_cast<bool*>( value );
+	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
+	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+
+	std::transform( s.begin(), s.end(), s.begin(),
+			[]( unsigned char c ) { return std::tolower( c ); } );
+
+	*b = ( s == "true" || s == "1" ) ? true : false;
+
+	tx += 2;
+	return 0;
+}
+
+
+int ParseIntObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+{
+	int32_t* i = reinterpret_cast<int32_t*>( value );
+	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
+	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+
+	*i = std::stoi( s );
+
+	tx += 2;
+	return 0;
+}
+
+
+int ParseUIntObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+{
+	uint32_t* u = reinterpret_cast<uint32_t*>( value );
+	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
+	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+
+	*u = std::stoul( s );
+
+	tx += 2;
+	return 0;
+}
+
+
+int ParseImageObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
+{
+	if ( tokens[ i ].type != JSMN_OBJECT ) {
+		return 0;
 	}
 
-	AssetLibImages* textureLib = reinterpret_cast<AssetLibImages*>( object );
+	AssetLibImages& textureLib = scene.textureLib;
 
-	const uint32_t valueLen = ( tokens[ tx ].end - tokens[ tx ].start );
-	std::string textureName = std::string( file.data() + tokens[ tx ].start, valueLen );
+	struct objectPair_t
+	{
+		const char*			name;
+		void*				ptr;
+		ParseObjectFunc*	func;
+	};
+
+	std::string name;
+	std::string type;
+
+	const uint32_t objectCount = 2;
+	static objectPair_t objectMap[ objectCount ] =
+	{
+		{ "name", &name, &ParseStringObject },
+		{ "type", &type, &ParseStringObject },
+	};
+
+	int itemsFound = 0;
+	int itemsCount = tokens[ i ].size;
+
+	++i;
+
+	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	{
+		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
+		{
+			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) != 0 ) {
+				continue;
+			}
+			(*objectMap[ mapIx ].func)( file, tokens, r, i, objectMap[ mapIx ].ptr );
+			++itemsFound;
+		}
+	}
 
 	TextureLoader* loader = new TextureLoader();
 	loader->SetBasePath( TexturePath );
-	loader->SetTextureFile( textureName );
-	loader->LoadAsCubemap( false );
+	loader->SetTextureFile( name );
+	loader->LoadAsCubemap( type == "CUBE" ? true : false );
 
-	textureLib->AddDeferred( textureName.c_str(), Asset<Texture>::loadHandlerPtr_t( loader ) );
+	textureLib.AddDeferred( name.c_str(), Asset<Texture>::loadHandlerPtr_t( loader ) );
 
-	return tx + 1;
+	return i;
 }
 
 
-void ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
+int ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
 {
 	if ( tokens[ i ].type != JSMN_OBJECT ) {
-		return;
+		return 0;
 	}
 
 	AssetLibGpuProgram& shaders = scene.gpuPrograms;
@@ -362,14 +327,14 @@ void ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens
 		}
 		//throw std::runtime_error( "ParseMaterialShaderObject: Could not find token!" );
 	}
-	return;
+	return 0;
 }
 
 
-void ParseMaterialTextureObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
+int ParseMaterialTextureObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
 {
 	if ( tokens[ i ].type != JSMN_OBJECT ) {
-		return;
+		return 0;
 	}
 
 	AssetLibImages& textures = scene.textureLib;
@@ -420,11 +385,11 @@ void ParseMaterialTextureObject( const std::vector<char>& file, jsmntok_t* token
 		}
 		//throw std::runtime_error( "ParseMaterialTextureObject: Could not find token!" );
 	}
-	return;
+	return 0;
 }
 
 
-int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+int ParseModelObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
 {
 	if ( tokens[ tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -432,33 +397,19 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 
 	std::string name;
 	std::string modelName;
-	std::vector<Entity*>& entities = scene.entities;
-
-	float x = 0.0f, y = 0.0f, z = 0.0f;
-	float rx = 0.0f, ry = 0.0f, rz = 0.0f;
-	float sx = 1.0f, sy = 1.0f, sz = 1.0f;
 
 	struct objectPair_t
 	{
-		const char*	name;
-		void*		ptr;
+		const char* name;
+		void* ptr;
 		parseType_t	type;
 	};
 
-	const uint32_t objectCount = 11;
+	const uint32_t objectCount = 2;
 	static const objectPair_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, PARSE_TYPE_STRING },
-		{ "model", &modelName, PARSE_TYPE_STRING },
-		{ "x", &x, PARSE_TYPE_FLOAT },
-		{ "y", &y, PARSE_TYPE_FLOAT },
-		{ "z", &z, PARSE_TYPE_FLOAT },
-		{ "rx", &rx, PARSE_TYPE_FLOAT },
-		{ "ry", &ry, PARSE_TYPE_FLOAT },
-		{ "rz", &rz, PARSE_TYPE_FLOAT },
-		{ "sx", &sx, PARSE_TYPE_FLOAT },
-		{ "sy", &sy, PARSE_TYPE_FLOAT },
-		{ "sz", &sz, PARSE_TYPE_FLOAT },
+		{ "model", &modelName, PARSE_TYPE_STRING }
 	};
 
 	int i = tx + 1;
@@ -471,10 +422,91 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
 			{
 				if ( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ConsumeFloatValue( file, tokens, i, objectMap[ mapIx ].ptr );
+					ParseFloatObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ConsumeStringValue( file, tokens, i, objectMap[ mapIx ].ptr );
+					ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+				}
+				else if ( objectMap[ mapIx ].type == PARSE_TYPE_BOOL ) {
+					ParseBoolObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+				}
+				++itemsFound;
+				break;
+			}
+		}
+		//throw std::runtime_error( "ParseModelObject: Could not find token!" );
+	}
+
+	ModelLoader* loader = new ModelLoader();
+	loader->SetModelPath( ModelPath );
+	loader->SetTexturePath( TexturePath );
+	loader->SetModelName( modelName );
+	loader->SetSceneRef( &scene );
+	scene.modelLib.AddDeferred( name.c_str(), loader_t( loader ) );
+
+	return i;
+}
+
+
+int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
+{
+	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+		return -1;
+	}
+
+	std::string name;
+	std::string modelName;
+	std::string materialName;
+	std::vector<Entity*>& entities = scene.entities;
+
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+	float rx = 0.0f, ry = 0.0f, rz = 0.0f;
+	float sx = 1.0f, sy = 1.0f, sz = 1.0f;
+	bool hidden = false, wireframe = false;
+
+	struct objectPair_t
+	{
+		const char*	name;
+		void*		ptr;
+		parseType_t	type;
+	};
+
+	const uint32_t objectCount = 14;
+	static const objectPair_t objectMap[ objectCount ] =
+	{
+		{ "name", &name, PARSE_TYPE_STRING },
+		{ "model", &modelName, PARSE_TYPE_STRING },
+		{ "material", &materialName, PARSE_TYPE_STRING },
+		{ "x", &x, PARSE_TYPE_FLOAT },
+		{ "y", &y, PARSE_TYPE_FLOAT },
+		{ "z", &z, PARSE_TYPE_FLOAT },
+		{ "rx", &rx, PARSE_TYPE_FLOAT },
+		{ "ry", &ry, PARSE_TYPE_FLOAT },
+		{ "rz", &rz, PARSE_TYPE_FLOAT },
+		{ "sx", &sx, PARSE_TYPE_FLOAT },
+		{ "sy", &sy, PARSE_TYPE_FLOAT },
+		{ "sz", &sz, PARSE_TYPE_FLOAT },		
+		{ "hidden", &hidden, PARSE_TYPE_BOOL },
+		{ "wireframe", &wireframe, PARSE_TYPE_BOOL },
+	};
+
+	int i = tx + 1;
+	int itemsFound = 0;
+	int itemsCount = tokens[ tx ].size;
+	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	{
+		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
+		{
+			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			{
+				if ( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
+					ParseFloatObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+				}
+				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
+					ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+				}
+				else if ( objectMap[ mapIx ].type == PARSE_TYPE_BOOL ) {
+					ParseBoolObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
 				}
 				++itemsFound;
 				break;
@@ -482,8 +514,6 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 		}
 		//throw std::runtime_error( "ParseEntityObject: Could not find token!" );
 	}
-
-	using loader_t = Asset<Model>::loadHandlerPtr_t;
 
 	Entity* ent = new Entity();
 	ent->name = name;
@@ -500,13 +530,22 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 	ent->SetOrigin( vec3f( x, y, z ) );
 	ent->SetRotation( vec3f( rx, ry, rz ) );
 	ent->SetScale( vec3f( sx, sy, sz ) );
+	if( materialName != "" ) {
+		ent->materialHdl = AssetLibMaterials::Handle( materialName.c_str() );
+	}
+	if( hidden ) {
+		ent->SetFlag( ENT_FLAG_NO_DRAW );
+	}
+	if ( wireframe ) {
+		ent->SetFlag( ENT_FLAG_WIREFRAME );
+	}
 	scene.entities.push_back( ent );
 
 	return i;
 }
 
 
-int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
 {
 	if ( tokens[ tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -558,10 +597,10 @@ int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const
 			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
 			{
 				if( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ConsumeFloatValue( file, tokens, i, objectMap[ mapIx ].ptr );
+					ParseFloatObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ConsumeStringValue( file, tokens, i, objectMap[ mapIx ].ptr );
+					ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
 				}
 				++itemsFound;
 				break;
@@ -577,7 +616,7 @@ int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const
 }
 
 
-int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, const int tx, void* object )
+int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
 {
 	if ( tokens[ tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -612,7 +651,7 @@ int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 		{
 			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
 			{
-				ConsumeStringValue( file, tokens, i, objectMap[ mapIx ].ptr );
+				ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
 				++itemsFound;
 				break;
 			}
@@ -690,7 +729,7 @@ void LoadScene()
 			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
-			ParseArray( file, t, r, ++i, ParseImageString, &scene.textureLib );
+			ParseArray( file, t, r, ++i, ParseImageObject, &scene.textureLib );
 		}
 		else if ( jsoneq( file.data(), &t[ i ], "materials" ) == 0 )
 		{
@@ -698,6 +737,13 @@ void LoadScene()
 				continue;
 			}
 			ParseArray( file, t, r, ++i, ParseMaterialObject, &scene.materialLib );
+		}
+		else if ( jsoneq( file.data(), &t[ i ], "models" ) == 0 )
+		{
+			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+				continue;
+			}
+			ParseArray( file, t, r, ++i, ParseModelObject, &scene.modelLib );
 		}
 		else if ( jsoneq( file.data(), &t[ i ], "entities" ) == 0 )
 		{
@@ -716,15 +762,8 @@ void MakeScene()
 
 	LoadScene();
 
-	LoadMaterials( scene.materialLib );
-
-	LoadImages( scene.textureLib );
-	LoadModels( scene.modelLib );
-
-	bool hasItems = scene.gpuPrograms.HasPendingLoads()	||
-					scene.modelLib.HasPendingLoads()	||
-					scene.textureLib.HasPendingLoads();
-	while( hasItems )
+	bool hasItems = true;
+	do
 	{
 		scene.gpuPrograms.LoadAll();
 		scene.textureLib.LoadAll();
@@ -733,7 +772,7 @@ void MakeScene()
 		hasItems =	scene.gpuPrograms.HasPendingLoads()	||
 					scene.modelLib.HasPendingLoads()	||
 					scene.textureLib.HasPendingLoads();
-	}
+	} while( hasItems );
 
 	const uint32_t entCount = static_cast<uint32_t>( scene.entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {		
@@ -751,6 +790,8 @@ void MakeScene()
 		ent->name = "_skybox";
 		scene.entities.push_back( ent );
 	}
+
+	scene.modelLib.Find( "plane" )->Get().surfs[ 0 ].materialHdl = scene.materialLib.RetrieveHdl( "GlowSquare" );
 
 	//{
 	//	Entity* ent = new Entity();

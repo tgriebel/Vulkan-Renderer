@@ -78,16 +78,50 @@
     },
   ],
   "images": [
-      "checker.png",
-      "sapeli.jpg",
-      "white.jpg",
-      "black.jpg",
-      "chapel_right.jpg",
-      "chapel_left.jpg",
-      "chapel_top.jpg",
-      "chapel_bottom.jpg",
-      "chapel_front.jpg",
-      "chapel_back.jpg"
+    {
+	  "name": "checker.png",
+	  "type": "2D"
+	},
+	{
+	  "name": "sapeli.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "white.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "black.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_right.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_left.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_top.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_bottom.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_front.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_back.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_low.jpg",
+	  "type": "CUBE"
+	}
   ],
   "materials": [
     {
@@ -128,6 +162,44 @@
       }
     }
   ],
+  "models": [
+  	{
+      "name" : "cube",
+      "model" : "cube"
+    },
+	{
+      "name" : "diamond",
+      "model" : "diamond"
+    },
+	{
+      "name" : "pawn",
+      "model" : "pawn"
+    },
+	{
+      "name" : "rook",
+      "model" : "rook"
+    },
+	{
+      "name" : "knight",
+      "model" : "knight"
+    },
+	{
+      "name" : "bishop",
+      "model" : "bishop"
+    },
+	{
+      "name" : "king",
+      "model" : "king"
+    },
+	{
+      "name" : "queen",
+      "model" : "queen"
+    },
+	{
+      "name" : "plane",
+      "model" : "plane"
+    }
+  ],
   "entities": [
     {
       "name" : "_skybox",
@@ -140,11 +212,22 @@
 	  "rz" : "0.0",
 	  "sx" : "1.0",
 	  "sy" : "1.0",
-	  "sz" : "1.0"
+	  "sz" : 1.0
     },
 	{
       "name" : "chess_board",
       "model" : "chess_board",
+	  "rz" : 0.0,
+	  "sz" : 1.0
+    },
+	{
+      "name" : "sphere",
+      "model" : "sphere",
+	  "hidden" : "true"
+    },
+	{
+      "name" : "axis",
+      "model" : "axis",
     }
   ]
 }

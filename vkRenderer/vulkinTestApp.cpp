@@ -36,6 +36,7 @@ imguiControls_t imguiControls;
 #endif
 
 void MakeScene();
+void CreateCodeAssets( Scene& scene );
 void UpdateScene( const float dt );
 
 static float AdvanceTime()
@@ -66,6 +67,7 @@ void CheckReloadAssets() {
 
 int main()
 {
+	CreateCodeAssets( scene );
 	MakeScene();
 
 	std::thread renderThread( RenderThread );

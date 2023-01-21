@@ -105,7 +105,7 @@ void Window::Init()
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
 	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 
-	window = glfwCreateWindow( DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, "Vulkan", nullptr, nullptr );
+	window = glfwCreateWindow( DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, ApplicationName, nullptr, nullptr );
 	glfwSetWindowUserPointer( window, this );
 	glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
 	glfwSetFramebufferSizeCallback( window, FramebufferResizeCallback );

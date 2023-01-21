@@ -2,8 +2,11 @@
 #include "common.h"
 #include "input.h"
 
+static const char *const ApplicationName = "Extensa";
+
 class Window {
 public:
+
 	Window() : needsImageResize( false ) { }
 
 	~Window() {
