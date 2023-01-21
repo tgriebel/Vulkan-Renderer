@@ -139,9 +139,24 @@ static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	return -1;
 }
 
-typedef int ParseObjectFunc( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object );
+struct parseState_t
+{
+	std::vector<char>*	file;
+	jsmntok_t*			tokens;
+	int					r;
+	int					tx;
+};
+
+typedef int ParseObjectFunc( parseState_t& st, void* object );
 template<class T>
-void ParseArray( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, ParseObjectFunc* readFunc, void* object );
+void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object );
+
+struct objectTuple_t
+{
+	const char*			name;
+	void*				ptr;
+	ParseObjectFunc*	func;
+};
 
 enum parseType_t : uint32_t
 {
@@ -152,115 +167,101 @@ enum parseType_t : uint32_t
 	PARSE_TYPE_UINT,
 };
 
-struct parseState_t
-{
-	std::vector<char>* file;
-	jsmntok_t* tokens;
-	int r;
-};
-
-int ParseStringObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+int ParseStringObject( parseState_t& st, void* value )
 {
 	std::string* s = reinterpret_cast<std::string*>( value );
-	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
-	*s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
-	tx += 2;
+	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+	*s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	st.tx += 2;
 	return 0;
 }
 
 
-int ParseFloatObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+int ParseFloatObject( parseState_t& st, void* value )
 {
 	float* f = reinterpret_cast<float*>( value );
-	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
-	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
 	*f = std::stof( s );
 
-	tx += 2;
+	st.tx += 2;
 	return 0;
 }
 
 
-int ParseBoolObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+int ParseBoolObject( parseState_t& st, void* value )
 {
 	bool* b = reinterpret_cast<bool*>( value );
-	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
-	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
 
 	std::transform( s.begin(), s.end(), s.begin(),
 			[]( unsigned char c ) { return std::tolower( c ); } );
 
 	*b = ( s == "true" || s == "1" ) ? true : false;
 
-	tx += 2;
+	st.tx += 2;
 	return 0;
 }
 
 
-int ParseIntObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+int ParseIntObject( parseState_t& st, void* value )
 {
 	int32_t* i = reinterpret_cast<int32_t*>( value );
-	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
-	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
 
 	*i = std::stoi( s );
 
-	tx += 2;
+	st.tx += 2;
 	return 0;
 }
 
 
-int ParseUIntObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* value )
+int ParseUIntObject( parseState_t& st, void* value )
 {
 	uint32_t* u = reinterpret_cast<uint32_t*>( value );
-	const uint32_t valueLen = ( tokens[ tx + 1 ].end - tokens[ tx + 1 ].start );
-	std::string s = std::string( file.data() + tokens[ tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
 
 	*u = std::stoul( s );
 
-	tx += 2;
+	st.tx += 2;
 	return 0;
 }
 
 
-int ParseImageObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
+int ParseImageObject( parseState_t& st, void* object )
 {
-	if ( tokens[ i ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return 0;
 	}
 
 	AssetLibImages& textureLib = scene.textureLib;
 
-	struct objectPair_t
-	{
-		const char*			name;
-		void*				ptr;
-		ParseObjectFunc*	func;
-	};
-
 	std::string name;
 	std::string type;
 
 	const uint32_t objectCount = 2;
-	static objectPair_t objectMap[ objectCount ] =
+	static objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
 		{ "type", &type, &ParseStringObject },
 	};
 
 	int itemsFound = 0;
-	int itemsCount = tokens[ i ].size;
+	int itemsCount = st.tokens[ st.tx ].size;
 
-	++i;
+	st.tx += 1;
 
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) != 0 ) {
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) != 0 ) {
 				continue;
 			}
-			(*objectMap[ mapIx ].func)( file, tokens, r, i, objectMap[ mapIx ].ptr );
+			(*objectMap[ mapIx ].func)( st, objectMap[ mapIx ].ptr );
 			++itemsFound;
 		}
 	}
@@ -272,13 +273,13 @@ int ParseImageObject( const std::vector<char>& file, jsmntok_t* tokens, const in
 
 	textureLib.AddDeferred( name.c_str(), Asset<Texture>::loadHandlerPtr_t( loader ) );
 
-	return i;
+	return st.tx;
 }
 
 
-int ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
+int ParseMaterialShaderObject( parseState_t& st, void* object )
 {
-	if ( tokens[ i ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return 0;
 	}
 
@@ -306,20 +307,20 @@ int ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens,
 	};
 
 	int itemsFound = 0;
-	int itemsCount = tokens[ i ].size;
+	int itemsCount = st.tokens[ st.tx ].size;
 
-	++i;
+	st.tx += 1;
 	
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
 		for( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
 			{
-				const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
-				std::string shaderName = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+				const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+				std::string shaderName = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
 				++itemsFound;
-				i += 2;
+				st.tx += 2;
 
 				material->AddShader( objectMap[ mapIx ].pass, shaders.AddDeferred( shaderName.c_str() ) );
 				break;
@@ -331,9 +332,9 @@ int ParseMaterialShaderObject( const std::vector<char>& file, jsmntok_t* tokens,
 }
 
 
-int ParseMaterialTextureObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, void* object )
+int ParseMaterialTextureObject( parseState_t& st, void* object )
 {
-	if ( tokens[ i ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return 0;
 	}
 
@@ -364,20 +365,20 @@ int ParseMaterialTextureObject( const std::vector<char>& file, jsmntok_t* tokens
 	};
 
 	int itemsFound = 0;
-	int itemsCount = tokens[ i ].size;
+	int itemsCount = st.tokens[ st.tx ].size;
 
-	++i;
+	st.tx += 1;
 
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
 			{
-				const uint32_t valueLen = ( tokens[ i + 1 ].end - tokens[ i + 1 ].start );
-				std::string textureName = std::string( file.data() + tokens[ i + 1 ].start, valueLen );
+				const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+				std::string textureName = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
 				++itemsFound;
-				i += 2;
+				st.tx += 2;
 
 				material->AddTexture( objectMap[ mapIx ].slot, textures.AddDeferred( textureName.c_str() ) );
 				break;
@@ -389,9 +390,9 @@ int ParseMaterialTextureObject( const std::vector<char>& file, jsmntok_t* tokens
 }
 
 
-int ParseModelObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
+int ParseModelObject( parseState_t& st, void* object )
 {
-	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
 	}
 
@@ -412,23 +413,25 @@ int ParseModelObject( const std::vector<char>& file, jsmntok_t* tokens, const in
 		{ "model", &modelName, PARSE_TYPE_STRING }
 	};
 
-	int i = tx + 1;
 	int itemsFound = 0;
-	int itemsCount = tokens[ tx ].size;
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	int itemsCount = st.tokens[ st.tx ].size;
+
+	st.tx += 1;
+
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
 			{
 				if ( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ParseFloatObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseFloatObject( st, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseStringObject( st, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_BOOL ) {
-					ParseBoolObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseBoolObject( st, objectMap[ mapIx ].ptr );
 				}
 				++itemsFound;
 				break;
@@ -444,13 +447,13 @@ int ParseModelObject( const std::vector<char>& file, jsmntok_t* tokens, const in
 	loader->SetSceneRef( &scene );
 	scene.modelLib.AddDeferred( name.c_str(), loader_t( loader ) );
 
-	return i;
+	return st.tx;
 }
 
 
-int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
+int ParseEntityObject( parseState_t& st, void* object )
 {
-	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
 	}
 
@@ -490,23 +493,25 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 		{ "wireframe", &wireframe, PARSE_TYPE_BOOL },
 	};
 
-	int i = tx + 1;
 	int itemsFound = 0;
-	int itemsCount = tokens[ tx ].size;
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	int itemsCount = st.tokens[ st.tx ].size;
+
+	st.tx += 1;
+
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
 			{
 				if ( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ParseFloatObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseFloatObject( st, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseStringObject( st, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_BOOL ) {
-					ParseBoolObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseBoolObject( st, objectMap[ mapIx ].ptr );
 				}
 				++itemsFound;
 				break;
@@ -541,13 +546,13 @@ int ParseEntityObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 	}
 	scene.entities.push_back( ent );
 
-	return i;
+	return st.tx;
 }
 
 
-int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
+int ParseMaterialObject( parseState_t& st, void* object )
 {
-	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
 	}
 
@@ -574,33 +579,37 @@ int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const
 		{ "illum", &m.illum, PARSE_TYPE_FLOAT },
 	};
 
-	int i = tx + 1;
 	int itemsFound = 0;
-	int itemsCount = tokens[ tx ].size;
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	int itemsCount = st.tokens[ st.tx ].size;
+
+	st.tx += 1;
+
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
-		if ( jsoneq( file.data(), &tokens[ i ], "shaders" ) == 0 )
+		if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "shaders" ) == 0 )
 		{
-			ParseMaterialShaderObject( file, tokens, r, ++i, &m );
+			st.tx += 1;
+			ParseMaterialShaderObject( st, &m );
 			++itemsFound;
 			continue;
 		}
-		else if ( jsoneq( file.data(), &tokens[ i ], "textures" ) == 0 )
+		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "textures" ) == 0 )
 		{
-			ParseMaterialTextureObject( file, tokens, r, ++i, &m );
+			st.tx += 1;
+			ParseMaterialTextureObject( st, &m );
 			++itemsFound;
 			continue;
 		}
 
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
 			{
 				if( objectMap[ mapIx ].type == PARSE_TYPE_FLOAT ) {
-					ParseFloatObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseFloatObject( st, objectMap[ mapIx ].ptr );
 				}
 				else if ( objectMap[ mapIx ].type == PARSE_TYPE_STRING ) {
-					ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+					ParseStringObject( st, objectMap[ mapIx ].ptr );
 				}
 				++itemsFound;
 				break;
@@ -612,13 +621,13 @@ int ParseMaterialObject( const std::vector<char>& file, jsmntok_t* tokens, const
 
 	materials->Add( name.c_str(), m );
 
-	return i;
+	return st.tx;
 }
 
 
-int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& tx, void* object )
+int ParseShaderObject( parseState_t& st, void* object )
 {
-	if ( tokens[ tx ].type != JSMN_OBJECT ) {
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
 	}
 
@@ -642,16 +651,18 @@ int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 		{ "ps", &psShader, PARSE_TYPE_STRING },
 	};
 
-	int i = tx + 1;
 	int itemsFound = 0;
-	int itemsCount = tokens[ tx ].size;
-	while ( ( itemsFound < itemsCount ) && ( i < r ) )
+	int itemsCount = st.tokens[ st.tx ].size;
+
+	st.tx += 1;
+
+	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
-			if ( jsoneq( file.data(), &tokens[ i ], objectMap[ mapIx ].name ) == 0 )
+			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) == 0 )
 			{
-				ParseStringObject( file, tokens, r, i, objectMap[ mapIx ].ptr );
+				ParseStringObject( st, objectMap[ mapIx ].ptr );
 				++itemsFound;
 				break;
 			}
@@ -663,31 +674,31 @@ int ParseShaderObject( const std::vector<char>& file, jsmntok_t* tokens, const i
 	loader->AddRasterPath( vsShader, psShader );
 	shaders->AddDeferred( name.c_str(), Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 
-	return i;
+	return st.tx;
 }
 
 
-void ParseArray( const std::vector<char>& file, jsmntok_t* tokens, const int r, int& i, ParseObjectFunc* readFunc, void* object )
+void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 {
-	if ( tokens[i].type != JSMN_ARRAY ) {
+	if ( st.tokens[st.tx].type != JSMN_ARRAY ) {
 		return;
 	}
 	int itemsFound = 0;
-	int itemsCount = tokens[ i ].size;
+	int itemsCount = st.tokens[ st.tx ].size;
 
-	++i;
+	st.tx += 1;
 
-	while( ( itemsFound < itemsCount ) && ( i < r ) )
+	while( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
-		int ret = (*readFunc)( file, tokens, r, i, object );
+		int ret = (*readFunc)( st, object );
 		if ( ret > 0 )
 		{
-			i = ret;
+			st.tx = ret;
 			++itemsFound;
 		}
 	}
 
-	--i;
+	st.tx -= 1;
 	return;
 }
 
@@ -710,47 +721,58 @@ void LoadScene()
 		std::cout << "Object expected" << std::endl;
 	}
 
-	for ( int i = 1; i < r; i++ ) {
-		if ( jsoneq( file.data(), &t[ i ], "scene" ) == 0 )
+	parseState_t st;
+	st.file = &file;
+	st.r = r;
+	st.tokens = t;
+	st.tx = 1;
+
+	for ( ; st.tx < st.r; ++st.tx ) {
+		if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "scene" ) == 0 )
 		{
-			const uint32_t valueLen = ( t[ i + 1 ].end - t[ i + 1 ].start );
-			std::string s = std::string( file.data() + t[ i + 1 ].start, valueLen );
-			i++;
+			const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+			std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+			st.tx += 1;
 		}
-		else if ( jsoneq( file.data(), &t[ i ], "shaders" ) == 0 )
+		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "shaders" ) == 0 )
 		{
-			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
-			ParseArray( file, t, r, ++i, ParseShaderObject, &scene.gpuPrograms );
+			st.tx += 1;
+			ParseArray( st, ParseShaderObject, &scene.gpuPrograms );
 		}
-		else if ( jsoneq( file.data(), &t[ i ], "images" ) == 0 )
+		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "images" ) == 0 )
 		{
-			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
-			ParseArray( file, t, r, ++i, ParseImageObject, &scene.textureLib );
+			st.tx += 1;
+			ParseArray( st, ParseImageObject, &scene.textureLib );
 		}
-		else if ( jsoneq( file.data(), &t[ i ], "materials" ) == 0 )
+		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "materials" ) == 0 )
 		{
-			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
-			ParseArray( file, t, r, ++i, ParseMaterialObject, &scene.materialLib );
+			st.tx += 1;
+			ParseArray( st, ParseMaterialObject, &scene.materialLib );
 		}
-		else if ( jsoneq( file.data(), &t[ i ], "models" ) == 0 )
+		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "models" ) == 0 )
 		{
-			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
-			ParseArray( file, t, r, ++i, ParseModelObject, &scene.modelLib );
+			st.tx += 1;
+			ParseArray( st, ParseModelObject, &scene.modelLib );
 		}
-		else if ( jsoneq( file.data(), &t[ i ], "entities" ) == 0 )
+		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "entities" ) == 0 )
 		{
-			if ( t[ i + 1 ].type != JSMN_ARRAY ) {
+			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
-			ParseArray( file, t, r, ++i, ParseEntityObject, &scene.entities );
+			st.tx += 1;
+			ParseArray( st, ParseEntityObject, &scene.entities );
 		}
 	}
 }
