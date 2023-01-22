@@ -29,10 +29,10 @@ void Renderer::Cleanup()
 		vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
 	}
 
-	const uint32_t textureCount = scene.textureLib.Count();
+	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		const Texture& texture = scene.textureLib.Find( i )->Get();
+		const Texture& texture = gAssets.textureLib.Find( i )->Get();
 		vkDestroyImageView( context.device, texture.gpuImage.vk_view, nullptr );
 		vkDestroyImage( context.device, texture.gpuImage.vk_image, nullptr );
 	}

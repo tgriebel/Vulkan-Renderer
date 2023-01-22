@@ -22,7 +22,7 @@ static void BuildRayTraceScene()
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
 		RtModel rtModel;
-		CreateRayTraceModel( scene, scene.entities[ pieceEntities[ i ] ], &rtModel );
+		CreateRayTraceModel( gAssets, scene.entities[ pieceEntities[ i ] ], &rtModel );
 		rtScene.models.push_back( rtModel );
 
 		AABB& aabb = rtModel.octree.GetAABB();
@@ -160,13 +160,13 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 
 	assert( DRAWPASS_COUNT <= Material::MaxMaterialShaders );
 
-	Model& source = scene.modelLib.Find( ent.modelHdl )->Get();
+	Model& source = gAssets.modelLib.Find( ent.modelHdl )->Get();
 	for ( uint32_t i = 0; i < source.surfCount; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		surfaceUpload_t& upload = source.upload[ i ];
 
-		const Material& material = scene.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl )->Get();
+		const Material& material = gAssets.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl )->Get();
 		assert( material.uploadId >= 0 );
 
 		renderFlags_t renderFlags = NONE;
@@ -189,7 +189,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
 			if ( material.GetShader( pass ).IsValid() ) {
-				Asset<GpuProgram>* prog = scene.gpuPrograms.Find( material.GetShader( pass ) );
+				Asset<GpuProgram>* prog = gAssets.gpuPrograms.Find( material.GetShader( pass ) );
 				if ( prog == nullptr ) {
 					continue;
 				}
@@ -475,10 +475,10 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	image2DInfo.resize( MaxImageDescriptors );
 	imageCubeInfo.resize( MaxImageDescriptors );
 	int firstCube = -1;
-	const uint32_t textureCount = scene.textureLib.Count();
+	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture& texture = scene.textureLib.Find( i )->Get();
+		Texture& texture = gAssets.textureLib.Find( i )->Get();
 		if( texture.uploadId == -1 ) {
 			continue;
 		}
@@ -495,7 +495,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info2d.imageView = scene.textureLib.GetDefault()->gpuImage.vk_view;
+			info2d.imageView = gAssets.textureLib.GetDefault()->gpuImage.vk_view;
 			info2d.sampler = vk_bilinearSampler;
 			image2DInfo[ texture.uploadId ] = info2d;
 		}
@@ -506,7 +506,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	}
 	// Defaults
 	{
-		const Texture* default2DTexture = scene.textureLib.GetDefault();
+		const Texture* default2DTexture = gAssets.textureLib.GetDefault();
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
 			const VkImageView& imageView = default2DTexture->gpuImage.vk_view;
@@ -655,7 +655,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowImageInfo.reserve( MaxImageDescriptors );
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture& texture = scene.textureLib.Find( i )->Get();
+		Texture& texture = gAssets.textureLib.Find( i )->Get();
 		VkImageView& imageView = texture.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -666,7 +666,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	// Defaults
 	for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 	{
-		const Texture* texture = scene.textureLib.GetDefault();
+		const Texture* texture = gAssets.textureLib.GetDefault();
 		const VkImageView& imageView = texture->gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -679,7 +679,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowCodeImageInfo.reserve( MaxCodeImages );
 	for ( size_t j = 0; j < MaxCodeImages; ++j )
 	{
-		const Texture* texture = scene.textureLib.GetDefault();
+		const Texture* texture = gAssets.textureLib.GetDefault();
 		const VkImageView& imageView = texture->gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1362,11 +1362,11 @@ void Renderer::DrawDebugMenu()
 		{
 			if( ImGui::TreeNode( "Materials" ) )
 			{
-				const uint32_t matCount = scene.materialLib.Count();
+				const uint32_t matCount = gAssets.materialLib.Count();
 				for ( uint32_t m = 0; m < matCount; ++m )
 				{		
-					Material& mat = scene.materialLib.Find(m)->Get();
-					const char* matName = scene.materialLib.FindName(m);
+					Material& mat = gAssets.materialLib.Find(m)->Get();
+					const char* matName = gAssets.materialLib.FindName(m);
 
 					if ( ImGui::TreeNode( matName ) )
 					{
@@ -1386,7 +1386,7 @@ void Renderer::DrawDebugMenu()
 							if( texHdl.IsValid() == false ) {
 								continue;
 							}
-							const char* texName = scene.textureLib.FindName( texHdl );
+							const char* texName = gAssets.textureLib.FindName( texHdl );
 							ImGui::Text( texName );
 						}
 						ImGui::Separator();
@@ -1397,11 +1397,11 @@ void Renderer::DrawDebugMenu()
 			}
 			if ( ImGui::TreeNode( "Models" ) )
 			{
-				const uint32_t modelCount = scene.modelLib.Count();
+				const uint32_t modelCount = gAssets.modelLib.Count();
 				for ( uint32_t m = 0; m < modelCount; ++m )
 				{
-					Model& model = scene.modelLib.Find( m )->Get();
-					const char* modelName = scene.modelLib.FindName( m );
+					Model& model = gAssets.modelLib.Find( m )->Get();
+					const char* modelName = gAssets.modelLib.FindName( m );
 					if ( ImGui::TreeNode( modelName ) )
 					{
 						const vec3f& min = model.bounds.GetMin();
@@ -1415,11 +1415,11 @@ void Renderer::DrawDebugMenu()
 			}
 			if ( ImGui::TreeNode( "Textures" ) )
 			{
-				const uint32_t texCount = scene.textureLib.Count();
+				const uint32_t texCount = gAssets.textureLib.Count();
 				for ( uint32_t t = 0; t < texCount; ++t )
 				{
-					Texture& texture = scene.textureLib.Find( t )->Get();
-					const char* texName = scene.textureLib.FindName( t );
+					Texture& texture = gAssets.textureLib.Find( t )->Get();
+					const char* texName = gAssets.textureLib.FindName( t );
 					if ( ImGui::TreeNode( texName ) )
 					{
 						ImGui::Text("%u", texture.info.channels);
@@ -1431,11 +1431,11 @@ void Renderer::DrawDebugMenu()
 			}
 			if ( ImGui::TreeNode( "Shaders" ) )
 			{
-				const uint32_t shaderCount = scene.gpuPrograms.Count();
+				const uint32_t shaderCount = gAssets.gpuPrograms.Count();
 				for ( uint32_t s = 0; s < shaderCount; ++s )
 				{
-					GpuProgram& shader = scene.gpuPrograms.Find( s )->Get();
-					const char* shaderName = scene.gpuPrograms.FindName( s );
+					GpuProgram& shader = gAssets.gpuPrograms.Find( s )->Get();
+					const char* shaderName = gAssets.gpuPrograms.FindName( s );
 					ImGui::Text( shaderName );
 				}
 				ImGui::TreePop();
@@ -1537,7 +1537,7 @@ void Renderer::DrawDebugMenu()
 
 	char entityName[ 256 ];
 	if ( imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, scene.modelLib.FindName( scene.entities[ imguiControls.selectedEntityId ]->modelHdl ) );
+		sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, gAssets.modelLib.FindName( scene.entities[ imguiControls.selectedEntityId ]->modelHdl ) );
 	}
 	else {
 		memset( &entityName[ 0 ], 0, 256 );

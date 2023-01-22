@@ -2,8 +2,9 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
+#include <scene/assetManager.h>
 
-extern Scene scene;
+extern AssetManager gAssets;
 
 void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers )
 {
@@ -35,11 +36,11 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 
 void Renderer::UploadTextures()
 {
-	const uint32_t textureCount = scene.textureLib.Count();
+	const uint32_t textureCount = gAssets.textureLib.Count();
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = scene.textureLib.Find( i );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
 		if( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -65,7 +66,7 @@ void Renderer::UploadTextures()
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = scene.textureLib.Find( i );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -75,7 +76,7 @@ void Renderer::UploadTextures()
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = scene.textureLib.Find( i );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -93,11 +94,11 @@ void Renderer::UploadTextures()
 
 void Renderer::UpdateGpuMaterials()
 {
-	const uint32_t materialCount = scene.materialLib.Count();
+	const uint32_t materialCount = gAssets.materialLib.Count();
 	materialBuffer.resize( materialCount );
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
-		Material& m = scene.materialLib.Find( i )->Get();
+		Material& m = gAssets.materialLib.Find( i )->Get();
 		if( m.uploadId >= 0 ) {
 			continue;
 		}
@@ -107,7 +108,7 @@ void Renderer::UpdateGpuMaterials()
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t handle = m.GetTexture( t );
 			if ( handle.IsValid() ) {
-				const int uploadId = scene.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
+				const int uploadId = gAssets.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
 				assert( uploadId >= 0 );
 				ubo.textures[ t ] = uploadId;
 			}
@@ -141,7 +142,7 @@ void Renderer::UploadModelsToGPU()
 {
 	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
 	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-	const uint32_t modelCount = scene.modelLib.Count();
+	const uint32_t modelCount = gAssets.modelLib.Count();
 	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
 	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
 
@@ -149,7 +150,7 @@ void Renderer::UploadModelsToGPU()
 	static uint32_t ibBufElements = 0;
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
-		Model& model = scene.modelLib.Find( m )->Get();
+		Model& model = gAssets.modelLib.Find( m )->Get();
 		if ( model.uploaded ) {
 			continue;
 		}

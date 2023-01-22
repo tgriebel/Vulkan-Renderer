@@ -12,37 +12,37 @@
 #include "scenes/chessScene.h"
 #endif
 
-extern Scene scene;
+extern AssetManager gAssets;
 
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
-void CreateCodeAssets( Scene& scene )
+void CreateCodeAssets()
 {
 	// Materials
 	{
 		{
 			Material material;
 			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
-			scene.materialLib.Add( "TONEMAP", material );
+			gAssets.materialLib.Add( "TONEMAP", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
-			scene.materialLib.Add( "IMAGE2D", material );
+			gAssets.materialLib.Add( "IMAGE2D", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLibGpuProgram::Handle( "Debug" ) );
-			scene.materialLib.Add( "DEBUG_WIRE", material );
+			gAssets.materialLib.Add( "DEBUG_WIRE", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_DEBUG_SOLID, AssetLibGpuProgram::Handle( "Debug_Solid" ) );
-			scene.materialLib.Add( "DEBUG_SOLID", material );
+			gAssets.materialLib.Add( "DEBUG_SOLID", material );
 		}
 	}
 
@@ -51,12 +51,12 @@ void CreateCodeAssets( Scene& scene )
 		{
 			Model model;
 			CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
-			scene.modelLib.Add( "_postProcessQuad", model );
+			gAssets.modelLib.Add( "_postProcessQuad", model );
 		}
 		{
 			Model model;
 			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
-			scene.modelLib.Add( "_quadTexDebug", model );
+			gAssets.modelLib.Add( "_quadTexDebug", model );
 		}
 	}
 }
@@ -109,7 +109,7 @@ void UpdateScene( const float dt )
 	if ( imguiControls.dbgImageId >= 0 )
 	{
 		scene.FindEntity( "_quadTexDebug" )->ClearFlag( ENT_FLAG_NO_DRAW );
-		scene.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, imguiControls.dbgImageId % scene.textureLib.Count() );
+		gAssets.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, imguiControls.dbgImageId % gAssets.textureLib.Count() );
 	}
 	else {
 		scene.FindEntity( "_quadTexDebug" )->SetFlag( ENT_FLAG_NO_DRAW );

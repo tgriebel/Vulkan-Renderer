@@ -59,6 +59,9 @@
     <ClCompile Include="io.cpp">
       <Filter>io</Filter>
     </ClCompile>
+    <ClCompile Include="scenes\sceneParser.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -139,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="swapChain.h">
       <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\sceneParser.h">
+      <Filter>scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

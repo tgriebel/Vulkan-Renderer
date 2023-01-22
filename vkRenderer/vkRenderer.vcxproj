@@ -179,6 +179,7 @@
     <ClInclude Include="scenes\beachScene.h" />
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="render_util.h" />
+    <ClInclude Include="scenes\sceneParser.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="debug.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="render_util.cpp" />
     <ClCompile Include="gpuTransfer.cpp" />
+    <ClCompile Include="scenes\sceneParser.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_vulkan.cpp" />

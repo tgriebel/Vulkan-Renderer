@@ -98,7 +98,7 @@ void Renderer::InitVulkan()
 	CreateResourceBuffers();
 	CreateTextureSamplers();
 
-	GenerateGpuPrograms( scene.gpuPrograms );
+	GenerateGpuPrograms( gAssets.gpuPrograms );
 
 	CreateCodeTextures();
 	CreateDescSetLayouts();
@@ -286,12 +286,12 @@ void Renderer::CreateResourceBuffers()
 void Renderer::CreatePipelineObjects()
 {
 	pipelineLib.Clear();
-	for ( uint32_t i = 0; i < scene.materialLib.Count(); ++i )
+	for ( uint32_t i = 0; i < gAssets.materialLib.Count(); ++i )
 	{
-		const Material& m = scene.materialLib.Find( i )->Get();
+		const Material& m = gAssets.materialLib.Find( i )->Get();
 
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-			Asset<GpuProgram>* prog = scene.gpuPrograms.Find( m.GetShader( passIx ) );
+			Asset<GpuProgram>* prog = gAssets.gpuPrograms.Find( m.GetShader( passIx ) );
 			if ( prog == nullptr ) {
 				continue;
 			}
@@ -300,7 +300,7 @@ void Renderer::CreatePipelineObjects()
 			state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
 			state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
 			state.shaders = &prog->Get();
-			state.tag = scene.gpuPrograms.FindName( m.GetShader( passIx ) );
+			state.tag = gAssets.gpuPrograms.FindName( m.GetShader( passIx ) );
 
 			VkRenderPass pass;
 			VkDescriptorSetLayout layout;

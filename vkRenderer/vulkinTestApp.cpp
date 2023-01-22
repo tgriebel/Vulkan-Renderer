@@ -7,6 +7,7 @@
 #include "common.h"
 #include <scene/camera.h>
 #include <scene/scene.h>
+#include <scene/assetManager.h>
 #include <core/assetLib.h>
 #include "render_util.h"
 #include "deviceContext.h"
@@ -18,6 +19,7 @@
 #include "renderer.h"
 #include "allocator.h"
 #include "gpuResources.h"
+#include "scenes/sceneParser.h"
 #include <resource_types/gpuProgram.h>
 
 typedef AssetLib< Texture >			AssetLibImages;
@@ -25,6 +27,7 @@ typedef AssetLib< Material >		AssetLibMaterials;
 typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< Model >			AssetLibModels;
 
+AssetManager						gAssets;
 Scene								scene;
 Renderer							renderer;
 Window								window;
@@ -36,7 +39,7 @@ imguiControls_t imguiControls;
 #endif
 
 void MakeScene();
-void CreateCodeAssets( Scene& scene );
+void CreateCodeAssets();
 void UpdateScene( const float dt );
 
 static float AdvanceTime()
@@ -55,10 +58,10 @@ void RenderThread()
 void CheckReloadAssets() {
 	if ( imguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
-		scene.gpuPrograms.Clear();
+		gAssets.gpuPrograms.Clear();
 		assert( false ); // FIXME
 		//LoadShaders( scene.gpuPrograms );
-		Renderer::GenerateGpuPrograms( scene.gpuPrograms );
+		Renderer::GenerateGpuPrograms( gAssets.gpuPrograms );
 		renderer.CreatePipelineObjects();
 
 		imguiControls.rebuildShaders = false;
@@ -67,7 +70,8 @@ void CheckReloadAssets() {
 
 int main()
 {
-	CreateCodeAssets( scene );
+	CreateCodeAssets();
+	LoadScene();
 	MakeScene();
 
 	std::thread renderThread( RenderThread );
