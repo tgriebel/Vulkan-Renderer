@@ -62,6 +62,9 @@
     <ClCompile Include="scenes\sceneParser.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
+    <ClCompile Include="scenes\chessScene.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />

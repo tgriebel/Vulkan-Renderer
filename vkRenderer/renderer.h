@@ -44,9 +44,6 @@ extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						window;
 
-extern std::vector< uint32_t > boundEntities;
-extern std::vector< uint32_t > pieceEntities;
-
 class Renderer
 {
 public:

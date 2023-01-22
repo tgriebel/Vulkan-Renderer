@@ -16,7 +16,7 @@ static void BuildRayTraceScene( Scene* scene )
 {
 	rtScene.scene = scene;
 
-	const uint32_t entCount = static_cast<uint32_t>( pieceEntities.size() );
+	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	rtScene.lights.clear();
 	rtScene.models.clear();
 	rtScene.models.reserve( entCount );
@@ -25,7 +25,7 @@ static void BuildRayTraceScene( Scene* scene )
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
 		RtModel rtModel;
-		CreateRayTraceModel( gAssets, scene->entities[ pieceEntities[ i ] ], &rtModel );
+		CreateRayTraceModel( gAssets, scene->entities[ i ], &rtModel );
 		rtScene.models.push_back( rtModel );
 
 		AABB& aabb = rtModel.octree.GetAABB();
