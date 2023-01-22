@@ -1,3 +1,7 @@
 #pragma once
+#include <string>
 
-void LoadScene();
+class Scene;
+class AssetManager;
+
+void LoadScene( std::string fileName, Scene** scene, AssetManager* assets );

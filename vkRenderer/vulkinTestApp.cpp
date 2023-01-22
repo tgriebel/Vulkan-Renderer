@@ -70,16 +70,13 @@ void CheckReloadAssets() {
 
 int main()
 {
-	gScene = new ChessScene();
-
 	CreateCodeAssets();
-	LoadScene();
-
-	gScene->Init();
+	LoadScene( "chess.json", &gScene, &gAssets );
 
 	std::thread renderThread( RenderThread );
 
 	gWindow.Init();
+	gScene->Init();
 
 	try
 	{

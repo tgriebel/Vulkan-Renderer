@@ -1,5 +1,8 @@
 #include "sceneParser.h"
 
+#include <algorithm>
+#include <string>
+
 #include "../common.h"
 #include "../render_util.h"
 #include <scene/entity.h>
@@ -8,13 +11,10 @@
 #include <resource_types/model.h>
 #include <io/io.h>
 #include <SysCore/jsmn.h>
-#include <algorithm>
+#include "chessScene.h"
 
 static jsmn_parser p;
 static jsmntok_t t[ 1024 ];
-
-extern Scene* gScene;
-extern AssetManager assets;
 
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
@@ -26,10 +26,12 @@ static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 
 struct parseState_t
 {
-	std::vector<char>* file;
-	jsmntok_t* tokens;
+	std::vector<char>*	file;
+	jsmntok_t*			tokens;
 	int					r;
 	int					tx;
+	Scene*				scene;
+	AssetManager*		assets;
 };
 
 struct enumString_t
@@ -125,7 +127,7 @@ int ParseImageObject( parseState_t& st, void* object )
 		return 0;
 	}
 
-	AssetLibImages& textureLib = gAssets.textureLib;
+	AssetLibImages& textureLib = st.assets->textureLib;
 
 	std::string name;
 	std::string type;
@@ -287,8 +289,8 @@ int ParseModelObject( parseState_t& st, void* object )
 	loader->SetModelPath( ModelPath );
 	loader->SetTexturePath( TexturePath );
 	loader->SetModelName( od.modelName );
-	loader->SetAssetRef( &gAssets );
-	gAssets.modelLib.AddDeferred( od.name.c_str(), loader_t( loader ) );
+	loader->SetAssetRef( st.assets );
+	st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( loader ) );
 
 	return st.tx;
 }
@@ -303,7 +305,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 	std::string name;
 	std::string modelName;
 	std::string materialName;
-	std::vector<Entity*>& entities = gScene->entities;
+	std::vector<Entity*>& entities = st.scene->entities;
 
 	float x = 0.0f, y = 0.0f, z = 0.0f;
 	float rx = 0.0f, ry = 0.0f, rz = 0.0f;
@@ -334,15 +336,15 @@ int ParseEntityObject( parseState_t& st, void* object )
 	Entity* ent = new Entity();
 	ent->name = name;
 	if ( modelName == "_skybox" ) {
-		ent->modelHdl = gAssets.modelLib.AddDeferred( modelName.c_str(), loader_t( new SkyBoxLoader() ) );
+		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName.c_str(), loader_t( new SkyBoxLoader() ) );
 	}
 	else {
 		ModelLoader* loader = new ModelLoader();
 		loader->SetModelPath( ModelPath );
 		loader->SetTexturePath( TexturePath );
 		loader->SetModelName( modelName );
-		loader->SetAssetRef( &gAssets );
-		ent->modelHdl = gAssets.modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
+		loader->SetAssetRef( st.assets );
+		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
 	}
 	ent->SetOrigin( vec3f( x, y, z ) );
 	ent->SetRotation( vec3f( rx, ry, rz ) );
@@ -356,7 +358,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 	if ( wireframe ) {
 		ent->SetFlag( ENT_FLAG_WIREFRAME );
 	}
-	gScene->entities.push_back( ent );
+	st.scene->entities.push_back( ent );
 
 	return st.tx;
 }
@@ -474,9 +476,9 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 }
 
 
-void LoadScene()
+void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 {
-	std::vector<char> file = ReadFile( "chess.json" );
+	std::vector<char> file = ReadFile( fileName );
 
 	jsmn_init( &p );
 	int r = jsmn_parse( &p, file.data(), static_cast<uint32_t>( file.size() ), t,
@@ -489,26 +491,37 @@ void LoadScene()
 		std::cout << "Object expected" << std::endl;
 	}
 
+	for ( int i = 1; i < r; ++i ) {
+		if ( jsoneq( file.data(), &t[ i ], "scene" ) == 0 )
+		{
+			const uint32_t valueLen = ( t[ i + 1 ].end - t[ i + 1 ].start );
+			std::string s = std::string( file.data() + t[ i + 1 ].start, valueLen );
+
+			if ( s == "chess" ) {
+				*scene = new ChessScene();
+			} else {
+				*scene = new Scene();
+			}
+			break;
+		}
+	}
+
 	parseState_t st;
 	st.file = &file;
 	st.r = r;
 	st.tokens = t;
 	st.tx = 1;
+	st.assets = assets;
+	st.scene = *scene;
 
 	for ( ; st.tx < st.r; ++st.tx ) {
-		if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "scene" ) == 0 )
-		{
-			const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-			std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
-			st.tx += 1;
-		}
-		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "shaders" ) == 0 )
+		if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "shaders" ) == 0 )
 		{
 			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
 				continue;
 			}
 			st.tx += 1;
-			ParseArray( st, ParseShaderObject, &gAssets.gpuPrograms );
+			ParseArray( st, ParseShaderObject, &st.assets->gpuPrograms );
 		}
 		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "images" ) == 0 )
 		{
@@ -516,7 +529,7 @@ void LoadScene()
 				continue;
 			}
 			st.tx += 1;
-			ParseArray( st, ParseImageObject, &gAssets.textureLib );
+			ParseArray( st, ParseImageObject, &st.assets->textureLib );
 		}
 		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "materials" ) == 0 )
 		{
@@ -524,7 +537,7 @@ void LoadScene()
 				continue;
 			}
 			st.tx += 1;
-			ParseArray( st, ParseMaterialObject, &gAssets.materialLib );
+			ParseArray( st, ParseMaterialObject, &st.assets->materialLib );
 		}
 		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "models" ) == 0 )
 		{
@@ -532,7 +545,7 @@ void LoadScene()
 				continue;
 			}
 			st.tx += 1;
-			ParseArray( st, ParseModelObject, &gAssets.modelLib );
+			ParseArray( st, ParseModelObject, &st.assets->modelLib );
 		}
 		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "entities" ) == 0 )
 		{
@@ -540,19 +553,19 @@ void LoadScene()
 				continue;
 			}
 			st.tx += 1;
-			ParseArray( st, ParseEntityObject, &gScene->entities );
+			ParseArray( st, ParseEntityObject, &st.scene->entities );
 		}
 	}
 
 	bool hasItems = true;
 	do
 	{
-		gAssets.gpuPrograms.LoadAll();
-		gAssets.textureLib.LoadAll();
-		gAssets.modelLib.LoadAll();
+		assets->gpuPrograms.LoadAll();
+		assets->textureLib.LoadAll();
+		assets->modelLib.LoadAll();
 
-		hasItems = gAssets.gpuPrograms.HasPendingLoads() ||
-			gAssets.modelLib.HasPendingLoads() ||
-			gAssets.textureLib.HasPendingLoads();
+		hasItems =	assets->gpuPrograms.HasPendingLoads()	||
+					assets->modelLib.HasPendingLoads()		||
+					assets->textureLib.HasPendingLoads();
 	} while ( hasItems );
 }
