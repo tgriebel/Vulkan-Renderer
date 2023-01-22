@@ -126,11 +126,11 @@
   "materials": [
     {
       "name": "WHITE_WOOD",
-      "tr": "0.0",
-      "ns": "0.0",
-      "ni": "0.0",
-      "d": "1.0",
-      "illum": "0.0",
+      "tr": 0.0,
+      "ns": 0.0,
+      "ni": 0.0,
+      "d": 1.0,
+      "illum": 0.0,
       "shaders": {
           "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
@@ -204,14 +204,14 @@
     {
       "name" : "_skybox",
       "model" : "_skybox",
-	  "x" : "0.0",
-	  "y" : "0.0",
-	  "z" : "0.0",
-	  "rx" : "0.0",
-	  "ry" : "0.0",
-	  "rz" : "0.0",
-	  "sx" : "1.0",
-	  "sy" : "1.0",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 0.0,
+	  "rx" : 0.0,
+	  "ry" : 0.0,
+	  "rz" : 0.0,
+	  "sx" : 1.0,
+	  "sy" : 1.0,
 	  "sz" : 1.0
     },
 	{
