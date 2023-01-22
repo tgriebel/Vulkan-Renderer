@@ -42,7 +42,7 @@ static void BuildRayTraceScene( Scene* scene )
 
 static void TraceScene()
 {
-	imguiControls.raytraceScene = false;
+	gImguiControls.raytraceScene = false;
 
 	rtview.targetSize[ 0 ] = 320;
 	rtview.targetSize[ 1 ] = 180;
@@ -214,11 +214,11 @@ void Renderer::RenderScene( Scene* scene )
 	Commit( scene );
 	SubmitFrame();
 
-	if( imguiControls.rebuildRaytraceScene ) {
+	if( gImguiControls.rebuildRaytraceScene ) {
 		BuildRayTraceScene( scene );
 	}
 
-	if ( imguiControls.raytraceScene ) {
+	if ( gImguiControls.raytraceScene ) {
 		TraceScene();
 	}
 
@@ -384,10 +384,10 @@ void Renderer::SubmitFrame()
 
 	result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 
-	if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.IsResizeRequested() )
+	if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || gWindow.IsResizeRequested() )
 	{
 		RecreateSwapChain();
-		window.AcceptImageResize();
+		gWindow.AcceptImageResize();
 		return;
 	}
 	else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
@@ -408,7 +408,7 @@ void Renderer::UpdateView()
 {
 	int width;
 	int height;
-	window.GetWindowSize( width, height );
+	gWindow.GetWindowSize( width, height );
 	renderView.viewport.width = static_cast<float>( width );
 	renderView.viewport.height = static_cast<float>( height );
 
@@ -900,10 +900,10 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		const float viewHeight = renderView.viewport.height;
 
 		globals.time = vec4f( time, intPart, fracPart, 1.0f );
-		globals.generic = vec4f( imguiControls.heightMapHeight, imguiControls.roughness, 0.0f, 0.0f );
+		globals.generic = vec4f( gImguiControls.heightMapHeight, gImguiControls.roughness, 0.0f, 0.0f );
 		globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
-		globals.tonemap = vec4f( imguiControls.toneMapColor[ 0 ], imguiControls.toneMapColor[ 1 ], imguiControls.toneMapColor[ 2 ], imguiControls.toneMapColor[ 3 ] );
-		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, imguiControls.shadowStrength );
+		globals.tonemap = vec4f( gImguiControls.toneMapColor[ 0 ], gImguiControls.toneMapColor[ 1 ], gImguiControls.toneMapColor[ 2 ], gImguiControls.toneMapColor[ 3 ] );
+		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, gImguiControls.shadowStrength );
 		globalsBuffer.push_back( globals );
 	}
 
@@ -974,7 +974,7 @@ void Renderer::PickPhysicalDevice()
 
 	for ( const auto& device : devices )
 	{
-		if ( IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
+		if ( IsDeviceSuitable( device, gWindow.vk_surface, deviceExtensions ) )
 		{
 			VkPhysicalDeviceProperties deviceProperties;
 			vkGetPhysicalDeviceProperties( device, &deviceProperties );
@@ -1103,7 +1103,7 @@ void Renderer::Render( RenderView& view )
 
 	int width = 0;
 	int height = 0;
-	window.GetWindowSize( width, height );
+	gWindow.GetWindowSize( width, height );
 
 	if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
@@ -1343,22 +1343,22 @@ void Renderer::DrawDebugMenu()
 	{
 		if ( ImGui::BeginTabItem( "Loading" ) )
 		{
-			imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+			gImguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
 			ImGui::SameLine();
-			imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
+			gImguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
 			ImGui::SameLine();
-			imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+			gImguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
 			ImGui::EndTabItem();
 		}
 		if ( ImGui::BeginTabItem( "Other" ) )
 		{
-			ImGui::InputFloat( "Heightmap Height", &imguiControls.heightMapHeight, 0.1f, 1.0f );
-			ImGui::SliderFloat( "Roughness", &imguiControls.roughness, 0.1f, 1.0f );
-			ImGui::SliderFloat( "Shadow Strength", &imguiControls.shadowStrength, 0.0f, 1.0f );
-			ImGui::InputFloat( "Tone Map R", &imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map G", &imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map B", &imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map A", &imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Heightmap Height", &gImguiControls.heightMapHeight, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Roughness", &gImguiControls.roughness, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Shadow Strength", &gImguiControls.shadowStrength, 0.0f, 1.0f );
+			ImGui::InputFloat( "Tone Map R", &gImguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map G", &gImguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map B", &gImguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map A", &gImguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::EndTabItem();
 		}
 		if ( ImGui::BeginTabItem( "Scene" ) )
@@ -1531,16 +1531,16 @@ void Renderer::DrawDebugMenu()
 
 	ImGui::Separator();
 
-	ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
-	ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
-	ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
+	ImGui::InputInt( "Image Id", &gImguiControls.dbgImageId );
+	ImGui::Text( "Mouse: (%f, %f)", (float)gWindow.input.GetMouse().x, (float)gWindow.input.GetMouse().y );
+	ImGui::Text( "Mouse Dt: (%f, %f)", (float)gWindow.input.GetMouse().dx, (float)gWindow.input.GetMouse().dy );
 	const vec4f cameraOrigin = gScene->camera.GetOrigin();
 	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
-	const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
+	const vec2f ndc = gWindow.GetNdc( gWindow.input.GetMouse().x, gWindow.input.GetMouse().y );
 
 	char entityName[ 256 ];
-	if ( imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, gAssets.modelLib.FindName( gScene->entities[ imguiControls.selectedEntityId ]->modelHdl ) );
+	if ( gImguiControls.selectedEntityId >= 0 ) {
+		sprintf_s( entityName, "%i: %s", gImguiControls.selectedEntityId, gAssets.modelLib.FindName( gScene->entities[ gImguiControls.selectedEntityId ]->modelHdl ) );
 	}
 	else {
 		memset( &entityName[ 0 ], 0, 256 );
@@ -1548,11 +1548,11 @@ void Renderer::DrawDebugMenu()
 	static vec3f tempOrigin;
 	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
 
-	if ( imguiControls.selectedEntityId >= 0 ) {
-		Entity* entity = gScene->FindEntity( (uint32_t)imguiControls.selectedEntityId );
-		entity->SetOrigin( vec3f( tempOrigin[ 0 ] + imguiControls.selectedModelOrigin[ 0 ],
-			tempOrigin[ 1 ] + imguiControls.selectedModelOrigin[ 1 ],
-			tempOrigin[ 2 ] + imguiControls.selectedModelOrigin[ 2 ] ) );
+	if ( gImguiControls.selectedEntityId >= 0 ) {
+		Entity* entity = gScene->FindEntity( (uint32_t)gImguiControls.selectedEntityId );
+		entity->SetOrigin( vec3f( tempOrigin[ 0 ] + gImguiControls.selectedModelOrigin[ 0 ],
+			tempOrigin[ 1 ] + gImguiControls.selectedModelOrigin[ 1 ],
+			tempOrigin[ 2 ] + gImguiControls.selectedModelOrigin[ 2 ] ) );
 	}
 
 	ImGui::Text( "Frame Number: %d", frameNumber );

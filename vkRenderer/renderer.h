@@ -34,7 +34,7 @@
 
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
-extern imguiControls_t imguiControls;
+extern imguiControls_t gImguiControls;
 #endif
 
 typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
@@ -42,7 +42,7 @@ typedef AssetLib<GpuImage>			AssetLibGpuImages;
 
 extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
-extern Window						window;
+extern Window						gWindow;
 
 class Renderer
 {
@@ -172,14 +172,14 @@ private:
 	void RecreateSwapChain()
 	{
 		int width = 0, height = 0;
-		window.GetWindowFrameBufferSize( width, height, true );
+		gWindow.GetWindowFrameBufferSize( width, height, true );
 
 		vkDeviceWaitIdle( context.device );
 
 		DestroyFrameResources();
 		swapChain.Destroy();
 		frameBufferMemory.Reset();
-		swapChain.Create( &window, width, height );
+		swapChain.Create( &gWindow, width, height );
 		CreateRenderPasses();
 		CreateFramebuffers();
 	}

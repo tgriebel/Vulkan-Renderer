@@ -14,9 +14,6 @@
 #include <io/io.h>
 #include <algorithm>
 
-extern imguiControls_t			imguiControls;
-extern Window					window;
-
 class PieceEntity : public Entity {
 public:
 	PieceEntity( const char file, const char rank ) : Entity(),

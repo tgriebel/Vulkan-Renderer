@@ -1,5 +1,8 @@
 #include "chessScene.h"
 
+extern imguiControls_t	gImguiControls;
+extern Window			gWindow;
+
 struct pieceMappingInfo_t {
 	const char* name;
 };
@@ -202,7 +205,7 @@ void ChessScene::Update( const float dt )
 
 	lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
-	const mouse_t& mouse = window.input.GetMouse();
+	const mouse_t& mouse = gWindow.input.GetMouse();
 	if ( mouse.centered )
 	{
 		const float maxSpeed = mouse.speed;

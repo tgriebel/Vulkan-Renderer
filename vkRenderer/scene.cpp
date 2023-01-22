@@ -8,8 +8,8 @@
 
 extern AssetManager gAssets;
 
-extern imguiControls_t			imguiControls;
-extern Window					window;
+extern imguiControls_t			gImguiControls;
+extern Window					gWindow;
 
 void CreateCodeAssets()
 {
@@ -59,37 +59,37 @@ void UpdateScene( Scene* scene, const float dt )
 {
 	// FIXME: race conditions
 	// Need to do a ping-pong update
-	if ( window.input.IsKeyPressed( 'D' ) ) {
+	if ( gWindow.input.IsKeyPressed( 'D' ) ) {
 		scene->camera.MoveRight( dt * 0.01f );
 	}
-	if ( window.input.IsKeyPressed( 'A' ) ) {
+	if ( gWindow.input.IsKeyPressed( 'A' ) ) {
 		scene->camera.MoveRight( dt * -0.01f );
 	}
-	if ( window.input.IsKeyPressed( 'W' ) ) {
+	if ( gWindow.input.IsKeyPressed( 'W' ) ) {
 		scene->camera.MoveForward( dt * 0.01f );
 	}
-	if ( window.input.IsKeyPressed( 'S' ) ) {
+	if ( gWindow.input.IsKeyPressed( 'S' ) ) {
 		scene->camera.MoveForward( dt * -0.01f );
 	}
-	if ( window.input.IsKeyPressed( '8' ) ) {
+	if ( gWindow.input.IsKeyPressed( '8' ) ) {
 		scene->camera.AdjustPitch( -dt * 0.01f );
 	}
-	if ( window.input.IsKeyPressed( '2' ) ) {
+	if ( gWindow.input.IsKeyPressed( '2' ) ) {
 		scene->camera.AdjustPitch( dt * 0.01f );
 	}
-	if ( window.input.IsKeyPressed( '4' ) ) {
+	if ( gWindow.input.IsKeyPressed( '4' ) ) {
 		scene->camera.AdjustYaw( dt * 0.01f );
 	}
-	if ( window.input.IsKeyPressed( '6' ) ) {
+	if ( gWindow.input.IsKeyPressed( '6' ) ) {
 		scene->camera.AdjustYaw( -dt * 0.01f );
 	}
-	if ( window.input.IsKeyPressed( '+' ) ) {
+	if ( gWindow.input.IsKeyPressed( '+' ) ) {
 		scene->camera.SetFov( scene->camera.GetFov() + Radians( 0.1f ) );
 	}
-	if ( window.input.IsKeyPressed( '-' ) ) {
+	if ( gWindow.input.IsKeyPressed( '-' ) ) {
 		scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
 	}
-	scene->camera.SetAspectRatio( window.GetWindowFrameBufferAspect() );
+	scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
 
 	// Skybox
 	vec3f skyBoxOrigin;
@@ -100,10 +100,10 @@ void UpdateScene( Scene* scene, const float dt )
 
 	scene->Update( dt );
 
-	if ( imguiControls.dbgImageId >= 0 )
+	if ( gImguiControls.dbgImageId >= 0 )
 	{
 		scene->FindEntity( "_quadTexDebug" )->ClearFlag( ENT_FLAG_NO_DRAW );
-		gAssets.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, imguiControls.dbgImageId % gAssets.textureLib.Count() );
+		gAssets.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, gImguiControls.dbgImageId % gAssets.textureLib.Count() );
 	}
 	else {
 		scene->FindEntity( "_quadTexDebug" )->SetFlag( ENT_FLAG_NO_DRAW );

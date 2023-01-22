@@ -69,10 +69,10 @@ void Renderer::InitVulkan()
 		// Device Set-up
 		CreateInstance();
 		SetupDebugMessenger();
-		window.CreateSurface();
+		gWindow.CreateSurface();
 		PickPhysicalDevice();
 		CreateLogicalDevice();
-		swapChain.Create( &window, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
+		swapChain.Create( &gWindow, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
 	}
 
 	{
@@ -128,7 +128,7 @@ void Renderer::InitImGui()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForVulkan( window.window, true );
+	ImGui_ImplGlfw_InitForVulkan( gWindow.window, true );
 
 	ImGui_ImplVulkan_InitInfo vkInfo = {};
 	vkInfo.Instance = context.instance;
@@ -156,25 +156,25 @@ void Renderer::InitImGui()
 	}
 	ImGui_ImplGlfw_NewFrame();
 #endif
-	imguiControls.raytraceScene = false;
-	imguiControls.rebuildRaytraceScene = false;
-	imguiControls.rebuildShaders = false;
-	imguiControls.heightMapHeight = 1.0f;
-	imguiControls.roughness = 0.9f;
-	imguiControls.shadowStrength = 0.99f;
-	imguiControls.toneMapColor[ 0 ] = 1.0f;
-	imguiControls.toneMapColor[ 1 ] = 1.0f;
-	imguiControls.toneMapColor[ 2 ] = 1.0f;
-	imguiControls.toneMapColor[ 3 ] = 1.0f;
-	imguiControls.dbgImageId = -1;
-	imguiControls.selectedEntityId = -1;
-	imguiControls.selectedModelOrigin = vec3f( 0.0f );
+	gImguiControls.raytraceScene = false;
+	gImguiControls.rebuildRaytraceScene = false;
+	gImguiControls.rebuildShaders = false;
+	gImguiControls.heightMapHeight = 1.0f;
+	gImguiControls.roughness = 0.9f;
+	gImguiControls.shadowStrength = 0.99f;
+	gImguiControls.toneMapColor[ 0 ] = 1.0f;
+	gImguiControls.toneMapColor[ 1 ] = 1.0f;
+	gImguiControls.toneMapColor[ 2 ] = 1.0f;
+	gImguiControls.toneMapColor[ 3 ] = 1.0f;
+	gImguiControls.dbgImageId = -1;
+	gImguiControls.selectedEntityId = -1;
+	gImguiControls.selectedModelOrigin = vec3f( 0.0f );
 }
 
 
 void Renderer::CreateLogicalDevice()
 {
-	QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, window.vk_surface );
+	QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, gWindow.vk_surface );
 	context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
 	context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
 	context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
@@ -584,7 +584,7 @@ void Renderer::CreateFramebuffers()
 {
 	int width = 0;
 	int height = 0;
-	window.GetWindowFrameBufferSize( width, height );
+	gWindow.GetWindowFrameBufferSize( width, height );
 
 	/////////////////////////////////
 	//       Shadow Map Render     //

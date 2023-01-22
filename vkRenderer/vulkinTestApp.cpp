@@ -30,13 +30,13 @@ typedef AssetLib< Model >			AssetLibModels;
 
 AssetManager						gAssets;
 Scene*								gScene;
-Renderer							renderer;
-Window								window;
+Renderer							gRenderer;
+Window								gWindow;
 
 static SpinLock						acquireNextFrame;
 
 #if defined( USE_IMGUI )
-imguiControls_t imguiControls;
+imguiControls_t gImguiControls;
 #endif
 
 void CreateCodeAssets();
@@ -56,15 +56,15 @@ void RenderThread()
 }
 
 void CheckReloadAssets() {
-	if ( imguiControls.rebuildShaders ) {
+	if ( gImguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
 		gAssets.gpuPrograms.Clear();
 		assert( false ); // FIXME
 		//LoadShaders( scene.gpuPrograms );
 		Renderer::GenerateGpuPrograms( gAssets.gpuPrograms );
-		renderer.CreatePipelineObjects();
+		gRenderer.CreatePipelineObjects();
 
-		imguiControls.rebuildShaders = false;
+		gImguiControls.rebuildShaders = false;
 	}
 }
 
@@ -79,24 +79,24 @@ int main()
 
 	std::thread renderThread( RenderThread );
 
-	window.Init();
+	gWindow.Init();
 
 	try
 	{
-		renderer.Init();
-		while ( window.IsOpen() )
+		gRenderer.Init();
+		while ( gWindow.IsOpen() )
 		{
 			CheckReloadAssets();
 
-			window.PumpMessages();
+			gWindow.PumpMessages();
 			UpdateScene( gScene, AdvanceTime() );
-			window.input.NewFrame();
-			renderer.RenderScene( gScene );
+			gWindow.input.NewFrame();
+			gRenderer.RenderScene( gScene );
 #if defined( USE_IMGUI )
 			ImGui_ImplGlfw_NewFrame();
 #endif
 		}
-		renderer.Destroy();
+		gRenderer.Destroy();
 	}
 	catch (const std::exception& e)
 	{

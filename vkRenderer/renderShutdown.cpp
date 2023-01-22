@@ -57,10 +57,10 @@ void Renderer::Cleanup()
 		DestroyDebugUtilsMessengerEXT( context.instance, debugMessenger, nullptr );
 	}
 
-	vkDestroySurfaceKHR( context.instance, window.vk_surface, nullptr );
+	vkDestroySurfaceKHR( context.instance, gWindow.vk_surface, nullptr );
 	vkDestroyInstance( context.instance, nullptr );
 
-	window.~Window();
+	gWindow.~Window();
 }
 
 
