@@ -176,7 +176,6 @@
     <ClInclude Include="renderview.h" />
     <ClInclude Include="renderConstants.h" />
     <ClInclude Include="renderer.h" />
-    <ClInclude Include="scenes\beachScene.h" />
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="render_util.h" />
     <ClInclude Include="scenes\sceneParser.h" />

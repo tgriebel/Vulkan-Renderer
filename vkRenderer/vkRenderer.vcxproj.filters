@@ -95,9 +95,6 @@
     <ClInclude Include="scenes\chessScene.h">
       <Filter>scenes</Filter>
     </ClInclude>
-    <ClInclude Include="scenes\beachScene.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
     <ClInclude Include="renderer.h">
       <Filter>render core</Filter>
     </ClInclude>

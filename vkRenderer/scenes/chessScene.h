@@ -14,8 +14,6 @@
 #include <io/io.h>
 #include <algorithm>
 
-extern Scene scene;
-
 extern imguiControls_t			imguiControls;
 extern Window					window;
 
@@ -48,17 +46,21 @@ public:
 
 class ChessScene : public Scene
 {
-
+private:
+	Entity* GetTracedEntity( const Ray& ray );
+public:
+	void Update( const float dt ) override;
+	void Init() override;
 };
 
-Entity* GetTracedEntity( const Ray& ray )
+Entity* ChessScene::GetTracedEntity( const Ray& ray )
 {
 	Entity* closestEnt = nullptr;
 	float closestT = FLT_MAX;
-	const uint32_t entityNum = static_cast<uint32_t>( scene.entities.size() );
+	const uint32_t entityNum = static_cast<uint32_t>( entities.size() );
 	for ( uint32_t i = 0; i < entityNum; ++i )
 	{
-		Entity* ent = scene.entities[i];
+		Entity* ent = entities[i];
 		if ( !ent->HasFlag( ENT_FLAG_SELECTABLE ) ) {
 			continue;
 		}
@@ -132,25 +134,13 @@ static vec3f GetSquareCenterForLocation( const char file, const char rank ) {
 }
 
 
-void MakeScene()
+void ChessScene::Init()
 {
 	const int piecesNum = 16;
 
-	bool hasItems = true;
-	do
-	{
-		gAssets.gpuPrograms.LoadAll();
-		gAssets.textureLib.LoadAll();
-		gAssets.modelLib.LoadAll();
-		
-		hasItems =	gAssets.gpuPrograms.HasPendingLoads()	||
-					gAssets.modelLib.HasPendingLoads()	||
-					gAssets.textureLib.HasPendingLoads();
-	} while( hasItems );
-
-	const uint32_t entCount = static_cast<uint32_t>( scene.entities.size() );
+	const uint32_t entCount = static_cast<uint32_t>( entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {		
-		scene.CreateEntityBounds( scene.entities[ i ]->modelHdl, *scene.entities[ i ] );
+		CreateEntityBounds( entities[ i ]->modelHdl, *entities[ i ] );
 	}
 
 	gameConfig_t cfg;
@@ -160,9 +150,9 @@ void MakeScene()
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_skybox" ), *ent );
+		CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_skybox" ), *ent );
 		ent->name = "_skybox";
-		scene.entities.push_back( ent );
+		entities.push_back( ent );
 	}
 
 	gAssets.modelLib.Find( "plane" )->Get().surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "GlowSquare" );
@@ -179,7 +169,7 @@ void MakeScene()
 		for ( int j = 0; j < 8; ++j )
 		{
 			PieceEntity* squareEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			scene.CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "plane" ), *squareEnt );
+			CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "plane" ), *squareEnt );
 			squareEnt->SetOrigin( GetSquareCenterForLocation( squareEnt->file, squareEnt->rank ) + vec3f( 0.0f, 0.0f, 0.01f ) );
 			squareEnt->SetFlag( ENT_FLAG_SELECTABLE );
 			squareEnt->handle = -1;
@@ -187,15 +177,15 @@ void MakeScene()
 			name += std::to_string( i ) + "_" + std::to_string( j );
 
 			squareEnt->name = name.c_str();
-			glowEntities.push_back( static_cast<uint32_t>( scene.entities.size() ) );
-			scene.entities.push_back( squareEnt );
+			glowEntities.push_back( static_cast<uint32_t>( entities.size() ) );
+			entities.push_back( squareEnt );
 
 			pieceInfo_t pieceInfo = chessEngine.GetInfo( j, i );
 			if ( pieceInfo.onBoard == false ) {
 				continue;
 			}
 			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			scene.CreateEntityBounds( gAssets.modelLib.RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
+			CreateEntityBounds( gAssets.modelLib.RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
 			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
@@ -205,8 +195,8 @@ void MakeScene()
 				pieceEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "Chess_Black.001" );
 			}
 			pieceEnt->name = GetName( pieceInfo ).c_str();
-			pieceEntities.push_back( static_cast<uint32_t>( scene.entities.size() ) );
-			scene.entities.push_back( pieceEnt );
+			pieceEntities.push_back( static_cast<uint32_t>( entities.size() ) );
+			entities.push_back( pieceEnt );
 		}
 	}
 
@@ -218,13 +208,13 @@ void MakeScene()
 		for ( uint32_t i = 0; i < pieceCount; ++i )
 		{
 			BoundEntity* cubeEnt = new BoundEntity();
-			scene.CreateEntityBounds( cubeHdl, *cubeEnt );
+			CreateEntityBounds( cubeHdl, *cubeEnt );
 			cubeEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
 			cubeEnt->SetFlag( ENT_FLAG_WIREFRAME );
-			cubeEnt->name = ( scene.entities[ pieceEntities[ i ] ]->name + "_cube" ).c_str();
+			cubeEnt->name = ( entities[ pieceEntities[ i ] ]->name + "_cube" ).c_str();
 			cubeEnt->pieceId = pieceEntities[ i ];
-			boundEntities.push_back( static_cast<uint32_t>( scene.entities.size() ) );
-			scene.entities.push_back( cubeEnt );
+			boundEntities.push_back( static_cast<uint32_t>( entities.size() ) );
+			entities.push_back( cubeEnt );
 		}
 	}
 
@@ -232,50 +222,50 @@ void MakeScene()
 	for ( int i = 0; i < MaxLights; ++i )
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntityBounds( diamondHdl, *ent );
+		CreateEntityBounds( diamondHdl, *ent );
 		ent->materialHdl = gAssets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
 		ent->SetFlag( ENT_FLAG_WIREFRAME );
 		ent->name = ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str();
-		scene.entities.push_back( ent );
+		entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
+		CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
 		ent->name = "_postProcessQuad";
-		scene.entities.push_back( ent );
+		entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
-		scene.CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
+		CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
 		ent->name = "_quadTexDebug";
-		scene.entities.push_back( ent );
+		entities.push_back( ent );
 	}
 
 	{
-		scene.lights[ 0 ].lightPos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
-		scene.lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		scene.lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
+		lights[ 0 ].lightPos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
+		lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 
-		scene.lights[ 1 ].lightPos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
-		scene.lights[ 1 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
-		scene.lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		lights[ 1 ].lightPos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
+		lights[ 1 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
+		lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 
-		scene.lights[ 2 ].lightPos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
-		scene.lights[ 2 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
-		scene.lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		lights[ 2 ].lightPos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
+		lights[ 2 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
+		lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
 	}
 }
 
-void UpdateSceneLocal( const float dt )
+void ChessScene::Update( const float dt )
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
 
-	scene.lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
+	lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
 	const mouse_t& mouse = window.input.GetMouse();
 	if ( mouse.centered )
@@ -283,12 +273,12 @@ void UpdateSceneLocal( const float dt )
 		const float maxSpeed = mouse.speed;
 		const float yawDelta = maxSpeed * mouse.dx;
 		const float pitchDelta = -maxSpeed * mouse.dy;
-		scene.camera.AdjustYaw( yawDelta );
-		scene.camera.AdjustPitch( pitchDelta );
+		camera.AdjustYaw( yawDelta );
+		camera.AdjustPitch( pitchDelta );
 	}
 	else if( mouse.leftDown )
 	{
-		Ray ray = scene.camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
+		Ray ray = camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
 		selectedEntity = GetTracedEntity( ray );
 	}
 
@@ -337,7 +327,7 @@ void UpdateSceneLocal( const float dt )
 
 	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( pieceEntities.size() ); ++entityIx ) {
 		const uint32_t pieceIx = pieceEntities[ entityIx ];
-		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.entities[ pieceIx ] );
+		PieceEntity* ent = reinterpret_cast<PieceEntity*>( entities[ pieceIx ] );
 		if ( ent == selectedEntity ) {
 			ent->outline = true;
 		} else {
@@ -352,7 +342,7 @@ void UpdateSceneLocal( const float dt )
 
 	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( glowEntities.size() ); ++entityIx ) {
 		const uint32_t glowIx = glowEntities[ entityIx ];
-		PieceEntity* ent = reinterpret_cast<PieceEntity*>( scene.FindEntity( glowIx ) );
+		PieceEntity* ent = reinterpret_cast<PieceEntity*>( FindEntity( glowIx ) );
 		bool validTile = false;
 		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
 			const moveAction_t& action = actions[ actionIx ];
@@ -375,10 +365,10 @@ void UpdateSceneLocal( const float dt )
 	const uint32_t pieceBoundCount = static_cast<uint32_t>( boundEntities.size() );
 	for ( uint32_t i = 0; i < pieceBoundCount; ++i )
 	{
-		BoundEntity* boundEnt = reinterpret_cast<BoundEntity*>( scene.entities[ boundEntities[i] ] );
+		BoundEntity* boundEnt = reinterpret_cast<BoundEntity*>( entities[ boundEntities[i] ] );
 		if( boundEnt->pieceId == ~0x0 )
 			continue;
-		Entity* pieceEnt = scene.entities[ boundEnt->pieceId ];
+		Entity* pieceEnt = entities[ boundEnt->pieceId ];
 		AABB bounds = pieceEnt->GetBounds();
 		vec3f size = bounds.GetSize();
 		vec3f center = bounds.GetCenter();
@@ -388,11 +378,11 @@ void UpdateSceneLocal( const float dt )
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{
-		Entity* debugLight = scene.FindEntity( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
+		Entity* debugLight = FindEntity( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
 		if ( debugLight == nullptr ) {
 			continue;
 		}
-		vec3f origin = vec3f( scene.lights[ i ].lightPos[ 0 ], scene.lights[ i ].lightPos[ 1 ], scene.lights[ i ].lightPos[ 2 ] );
+		vec3f origin = vec3f( lights[ i ].lightPos[ 0 ], lights[ i ].lightPos[ 1 ], lights[ i ].lightPos[ 2 ] );
 		debugLight->SetOrigin( origin );
 		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
 	}

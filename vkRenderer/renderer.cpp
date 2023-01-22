@@ -2,6 +2,7 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
+#include <scene/scene.h>
 #include <scene/entity.h>
 #include <sstream>
 
@@ -9,9 +10,11 @@
 static RtView rtview;
 static RtScene rtScene;
 
-static void BuildRayTraceScene()
+extern Scene* gScene;
+
+static void BuildRayTraceScene( Scene* scene )
 {
-	rtScene.scene = &scene;
+	rtScene.scene = scene;
 
 	const uint32_t entCount = static_cast<uint32_t>( pieceEntities.size() );
 	rtScene.lights.clear();
@@ -22,7 +25,7 @@ static void BuildRayTraceScene()
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
 		RtModel rtModel;
-		CreateRayTraceModel( gAssets, scene.entities[ pieceEntities[ i ] ], &rtModel );
+		CreateRayTraceModel( gAssets, scene->entities[ pieceEntities[ i ] ], &rtModel );
 		rtScene.models.push_back( rtModel );
 
 		AABB& aabb = rtModel.octree.GetAABB();
@@ -32,7 +35,7 @@ static void BuildRayTraceScene()
 
 	for ( uint32_t i = 0; i < MaxLights; ++i )
 	{
-		rtScene.lights.push_back( scene.lights[ i ] );
+		rtScene.lights.push_back( scene->lights[ i ] );
 	}
 }
 
@@ -46,7 +49,7 @@ static void TraceScene()
 	//window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
 	Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::Black, "testRayTrace" );
 	{
-		rtview.camera = scene.camera;
+		rtview.camera = rtScene.scene->camera;
 		rtview.viewTransform = rtview.camera.GetViewMatrix().Transpose();
 		rtview.projTransform = rtview.camera.GetPerspectiveMatrix().Transpose();
 		rtview.projView = rtview.projTransform * rtview.viewTransform;
@@ -87,31 +90,31 @@ static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
 }
 
 
-void Renderer::Commit( const Scene& scene )
+void Renderer::Commit( const Scene* scene )
 {
 	renderView.committedModelCnt = 0;
-	const uint32_t entCount = static_cast<uint32_t>( scene.entities.size() );
+	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( renderView, *scene.entities[i], 0 );
+		CommitModel( renderView, *scene->entities[i], 0 );
 	}
 	MergeSurfaces( renderView );
 
 	shadowView.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
-		if ( ( scene.entities[i] )->HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
+		if ( ( scene->entities[i] )->HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
 			continue;
 		}
-		CommitModel( shadowView, *scene.entities[i], MaxModels );
+		CommitModel( shadowView, *scene->entities[i], MaxModels );
 	}
 	MergeSurfaces( shadowView );
 
-	renderView.viewMatrix = scene.camera.GetViewMatrix();
-	renderView.projMatrix = scene.camera.GetPerspectiveMatrix();
+	renderView.viewMatrix = scene->camera.GetViewMatrix();
+	renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
 	renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
 
 	for ( int i = 0; i < MaxLights; ++i ) {
-		renderView.lights[ i ] = scene.lights[ i ];
+		renderView.lights[ i ] = scene->lights[ i ];
 	}
 
 	UpdateView();
@@ -205,14 +208,14 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 }
 
 
-void Renderer::RenderScene( Scene& scene )
+void Renderer::RenderScene( Scene* scene )
 {
 	UpdateGpuMaterials();
 	Commit( scene );
 	SubmitFrame();
 
 	if( imguiControls.rebuildRaytraceScene ) {
-		BuildRayTraceScene();
+		BuildRayTraceScene( scene );
 	}
 
 	if ( imguiControls.raytraceScene ) {
@@ -1531,13 +1534,13 @@ void Renderer::DrawDebugMenu()
 	ImGui::InputInt( "Image Id", &imguiControls.dbgImageId );
 	ImGui::Text( "Mouse: (%f, %f)", (float)window.input.GetMouse().x, (float)window.input.GetMouse().y );
 	ImGui::Text( "Mouse Dt: (%f, %f)", (float)window.input.GetMouse().dx, (float)window.input.GetMouse().dy );
-	const vec4f cameraOrigin = scene.camera.GetOrigin();
+	const vec4f cameraOrigin = gScene->camera.GetOrigin();
 	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
 	const vec2f ndc = window.GetNdc( window.input.GetMouse().x, window.input.GetMouse().y );
 
 	char entityName[ 256 ];
 	if ( imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, gAssets.modelLib.FindName( scene.entities[ imguiControls.selectedEntityId ]->modelHdl ) );
+		sprintf_s( entityName, "%i: %s", imguiControls.selectedEntityId, gAssets.modelLib.FindName( gScene->entities[ imguiControls.selectedEntityId ]->modelHdl ) );
 	}
 	else {
 		memset( &entityName[ 0 ], 0, 256 );
@@ -1546,7 +1549,7 @@ void Renderer::DrawDebugMenu()
 	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
 
 	if ( imguiControls.selectedEntityId >= 0 ) {
-		Entity* entity = scene.FindEntity( (uint32_t)imguiControls.selectedEntityId );
+		Entity* entity = gScene->FindEntity( (uint32_t)imguiControls.selectedEntityId );
 		entity->SetOrigin( vec3f( tempOrigin[ 0 ] + imguiControls.selectedModelOrigin[ 0 ],
 			tempOrigin[ 1 ] + imguiControls.selectedModelOrigin[ 1 ],
 			tempOrigin[ 2 ] + imguiControls.selectedModelOrigin[ 2 ] ) );

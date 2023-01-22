@@ -10,7 +10,11 @@
 #include <SysCore/jsmn.h>
 #include <algorithm>
 
-extern Scene scene;
+static jsmn_parser p;
+static jsmntok_t t[ 1024 ];
+
+extern Scene* gScene;
+extern AssetManager assets;
 
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
@@ -299,7 +303,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 	std::string name;
 	std::string modelName;
 	std::string materialName;
-	std::vector<Entity*>& entities = scene.entities;
+	std::vector<Entity*>& entities = gScene->entities;
 
 	float x = 0.0f, y = 0.0f, z = 0.0f;
 	float rx = 0.0f, ry = 0.0f, rz = 0.0f;
@@ -352,7 +356,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 	if ( wireframe ) {
 		ent->SetFlag( ENT_FLAG_WIREFRAME );
 	}
-	scene.entities.push_back( ent );
+	gScene->entities.push_back( ent );
 
 	return st.tx;
 }
@@ -472,9 +476,6 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 
 void LoadScene()
 {
-	jsmn_parser p;
-	jsmntok_t t[ 1024 ];
-
 	std::vector<char> file = ReadFile( "chess.json" );
 
 	jsmn_init( &p );
@@ -539,7 +540,19 @@ void LoadScene()
 				continue;
 			}
 			st.tx += 1;
-			ParseArray( st, ParseEntityObject, &scene.entities );
+			ParseArray( st, ParseEntityObject, &gScene->entities );
 		}
 	}
+
+	bool hasItems = true;
+	do
+	{
+		gAssets.gpuPrograms.LoadAll();
+		gAssets.textureLib.LoadAll();
+		gAssets.modelLib.LoadAll();
+
+		hasItems = gAssets.gpuPrograms.HasPendingLoads() ||
+			gAssets.modelLib.HasPendingLoads() ||
+			gAssets.textureLib.HasPendingLoads();
+	} while ( hasItems );
 }

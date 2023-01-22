@@ -56,7 +56,7 @@ public:
 		InitImGui();
 	}
 
-	void RenderScene( Scene& scene );
+	void RenderScene( Scene* scene );
 
 	void Destroy()
 	{
@@ -304,7 +304,7 @@ private:
 		return VK_FALSE;
 	}
 
-	void						Commit( const Scene& scene );
+	void						Commit( const Scene* scene );
 
 	std::vector<const char*>	GetRequiredExtensions() const;
 	

@@ -2,12 +2,12 @@
 #include "deviceContext.h"
 #include "io.h"
 #include "GeoBuilder.h"
+#include <scene/assetManager.h>
 #include <core/assetLib.h>
-#include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
 #include "render_util.h"
 
-extern Scene						scene;
+extern AssetManager gAssets;
 
 
 mat4x4f MatrixFromVector( const vec3f& v )

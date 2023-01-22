@@ -8,8 +8,6 @@
 
 void SerializeStruct( Serializer* s, vertex_t& v );
 
-extern Scene scene;
-
 GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile )
 {
 	GpuProgram program;

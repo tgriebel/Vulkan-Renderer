@@ -20,6 +20,7 @@
 #include "allocator.h"
 #include "gpuResources.h"
 #include "scenes/sceneParser.h"
+#include "scenes/chessScene.h"
 #include <resource_types/gpuProgram.h>
 
 typedef AssetLib< Texture >			AssetLibImages;
@@ -28,7 +29,7 @@ typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 typedef AssetLib< Model >			AssetLibModels;
 
 AssetManager						gAssets;
-Scene								scene;
+Scene*								gScene;
 Renderer							renderer;
 Window								window;
 
@@ -38,9 +39,8 @@ static SpinLock						acquireNextFrame;
 imguiControls_t imguiControls;
 #endif
 
-void MakeScene();
 void CreateCodeAssets();
-void UpdateScene( const float dt );
+void UpdateScene( Scene* scene, const float dt );
 
 static float AdvanceTime()
 {
@@ -70,9 +70,12 @@ void CheckReloadAssets() {
 
 int main()
 {
+	gScene = new ChessScene();
+
 	CreateCodeAssets();
 	LoadScene();
-	MakeScene();
+
+	gScene->Init();
 
 	std::thread renderThread( RenderThread );
 
@@ -86,9 +89,9 @@ int main()
 			CheckReloadAssets();
 
 			window.PumpMessages();
-			UpdateScene( AdvanceTime() );
+			UpdateScene( gScene, AdvanceTime() );
 			window.input.NewFrame();
-			renderer.RenderScene( scene );
+			renderer.RenderScene( gScene );
 #if defined( USE_IMGUI )
 			ImGui_ImplGlfw_NewFrame();
 #endif
