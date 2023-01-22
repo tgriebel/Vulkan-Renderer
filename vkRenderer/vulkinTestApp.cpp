@@ -58,9 +58,8 @@ void RenderThread()
 void CheckReloadAssets() {
 	if ( gImguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
-		gAssets.gpuPrograms.Clear();
-		assert( false ); // FIXME
-		//LoadShaders( scene.gpuPrograms );
+		gAssets.gpuPrograms.UnloadAll();
+		gAssets.gpuPrograms.LoadAll();
 		Renderer::GenerateGpuPrograms( gAssets.gpuPrograms );
 		gRenderer.CreatePipelineObjects();
 
