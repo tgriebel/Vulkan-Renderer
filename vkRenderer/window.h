@@ -2,6 +2,8 @@
 #include "common.h"
 #include "input.h"
 
+#define WINDOWS
+
 static const char *const ApplicationName = "Extensa";
 
 class Window {
@@ -20,6 +22,7 @@ public:
 	void					Init();
 	bool					IsOpen() const;
 	bool					IsFocused() const;
+	void					OpenFileDialog();
 	void					PumpMessages();
 	void					CreateSurface();
 	vec2f					GetNdc( const float x, const float y );

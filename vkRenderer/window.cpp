@@ -1,6 +1,11 @@
 #include "window.h"
 #include "deviceContext.h"
 
+#ifdef WINDOWS
+#include <windows.h>
+#include <shobjidl.h> 
+#endif
+
 void FramebufferResizeCallback( GLFWwindow* window, int width, int height )
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
@@ -91,6 +96,11 @@ bool Window::IsOpen() const
 bool Window::IsFocused() const
 {
 	return focused;
+}
+
+void Window::OpenFileDialog()
+{
+
 }
 
 void Window::PumpMessages()

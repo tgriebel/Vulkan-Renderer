@@ -1379,6 +1379,10 @@ void Renderer::DrawDebugMenu()
 	{
 		if ( ImGui::BeginMenu( "File" ) )
 		{
+			if ( ImGui::MenuItem( "Open", "CTRL+O" ) )
+			{
+			//	GetOpenFileNameA(
+			}
 			ImGui::EndMenu();
 		}
 		if ( ImGui::BeginMenu( "Edit" ) )
