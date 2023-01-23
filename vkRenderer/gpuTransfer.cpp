@@ -102,6 +102,7 @@ void Renderer::UpdateGpuMaterials()
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialFreeSlot++;
 		}
+		m.dirty = false;
 
 		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {

@@ -23,11 +23,6 @@
 #include "scenes/chessScene.h"
 #include <resource_types/gpuProgram.h>
 
-typedef AssetLib< Texture >			AssetLibImages;
-typedef AssetLib< Material >		AssetLibMaterials;
-typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
-typedef AssetLib< Model >			AssetLibModels;
-
 AssetManager						gAssets;
 Scene*								gScene;
 Renderer							gRenderer;

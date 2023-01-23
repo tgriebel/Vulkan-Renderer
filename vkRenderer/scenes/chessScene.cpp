@@ -301,6 +301,7 @@ void ChessScene::Update( const float dt )
 	Material& glowMat = gAssets.materialLib.Find( "GlowSquare" )->Get();
 	glowMat.Kd = rgbTuplef_t( 0.1f, 0.1f, 1.0f );
 	glowMat.d = 0.5f * cos( 3.0f * time ) + 0.5f;
+	glowMat.dirty = true;
 
 	const uint32_t pieceBoundCount = static_cast<uint32_t>( boundEntities.size() );
 	for ( uint32_t i = 0; i < pieceBoundCount; ++i )

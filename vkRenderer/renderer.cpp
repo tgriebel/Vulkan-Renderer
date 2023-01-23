@@ -190,7 +190,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 		surf.hash = Hash( surf );
 
-		if( material.uploadId < 0 ) {
+		if( material.dirty ) {
 			pendingMaterials.insert( materialHdl );
 		}
 
