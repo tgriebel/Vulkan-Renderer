@@ -374,6 +374,12 @@ void Renderer::UpdateDescriptorSets()
 }
 
 
+void Renderer::WaitForEndFrame()
+{
+	vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
+}
+
+
 void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();

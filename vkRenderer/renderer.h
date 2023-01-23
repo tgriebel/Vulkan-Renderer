@@ -133,28 +133,6 @@ private:
 	float							nearPlane = 1000.0f;
 	float							farPlane = 0.1f;
 
-	void						Render( RenderView& view );
-
-	void						CreateInstance();
-
-	void						UploadModelsToGPU();
-
-	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
-
-	void						MergeSurfaces( RenderView& view );
-
-	void						InitVulkan();
-
-	void						InitImGui();
-
-	void						ShutdownImGui();
-
-	void						CreateDescSetLayouts();
-
-	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
-
-	viewport_t					GetDrawPassViewport( const drawPass_t pass );
-
 	VkSampleCountFlagBits GetMaxUsableSampleCount()
 	{
 		/*
@@ -172,12 +150,6 @@ private:
 		return VK_SAMPLE_COUNT_1_BIT;
 	}
 
-	void						PickPhysicalDevice();
-
-	void						CreateLogicalDevice();
-
-	void						DestroyFrameResources();
-
 	void RecreateSwapChain()
 	{
 		int width = 0, height = 0;
@@ -192,12 +164,6 @@ private:
 		CreateRenderPasses();
 		CreateFramebuffers();
 	}
-
-	void						CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
-
-	void						UpdateFrameDescSet( const int currentImage );
-
-	void						UpdateDescriptorSets();
 
 	VkFormat FindColorFormat()
 	{
@@ -243,61 +209,64 @@ private:
 		outAllocation.Bind( memory, memPtr, allocSize, typeIndex );
 	}
 
-	void						CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory );
+	// Init/Shutdown
+	void						InitVulkan();
+	void						InitImGui();
+	void						ShutdownImGui();
+	void						Cleanup();
+
+	// Image Functions
+	void						TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info );
+	void						CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers );
+	void						GenerateMipmaps( VkImage image, VkFormat imageFormat, const textureInfo_t& info );
 
 	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
+	// API Creation Functions
+	void						CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory );
+	void						CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory );
+	void						CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
+	void						CreateDescSetLayouts();
+	void						CreateDescriptorPool();
+	void						CreateInstance();
+	void						CreateResourceBuffers();
+	void						CreateLogicalDevice();
+	void						CreateSyncObjects();
+	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
-
-	void						CreateCodeTextures();
-
 	void						CreateUniformBuffers();
-
 	void						CreateRenderPasses();
-
 	void						CreateFramebuffers();
-
 	void						CreateCommandPools();
 
-	void						CreateDescriptorPool();
-
-	VkCommandBuffer				BeginSingleTimeCommands();
-
-	void						EndSingleTimeCommands( VkCommandBuffer commandBuffer );
-
-	void						TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info );
-
-	void						CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers );
-
-	void						CreateCommandBuffers();
-
-	void						CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory );
-
-	void						GenerateMipmaps( VkImage image, VkFormat imageFormat, const textureInfo_t& info );
-
-	void						CreateResourceBuffers();
-
-	void						UploadTextures();
-
-	void						UpdateGpuMaterials();
-
-	void						CreateSyncObjects();
-
-	void						UpdateView();
-
+	// Draw Frame
+	void						Render( RenderView& view );
+	void						Commit( const Scene* scene );
+	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
+	void						MergeSurfaces( RenderView& view );
+	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
+	viewport_t					GetDrawPassViewport( const drawPass_t pass );
 	void						DrawDebugMenu();
-
-	void WaitForEndFrame()
-	{
-		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
-	}
-
+	void						WaitForEndFrame();
 	void						SubmitFrame();
 
-	void						Cleanup();
+	// Misc
+	void						DestroyFrameResources();
+	void						CreateCodeTextures();
+	VkCommandBuffer				BeginSingleTimeCommands();
+	void						EndSingleTimeCommands( VkCommandBuffer commandBuffer );
+	void						PickPhysicalDevice();
 
+	// Update
+	void						UpdateView();
+	void						UploadTextures();
+	void						UpdateGpuMaterials();
+	void						UploadModelsToGPU();
 	void						UpdateBufferContents( uint32_t currentImage );
+	void						UpdateFrameDescSet( const int currentImage );
+	void						UpdateDescriptorSets();
 
+	// Debug
 	static VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -310,17 +279,10 @@ private:
 		return VK_FALSE;
 	}
 
-	void						Commit( const Scene* scene );
-
-	std::vector<const char*>	GetRequiredExtensions() const;
-	
+	std::vector<const char*>	GetRequiredExtensions() const;	
 	bool						CheckValidationLayerSupport();
-	
-	void						PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );
-	
+	void						PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );	
 	void						SetupDebugMessenger();
-	
 	static VkResult				CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
-	
 	static void					DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator );
 };
