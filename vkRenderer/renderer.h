@@ -93,9 +93,8 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 
-	std::vector< materialBufferObject_t > materialBuffer;
-	std::vector<uint32_t>			pendingTextures;
-	std::vector<uint32_t>			pendingMaterials;
+	std::set<hdl_t>					pendingTextures;
+	std::set<hdl_t>					pendingMaterials;
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
@@ -117,9 +116,12 @@ private:
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
 	GpuImage						gpuImages[ MaxImageDescriptors ];
+	materialBufferObject_t			materialBuffer[ MaxMaterialDescriptors ];
 
 	uint32_t						imageFreeSlot = 0;
 	uint32_t						materialFreeSlot = 0;
+	uint32_t						vbBufElements = 0;
+	uint32_t						ibBufElements = 0;
 
 	AllocatorVkMemory				localMemory;
 	AllocatorVkMemory				frameBufferMemory;

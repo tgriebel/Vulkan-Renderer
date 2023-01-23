@@ -169,8 +169,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		surfaceUpload_t& upload = source.upload[ i ];
 
-		const Material& material = gAssets.materialLib.Find( ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl )->Get();
-		assert( material.uploadId >= 0 );
+		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl;
+		const Material& material = gAssets.materialLib.Find( materialHdl )->Get();
 
 		renderFlags_t renderFlags = NONE;
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_NO_DRAW ) ? HIDDEN : NONE ) );
@@ -189,6 +189,20 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.flags = renderFlags;
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 		surf.hash = Hash( surf );
+
+		if( material.uploadId < 0 ) {
+			pendingMaterials.insert( materialHdl );
+		}
+
+		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
+			const hdl_t texHandle = material.GetTexture( t );
+			if ( texHandle.IsValid() ) {
+				Texture& texture = gAssets.textureLib.Find( texHandle )->Get();
+				if( texture.uploadId < 0 ) {
+					pendingTextures.insert( texHandle );
+				}
+			}
+		}
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
 			if ( material.GetShader( pass ).IsValid() ) {
@@ -221,7 +235,7 @@ void Renderer::UploadAssets( AssetManager& assets )
 		if ( material.uploadId != -1 ) {
 			continue;
 		}
-		pendingMaterials.push_back( i );
+		pendingMaterials.insert( assets.materialLib.RetrieveHdl( materialAsset->GetName().c_str() ) );
 	}
 
 	const uint32_t textureCount = assets.textureLib.Count();
@@ -235,19 +249,20 @@ void Renderer::UploadAssets( AssetManager& assets )
 		if ( texture.uploadId != -1 ) {
 			continue;
 		}
-		pendingTextures.push_back( i );
+		pendingTextures.insert( assets.textureLib.RetrieveHdl( textureAsset->GetName().c_str() ) );
 	}
-
-	UploadTextures();
-	UploadModelsToGPU();
-	UpdateDescriptorSets();
 }
 
 
 void Renderer::RenderScene( Scene* scene )
 {
-	UpdateGpuMaterials();
 	Commit( scene );
+
+	UploadTextures();
+	UploadModelsToGPU();
+	UpdateGpuMaterials();
+	UpdateDescriptorSets();
+
 	SubmitFrame();
 
 	if( gImguiControls.rebuildRaytraceScene ) {
@@ -986,9 +1001,8 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	frameState[ currentImage ].surfParms.Reset();
 	frameState[ currentImage ].surfParms.CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
 
-	assert( materialBuffer.size() <= MaxMaterialDescriptors );
 	frameState[ currentImage ].materialBuffers.Reset();
-	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer.data(), sizeof( materialBufferObject_t ) * materialBuffer.size() );
+	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
 
 	assert( lightBuffer.size() <= MaxLights );
 	frameState[ currentImage ].lightParms.Reset();

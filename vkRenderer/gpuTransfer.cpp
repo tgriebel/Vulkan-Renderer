@@ -38,10 +38,9 @@ void Renderer::UploadTextures()
 {
 	const uint32_t textureCount = static_cast<uint32_t>( pendingTextures.size() );
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-	for ( uint32_t i = 0; i < textureCount; ++i )
+	for ( auto it = pendingTextures.begin(); it != pendingTextures.end(); ++it )
 	{
-		const uint32_t texId = pendingTextures[i];
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( texId );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
 		if( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -65,10 +64,9 @@ void Renderer::UploadTextures()
 	}
 	EndSingleTimeCommands( commandBuffer );
 
-	for ( uint32_t i = 0; i < textureCount; ++i )
+	for ( auto it = pendingTextures.begin(); it != pendingTextures.end(); ++it )
 	{
-		const uint32_t texId = pendingTextures[ i ];
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( texId );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -76,10 +74,9 @@ void Renderer::UploadTextures()
 		GenerateMipmaps( texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
 
-	for ( uint32_t i = 0; i < textureCount; ++i )
+	for ( auto it = pendingTextures.begin(); it != pendingTextures.end(); ++it )
 	{
-		const uint32_t texId = pendingTextures[ i ];
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( texId );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -93,20 +90,20 @@ void Renderer::UploadTextures()
 		}
 		texture.gpuImage.vk_view = CreateImageView( texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
 	}
+
+	pendingTextures.clear();
 }
 
 void Renderer::UpdateGpuMaterials()
 {
-	const uint32_t materialCount = static_cast<uint32_t>( pendingMaterials.size() );
-	materialBuffer.resize( materialCount );
-	for ( uint32_t i = 0; i < materialCount; ++i )
+	for ( auto it = pendingMaterials.begin(); it != pendingMaterials.end(); ++it )
 	{
-		Material& m = gAssets.materialLib.Find( pendingMaterials[i] )->Get();
+		Material& m = gAssets.materialLib.Find( *it )->Get();
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialFreeSlot++;
 		}
 
-		materialBufferObject_t& ubo = materialBuffer[i];
+		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t handle = m.GetTexture( t );
 			if ( handle.IsValid() ) {
@@ -129,6 +126,7 @@ void Renderer::UpdateGpuMaterials()
 		ubo.illum = m.illum;
 		ubo.d = m.d;
 	}
+	pendingMaterials.clear();
 }
 
 void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
@@ -142,14 +140,8 @@ void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBuff
 
 void Renderer::UploadModelsToGPU()
 {
-	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
-	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
 	const uint32_t modelCount = gAssets.modelLib.Count();
-	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
-	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
 
-	static uint32_t vbBufElements = 0;
-	static uint32_t ibBufElements = 0;
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
 		Model& model = gAssets.modelLib.Find( m )->Get();
