@@ -69,6 +69,8 @@ public:
 
 	void		CreatePipelineObjects();
 
+	void		UploadAssets( AssetManager& assets );
+
 private:
 
 	static const uint32_t				ShadowMapWidth = 1024;
@@ -92,6 +94,8 @@ private:
 #endif
 
 	std::vector< materialBufferObject_t > materialBuffer;
+	std::vector<uint32_t>			pendingTextures;
+	std::vector<uint32_t>			pendingMaterials;
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
@@ -113,6 +117,9 @@ private:
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
 	GpuImage						gpuImages[ MaxImageDescriptors ];
+
+	uint32_t						imageFreeSlot = 0;
+	uint32_t						materialFreeSlot = 0;
 
 	AllocatorVkMemory				localMemory;
 	AllocatorVkMemory				frameBufferMemory;

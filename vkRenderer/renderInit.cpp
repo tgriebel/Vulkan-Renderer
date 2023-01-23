@@ -114,10 +114,6 @@ void Renderer::InitVulkan()
 		CreateUniformBuffers();
 		CreateCommandBuffers();
 	}
-
-	UploadTextures();
-	UploadModelsToGPU();
-	UpdateDescriptorSets();
 }
 
 

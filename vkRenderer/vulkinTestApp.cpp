@@ -80,6 +80,8 @@ int main()
 	try
 	{
 		gRenderer.Init();
+		gRenderer.UploadAssets( gAssets );
+
 		while ( gWindow.IsOpen() )
 		{
 			CheckReloadAssets();

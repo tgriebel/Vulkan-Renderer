@@ -208,6 +208,42 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 }
 
 
+void Renderer::UploadAssets( AssetManager& assets )
+{
+	const uint32_t materialCount = assets.materialLib.Count();
+	for ( uint32_t i = 0; i < materialCount; ++i )
+	{
+		Asset<Material>* materialAsset = assets.materialLib.Find( i );
+		if ( materialAsset->IsLoaded() == false ) {
+			continue;
+		}
+		Material& material = materialAsset->Get();
+		if ( material.uploadId != -1 ) {
+			continue;
+		}
+		pendingMaterials.push_back( i );
+	}
+
+	const uint32_t textureCount = assets.textureLib.Count();
+	for ( uint32_t i = 0; i < textureCount; ++i )
+	{
+		Asset<Texture>* textureAsset = assets.textureLib.Find( i );
+		if ( textureAsset->IsLoaded() == false ) {
+			continue;
+		}
+		Texture& texture = textureAsset->Get();
+		if ( texture.uploadId != -1 ) {
+			continue;
+		}
+		pendingTextures.push_back( i );
+	}
+
+	UploadTextures();
+	UploadModelsToGPU();
+	UpdateDescriptorSets();
+}
+
+
 void Renderer::RenderScene( Scene* scene )
 {
 	UpdateGpuMaterials();

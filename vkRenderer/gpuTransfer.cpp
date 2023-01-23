@@ -36,11 +36,12 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 
 void Renderer::UploadTextures()
 {
-	const uint32_t textureCount = gAssets.textureLib.Count();
+	const uint32_t textureCount = static_cast<uint32_t>( pendingTextures.size() );
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
+		const uint32_t texId = pendingTextures[i];
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( texId );
 		if( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -59,14 +60,15 @@ void Renderer::UploadTextures()
 
 		const uint32_t layers = texture.info.layers;
 		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage.vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
-		texture.uploadId = i;
+		texture.uploadId = imageFreeSlot++;
 		gpuImages[texture.uploadId];
 	}
 	EndSingleTimeCommands( commandBuffer );
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
+		const uint32_t texId = pendingTextures[ i ];
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( texId );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -76,7 +78,8 @@ void Renderer::UploadTextures()
 
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
+		const uint32_t texId = pendingTextures[ i ];
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( texId );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -94,15 +97,14 @@ void Renderer::UploadTextures()
 
 void Renderer::UpdateGpuMaterials()
 {
-	const uint32_t materialCount = gAssets.materialLib.Count();
+	const uint32_t materialCount = static_cast<uint32_t>( pendingMaterials.size() );
 	materialBuffer.resize( materialCount );
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
-		Material& m = gAssets.materialLib.Find( i )->Get();
-		if( m.uploadId >= 0 ) {
-			continue;
+		Material& m = gAssets.materialLib.Find( pendingMaterials[i] )->Get();
+		if( m.uploadId < 0 ) {
+			m.uploadId = materialFreeSlot++;
 		}
-		m.uploadId = i;
 
 		materialBufferObject_t& ubo = materialBuffer[i];
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {

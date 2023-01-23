@@ -1,14 +1,2 @@
 ﻿  gpuTransfer.cpp
-  io.cpp
-  pipeline.cpp
-  renderCommand.cpp
-  renderInit.cpp
-  renderShutdown.cpp
-  render_util.cpp
-  renderer.cpp
-  scene.cpp
-  chessScene.cpp
-  sceneParser.cpp
-  vulkinTestApp.cpp
-  Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
