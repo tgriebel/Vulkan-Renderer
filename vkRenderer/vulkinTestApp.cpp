@@ -11,14 +11,14 @@
 #include <core/assetLib.h>
 #include "render_util.h"
 #include "deviceContext.h"
-#include "pipeline.h"
+#include "src/render_binding/pipeline.h"
 #include "src/render_core/swapChain.h"
 #include "window.h"
 #include "FrameState.h"
 #include "renderConstants.h"
 #include "src/render_core/renderer.h"
-#include "allocator.h"
-#include "gpuResources.h"
+#include "src/render_binding/allocator.h"
+#include "src/render_binding/gpuResources.h"
 #include "scenes/sceneParser.h"
 #include "scenes/chessScene.h"
 #include <resource_types/gpuProgram.h>

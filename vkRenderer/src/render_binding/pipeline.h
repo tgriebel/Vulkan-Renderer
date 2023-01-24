@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "../../common.h"
 
 enum gfxStateBits_t : uint64_t
 {

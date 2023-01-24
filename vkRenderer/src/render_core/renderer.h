@@ -8,7 +8,7 @@
 #include "../../common.h"
 #include "../../render_util.h"
 #include "../../deviceContext.h"
-#include "../../pipeline.h"
+#include "../render_binding/pipeline.h"
 #include "swapChain.h"
 #include "../../FrameState.h"
 #include "../../renderConstants.h"

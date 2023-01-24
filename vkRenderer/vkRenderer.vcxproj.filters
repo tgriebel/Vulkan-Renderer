@@ -2,12 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="gpuTransfer.cpp">
-      <Filter>render binding</Filter>
-    </ClCompile>
-    <ClCompile Include="pipeline.cpp">
-      <Filter>render binding</Filter>
-    </ClCompile>
     <ClCompile Include="deviceContext.cpp">
       <Filter>render state</Filter>
     </ClCompile>
@@ -68,6 +62,12 @@
     <ClCompile Include="src\render_core\renderShutdown.cpp">
       <Filter>render core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\gpuTransfer.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_binding\pipeline.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -79,12 +79,6 @@
     </ClInclude>
     <ClInclude Include="scenes\chessScene.h">
       <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="gpuResources.h">
-      <Filter>render binding</Filter>
-    </ClInclude>
-    <ClInclude Include="pipeline.h">
-      <Filter>render binding</Filter>
     </ClInclude>
     <ClInclude Include="deviceContext.h">
       <Filter>render state</Filter>
@@ -109,9 +103,6 @@
     </ClInclude>
     <ClInclude Include="input.h">
       <Filter>app</Filter>
-    </ClInclude>
-    <ClInclude Include="allocator.h">
-      <Filter>render binding</Filter>
     </ClInclude>
     <ClInclude Include="io.h">
       <Filter>io</Filter>
@@ -151,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="src\render_core\swapChain.h">
       <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_binding\allocator.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_binding\gpuResources.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_binding\pipeline.h">
+      <Filter>render binding</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
