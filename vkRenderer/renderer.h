@@ -26,9 +26,9 @@
 #include <SysCore/timer.h>
 
 #if defined( USE_IMGUI )
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_vulkan.h"
+#include "external/imgui/imgui.h"
+#include "external/imgui/backends/imgui_impl_glfw.h"
+#include "external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
 #include <scene/entity.h>

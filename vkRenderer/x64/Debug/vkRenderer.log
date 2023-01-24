@@ -1,2 +1,9 @@
-﻿  vulkinTestApp.cpp
+﻿  renderCommand.cpp
+  renderer.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\renderer.cpp(275,36): warning C4244: '=': conversion from 'uint64_t' to 'float', possible loss of data
+  renderInit.cpp
+  renderShutdown.cpp
+  gpuTransfer.cpp
+  vulkinTestApp.cpp
+  Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
