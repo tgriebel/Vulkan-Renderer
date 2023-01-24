@@ -2,18 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="renderCommand.cpp">
-      <Filter>render core</Filter>
-    </ClCompile>
-    <ClCompile Include="renderInit.cpp">
-      <Filter>render core</Filter>
-    </ClCompile>
-    <ClCompile Include="renderShutdown.cpp">
-      <Filter>render core</Filter>
-    </ClCompile>
-    <ClCompile Include="renderer.cpp">
-      <Filter>render core</Filter>
-    </ClCompile>
     <ClCompile Include="gpuTransfer.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
@@ -60,10 +48,25 @@
       <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="external\imgui\backends\imgui_impl_glfw.cpp">
-      <Filter>external</Filter>
+      <Filter>external\imgui</Filter>
     </ClCompile>
     <ClCompile Include="external\imgui\backends\imgui_impl_vulkan.cpp">
-      <Filter>external</Filter>
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c">
+      <Filter>external\tinyfiledialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_core\renderCommand.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_core\renderer.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_core\renderInit.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_core\renderShutdown.cpp">
+      <Filter>render core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,9 +79,6 @@
     </ClInclude>
     <ClInclude Include="scenes\chessScene.h">
       <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="renderer.h">
-      <Filter>render core</Filter>
     </ClInclude>
     <ClInclude Include="gpuResources.h">
       <Filter>render binding</Filter>
@@ -116,9 +116,6 @@
     <ClInclude Include="io.h">
       <Filter>io</Filter>
     </ClInclude>
-    <ClInclude Include="swapChain.h">
-      <Filter>render core</Filter>
-    </ClInclude>
     <ClInclude Include="scenes\sceneParser.h">
       <Filter>scenes</Filter>
     </ClInclude>
@@ -141,10 +138,19 @@
       <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h">
-      <Filter>external</Filter>
+      <Filter>external\imgui</Filter>
     </ClInclude>
     <ClInclude Include="external\imgui\backends\imgui_impl_vulkan.h">
-      <Filter>external</Filter>
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h">
+      <Filter>external\tinyfiledialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\renderer.h">
+      <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\swapChain.h">
+      <Filter>render core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -221,6 +227,9 @@
     </Filter>
     <Filter Include="io">
       <UniqueIdentifier>{10252c62-08b9-4c28-a3e6-9dc33fa9a25a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\tinyfiledialogs">
+      <UniqueIdentifier>{ef848272-6ac6-4f38-b6f0-14d00456cc67}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

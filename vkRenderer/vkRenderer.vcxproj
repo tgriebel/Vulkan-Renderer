@@ -179,14 +179,16 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
+    <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="FrameState.h" />
     <ClInclude Include="gpuResources.h" />
     <ClInclude Include="renderview.h" />
     <ClInclude Include="renderConstants.h" />
-    <ClInclude Include="renderer.h" />
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="render_util.h" />
     <ClInclude Include="scenes\sceneParser.h" />
+    <ClInclude Include="src\render_core\renderer.h" />
+    <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="common.h" />
     <ClInclude Include="debug.h" />
@@ -197,7 +199,6 @@
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="shaders\globals.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="swapChain.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -209,16 +210,17 @@
     <ClCompile Include="external\imgui\imgui_draw.cpp" />
     <ClCompile Include="external\imgui\imgui_tables.cpp" />
     <ClCompile Include="external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="io.cpp" />
-    <ClCompile Include="renderCommand.cpp" />
-    <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="renderInit.cpp" />
-    <ClCompile Include="renderShutdown.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="render_util.cpp" />
     <ClCompile Include="gpuTransfer.cpp" />
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\render_core\renderCommand.cpp" />
+    <ClCompile Include="src\render_core\renderer.cpp" />
+    <ClCompile Include="src\render_core\renderInit.cpp" />
+    <ClCompile Include="src\render_core\renderShutdown.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="pipeline.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />

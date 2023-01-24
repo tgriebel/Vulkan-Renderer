@@ -3,19 +3,19 @@
 #include <scene/camera.h>
 
 #include "common.h"
-#include "window.h"
-#include "input.h"
-#include "common.h"
-#include "render_util.h"
-#include "deviceContext.h"
-#include "pipeline.h"
+#include "../../window.h"
+#include "../../input.h"
+#include "../../common.h"
+#include "../../render_util.h"
+#include "../../deviceContext.h"
+#include "../../pipeline.h"
 #include "swapChain.h"
-#include "core/assetLib.h"
-#include "FrameState.h"
-#include "renderConstants.h"
-#include "renderview.h"
-#include "io.h"
-#include "GeoBuilder.h"
+#include "../../FrameState.h"
+#include "../../renderConstants.h"
+#include "../../renderview.h"
+#include "../../io.h"
+#include "../../GeoBuilder.h"
+#include <core/assetLib.h>
 #include <primitives/geom.h>
 #include <resource_types/texture.h>
 #include <resource_types/gpuProgram.h>
@@ -26,9 +26,9 @@
 #include <SysCore/timer.h>
 
 #if defined( USE_IMGUI )
-#include "external/imgui/imgui.h"
-#include "external/imgui/backends/imgui_impl_glfw.h"
-#include "external/imgui/backends/imgui_impl_vulkan.h"
+#include "../../external/imgui/imgui.h"
+#include "../../external/imgui/backends/imgui_impl_glfw.h"
+#include "../../external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
 #include <scene/entity.h>

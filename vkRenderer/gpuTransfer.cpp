@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
-#include "renderer.h"
+#include "src/render_core/renderer.h"
 #include <scene/assetManager.h>
 
 extern AssetManager gAssets;
