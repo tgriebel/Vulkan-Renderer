@@ -251,6 +251,11 @@ void Renderer::UploadAssets( AssetManager& assets )
 		}
 		uploadTextures.insert( assets.textureLib.RetrieveHdl( textureAsset->GetName().c_str() ) );
 	}
+
+	UploadTextures();
+	UploadModelsToGPU();
+	UpdateGpuMaterials();
+	UpdateDescriptorSets();
 }
 
 
@@ -261,7 +266,6 @@ void Renderer::RenderScene( Scene* scene )
 	UploadTextures();
 	UploadModelsToGPU();
 	UpdateGpuMaterials();
-	UpdateDescriptorSets();
 
 	SubmitFrame();
 
