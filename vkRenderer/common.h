@@ -42,6 +42,7 @@ const uint32_t	DescriptorPoolMaxImages			= 1000;
 const uint32_t	DescriptorPoolMaxComboImages	= 1000;
 const uint32_t	DescriptorPoolMaxSets			= 8000;
 const uint32_t	MaxImageDescriptors				= 100;
+const uint32_t	MaxPostImageDescriptors			= 3;
 const uint32_t	MaxUboDescriptors				= 4;
 const uint32_t	MaxViews						= 2;
 const uint32_t	MaxModels						= 1000;

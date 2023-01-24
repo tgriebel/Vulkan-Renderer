@@ -36,9 +36,9 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 
 void Renderer::UploadTextures()
 {
-	const uint32_t textureCount = static_cast<uint32_t>( pendingTextures.size() );
+	const uint32_t textureCount = static_cast<uint32_t>( uploadTextures.size() );
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-	for ( auto it = pendingTextures.begin(); it != pendingTextures.end(); ++it )
+	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
 		if( textureAsset->IsLoaded() == false ) {
@@ -64,7 +64,7 @@ void Renderer::UploadTextures()
 	}
 	EndSingleTimeCommands( commandBuffer );
 
-	for ( auto it = pendingTextures.begin(); it != pendingTextures.end(); ++it )
+	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
@@ -74,7 +74,7 @@ void Renderer::UploadTextures()
 		GenerateMipmaps( texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
 
-	for ( auto it = pendingTextures.begin(); it != pendingTextures.end(); ++it )
+	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
@@ -91,12 +91,12 @@ void Renderer::UploadTextures()
 		texture.gpuImage.vk_view = CreateImageView( texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
 	}
 
-	pendingTextures.clear();
+	uploadTextures.clear();
 }
 
 void Renderer::UpdateGpuMaterials()
 {
-	for ( auto it = pendingMaterials.begin(); it != pendingMaterials.end(); ++it )
+	for ( auto it = uploadMaterials.begin(); it != uploadMaterials.end(); ++it )
 	{
 		Material& m = gAssets.materialLib.Find( *it )->Get();
 		if( m.uploadId < 0 ) {
@@ -127,7 +127,7 @@ void Renderer::UpdateGpuMaterials()
 		ubo.illum = m.illum;
 		ubo.d = m.d;
 	}
-	pendingMaterials.clear();
+	uploadMaterials.clear();
 }
 
 void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )

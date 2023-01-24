@@ -93,8 +93,8 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 
-	std::set<hdl_t>					pendingTextures;
-	std::set<hdl_t>					pendingMaterials;
+	std::set<hdl_t>					uploadTextures;
+	std::set<hdl_t>					uploadMaterials;
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	SwapChain						swapChain;
@@ -129,6 +129,16 @@ private:
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
+
+	VkDescriptorBufferInfo			vk_globalConstantsInfo;
+	VkDescriptorBufferInfo			vk_surfaceUbo[ MaxSurfaces ];
+	VkDescriptorImageInfo			vk_image2DInfo[ MaxImageDescriptors ];
+	VkDescriptorImageInfo			vk_codeImageInfo[ MaxCodeImages ];
+	VkDescriptorImageInfo			vk_shadowCodeImageInfo[ MaxCodeImages ];
+	VkDescriptorImageInfo			vk_imageCubeInfo[ MaxImageDescriptors ];
+	VkDescriptorImageInfo			vk_postImageInfo[ MaxPostImageDescriptors ];
+	VkDescriptorBufferInfo			vk_materialBufferInfo[ MaxMaterialDescriptors ];
+	VkDescriptorBufferInfo			vk_lightBufferInfo[ MaxLights ];
 
 	float							nearPlane = 1000.0f;
 	float							farPlane = 0.1f;

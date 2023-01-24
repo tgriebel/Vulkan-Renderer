@@ -191,7 +191,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.hash = Hash( surf );
 
 		if( material.dirty ) {
-			pendingMaterials.insert( materialHdl );
+			uploadMaterials.insert( materialHdl );
 		}
 
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
@@ -199,7 +199,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 			if ( texHandle.IsValid() ) {
 				Texture& texture = gAssets.textureLib.Find( texHandle )->Get();
 				if( texture.uploadId < 0 ) {
-					pendingTextures.insert( texHandle );
+					uploadTextures.insert( texHandle );
 				}
 			}
 		}
@@ -235,7 +235,7 @@ void Renderer::UploadAssets( AssetManager& assets )
 		if ( material.uploadId != -1 ) {
 			continue;
 		}
-		pendingMaterials.insert( assets.materialLib.RetrieveHdl( materialAsset->GetName().c_str() ) );
+		uploadMaterials.insert( assets.materialLib.RetrieveHdl( materialAsset->GetName().c_str() ) );
 	}
 
 	const uint32_t textureCount = assets.textureLib.Count();
@@ -249,7 +249,7 @@ void Renderer::UploadAssets( AssetManager& assets )
 		if ( texture.uploadId != -1 ) {
 			continue;
 		}
-		pendingTextures.insert( assets.textureLib.RetrieveHdl( textureAsset->GetName().c_str() ) );
+		uploadTextures.insert( assets.textureLib.RetrieveHdl( textureAsset->GetName().c_str() ) );
 	}
 }
 
@@ -509,31 +509,21 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	//													//
 	//////////////////////////////////////////////////////
 
-	std::vector<VkDescriptorBufferInfo> globalConstantsInfo;
-	globalConstantsInfo.reserve( 1 );
 	{
-		VkDescriptorBufferInfo info{ };
-		info.buffer = frameState[ i ].globalConstants.GetVkObject();
-		info.offset = 0;
-		info.range = sizeof( globalUboConstants_t );
-		globalConstantsInfo.push_back( info );
+		vk_globalConstantsInfo.buffer = frameState[ i ].globalConstants.GetVkObject();
+		vk_globalConstantsInfo.offset = 0;
+		vk_globalConstantsInfo.range = sizeof( globalUboConstants_t );
 	}
 
-	std::vector<VkDescriptorBufferInfo> bufferInfo;
-	bufferInfo.reserve( MaxSurfaces );
 	for ( int j = 0; j < MaxSurfaces; ++j )
 	{
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].surfParms.GetVkObject();
 		info.offset = j * sizeof( uniformBufferObject_t );
 		info.range = sizeof( uniformBufferObject_t );
-		bufferInfo.push_back( info );
+		vk_surfaceUbo[j] = info;
 	}
 
-	std::vector<VkDescriptorImageInfo> image2DInfo;
-	std::vector<VkDescriptorImageInfo> imageCubeInfo;
-	image2DInfo.resize( MaxImageDescriptors );
-	imageCubeInfo.resize( MaxImageDescriptors );
 	int firstCube = -1;
 	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
@@ -550,18 +540,18 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.sampler = vk_bilinearSampler;
 
 		if ( texture.info.type == TEXTURE_TYPE_CUBE ) {
-			imageCubeInfo[ texture.uploadId ] = info;
+			vk_imageCubeInfo[ texture.uploadId ] = info;
 			firstCube = texture.uploadId;
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info2d.imageView = gAssets.textureLib.GetDefault()->gpuImage.vk_view;
 			info2d.sampler = vk_bilinearSampler;
-			image2DInfo[ texture.uploadId ] = info2d;
+			vk_image2DInfo[ texture.uploadId ] = info2d;
 		}
 		else 
 		{
-			image2DInfo[ texture.uploadId ] = info;
+			vk_image2DInfo[ texture.uploadId ] = info;
 		}
 	}
 	// Defaults
@@ -574,46 +564,40 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
 			info.sampler = vk_bilinearSampler;
-			image2DInfo[j] = info;
+			vk_image2DInfo[j] = info;
 		}
 		assert( firstCube >= 0 ); // Hack: need a default
 		for ( size_t i = 0; i < MaxImageDescriptors; ++i )
 		{
-			if( imageCubeInfo[i].imageView == nullptr ) {
-				const VkImageView& imageView = imageCubeInfo[ firstCube ].imageView;
+			if( vk_imageCubeInfo[i].imageView == nullptr ) {
+				const VkImageView& imageView = vk_imageCubeInfo[ firstCube ].imageView;
 				VkDescriptorImageInfo info{ };
 				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				info.imageView = imageView;
 				info.sampler = vk_bilinearSampler;
-				imageCubeInfo[i] = info;
+				vk_imageCubeInfo[i] = info;
 			}
 		}
 	}
 
-	std::vector<VkDescriptorBufferInfo> materialBufferInfo;
-	materialBufferInfo.reserve( MaxMaterialDescriptors );
 	for ( int j = 0; j < MaxMaterialDescriptors; ++j )
 	{
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].materialBuffers.GetVkObject();
 		info.offset = j * sizeof( materialBufferObject_t );
 		info.range = sizeof( materialBufferObject_t );
-		materialBufferInfo.push_back( info );
+		vk_materialBufferInfo[j] = info;
 	}
 
-	std::vector<VkDescriptorBufferInfo> lightBufferInfo;
-	lightBufferInfo.reserve( MaxLights );
 	for ( int j = 0; j < MaxLights; ++j )
 	{
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].lightParms.GetVkObject();
 		info.offset = j * sizeof( lightBufferObject_t );
 		info.range = sizeof( lightBufferObject_t );
-		lightBufferInfo.push_back( info );
+		vk_lightBufferInfo[j] = info;
 	}
 
-	std::vector<VkDescriptorImageInfo> codeImageInfo;
-	codeImageInfo.reserve( MaxCodeImages );
 	// Shadow Map
 	for ( int j = 0; j < MaxCodeImages; ++j )
 	{
@@ -622,7 +606,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_depthShadowSampler;
-		codeImageInfo.push_back( info );
+		vk_codeImageInfo[j] = info;
 	}
 
 	const uint32_t descriptorSetCnt = 8;
@@ -635,7 +619,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &globalConstantsInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -644,7 +628,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = MaxSurfaces;
-	descriptorWrites[ descriptorId ].pBufferInfo = &bufferInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[ 0 ];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -653,7 +637,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	descriptorWrites[ descriptorId ].pImageInfo = &image2DInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -662,7 +646,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	descriptorWrites[ descriptorId ].pImageInfo = &imageCubeInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -671,7 +655,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
-	descriptorWrites[ descriptorId ].pBufferInfo = &materialBufferInfo[ 0 ]; // TODO: replace
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo[ 0 ];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -680,7 +664,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = MaxLights;
-	descriptorWrites[ descriptorId ].pBufferInfo = &lightBufferInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo[ 0 ];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -689,7 +673,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-	descriptorWrites[ descriptorId ].pImageInfo = &codeImageInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -698,7 +682,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pImageInfo = &codeImageInfo[ 0 ];
+	descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
 	++descriptorId;
 
 	assert( descriptorId == descriptorSetCnt );
@@ -735,8 +719,6 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		shadowImageInfo.push_back( info );
 	}
 
-	std::vector<VkDescriptorImageInfo> shadowCodeImageInfo;
-	shadowCodeImageInfo.reserve( MaxCodeImages );
 	for ( size_t j = 0; j < MaxCodeImages; ++j )
 	{
 		const Texture* texture = gAssets.textureLib.GetDefault();
@@ -745,7 +727,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
-		shadowCodeImageInfo.push_back( info );
+		vk_shadowCodeImageInfo[j] = info;
 	}
 
 	std::array<VkWriteDescriptorSet, descriptorSetCnt> shadowDescriptorWrites{ };
@@ -757,7 +739,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &globalConstantsInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -766,7 +748,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxSurfaces;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &bufferInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[ 0 ];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -793,7 +775,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &materialBufferInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo[ 0 ];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -802,7 +784,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxLights;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &lightBufferInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo[ 0 ];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -811,7 +793,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowCodeImageInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowCodeImageInfo[ 0 ];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -820,7 +802,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowCodeImageInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowCodeImageInfo[ 0 ];
 	++descriptorId;
 
 	assert( descriptorId == descriptorSetCnt );
@@ -831,8 +813,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	// Post Descriptor Sets								//
 	//													//
 	//////////////////////////////////////////////////////
-	std::vector<VkDescriptorImageInfo> postImageInfo;
-	postImageInfo.reserve( 3 );
+
 	// View Color Map
 	{
 		VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
@@ -840,8 +821,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
-		postImageInfo.push_back( info );
+		vk_postImageInfo[0] = info;
 	}
+
 	// View Depth Map
 	{
 		VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
@@ -849,8 +831,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
-		postImageInfo.push_back( info );
+		vk_postImageInfo[ 1 ] = info;
 	}
+
 	// View Stencil Map
 	{
 		VkImageView& imageView = frameState[ currentImage ].stencilImage.vk_view;
@@ -858,7 +841,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
-		postImageInfo.push_back( info );
+		vk_postImageInfo[ 2 ] = info;
 	}
 
 	std::array<VkWriteDescriptorSet, 8> postDescriptorWrites{ };
@@ -870,7 +853,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &globalConstantsInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -879,7 +862,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = MaxSurfaces;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &bufferInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[ 0 ];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -888,7 +871,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &image2DInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -897,7 +880,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &imageCubeInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -906,7 +889,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &materialBufferInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo[ 0 ];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -915,7 +898,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = MaxLights;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &lightBufferInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo[ 0 ];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -924,7 +907,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &postImageInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_postImageInfo[ 0 ];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -933,7 +916,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &postImageInfo[ 2 ];
+	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_postImageInfo[ 2 ];
 	++descriptorId;
 
 	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( postDescriptorWrites.size() ), postDescriptorWrites.data(), 0, nullptr );
