@@ -1,9 +1,14 @@
-﻿  gpuTransfer.cpp
-  pipeline.cpp
-  renderer.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderer.cpp(275,36): warning C4244: '=': conversion from 'uint64_t' to 'float', possible loss of data
-  renderInit.cpp
-  renderShutdown.cpp
+﻿  window.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: 'APIENTRY': macro redefinition
+C:\Program Files (x86)\Microsoft Visual Studio\Libraries\glfw-3.3.5.bin.WIN64\include\GLFW\glfw3.h(123): message : see previous definition of 'APIENTRY'
   vulkinTestApp.cpp
   Generating Code...
+  LINK : C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe not found or not built by the last incremental link; performing full link
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+Chess.lib(chessState.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+Chess.lib(chess.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+Chess.lib(util.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+Chess.lib(piece.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(serializer.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(timer.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

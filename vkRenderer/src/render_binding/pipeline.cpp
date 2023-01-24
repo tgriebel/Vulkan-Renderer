@@ -1,7 +1,7 @@
 #include "../../stdafx.h"
 
 #include "pipeline.h"
-#include "../../deviceContext.h"
+#include "../render_state/deviceContext.h"
 #include <core/assetLib.h>
 #include <scene/scene.h>
 

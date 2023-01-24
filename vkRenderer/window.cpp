@@ -1,5 +1,5 @@
 #include "window.h"
-#include "deviceContext.h"
+#include "src/render_state/deviceContext.h"
 
 #ifdef WINDOWS
 #include <windows.h>

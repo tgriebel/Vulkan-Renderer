@@ -2,7 +2,7 @@
 
 #include "../../common.h"
 #include "../../window.h"
-#include "../../deviceContext.h"
+#include "../render_state/deviceContext.h"
 
 QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 
