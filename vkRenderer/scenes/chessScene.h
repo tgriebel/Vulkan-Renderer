@@ -1,7 +1,7 @@
 #pragma once
 #include "../src/globals/common.h"
 #include "../src/globals/render_util.h"
-#include "../io.h"
+#include "../src/io/io.h"
 #include "../window.h"
 #include "../input.h"
 #include <chess.h>

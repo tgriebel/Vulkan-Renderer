@@ -1,6 +1,6 @@
 #include "io.h"
 #include <core/assetlib.h>
-#include "src/globals/render_util.h"
+#include "../globals/render_util.h"
 #include <scene/scene.h>
 #include <resource_types/gpuProgram.h>
 #include <resource_types/model.h>

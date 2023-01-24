@@ -11,9 +11,6 @@
     <ClCompile Include="scene.cpp">
       <Filter>app</Filter>
     </ClCompile>
-    <ClCompile Include="io.cpp">
-      <Filter>io</Filter>
-    </ClCompile>
     <ClCompile Include="scenes\sceneParser.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
@@ -68,6 +65,9 @@
     <ClCompile Include="src\globals\render_util.cpp">
       <Filter>globals</Filter>
     </ClCompile>
+    <ClCompile Include="src\io\io.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -85,9 +85,6 @@
     </ClInclude>
     <ClInclude Include="input.h">
       <Filter>app</Filter>
-    </ClInclude>
-    <ClInclude Include="io.h">
-      <Filter>io</Filter>
     </ClInclude>
     <ClInclude Include="scenes\sceneParser.h">
       <Filter>scenes</Filter>
@@ -151,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="src\globals\renderview.h">
       <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="src\io\io.h">
+      <Filter>io</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -185,6 +185,7 @@
     <ClInclude Include="src\globals\renderConstants.h" />
     <ClInclude Include="src\globals\renderview.h" />
     <ClInclude Include="src\globals\render_util.h" />
+    <ClInclude Include="src\io\io.h" />
     <ClInclude Include="src\render_binding\allocator.h" />
     <ClInclude Include="src\render_binding\gpuResources.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />
@@ -196,7 +197,6 @@
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
     <ClInclude Include="input.h" />
-    <ClInclude Include="io.h" />
     <ClInclude Include="shaders\globals.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -210,11 +210,11 @@
     <ClCompile Include="external\imgui\imgui_tables.cpp" />
     <ClCompile Include="external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
-    <ClCompile Include="io.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
     <ClCompile Include="src\globals\render_util.cpp" />
+    <ClCompile Include="src\io\io.cpp" />
     <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
     <ClCompile Include="src\render_binding\pipeline.cpp" />
     <ClCompile Include="src\render_core\renderCommand.cpp" />
