@@ -23,6 +23,7 @@
 
 #include <raytracer/scene.h>
 #include <raytracer/raytrace.h>
+#include <SysCore/timer.h>
 
 #if defined( USE_IMGUI )
 #include "imgui/imgui.h"
@@ -93,6 +94,9 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 
+	Timer							frameTimer;
+	float							renderTime = 0.0f;
+
 	std::set<hdl_t>					uploadTextures;
 	std::set<hdl_t>					uploadMaterials;
 
@@ -111,7 +115,6 @@ private:
 	size_t							frameId = 0;
 	uint32_t						bufferId = 0;
 	uint32_t						frameNumber = 0;
-	float							renderTime = 0.0f;
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;

@@ -261,6 +261,8 @@ void Renderer::UploadAssets( AssetManager& assets )
 
 void Renderer::RenderScene( Scene* scene )
 {
+	frameTimer.Start();
+
 	Commit( scene );
 
 	UploadTextures();
@@ -268,6 +270,9 @@ void Renderer::RenderScene( Scene* scene )
 	UpdateGpuMaterials();
 
 	SubmitFrame();
+
+	frameTimer.Stop();
+	renderTime = frameTimer.GetElapsed();
 
 	if( gImguiControls.rebuildRaytraceScene ) {
 		BuildRayTraceScene( scene );
@@ -458,10 +463,6 @@ void Renderer::SubmitFrame()
 
 	frameId = ( frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;
 	++frameNumber;
-	static auto prevTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	renderTime = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
-	prevTime = currentTime;
 }
 
 
