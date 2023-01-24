@@ -2,7 +2,7 @@
 #include <atomic>
 #include <chrono>
 #include "common.h"
-#include "GeoBuilder.h"
+#include "../../GeoBuilder.h"
 #include <resource_types/texture.h>
 #include <resource_types/model.h>
 

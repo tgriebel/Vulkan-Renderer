@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common.h"
+#include "../globals/common.h"
 #include "../render_binding/gpuResources.h"
 
 class FrameState

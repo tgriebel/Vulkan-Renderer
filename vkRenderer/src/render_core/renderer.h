@@ -2,17 +2,17 @@
 
 #include <scene/camera.h>
 
-#include "common.h"
+#include "../globals/common.h"
 #include "../../window.h"
 #include "../../input.h"
-#include "../../common.h"
-#include "../../render_util.h"
+#include "../globals/common.h"
+#include "../globals/render_util.h"
 #include "../render_state/deviceContext.h"
 #include "../render_binding/pipeline.h"
 #include "swapChain.h"
 #include "../render_state/FrameState.h"
-#include "../../renderConstants.h"
-#include "../../renderview.h"
+#include "../globals/renderConstants.h"
+#include "../globals/renderview.h"
 #include "../../io.h"
 #include "../../GeoBuilder.h"
 #include <core/assetLib.h>

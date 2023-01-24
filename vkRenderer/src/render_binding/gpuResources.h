@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "../globals/common.h"
 #include "allocator.h"
 
 struct GpuBuffer

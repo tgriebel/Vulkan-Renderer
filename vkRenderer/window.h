@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "src/globals/common.h"
 #include "input.h"
 
 #define WINDOWS

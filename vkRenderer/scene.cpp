@@ -4,7 +4,7 @@
 #include "window.h"
 #include <scene/entity.h>
 #include <scene/scene.h>
-#include "render_util.h"
+#include "src/globals/render_util.h"
 
 extern AssetManager gAssets;
 

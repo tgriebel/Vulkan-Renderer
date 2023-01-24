@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../common.h"
+#include "../globals/common.h"
 #include "../../window.h"
 #include "../render_state/deviceContext.h"
 

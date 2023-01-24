@@ -1,7 +1,7 @@
 #include "common.h"
-#include "src/render_state/deviceContext.h"
+#include "../render_state/deviceContext.h"
 #include "io.h"
-#include "GeoBuilder.h"
+#include "../../GeoBuilder.h"
 #include <scene/assetManager.h>
 #include <core/assetLib.h>
 #include <resource_types/gpuProgram.h>

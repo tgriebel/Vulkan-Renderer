@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "src/globals/common.h"
 
 struct mouse_t
 {

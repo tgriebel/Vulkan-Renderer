@@ -179,11 +179,12 @@
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h" />
-    <ClInclude Include="renderview.h" />
-    <ClInclude Include="renderConstants.h" />
     <ClInclude Include="scenes\chessScene.h" />
-    <ClInclude Include="render_util.h" />
     <ClInclude Include="scenes\sceneParser.h" />
+    <ClInclude Include="src\globals\common.h" />
+    <ClInclude Include="src\globals\renderConstants.h" />
+    <ClInclude Include="src\globals\renderview.h" />
+    <ClInclude Include="src\globals\render_util.h" />
     <ClInclude Include="src\render_binding\allocator.h" />
     <ClInclude Include="src\render_binding\gpuResources.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />
@@ -192,7 +193,6 @@
     <ClInclude Include="src\render_state\deviceContext.h" />
     <ClInclude Include="src\render_state\FrameState.h" />
     <ClInclude Include="window.h" />
-    <ClInclude Include="common.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
     <ClInclude Include="input.h" />
@@ -212,9 +212,9 @@
     <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="io.cpp" />
     <ClCompile Include="scene.cpp" />
-    <ClCompile Include="render_util.cpp" />
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\globals\render_util.cpp" />
     <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
     <ClCompile Include="src\render_binding\pipeline.cpp" />
     <ClCompile Include="src\render_core\renderCommand.cpp" />

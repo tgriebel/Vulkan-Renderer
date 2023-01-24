@@ -2,9 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="render_util.cpp">
-      <Filter>globals</Filter>
-    </ClCompile>
     <ClCompile Include="vulkinTestApp.cpp">
       <Filter>app</Filter>
     </ClCompile>
@@ -68,6 +65,9 @@
     <ClCompile Include="src\render_state\deviceContext.cpp">
       <Filter>render state</Filter>
     </ClCompile>
+    <ClCompile Include="src\globals\render_util.cpp">
+      <Filter>globals</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -79,18 +79,6 @@
     </ClInclude>
     <ClInclude Include="scenes\chessScene.h">
       <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>globals</Filter>
-    </ClInclude>
-    <ClInclude Include="render_util.h">
-      <Filter>globals</Filter>
-    </ClInclude>
-    <ClInclude Include="renderview.h">
-      <Filter>globals</Filter>
-    </ClInclude>
-    <ClInclude Include="renderConstants.h">
-      <Filter>globals</Filter>
     </ClInclude>
     <ClInclude Include="window.h">
       <Filter>app</Filter>
@@ -151,6 +139,18 @@
     </ClInclude>
     <ClInclude Include="src\render_state\FrameState.h">
       <Filter>render state</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globals\common.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globals\render_util.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globals\renderConstants.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globals\renderview.h">
+      <Filter>globals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

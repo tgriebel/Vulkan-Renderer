@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <string>
 
-#include "../common.h"
-#include "../render_util.h"
+#include "../src/globals/common.h"
+#include "../src/globals/render_util.h"
 #include <scene/entity.h>
 #include <scene/scene.h>
 #include <resource_types/gpuProgram.h>

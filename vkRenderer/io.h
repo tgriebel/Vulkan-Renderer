@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 
-#include "common.h"
+#include "src/globals/common.h"
 
 #include <syscore/serializer.h>
 

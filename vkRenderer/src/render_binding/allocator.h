@@ -1,5 +1,5 @@
 #pragma once
-#include "common.h"
+#include "../globals/common.h"
 
 template< class ResourceType >
 class Allocator
