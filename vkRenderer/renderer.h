@@ -133,6 +133,7 @@ private:
 	VkDescriptorBufferInfo			vk_globalConstantsInfo;
 	VkDescriptorBufferInfo			vk_surfaceUbo[ MaxSurfaces ];
 	VkDescriptorImageInfo			vk_image2DInfo[ MaxImageDescriptors ];
+	VkDescriptorImageInfo			vk_shadowImageInfo[ MaxImageDescriptors ];
 	VkDescriptorImageInfo			vk_codeImageInfo[ MaxCodeImages ];
 	VkDescriptorImageInfo			vk_shadowCodeImageInfo[ MaxCodeImages ];
 	VkDescriptorImageInfo			vk_imageCubeInfo[ MaxImageDescriptors ];

@@ -699,8 +699,6 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	//													//
 	//////////////////////////////////////////////////////
 
-	std::vector<VkDescriptorImageInfo> shadowImageInfo;
-	shadowImageInfo.reserve( MaxImageDescriptors );
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
 		Texture& texture = gAssets.textureLib.Find( i )->Get();
@@ -709,7 +707,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
-		shadowImageInfo.push_back( info );
+		vk_shadowImageInfo[i] = info;
 	}
 	// Defaults
 	for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
@@ -720,7 +718,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
 		info.sampler = vk_bilinearSampler;
-		shadowImageInfo.push_back( info );
+		vk_shadowImageInfo[j] = info;
 	}
 
 	for ( size_t j = 0; j < MaxCodeImages; ++j )
@@ -761,7 +759,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowImageInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowImageInfo[ 0 ];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -770,7 +768,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &shadowImageInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowImageInfo[ 0 ];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -929,8 +927,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 void Renderer::UpdateBufferContents( uint32_t currentImage )
 {
-	std::vector< globalUboConstants_t > globalsBuffer;
-	globalsBuffer.reserve( 1 );
+	static globalUboConstants_t globalsBuffer;
 	{
 		globalUboConstants_t globals;
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -948,11 +945,10 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
 		globals.tonemap = vec4f( gImguiControls.toneMapColor[ 0 ], gImguiControls.toneMapColor[ 1 ], gImguiControls.toneMapColor[ 2 ], gImguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, gImguiControls.shadowStrength );
-		globalsBuffer.push_back( globals );
+		globalsBuffer = globals;
 	}
 
-	std::vector< uniformBufferObject_t > uboBuffer;
-	uboBuffer.resize( MaxSurfacesDescriptors );
+	static uniformBufferObject_t uboBuffer[MaxSurfacesDescriptors];
 	assert( renderView.committedModelCnt < MaxModels );
 	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
 	{
@@ -976,30 +972,28 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		uboBuffer[ objectId ] = ubo;
 	}
 
-	std::vector< lightBufferObject_t > lightBuffer;
-	lightBuffer.reserve( MaxLights );
+	static lightBufferObject_t lightBuffer[ MaxLights ];
 	for ( int i = 0; i < MaxLights; ++i )
 	{
 		lightBufferObject_t light;
 		light.intensity = renderView.lights[ i ].intensity;
 		light.lightDir = renderView.lights[ i ].lightDir;
 		light.lightPos = renderView.lights[ i ].lightPos;
-		lightBuffer.push_back( light );
+		lightBuffer[i] = light;
 	}
 
 	frameState[ currentImage ].globalConstants.Reset();
-	frameState[ currentImage ].globalConstants.CopyData( globalsBuffer.data(), sizeof( globalUboConstants_t ) );
+	frameState[ currentImage ].globalConstants.CopyData( &globalsBuffer, sizeof( globalUboConstants_t ) );
 
-	assert( uboBuffer.size() <= MaxSurfaces );
+	const uint32_t uboCount = renderView.committedModelCnt + shadowView.committedModelCnt;
 	frameState[ currentImage ].surfParms.Reset();
-	frameState[ currentImage ].surfParms.CopyData( uboBuffer.data(), sizeof( uniformBufferObject_t ) * uboBuffer.size() );
+	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * uboCount );
 
 	frameState[ currentImage ].materialBuffers.Reset();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
 
-	assert( lightBuffer.size() <= MaxLights );
 	frameState[ currentImage ].lightParms.Reset();
-	frameState[ currentImage ].lightParms.CopyData( lightBuffer.data(), sizeof( lightBufferObject_t ) * lightBuffer.size() );
+	frameState[ currentImage ].lightParms.CopyData( lightBuffer, sizeof( lightBufferObject_t ) * MaxLights );
 }
 
 
