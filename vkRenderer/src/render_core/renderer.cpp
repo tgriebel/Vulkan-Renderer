@@ -1602,6 +1602,43 @@ void Renderer::DrawDebugMenu()
 			}
 			ImGui::EndTabItem();
 		}
+		if ( ImGui::BeginTabItem( "Create Entity" ) )
+		{
+			static uint32_t currentIdx = 0;
+			const char* previewValue = gAssets.modelLib.FindName( currentIdx );
+			if ( ImGui::BeginCombo( "Model", previewValue ) )
+			{
+				const uint32_t modelCount = gAssets.modelLib.Count();
+				for ( uint32_t m = 0; m < modelCount; ++m )
+				{
+					Asset<Model>* modelAsset = gAssets.modelLib.Find( m );
+
+					const bool selected = ( currentIdx == m );
+					if ( ImGui::Selectable( modelAsset->GetName().c_str(), selected ) ) {
+						currentIdx = m;
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
+			char name[128] = {};
+			ImGui::InputText( "Name", name, 128 );
+
+			if( ImGui::Button("Create") )
+			{
+				Entity* ent = new Entity();
+				ent->name = name;
+				ent->SetFlag( ENT_FLAG_DEBUG );
+				gScene->entities.push_back( ent );
+				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( gAssets.modelLib.FindName( currentIdx ) ), *ent );
+			}
+
+			ImGui::EndTabItem();
+		}
 		if ( ImGui::BeginTabItem( "Outliner" ) )
 		{
 			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
