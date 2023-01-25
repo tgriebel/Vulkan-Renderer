@@ -1385,17 +1385,14 @@ void Renderer::DrawDebugMenu()
 	ImGui::Begin( "Control Panel" );
 	if ( ImGui::BeginTabBar( "Tabs" ) )
 	{
-		if ( ImGui::BeginTabItem( "Loading" ) )
+		if ( ImGui::BeginTabItem( "Debug" ) )
 		{
 			gImguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
 			ImGui::SameLine();
 			gImguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
 			ImGui::SameLine();
 			gImguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
-			ImGui::EndTabItem();
-		}
-		if ( ImGui::BeginTabItem( "Other" ) )
-		{
+
 			ImGui::InputFloat( "Heightmap Height", &gImguiControls.heightMapHeight, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Roughness", &gImguiControls.roughness, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Shadow Strength", &gImguiControls.shadowStrength, 0.0f, 1.0f );
@@ -1405,7 +1402,7 @@ void Renderer::DrawDebugMenu()
 			ImGui::InputFloat( "Tone Map A", &gImguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::EndTabItem();
 		}
-		if ( ImGui::BeginTabItem( "Scene" ) )
+		if ( ImGui::BeginTabItem( "Assets" ) )
 		{
 			if( ImGui::TreeNode( "Materials" ) )
 			{
@@ -1602,6 +1599,45 @@ void Renderer::DrawDebugMenu()
 			}
 			ImGui::EndTabItem();
 		}
+		if ( ImGui::BeginTabItem( "Manip" ) )
+		{
+			static uint32_t currentIdx = 0;
+			Entity* ent = gScene->FindEntity( currentIdx );
+			const char* previewValue = ent->name.c_str();
+			if ( ImGui::BeginCombo( "Entity", previewValue ) )
+			{
+				const uint32_t modelCount = gAssets.modelLib.Count();
+				for ( uint32_t e = 0; e < gScene->EntityCount(); ++e )
+				{
+					Entity* comboEnt = gScene->FindEntity( e );
+
+					const bool selected = ( currentIdx == e );
+					if ( ImGui::Selectable( comboEnt->name.c_str(), selected ) ) {
+						currentIdx = e;
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			if ( ent != nullptr )
+			{
+				const vec3f o = ent->GetOrigin();
+				float origin[3] = { o[0], o[1], o[2] };
+				ImGui::InputFloat3( "Origin", origin );
+
+				float scale[ 3 ] = { 1.0f, 1.0f, 1.0f };
+				ImGui::InputFloat3( "Scale", scale );
+
+				float rotation[ 3 ] = { 0.0f, 0.0f, 0.0f };
+				ImGui::InputFloat3( "Rotation", rotation );
+
+				ent->SetOrigin( origin );
+			}
+			ImGui::EndTabItem();
+		}
 		if ( ImGui::BeginTabItem( "Create Entity" ) )
 		{
 			static uint32_t currentIdx = 0;
@@ -1625,7 +1661,7 @@ void Renderer::DrawDebugMenu()
 				ImGui::EndCombo();
 			}
 
-			char name[128] = {};
+			static char name[128] = {};
 			ImGui::InputText( "Name", name, 128 );
 
 			if( ImGui::Button("Create") )
@@ -1739,16 +1775,8 @@ void Renderer::DrawDebugMenu()
 	else {
 		memset( &entityName[ 0 ], 0, 256 );
 	}
-	static vec3f tempOrigin;
+
 	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
-
-	if ( gImguiControls.selectedEntityId >= 0 ) {
-		Entity* entity = gScene->FindEntity( (uint32_t)gImguiControls.selectedEntityId );
-		entity->SetOrigin( vec3f( tempOrigin[ 0 ] + gImguiControls.selectedModelOrigin[ 0 ],
-			tempOrigin[ 1 ] + gImguiControls.selectedModelOrigin[ 1 ],
-			tempOrigin[ 2 ] + gImguiControls.selectedModelOrigin[ 2 ] ) );
-	}
-
 	ImGui::Text( "Frame Number: %d", frameNumber );
 	ImGui::SameLine();
 	ImGui::Text( "FPS: %f", 1000.0f / renderTime );
