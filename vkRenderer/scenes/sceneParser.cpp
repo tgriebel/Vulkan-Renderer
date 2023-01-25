@@ -557,15 +557,5 @@ void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 		}
 	}
 
-	bool hasItems = true;
-	do
-	{
-		assets->gpuPrograms.LoadAll();
-		assets->textureLib.LoadAll();
-		assets->modelLib.LoadAll();
-
-		hasItems =	assets->gpuPrograms.HasPendingLoads()	||
-					assets->modelLib.HasPendingLoads()		||
-					assets->textureLib.HasPendingLoads();
-	} while ( hasItems );
+	gAssets.RunLoadLoop();
 }

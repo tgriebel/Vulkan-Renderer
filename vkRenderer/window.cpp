@@ -1,10 +1,7 @@
 #include "window.h"
 #include "src/render_state/deviceContext.h"
 
-#ifdef WINDOWS
-#include <windows.h>
-#include <shobjidl.h> 
-#endif
+#include "external/tinyfiledialogs/tinyfiledialogs.h"
 
 void FramebufferResizeCallback( GLFWwindow* window, int width, int height )
 {
@@ -98,9 +95,21 @@ bool Window::IsFocused() const
 	return focused;
 }
 
-void Window::OpenFileDialog()
+std::string Window::OpenFileDialog()
 {
+	tinyfd_assumeGraphicDisplay = 1;
 
+	char const* fileFilter[1] = { "*.obj" };
+
+	char* fileName = tinyfd_openFileDialog(
+		"Import OBJ",
+		"",
+		COUNTARRAY( fileFilter ),
+		fileFilter,
+		"obj files",
+		0 );
+
+	return fileName;
 }
 
 void Window::PumpMessages()

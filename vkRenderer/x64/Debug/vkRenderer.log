@@ -1,5 +1,2 @@
-﻿  chessScene.cpp
-  sceneParser.cpp
-  vulkinTestApp.cpp
-  Generating Code...
+﻿  vulkinTestApp.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

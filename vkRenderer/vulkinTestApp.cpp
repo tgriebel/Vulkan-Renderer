@@ -82,6 +82,33 @@ int main()
 			CheckReloadAssets();
 
 			gWindow.PumpMessages();
+
+			if ( gImguiControls.openFileDialog ) {
+				std::string path = gWindow.OpenFileDialog();
+				std::size_t dirPos = path.find_last_of( "\\" );
+				std::size_t extPos = path.find_last_of( "." );
+				std::string dir = path.substr( 0, dirPos );
+				std::string file = path.substr( dirPos, extPos - dirPos );
+				std::string ext = path.substr( extPos, path.length() );
+
+				std::string modelName = path;
+
+				ModelLoader* loader = new ModelLoader();
+				loader->SetModelPath( dir );
+				loader->SetTexturePath( dir );
+				loader->SetModelName( file );
+				loader->SetAssetRef( &gAssets );
+				gAssets.modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
+
+				gAssets.RunLoadLoop();
+				Entity* ent = new Entity();
+				ent->name = path;
+				gScene->entities.push_back( ent );
+				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
+
+				gImguiControls.openFileDialog = false;
+			}
+
 			UpdateScene( gScene, AdvanceTime() );
 			gWindow.input.NewFrame();
 			gRenderer.RenderScene( gScene );

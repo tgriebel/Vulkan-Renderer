@@ -323,6 +323,7 @@ struct imguiControls_t
 	bool		rebuildShaders;
 	bool		raytraceScene;
 	bool		rebuildRaytraceScene;
+	bool		openFileDialog;
 	vec3f		selectedModelOrigin;
 };
 #endif

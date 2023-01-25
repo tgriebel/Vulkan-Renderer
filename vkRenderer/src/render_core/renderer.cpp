@@ -550,7 +550,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info2d.imageView = gAssets.textureLib.GetDefault()->gpuImage.vk_view;
+			info2d.imageView = gAssets.textureLib.GetDefault()->Get().gpuImage.vk_view;
 			info2d.sampler = vk_bilinearSampler;
 			vk_image2DInfo[ texture.uploadId ] = info2d;
 		}
@@ -561,10 +561,10 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	}
 	// Defaults
 	{
-		const Texture* default2DTexture = gAssets.textureLib.GetDefault();
+		const Texture& default2DTexture = gAssets.textureLib.GetDefault()->Get();
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			const VkImageView& imageView = default2DTexture->gpuImage.vk_view;
+			const VkImageView& imageView = default2DTexture.gpuImage.vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -713,8 +713,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	// Defaults
 	for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 	{
-		const Texture* texture = gAssets.textureLib.GetDefault();
-		const VkImageView& imageView = texture->gpuImage.vk_view;
+		const Texture& texture = gAssets.textureLib.GetDefault()->Get();
+		const VkImageView& imageView = texture.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -724,8 +724,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	for ( size_t j = 0; j < MaxCodeImages; ++j )
 	{
-		const Texture* texture = gAssets.textureLib.GetDefault();
-		const VkImageView& imageView = texture->gpuImage.vk_view;
+		const Texture& texture = gAssets.textureLib.GetDefault()->Get();
+		const VkImageView& imageView = texture.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -1361,9 +1361,8 @@ void Renderer::DrawDebugMenu()
 	{
 		if ( ImGui::BeginMenu( "File" ) )
 		{
-			if ( ImGui::MenuItem( "Open", "CTRL+O" ) )
-			{
-			//	GetOpenFileNameA(
+			if ( ImGui::MenuItem( "Open", "CTRL+O" ) ) {
+				gImguiControls.openFileDialog = true;
 			}
 			ImGui::EndMenu();
 		}

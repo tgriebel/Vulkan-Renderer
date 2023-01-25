@@ -22,7 +22,7 @@ public:
 	void					Init();
 	bool					IsOpen() const;
 	bool					IsFocused() const;
-	void					OpenFileDialog();
+	std::string				OpenFileDialog();
 	void					PumpMessages();
 	void					CreateSurface();
 	vec2f					GetNdc( const float x, const float y );
