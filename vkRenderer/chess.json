@@ -64,7 +64,7 @@
     {
       "name": "DebugSolid",
       "vs": "simpleVS.spv",
-      "ps": "litPS.spv"
+      "ps": "emissivePS.spv"
     },
     {
       "name": "PostProcess",
@@ -198,6 +198,10 @@
 	{
       "name" : "plane",
       "model" : "plane"
+    },
+	{
+      "name" : "axis",
+      "model" : "axis",
     }
   ],
   "entities": [
@@ -224,10 +228,6 @@
       "name" : "sphere",
       "model" : "sphere",
 	  "hidden" : "true"
-    },
-	{
-      "name" : "axis",
-      "model" : "axis",
     }
   ]
 }

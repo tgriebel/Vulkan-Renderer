@@ -35,7 +35,7 @@ void CreateCodeAssets()
 
 		{
 			Material material;
-			material.AddShader( DRAWPASS_DEBUG_SOLID, AssetLibGpuProgram::Handle( "Debug_Solid" ) );
+			material.AddShader( DRAWPASS_DEBUG_SOLID, AssetLibGpuProgram::Handle( "DebugSolid" ) );
 			gAssets.materialLib.Add( "DEBUG_SOLID", material );
 		}
 	}

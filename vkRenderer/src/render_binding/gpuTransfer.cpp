@@ -126,6 +126,7 @@ void Renderer::UpdateGpuMaterials()
 		ubo.Ns = m.Ns;
 		ubo.illum = m.illum;
 		ubo.d = m.d;
+		ubo.textured = m.IsTextured();
 	}
 	uploadMaterials.clear();
 }

@@ -129,7 +129,8 @@ struct materialBufferObject_t
 	float					Ni;
 	float					d;
 	float					illum;
-	uint32_t				pad[ 15 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
+	uint32_t				textured;
+	uint32_t				pad[ 14 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
 };
 
 struct lightBufferObject_t

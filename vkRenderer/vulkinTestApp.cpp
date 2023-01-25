@@ -103,6 +103,7 @@ int main()
 				gAssets.RunLoadLoop();
 				Entity* ent = new Entity();
 				ent->name = path;
+				ent->SetFlag( ENT_FLAG_DEBUG );
 				gScene->entities.push_back( ent );
 				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
 
