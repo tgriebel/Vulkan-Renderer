@@ -1358,6 +1358,8 @@ void Renderer::Render( RenderView& view )
 void Renderer::DrawDebugMenu()
 {
 #if defined( USE_IMGUI )
+	static ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+
 	if ( ImGui::BeginMainMenuBar() )
 	{
 		if ( ImGui::BeginMenu( "File" ) )
@@ -1428,11 +1430,15 @@ void Renderer::DrawDebugMenu()
 						for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
 						{
 							hdl_t texHdl = mat.GetTexture( t );
-							if( texHdl.IsValid() == false ) {
-								continue;
+							if( texHdl.IsValid() == false )
+							{
+								ImGui::Text( "<None>" );
 							}
-							const char* texName = gAssets.textureLib.FindName( texHdl );
-							ImGui::Text( texName );
+							else
+							{
+								const char* texName = gAssets.textureLib.FindName( texHdl );
+								ImGui::Text( texName );
+							}
 						}
 						ImGui::Separator();
 						ImGui::TreePop();
@@ -1451,8 +1457,64 @@ void Renderer::DrawDebugMenu()
 					{
 						const vec3f& min = model.bounds.GetMin();
 						const vec3f& max = model.bounds.GetMax();
-						ImGui::Text( "Bounds: [(%4.3f, %4.3f, %4.3f), (%4.3f, %4.3f, %4.3f)]", min[0], min[1], min[2], max[ 0 ], max[ 1 ], max[ 2 ] );
-						ImGui::Text( "%u", model.surfCount );
+						if ( ImGui::BeginTable( "Bounds", 4, tableFlags ) )
+						{
+							ImGui::TableSetupColumn( "" );
+							ImGui::TableSetupColumn( "X" );
+							ImGui::TableSetupColumn( "Y" );
+							ImGui::TableSetupColumn( "Z" );
+							ImGui::TableHeadersRow();
+
+							ImGui::TableNextRow();
+							ImGui::TableSetColumnIndex( 0 );
+							ImGui::Text( "Min" );
+							ImGui::TableSetColumnIndex( 1 );	
+							ImGui::Text( "%4.3f", min[ 0 ] );
+							ImGui::TableSetColumnIndex( 2 );
+							ImGui::Text( "%4.3f", min[ 1 ] );
+							ImGui::TableSetColumnIndex( 3 );
+							ImGui::Text( "%4.3f", min[ 2 ] );
+
+							ImGui::TableNextRow();
+							ImGui::TableSetColumnIndex( 0 );
+							ImGui::Text( "Max" );
+							ImGui::TableSetColumnIndex( 1 );
+							ImGui::Text( "%4.3f", max[ 0 ] );
+							ImGui::TableSetColumnIndex( 2 );
+							ImGui::Text( "%4.3f", max[ 1 ] );
+							ImGui::TableSetColumnIndex( 3 );
+							ImGui::Text( "%4.3f", max[ 2 ] );
+
+							ImGui::EndTable();
+						}
+
+						if ( ImGui::TreeNode( "##Surfaces", "Surfaces (%u)", model.surfCount ) )
+						{
+							if ( ImGui::BeginTable( "Surface", 4, tableFlags ) )
+							{
+								ImGui::TableSetupColumn( "Number" );
+								ImGui::TableSetupColumn( "Material" );
+								ImGui::TableSetupColumn( "Vertices" );
+								ImGui::TableSetupColumn( "Indices" );
+								ImGui::TableHeadersRow();
+
+								for ( uint32_t s = 0; s < model.surfCount; ++s )
+								{
+									ImGui::TableNextRow();
+									ImGui::TableSetColumnIndex( 0 );
+									ImGui::Text( "%u", s );
+									ImGui::TableSetColumnIndex( 1 );
+									const char* modelName = gAssets.materialLib.FindName( model.surfs[ s ].materialHdl );
+									ImGui::Text( modelName );
+									ImGui::TableSetColumnIndex( 2 );
+									ImGui::Text( "%i", (int)model.surfs[ s ].vertices.size() );
+									ImGui::TableSetColumnIndex( 3 );
+									ImGui::Text( "%i", (int)model.surfs[ s ].indices.size() );
+								}
+								ImGui::EndTable();
+							}
+							ImGui::TreePop();
+						}
 						ImGui::TreePop();
 					}
 				}
@@ -1467,8 +1529,61 @@ void Renderer::DrawDebugMenu()
 					const char* texName = gAssets.textureLib.FindName( t );
 					if ( ImGui::TreeNode( texName ) )
 					{
-						ImGui::Text("%u", texture.info.channels);
-						ImGui::Text("%ux%u", texture.info.width, texture.info.height );
+						if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
+						{
+							ImGui::Text("Width");
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.info.width );
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Height" );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.info.height );
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Layers" );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.info.layers );
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Channels" );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.info.channels );
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Mips" );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.info.mipLevels );
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Layers" );
+							ImGui::TableNextColumn();
+							switch( texture.info.type )
+							{
+								case TEXTURE_TYPE_2D:
+									ImGui::Text( "2D" );
+									break;
+								case TEXTURE_TYPE_CUBE:
+									ImGui::Text( "CUBE" );
+									break;
+								default:
+									ImGui::Text( "Unknown" );
+							}
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Upload Id" );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.uploadId );
+							ImGui::TableNextRow();
+
+							ImGui::Text( "Size(bytes)" );
+							ImGui::TableNextColumn();
+							ImGui::Text( "%u", texture.sizeBytes );
+							ImGui::TableNextRow();
+
+							ImGui::EndTable();
+						}
+
 						ImGui::TreePop();
 					}
 				}
