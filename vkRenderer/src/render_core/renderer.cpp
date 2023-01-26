@@ -15,6 +15,7 @@ extern Scene* gScene;
 static void BuildRayTraceScene( Scene* scene )
 {
 	rtScene.scene = scene;
+	rtScene.assets = &gAssets;
 
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	rtScene.lights.clear();
@@ -56,8 +57,8 @@ static void TraceScene()
 	}
 
 	// Need to turn cpu images back on
-	//TraceScene( rtview, rtScene, rtimage );
-	//RasterScene( rtimage, rtview, rtScene, false );
+	TraceScene( rtview, rtScene, rtimage );
+	//RasterScene( rtimage, rtview, rtScene, true );
 
 	{
 		std::stringstream ss;
