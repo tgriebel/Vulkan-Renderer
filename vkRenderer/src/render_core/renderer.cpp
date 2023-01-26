@@ -1661,6 +1661,24 @@ void Renderer::DrawDebugMenu()
 				ent->SetOrigin( origin );
 				ent->SetScale( scale );
 				ent->SetRotation( rotation );
+
+				if( ImGui::Button( "Add Bounds" ) )
+				{
+					AABB bounds = ent->GetBounds();
+					const vec3f X = bounds.GetMax()[0] - bounds.GetMin()[0];
+					const vec3f Y = bounds.GetMax()[1] - bounds.GetMin()[1];
+					const vec3f Z = bounds.GetMax()[2] - bounds.GetMin()[2];
+
+					//mat4x4f m = CreateMatrix4x4( )
+
+					Entity* boundEnt = new Entity( *ent );
+					boundEnt->name = ent->name + "_bounds";
+					boundEnt->SetFlag( ENT_FLAG_WIREFRAME );
+					boundEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+
+					gScene->entities.push_back( boundEnt );
+					gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "cube" ), *boundEnt );
+				}
 			}
 			ImGui::EndTabItem();
 		}

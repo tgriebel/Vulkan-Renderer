@@ -138,24 +138,6 @@ void ChessScene::Init()
 		}
 	}
 
-	const hdl_t cubeHdl = gAssets.modelLib.RetrieveHdl( "cube" );
-	const uint32_t pieceCount = static_cast<uint32_t>( pieceEntities.size() );
-	bool drawPieceWireframes = true;
-	if ( drawPieceWireframes )
-	{
-		for ( uint32_t i = 0; i < pieceCount; ++i )
-		{
-			BoundEntity* cubeEnt = new BoundEntity();
-			CreateEntityBounds( cubeHdl, *cubeEnt );
-			cubeEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
-			cubeEnt->SetFlag( ENT_FLAG_WIREFRAME );
-			cubeEnt->name = ( entities[ pieceEntities[ i ] ]->name + "_cube" ).c_str();
-			cubeEnt->pieceId = pieceEntities[ i ];
-			boundEntities.push_back( static_cast<uint32_t>( entities.size() ) );
-			entities.push_back( cubeEnt );
-		}
-	}
-
 	const hdl_t diamondHdl = gAssets.modelLib.RetrieveHdl( "diamond" );
 	for ( int i = 0; i < MaxLights; ++i )
 	{
@@ -302,20 +284,6 @@ void ChessScene::Update( const float dt )
 	glowMat.Kd = rgbTuplef_t( 0.1f, 0.1f, 1.0f );
 	glowMat.d = 0.5f * cos( 3.0f * time ) + 0.5f;
 	glowMat.dirty = true;
-
-	const uint32_t pieceBoundCount = static_cast<uint32_t>( boundEntities.size() );
-	for ( uint32_t i = 0; i < pieceBoundCount; ++i )
-	{
-		BoundEntity* boundEnt = reinterpret_cast<BoundEntity*>( entities[ boundEntities[ i ] ] );
-		if ( boundEnt->pieceId == ~0x0 )
-			continue;
-		Entity* pieceEnt = entities[ boundEnt->pieceId ];
-		AABB bounds = pieceEnt->GetBounds();
-		vec3f size = bounds.GetSize();
-		vec3f center = bounds.GetCenter();
-		boundEnt->SetOrigin( vec3f( center[ 0 ], center[ 1 ], center[ 2 ] ) );
-		boundEnt->SetScale( 0.5f * vec3f( size[ 0 ], size[ 1 ], size[ 2 ] ) );
-	}
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{
