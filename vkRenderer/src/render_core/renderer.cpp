@@ -1625,21 +1625,48 @@ void Renderer::DrawDebugMenu()
 			if ( ent != nullptr )
 			{
 				const vec3f o = ent->GetOrigin();
+				const vec3f s = ent->GetScale();
+				const mat4x4f r = ent->GetRotation();
 				float origin[3] = { o[0], o[1], o[2] };
-				ImGui::InputFloat3( "Origin", origin );
+				ImGui::PushItemWidth( 100 );
+				ImGui::Text( "Origin" );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##OriginX", &origin[0], 0.1f, 1.0f );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##OriginY", &origin[1], 0.1f, 1.0f );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##OriginZ", &origin[2], 0.1f, 1.0f );
 
-				float scale[ 3 ] = { 1.0f, 1.0f, 1.0f };
-				ImGui::InputFloat3( "Scale", scale );
+				float scale[ 3 ] = { s[0], s[1], s[2] };
+				ImGui::Text( "Scale" );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##ScaleX", &scale[ 0 ], 0.1f, 1.0f );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##ScaleY", &scale[ 1 ], 0.1f, 1.0f );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##ScaleZ", &scale[ 2 ], 0.1f, 1.0f );
 
 				float rotation[ 3 ] = { 0.0f, 0.0f, 0.0f };
-				ImGui::InputFloat3( "Rotation", rotation );
+				MatrixToEulerZYX( r, rotation[0], rotation[1], rotation[2] );
+
+				ImGui::Text( "Rotation" );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##RotationX", &rotation[ 0 ], 1.0f, 10.0f );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##RotationY", &rotation[ 1 ], 1.0f, 10.0f );
+				ImGui::SameLine();
+				ImGui::InputFloat( "##RotationZ", &rotation[ 2 ], 1.0f, 10.0f );
+				ImGui::PopItemWidth();
 
 				ent->SetOrigin( origin );
+				ent->SetScale( scale );
+				ent->SetRotation( rotation );
 			}
 			ImGui::EndTabItem();
 		}
 		if ( ImGui::BeginTabItem( "Create Entity" ) )
 		{
+			static char name[ 128 ] = {};
 			static uint32_t currentIdx = 0;
 			const char* previewValue = gAssets.modelLib.FindName( currentIdx );
 			if ( ImGui::BeginCombo( "Model", previewValue ) )
@@ -1661,7 +1688,6 @@ void Renderer::DrawDebugMenu()
 				ImGui::EndCombo();
 			}
 
-			static char name[128] = {};
 			ImGui::InputText( "Name", name, 128 );
 
 			if( ImGui::Button("Create") )

@@ -61,4 +61,5 @@ public:
 };
 
 mat4x4f MatrixFromVector( const vec3f& v );
+void MatrixToEulerZYX( const mat4x4f& m, float& a, float& b, float& c );
 void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size );

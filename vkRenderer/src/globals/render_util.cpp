@@ -28,6 +28,35 @@ mat4x4f MatrixFromVector( const vec3f& v )
 }
 
 
+void MatrixToEulerZYX( const mat4x4f& m, float& xDegrees, float& yDegrees, float& zDegrees )
+{
+	if( m[2][0] < 1.0f )
+	{
+		if( m[2][0] >= -1.0f )
+		{
+			yDegrees = asin( -m[2][0] );
+			zDegrees = atan2( m[1][0], m[0][0] );
+			xDegrees = atan2( m[2][1], m[2][2] );
+		}
+		else
+		{
+			yDegrees = 1.570795f;
+			zDegrees = -atan2( -m[1][2], m[1][1] );
+			xDegrees = 0.0f;
+		}
+	}
+	else
+	{
+		yDegrees = -1.570795f / 2.0f;
+		zDegrees = atan2( -m[1][2], m[1][1] );
+		xDegrees = 0.0f;
+	}
+	xDegrees = Degrees( xDegrees );
+	yDegrees = Degrees( yDegrees );
+	zDegrees = Degrees( zDegrees );
+}
+
+
 static void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vertex_t>& vb, std::vector<uint32_t>& ib )
 {
 	vb.reserve( gb.vb.size() );
