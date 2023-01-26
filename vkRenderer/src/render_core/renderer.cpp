@@ -497,12 +497,12 @@ void Renderer::UpdateView()
 
 	Camera shadowCam;
 	shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-	shadowCam.far = nearPlane;
-	shadowCam.near = farPlane;
+	shadowCam.near = shadowNearPlane;
+	shadowCam.far = shadowFarPlane;
 	shadowCam.focalLength = shadowCam.far;
 	shadowCam.SetFov( Radians( 90.0f ) );
 	shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
-	shadowView.projMatrix = shadowCam.GetPerspectiveMatrix();
+	shadowView.projMatrix = shadowCam.GetPerspectiveMatrix( false );
 }
 
 
@@ -988,9 +988,8 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	frameState[ currentImage ].globalConstants.Reset();
 	frameState[ currentImage ].globalConstants.CopyData( &globalsBuffer, sizeof( globalUboConstants_t ) );
 
-	const uint32_t uboCount = renderView.committedModelCnt + shadowView.committedModelCnt;
 	frameState[ currentImage ].surfParms.Reset();
-	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * uboCount );
+	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfacesDescriptors );
 
 	frameState[ currentImage ].materialBuffers.Reset();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );

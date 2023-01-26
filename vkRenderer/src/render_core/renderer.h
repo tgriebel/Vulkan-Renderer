@@ -144,8 +144,8 @@ private:
 	VkDescriptorBufferInfo			vk_materialBufferInfo[ MaxMaterialDescriptors ];
 	VkDescriptorBufferInfo			vk_lightBufferInfo[ MaxLights ];
 
-	float							nearPlane = 1000.0f;
-	float							farPlane = 0.1f;
+	float							shadowNearPlane = 0.1f;
+	float							shadowFarPlane = 1000.0f;
 
 	VkSampleCountFlagBits GetMaxUsableSampleCount()
 	{
