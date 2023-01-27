@@ -489,7 +489,7 @@ void Renderer::UpdateView()
 	shadowView.viewport.width = ShadowMapWidth;
 	shadowView.viewport.height = ShadowMapHeight;
 	shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
-	shadowView.viewMatrix = shadowView.viewMatrix.Transpose();
+	shadowView.viewMatrix = shadowView.viewMatrix;
 	const vec4f shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
 	shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
 	shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
