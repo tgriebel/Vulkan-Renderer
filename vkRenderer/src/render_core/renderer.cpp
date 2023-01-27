@@ -51,8 +51,8 @@ static void TraceScene()
 	Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::Black, "testRayTrace" );
 	{
 		rtview.camera = rtScene.scene->camera;
-		rtview.viewTransform = rtview.camera.GetViewMatrix().Transpose();
-		rtview.projTransform = rtview.camera.GetPerspectiveMatrix().Transpose();
+		rtview.viewTransform = rtview.camera.GetViewMatrix();
+		rtview.projTransform = rtview.camera.GetPerspectiveMatrix();
 		rtview.projView = rtview.projTransform * rtview.viewTransform;
 	}
 
