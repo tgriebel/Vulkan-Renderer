@@ -1682,6 +1682,13 @@ void Renderer::DrawDebugMenu()
 					gScene->entities.push_back( boundEnt );
 					gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "cube" ), *boundEnt );
 				}
+
+				ImGui::SameLine();
+				if( ImGui::Button( "Export Model" ) )
+				{
+					Asset<Model>* asset = gAssets.modelLib.Find( ent->modelHdl );
+					WriteModel( asset, BakePath + asset->GetName() + BakedModelExtension );
+				}
 			}
 			ImGui::EndTabItem();
 		}
