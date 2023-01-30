@@ -265,11 +265,11 @@ void Renderer::RenderScene( Scene* scene )
 {
 	frameTimer.Start();
 
-	Commit( scene );
-
 	UploadTextures();
 	UploadModelsToGPU();
 	UpdateGpuMaterials();
+
+	Commit( scene );
 
 	SubmitFrame();
 
@@ -1487,12 +1487,13 @@ void Renderer::DrawDebugMenu()
 
 						if ( ImGui::TreeNode( "##Surfaces", "Surfaces (%u)", model.surfCount ) )
 						{
-							if ( ImGui::BeginTable( "Surface", 4, tableFlags ) )
+							if ( ImGui::BeginTable( "Surface", 5, tableFlags ) )
 							{
 								ImGui::TableSetupColumn( "Number" );
 								ImGui::TableSetupColumn( "Material" );
 								ImGui::TableSetupColumn( "Vertices" );
 								ImGui::TableSetupColumn( "Indices" );
+								ImGui::TableSetupColumn( "Centroid" );
 								ImGui::TableHeadersRow();
 
 								for ( uint32_t s = 0; s < model.surfCount; ++s )
@@ -1501,12 +1502,14 @@ void Renderer::DrawDebugMenu()
 									ImGui::TableSetColumnIndex( 0 );
 									ImGui::Text( "%u", s );
 									ImGui::TableSetColumnIndex( 1 );
-									const char* modelName = gAssets.materialLib.FindName( model.surfs[ s ].materialHdl );
+									const char* modelName = gAssets.materialLib.FindName( model.surfs[s].materialHdl );
 									ImGui::Text( modelName );
 									ImGui::TableSetColumnIndex( 2 );
-									ImGui::Text( "%i", (int)model.surfs[ s ].vertices.size() );
+									ImGui::Text( "%i", (int)model.surfs[s].vertices.size() );
 									ImGui::TableSetColumnIndex( 3 );
-									ImGui::Text( "%i", (int)model.surfs[ s ].indices.size() );
+									ImGui::Text( "%i", (int)model.surfs[s].indices.size() );
+									ImGui::TableSetColumnIndex( 4 );
+									ImGui::Text( "(%.2f %.2f %.2f)", model.surfs[s].centroid[0], model.surfs[s].centroid[1], model.surfs[s].centroid[2] );
 								}
 								ImGui::EndTable();
 							}

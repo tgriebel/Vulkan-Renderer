@@ -22,6 +22,7 @@
 #include "scenes/sceneParser.h"
 #include "scenes/chessScene.h"
 #include <resource_types/gpuProgram.h>
+#include <SysCore/systemUtils.h>
 
 AssetManager						gAssets;
 Scene*								gScene;
@@ -85,11 +86,10 @@ int main()
 
 			if ( gImguiControls.openFileDialog ) {
 				std::string path = gWindow.OpenFileDialog();
-				std::size_t dirPos = path.find_last_of( "\\" );
-				std::size_t extPos = path.find_last_of( "." );
-				std::string dir = path.substr( 0, dirPos );
-				std::string file = path.substr( dirPos, extPos - dirPos );
-				std::string ext = path.substr( extPos, path.length() );
+				std::string dir;
+				std::string file;
+
+				SplitPath( path, dir, file );
 
 				std::string modelName = path;
 
@@ -103,7 +103,7 @@ int main()
 				gAssets.RunLoadLoop();
 				Entity* ent = new Entity();
 				ent->name = path;
-				ent->SetFlag( ENT_FLAG_DEBUG );
+				//ent->SetFlag( ENT_FLAG_DEBUG );
 				gScene->entities.push_back( ent );
 				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
 

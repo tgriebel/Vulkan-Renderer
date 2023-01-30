@@ -165,43 +165,43 @@
   "models": [
   	{
       "name" : "cube",
-      "model" : "cube"
+      "model" : "cube.obj"
     },
 	{
       "name" : "diamond",
-      "model" : "diamond"
+      "model" : "diamond.obj"
     },
 	{
       "name" : "pawn",
-      "model" : "pawn"
+      "model" : "pawn.obj"
     },
 	{
       "name" : "rook",
-      "model" : "rook"
+      "model" : "rook.obj"
     },
 	{
       "name" : "knight",
-      "model" : "knight"
+      "model" : "knight.obj"
     },
 	{
       "name" : "bishop",
-      "model" : "bishop"
+      "model" : "bishop.obj"
     },
 	{
       "name" : "king",
-      "model" : "king"
+      "model" : "king.obj"
     },
 	{
       "name" : "queen",
-      "model" : "queen"
+      "model" : "queen.obj"
     },
 	{
       "name" : "plane",
-      "model" : "plane"
+      "model" : "plane.obj"
     },
 	{
       "name" : "axis",
-      "model" : "axis",
+      "model" : "axis.obj",
     }
   ],
   "entities": [
@@ -220,13 +220,13 @@
     },
 	{
       "name" : "chess_board",
-      "model" : "chess_board",
+      "model" : "chess_board.obj",
 	  "rz" : 0.0,
 	  "sz" : 1.0
     },
 	{
       "name" : "sphere",
-      "model" : "sphere",
+      "model" : "sphere.obj",
 	  "hidden" : "true"
     }
   ]

@@ -146,9 +146,10 @@ bool SkyBoxLoader::Load( Model& model )
 		gb.AddPlaneSurf( info[ i ] );
 	}
 
+	model.surfCount = 1;
+	model.surfs.resize( model.surfCount );
 	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
 
-	model.surfCount = 1;
 	model.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "SKY" );
 
 	return true;
@@ -170,9 +171,10 @@ bool TerrainLoader::Load( Model& model )
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
+	model.surfCount = 1;
+	model.surfs.resize( model.surfCount );
 	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
 
-	model.surfCount = 1;
 	model.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "TERRAIN" );
 
 	return true;
@@ -199,9 +201,10 @@ bool WaterLoader::Load( Model& model )
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
+	model.surfCount = 1;
+	model.surfs.resize( model.surfCount );
 	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
 
-	model.surfCount = 1;
 	model.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "WATER" );
 
 	return true;
@@ -222,6 +225,8 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
 
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
 
 	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
@@ -233,7 +238,6 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
 	outModel.surfs[ 0 ].vertices[ 3 ].uv2 = vec2f( 0.0f, 0.0f );
 
-	outModel.surfCount = 1;
 	outModel.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( materialName.c_str() );
 }
 
