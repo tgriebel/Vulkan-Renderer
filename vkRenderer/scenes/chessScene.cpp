@@ -75,11 +75,6 @@ void ChessScene::Init()
 {
 	const int piecesNum = 16;
 
-	const uint32_t entCount = static_cast<uint32_t>( entities.size() );
-	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CreateEntityBounds( entities[ i ]->modelHdl, *entities[ i ] );
-	}
-
 	gameConfig_t cfg;
 	LoadConfig( "scenes/chessCfg/default_board.txt", cfg );
 	chessEngine.Init( cfg );
@@ -93,13 +88,6 @@ void ChessScene::Init()
 	}
 
 	gAssets.modelLib.Find( "plane" )->Get().surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "GlowSquare" );
-
-	//{
-	//	Entity* ent = new Entity();
-	//	scene.CreateEntityBounds( scene.modelLib.RetrieveHdl( "chess_board" ), *ent );
-	//	ent->name = "chess_board";
-	//	scene.entities.push_back( ent );
-	//}
 
 	for ( int i = 0; i < 8; ++i )
 	{
@@ -148,34 +136,6 @@ void ChessScene::Init()
 		ent->name = ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str();
 		entities.push_back( ent );
 	}
-
-	{
-		Entity* ent = new Entity();
-		CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
-		ent->name = "_postProcessQuad";
-		entities.push_back( ent );
-	}
-
-	{
-		Entity* ent = new Entity();
-		CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
-		ent->name = "_quadTexDebug";
-		entities.push_back( ent );
-	}
-
-	{
-		lights[ 0 ].lightPos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
-		lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
-
-		lights[ 1 ].lightPos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
-		lights[ 1 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
-		lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
-
-		lights[ 2 ].lightPos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
-		lights[ 2 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
-		lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
-	}
 }
 
 void ChessScene::Update( const float dt )
@@ -188,15 +148,7 @@ void ChessScene::Update( const float dt )
 	lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
 
 	const mouse_t& mouse = gWindow.input.GetMouse();
-	if ( mouse.centered )
-	{
-		const float maxSpeed = mouse.speed;
-		const float yawDelta = maxSpeed * mouse.dx;
-		const float pitchDelta = -maxSpeed * mouse.dy;
-		camera.AdjustYaw( yawDelta );
-		camera.AdjustPitch( pitchDelta );
-	}
-	else if ( mouse.leftDown )
+	if ( ( mouse.centered == false ) && mouse.leftDown )
 	{
 		Ray ray = camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
 		selectedEntity = GetTracedEntity( ray );

@@ -55,6 +55,47 @@ void CreateCodeAssets()
 	}
 }
 
+
+void InitScene( Scene* scene )
+{
+	// FIXME: weird left-over stuff from refactors
+	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
+	for ( uint32_t i = 0; i < entCount; ++i ) {
+		scene->CreateEntityBounds( scene->entities[ i ]->modelHdl, *scene->entities[ i ] );
+	}
+
+	scene->Init();
+
+	{
+		Entity* ent = new Entity();
+		scene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
+		ent->name = "_postProcessQuad";
+		scene->entities.push_back( ent );
+	}
+
+	{
+		Entity* ent = new Entity();
+		scene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
+		ent->name = "_quadTexDebug";
+		scene->entities.push_back( ent );
+	}
+
+	{
+		scene->lights[ 0 ].lightPos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
+		scene->lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		scene->lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
+
+		scene->lights[ 1 ].lightPos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
+		scene->lights[ 1 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
+		scene->lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+
+		scene->lights[ 2 ].lightPos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
+		scene->lights[ 2 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
+		scene->lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+	}
+}
+
+
 void UpdateScene( Scene* scene, const float dt )
 {
 	// FIXME: race conditions
@@ -90,6 +131,21 @@ void UpdateScene( Scene* scene, const float dt )
 		scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
 	}
 	scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
+
+	const mouse_t& mouse = gWindow.input.GetMouse();
+	if ( mouse.centered )
+	{
+		const float maxSpeed = mouse.speed;
+		const float yawDelta = maxSpeed * mouse.dx;
+		const float pitchDelta = -maxSpeed * mouse.dy;
+		scene->camera.AdjustYaw( yawDelta );
+		scene->camera.AdjustPitch( pitchDelta );
+	}
+	else if ( mouse.leftDown )
+	{
+		Ray ray = scene->camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
+		scene->selectedEntity = scene->GetTracedEntity( ray );
+	}
 
 	// Skybox
 	vec3f skyBoxOrigin;

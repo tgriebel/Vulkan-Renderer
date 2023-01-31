@@ -37,7 +37,6 @@ class ChessScene : public Scene
 private:
 	gameConfig_t	cfg;
 	Chess			chessEngine;
-	Entity*			selectedEntity = nullptr;
 	Entity*			movePieceId = nullptr;
 
 	std::vector< moveAction_t >	actions;

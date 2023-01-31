@@ -37,6 +37,7 @@ imguiControls_t gImguiControls;
 
 void CreateCodeAssets();
 void UpdateScene( Scene* scene, const float dt );
+void InitScene( Scene* scene );
 
 static float AdvanceTime()
 {
@@ -63,7 +64,7 @@ void CheckReloadAssets() {
 	}
 }
 
-int main()
+int main( int argc, char* argv[] )
 {
 	CreateCodeAssets();
 	LoadScene( "chess.json", &gScene, &gAssets );
@@ -71,7 +72,7 @@ int main()
 	std::thread renderThread( RenderThread );
 
 	gWindow.Init();
-	gScene->Init();
+	InitScene( gScene );
 
 	try
 	{
