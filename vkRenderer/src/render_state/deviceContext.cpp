@@ -16,7 +16,6 @@ bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<con
 	for ( const auto& extension : availableExtensions ) {
 		requiredExtensions.erase( extension.extensionName );
 	}
-
 	return requiredExtensions.empty();
 }
 

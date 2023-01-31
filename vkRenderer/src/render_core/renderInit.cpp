@@ -72,6 +72,7 @@ void Renderer::InitVulkan()
 		gWindow.CreateSurface();
 		PickPhysicalDevice();
 		CreateLogicalDevice();
+		SetupMarkers();
 		swapChain.Create( &gWindow, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
 	}
 
@@ -205,8 +206,21 @@ void Renderer::CreateLogicalDevice()
 	deviceFeatures.sampleRateShading = VK_TRUE;
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = static_cast<uint32_t>( deviceExtensions.size() );
-	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+	std::vector<const char*> enabledExtensions;
+	for( auto ext : deviceExtensions )
+	{
+		enabledExtensions.push_back( ext );
+	}
+	std::vector<const char*> captureExtensions = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
+	if( IsDeviceSuitable( context.physicalDevice, gWindow.vk_surface, captureExtensions ) ) {
+		for ( const char* ext : captureExtensions ) {
+			enabledExtensions.push_back( ext );
+		}
+	}
+
+	createInfo.enabledExtensionCount = static_cast<uint32_t>( enabledExtensions.size() );
+	createInfo.ppEnabledExtensionNames = enabledExtensions.data();
 	if ( enableValidationLayers )
 	{
 		createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );

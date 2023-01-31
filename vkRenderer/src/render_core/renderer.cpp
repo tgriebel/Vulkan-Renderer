@@ -171,7 +171,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surfaceUpload_t& upload = source.upload[ i ];
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl;
-		const Material& material = gAssets.materialLib.Find( materialHdl )->Get();
+		const Asset<Material>* materialAsset = gAssets.materialLib.Find( materialHdl );
+		const Material& material = materialAsset->Get();
 
 		renderFlags_t renderFlags = NONE;
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_NO_DRAW ) ? HIDDEN : NONE ) );
@@ -191,6 +192,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.flags = renderFlags;
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 		surf.hash = Hash( surf );
+		surf.dbgName = materialAsset->GetName().c_str();
 
 		if( material.dirty ) {
 			uploadMaterials.insert( materialHdl );
@@ -1093,6 +1095,107 @@ void Renderer::PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfo
 }
 
 
+void Renderer::SetupMarkers()
+{
+	uint32_t extensionCount;
+	vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, nullptr );
+
+	std::vector<VkExtensionProperties> availableExtensions( extensionCount );
+	vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, availableExtensions.data() );
+
+	bool found = false;
+	for ( const auto& extension : availableExtensions ) {
+		if ( strcmp( extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME ) == 0 ) {
+			found = true;
+			break;
+		}
+	}
+
+	if( found )
+	{
+		std::cout << "Enabling debug markers." << std::endl;
+
+		vk_fnDebugMarkerSetObjectTag = (PFN_vkDebugMarkerSetObjectTagEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectTagEXT" );
+		vk_fnDebugMarkerSetObjectName = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectNameEXT" );
+		vk_fnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerBeginEXT" );
+		vk_fnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerEndEXT" );
+		vk_fnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerInsertEXT" );
+
+		debugMarkersEnabled = ( vk_fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
+	} else {
+		std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled.";
+	}
+}
+
+
+void Renderer::MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name )
+{
+	if ( debugMarkersEnabled )
+	{
+		VkDebugMarkerObjectNameInfoEXT nameInfo = {};
+		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
+		nameInfo.objectType = objectType;
+		nameInfo.object = object;
+		nameInfo.pObjectName = name;
+		vk_fnDebugMarkerSetObjectName( context.device, &nameInfo );
+	}
+}
+
+
+void Renderer::MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag )
+{
+	if ( debugMarkersEnabled )
+	{
+		VkDebugMarkerObjectTagInfoEXT tagInfo = {};
+		tagInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT;
+		tagInfo.objectType = objectType;
+		tagInfo.object = object;
+		tagInfo.tagName = name;
+		tagInfo.tagSize = tagSize;
+		tagInfo.pTag = tag;
+		vk_fnDebugMarkerSetObjectTag( context.device, &tagInfo );
+	}
+}
+
+
+void Renderer::MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarkerName, const vec4f color )
+{
+	if ( debugMarkersEnabled )
+	{
+		VkDebugMarkerMarkerInfoEXT markerInfo = {};
+		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+		markerInfo.color[0] = color[0];
+		markerInfo.color[1] = color[1];
+		markerInfo.color[2] = color[2];
+		markerInfo.color[3] = color[3];
+		markerInfo.pMarkerName = pMarkerName;
+		vk_fnCmdDebugMarkerBegin( cmdbuffer, &markerInfo );	
+	}
+}
+
+
+void Renderer::MarkerEndRegion( VkCommandBuffer cmdBuffer )
+{
+	if ( debugMarkersEnabled )
+	{
+		vk_fnCmdDebugMarkerEnd( cmdBuffer );
+	}
+}
+
+
+void Renderer::MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, const vec4f color )
+{
+	if ( debugMarkersEnabled )
+	{
+		VkDebugMarkerMarkerInfoEXT markerInfo = {};
+		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
+		markerInfo.pMarkerName = markerName.c_str();
+		vk_fnCmdDebugMarkerInsert( cmdbuffer, &markerInfo );
+	}
+}
+
+
 void Renderer::SetupDebugMessenger()
 {
 	if ( !enableValidationLayers ) {
@@ -1127,6 +1230,24 @@ void Renderer::DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsM
 	if ( func != nullptr ) {
 		func( instance, debugMessenger, pAllocator );
 	}
+}
+
+
+static const char* GetPassDebugName( const drawPass_t pass )
+{
+	switch( pass )
+	{
+		case DRAWPASS_SHADOW:			return "Shadow Pass";
+		case DRAWPASS_DEPTH:			return "Depth Pass";
+		case DRAWPASS_TERRAIN:			return "Terrain Pass";
+		case DRAWPASS_OPAQUE:			return "Opaque Pass";
+		case DRAWPASS_SKYBOX:			return "Skybox Pass";
+		case DRAWPASS_TRANS:			return "Trans Pass";
+		case DRAWPASS_DEBUG_SOLID:		return "Debug Solid Pass";
+		case DRAWPASS_DEBUG_WIREFRAME:	return "Wireframe Pass";
+		case DRAWPASS_POST_2D:			return "2D Pass";
+	};
+	return "";
 }
 
 
@@ -1169,14 +1290,7 @@ void Renderer::Render( RenderView& view )
 		shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
 		shadowPassInfo.pClearValues = shadowClearValues.data();
 
-		//VkDebugUtilsLabelEXT markerInfo = {};
-		//markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
-		//markerInfo.pLabelName = "Begin Section";
-		//vkCmdBeginDebugUtilsLabelEXT( graphicsQueue.commandBuffers[ i ], &markerInfo );
-
-		//// contents of section here
-
-		//vkCmdEndDebugUtilsLabelEXT( graphicsQueue.commandBuffers[ i ] );
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Shadow Pass", ColorToVector( Color::White ) );
 
 		// TODO: how to handle views better?
 		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -1218,9 +1332,12 @@ void Renderer::Render( RenderView& view )
 			pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
+			MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
 			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, shadowView.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 		}
 		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+
+		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
 
 	// Main Passes
@@ -1240,6 +1357,8 @@ void Renderer::Render( RenderView& view )
 		renderPassInfo.pClearValues = clearValues.data();
 		renderPassInfo.clearValueCount = 2;
 
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Main Pass", ColorToVector( Color::White ) );
+
 		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 		VkViewport viewport{ };
@@ -1258,6 +1377,7 @@ void Renderer::Render( RenderView& view )
 
 		for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
 		{
+			MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], GetPassDebugName( (drawPass_t)pass ), ColorToVector( Color::White ) );
 			for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 			{
 				drawSurf_t& surface = view.merged[ surfIx ];
@@ -1290,10 +1410,14 @@ void Renderer::Render( RenderView& view )
 				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
+				MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
 				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 			}
+			MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 		}
 		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
+
 	}
 
 	// Post Process Passes
@@ -1311,6 +1435,8 @@ void Renderer::Render( RenderView& view )
 
 		postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
 		postProcessPassInfo.pClearValues = postProcessClearValues.data();
+
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Post-Process Pass", ColorToVector( Color::White ) );
 
 		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
@@ -1333,7 +1459,8 @@ void Renderer::Render( RenderView& view )
 			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 		}
 
-#ifdef USE_IMGUI 
+#ifdef USE_IMGUI
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Debug Menus", ColorToVector( Color::DGrey ) );
 		ImGui_ImplVulkan_NewFrame();
 		ImGui::NewFrame();
 
@@ -1342,9 +1469,11 @@ void Renderer::Render( RenderView& view )
 		// Render dear imgui into screen
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
+		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 #endif
 
 		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
 
 

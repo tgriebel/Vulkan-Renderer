@@ -144,6 +144,13 @@ private:
 	VkDescriptorBufferInfo			vk_materialBufferInfo[ MaxMaterialDescriptors ];
 	VkDescriptorBufferInfo			vk_lightBufferInfo[ MaxLights ];
 
+	bool								debugMarkersEnabled = false;
+	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
+	PFN_vkDebugMarkerSetObjectNameEXT	vk_fnDebugMarkerSetObjectName = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerBeginEXT		vk_fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerEndEXT			vk_fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerInsertEXT		vk_fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
+
 	float							shadowNearPlane = 0.1f;
 	float							shadowFarPlane = 1000.0f;
 
@@ -295,7 +302,13 @@ private:
 
 	std::vector<const char*>	GetRequiredExtensions() const;	
 	bool						CheckValidationLayerSupport();
-	void						PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );	
+	void						PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );
+	void						SetupMarkers();
+	void						MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );
+	void						MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
+	void						MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarkerName, const vec4f color );
+	void						MarkerEndRegion( VkCommandBuffer cmdBuffer );
+	void						MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, const vec4f color );
 	void						SetupDebugMessenger();
 	static VkResult				CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
 	static void					DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator );

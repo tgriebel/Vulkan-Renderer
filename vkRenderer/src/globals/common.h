@@ -243,6 +243,8 @@ struct drawSurf_t
 	uint8_t				stencilBit;
 	uint32_t			hash;
 
+	const char*			dbgName;
+
 	hdl_t				pipelineObject[ DRAWPASS_COUNT ];
 };
 
