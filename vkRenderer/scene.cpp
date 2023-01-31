@@ -102,11 +102,18 @@ void UpdateScene( Scene* scene, const float dt )
 
 	if ( gImguiControls.dbgImageId >= 0 )
 	{
-		scene->FindEntity( "_quadTexDebug" )->ClearFlag( ENT_FLAG_NO_DRAW );
-		gAssets.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, gImguiControls.dbgImageId % gAssets.textureLib.Count() );
+		Entity* ent = scene->FindEntity( "_quadTexDebug" );
+		if( ent != nullptr )
+		{
+			ent->ClearFlag( ENT_FLAG_NO_DRAW );
+			gAssets.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, gImguiControls.dbgImageId % gAssets.textureLib.Count() );
+		}
 	}
 	else {
-		scene->FindEntity( "_quadTexDebug" )->SetFlag( ENT_FLAG_NO_DRAW );
+		Entity* ent = scene->FindEntity( "_quadTexDebug" );
+		if ( ent != nullptr ) {
+			ent->SetFlag( ENT_FLAG_NO_DRAW );
+		}
 	}
 
 	scene->Update( dt );
