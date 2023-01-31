@@ -109,7 +109,7 @@ std::string Window::OpenFileDialog()
 		"obj files",
 		0 );
 
-	return fileName;
+	return ( fileName == nullptr ) ? "" : fileName;
 }
 
 void Window::PumpMessages()
