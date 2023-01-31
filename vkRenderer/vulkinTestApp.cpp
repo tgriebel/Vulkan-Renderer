@@ -67,7 +67,11 @@ void CheckReloadAssets() {
 int main( int argc, char* argv[] )
 {
 	CreateCodeAssets();
-	LoadScene( "chess.json", &gScene, &gAssets );
+	if( argc == 2 ) {
+		LoadScene( argv[1], &gScene, &gAssets );
+	} else {
+		LoadScene( "chess.json", &gScene, &gAssets );
+	}
 
 	std::thread renderThread( RenderThread );
 
