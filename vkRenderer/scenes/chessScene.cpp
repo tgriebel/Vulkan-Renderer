@@ -282,7 +282,7 @@ void ChessScene::Update( const float dt )
 
 	Material& glowMat = gAssets.materialLib.Find( "GlowSquare" )->Get();
 	glowMat.Kd = rgbTuplef_t( 0.1f, 0.1f, 1.0f );
-	glowMat.d = 0.5f * cos( 3.0f * time ) + 0.5f;
+	glowMat.Tr = 0.5f * cos( 3.0f * time ) + 0.5f;
 	glowMat.dirty = true;
 
 	for ( int i = 0; i < MaxLights; ++i )
