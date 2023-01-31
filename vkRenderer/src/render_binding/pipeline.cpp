@@ -261,15 +261,31 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 		colorFlags = 0;
 	}
 
+	const bool blendEnable = ( ( state.stateBits & GFX_STATE_BLEND_ENABLE ) != 0 );
+
 	VkPipelineColorBlendAttachmentState colorBlendAttachment{ };
-	colorBlendAttachment.colorWriteMask = colorFlags;
-	colorBlendAttachment.blendEnable = ( ( state.stateBits & GFX_STATE_BLEND_ENABLE ) != 0 ) ? VK_TRUE : VK_FALSE;
-	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+	if( blendEnable )
+	{
+		colorBlendAttachment.colorWriteMask = colorFlags;
+		colorBlendAttachment.blendEnable = VK_TRUE;
+		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+	}
+	else
+	{
+		colorBlendAttachment.colorWriteMask = colorFlags;
+		colorBlendAttachment.blendEnable = VK_FALSE;
+		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+	}
 
 	VkPipelineColorBlendStateCreateInfo colorBlending{ };
 	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -312,15 +328,28 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 		throw std::runtime_error( "Failed to create pipeline layout!" );
 	}
 
+	const bool depthTestEnable = ( ( state.stateBits & GFX_STATE_DEPTH_TEST ) != 0 );
+	const bool depthWriteEnable = ( ( state.stateBits & GFX_STATE_DEPTH_WRITE ) != 0 );
+
+	VkCompareOp blendOp;
+	if( ( state.stateBits & GFX_STATE_DEPTH_OP_0 ) != 0 ) {
+		blendOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+	} else {
+		blendOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
+	}
+
 	VkPipelineDepthStencilStateCreateInfo depthStencil{ };
 	depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-	depthStencil.depthTestEnable = ( ( state.stateBits & GFX_STATE_DEPTH_TEST ) != 0 ) ? VK_TRUE : VK_FALSE;
-	depthStencil.depthWriteEnable = ( ( state.stateBits & GFX_STATE_DEPTH_WRITE ) != 0 ) ? VK_TRUE : VK_FALSE;
-	depthStencil.depthCompareOp = ( ( state.stateBits & GFX_STATE_DEPTH_OP_0 ) != 0 ) ? VK_COMPARE_OP_LESS_OR_EQUAL : VK_COMPARE_OP_GREATER_OR_EQUAL;
+	depthStencil.depthTestEnable = depthTestEnable ? VK_TRUE : VK_FALSE;
+	depthStencil.depthWriteEnable = depthWriteEnable && !blendEnable ? VK_TRUE : VK_FALSE;
+	depthStencil.depthCompareOp = blendOp;
 	depthStencil.depthBoundsTestEnable = VK_FALSE;
 	depthStencil.minDepthBounds = 0.0f; // Optional
 	depthStencil.maxDepthBounds = 1.0f; // Optional
-	if ( ( state.stateBits & GFX_STATE_STENCIL_ENABLE ) != 0 )
+
+	const bool stencilEnable = ( ( state.stateBits & GFX_STATE_STENCIL_ENABLE ) != 0 );
+
+	if ( stencilEnable && ( blendEnable == false ) )
 	{
 		depthStencil.stencilTestEnable = VK_TRUE;
 		depthStencil.back.compareOp = VK_COMPARE_OP_GREATER_OR_EQUAL;
