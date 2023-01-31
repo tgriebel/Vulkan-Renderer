@@ -121,7 +121,7 @@ void main()
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
         const vec3 radiance     = attenuation * spotFalloff * lights[ i ].intensity;
 
-        vec3 diffuse = ( ( kD * albedo.rgb ) / PI + Fr ) * radiance * NoL;
+        vec3 diffuse = ( ( kD * albedo.rgb * diffuseColor ) / PI + Fr ) * radiance * NoL;
         Lo += diffuse;
     }
     outColor.rgb = Lo.rgb + ambient;
@@ -147,7 +147,7 @@ void main()
     }
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
-    outColor.rgb = envColor.rgb;
+//    outColor.rgb = envColor.rgb;
 //    outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
 //    outColor.rg = fragTexCoord.rb;
 }
