@@ -98,8 +98,6 @@ void UpdateScene( Scene* scene, const float dt )
 	skyBoxOrigin[ 2 ] = scene->camera.GetOrigin()[ 2 ] - 0.5f;
 	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
-	scene->Update( dt );
-
 	if ( gImguiControls.dbgImageId >= 0 )
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
