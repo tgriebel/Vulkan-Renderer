@@ -36,10 +36,7 @@ void Renderer::Cleanup()
 
 	ShutdownImGui();
 
-	vkDestroyBuffer( context.device, ib.GetVkObject(), nullptr );
-	vkDestroyBuffer( context.device, vb.GetVkObject(), nullptr );
-	vkDestroyBuffer( context.device, stagingBuffer.GetVkObject(), nullptr );
-
+	// Memory
 	vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
 	vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
@@ -48,8 +45,13 @@ void Renderer::Cleanup()
 	frameBufferMemory.Unbind();
 	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
+	// Buffers
 	vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 	vkFreeCommandBuffers( context.device, computeQueue.commandPool, 1, &computeQueue.commandBuffer );
+
+	vkDestroyBuffer( context.device, ib.GetVkObject(), nullptr );
+	vkDestroyBuffer( context.device, vb.GetVkObject(), nullptr );
+	vkDestroyBuffer( context.device, stagingBuffer.GetVkObject(), nullptr );
 
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
 		vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
@@ -57,6 +59,13 @@ void Renderer::Cleanup()
 		vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.GetVkObject(), nullptr );
 		vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
 	}
+
+	// Images
+	vkDestroyImage( context.device, rc.whiteImage.vk_image, nullptr );
+	vkDestroyImageView( context.device, rc.whiteImage.vk_view, nullptr );
+
+	vkDestroyImage( context.device, rc.blackImage.vk_image, nullptr );
+	vkDestroyImageView( context.device, rc.blackImage.vk_view, nullptr );
 
 	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
@@ -69,6 +78,7 @@ void Renderer::Cleanup()
 	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
 	vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
 
+	// PSO
 	const uint32_t psoCount = pipelineLib.Count();
 	for ( uint32_t i = 0; i < psoCount; ++i )
 	{
@@ -85,6 +95,10 @@ void Renderer::Cleanup()
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[1], nullptr );
 	}
 
+	vkDestroyDescriptorSetLayout( context.device, globalLayout, nullptr );
+	vkDestroyDescriptorSetLayout( context.device, postProcessLayout, nullptr );
+
+	// Sync
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 	{
 		vkDestroySemaphore( context.device, graphicsQueue.renderFinishedSemaphores[ i ], nullptr );
@@ -121,11 +135,13 @@ void Renderer::DestroyFrameResources()
 		vkDestroyImageView( context.device, frameState[ i ].viewColorImage.vk_view, nullptr );
 		vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.vk_view, nullptr );
 		vkDestroyImageView( context.device, frameState[ i ].depthImage.vk_view, nullptr );
+		vkDestroyImageView( context.device, frameState[ i ].stencilImage.vk_view, nullptr );
 
 		// Images
 		vkDestroyImage( context.device, frameState[ i ].viewColorImage.vk_image, nullptr );
 		vkDestroyImage( context.device, frameState[ i ].shadowMapImage.vk_image, nullptr );
 		vkDestroyImage( context.device, frameState[ i ].depthImage.vk_image, nullptr );
+		vkDestroyImage( context.device, frameState[ i ].stencilImage.vk_image, nullptr );
 
 		// Passes
 		vkDestroyFramebuffer( context.device, shadowPassState.fb[ i ], nullptr );
