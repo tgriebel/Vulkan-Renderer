@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\SysCore;..\..\..\Chess\Chess;C:\Users\thoma\source\repos\Raytracer-Graphic-Pipeline-master\src;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup>
