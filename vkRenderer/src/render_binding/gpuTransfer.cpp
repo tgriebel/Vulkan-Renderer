@@ -59,6 +59,8 @@ void Renderer::UploadTextures()
 
 		const uint32_t layers = texture.info.layers;
 		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage.vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
+		
+		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.uploadId = imageFreeSlot++;
 		gpuImages[texture.uploadId];
 	}
@@ -104,6 +106,7 @@ void Renderer::UpdateGpuMaterials()
 		}
 		m.dirty = false;
 
+		assert( m.uploadId < MaxMaterialDescriptors );
 		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t handle = m.GetTexture( t );
@@ -192,6 +195,8 @@ void Renderer::UploadModelsToGPU()
 
 				upload.vertexCount = vertexCount;
 				vbBufElements += vertexCount;
+
+				assert( vbBufElements < MaxVertices );
 			}
 
 			// Upload Index Buffer
@@ -210,6 +215,8 @@ void Renderer::UploadModelsToGPU()
 				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
 				upload.indexCount = indexCount;
 				ibBufElements += indexCount;
+
+				assert( ibBufElements < MaxIndices );
 			}
 		}
 		model.uploaded = true;
