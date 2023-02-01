@@ -842,9 +842,10 @@ void Renderer::CreateImage( const textureInfo_t& info, VkFormat format, VkImageT
 	imageInfo.usage = usage;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = numSamples;
+
+	VkImageStencilUsageCreateInfo stencilUsage{};
 	if ( format == FindDepthFormat() )
 	{
-		VkImageStencilUsageCreateInfo stencilUsage{};
 		stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 		stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 		imageInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
