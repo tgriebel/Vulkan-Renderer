@@ -2,6 +2,28 @@
 
 Work-in-progress.
 
-Basic rendering: depth-prepass, shadow maps, opaque, transparent, post-process. Multiple shaders, PBR, stencil effects, rudimentary asset pipeline.
+Features:
+* Depth-prepass
+* Shadow maps
+* PBR Opaque
+* Transparents
+* Post-process
+* Multiple shaders
+* Stencil effects
+* Asset and scene management
+* Model instancing
+* Runtime Object manipulation
+* Shader hotswap
 
-Very rough and not very polished.
+Partial Support:
+* Raytracer and software rasterizer
+* MSAA
+* Env-maps
+
+To-Do:
+* Depth-of-Field
+* Bin files for models
+* Individual shader reload
+* Fix release build
+
+Still a work-in-progress
