@@ -27,12 +27,18 @@
 #include "renderer.h"
 #include <scene/entity.h>
 
+extern AssetLib< pipelineObject_t > pipelineLib; // TODO: move to renderer
+
 void Renderer::Cleanup()
 {
 	DestroyFrameResources();
 	swapChain.Destroy();
 
 	ShutdownImGui();
+
+	vkDestroyBuffer( context.device, ib.GetVkObject(), nullptr );
+	vkDestroyBuffer( context.device, vb.GetVkObject(), nullptr );
+	vkDestroyBuffer( context.device, stagingBuffer.GetVkObject(), nullptr );
 
 	vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
 	vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
@@ -62,6 +68,22 @@ void Renderer::Cleanup()
 
 	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
 	vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
+
+	const uint32_t psoCount = pipelineLib.Count();
+	for ( uint32_t i = 0; i < psoCount; ++i )
+	{
+		Asset<pipelineObject_t>* psoAsset = pipelineLib.Find( i );
+		vkDestroyPipeline( context.device, psoAsset->Get().pipeline, nullptr );
+		vkDestroyPipelineLayout( context.device, psoAsset->Get().pipelineLayout, nullptr );
+	}
+
+	const uint32_t shaderCount = gAssets.gpuPrograms.Count();
+	for ( uint32_t i = 0; i < shaderCount; ++i )
+	{
+		Asset<GpuProgram>* shaderAsset = gAssets.gpuPrograms.Find( i );
+		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[0], nullptr );
+		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[1], nullptr );
+	}
 
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 	{
