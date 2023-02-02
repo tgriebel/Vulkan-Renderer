@@ -77,6 +77,10 @@ void main()
     const uint albedoTexId = materials[ materialId ].textureId0;
     const uint normalTexId = materials[ materialId ].textureId1;
     const uint roughnessTexId = materials[ materialId ].textureId2;
+	
+	const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
+    const vec3 specularColor = materials[ materialId ].Ks.rgb;
+    const float specularPower = materials[ materialId ].Ns;
 
     const mat4 modelMat = ubo[ objectId ].model;
     const mat4 viewMat = ubo[ objectId ].view;
@@ -84,9 +88,9 @@ void main()
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
-    const vec4 albedo = isTextured ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : fragColor;
+    const vec4 albedoTex = isTextured ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4( diffuseColor, 1.0f );
     const vec3 normalTex = isTextured ? 2.0f * texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb - vec3( 1.0f, 1.0f, 1.0f ) : vec3( 0.0f, 0.0f, 1.0f );
-    const vec4 roughnessTex = isTextured ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( 1.0f );
+    const vec4 roughnessTex = isTextured ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( specularColor, 1.0f );
 
     const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 
@@ -104,17 +108,16 @@ void main()
     float NoV = abs( dot( n, v ) );
 
     float metallic = 0.0f;
-
-    vec3 F0 = vec3( 0.04f ); 
-    F0 = mix( F0, albedo.rgb, metallic );
-
-    const float AMBIENT_LIGHT_FACTOR = 0.03f;
+	
+	const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;
-    const vec3 ambient = albedo.rgb * ao * AMBIENT_LIGHT_FACTOR * materials[ materialId ].Ka.rgb;
-    const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
-    const vec3 specularColor = materials[ materialId ].Ks.rgb;
-    const float specularPower = materials[ materialId ].Ns;
 
+	const vec3 albedoColor = albedoTex.rgb;
+    const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * materials[ materialId ].Ka.rgb;
+	
+    vec3 F0 = vec3( 0.04f ); 
+    F0 = mix( F0, albedoColor.rgb, metallic );
+	
     vec3 Lo = vec3( 0.0f, 0.0f, 0.0f );
     for( int i = 0; i < 3; ++i ) {
 	    const vec3 l = normalize( lights[ i ].lightPos - worldPosition.xyz );
@@ -144,7 +147,7 @@ void main()
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
         const vec3 radiance     = attenuation * spotFalloff * lights[ i ].intensity;
 
-        vec3 diffuse = ( ( kD * albedo.rgb * diffuseColor ) / PI + Fr ) * radiance * NoL;
+        vec3 diffuse = ( ( kD * albedoColor.rgb ) / PI + Fr ) * radiance * NoL;
         Lo += diffuse;
     }
     outColor.rgb = Lo.rgb + ambient;
@@ -170,6 +173,7 @@ void main()
     }
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
+	outColor.a = materials[ materialId ].Tr;
 //    outColor.rgb = envColor.rgb;
 //    outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
 //    outColor.rg = fragTexCoord.rb;
