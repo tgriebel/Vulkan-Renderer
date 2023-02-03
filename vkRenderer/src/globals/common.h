@@ -351,6 +351,7 @@ struct imguiControls_t
 	bool		rebuildRaytraceScene;
 	bool		openModelImportFileDialog;
 	bool		openSceneFileDialog;
+	bool		reloadScene;
 	vec3f		selectedModelOrigin;
 };
 #endif

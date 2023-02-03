@@ -293,28 +293,50 @@ int ParseModelObject( parseState_t& st, void* object )
 
 	struct modelObjectData_t
 	{
-		std::string name;
-		std::string modelName;
+		std::string	name;
+		std::string	modelName;
+		std::string	s[3];
+		float		f[3];
+		int			i[3];
 	};
 
 	modelObjectData_t od;
 
-	const uint32_t objectCount = 2;
+	const uint32_t objectCount = 11;
 	static const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &od.name, &ParseStringObject },
-		{ "model", &od.modelName, &ParseStringObject }
+		{ "model", &od.modelName, &ParseStringObject },
+		{ "argStr0", &od.s[0], &ParseStringObject },
+		{ "argStr1", &od.s[1], &ParseStringObject },
+		{ "argStr2", &od.s[2], &ParseStringObject },
+		{ "argInt0", &od.i[0], &ParseIntObject },
+		{ "argInt1", &od.i[1], &ParseIntObject },
+		{ "argInt2", &od.i[2], &ParseIntObject },
+		{ "argFlt0", &od.f[0], &ParseFloatObject },
+		{ "argFlt1", &od.f[1], &ParseFloatObject },
+		{ "argFlt2", &od.f[2], &ParseFloatObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
 
-	ModelLoader* loader = new ModelLoader();
-	loader->SetModelPath( ModelPath );
-	loader->SetTexturePath( TexturePath );
-	loader->SetModelName( od.modelName );
-	loader->SetAssetRef( st.assets );
-	st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( loader ) );
-
+	if ( od.modelName == "_skybox" ) {
+		st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( new SkyBoxLoader() ) );
+	}
+	else if ( od.modelName == "_terrain" )
+	{
+		hdl_t handle = AssetLibMaterials::Handle( od.s[0].c_str() );
+		st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( new TerrainLoader( od.i[0], od.i[1], od.f[0], od.f[1], handle ) ) );
+	}
+	else 
+	{
+		ModelLoader* loader = new ModelLoader();
+		loader->SetModelPath( ModelPath );
+		loader->SetTexturePath( TexturePath );
+		loader->SetModelName( od.modelName );
+		loader->SetAssetRef( st.assets );
+		st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( loader ) );
+	}
 	return st.tx;
 }
 
@@ -358,10 +380,13 @@ int ParseEntityObject( parseState_t& st, void* object )
 
 	Entity* ent = new Entity();
 	ent->name = name;
+	ent->modelHdl = AssetLibModels::Handle( modelName.c_str() );
+	
 	if ( modelName == "_skybox" ) {
 		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName.c_str(), loader_t( new SkyBoxLoader() ) );
 	}
-	else {
+	else if( st.assets->modelLib.Find( ent->modelHdl ) == st.assets->modelLib.GetDefault() )
+	{
 		ModelLoader* loader = new ModelLoader();
 		loader->SetModelPath( ModelPath );
 		loader->SetTexturePath( TexturePath );
@@ -398,10 +423,26 @@ int ParseMaterialObject( parseState_t& st, void* object )
 	Material m;
 	std::string name;
 
-	const uint32_t objectCount = 8;
+	// TODO: allow parse functions that aren't just primitives. Need objects/array reading
+	const uint32_t objectCount = 23;
 	static const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
+		{ "KaR", &m.Ka.r, &ParseFloatObject },
+		{ "KaG", &m.Ka.g, &ParseFloatObject },
+		{ "KaB", &m.Ka.b, &ParseFloatObject },
+		{ "KeR", &m.Ke.r, &ParseFloatObject },
+		{ "KeG", &m.Ke.g, &ParseFloatObject },
+		{ "KeB", &m.Ke.b, &ParseFloatObject },
+		{ "KdR", &m.Kd.r, &ParseFloatObject },
+		{ "KdG", &m.Kd.g, &ParseFloatObject },
+		{ "KdB", &m.Kd.b, &ParseFloatObject },
+		{ "KsR", &m.Ks.r, &ParseFloatObject },
+		{ "KsG", &m.Ks.g, &ParseFloatObject },
+		{ "KsB", &m.Ks.b, &ParseFloatObject },
+		{ "TfR", &m.Tf.r, &ParseFloatObject },
+		{ "TfG", &m.Tf.g, &ParseFloatObject },
+		{ "TfB", &m.Tf.b, &ParseFloatObject },
 		{ "tr", &m.Tr, &ParseFloatObject },
 		{ "ns", &m.Ns, &ParseFloatObject },
 		{ "ni", &m.Ni, &ParseFloatObject },

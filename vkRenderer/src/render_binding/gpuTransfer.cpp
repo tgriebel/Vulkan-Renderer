@@ -131,15 +131,27 @@ void Renderer::UpdateGpuMaterials()
 
 		assert( m.uploadId < MaxMaterialDescriptors );
 		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
-		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
-			const hdl_t handle = m.GetTexture( t );
-			if ( handle.IsValid() ) {
-				const int uploadId = gAssets.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
-				assert( uploadId >= 0 );
-				ubo.textures[ t ] = uploadId;
+
+		if( m.usage == MATERIAL_USAGE_CODE )
+		{
+			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
+			{
+				ubo.textures[ t ] = t;
 			}
-			else {
-				ubo.textures[ t ] = 0;
+		}
+		else
+		{
+			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
+			{
+				const hdl_t handle = m.GetTexture( t );
+				if ( handle.IsValid() ) {
+					const int uploadId = gAssets.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
+					assert( uploadId >= 0 );
+					ubo.textures[ t ] = uploadId;
+				}
+				else {
+					ubo.textures[ t ] = -1;
+				}
 			}
 		}
 		ubo.Kd = vec4f( m.Kd.r, m.Kd.g, m.Kd.b, 1.0f );

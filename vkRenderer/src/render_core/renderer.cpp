@@ -330,7 +330,7 @@ void Renderer::RenderScene( Scene* scene )
 	SubmitFrame();
 
 	frameTimer.Stop();
-	renderTime = frameTimer.GetElapsed();
+	renderTime = static_cast<float>( frameTimer.GetElapsed() );
 
 	if( gImguiControls.rebuildRaytraceScene ) {
 		BuildRayTraceScene( scene );
@@ -1452,6 +1452,9 @@ void Renderer::Render( RenderView& view )
 				if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
 					continue;
 				}
+				if ( ( pass == DRAWPASS_DEPTH ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
+					continue;
+				}
 				if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
 					continue;
 				}
@@ -1558,6 +1561,9 @@ void Renderer::DrawDebugMenu()
 		{
 			if ( ImGui::MenuItem( "Open Scene", "CTRL+O" ) ) {
 				gImguiControls.openSceneFileDialog = true;
+			}
+			if ( ImGui::MenuItem( "Reload", "CTRL+R" ) ) {
+				gImguiControls.reloadScene = true;
 			}
 			if ( ImGui::MenuItem( "Import Obj", "CTRL+I" ) ) {
 				gImguiControls.openModelImportFileDialog = true;
@@ -1726,6 +1732,7 @@ void Renderer::DrawDebugMenu()
 					{
 						if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
 						{
+							ImGui::TableSetColumnIndex( 0 );
 							ImGui::Text("Width");
 							ImGui::TableNextColumn();
 							ImGui::Text( "%u", texture.info.width );
@@ -1892,6 +1899,16 @@ void Renderer::DrawDebugMenu()
 						ent->SetFlag( ENT_FLAG_NO_DRAW );
 					} else {
 						ent->ClearFlag( ENT_FLAG_NO_DRAW );
+					}
+				}
+				ImGui::SameLine();
+				bool wireframe = ent->HasFlag( ENT_FLAG_WIREFRAME );
+				if ( ImGui::Checkbox( "Wireframe", &wireframe ) )
+				{
+					if ( wireframe ) {
+						ent->SetFlag( ENT_FLAG_WIREFRAME );
+					} else {
+						ent->ClearFlag( ENT_FLAG_WIREFRAME );
 					}
 				}
 			}

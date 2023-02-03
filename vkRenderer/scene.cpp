@@ -17,12 +17,14 @@ void CreateCodeAssets()
 	{
 		{
 			Material material;
+			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
 			gAssets.materialLib.Add( "TONEMAP", material );
 		}
 
 		{
 			Material material;
+			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
 			gAssets.materialLib.Add( "IMAGE2D", material );
 		}

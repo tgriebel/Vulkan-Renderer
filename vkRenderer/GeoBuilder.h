@@ -51,6 +51,7 @@ public:
 		vec2f				gridSize;
 		normalDirection_t	normalDirection;
 		vec2f				uv[ 2 ];
+		float				uvScale;
 	};
 
 	std::vector<vertex_t>	vb;
@@ -59,6 +60,23 @@ public:
 	GeoBuilder()
 	{
 	
+	}
+
+	static float WrapU( const float u )
+	{
+		float s = u;
+		s = ( s > 1.0 ) ? ( s - floor( s ) ) : s;
+		s = Saturate( s );
+
+		return s;
+	}
+
+	static vec2f WrapUV( const vec2f& uv )
+	{
+		vec2f st = uv;
+		st[0] = WrapU( st[0] );
+		st[1] = WrapU( st[1] );
+		return st;
 	}
 
 	void AddPlaneSurf( const planeInfo_t& info )
@@ -73,12 +91,15 @@ public:
 		vb.resize( vbIx + vertexDim.first * vertexDim.second );
 		ib.resize( indicesCnt + verticesPerQuad * info.widthInQuads * info.heightInQuads );
 
+		const vec2f uv0 = info.uv[ 0 ];
+		const vec2f uv1 = info.uv[ 1 ];
+
 		for ( size_t j = 0; j < vertexDim.second; ++j )
 		{
 			for ( size_t i = 0; i < vertexDim.first; ++i )
 			{
-				const float u = ( i / static_cast<float>( info.widthInQuads ) );
-				const float v = ( j / static_cast<float>( info.heightInQuads ) );
+				const float u = info.uvScale * ( i / static_cast<float>( info.widthInQuads ) );
+				const float v = info.uvScale * ( j / static_cast<float>( info.heightInQuads ) );
 
 				vertex_t& vert = vb[ vbIx ];
 				switch ( info.normalDirection )
@@ -89,8 +110,8 @@ public:
 									vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
 									vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
 									vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );
-									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
-									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
+									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
+									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
 								 break;
 
 				case NORMAL_X_NEG:	vert.pos			= { 0.0f, i * info.gridSize[ 0 ], j * info.gridSize[ 1 ] };
@@ -98,8 +119,8 @@ public:
 									vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
 									vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
 									vert.normal			= vec3f( -1.0f, 0.0f, 0.0f );
-									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + u * info.uv[ 1 ][ 0 ];
-									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
+									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + u * uv1[ 0 ] );
+									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
 								 break;
 
 				case NORMAL_Y_POS:	vert.pos			= { i * info.gridSize[ 0 ], 0.0f, j * info.gridSize[ 1 ] };
@@ -107,8 +128,8 @@ public:
 									vert.tangent		= vec3f( -1.0f, 0.0f, 0.0f );
 									vert.bitangent		= vec3f( 0.0f, 0.0f,1.0f );
 									vert.normal			= vec3f( 0.0f, 1.0f, 0.0f );
-									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
-									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
+									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
+									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
 								 break;
 
 				case NORMAL_Y_NEG:	vert.pos			= { i * info.gridSize[ 0 ], 0.0f, j * info.gridSize[ 1 ] };
@@ -116,8 +137,8 @@ public:
 									vert.tangent		= vec3f( 0.0f, 0.0f, 1.0f );
 									vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
 									vert.normal			= vec3f( 0.0f, -1.0f, 0.0f );
-									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + u * info.uv[ 1 ][ 0 ];
-									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
+									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + u * uv1[ 0 ] );
+									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
 								 break;
 
 				case NORMAL_Z_POS:	vert.pos			= { i * info.gridSize[ 0 ], j * info.gridSize[ 1 ], 0.0f };
@@ -125,8 +146,8 @@ public:
 									vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
 									vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
 									vert.normal			= vec3f( 0.0f, 0.0f, 1.0f );
-									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
-									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + ( 1.0f - v ) * info.uv[ 1 ][ 1 ];
+									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
+									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
 								 break;
 
 				case NORMAL_Z_NEG:	vert.pos			= { i * info.gridSize[ 0 ],	j * info.gridSize[ 1 ],	0.0f };
@@ -134,8 +155,8 @@ public:
 									vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
 									vert.bitangent		= vec3f( 1.0f, 0.0f, 0.0f );
 									vert.normal			= vec3f( 0.0f, 0.0f, -1.0f );
-									vert.texCoord[ 0 ]	= info.uv[ 0 ][ 0 ] + ( 1.0f - u ) * info.uv[ 1 ][ 0 ];
-									vert.texCoord[ 1 ]	= info.uv[ 0 ][ 1 ] + v * info.uv[ 1 ][ 1 ];
+									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
+									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + v * uv1[ 1 ] );
 								 break;
 				}
 				vert.pos -= info.origin;

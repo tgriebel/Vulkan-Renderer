@@ -80,25 +80,29 @@ void MatrixToEulerZYX( const mat4x4f& m, float& xDegrees, float& yDegrees, float
 }
 
 
-static void CopyGeoBuilderResult( const GeoBuilder& gb, std::vector<vertex_t>& vb, std::vector<uint32_t>& ib )
+static void CopyGeoBuilderResult( const GeoBuilder& gb, Surface& surf, AABB& bounds )
 {
-	vb.reserve( gb.vb.size() );
+
+	surf.vertices.reserve( gb.vb.size() );
 	for ( const GeoBuilder::vertex_t& v : gb.vb )
 	{
 		vertex_t vert;
 		vert.pos = vec4f( v.pos[ 0 ], v.pos[ 1 ], v.pos[ 2 ], 0.0f );
 		vert.color = Color( v.color[ 0 ], v.color[ 1 ], v.color[ 2 ], v.color[ 3 ] );
 		vert.normal = vec3f( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
+		vert.tangent = vec3f( v.tangent[ 0 ], v.tangent[ 1 ], v.tangent[ 2 ] );
+		vert.bitangent = vec3f( v.bitangent[ 0 ], v.bitangent[ 1 ], v.bitangent[ 2 ] );
 		vert.uv = vec2f( v.texCoord[ 0 ], v.texCoord[ 1 ] );
 		vert.uv2 = vec2f( 0.0f, 0.0f );
 
-		vb.push_back( vert );
+		surf.vertices.push_back( vert );
+		bounds.Expand( vert.pos );
 	}
 
-	ib.reserve( gb.ib.size() );
+	surf.indices.reserve( gb.ib.size() );
 	for ( uint32_t index : gb.ib )
 	{
-		ib.push_back( index );
+		surf.indices.push_back( index );
 	}
 }
 
@@ -113,6 +117,7 @@ bool SkyBoxLoader::Load( Model& model )
 	info[ 0 ].gridSize = vec2f( gridSize );
 	info[ 0 ].widthInQuads = width;
 	info[ 0 ].heightInQuads = height;
+	info[ 0 ].uvScale = 1.0f;
 	info[ 0 ].uv[ 0 ] = vec2f( 1.0f, 1.0f );
 	info[ 0 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
 	info[ 0 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
@@ -122,6 +127,7 @@ bool SkyBoxLoader::Load( Model& model )
 	info[ 1 ].gridSize = vec2f( gridSize );
 	info[ 1 ].widthInQuads = width;
 	info[ 1 ].heightInQuads = height;
+	info[ 1 ].uvScale = 1.0f;
 	info[ 1 ].uv[ 0 ] = vec2f( 1.0f, 1.0f );
 	info[ 1 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
 	info[ 1 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, -gridSize );
@@ -131,6 +137,7 @@ bool SkyBoxLoader::Load( Model& model )
 	info[ 2 ].gridSize = vec2f( gridSize );
 	info[ 2 ].widthInQuads = width;
 	info[ 2 ].heightInQuads = height;
+	info[ 2 ].uvScale = 1.0f;
 	info[ 2 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
 	info[ 2 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 2 ].origin = vec3f( -0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
@@ -140,6 +147,7 @@ bool SkyBoxLoader::Load( Model& model )
 	info[ 3 ].gridSize = vec2f( gridSize );
 	info[ 3 ].widthInQuads = width;
 	info[ 3 ].heightInQuads = height;
+	info[ 3 ].uvScale = 1.0f;
 	info[ 3 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
 	info[ 3 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 3 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
@@ -149,6 +157,7 @@ bool SkyBoxLoader::Load( Model& model )
 	info[ 4 ].gridSize = vec2f( gridSize );
 	info[ 4 ].widthInQuads = width;
 	info[ 4 ].heightInQuads = height;
+	info[ 4 ].uvScale = 1.0f;
 	info[ 4 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
 	info[ 4 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 4 ].origin = vec3f( 0.5f * gridSize * width, -0.5f * gridSize * height, 0.0f );
@@ -158,6 +167,7 @@ bool SkyBoxLoader::Load( Model& model )
 	info[ 5 ].gridSize = vec2f( gridSize );
 	info[ 5 ].widthInQuads = width;
 	info[ 5 ].heightInQuads = height;
+	info[ 5 ].uvScale = 1.0f;
 	info[ 5 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
 	info[ 5 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 5 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
@@ -171,9 +181,9 @@ bool SkyBoxLoader::Load( Model& model )
 
 	model.surfCount = 1;
 	model.surfs.resize( model.surfCount );
-	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, model.surfs[ 0 ], model.bounds );
 
-	model.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "SKY" );
+	model.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( "SKY" );
 
 	return true;
 }
@@ -182,9 +192,10 @@ bool SkyBoxLoader::Load( Model& model )
 bool TerrainLoader::Load( Model& model )
 {
 	GeoBuilder::planeInfo_t info;
-	info.gridSize = vec2f( 0.1f );
-	info.widthInQuads = 100;
-	info.heightInQuads = 100;
+	info.gridSize = vec2f( cellSize );
+	info.widthInQuads = width;
+	info.heightInQuads = height;
+	info.uvScale = uvScale;
 	info.uv[ 0 ] = vec2f( 0.0f, 0.0f );
 	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, 0.0f );
@@ -196,9 +207,9 @@ bool TerrainLoader::Load( Model& model )
 
 	model.surfCount = 1;
 	model.surfs.resize( model.surfCount );
-	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, model.surfs[ 0 ], model.bounds );
 
-	model.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "TERRAIN" );
+	model.surfs[ 0 ].materialHdl = handle;
 
 	return true;
 }
@@ -215,6 +226,7 @@ bool WaterLoader::Load( Model& model )
 	info.gridSize = vec2f( 10.0f );
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
+	info.uvScale = 1.0f;
 	info.uv[ 0 ] = vec2f( 0.0f, 0.0f );
 	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, -0.15f );
@@ -226,9 +238,9 @@ bool WaterLoader::Load( Model& model )
 
 	model.surfCount = 1;
 	model.surfs.resize( model.surfCount );
-	CopyGeoBuilderResult( gb, model.surfs[ 0 ].vertices, model.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, model.surfs[ 0 ], model.bounds );
 
-	model.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "WATER" );
+	model.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( "WATER" );
 
 	return true;
 }
@@ -240,6 +252,7 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	info.gridSize = size;
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
+	info.uvScale = 1.0f;
 	info.uv[ 0 ] = vec2f( 1.0f, 0.0f );
 	info.uv[ 1 ] = vec2f( -1.0f, 1.0f );
 	info.origin = vec3f( origin[ 0 ], origin[ 1 ], 0.0f );
@@ -250,7 +263,7 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 
 	outModel.surfCount = 1;
 	outModel.surfs.resize( outModel.surfCount );
-	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ].vertices, outModel.surfs[ 0 ].indices );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
 
 	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
 	outModel.surfs[ 0 ].vertices[ 0 ].uv2 = vec2f( 0.0f, 0.0f );
@@ -261,7 +274,7 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
 	outModel.surfs[ 0 ].vertices[ 3 ].uv2 = vec2f( 0.0f, 0.0f );
 
-	outModel.surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( materialName.c_str() );
+	outModel.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( materialName.c_str() );
 }
 
 

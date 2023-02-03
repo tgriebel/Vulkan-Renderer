@@ -74,9 +74,9 @@ void main()
 {
     const uint materialId = pushConstants.materialId;
 	const bool isTextured = materials[ materialId ].textured != 0;
-    const uint albedoTexId = materials[ materialId ].textureId0;
-    const uint normalTexId = materials[ materialId ].textureId1;
-    const uint roughnessTexId = materials[ materialId ].textureId2;
+    const int albedoTexId = isTextured ? materials[ materialId ].textureId0 : -1;
+    const int normalTexId = isTextured ? materials[ materialId ].textureId1 : -1;
+    const int roughnessTexId = isTextured ? materials[ materialId ].textureId2 : -1;
 	
 	const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
     const vec3 specularColor = materials[ materialId ].Ks.rgb;
@@ -88,9 +88,9 @@ void main()
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
-    const vec4 albedoTex = isTextured ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4( diffuseColor, 1.0f );
-    const vec3 normalTex = isTextured ? 2.0f * texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb - vec3( 1.0f, 1.0f, 1.0f ) : vec3( 0.0f, 0.0f, 1.0f );
-    const vec4 roughnessTex = isTextured ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( specularColor, 1.0f );
+    const vec4 albedoTex = ( albedoTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4( diffuseColor, 1.0f );
+    const vec3 normalTex = ( normalTexId >= 0 ) ? 2.0f * texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb - vec3( 1.0f, 1.0f, 1.0f ) : vec3( 0.0f, 0.0f, 1.0f );
+    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( specularColor, 1.0f );
 
     const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 

@@ -63,8 +63,21 @@ public:
 class TerrainLoader : public LoadHandler<Model>
 {
 private:
+	int width;
+	int height;
+	float cellSize;
+	float uvScale;
+	hdl_t handle;
 	bool Load( Model& model );
 public:
+	TerrainLoader( const int _width, const int _height, const float _cellSize, const float _uvScale, const hdl_t _handle )
+	{
+		width = _width;
+		height= _height;
+		cellSize = _cellSize;
+		handle = _handle;
+		uvScale = _uvScale;
+	}
 };
 
 

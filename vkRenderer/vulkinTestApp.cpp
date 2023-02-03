@@ -54,6 +54,8 @@ Window								gWindow;
 
 static SpinLock						acquireNextFrame;
 
+static std::string sceneFile = "chess.json";
+
 #if defined( USE_IMGUI )
 imguiControls_t gImguiControls;
 #endif
@@ -76,7 +78,8 @@ void RenderThread()
 {
 }
 
-void CheckReloadAssets() {
+void CheckReloadAssets()
+{
 	if ( gImguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
 		gAssets.gpuPrograms.UnloadAll();
@@ -88,13 +91,33 @@ void CheckReloadAssets() {
 	}
 }
 
+
+void LoadNewScene( const std::string fileName )
+{
+	gAssets.Clear();
+	ShutdownScene( gScene );
+	delete gScene;
+	gScene = nullptr;
+	gRenderer.ShutdownGPU();
+
+	CreateCodeAssets();
+	LoadScene( fileName, &gScene, &gAssets );
+	InitScene( gScene );
+
+	sceneFile = fileName;
+
+	gRenderer.InitGPU();
+	gRenderer.UploadAssets( gAssets );
+}
+
+
 int main( int argc, char* argv[] )
 {
 	CreateCodeAssets();
 	if( argc == 2 ) {
 		LoadScene( argv[1], &gScene, &gAssets );
 	} else {
-		LoadScene( "chess.json", &gScene, &gAssets );
+		LoadScene( sceneFile, &gScene, &gAssets );
 	}
 
 	std::thread renderThread( RenderThread );
@@ -154,6 +177,8 @@ int main( int argc, char* argv[] )
 		
 				gAssets.Clear();
 				ShutdownScene( gScene );
+				delete gScene;
+				gScene = nullptr;
 				gRenderer.ShutdownGPU();
 
 				CreateCodeAssets();
@@ -164,6 +189,11 @@ int main( int argc, char* argv[] )
 				gRenderer.UploadAssets( gAssets );
 
 				gImguiControls.openSceneFileDialog = false;
+			}
+
+			if( gImguiControls.reloadScene )
+			{
+				gImguiControls.reloadScene = true;
 			}
 
 			UpdateScene( gScene, AdvanceTime() );
