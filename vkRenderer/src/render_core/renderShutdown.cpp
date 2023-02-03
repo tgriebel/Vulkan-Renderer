@@ -37,63 +37,16 @@ void Renderer::Cleanup()
 	ShutdownImGui();
 
 	// Memory
-	vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
-	vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
-	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
-	localMemory.Unbind();
-	sharedMemory.Unbind();
-	frameBufferMemory.Unbind();
 	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
 	// Buffers
 	vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 	vkFreeCommandBuffers( context.device, computeQueue.commandPool, 1, &computeQueue.commandBuffer );
 
-	vkDestroyBuffer( context.device, ib.GetVkObject(), nullptr );
-	vkDestroyBuffer( context.device, vb.GetVkObject(), nullptr );
-	vkDestroyBuffer( context.device, stagingBuffer.GetVkObject(), nullptr );
-
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-		vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].surfParms.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
-	}
-
-	// Images
-	vkDestroyImage( context.device, rc.whiteImage.vk_image, nullptr );
-	vkDestroyImageView( context.device, rc.whiteImage.vk_view, nullptr );
-
-	vkDestroyImage( context.device, rc.blackImage.vk_image, nullptr );
-	vkDestroyImageView( context.device, rc.blackImage.vk_view, nullptr );
-
-	const uint32_t textureCount = gAssets.textureLib.Count();
-	for ( uint32_t i = 0; i < textureCount; ++i )
-	{
-		const Texture& texture = gAssets.textureLib.Find( i )->Get();
-		vkDestroyImageView( context.device, texture.gpuImage.vk_view, nullptr );
-		vkDestroyImage( context.device, texture.gpuImage.vk_image, nullptr );
-	}
+	ShutdownShaderResources();
 
 	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
 	vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
-
-	// PSO
-	const uint32_t psoCount = pipelineLib.Count();
-	for ( uint32_t i = 0; i < psoCount; ++i )
-	{
-		Asset<pipelineObject_t>* psoAsset = pipelineLib.Find( i );
-		vkDestroyPipeline( context.device, psoAsset->Get().pipeline, nullptr );
-		vkDestroyPipelineLayout( context.device, psoAsset->Get().pipelineLayout, nullptr );
-	}
-
-	const uint32_t shaderCount = gAssets.gpuPrograms.Count();
-	for ( uint32_t i = 0; i < shaderCount; ++i )
-	{
-		Asset<GpuProgram>* shaderAsset = gAssets.gpuPrograms.Find( i );
-		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[0], nullptr );
-		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[1], nullptr );
-	}
 
 	vkDestroyDescriptorSetLayout( context.device, globalLayout, nullptr );
 	vkDestroyDescriptorSetLayout( context.device, postProcessLayout, nullptr );
@@ -152,6 +105,9 @@ void Renderer::DestroyFrameResources()
 		frameState[ i ].shadowMapImage.allocation.Free();
 		frameState[ i ].depthImage.allocation.Free();
 	}
+
+	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
+	frameBufferMemory.Unbind();
 }
 
 
@@ -162,4 +118,64 @@ void Renderer::ShutdownImGui()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 #endif
+}
+
+void Renderer::ShutdownShaderResources()
+{
+	vkDestroyBuffer( context.device, ib.GetVkObject(), nullptr );
+	vkDestroyBuffer( context.device, vb.GetVkObject(), nullptr );
+	ib.Reset();
+	vb.Reset();
+
+	// Memory
+	vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
+	vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
+	localMemory.Unbind();
+	sharedMemory.Unbind();
+	localMemory.Reset();
+	sharedMemory.Reset();
+
+	// Staging
+	vkDestroyBuffer( context.device, stagingBuffer.GetVkObject(), nullptr );
+	stagingBuffer.Reset();
+
+	// UBOs
+	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+		vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
+		vkDestroyBuffer( context.device, frameState[ i ].surfParms.GetVkObject(), nullptr );
+		vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.GetVkObject(), nullptr );
+		vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
+	}
+
+	// Images
+	vkDestroyImage( context.device, rc.whiteImage.vk_image, nullptr );
+	vkDestroyImageView( context.device, rc.whiteImage.vk_view, nullptr );
+
+	vkDestroyImage( context.device, rc.blackImage.vk_image, nullptr );
+	vkDestroyImageView( context.device, rc.blackImage.vk_view, nullptr );
+
+	const uint32_t textureCount = gAssets.textureLib.Count();
+	for ( uint32_t i = 0; i < textureCount; ++i )
+	{
+		const Texture& texture = gAssets.textureLib.Find( i )->Get();
+		vkDestroyImageView( context.device, texture.gpuImage.vk_view, nullptr );
+		vkDestroyImage( context.device, texture.gpuImage.vk_image, nullptr );
+	}
+
+	// PSO
+	const uint32_t psoCount = pipelineLib.Count();
+	for ( uint32_t i = 0; i < psoCount; ++i )
+	{
+		Asset<pipelineObject_t>* psoAsset = pipelineLib.Find( i );
+		vkDestroyPipeline( context.device, psoAsset->Get().pipeline, nullptr );
+		vkDestroyPipelineLayout( context.device, psoAsset->Get().pipelineLayout, nullptr );
+	}
+
+	const uint32_t shaderCount = gAssets.gpuPrograms.Count();
+	for ( uint32_t i = 0; i < shaderCount; ++i )
+	{
+		Asset<GpuProgram>* shaderAsset = gAssets.gpuPrograms.Find( i );
+		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 0 ], nullptr );
+		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 1 ], nullptr );
+	}
 }

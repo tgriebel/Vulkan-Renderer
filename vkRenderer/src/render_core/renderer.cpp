@@ -249,6 +249,36 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 }
 
 
+void Renderer::InitGPU()
+{
+	InitShaderResources();
+	RecreateSwapChain();
+}
+
+
+void Renderer::ShutdownGPU()
+{
+	FlushGPU();
+	ShutdownShaderResources();
+
+	memset( &vk_globalConstantsInfo, 0, sizeof( VkDescriptorBufferInfo ) );
+	memset( &vk_surfaceUbo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxSurfaces );
+	memset( &vk_image2DInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
+	memset( &vk_shadowImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
+	memset( &vk_codeImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxCodeImages );
+	memset( &vk_shadowCodeImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxCodeImages );
+	memset( &vk_imageCubeInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
+	memset( &vk_postImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxPostImageDescriptors );
+	memset( &vk_materialBufferInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxMaterialDescriptors );
+	memset( &vk_lightBufferInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxLights );
+
+	imageFreeSlot = 0;
+	materialFreeSlot = 0;
+	vbBufElements = 0;
+	ibBufElements = 0;
+}
+
+
 void Renderer::UploadAssets( AssetManager& assets )
 {
 	const uint32_t materialCount = assets.materialLib.Count();
@@ -290,11 +320,12 @@ void Renderer::RenderScene( Scene* scene )
 {
 	frameTimer.Start();
 
-	UploadTextures();
-	UploadModelsToGPU();
-	UpdateGpuMaterials();
+	UploadModelsToGPU(); // TODO: Can this be moved after commit?
 
 	Commit( scene );
+
+	UploadTextures();
+	UpdateGpuMaterials();
 
 	SubmitFrame();
 
@@ -414,6 +445,15 @@ void Renderer::WaitForEndFrame()
 {
 	vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
 }
+
+
+void Renderer::FlushGPU()
+{
+	for ( int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i ) {
+		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ i ], VK_TRUE, UINT64_MAX );
+	}
+}
+
 
 
 void Renderer::SubmitFrame()
@@ -573,7 +613,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 		if ( texture.info.type == TEXTURE_TYPE_CUBE ) {
 			vk_imageCubeInfo[ texture.uploadId ] = info;
-			firstCube = texture.uploadId;
+			firstCube = firstCube == -1 ? texture.uploadId : firstCube;
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1516,8 +1556,11 @@ void Renderer::DrawDebugMenu()
 	{
 		if ( ImGui::BeginMenu( "File" ) )
 		{
-			if ( ImGui::MenuItem( "Open", "CTRL+O" ) ) {
-				gImguiControls.openFileDialog = true;
+			if ( ImGui::MenuItem( "Open Scene", "CTRL+O" ) ) {
+				gImguiControls.openSceneFileDialog = true;
+			}
+			if ( ImGui::MenuItem( "Import Obj", "CTRL+I" ) ) {
+				gImguiControls.openModelImportFileDialog = true;
 			}
 			ImGui::EndMenu();
 		}

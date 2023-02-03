@@ -89,6 +89,9 @@ public:
 		return ( frameNumber > 0 );
 	}
 
+	void		InitGPU();
+	void		ShutdownGPU();
+
 	static void	GenerateGpuPrograms( AssetLibGpuProgram& lib );
 
 	void		CreatePipelineObjects();
@@ -176,6 +179,7 @@ private:
 
 	float							shadowNearPlane = 0.1f;
 	float							shadowFarPlane = 1000.0f;
+	bool							restart = false;
 
 	VkSampleCountFlagBits GetMaxUsableSampleCount()
 	{
@@ -203,7 +207,11 @@ private:
 
 		DestroyFrameResources();
 		swapChain.Destroy();
+
+		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+		AllocateDeviceMemory( MaxFrameBufferMemory, type, frameBufferMemory );
 		frameBufferMemory.Reset();
+
 		swapChain.Create( &gWindow, width, height );
 		CreateRenderPasses();
 		CreateFramebuffers();
@@ -255,8 +263,10 @@ private:
 
 	// Init/Shutdown
 	void						InitVulkan();
+	void						InitShaderResources();
 	void						InitImGui();
 	void						ShutdownImGui();
+	void						ShutdownShaderResources();
 	void						Cleanup();
 
 	// Image Functions
@@ -291,6 +301,7 @@ private:
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
 	void						DrawDebugMenu();
+	void						FlushGPU();
 	void						WaitForEndFrame();
 	void						SubmitFrame();
 

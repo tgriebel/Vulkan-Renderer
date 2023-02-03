@@ -110,39 +110,49 @@ void Renderer::InitVulkan()
 		CreateCommandPools();
 	}
 
-	{
-		// Memory Allocations
-		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
-		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
-		type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
-		AllocateDeviceMemory( MaxFrameBufferMemory, type, frameBufferMemory );
-	}
-
-	CreateResourceBuffers();
-	CreateTextureSamplers();
-
-	GenerateGpuPrograms( gAssets.gpuPrograms );
-
-	CreateCodeTextures();
 	CreateDescSetLayouts();
-	CreatePipelineObjects();
+
+	InitShaderResources();
+
+	CreateTextureSamplers();
 
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 
 	{
 		// Create Frame Resources
+		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+		AllocateDeviceMemory( MaxFrameBufferMemory, type, frameBufferMemory );
+
 		CreateSyncObjects();
 		CreateFramebuffers();
-		CreateUniformBuffers();
 		CreateCommandBuffers();
 	}
+}
+
+
+void Renderer::InitShaderResources()
+{
+	{
+		// Memory Allocations
+		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
+		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
+		type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
+	}
+
+	GenerateGpuPrograms( gAssets.gpuPrograms );
+	CreatePipelineObjects();
+
+	CreateCodeTextures();
+	CreateUniformBuffers();
 
 	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
 	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
 	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
 	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
+
+	CreateResourceBuffers();
 }
 
 

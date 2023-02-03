@@ -95,18 +95,18 @@ bool Window::IsFocused() const
 	return focused;
 }
 
-std::string Window::OpenFileDialog()
+std::string Window::OpenFileDialog( const std::string& title, const std::vector<const char*>& filters, const std::string& filterDesc )
 {
 	tinyfd_assumeGraphicDisplay = 1;
 
 	char const* fileFilter[1] = { "*.obj" };
 
 	char* fileName = tinyfd_openFileDialog(
-		"Import OBJ",
+		title.c_str(),
 		"",
-		COUNTARRAY( fileFilter ),
-		fileFilter,
-		"obj files",
+		static_cast<int>(filters.size()),
+		filters.data(),
+		filterDesc.c_str(),
 		0 );
 
 	return ( fileName == nullptr ) ? "" : fileName;

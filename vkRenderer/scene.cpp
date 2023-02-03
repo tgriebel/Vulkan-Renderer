@@ -96,6 +96,16 @@ void InitScene( Scene* scene )
 }
 
 
+void ShutdownScene( Scene* scene )
+{
+	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
+	for( uint32_t i = 0; i < entCount; ++i )
+	{
+		delete scene->entities[i];
+	}
+}
+
+
 void UpdateScene( Scene* scene, const float dt )
 {
 	// FIXME: race conditions

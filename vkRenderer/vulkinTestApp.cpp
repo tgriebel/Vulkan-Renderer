@@ -61,6 +61,7 @@ imguiControls_t gImguiControls;
 void CreateCodeAssets();
 void UpdateScene( Scene* scene, const float dt );
 void InitScene( Scene* scene );
+void ShutdownScene( Scene* scene );
 
 static float AdvanceTime()
 {
@@ -112,8 +113,11 @@ int main( int argc, char* argv[] )
 
 			gWindow.PumpMessages();
 
-			if ( gImguiControls.openFileDialog ) {
-				std::string path = gWindow.OpenFileDialog();
+			if ( gImguiControls.openModelImportFileDialog )
+			{
+				std::vector<const char*> filters;
+				filters.push_back( "*.obj" );
+				std::string path = gWindow.OpenFileDialog( "Import Obj", filters, "Model files (*.obj)" );
 				std::string dir;
 				std::string file;
 
@@ -135,7 +139,31 @@ int main( int argc, char* argv[] )
 				gScene->entities.push_back( ent );
 				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
 
-				gImguiControls.openFileDialog = false;
+				gImguiControls.openModelImportFileDialog = false;
+			}
+
+			if ( gImguiControls.openSceneFileDialog )
+			{
+				std::vector<const char*> filters;
+				filters.push_back( "*.json" );
+				std::string path = gWindow.OpenFileDialog( "Open Scene", filters, "Scene files" );
+				
+				std::string dir;
+				std::string file;
+				SplitPath( path, dir, file );
+		
+				gAssets.Clear();
+				ShutdownScene( gScene );
+				gRenderer.ShutdownGPU();
+
+				CreateCodeAssets();
+				LoadScene( file, &gScene, &gAssets );
+				InitScene( gScene );
+		
+				gRenderer.InitGPU();
+				gRenderer.UploadAssets( gAssets );
+
+				gImguiControls.openSceneFileDialog = false;
 			}
 
 			UpdateScene( gScene, AdvanceTime() );
