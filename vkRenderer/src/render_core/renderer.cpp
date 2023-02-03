@@ -1884,6 +1884,16 @@ void Renderer::DrawDebugMenu()
 					Asset<Model>* asset = gAssets.modelLib.Find( ent->modelHdl );
 					WriteModel( asset, BakePath + asset->GetName() + BakedModelExtension );
 				}
+				ImGui::SameLine();
+				bool hidden = ent->HasFlag( ENT_FLAG_NO_DRAW );
+				if( ImGui::Checkbox( "Hide", &hidden ) )
+				{
+					if( hidden ) {
+						ent->SetFlag( ENT_FLAG_NO_DRAW );
+					} else {
+						ent->ClearFlag( ENT_FLAG_NO_DRAW );
+					}
+				}
 			}
 			ImGui::EndTabItem();
 		}
