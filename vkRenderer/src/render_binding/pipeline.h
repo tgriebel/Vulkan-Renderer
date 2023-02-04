@@ -45,10 +45,12 @@ enum gfxStateBits_t : uint64_t
 	GFX_STATE_MSAA_ENABLE		= ( 1 << 16 ),
 };
 
+
 struct pipelineState_t
 {
 	const char*		tag;
 	gfxStateBits_t	stateBits;
+	uint32_t		samplingRate;
 	GpuProgram*		shaders;
 	viewport_t		viewport;
 };

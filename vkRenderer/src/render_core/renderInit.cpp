@@ -347,6 +347,7 @@ void Renderer::CreatePipelineObjects()
 			pipelineState_t state;
 			state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
 			state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
+			state.samplingRate = msaaSamples;
 			state.shaders = &prog->Get();
 			state.tag = gAssets.gpuPrograms.FindName( m.GetShader( passIx ) );
 

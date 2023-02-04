@@ -269,7 +269,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	if ( state.stateBits & GFX_STATE_MSAA_ENABLE ) {
 		multisampling.sampleShadingEnable = VK_TRUE;
-		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_8_BIT; // FIXME
+		multisampling.rasterizationSamples = (VkSampleCountFlagBits)state.samplingRate;
 	} else {
 		multisampling.sampleShadingEnable = VK_FALSE;
 		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
