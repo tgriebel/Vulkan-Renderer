@@ -1011,6 +1011,7 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
 		globals.tonemap = vec4f( gImguiControls.toneMapColor[ 0 ], gImguiControls.toneMapColor[ 1 ], gImguiControls.toneMapColor[ 2 ], gImguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, gImguiControls.shadowStrength );
+		globals.numSamples = msaaSamples;
 		globalsBuffer = globals;
 	}
 

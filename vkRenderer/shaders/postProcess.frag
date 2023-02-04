@@ -28,7 +28,7 @@
 
 #include "globals.h"
 
-PS_LAYOUT_STANDARD( sampler2D )
+PS_LAYOUT_STANDARD( sampler2DMS )
 
 void main()
 {
@@ -56,8 +56,13 @@ void main()
 
 	stencilCoverage /= 4.0f;
 
+	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	for( uint i = 0; i < globals.numSamples; ++i ) {
+		sceneColor.rgb += texelFetch( codeSamplers[ textureId0 ], pixelLocation, i ).rgb;
+	}
+	sceneColor /= globals.numSamples;
+
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
-	const vec4 sceneColor = vec4( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;
 	const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );

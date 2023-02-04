@@ -75,6 +75,7 @@ struct material_t
 										vec4        dimensions;													\
 										vec4        shadowParms;												\
 										vec4        toneMap;													\
+										uint		numSamples;													\
 									} globals;
 
 #define SAMPLER_2D_LAYOUT( S, N )	layout( set = S, binding = N ) uniform sampler2D texSampler[];
