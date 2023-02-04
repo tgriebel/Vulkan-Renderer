@@ -28,6 +28,7 @@
 #include <scene/scene.h>
 #include <scene/entity.h>
 #include <sstream>
+#include "debugMenu.h"
 
 #include <io/io.h>
 static RtView rtview;
@@ -1614,29 +1615,7 @@ void Renderer::DrawDebugMenu()
 
 					if ( ImGui::TreeNode( matName ) )
 					{
-						ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", mat.Kd.r, mat.Kd.g, mat.Kd.b );
-						ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", mat.Ks.r, mat.Ks.g, mat.Ks.b );
-						ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", mat.Ke.r, mat.Ke.g, mat.Ke.b );
-						ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", mat.Ka.r, mat.Ka.g, mat.Ka.b );
-						ImGui::Text( "Ni: %1.2f", mat.Ni );
-						ImGui::Text( "Tf: %1.2f", mat.Tf );
-						ImGui::Text( "Tr: %1.2f", mat.Tr );
-						ImGui::Text( "d: %1.2f", mat.d );
-						ImGui::Text( "illum: %1.2f", mat.illum );
-						ImGui::Separator();
-						for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
-						{
-							hdl_t texHdl = mat.GetTexture( t );
-							if( texHdl.IsValid() == false )
-							{
-								ImGui::Text( "<None>" );
-							}
-							else
-							{
-								const char* texName = gAssets.textureLib.FindName( texHdl );
-								ImGui::Text( texName );
-							}
-						}
+						DebugMenuMaterialEdit( mat );
 						ImGui::Separator();
 						ImGui::TreePop();
 					}
@@ -1731,7 +1710,6 @@ void Renderer::DrawDebugMenu()
 					{
 						if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
 						{
-							ImGui::TableSetColumnIndex( 0 );
 							ImGui::Text("Width");
 							ImGui::TableNextColumn();
 							ImGui::Text( "%u", texture.info.width );

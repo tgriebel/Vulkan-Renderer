@@ -68,6 +68,9 @@
     <ClCompile Include="src\io\io.cpp">
       <Filter>io</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\debugMenu.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -151,6 +154,9 @@
     </ClInclude>
     <ClInclude Include="src\io\io.h">
       <Filter>io</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\debugMenu.h">
+      <Filter>render core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
