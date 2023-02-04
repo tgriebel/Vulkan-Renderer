@@ -1609,13 +1609,14 @@ void Renderer::DrawDebugMenu()
 			{
 				const uint32_t matCount = gAssets.materialLib.Count();
 				for ( uint32_t m = 0; m < matCount; ++m )
-				{		
-					Material& mat = gAssets.materialLib.Find(m)->Get();
+				{
+					Asset<Material>* matAsset = gAssets.materialLib.Find( m );
+					Material& mat = matAsset->Get();
 					const char* matName = gAssets.materialLib.FindName(m);
 
 					if ( ImGui::TreeNode( matName ) )
 					{
-						DebugMenuMaterialEdit( mat );
+						DebugMenuMaterialEdit( matAsset );
 						ImGui::Separator();
 						ImGui::TreePop();
 					}

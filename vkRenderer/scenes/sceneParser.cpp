@@ -421,6 +421,7 @@ int ParseMaterialObject( parseState_t& st, void* object )
 	AssetLibMaterials* materials = reinterpret_cast<AssetLibMaterials*>( object );
 
 	Material m;
+	materialParms_t mParms;
 	std::string name;
 
 	// TODO: allow parse functions that aren't just primitives. Need objects/array reading
@@ -428,29 +429,31 @@ int ParseMaterialObject( parseState_t& st, void* object )
 	static const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
-		{ "KaR", &m.Ka.r, &ParseFloatObject },
-		{ "KaG", &m.Ka.g, &ParseFloatObject },
-		{ "KaB", &m.Ka.b, &ParseFloatObject },
-		{ "KeR", &m.Ke.r, &ParseFloatObject },
-		{ "KeG", &m.Ke.g, &ParseFloatObject },
-		{ "KeB", &m.Ke.b, &ParseFloatObject },
-		{ "KdR", &m.Kd.r, &ParseFloatObject },
-		{ "KdG", &m.Kd.g, &ParseFloatObject },
-		{ "KdB", &m.Kd.b, &ParseFloatObject },
-		{ "KsR", &m.Ks.r, &ParseFloatObject },
-		{ "KsG", &m.Ks.g, &ParseFloatObject },
-		{ "KsB", &m.Ks.b, &ParseFloatObject },
-		{ "TfR", &m.Tf.r, &ParseFloatObject },
-		{ "TfG", &m.Tf.g, &ParseFloatObject },
-		{ "TfB", &m.Tf.b, &ParseFloatObject },
-		{ "tr", &m.Tr, &ParseFloatObject },
-		{ "ns", &m.Ns, &ParseFloatObject },
-		{ "ni", &m.Ni, &ParseFloatObject },
-		{ "d", &m.d, &ParseFloatObject },
-		{ "illum", &m.illum, &ParseFloatObject },
+		{ "KaR", &mParms.Ka.r, &ParseFloatObject },
+		{ "KaG", &mParms.Ka.g, &ParseFloatObject },
+		{ "KaB", &mParms.Ka.b, &ParseFloatObject },
+		{ "KeR", &mParms.Ke.r, &ParseFloatObject },
+		{ "KeG", &mParms.Ke.g, &ParseFloatObject },
+		{ "KeB", &mParms.Ke.b, &ParseFloatObject },
+		{ "KdR", &mParms.Kd.r, &ParseFloatObject },
+		{ "KdG", &mParms.Kd.g, &ParseFloatObject },
+		{ "KdB", &mParms.Kd.b, &ParseFloatObject },
+		{ "KsR", &mParms.Ks.r, &ParseFloatObject },
+		{ "KsG", &mParms.Ks.g, &ParseFloatObject },
+		{ "KsB", &mParms.Ks.b, &ParseFloatObject },
+		{ "TfR", &mParms.Tf.r, &ParseFloatObject },
+		{ "TfG", &mParms.Tf.g, &ParseFloatObject },
+		{ "TfB", &mParms.Tf.b, &ParseFloatObject },
+		{ "tr", &mParms.Tr, &ParseFloatObject },
+		{ "ns", &mParms.Ns, &ParseFloatObject },
+		{ "ni", &mParms.Ni, &ParseFloatObject },
+		{ "d", &mParms.d, &ParseFloatObject },
+		{ "illum", &mParms.illum, &ParseFloatObject },
 		{ "shaders", &m, &ParseMaterialShaderObject },
 		{ "textures", &m, &ParseMaterialTextureObject },
 	};
+
+	m.SetParms( mParms );
 
 	ParseObject( st, objectMap, objectCount );
 
