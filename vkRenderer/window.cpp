@@ -35,7 +35,9 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 	} else if ( key == GLFW_KEY_KP_6 ) {
 		app->input.SetKey( '6', ( action != GLFW_RELEASE ) );
 	} else if ( key == GLFW_KEY_LEFT_ALT ) {
-		app->focused = ( action != GLFW_RELEASE );
+		if( action != GLFW_RELEASE ) {
+			app->focused = !app->focused;
+		}
 	}
 }
 
