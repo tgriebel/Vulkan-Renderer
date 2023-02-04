@@ -33,7 +33,6 @@ static bool EditFloat( float& f )
 static bool EditRgb( rgbTuplef_t& rgb )
 {
 	bool edited = false;
-	ImGui::PushID( "##editRgbTuple" );
 	ImGui::PushItemWidth( defaultWidth );
 	edited = edited || ImGui::InputFloat( "##R", &rgb.r, 0.1f, 1.0f );
 	ImGui::SameLine();
@@ -41,7 +40,6 @@ static bool EditRgb( rgbTuplef_t& rgb )
 	ImGui::SameLine();
 	edited = edited || ImGui::InputFloat( "##B", &rgb.b, 0.1f, 1.0f );
 	ImGui::PopItemWidth();
-	ImGui::PopID();
 
 	return edited;
 }
@@ -110,24 +108,29 @@ void DebugMenuLibComboEdit( const std::string label, hdl_t& currentHdl, const As
 
 void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 {
-#define EditRgbValue( VALUE )	{	ImGui::Text( #VALUE );			\
-									ImGui::SameLine();				\
-									rgbTuplef_t rgb = mat.##VALUE();\
-									if( EditRgb( rgb ) ) {			\
-										mat.##VALUE( rgb );			\
-									}								\
+#define EditRgbValue( VALUE )	{															\
+									ImGui::PushID( ( matAsset->GetName() + "." + #VALUE ).c_str() ); \
+									ImGui::Text( #VALUE );									\
+									ImGui::SameLine();										\
+									rgbTuplef_t rgb = mat.##VALUE();						\
+									if( EditRgb( rgb ) ) {									\
+										mat.##VALUE( rgb );									\
+									}														\
+									ImGui::PopID();											\
 								}
 
-#define EditFloatValue( VALUE )	{	ImGui::Text( #VALUE );			\
-									ImGui::SameLine();				\
-									float value = mat.##VALUE();	\
-									if( EditFloat( value ) ) {		\
-										mat.##VALUE( value );		\
-									}								\
+#define EditFloatValue( VALUE )	{															\
+									ImGui::PushID( ( matAsset->GetName() + "." + #VALUE ).c_str() ); \
+									ImGui::Text( #VALUE );									\
+									ImGui::SameLine();										\
+									float value = mat.##VALUE();							\
+									if( EditFloat( value ) ) {								\
+										mat.##VALUE( value );								\
+									}														\
+									ImGui::PopID();											\
 								}
 
 	Material& mat = matAsset->Get();
-	//ImGui::PushID( matAsset->GetName().c_str() );
 
 	EditRgbValue(Kd);
 	EditRgbValue(Ks);
@@ -174,5 +177,4 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 		}
 		ImGui::TreePop();
 	}
-	//ImGui::PopID();
 }
