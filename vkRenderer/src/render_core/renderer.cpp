@@ -1614,7 +1614,7 @@ void Renderer::DrawDebugMenu()
 					Material& mat = matAsset->Get();
 					const char* matName = gAssets.materialLib.FindName(m);
 
-					if ( ImGui::TreeNode( matName ) )
+					if ( ImGui::TreeNode( matAsset->GetName().c_str() ) )
 					{
 						DebugMenuMaterialEdit( matAsset );
 						ImGui::Separator();
@@ -2017,6 +2017,8 @@ void Renderer::DrawDebugMenu()
 	ImGui::Separator();
 
 	ImGui::InputInt( "Image Id", &gImguiControls.dbgImageId );
+	gImguiControls.dbgImageId = Clamp( gImguiControls.dbgImageId, -1, int(gAssets.textureLib.Count() - 1) );
+
 	ImGui::Text( "Mouse: (%f, %f)", (float)gWindow.input.GetMouse().x, (float)gWindow.input.GetMouse().y );
 	ImGui::Text( "Mouse Dt: (%f, %f)", (float)gWindow.input.GetMouse().dx, (float)gWindow.input.GetMouse().dy );
 	const vec4f cameraOrigin = gScene->camera.GetOrigin();

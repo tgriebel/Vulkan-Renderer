@@ -123,7 +123,8 @@ void Renderer::UpdateGpuMaterials()
 {
 	for ( auto it = uploadMaterials.begin(); it != uploadMaterials.end(); ++it )
 	{
-		Material& m = gAssets.materialLib.Find( *it )->Get();
+		Asset<Material>* matAsset = gAssets.materialLib.Find( *it );
+		Material& m = matAsset->Get();
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialFreeSlot++;
 		}
@@ -136,7 +137,7 @@ void Renderer::UpdateGpuMaterials()
 		{
 			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
 			{
-				ubo.textures[ t ] = t;
+				ubo.textures[ t ] = (int)m.GetTexture( t ).Get();
 			}
 		}
 		else

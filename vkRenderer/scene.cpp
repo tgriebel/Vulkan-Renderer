@@ -19,6 +19,9 @@ void CreateCodeAssets()
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
+			for ( uint32_t i = 0; i < Material::MaxMaterialTextures; ++i ) {
+				material.AddTexture( i, i );
+			}
 			gAssets.materialLib.Add( "TONEMAP", material );
 		}
 
@@ -172,7 +175,12 @@ void UpdateScene( Scene* scene, const float dt )
 		if( ent != nullptr )
 		{
 			ent->ClearFlag( ENT_FLAG_NO_DRAW );
-			gAssets.materialLib.Find( "IMAGE2D" )->Get().AddTexture( 0, gImguiControls.dbgImageId % gAssets.textureLib.Count() );
+			Asset<Material>* matAsset = gAssets.materialLib.Find( "IMAGE2D" );
+			if( matAsset != nullptr )
+			{
+				Material& mat = matAsset->Get();
+				mat.AddTexture( 0, gImguiControls.dbgImageId );
+			}
 		}
 	}
 	else {

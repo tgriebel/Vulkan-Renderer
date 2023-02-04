@@ -20,6 +20,7 @@ static const int defaultWidth = 100;
 static bool EditFloat( float& f )
 {
 	bool edited = false;
+	ImGui::PushID( "##editFloat" );
 	ImGui::PushItemWidth( defaultWidth );
 	edited = edited || ImGui::InputFloat( "##editFloat", &f );
 	ImGui::PopItemWidth();
@@ -126,7 +127,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 								}
 
 	Material& mat = matAsset->Get();
-	ImGui::PushID( matAsset->GetName().c_str() );
+	//ImGui::PushID( matAsset->GetName().c_str() );
 
 	EditRgbValue(Kd);
 	EditRgbValue(Ks);
@@ -173,5 +174,5 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 		}
 		ImGui::TreePop();
 	}
-	ImGui::PopID();
+	//ImGui::PopID();
 }
