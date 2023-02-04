@@ -154,16 +154,15 @@ void Renderer::UpdateGpuMaterials()
 				}
 			}
 		}
-		ubo.Kd = vec4f( m.Kd.r, m.Kd.g, m.Kd.b, 1.0f );
-		ubo.Ks = vec4f( m.Ks.r, m.Ks.g, m.Ks.b, 1.0f );
-		ubo.Ka = vec4f( m.Ka.r, m.Ka.g, m.Ka.b, 1.0f );
-		ubo.Ke = vec4f( m.Ke.r, m.Ke.g, m.Ke.b, 1.0f );
-		ubo.Tf = vec4f( m.Tf.r, m.Tf.g, m.Tf.b, 1.0f );
+		ubo.Kd = vec3f( m.Kd.r, m.Kd.g, m.Kd.b );
+		ubo.Ks = vec3f( m.Ks.r, m.Ks.g, m.Ks.b );
+		ubo.Ka = vec3f( m.Ka.r, m.Ka.g, m.Ka.b );
+		ubo.Ke = vec3f( m.Ke.r, m.Ke.g, m.Ke.b );
+		ubo.Tf = vec3f( m.Tf.r, m.Tf.g, m.Tf.b );
 		ubo.Tr = m.Tr;
 		ubo.Ni = m.Ni;
 		ubo.Ns = m.Ns;
 		ubo.illum = m.illum;
-		ubo.d = m.d;
 		ubo.textured = m.IsTextured();
 	}
 	uploadMaterials.clear();

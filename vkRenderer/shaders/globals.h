@@ -42,20 +42,20 @@ struct material_t
 	int		textureId5;
 	int		textureId6;
 	int		textureId7;
-	vec4	Ka;
-	vec4	Ke;
-	vec4	Kd;
-	vec4	Ks;
-	vec4	Tf;
+	vec3	Ka;
 	float	Tr;
+	vec3	Ke;
 	float	Ns;
+	vec3	Kd;
 	float	Ni;
-	float	d;
+	vec3	Ks;
 	float	illum;
+	vec3	Tf;
 	uint	textured;
 	uint	pad0;
 	uint	pad1;
-	vec4	pad[ 3 ];
+	uint	pad2;
+	uint	pad3;
 };
 
 

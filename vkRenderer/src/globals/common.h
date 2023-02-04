@@ -142,18 +142,17 @@ struct globalUboConstants_t
 struct materialBufferObject_t
 {
 	int						textures[ Material::MaxMaterialTextures ];
-	vec4f					Ka;
-	vec4f					Ke;
-	vec4f					Kd;
-	vec4f					Ks;
-	vec4f					Tf;
+	vec3f					Ka;
 	float					Tr;
+	vec3f					Ke;
 	float					Ns;
+	vec3f					Kd;
 	float					Ni;
-	float					d;
+	vec3f					Ks;
 	float					illum;
+	vec3f					Tf;
 	uint32_t				textured;
-	uint32_t				pad[ 14 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
+	uint32_t				pad[ 4 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
 };
 
 
