@@ -125,7 +125,8 @@
   ],
   "materials": [
     {
-      "name": "WHITE_WOOD",
+      "name": "Grid",
+	  "KdR": 1.0,
       "tr": 0.0,
       "ns": 0.0,
       "ni": 0.0,
@@ -135,17 +136,11 @@
           "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
           "DRAWPASS_OPAQUE": "LitOpaque",
+		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "sapeli.jpg"
+		  "GGX_COLOR_MAP_SLOT" : "grid.png"
 	  }
-    },
-	{
-      "name": "GlowSquare",
-      "shaders": {
-          "DRAWPASS_TRANS": "LitTrans",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
     },
 	{
       "name": "SKY",
@@ -174,7 +169,16 @@
 	{
       "name" : "axis",
       "model" : "axis.obj",
-    }
+    },
+	{
+      "name" : "grid",
+      "model" : "_terrain",
+	  "argStr0" : "Grid",
+	  "argInt0" : 100,
+	  "argInt1" : 100,
+	  "argFlt0" : 1.0,
+	  "argFlt1" : 100.0,
+    },
   ],
   "entities": [
     {
@@ -191,8 +195,8 @@
 	  "sz" : 1.0
     },
 	{
-      "name" : "chess_board",
-      "model" : "chess_board.obj",
+      "name" : "grid",
+      "model" : "grid",
     },
 	{
       "name" : "spyrius",

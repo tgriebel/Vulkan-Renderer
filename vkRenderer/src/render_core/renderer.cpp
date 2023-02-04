@@ -1605,9 +1605,9 @@ void Renderer::DrawDebugMenu()
 		}
 		if ( ImGui::BeginTabItem( "Assets" ) )
 		{
-			if( ImGui::TreeNode( "Materials" ) )
+			const uint32_t matCount = gAssets.materialLib.Count();
+			if( ImGui::TreeNode( "Materials", "Materials (%i)", matCount ) )
 			{
-				const uint32_t matCount = gAssets.materialLib.Count();
 				for ( uint32_t m = 0; m < matCount; ++m )
 				{
 					Asset<Material>* matAsset = gAssets.materialLib.Find( m );
@@ -1623,9 +1623,10 @@ void Renderer::DrawDebugMenu()
 				}
 				ImGui::TreePop();
 			}
-			if ( ImGui::TreeNode( "Models" ) )
+			const uint32_t modelCount = gAssets.modelLib.Count();
+			if ( ImGui::TreeNode( "Models", "Models (%i)", modelCount ) )
 			{
-				const uint32_t modelCount = gAssets.modelLib.Count();
+
 				for ( uint32_t m = 0; m < modelCount; ++m )
 				{
 					Model& model = gAssets.modelLib.Find( m )->Get();
@@ -1700,9 +1701,9 @@ void Renderer::DrawDebugMenu()
 				}
 				ImGui::TreePop();
 			}
-			if ( ImGui::TreeNode( "Textures" ) )
+			const uint32_t texCount = gAssets.textureLib.Count();
+			if ( ImGui::TreeNode( "Textures", "Textures (%i)", texCount ) )
 			{
-				const uint32_t texCount = gAssets.textureLib.Count();
 				for ( uint32_t t = 0; t < texCount; ++t )
 				{
 					Texture& texture = gAssets.textureLib.Find( t )->Get();
@@ -1769,9 +1770,9 @@ void Renderer::DrawDebugMenu()
 				}
 				ImGui::TreePop();
 			}
-			if ( ImGui::TreeNode( "Shaders" ) )
+			const uint32_t shaderCount = gAssets.gpuPrograms.Count();
+			if ( ImGui::TreeNode( "Shaders", "Shaders (%i)", shaderCount ) )
 			{
-				const uint32_t shaderCount = gAssets.gpuPrograms.Count();
 				for ( uint32_t s = 0; s < shaderCount; ++s )
 				{
 					GpuProgram& shader = gAssets.gpuPrograms.Find( s )->Get();
