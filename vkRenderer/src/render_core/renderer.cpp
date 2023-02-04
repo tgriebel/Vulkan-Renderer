@@ -269,8 +269,8 @@ void Renderer::ShutdownGPU()
 	memset( &vk_shadowCodeImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxCodeImages );
 	memset( &vk_imageCubeInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
 	memset( &vk_postImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxPostImageDescriptors );
-	memset( &vk_materialBufferInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxMaterialDescriptors );
-	memset( &vk_lightBufferInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxLights );
+	memset( &vk_materialBufferInfo, 0, sizeof( VkDescriptorBufferInfo ) );
+	memset( &vk_lightBufferInfo, 0, sizeof( VkDescriptorBufferInfo ) );
 
 	imageFreeSlot = 0;
 	materialFreeSlot = 0;
@@ -652,22 +652,20 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		}
 	}
 
-	for ( int j = 0; j < MaxMaterialDescriptors; ++j )
 	{
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].materialBuffers.GetVkObject();
-		info.offset = j * sizeof( materialBufferObject_t );
-		info.range = sizeof( materialBufferObject_t );
-		vk_materialBufferInfo[j] = info;
+		info.offset = 0;
+		info.range = VK_WHOLE_SIZE;
+		vk_materialBufferInfo = info;
 	}
 
-	for ( int j = 0; j < MaxLights; ++j )
 	{
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].lightParms.GetVkObject();
-		info.offset = j * sizeof( lightBufferObject_t );
-		info.range = sizeof( lightBufferObject_t );
-		vk_lightBufferInfo[j] = info;
+		info.offset = 0;
+		info.range = VK_WHOLE_SIZE;
+		vk_lightBufferInfo = info;
 	}
 
 	// Shadow Map
@@ -726,8 +724,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstBinding = 4;
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo[ 0 ];
+	descriptorWrites[ descriptorId ].descriptorCount = 1;
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -735,8 +733,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstBinding = 5;
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = MaxLights;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo[ 0 ];
+	descriptorWrites[ descriptorId ].descriptorCount = 1;
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -844,8 +842,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstBinding = 4;
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -853,8 +851,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxLights;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo[ 0 ];
+	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -958,8 +956,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstBinding = 4;
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = MaxMaterialDescriptors;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -967,8 +965,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstBinding = 5;
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = MaxLights;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo[ 0 ];
+	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

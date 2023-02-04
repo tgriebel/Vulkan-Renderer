@@ -33,7 +33,7 @@ PS_LAYOUT_STANDARD( sampler2D )
 void main()
 {
     const uint materialId = pushConstants.materialId;
-	const uint textureId0 = materials[ materialId ].textureId0;
+	const uint textureId0 = materialUbo.materials[ materialId ].textureId0;
 
 	outColor = texture( texSampler[ textureId0 ], fragTexCoord.xy );
 }

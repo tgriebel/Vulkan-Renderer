@@ -129,7 +129,7 @@ void Renderer::UpdateGpuMaterials()
 		}
 		m.dirty = false;
 
-		assert( m.uploadId < MaxMaterialDescriptors );
+		assert( m.uploadId < MaxMaterials );
 		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
 
 		if( m.usage == MATERIAL_USAGE_CODE )

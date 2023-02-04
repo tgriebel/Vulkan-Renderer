@@ -60,7 +60,7 @@ void main()
 	objectId = pushConstants.objectId + gl_InstanceIndex;
 	const uint materialId = pushConstants.materialId;
 
-	const uint heightMapId = materials[ materialId ].textureId0;
+	const uint heightMapId = materialUbo.materials[ materialId ].textureId0;
 	const float heightMapValue = texture( texSampler[ heightMapId ], inTexCoord.xy ).r;
 
 	const float maxHeight = globals.generic.x;

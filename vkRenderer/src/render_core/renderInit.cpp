@@ -822,7 +822,7 @@ void Renderer::CreateUniformBuffers()
 		// Material Buffer
 		{
 			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( materialBufferObject_t ) );
-			const VkDeviceSize materialBufferSize = MaxMaterialDescriptors * stride;
+			const VkDeviceSize materialBufferSize = MaxMaterials * stride;
 			CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].materialBuffers, sharedMemory );
 		}
 

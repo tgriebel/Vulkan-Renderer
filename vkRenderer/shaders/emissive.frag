@@ -33,5 +33,5 @@ PS_LAYOUT_STANDARD( sampler2D )
 void main()
 {
     const uint materialId = pushConstants.materialId;
-    outColor = vec4( materials[ materialId ].Kd.rgb, 1.0f - materials[ materialId ].Tr );
+    outColor = vec4( materialUbo.materials[ materialId ].Kd.rgb, 1.0f - materialUbo.materials[ materialId ].Tr );
 }

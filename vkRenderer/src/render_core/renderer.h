@@ -145,7 +145,7 @@ private:
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
 	GpuImage						gpuImages[ MaxImageDescriptors ];
-	materialBufferObject_t			materialBuffer[ MaxMaterialDescriptors ];
+	materialBufferObject_t			materialBuffer[ MaxMaterials ];
 
 	uint32_t						imageFreeSlot = 0;
 	uint32_t						materialFreeSlot = 0;
@@ -167,8 +167,8 @@ private:
 	VkDescriptorImageInfo			vk_shadowCodeImageInfo[ MaxCodeImages ];
 	VkDescriptorImageInfo			vk_imageCubeInfo[ MaxImageDescriptors ];
 	VkDescriptorImageInfo			vk_postImageInfo[ MaxPostImageDescriptors ];
-	VkDescriptorBufferInfo			vk_materialBufferInfo[ MaxMaterialDescriptors ];
-	VkDescriptorBufferInfo			vk_lightBufferInfo[ MaxLights ];
+	VkDescriptorBufferInfo			vk_materialBufferInfo;
+	VkDescriptorBufferInfo			vk_lightBufferInfo;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
@@ -186,7 +186,7 @@ private:
 		/*
 		VkPhysicalDeviceProperties physicalDeviceProperties;
 		vkGetPhysicalDeviceProperties( context.physicalDevice, &physicalDeviceProperties );
-
+		
 		VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
 		if ( counts & VK_SAMPLE_COUNT_64_BIT ) { return VK_SAMPLE_COUNT_64_BIT; }
 		if ( counts & VK_SAMPLE_COUNT_32_BIT ) { return VK_SAMPLE_COUNT_32_BIT; }

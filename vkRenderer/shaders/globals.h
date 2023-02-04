@@ -21,6 +21,44 @@
 * SOFTWARE.
 */
 
+#define MaxLights		3
+#define MaxMaterials	256
+
+struct light_t
+{
+	vec4	lightPos;
+	vec4	intensity;
+	vec4	lightDir;
+	vec4	padding;
+};
+
+struct material_t
+{
+	int		textureId0;
+	int		textureId1;
+	int		textureId2;
+	int		textureId3;
+	int		textureId4;
+	int		textureId5;
+	int		textureId6;
+	int		textureId7;
+	vec4	Ka;
+	vec4	Ke;
+	vec4	Kd;
+	vec4	Ks;
+	vec4	Tf;
+	float	Tr;
+	float	Ns;
+	float	Ni;
+	float	d;
+	float	illum;
+	uint	textured;
+	uint	pad0;
+	uint	pad1;
+	vec4	pad[ 3 ];
+};
+
+
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
 #define MODEL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform UniformBufferObject					\
@@ -49,34 +87,13 @@
 
 #define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform MaterialBuffer						\
 									{																			\
-										int			textureId0;													\
-										int			textureId1;													\
-										int			textureId2;													\
-										int			textureId3;													\
-										int			textureId4;													\
-										int			textureId5;													\
-										int			textureId6;													\
-										int			textureId7;													\
-										vec4		Ka;															\
-										vec4		Ke;															\
-										vec4		Kd;															\
-										vec4		Ks;															\
-										vec4		Tf;															\
-										float		Tr;															\
-										float		Ns;															\
-										float		Ni;															\
-										float		d;															\
-										float		illum;														\
-										uint		textured;													\
-										uint		pad[ 14 ];													\
-									} materials[];
+										material_t materials[MaxMaterials];										\
+									} materialUbo;
 
 #define LIGHT_LAYOUT( S, N )		layout( set = S, binding = N ) uniform LightBuffer							\
 									{																			\
-										vec3	    lightPos;													\
-										vec3		intensity;													\
-										vec3		lightDir;													\
-									} lights[];
+										light_t lights[MaxLights];												\
+									} lightUbo;
 
 #define PUSH_CONSTANTS				layout( push_constant ) uniform fragmentPushConstants						\
 									{																			\

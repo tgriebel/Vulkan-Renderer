@@ -73,14 +73,14 @@ float Fd_Lambert() {
 void main()
 {
     const uint materialId = pushConstants.materialId;
-	const bool isTextured = materials[ materialId ].textured != 0;
-    const int albedoTexId = isTextured ? materials[ materialId ].textureId0 : -1;
-    const int normalTexId = isTextured ? materials[ materialId ].textureId1 : -1;
-    const int roughnessTexId = isTextured ? materials[ materialId ].textureId2 : -1;
+	const bool isTextured = materialUbo.materials[ materialId ].textured != 0;
+    const int albedoTexId = isTextured ? materialUbo.materials[ materialId ].textureId0 : -1;
+    const int normalTexId = isTextured ? materialUbo.materials[ materialId ].textureId1 : -1;
+    const int roughnessTexId = isTextured ? materialUbo.materials[ materialId ].textureId2 : -1;
 	
-	const vec3 diffuseColor = materials[ materialId ].Kd.rgb;
-    const vec3 specularColor = materials[ materialId ].Ks.rgb;
-    const float specularPower = materials[ materialId ].Ns;
+	const vec3 diffuseColor = materialUbo.materials[ materialId ].Kd.rgb;
+    const vec3 specularColor = materialUbo.materials[ materialId ].Ks.rgb;
+    const float specularPower = materialUbo.materials[ materialId ].Ns;
 
     const mat4 modelMat = ubo[ objectId ].model;
     const mat4 viewMat = ubo[ objectId ].view;
@@ -113,14 +113,14 @@ void main()
     const float ao = 1.0f;
 
 	const vec3 albedoColor = albedoTex.rgb;
-    const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * materials[ materialId ].Ka.rgb;
+    const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * materialUbo.materials[ materialId ].Ka.rgb;
 	
     vec3 F0 = vec3( 0.04f ); 
     F0 = mix( F0, albedoColor.rgb, metallic );
 	
     vec3 Lo = vec3( 0.0f, 0.0f, 0.0f );
     for( int i = 0; i < 3; ++i ) {
-	    const vec3 l = normalize( lights[ i ].lightPos - worldPosition.xyz );
+	    const vec3 l = normalize( lightUbo.lights[ i ].lightPos.xyz - worldPosition.xyz );
         const vec3 h = normalize( v + l );
 
         const float NoL = max( dot( n, l ), 0.0f );
@@ -135,7 +135,7 @@ void main()
         vec3 kD = vec3( 1.0f ) - kS;
         kD *= 1.0f - metallic;
 
-        const float spotAngle = dot( l, lights[ i ].lightDir );
+        const float spotAngle = dot( l, lightUbo.lights[ i ].lightDir.xyz );
         const float spotFov = 0.5f;
 
         vec3 numerator      = D * G * F;
@@ -145,7 +145,7 @@ void main()
         const float distance    = length( l );
         const float attenuation = 1.0f / ( distance * distance );
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
-        const vec3 radiance     = attenuation * spotFalloff * lights[ i ].intensity;
+        const vec3 radiance     = attenuation * spotFalloff * lightUbo.lights[ i ].intensity.rgb;
 
         vec3 diffuse = ( ( kD * albedoColor.rgb ) / PI + Fr ) * radiance * NoL;
         Lo += diffuse;
@@ -173,7 +173,7 @@ void main()
     }
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
-	outColor.a = materials[ materialId ].Tr;
+	outColor.a = materialUbo.materials[ materialId ].Tr;
 //    outColor.rgb = envColor.rgb;
 //    outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
 //    outColor.rg = fragTexCoord.rb;

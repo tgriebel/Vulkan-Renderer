@@ -34,9 +34,9 @@ void main()
 {
     const uint materialId = pushConstants.materialId;
 
-    const uint blendId = materials[ materialId ].textureId0;
-    const uint textureId0 = materials[ materialId ].textureId1;
-    const uint textureId1 = materials[ materialId ].textureId2;
+    const uint blendId = materialUbo.materials[ materialId ].textureId0;
+    const uint textureId0 = materialUbo.materials[ materialId ].textureId1;
+    const uint textureId1 = materialUbo.materials[ materialId ].textureId2;
 
     const float maxHeight = globals.generic.x;
     const vec4 blendValue = maxHeight * texture( texSampler[ blendId ], fragTexCoord.xy );
@@ -45,12 +45,12 @@ void main()
     const vec4 texColor = mix( texColor1, texColor0, smoothstep( 0.0f, 0.4f, blendValue ) );
     outColor = AMBIENT * texColor;
     for( int i = 0; i < 3; ++i ) {
-	    const vec3 lightDist = -normalize( lights[ i ].lightPos - worldPosition.xyz );
-        const float spotAngle = dot( lightDist, lights[ i ].lightDir );
+	    const vec3 lightDist = -normalize( lightUbo.lights[ i ].lightPos.xyz - worldPosition.xyz );
+        const float spotAngle = dot( lightDist, lightUbo.lights[ i ].lightDir.xyz );
         const float spotFov = 0.5f;
         vec4 color = texColor;
         // color.rgb *= lights[ i ].intensity * max( 0.0f, dot( lightDist, normalize( fragNormal ) ) );
-	    color.rgb *= lights[ i ].intensity * smoothstep( 0.5f, 0.8f, spotAngle );
+	    color.rgb *= lightUbo.lights[ i ].intensity.rgb * smoothstep( 0.5f, 0.8f, spotAngle );
         outColor += color;
     }
    // outColor.rgb = fragNormal;

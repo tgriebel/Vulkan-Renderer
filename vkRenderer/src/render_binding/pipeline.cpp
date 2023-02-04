@@ -119,14 +119,14 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 
 	VkDescriptorSetLayoutBinding materialBinding{ };
 	materialBinding.binding = 4;
-	materialBinding.descriptorCount = MaxMaterialDescriptors;
+	materialBinding.descriptorCount = 1;
 	materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	materialBinding.pImmutableSamplers = nullptr;
 	materialBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding lightBinding{ };
 	lightBinding.binding = 5;
-	lightBinding.descriptorCount = MaxLights;
+	lightBinding.descriptorCount = 1;
 	lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	lightBinding.pImmutableSamplers = nullptr;
 	lightBinding.stageFlags = VK_SHADER_STAGE_ALL;
@@ -269,7 +269,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	if ( state.stateBits & GFX_STATE_MSAA_ENABLE ) {
 		multisampling.sampleShadingEnable = VK_FALSE;
-		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT; // FIXME
 	} else {
 		multisampling.sampleShadingEnable = VK_FALSE;
 		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;

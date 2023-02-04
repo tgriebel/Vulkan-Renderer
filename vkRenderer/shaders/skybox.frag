@@ -42,11 +42,11 @@ void main()
     const float majorAxis = max( max( xm, ym ), zm );
 
     if( majorAxis == xm ) {
-        textureId = ( sign( fragNormal.x ) > 0.0f ) ? materials[ materialId ].textureId0 : materials[ materialId ].textureId1;
+        textureId = ( sign( fragNormal.x ) > 0.0f ) ? materialUbo.materials[ materialId ].textureId0 : materialUbo.materials[ materialId ].textureId1;
     } else if( majorAxis == ym ) {
-        textureId = ( sign( fragNormal.y ) > 0.0f ) ? materials[ materialId ].textureId5 : materials[ materialId ].textureId4;
+        textureId = ( sign( fragNormal.y ) > 0.0f ) ? materialUbo.materials[ materialId ].textureId5 : materialUbo.materials[ materialId ].textureId4;
     } else if( majorAxis == zm ) {
-        textureId = ( sign( fragNormal.z ) > 0.0f ) ? materials[ materialId ].textureId2 : materials[ materialId ].textureId3;
+        textureId = ( sign( fragNormal.z ) > 0.0f ) ? materialUbo.materials[ materialId ].textureId2 : materialUbo.materials[ materialId ].textureId3;
     }
 	outColor = SrgbToLinear( texture( texSampler[textureId], fragTexCoord.xy ) );
 }

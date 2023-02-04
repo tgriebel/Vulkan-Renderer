@@ -74,7 +74,7 @@ const uint32_t	MaxVertices						= 0x000FFFFF;
 const uint32_t	MaxIndices						= 0x000FFFFF;
 const uint32_t	MaxSurfaces						= MaxModels * MaxViews;
 const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
-const uint32_t	MaxMaterialDescriptors			= 512;
+const uint32_t	MaxMaterials					= 256;
 const uint32_t	MaxCodeImages					= 2;
 const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
@@ -155,6 +155,7 @@ struct materialBufferObject_t
 	uint32_t				textured;
 	uint32_t				pad[ 14 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
 };
+
 
 struct lightBufferObject_t
 {
