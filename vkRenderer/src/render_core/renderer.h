@@ -156,21 +156,10 @@ private:
 	AllocatorVkMemory				frameBufferMemory;
 	AllocatorVkMemory				sharedMemory;
 
+	VkPhysicalDeviceProperties		deviceProperties;
+
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
-
-	VkDescriptorBufferInfo			vk_globalConstantsInfo;
-	VkDescriptorBufferInfo			vk_viewUbo;
-	VkDescriptorBufferInfo			vk_shadowViewUbo;
-	VkDescriptorBufferInfo			vk_surfaceUbo[ MaxViews ];
-	VkDescriptorImageInfo			vk_image2DInfo[ MaxImageDescriptors ];
-	VkDescriptorImageInfo			vk_shadowImageInfo[ MaxImageDescriptors ];
-	VkDescriptorImageInfo			vk_codeImageInfo[ MaxCodeImages ];
-	VkDescriptorImageInfo			vk_shadowCodeImageInfo[ MaxCodeImages ];
-	VkDescriptorImageInfo			vk_imageCubeInfo[ MaxImageDescriptors ];
-	VkDescriptorImageInfo			vk_postImageInfo[ MaxPostImageDescriptors ];
-	VkDescriptorBufferInfo			vk_materialBufferInfo;
-	VkDescriptorBufferInfo			vk_lightBufferInfo;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;

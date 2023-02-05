@@ -17,6 +17,11 @@ extern imguiControls_t gImguiControls;
 
 static const int defaultWidth = 100;
 
+struct ImguiStyle
+{
+	static const ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
+};
+
 static bool EditFloat( float& f )
 {
 	bool edited = false;
@@ -174,6 +179,82 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 				const char* shaderName = gAssets.gpuPrograms.FindName( shaderHdl );
 				ImGui::Text( shaderName );
 			}
+		}
+		ImGui::TreePop();
+	}
+}
+
+
+void DebugMenuModelTreeNode( Asset<Model>* modelAsset )
+{
+	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
+
+	const char* modelName = modelAsset->GetName().c_str();
+	if ( ImGui::TreeNode( modelName ) )
+	{
+		Model& model = modelAsset->Get();
+		const vec3f& min = model.bounds.GetMin();
+		const vec3f& max = model.bounds.GetMax();
+		if ( ImGui::BeginTable( "Bounds", 4, tableFlags ) )
+		{
+			ImGui::TableSetupColumn( "" );
+			ImGui::TableSetupColumn( "X" );
+			ImGui::TableSetupColumn( "Y" );
+			ImGui::TableSetupColumn( "Z" );
+			ImGui::TableHeadersRow();
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex( 0 );
+			ImGui::Text( "Min" );
+			ImGui::TableSetColumnIndex( 1 );
+			ImGui::Text( "%4.3f", min[ 0 ] );
+			ImGui::TableSetColumnIndex( 2 );
+			ImGui::Text( "%4.3f", min[ 1 ] );
+			ImGui::TableSetColumnIndex( 3 );
+			ImGui::Text( "%4.3f", min[ 2 ] );
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex( 0 );
+			ImGui::Text( "Max" );
+			ImGui::TableSetColumnIndex( 1 );
+			ImGui::Text( "%4.3f", max[ 0 ] );
+			ImGui::TableSetColumnIndex( 2 );
+			ImGui::Text( "%4.3f", max[ 1 ] );
+			ImGui::TableSetColumnIndex( 3 );
+			ImGui::Text( "%4.3f", max[ 2 ] );
+
+			ImGui::EndTable();
+		}
+
+		if ( ImGui::TreeNode( "##Surfaces", "Surfaces (%u)", model.surfCount ) )
+		{
+			if ( ImGui::BeginTable( "Surface", 5, tableFlags ) )
+			{
+				ImGui::TableSetupColumn( "Number" );
+				ImGui::TableSetupColumn( "Material" );
+				ImGui::TableSetupColumn( "Vertices" );
+				ImGui::TableSetupColumn( "Indices" );
+				ImGui::TableSetupColumn( "Centroid" );
+				ImGui::TableHeadersRow();
+
+				for ( uint32_t s = 0; s < model.surfCount; ++s )
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex( 0 );
+					ImGui::Text( "%u", s );
+					ImGui::TableSetColumnIndex( 1 );
+					const char* modelName = gAssets.materialLib.FindName( model.surfs[ s ].materialHdl );
+					ImGui::Text( modelName );
+					ImGui::TableSetColumnIndex( 2 );
+					ImGui::Text( "%i", (int)model.surfs[ s ].vertices.size() );
+					ImGui::TableSetColumnIndex( 3 );
+					ImGui::Text( "%i", (int)model.surfs[ s ].indices.size() );
+					ImGui::TableSetColumnIndex( 4 );
+					ImGui::Text( "(%.2f %.2f %.2f)", model.surfs[ s ].centroid[ 0 ], model.surfs[ s ].centroid[ 1 ], model.surfs[ s ].centroid[ 2 ] );
+				}
+				ImGui::EndTable();
+			}
+			ImGui::TreePop();
 		}
 		ImGui::TreePop();
 	}

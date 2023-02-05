@@ -36,6 +36,19 @@ static RtScene rtScene;
 
 extern Scene* gScene;
 
+static VkDescriptorBufferInfo	vk_globalConstantsInfo;
+static VkDescriptorBufferInfo	vk_viewUbo;
+static VkDescriptorBufferInfo	vk_shadowViewUbo;
+static VkDescriptorBufferInfo	vk_surfaceUbo[ MaxViews ];
+static VkDescriptorImageInfo	vk_image2DInfo[ MaxImageDescriptors ];
+static VkDescriptorImageInfo	vk_shadowImageInfo[ MaxImageDescriptors ];
+static VkDescriptorImageInfo	vk_codeImageInfo[ MaxCodeImages ];
+static VkDescriptorImageInfo	vk_shadowCodeImageInfo[ MaxCodeImages ];
+static VkDescriptorImageInfo	vk_imageCubeInfo[ MaxImageDescriptors ];
+static VkDescriptorImageInfo	vk_postImageInfo[ MaxPostImageDescriptors ];
+static VkDescriptorBufferInfo	vk_materialBufferInfo;
+static VkDescriptorBufferInfo	vk_lightBufferInfo;
+
 static void BuildRayTraceScene( Scene* scene )
 {
 	rtScene.scene = scene;
@@ -263,6 +276,8 @@ void Renderer::ShutdownGPU()
 	ShutdownShaderResources();
 
 	memset( &vk_globalConstantsInfo, 0, sizeof( VkDescriptorBufferInfo ) );
+	memset( &vk_viewUbo, 0, sizeof( VkDescriptorBufferInfo ) );
+	memset( &vk_shadowViewUbo, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_surfaceUbo, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_image2DInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
 	memset( &vk_shadowImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
@@ -1125,7 +1140,6 @@ void Renderer::PickPhysicalDevice()
 	{
 		if ( IsDeviceSuitable( device, gWindow.vk_surface, deviceExtensions ) )
 		{
-			VkPhysicalDeviceProperties deviceProperties;
 			vkGetPhysicalDeviceProperties( device, &deviceProperties );
 			context.physicalDevice = device;
 			context.limits = deviceProperties.limits;
@@ -1671,78 +1685,10 @@ void Renderer::DrawDebugMenu()
 			const uint32_t modelCount = gAssets.modelLib.Count();
 			if ( ImGui::TreeNode( "Models", "Models (%i)", modelCount ) )
 			{
-
 				for ( uint32_t m = 0; m < modelCount; ++m )
 				{
-					Model& model = gAssets.modelLib.Find( m )->Get();
-					const char* modelName = gAssets.modelLib.FindName( m );
-					if ( ImGui::TreeNode( modelName ) )
-					{
-						const vec3f& min = model.bounds.GetMin();
-						const vec3f& max = model.bounds.GetMax();
-						if ( ImGui::BeginTable( "Bounds", 4, tableFlags ) )
-						{
-							ImGui::TableSetupColumn( "" );
-							ImGui::TableSetupColumn( "X" );
-							ImGui::TableSetupColumn( "Y" );
-							ImGui::TableSetupColumn( "Z" );
-							ImGui::TableHeadersRow();
-
-							ImGui::TableNextRow();
-							ImGui::TableSetColumnIndex( 0 );
-							ImGui::Text( "Min" );
-							ImGui::TableSetColumnIndex( 1 );	
-							ImGui::Text( "%4.3f", min[ 0 ] );
-							ImGui::TableSetColumnIndex( 2 );
-							ImGui::Text( "%4.3f", min[ 1 ] );
-							ImGui::TableSetColumnIndex( 3 );
-							ImGui::Text( "%4.3f", min[ 2 ] );
-
-							ImGui::TableNextRow();
-							ImGui::TableSetColumnIndex( 0 );
-							ImGui::Text( "Max" );
-							ImGui::TableSetColumnIndex( 1 );
-							ImGui::Text( "%4.3f", max[ 0 ] );
-							ImGui::TableSetColumnIndex( 2 );
-							ImGui::Text( "%4.3f", max[ 1 ] );
-							ImGui::TableSetColumnIndex( 3 );
-							ImGui::Text( "%4.3f", max[ 2 ] );
-
-							ImGui::EndTable();
-						}
-
-						if ( ImGui::TreeNode( "##Surfaces", "Surfaces (%u)", model.surfCount ) )
-						{
-							if ( ImGui::BeginTable( "Surface", 5, tableFlags ) )
-							{
-								ImGui::TableSetupColumn( "Number" );
-								ImGui::TableSetupColumn( "Material" );
-								ImGui::TableSetupColumn( "Vertices" );
-								ImGui::TableSetupColumn( "Indices" );
-								ImGui::TableSetupColumn( "Centroid" );
-								ImGui::TableHeadersRow();
-
-								for ( uint32_t s = 0; s < model.surfCount; ++s )
-								{
-									ImGui::TableNextRow();
-									ImGui::TableSetColumnIndex( 0 );
-									ImGui::Text( "%u", s );
-									ImGui::TableSetColumnIndex( 1 );
-									const char* modelName = gAssets.materialLib.FindName( model.surfs[s].materialHdl );
-									ImGui::Text( modelName );
-									ImGui::TableSetColumnIndex( 2 );
-									ImGui::Text( "%i", (int)model.surfs[s].vertices.size() );
-									ImGui::TableSetColumnIndex( 3 );
-									ImGui::Text( "%i", (int)model.surfs[s].indices.size() );
-									ImGui::TableSetColumnIndex( 4 );
-									ImGui::Text( "(%.2f %.2f %.2f)", model.surfs[s].centroid[0], model.surfs[s].centroid[1], model.surfs[s].centroid[2] );
-								}
-								ImGui::EndTable();
-							}
-							ImGui::TreePop();
-						}
-						ImGui::TreePop();
-					}
+					Asset<Model>* modelAsset = gAssets.modelLib.Find( m );
+					DebugMenuModelTreeNode( modelAsset );
 				}
 				ImGui::TreePop();
 			}
