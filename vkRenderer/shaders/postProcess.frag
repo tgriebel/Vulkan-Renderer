@@ -77,9 +77,7 @@ void main()
 	//}
 
 	outColor.a = 1.0f;
-	if( length( fragTexCoord.xy - vec2( 0.5f, 0.5f ) ) < 0.01f ) {
-		outColor.rgb = vec3( 0.0f, 0.0f, 0.0f );
-	} else if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
+	if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
 		outColor.rgb = globals.toneMap.rgb * mix( LinearToSrgb( sceneColor ).rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
 	} else {
 		outColor.rgb = globals.toneMap.rgb * LinearToSrgb( sceneColor ).rgb;
