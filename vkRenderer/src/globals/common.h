@@ -72,8 +72,8 @@ const uint32_t	MaxModels						= 1000;
 const uint32_t	ShadowObjectOffset				= MaxModels;
 const uint32_t	MaxVertices						= 0x000FFFFF;
 const uint32_t	MaxIndices						= 0x000FFFFF;
-const uint32_t	MaxSurfaces						= MaxModels * MaxViews;
-const uint32_t	MaxSurfacesDescriptors			= MaxModels * MaxViews;
+const uint32_t	MaxSurfaces						= MaxModels;
+const uint32_t	MaxSurfacesDescriptors			= 1;
 const uint32_t	MaxMaterials					= 256;
 const uint32_t	MaxCodeImages					= 2;
 const uint64_t	MaxSharedMemory					= MB( 1024 );
@@ -125,9 +125,15 @@ struct pipelineObject_t;
 struct uniformBufferObject_t
 {
 	mat4x4f model;
+};
+
+
+struct viewBufferObject_t
+{
 	mat4x4f view;
 	mat4x4f proj;
 };
+
 
 struct globalUboConstants_t
 {

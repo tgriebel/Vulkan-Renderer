@@ -66,11 +66,11 @@ void main()
 	const float maxHeight = globals.generic.x;
 	vec3 position = inPosition;
 	position.z += maxHeight * heightMapValue;
-	worldPosition = ubo[ objectId ].model * vec4( position, 1.0f );
-    gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
+	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
+    gl_Position = viewUbo.views[0].proj * viewUbo.views[0].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	mat3 worldTangent = ( mat3( ubo[ objectId ].model ) * GetTerrainTangent( inTexCoord.xy ) );
+	mat3 worldTangent = ( mat3( ubo.model[ objectId ] ) * GetTerrainTangent( inTexCoord.xy ) );
 	fragNormal = normalize( cross( worldTangent[0], worldTangent[1] ) );
 	clipPosition = gl_Position;
 }

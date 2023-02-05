@@ -58,7 +58,7 @@ void main()
     float visibility = 1.0f;
     const uint shadowMapTexId = 0;
     const uint shadowId = int( globals.shadowParms.x );
-    vec4 lsPosition = ubo[ shadowId ].proj * ubo[ shadowId ].view * vec4( worldPosition.xyz, 1.0f );
+    vec4 lsPosition = viewUbo.views[1].proj * viewUbo.views[1].view * vec4( worldPosition.xyz, 1.0f );
     lsPosition.xyz /= lsPosition.w;
     vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
     float bias = 0.0001f;

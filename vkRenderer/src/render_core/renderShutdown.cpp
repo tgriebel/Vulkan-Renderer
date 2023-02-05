@@ -142,7 +142,8 @@ void Renderer::ShutdownShaderResources()
 	// UBOs
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
 		vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].surfParms.GetVkObject(), nullptr );
+		vkDestroyBuffer( context.device, frameState[ i ].viewParms.GetVkObject(), nullptr );
+		vkDestroyBuffer( context.device, frameState[ i ].surfParms.GetVkObject(), nullptr );	
 		vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.GetVkObject(), nullptr );
 		vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
 	}

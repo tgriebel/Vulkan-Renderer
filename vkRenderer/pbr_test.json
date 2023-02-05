@@ -1,0 +1,217 @@
+{
+  "scene": "lego",
+  "shaders": [
+    {
+      "name": "Basic",
+      "vs": "simpleVS.spv",
+      "ps": "simplePS.spv"
+    },
+    {
+      "name": "Shadow",
+      "vs": "simpleVS.spv",
+      "ps": "shadowPS.spv"
+    },
+    {
+      "name": "Prepass",
+      "vs": "simpleVS.spv",
+      "ps": "depthPS.spv"
+    },
+    {
+      "name": "Terrain",
+      "vs": "terrainVS.spv",
+      "ps": "terrainPS.spv"
+    },
+    {
+      "name": "TerrainDepth",
+      "vs": "terrainVS.spv",
+      "ps": "depthPS.spv"
+    },
+    {
+      "name": "TerrainShadow",
+      "vs": "terrainVS.spv",
+      "ps": "shadowPS.spv"
+    },
+    {
+      "name": "Sky",
+      "vs": "skyboxVS.spv",
+      "ps": "skyboxPS.spv"
+    },
+    {
+      "name": "LitDepth",
+      "vs": "simpleVS.spv",
+      "ps": "depthPS.spv"
+    },
+    {
+      "name": "LitOpaque",
+      "vs": "simpleVS.spv",
+      "ps": "litPS.spv"
+    },
+    {
+      "name": "LitTree",
+      "vs": "treeVS.spv",
+      "ps": "litPS.spv"
+    },
+    {
+      "name": "LitTrans",
+      "vs": "simpleVS.spv",
+      "ps": "litPS.spv"
+    },
+    {
+      "name": "Debug",
+      "vs": "simpleVS.spv",
+      "ps": "depthPS.spv"
+    },
+    {
+      "name": "DebugSolid",
+      "vs": "simpleVS.spv",
+      "ps": "emissivePS.spv"
+    },
+    {
+      "name": "PostProcess",
+      "vs": "defaultVS.spv",
+      "ps": "postProcessPS.spv"
+    },
+    {
+      "name": "Image2D",
+      "vs": "defaultVS.spv",
+      "ps": "simplePS.spv"
+    },
+  ],
+  "images": [
+    {
+	  "name": "checker.png",
+	  "type": "2D"
+	},
+	{
+	  "name": "grid.png",
+	  "type": "2D"
+	},
+	{
+	  "name": "white.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "black.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_right.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_left.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_top.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_bottom.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_front.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_back.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_low.jpg",
+	  "type": "CUBE"
+	}
+  ],
+  "materials": [
+    {
+      "name": "Grid",
+	  "KdR": 1.0,
+      "tr": 0.0,
+      "ns": 0.0,
+      "ni": 0.0,
+      "d": 1.0,
+      "illum": 0.0,
+      "shaders": {
+          "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      },
+	  "textures": {
+		  "GGX_COLOR_MAP_SLOT" : "grid.png"
+	  }
+    },
+	{
+      "name": "TERRAIN",
+      "shaders": {
+		  "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      }
+    },
+	{
+      "name": "SKY",
+      "shaders": {
+          "DRAWPASS_SKYBOX": "Sky"
+      }
+      "textures": {
+          "CUBE_RIGHT_SLOT" : "gray.jpg",
+          "CUBE_LEFT_SLOT" : "gray.jpg",
+          "CUBE_TOP_SLOT" : "gray.jpg",	  
+          "CUBE_BOTTOM_SLOT" : "gray.jpg",
+          "CUBE_FRONT_SLOT" : "gray.jpg",
+          "CUBE_BACK_SLOT" : "gray.jpg",
+      }
+    }
+  ],
+  "models": [
+  	{
+      "name" : "cube",
+      "model" : "cube.obj"
+    },
+	{
+      "name" : "axis",
+      "model" : "axis.obj",
+    },
+	{
+      "name" : "grid",
+      "model" : "_terrain",
+	  "argStr0" : "WHITE_WOOD",
+	  "argInt0" : 100,
+	  "argInt1" : 100,
+	  "argFlt0" : 1.0,
+	  "argFlt1" : 100.0,
+    },
+  ],
+  "entities": [
+    {
+      "name" : "_skybox",
+      "model" : "_skybox",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 0.0,
+	  "rx" : 0.0,
+	  "ry" : 0.0,
+	  "rz" : 0.0,
+	  "sx" : 1.0,
+	  "sy" : 1.0,
+	  "sz" : 1.0
+    },
+	{
+      "name" : "grid",
+      "model" : "grid",
+    },
+	{
+      "name" : "car",
+      "model" : "911_scene.obj",
+	  "rx" : -90.0,
+    },
+	{
+      "name" : "sphere",
+      "model" : "sphere.obj",
+	  "hidden" : "true"
+    }
+  ]
+}

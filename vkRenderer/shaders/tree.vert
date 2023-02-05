@@ -36,8 +36,8 @@ void main()
 	const uint materialId = pushConstants.materialId;
 
 	vec3 position = inPosition;
-	worldPosition = ubo[ objectId ].model * vec4( position, 1.0f );
-    gl_Position = ubo[ objectId ].proj * ubo[ objectId ].view * worldPosition;
+	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
+    gl_Position = viewUbo.views[0].proj * viewUbo.views[0].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 	fragNormal = inNormal;

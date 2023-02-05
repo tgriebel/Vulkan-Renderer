@@ -34,6 +34,7 @@ public:
 	GpuImage		depthImage;
 	GpuImage		stencilImage;
 	GpuBuffer		globalConstants;
+	GpuBuffer		viewParms;
 	GpuBuffer		surfParms;
 	GpuBuffer		materialBuffers;
 	GpuBuffer		lightParms;

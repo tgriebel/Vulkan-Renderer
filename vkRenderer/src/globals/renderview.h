@@ -49,8 +49,8 @@ public:
 
 	uint32_t									committedModelCnt;
 	uint32_t									mergedModelCnt;
-	drawSurf_t									surfaces[ MaxModels ];
-	drawSurf_t									merged[ MaxModels ];
-	drawSurfInstance_t							instances[ MaxModels ];
-	uint32_t									instanceCounts[ MaxModels ];
+	drawSurf_t									surfaces[ MaxSurfaces ];
+	drawSurf_t									merged[ MaxSurfaces ];
+	drawSurfInstance_t							instances[ MaxSurfaces ];
+	uint32_t									instanceCounts[ MaxSurfaces ];
 };

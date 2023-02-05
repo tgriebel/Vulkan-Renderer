@@ -38,7 +38,7 @@ void main()
     const uint textureId1 = materialUbo.materials[ materialId ].textureId1;
     const uint textureId2 = materialUbo.materials[ materialId ].textureId2;
 
-	const mat4 viewMat = ubo[ 0 ].view;
+	const mat4 viewMat = viewUbo.views[0].view;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
 	const vec3 up = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 1 ][ 0 ], viewMat[ 2 ][ 0 ] ) );	
 	const vec3 right = normalize( vec3( viewMat[ 0 ][ 1 ], viewMat[ 1 ][ 1 ], viewMat[ 2 ][ 1 ] ) );
@@ -57,7 +57,7 @@ void main()
 	stencilCoverage /= 4.0f;
 
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-	for( uint i = 0; i < globals.numSamples; ++i ) {
+	for( int i = 0; i < int(globals.numSamples); ++i ) {
 		sceneColor.rgb += texelFetch( codeSamplers[ textureId0 ], pixelLocation, i ).rgb;
 	}
 	sceneColor /= globals.numSamples;

@@ -160,7 +160,8 @@ private:
 	VkSampler						vk_depthShadowSampler;
 
 	VkDescriptorBufferInfo			vk_globalConstantsInfo;
-	VkDescriptorBufferInfo			vk_surfaceUbo[ MaxSurfaces ];
+	VkDescriptorBufferInfo			vk_viewUbo;
+	VkDescriptorBufferInfo			vk_surfaceUbo;
 	VkDescriptorImageInfo			vk_image2DInfo[ MaxImageDescriptors ];
 	VkDescriptorImageInfo			vk_shadowImageInfo[ MaxImageDescriptors ];
 	VkDescriptorImageInfo			vk_codeImageInfo[ MaxCodeImages ];

@@ -94,58 +94,66 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 	globalsLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	globalsLayoutBinding.descriptorCount = 1;
 	globalsLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	globalsLayoutBinding.pImmutableSamplers = nullptr; // Optional
+	globalsLayoutBinding.pImmutableSamplers = nullptr;
+
+	VkDescriptorSetLayoutBinding viewLayoutBinding{ };
+	viewLayoutBinding.binding = 1;
+	viewLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	viewLayoutBinding.descriptorCount = 1;
+	viewLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
+	viewLayoutBinding.pImmutableSamplers = nullptr;
 
 	VkDescriptorSetLayoutBinding uboLayoutBinding{ };
-	uboLayoutBinding.binding = 1;
+	uboLayoutBinding.binding = 2;
 	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount = MaxSurfaces;
+	uboLayoutBinding.descriptorCount = 1;
 	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	uboLayoutBinding.pImmutableSamplers = nullptr; // Optional
+	uboLayoutBinding.pImmutableSamplers = nullptr;
 
 	VkDescriptorSetLayoutBinding sampler2dLayoutBinding{ };
-	sampler2dLayoutBinding.binding = 2;
+	sampler2dLayoutBinding.binding = 3;
 	sampler2dLayoutBinding.descriptorCount = MaxImageDescriptors;
 	sampler2dLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	sampler2dLayoutBinding.pImmutableSamplers = nullptr;
 	sampler2dLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding samplerCubeLayoutBinding{ };
-	samplerCubeLayoutBinding.binding = 3;
+	samplerCubeLayoutBinding.binding = 4;
 	samplerCubeLayoutBinding.descriptorCount = MaxImageDescriptors;
 	samplerCubeLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	samplerCubeLayoutBinding.pImmutableSamplers = nullptr;
 	samplerCubeLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding materialBinding{ };
-	materialBinding.binding = 4;
+	materialBinding.binding = 5;
 	materialBinding.descriptorCount = 1;
 	materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	materialBinding.pImmutableSamplers = nullptr;
 	materialBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding lightBinding{ };
-	lightBinding.binding = 5;
+	lightBinding.binding = 6;
 	lightBinding.descriptorCount = 1;
 	lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	lightBinding.pImmutableSamplers = nullptr;
 	lightBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding codeImageBinding{ };
-	codeImageBinding.binding = 6;
+	codeImageBinding.binding = 7;
 	codeImageBinding.descriptorCount = MaxCodeImages;
 	codeImageBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	codeImageBinding.pImmutableSamplers = nullptr;
 	codeImageBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding stencilBinding{ };
-	stencilBinding.binding = 7;
+	stencilBinding.binding = 8;
 	stencilBinding.descriptorCount = 1;
 	stencilBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	stencilBinding.pImmutableSamplers = nullptr;
 	stencilBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-	std::array<VkDescriptorSetLayoutBinding, 8> bindings = {	globalsLayoutBinding,
+	std::array<VkDescriptorSetLayoutBinding, 9> bindings = {	globalsLayoutBinding,
+																viewLayoutBinding,
 																uboLayoutBinding,
 																sampler2dLayoutBinding,
 																samplerCubeLayoutBinding,

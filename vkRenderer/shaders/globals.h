@@ -23,6 +23,8 @@
 
 #define MaxLights		3
 #define MaxMaterials	256
+#define MaxViews		2
+#define MaxSurfaces		1000
 
 struct light_t
 {
@@ -58,15 +60,19 @@ struct material_t
 	uint	pad3;
 };
 
+struct view_t
+{
+	mat4	view;
+	mat4	proj;
+};
+
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
 #define MODEL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform UniformBufferObject					\
 									{																			\
-										mat4        model;														\
-										mat4        view;														\
-										mat4        proj;														\
-									} ubo[];
+										mat4        model[MaxSurfaces];											\
+									} ubo;
 
 #define GLOBALS_LAYOUT( S, N )		layout( set = S, binding = N ) uniform GlobalConstants						\
 									{																			\
@@ -77,6 +83,11 @@ struct material_t
 										vec4        toneMap;													\
 										uint		numSamples;													\
 									} globals;
+
+#define VIEW_LAYOUT( S, N )			layout( set = S, binding = N ) uniform ViewUniformBuffer					\
+									{																			\
+										view_t		views[MaxViews];											\
+									} viewUbo;
 
 #define SAMPLER_2D_LAYOUT( S, N )	layout( set = S, binding = N ) uniform sampler2D texSampler[];
 
@@ -121,13 +132,14 @@ struct material_t
 							VS_OUT
 
 #define VS_LAYOUT_STANDARD( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
-										MODEL_LAYOUT( 0, 1 )													\
-										SAMPLER_2D_LAYOUT( 0, 2 )												\
-										SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-										MATERIAL_LAYOUT( 0, 4 )													\
-										LIGHT_LAYOUT( 0, 5 )													\
-										CODE_IMAGE_LAYOUT( 0, 6, SAMPLER )										\
-										STENCIL_LAYOUT( 0, 7, SAMPLER )											\
+										VIEW_LAYOUT( 0, 1)														\
+										MODEL_LAYOUT( 0, 2 )													\
+										SAMPLER_2D_LAYOUT( 0, 3 )												\
+										SAMPLER_CUBE_LAYOUT( 0, 4 )												\
+										MATERIAL_LAYOUT( 0, 5 )													\
+										LIGHT_LAYOUT( 0, 6 )													\
+										CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
+										STENCIL_LAYOUT( 0, 8, SAMPLER )											\
 										PUSH_CONSTANTS															\
 										VS_IN																	\
 										VS_OUT
@@ -146,13 +158,14 @@ struct material_t
 							PS_OUT
 
 #define PS_LAYOUT_STANDARD( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
-										MODEL_LAYOUT( 0, 1 )													\
-										SAMPLER_2D_LAYOUT( 0, 2 )												\
-										SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-										MATERIAL_LAYOUT( 0, 4 )													\
-										LIGHT_LAYOUT( 0, 5 )													\
-										CODE_IMAGE_LAYOUT( 0, 6, SAMPLER )										\
-										STENCIL_LAYOUT( 0, 7, SAMPLER )											\
+										VIEW_LAYOUT( 0, 1)														\
+										MODEL_LAYOUT( 0, 2 )													\
+										SAMPLER_2D_LAYOUT( 0, 3 )												\
+										SAMPLER_CUBE_LAYOUT( 0, 4 )												\
+										MATERIAL_LAYOUT( 0, 5 )													\
+										LIGHT_LAYOUT( 0, 6 )													\
+										CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
+										STENCIL_LAYOUT( 0, 8, SAMPLER )											\
 										PUSH_CONSTANTS															\
 										PS_IN																	\
 										PS_OUT
