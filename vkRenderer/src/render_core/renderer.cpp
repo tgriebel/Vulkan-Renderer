@@ -1712,8 +1712,9 @@ void Renderer::DrawDebugMenu()
 			{
 				for ( uint32_t s = 0; s < shaderCount; ++s )
 				{
-					GpuProgram& shader = gAssets.gpuPrograms.Find( s )->Get();
-					const char* shaderName = gAssets.gpuPrograms.FindName( s );
+					Asset<GpuProgram>* shaderAsset = gAssets.gpuPrograms.Find( s );
+					GpuProgram& shader = shaderAsset->Get();
+					const char* shaderName = shaderAsset->GetName().c_str();
 					ImGui::Text( shaderName );
 				}
 				ImGui::TreePop();
