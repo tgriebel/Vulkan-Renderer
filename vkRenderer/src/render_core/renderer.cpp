@@ -1662,6 +1662,11 @@ void Renderer::DrawDebugMenu()
 			ImGui::InputFloat( "Tone Map A", &gImguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::EndTabItem();
 		}
+		if ( ImGui::BeginTabItem( "Device" ) )
+		{
+			DebugMenuDeviceProperties( deviceProperties );
+			ImGui::EndTabItem();
+		}
 		if ( ImGui::BeginTabItem( "Assets" ) )
 		{
 			const uint32_t matCount = gAssets.materialLib.Count();

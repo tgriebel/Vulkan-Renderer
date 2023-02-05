@@ -9,11 +9,8 @@ extern AssetManager gAssets;
 #include "../../external/imgui/imgui.h"
 #include "../../external/imgui/backends/imgui_impl_glfw.h"
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
-#endif
 
-#if defined( USE_IMGUI )
 extern imguiControls_t gImguiControls;
-#endif
 
 static const int defaultWidth = 100;
 
@@ -182,6 +179,9 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 		}
 		ImGui::TreePop();
 	}
+
+#undef EditRgbValue
+#undef EditFloatValue
 }
 
 
@@ -272,32 +272,28 @@ void DebugMenuTextureTreeNode( Asset<Texture>* texAsset )
 		Texture& texture = texAsset->Get();
 		if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
 		{
-			ImGui::Text( "Width" );
-			ImGui::TableNextColumn();
-			ImGui::Text( "%u", texture.info.width );
+			ImGui::TableNextColumn();	ImGui::Text( "Width" );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.info.width );
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Height" );
-			ImGui::TableNextColumn();
-			ImGui::Text( "%u", texture.info.height );
+			ImGui::TableNextColumn();	ImGui::Text( "Height" );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.info.height );
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Layers" );
-			ImGui::TableNextColumn();
-			ImGui::Text( "%u", texture.info.layers );
+			ImGui::TableNextColumn();	ImGui::Text( "Layers" );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.info.layers );
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Channels" );
-			ImGui::TableNextColumn();
-			ImGui::Text( "%u", texture.info.channels );
+			ImGui::TableNextColumn();	ImGui::Text( "Channels" );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.info.channels );
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Mips" );
+			ImGui::TableNextColumn();	ImGui::Text( "Mips" );
 			ImGui::TableNextColumn();
 			ImGui::Text( "%u", texture.info.mipLevels );
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Layers" );
+			ImGui::TableNextColumn();	ImGui::Text( "Layers" );
 			ImGui::TableNextColumn();
 			switch ( texture.info.type )
 			{
@@ -312,14 +308,12 @@ void DebugMenuTextureTreeNode( Asset<Texture>* texAsset )
 			}
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Upload Id" );
-			ImGui::TableNextColumn();
-			ImGui::Text( "%u", texture.uploadId );
+			ImGui::TableNextColumn();	ImGui::Text( "Upload Id" );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.uploadId );
 			ImGui::TableNextRow();
 
-			ImGui::Text( "Size(bytes)" );
-			ImGui::TableNextColumn();
-			ImGui::Text( "%u", texture.sizeBytes );
+			ImGui::TableNextColumn();	ImGui::Text( "Size(bytes)" );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.sizeBytes );
 			ImGui::TableNextRow();
 
 			ImGui::EndTable();
@@ -328,3 +322,189 @@ void DebugMenuTextureTreeNode( Asset<Texture>* texAsset )
 		ImGui::TreePop();
 	}
 }
+
+
+void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties )
+{
+	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
+
+#define LimitUint( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
+
+#define LimitDeviceSize( FIELD )	ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
+
+#define LimitSizeT( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%ull", deviceProperties.limits.##FIELD );
+
+#define LimitBool( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
+
+#define LimitFloat( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%f", deviceProperties.limits.##FIELD );
+
+#define LimitInt( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%i", deviceProperties.limits.##FIELD );
+
+#define LimitHex( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%X", deviceProperties.limits.##FIELD );
+
+	if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
+	{
+		ImGui::TableNextColumn();	ImGui::Text( "Device" );
+		ImGui::TableNextColumn();	ImGui::Text( deviceProperties.deviceName );
+
+		ImGui::TableNextColumn();	ImGui::Text( "API Version" );
+		ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.apiVersion );
+
+		ImGui::TableNextColumn();	ImGui::Text( "Driver Version" );
+		ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.driverVersion );
+
+		ImGui::TableNextColumn();
+		ImGui::Text( "Type" );
+		ImGui::TableNextColumn();
+		switch( deviceProperties.deviceType )
+		{
+			case VK_PHYSICAL_DEVICE_TYPE_OTHER:				ImGui::Text( "Unknown" );	break;
+			case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:	ImGui::Text( "Integrated" );break;
+			case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:		ImGui::Text( "Discrete" );	break;
+			case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:		ImGui::Text( "Virtual" );	break;
+			case VK_PHYSICAL_DEVICE_TYPE_CPU:				ImGui::Text( "CPU" );		break;
+		}
+
+		ImGui::EndTable();
+	}
+
+	if ( ImGui::TreeNode( "Limits" ) )
+	{
+		if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
+		{
+			LimitUint( maxImageDimension1D )
+			LimitUint( maxImageDimension2D )
+			LimitUint( maxImageDimension3D )
+			LimitUint( maxImageDimensionCube )
+			LimitUint( maxImageArrayLayers )
+			LimitUint( maxTexelBufferElements )
+			LimitUint( maxUniformBufferRange )
+			LimitUint( maxStorageBufferRange )
+			LimitUint( maxPushConstantsSize )
+			LimitUint( maxMemoryAllocationCount )
+			LimitUint( maxSamplerAllocationCount )
+			LimitUint( maxBoundDescriptorSets )
+			LimitUint( maxPerStageDescriptorSamplers )
+			LimitUint( maxPerStageDescriptorUniformBuffers )
+			LimitUint( maxPerStageDescriptorStorageBuffers )
+			LimitUint( maxPerStageDescriptorSampledImages )
+			LimitUint( maxPerStageDescriptorStorageImages )
+			LimitUint( maxPerStageDescriptorInputAttachments )
+			LimitUint( maxPerStageResources )
+			LimitUint( maxDescriptorSetSamplers )
+			LimitUint( maxDescriptorSetUniformBuffers )
+			LimitUint( maxDescriptorSetUniformBuffersDynamic )
+			LimitUint( maxDescriptorSetStorageBuffers )
+			LimitUint( maxDescriptorSetStorageBuffersDynamic )
+			LimitUint( maxDescriptorSetSampledImages )
+			LimitUint( maxDescriptorSetStorageImages )
+			LimitUint( maxDescriptorSetInputAttachments )
+			LimitUint( maxVertexInputAttributes )
+			LimitUint( maxVertexInputBindings )
+			LimitUint( maxVertexInputAttributeOffset )
+			LimitUint( maxVertexInputBindingStride )
+			LimitUint( maxVertexOutputComponents )
+			LimitUint( maxTessellationGenerationLevel )
+			LimitUint( maxTessellationPatchSize )
+			LimitUint( maxTessellationControlPerVertexInputComponents )
+			LimitUint( maxTessellationControlPerVertexOutputComponents )
+			LimitUint( maxTessellationControlPerPatchOutputComponents )
+			LimitUint( maxTessellationControlTotalOutputComponents )
+			LimitUint( maxTessellationEvaluationInputComponents )
+			LimitUint( maxTessellationEvaluationOutputComponents )
+			LimitUint( maxGeometryShaderInvocations )
+			LimitUint( maxGeometryInputComponents )
+			LimitUint( maxGeometryOutputComponents )
+			LimitUint( maxGeometryOutputVertices )
+			LimitUint( maxGeometryTotalOutputComponents )
+			LimitUint( maxFragmentInputComponents )
+			LimitUint( maxFragmentOutputAttachments )
+			LimitUint( maxFragmentDualSrcAttachments )
+			LimitUint( maxFragmentCombinedOutputResources )
+			LimitUint( maxComputeSharedMemorySize )
+			LimitUint( maxComputeWorkGroupCount[0] )
+			LimitUint( maxComputeWorkGroupCount[1] )
+			LimitUint( maxComputeWorkGroupCount[2] )
+			LimitUint( maxComputeWorkGroupInvocations )
+			LimitUint( maxComputeWorkGroupSize[0] )
+			LimitUint( maxComputeWorkGroupSize[1] )
+			LimitUint( maxComputeWorkGroupSize[2] )
+			LimitUint( subPixelPrecisionBits )
+			LimitUint( subTexelPrecisionBits )
+			LimitUint( mipmapPrecisionBits )
+			LimitUint( maxDrawIndexedIndexValue )
+			LimitUint( maxDrawIndirectCount )
+			LimitUint( maxViewports )
+			LimitUint( maxViewportDimensions[0] )
+			LimitUint( maxViewportDimensions[1] )
+			LimitUint( viewportSubPixelBits )
+			LimitUint( maxTexelOffset )
+			LimitUint( maxTexelGatherOffset )
+			LimitUint( subPixelInterpolationOffsetBits )
+			LimitUint( maxFramebufferWidth )
+			LimitUint( maxFramebufferHeight )
+			LimitUint( maxFramebufferLayers )
+			LimitUint( maxColorAttachments )
+			LimitUint( maxSampleMaskWords )
+			LimitUint( maxClipDistances )
+			LimitUint( maxCullDistances )
+			LimitUint( maxCombinedClipAndCullDistances )
+			LimitUint( discreteQueuePriorities )
+			LimitDeviceSize( bufferImageGranularity )
+			LimitDeviceSize( sparseAddressSpaceSize )
+			LimitDeviceSize( minTexelBufferOffsetAlignment )
+			LimitDeviceSize( minUniformBufferOffsetAlignment )
+			LimitDeviceSize( minStorageBufferOffsetAlignment )
+			LimitDeviceSize( optimalBufferCopyOffsetAlignment )
+			LimitDeviceSize( optimalBufferCopyRowPitchAlignment )
+			LimitDeviceSize( nonCoherentAtomSize )
+			LimitBool( timestampComputeAndGraphics )
+			LimitBool( strictLines )
+			LimitBool( standardSampleLocations )
+			LimitFloat( maxSamplerLodBias )
+			LimitFloat( maxSamplerAnisotropy )
+			LimitFloat( viewportBoundsRange[0] )
+			LimitFloat( viewportBoundsRange[1] )
+			LimitFloat( minInterpolationOffset )
+			LimitFloat( maxInterpolationOffset )
+			LimitFloat( timestampPeriod )
+			LimitFloat( pointSizeRange[0] )
+			LimitFloat( pointSizeRange[1] )
+			LimitFloat( lineWidthRange[0] )
+			LimitFloat( lineWidthRange[1] )
+			LimitFloat( pointSizeGranularity )
+			LimitFloat( lineWidthGranularity )
+			LimitInt( minTexelOffset )
+			LimitInt( minTexelGatherOffset )
+			LimitSizeT( minMemoryMapAlignment )
+			LimitHex( framebufferColorSampleCounts )
+			LimitHex( framebufferDepthSampleCounts )
+			LimitHex( framebufferStencilSampleCounts )
+			LimitHex( framebufferNoAttachmentsSampleCounts )
+			LimitHex( sampledImageColorSampleCounts )
+			LimitHex( sampledImageIntegerSampleCounts )
+			LimitHex( sampledImageDepthSampleCounts )
+			LimitHex( sampledImageStencilSampleCounts )
+			LimitHex( storageImageSampleCounts )
+
+			ImGui::EndTable();
+		}
+
+		ImGui::TreePop();
+	}
+
+#undef LimitUint
+#undef LimitDeviceSize
+#undef LimitBool
+#undef LimitFloat
+#undef LimitInt
+#undef LimitHex
+}
+#endif
