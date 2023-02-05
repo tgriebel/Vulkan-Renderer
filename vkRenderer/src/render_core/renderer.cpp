@@ -1697,67 +1697,8 @@ void Renderer::DrawDebugMenu()
 			{
 				for ( uint32_t t = 0; t < texCount; ++t )
 				{
-					Texture& texture = gAssets.textureLib.Find( t )->Get();
-					const char* texName = gAssets.textureLib.FindName( t );
-					if ( ImGui::TreeNode( texName ) )
-					{
-						if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
-						{
-							ImGui::Text("Width");
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.info.width );
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Height" );
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.info.height );
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Layers" );
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.info.layers );
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Channels" );
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.info.channels );
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Mips" );
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.info.mipLevels );
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Layers" );
-							ImGui::TableNextColumn();
-							switch( texture.info.type )
-							{
-								case TEXTURE_TYPE_2D:
-									ImGui::Text( "2D" );
-									break;
-								case TEXTURE_TYPE_CUBE:
-									ImGui::Text( "CUBE" );
-									break;
-								default:
-									ImGui::Text( "Unknown" );
-							}
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Upload Id" );
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.uploadId );
-							ImGui::TableNextRow();
-
-							ImGui::Text( "Size(bytes)" );
-							ImGui::TableNextColumn();
-							ImGui::Text( "%u", texture.sizeBytes );
-							ImGui::TableNextRow();
-
-							ImGui::EndTable();
-						}
-
-						ImGui::TreePop();
-					}
+					Asset<Texture>* texAsset = gAssets.textureLib.Find( t );
+					DebugMenuTextureTreeNode( texAsset );
 				}
 				ImGui::TreePop();
 			}
