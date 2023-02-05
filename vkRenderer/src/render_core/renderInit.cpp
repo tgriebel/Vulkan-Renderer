@@ -823,7 +823,7 @@ void Renderer::CreateUniformBuffers()
 		// Model Buffer
 		{
 			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( uniformBufferObject_t ) );
-			const VkDeviceSize bufferSize = MaxSurfaces * stride;
+			const VkDeviceSize bufferSize = MaxViews * MaxSurfaces * stride;
 			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].surfParms, sharedMemory );
 		}
 

@@ -588,16 +588,20 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		vk_globalConstantsInfo.range = sizeof( globalUboConstants_t );
 	}
 
-	{
-		vk_viewUbo.buffer = frameState[ i ].viewParms.GetVkObject();
-		vk_viewUbo.offset = 0;
-		vk_viewUbo.range = sizeof( viewBufferObject_t );
-	}
+	vk_viewUbo.buffer = frameState[ i ].viewParms.GetVkObject();
+	vk_viewUbo.offset = 0;
+	vk_viewUbo.range = MaxViews * sizeof( viewBufferObject_t );
 
+	vk_shadowViewUbo.buffer = frameState[ i ].viewParms.GetVkObject();
+	vk_shadowViewUbo.offset = sizeof( viewBufferObject_t );
+	vk_shadowViewUbo.range = sizeof( viewBufferObject_t );
+
+	for ( uint32_t v = 0; v < MaxViews; ++v )
 	{
-		vk_surfaceUbo.buffer = frameState[ i ].surfParms.GetVkObject();
-		vk_surfaceUbo.offset = 0;
-		vk_surfaceUbo.range = VK_WHOLE_SIZE;
+		const VkDeviceSize size = MaxSurfaces * sizeof( uniformBufferObject_t );
+		vk_surfaceUbo[v].buffer = frameState[ i ].surfParms.GetVkObject();
+		vk_surfaceUbo[v].offset = v * size;
+		vk_surfaceUbo[v].range = size;
 	}
 
 	int firstCube = -1;
@@ -711,7 +715,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
 	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo;
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[0];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -829,7 +833,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_shadowViewUbo;
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -838,7 +842,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo;
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[1];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -961,7 +965,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo;
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[0];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1066,6 +1070,17 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		uboBuffer[ objectId ] = ubo;
 	}
 
+	static uniformBufferObject_t shadowUboBuffer[ MaxSurfaces ];
+	assert( shadowView.committedModelCnt < MaxSurfaces );
+	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
+	{
+		uniformBufferObject_t ubo;
+		ubo.model = shadowView.instances[ i ].modelMatrix;
+		const drawSurf_t& surf = shadowView.merged[ shadowView.instances[ i ].surfId ];
+		const uint32_t objectId = ( shadowView.instances[ i ].id + surf.objectId );
+		shadowUboBuffer[ objectId ] = ubo;
+	}
+
 	static lightBufferObject_t lightBuffer[ MaxLights ];
 	for ( int i = 0; i < MaxLights; ++i )
 	{
@@ -1084,6 +1099,7 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 
 	frameState[ currentImage ].surfParms.Reset();
 	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParms.CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
 	frameState[ currentImage ].materialBuffers.Reset();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
