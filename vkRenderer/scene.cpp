@@ -13,6 +13,36 @@ extern Window					gWindow;
 
 void CreateCodeAssets()
 {
+	// Textures
+	{
+		{
+			const RGBA rgba = Color( Color::Gold ).AsRGBA();
+
+			hdl_t handle = gAssets.textureLib.Add( "CODE_COLOR", Texture() );
+			Texture& texture = gAssets.textureLib.Find( handle )->Get();
+
+			texture.info.width = 8;
+			texture.info.height = 8;
+			texture.info.mipLevels = 1;
+			texture.info.layers = 1;
+			texture.info.type = TEXTURE_TYPE_2D;
+			texture.info.channels = 4;
+			texture.sizeBytes = texture.info.channels * texture.info.width * texture.info.height;
+
+			texture.bytes = new uint8_t[ texture.sizeBytes ];
+
+			const uint32_t pixelCount = texture.info.width * texture.info.height;
+			for ( uint32_t i = 0; i < pixelCount; ++i )
+			{
+				texture.bytes[ i * 4 + 0 ] = rgba.r;
+				texture.bytes[ i * 4 + 1 ] = rgba.g;
+				texture.bytes[ i * 4 + 2 ] = rgba.b;
+				texture.bytes[ i * 4 + 3 ] = rgba.a;
+			}
+			
+		}
+	}
+
 	// Materials
 	{
 		{
@@ -168,6 +198,22 @@ void UpdateScene( Scene* scene, const float dt )
 	skyBoxOrigin[ 1 ] = scene->camera.GetOrigin()[ 1 ];
 	skyBoxOrigin[ 2 ] = scene->camera.GetOrigin()[ 2 ] - 0.5f;
 	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
+
+	/*
+	{
+		const RGBA rgba = Color( Color::Pink ).AsRGBA();
+		Texture& texture = gAssets.textureLib.Find( "CODE_COLOR" )->Get();
+
+		const uint32_t pixelCount = texture.info.width * texture.info.height;
+		for ( uint32_t i = 0; i < pixelCount; ++i )
+		{
+			texture.bytes[ i * 4 + 0 ] = rgba.r;
+			texture.bytes[ i * 4 + 1 ] = rgba.g;
+			texture.bytes[ i * 4 + 2 ] = rgba.b;
+			texture.bytes[ i * 4 + 3 ] = rgba.a;
+		}
+	}
+	*/
 
 	if ( gImguiControls.dbgImageId >= 0 )
 	{
