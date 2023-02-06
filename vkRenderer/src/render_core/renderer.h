@@ -290,6 +290,7 @@ private:
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
 	void						MergeSurfaces( RenderView& view );
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
+	VkFormat					GetVkTextureFormat( textureFmt_t fmt );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
 	void						DrawDebugMenu();
 	void						FlushGPU();

@@ -440,6 +440,28 @@ gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
 }
 
 
+VkFormat Renderer::GetVkTextureFormat( textureFmt_t fmt )
+{
+	switch ( fmt )
+	{
+		case TEXTURE_FMT_UNKNOWN:	return VK_FORMAT_UNDEFINED;				break;
+		case TEXTURE_FMT_R_8:		return VK_FORMAT_R8_SRGB;				break;
+		case TEXTURE_FMT_R_16:		return VK_FORMAT_R16_SFLOAT;			break;
+		case TEXTURE_FMT_D_16:		return VK_FORMAT_D16_UNORM;				break;
+		case TEXTURE_FMT_D24S8:		return VK_FORMAT_D24_UNORM_S8_UINT;		break;
+		case TEXTURE_FMT_D_32:		return VK_FORMAT_D32_SFLOAT;			break;
+		case TEXTURE_FMT_RGB_8:		return VK_FORMAT_R8G8B8_SRGB;			break;
+		case TEXTURE_FMT_RGBA_8:	return VK_FORMAT_R8G8B8A8_SRGB;			break;
+		case TEXTURE_FMT_ABGR_8:	return VK_FORMAT_A8B8G8R8_SRGB_PACK32;	break;
+		case TEXTURE_FMT_BGR_8:		return VK_FORMAT_B8G8R8_SRGB;			break;
+		case TEXTURE_FMT_RGB_16:	return VK_FORMAT_R16G16B16_SFLOAT;		break;
+		case TEXTURE_FMT_RGBA_16:	return VK_FORMAT_R16G16B16A16_SFLOAT;	break;
+		default: assert( false );	break;
+	}
+	return VK_FORMAT_R8G8B8A8_SRGB;
+}
+
+
 viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 {
 	if ( pass == DRAWPASS_SHADOW ) {
