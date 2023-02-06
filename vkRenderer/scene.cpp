@@ -199,9 +199,10 @@ void UpdateScene( Scene* scene, const float dt )
 	skyBoxOrigin[ 2 ] = scene->camera.GetOrigin()[ 2 ] - 0.5f;
 	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
-	/*
+	
 	{
-		const RGBA rgba = Color( Color::Pink ).AsRGBA();
+		Color randomColor( Random(), Random(), Random(), 1.0f );
+		const RGBA rgba = Color( randomColor ).AsRGBA();
 		Texture& texture = gAssets.textureLib.Find( "CODE_COLOR" )->Get();
 
 		const uint32_t pixelCount = texture.info.width * texture.info.height;
@@ -212,8 +213,9 @@ void UpdateScene( Scene* scene, const float dt )
 			texture.bytes[ i * 4 + 2 ] = rgba.b;
 			texture.bytes[ i * 4 + 3 ] = rgba.a;
 		}
+		texture.dirty = true;
 	}
-	*/
+	
 
 	if ( gImguiControls.dbgImageId >= 0 )
 	{

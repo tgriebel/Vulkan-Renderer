@@ -107,7 +107,7 @@ void LoadNewScene( const std::string fileName )
 	sceneFile = fileName;
 
 	gRenderer.InitGPU();
-	gRenderer.UploadAssets( gAssets );
+	gRenderer.UploadAssets();
 }
 
 
@@ -128,7 +128,7 @@ int main( int argc, char* argv[] )
 	try
 	{
 		gRenderer.Init();
-		gRenderer.UploadAssets( gAssets );
+		gRenderer.UploadAssets();
 
 		while ( gWindow.IsOpen() )
 		{
@@ -186,7 +186,7 @@ int main( int argc, char* argv[] )
 				InitScene( gScene );
 		
 				gRenderer.InitGPU();
-				gRenderer.UploadAssets( gAssets );
+				gRenderer.UploadAssets();
 
 				gImguiControls.openSceneFileDialog = false;
 			}

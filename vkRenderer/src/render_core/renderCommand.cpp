@@ -64,10 +64,8 @@ void Renderer::EndSingleTimeCommands( VkCommandBuffer commandBuffer )
 }
 
 
-void Renderer::TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info )
+void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info )
 {
-	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = oldLayout;
@@ -110,12 +108,10 @@ void Renderer::TransitionImageLayout( VkImage image, VkFormat format, VkImageLay
 		0, nullptr,
 		1, &barrier
 	);
-
-	EndSingleTimeCommands( commandBuffer );
 }
 
 
-void Renderer::GenerateMipmaps( VkImage image, VkFormat imageFormat, const textureInfo_t& info )
+void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const textureInfo_t& info )
 {
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, imageFormat, &formatProperties );
@@ -124,8 +120,6 @@ void Renderer::GenerateMipmaps( VkImage image, VkFormat imageFormat, const textu
 	{
 		throw std::runtime_error( "texture image format does not support linear blitting!" );
 	}
-
-	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -200,6 +194,4 @@ void Renderer::GenerateMipmaps( VkImage image, VkFormat imageFormat, const textu
 		0, nullptr,
 		0, nullptr,
 		1, &barrier );
-
-	EndSingleTimeCommands( commandBuffer );
 }

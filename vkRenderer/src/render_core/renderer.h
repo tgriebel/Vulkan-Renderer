@@ -96,7 +96,7 @@ public:
 
 	void		CreatePipelineObjects();
 
-	void		UploadAssets( AssetManager& assets );
+	void		UploadAssets();
 
 private:
 
@@ -124,6 +124,7 @@ private:
 	float							renderTime = 0.0f;
 
 	std::set<hdl_t>					uploadTextures;
+	std::set<hdl_t>					updateTextures;
 	std::set<hdl_t>					uploadMaterials;
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
@@ -260,9 +261,9 @@ private:
 	void						Cleanup();
 
 	// Image Functions
-	void						TransitionImageLayout( VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info );
+	void						TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info );
 	void						CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers );
-	void						GenerateMipmaps( VkImage image, VkFormat imageFormat, const textureInfo_t& info );
+	void						GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const textureInfo_t& info );
 
 	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
@@ -304,6 +305,7 @@ private:
 
 	// Update
 	void						UpdateView();
+	void						UpdateTextures();
 	void						UploadTextures();
 	void						UpdateGpuMaterials();
 	void						UploadModelsToGPU();

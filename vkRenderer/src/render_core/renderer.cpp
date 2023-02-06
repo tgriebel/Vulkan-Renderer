@@ -242,6 +242,9 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 				if( texture.uploadId < 0 ) {
 					uploadTextures.insert( texHandle );
 				}
+				if ( texture.dirty ) {
+					updateTextures.insert( texHandle );
+				}
 			}
 		}
 
@@ -295,12 +298,12 @@ void Renderer::ShutdownGPU()
 }
 
 
-void Renderer::UploadAssets( AssetManager& assets )
+void Renderer::UploadAssets()
 {
-	const uint32_t materialCount = assets.materialLib.Count();
+	const uint32_t materialCount = gAssets.materialLib.Count();
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
-		Asset<Material>* materialAsset = assets.materialLib.Find( i );
+		Asset<Material>* materialAsset = gAssets.materialLib.Find( i );
 		if ( materialAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -308,13 +311,13 @@ void Renderer::UploadAssets( AssetManager& assets )
 		if ( material.uploadId != -1 ) {
 			continue;
 		}
-		uploadMaterials.insert( assets.materialLib.RetrieveHdl( materialAsset->GetName().c_str() ) );
+		uploadMaterials.insert( materialAsset->Handle() );
 	}
 
-	const uint32_t textureCount = assets.textureLib.Count();
+	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = assets.textureLib.Find( i );
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -322,7 +325,7 @@ void Renderer::UploadAssets( AssetManager& assets )
 		if ( texture.uploadId != -1 ) {
 			continue;
 		}
-		uploadTextures.insert( assets.textureLib.RetrieveHdl( textureAsset->GetName().c_str() ) );
+		uploadTextures.insert( textureAsset->Handle() );
 	}
 
 	UploadTextures();
@@ -341,6 +344,7 @@ void Renderer::RenderScene( Scene* scene )
 	Commit( scene );
 
 	UploadTextures();
+	UpdateTextures();
 	UpdateGpuMaterials();
 
 	SubmitFrame();
