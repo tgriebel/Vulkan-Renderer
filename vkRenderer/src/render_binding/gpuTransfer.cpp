@@ -64,6 +64,7 @@ void Renderer::UpdateTextures()
 	if( textureCount == 0 ) {
 		return;
 	}
+	stagingBuffer.Reset();
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
