@@ -61,15 +61,15 @@ imguiControls_t gImguiControls;
 #endif
 
 void CreateCodeAssets();
-void UpdateScene( Scene* scene, const float dt );
+void UpdateScene( Scene* scene, const std::chrono::nanoseconds dt );
 void InitScene( Scene* scene );
 void ShutdownScene( Scene* scene );
 
-static float AdvanceTime()
+static std::chrono::nanoseconds AdvanceTime()
 {
 	static auto prevTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
-	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( currentTime - prevTime ).count();
+	const std::chrono::nanoseconds dt = ( currentTime - prevTime );
 	prevTime = currentTime;
 	return dt;
 }

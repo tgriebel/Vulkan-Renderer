@@ -161,8 +161,10 @@ void ChessScene::Init()
 	}
 }
 
-void ChessScene::Update( const float dt )
+void ChessScene::Update( const std::chrono::nanoseconds delta )
 {
+	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( delta ).count();
+
 	static auto startTime = std::chrono::high_resolution_clock::now();
 
 	auto currentTime = std::chrono::high_resolution_clock::now();

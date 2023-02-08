@@ -35,6 +35,7 @@
 #include <io/io.h>
 #include <SysCore/jsmn.h>
 #include "chessScene.h"
+#include "nesScene.h"
 
 static jsmn_parser p;
 static jsmntok_t t[ 1024 ];
@@ -566,9 +567,11 @@ void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 
 			if ( s == "chess" ) {
 				*scene = new ChessScene();
+			} else if ( s == "nes" ) {
+				*scene = new NesScene();
 			} else {
-				*scene = new Scene();
-			}
+			*scene = new Scene();
+		}
 			break;
 		}
 	}

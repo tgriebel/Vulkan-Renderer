@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup>
@@ -180,6 +180,7 @@
     <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="scenes\chessScene.h" />
+    <ClInclude Include="scenes\nesScene.h" />
     <ClInclude Include="scenes\sceneParser.h" />
     <ClInclude Include="src\globals\common.h" />
     <ClInclude Include="src\globals\renderConstants.h" />
@@ -213,6 +214,7 @@
     <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="scenes\chessScene.cpp" />
+    <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
     <ClCompile Include="src\globals\render_util.cpp" />
     <ClCompile Include="src\io\io.cpp" />
@@ -255,6 +257,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\..\GfxCore\GfxCore.vcxproj">
       <Project>{3de9a00c-b04b-43ab-943d-1973c47dece3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\nesEmu\wintendo\wintendoCore\wintendo.vcxproj">
+      <Project>{f89dd5f8-f02f-43b5-a687-6e61449d54b0}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Raytracer-Graphic-Pipeline-master\RayTracer.vcxproj">
       <Project>{5a3a1d7e-43f5-41d1-af37-d75dfd0dbc49}</Project>

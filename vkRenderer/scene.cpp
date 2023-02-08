@@ -21,8 +21,8 @@ void CreateCodeAssets()
 			hdl_t handle = gAssets.textureLib.Add( "CODE_COLOR", Texture() );
 			Texture& texture = gAssets.textureLib.Find( handle )->Get();
 
-			texture.info.width = 8;
-			texture.info.height = 8;
+			texture.info.width = 256;
+			texture.info.height = 240;
 			texture.info.mipLevels = 1;
 			texture.info.layers = 1;
 			texture.info.type = TEXTURE_TYPE_2D;
@@ -141,8 +141,10 @@ void ShutdownScene( Scene* scene )
 }
 
 
-void UpdateScene( Scene* scene, const float dt )
+void UpdateScene( Scene* scene, const std::chrono::nanoseconds delta )
 {
+	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( delta ).count();
+
 	// FIXME: race conditions
 	// Need to do a ping-pong update
 	if ( gWindow.input.IsKeyPressed( 'D' ) ) {
@@ -200,6 +202,7 @@ void UpdateScene( Scene* scene, const float dt )
 	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
 	
+	if(0)
 	{
 		Color randomColor( Random(), Random(), Random(), 1.0f );
 		const RGBA rgba = Color( randomColor ).AsRGBA();
@@ -238,5 +241,5 @@ void UpdateScene( Scene* scene, const float dt )
 		}
 	}
 
-	scene->Update( dt );
+	scene->Update( delta );
 }

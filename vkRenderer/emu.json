@@ -1,5 +1,5 @@
 {
-  "scene": "lego",
+  "scene": "nes",
   "shaders": [
     {
       "name": "Basic",
@@ -54,7 +54,7 @@
     {
       "name": "LitTrans",
       "vs": "simpleVS.spv",
-      "ps": "emissivePS.spv"
+      "ps": "litPS.spv"
     },
     {
       "name": "Debug",
@@ -83,7 +83,7 @@
 	  "type": "2D"
 	},
 	{
-	  "name": "sapeli.jpg",
+	  "name": "grid.png",
 	  "type": "2D"
 	},
 	{
@@ -92,10 +92,6 @@
 	},
 	{
 	  "name": "black.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "grid.png",
 	  "type": "2D"
 	},
 	{
@@ -147,17 +143,26 @@
 	  }
     },
 	{
+      "name": "TERRAIN",
+      "shaders": {
+		  "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      }
+    },
+	{
       "name": "SKY",
       "shaders": {
           "DRAWPASS_SKYBOX": "Sky"
       }
       "textures": {
-          "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
-          "CUBE_LEFT_SLOT" : "chapel_left.jpg",
-          "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
-          "CUBE_FRONT_SLOT" : "chapel_front.jpg",
-          "CUBE_BACK_SLOT" : "chapel_back.jpg",
+          "CUBE_RIGHT_SLOT" : "gray.jpg",
+          "CUBE_LEFT_SLOT" : "gray.jpg",
+          "CUBE_TOP_SLOT" : "gray.jpg",	  
+          "CUBE_BOTTOM_SLOT" : "gray.jpg",
+          "CUBE_FRONT_SLOT" : "gray.jpg",
+          "CUBE_BACK_SLOT" : "gray.jpg",
       }
     }
   ],
@@ -167,17 +172,13 @@
       "model" : "cube.obj"
     },
 	{
-      "name" : "plane",
-      "model" : "plane.obj"
-    },
-	{
       "name" : "axis",
       "model" : "axis.obj",
     },
 	{
       "name" : "grid",
       "model" : "_terrain",
-	  "argStr0" : "Grid",
+	  "argStr0" : "WHITE_WOOD",
 	  "argInt0" : 100,
 	  "argInt1" : 100,
 	  "argFlt0" : 1.0,
@@ -203,12 +204,9 @@
       "model" : "grid",
     },
 	{
-      "name" : "spyrius",
-      "model" : "spyrius_lego.obj",
-	  "rz" : 0.0,
-	  "sx" : 0.01,
-	  "sy" : 0.01,
-	  "sz" : 0.01,
+      "name" : "car",
+      "model" : "911_scene.obj",
+	  "rx" : -90.0,
     },
 	{
       "name" : "sphere",

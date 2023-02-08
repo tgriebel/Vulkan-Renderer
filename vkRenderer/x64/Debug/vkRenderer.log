@@ -1,8 +1,2 @@
-﻿  gpuTransfer.cpp
-  renderCommand.cpp
-  renderInit.cpp
-  renderShutdown.cpp
-  renderer.cpp
-  vulkinTestApp.cpp
-  Generating Code...
+﻿  nesScene.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
