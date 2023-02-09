@@ -15,10 +15,15 @@ void CreateCodeAssets()
 {
 	// Textures
 	{
+		for( uint32_t t = 0; t < 2; ++t )
 		{
 			const RGBA rgba = Color( Color::Gold ).AsRGBA();
 
-			hdl_t handle = gAssets.textureLib.Add( "CODE_COLOR", Texture() );
+			std::stringstream ss;
+			ss << "CODE_COLOR_" << t;
+			std::string s = ss.str();
+
+			hdl_t handle = gAssets.textureLib.Add( s.c_str(), Texture() );
 			Texture& texture = gAssets.textureLib.Find( handle )->Get();
 
 			texture.info.width = 256;
@@ -145,39 +150,42 @@ void UpdateScene( Scene* scene, const std::chrono::nanoseconds delta )
 {
 	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( delta ).count();
 
-	// FIXME: race conditions
-	// Need to do a ping-pong update
-	if ( gWindow.input.IsKeyPressed( 'D' ) ) {
-		scene->camera.MoveRight( dt * 0.01f );
+	if( gWindow.IsFocused() == false )
+	{
+		// FIXME: race conditions
+		// Need to do a ping-pong update
+		if ( gWindow.input.IsKeyPressed( 'D' ) ) {
+			scene->camera.MoveRight( dt * 0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( 'A' ) ) {
+			scene->camera.MoveRight( dt * -0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( 'W' ) ) {
+			scene->camera.MoveForward( dt * 0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( 'S' ) ) {
+			scene->camera.MoveForward( dt * -0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( '8' ) ) {
+			scene->camera.AdjustPitch( -dt * 0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( '2' ) ) {
+			scene->camera.AdjustPitch( dt * 0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( '4' ) ) {
+			scene->camera.AdjustYaw( dt * 0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( '6' ) ) {
+			scene->camera.AdjustYaw( -dt * 0.01f );
+		}
+		if ( gWindow.input.IsKeyPressed( '+' ) ) {
+			scene->camera.SetFov( scene->camera.GetFov() + Radians( 0.1f ) );
+		}
+		if ( gWindow.input.IsKeyPressed( '-' ) ) {
+			scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
+		}
+		scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
 	}
-	if ( gWindow.input.IsKeyPressed( 'A' ) ) {
-		scene->camera.MoveRight( dt * -0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( 'W' ) ) {
-		scene->camera.MoveForward( dt * 0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( 'S' ) ) {
-		scene->camera.MoveForward( dt * -0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( '8' ) ) {
-		scene->camera.AdjustPitch( -dt * 0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( '2' ) ) {
-		scene->camera.AdjustPitch( dt * 0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( '4' ) ) {
-		scene->camera.AdjustYaw( dt * 0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( '6' ) ) {
-		scene->camera.AdjustYaw( -dt * 0.01f );
-	}
-	if ( gWindow.input.IsKeyPressed( '+' ) ) {
-		scene->camera.SetFov( scene->camera.GetFov() + Radians( 0.1f ) );
-	}
-	if ( gWindow.input.IsKeyPressed( '-' ) ) {
-		scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
-	}
-	scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = gWindow.input.GetMouse();
 	if ( mouse.centered )
@@ -206,7 +214,7 @@ void UpdateScene( Scene* scene, const std::chrono::nanoseconds delta )
 	{
 		Color randomColor( Random(), Random(), Random(), 1.0f );
 		const RGBA rgba = Color( randomColor ).AsRGBA();
-		Texture& texture = gAssets.textureLib.Find( "CODE_COLOR" )->Get();
+		Texture& texture = gAssets.textureLib.Find( "CODE_COLOR_0" )->Get();
 
 		const uint32_t pixelCount = texture.info.width * texture.info.height;
 		for ( uint32_t i = 0; i < pixelCount; ++i )

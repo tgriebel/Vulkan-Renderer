@@ -178,12 +178,29 @@
 	{
       "name" : "grid",
       "model" : "_terrain",
-	  "argStr0" : "WHITE_WOOD",
+	  "argStr0" : "Grid",
 	  "argInt0" : 100,
 	  "argInt1" : 100,
 	  "argFlt0" : 1.0,
 	  "argFlt1" : 100.0,
     },
+	{
+      "name" : "plane0",
+      "model" : "_terrain",
+	  "argStr0" : "Grid",
+	  "argInt0" : 1,
+	  "argInt1" : 1,
+	  "argFlt0" : 1.0,
+	  "argFlt1" : 100.0,
+    },
+	{
+      "name" : "plane1",
+      "model" : "_terrain",
+	  "argStr0" : "Grid",
+	  "argInt0" : 1,
+	  "argInt1" : 1,
+	  "argFlt0" : 1.0,
+	}
   ],
   "entities": [
     {

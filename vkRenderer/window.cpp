@@ -3,6 +3,78 @@
 
 #include "external/tinyfiledialogs/tinyfiledialogs.h"
 
+#define KEY_MAP( k ) { GLFW_KEY_##k, KEY_##k }
+
+struct KeyPair
+{
+	int		glfwKey;
+	key_t	key;
+};
+
+static KeyPair GlfwKeyMap[] =
+{
+	KEY_MAP( 0 ),
+	KEY_MAP( 1 ),
+	KEY_MAP( 2 ),
+	KEY_MAP( 3 ),
+	KEY_MAP( 4 ),
+	KEY_MAP( 5 ),
+	KEY_MAP( 6 ),
+	KEY_MAP( 7 ),
+	KEY_MAP( 8 ),
+	KEY_MAP( 9 ),
+	KEY_MAP( A ),
+	KEY_MAP( B ),
+	KEY_MAP( C ),
+	KEY_MAP( D ),
+	KEY_MAP( E ),
+	KEY_MAP( F ),
+	KEY_MAP( G ),
+	KEY_MAP( H ),
+	KEY_MAP( I ),
+	KEY_MAP( J ),
+	KEY_MAP( K ),
+	KEY_MAP( L ),
+	KEY_MAP( M ),
+	KEY_MAP( N ),
+	KEY_MAP( O ),
+	KEY_MAP( P ),
+	KEY_MAP( Q ),
+	KEY_MAP( R ),
+	KEY_MAP( S ),
+	KEY_MAP( T ),
+	KEY_MAP( U ),
+	KEY_MAP( V ),
+	KEY_MAP( W ),
+	KEY_MAP( X ),
+	KEY_MAP( Y ),
+	KEY_MAP( Z ),
+
+	{ GLFW_KEY_KP_0,		KEY_NUM_0 },
+	{ GLFW_KEY_KP_1,		KEY_NUM_1 },
+	{ GLFW_KEY_KP_2,		KEY_NUM_2 },
+	{ GLFW_KEY_KP_3,		KEY_NUM_3 },
+	{ GLFW_KEY_KP_4,		KEY_NUM_4 },
+	{ GLFW_KEY_KP_5,		KEY_NUM_5 },
+	{ GLFW_KEY_KP_6,		KEY_NUM_6 },
+	{ GLFW_KEY_KP_7,		KEY_NUM_7 },
+	{ GLFW_KEY_KP_8,		KEY_NUM_8 },
+	{ GLFW_KEY_KP_9,		KEY_NUM_9 },
+	{ GLFW_KEY_KP_ADD,		KEY_ADD },
+	{ GLFW_KEY_KP_SUBTRACT,	KEY_SUB},
+	{ GLFW_KEY_KP_MULTIPLY,	KEY_MUL },
+	{ GLFW_KEY_KP_DIVIDE,	KEY_DIV },
+
+	{ GLFW_KEY_LEFT_ALT,	KEY_LEFT_ALT },
+	{ GLFW_KEY_RIGHT_ALT,	KEY_RIGHT_ALT },
+	{ GLFW_KEY_LEFT,		KEY_LEFT_ARROW },
+	{ GLFW_KEY_RIGHT,		KEY_RIGHT_ARROW },
+	{ GLFW_KEY_UP,			KEY_UP_ARROW },
+	{ GLFW_KEY_DOWN,		KEY_DOWN_ARROW },
+};
+
+#undef KEY_MAP
+
 void FramebufferResizeCallback( GLFWwindow* window, int width, int height )
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
@@ -14,28 +86,18 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 
-	if ( key == GLFW_KEY_D ) {
-		app->input.SetKey( 'D', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_A ) {
-		app->input.SetKey( 'A', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_W ) {
-		app->input.SetKey( 'W', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_S ) {
-		app->input.SetKey( 'S', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_KP_ADD ) {
-		app->input.SetKey( '+', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_KP_SUBTRACT ) {
-		app->input.SetKey( '-', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_KP_8 ) {
-		app->input.SetKey( '8', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_KP_2 ) {
-		app->input.SetKey( '2', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_KP_4 ) {
-		app->input.SetKey( '4', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_KP_6 ) {
-		app->input.SetKey( '6', ( action != GLFW_RELEASE ) );
-	} else if ( key == GLFW_KEY_LEFT_ALT ) {
-		if( action != GLFW_RELEASE ) {
+	const uint32_t mappedKeys = COUNTARRAY( GlfwKeyMap );
+
+	for( uint32_t k = 0; k < mappedKeys; ++k )
+	{
+		if( key == GlfwKeyMap[k].glfwKey ) {
+			app->input.SetKey( GlfwKeyMap[ k ].key, ( action != GLFW_RELEASE ) );
+			break;
+		}
+	}
+
+	if ( key == GLFW_KEY_LEFT_ALT ) {
+		if ( action != GLFW_RELEASE ) {
 			app->focused = !app->focused;
 		}
 	}

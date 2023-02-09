@@ -22,55 +22,110 @@
 */
 
 #include "nesScene.h"
+#include "../window.h"
 
 #include <tomtendo/interface.h>
 
-static Tomtendo::Emulator* nes = new Tomtendo::Emulator();
+static const uint32_t EmuInstances = 2;
+static uint32_t lastFrame[ EmuInstances ] = {};
+static const char* textureBuffers[ EmuInstances ] = { "CODE_COLOR_0", "CODE_COLOR_1" };
+static Tomtendo::Emulator nes[ EmuInstances ];
 static Tomtendo::config_t nesCfg;
+static Tomtendo::wtFrameResult fr;
+
+struct bind_t
+{
+	key_t					key;
+	Tomtendo::ButtonFlags	btn;
+};
+
+static const uint32_t ButtonCount = 8;
+
+static bind_t ControllerBinds[ ButtonCount ] =
+{
+	bind_t{ KEY_H, Tomtendo::ButtonFlags::BUTTON_START },
+	bind_t{ KEY_G, Tomtendo::ButtonFlags::BUTTON_SELECT },
+	bind_t{ KEY_J, Tomtendo::ButtonFlags::BUTTON_B },
+	bind_t{ KEY_K, Tomtendo::ButtonFlags::BUTTON_A },
+	bind_t{ KEY_A, Tomtendo::ButtonFlags::BUTTON_LEFT },
+	bind_t{ KEY_D, Tomtendo::ButtonFlags::BUTTON_RIGHT },
+	bind_t{ KEY_W, Tomtendo::ButtonFlags::BUTTON_UP },
+	bind_t{ KEY_S, Tomtendo::ButtonFlags::BUTTON_DOWN },
+};
+
+extern Window gWindow;
+
+void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
+{
+	Texture& texture = gAssets.textureLib.Find( texHandle )->Get();
+
+	const uint32_t width = fr.frameBuffer->GetWidth();
+	const uint32_t height = fr.frameBuffer->GetHeight();
+
+	for ( uint32_t y = 0; y < height; ++y )
+	{
+		for ( uint32_t x = 0; x < width; ++x )
+		{
+			const uint32_t pixelIx = y * width + x;
+			Tomtendo::Pixel pixel = fr.frameBuffer->Get( pixelIx );
+
+			texture.bytes[ pixelIx * 4 + 0 ] = pixel.rgba.red;
+			texture.bytes[ pixelIx * 4 + 1 ] = pixel.rgba.green;
+			texture.bytes[ pixelIx * 4 + 2 ] = pixel.rgba.blue;
+			texture.bytes[ pixelIx * 4 + 3 ] = pixel.rgba.alpha;
+		}
+		texture.dirty = true;
+	}
+}
 
 void NesScene::Init()
 {
-	std::wstring filePath = L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Legend of Zelda.nes";
+	std::wstring filePaths[ EmuInstances ] =
+	{
+		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super Mario Bros.nes",
+		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super C.nes"
+	};
 	Tomtendo::InitConfig( nesCfg );
-	nes->Boot( filePath );
-	nes->SetConfig( nesCfg );
+
+	for( uint32_t i = 0; i < EmuInstances; ++i )
+	{
+		nes[i].Boot( filePaths[i] );
+		nes[i].SetConfig( nesCfg );
+
+		for ( uint32_t k = 0; k < ButtonCount; ++k )
+		{
+			using namespace Tomtendo;
+			nes[i].input.BindKey( ControllerBinds[ k ].key, ControllerId::CONTROLLER_0, ControllerBinds[ k ].btn );
+		}
+	}
 }
 
 void NesScene::Update( const std::chrono::nanoseconds delta )
 {
-	static uint32_t lastFrame = 0;
 	static bool emulatorRunning = true;
 	if( emulatorRunning )
 	{
-		if ( !nes->RunEpoch( delta ) ) {
-			emulatorRunning = false;
-		}
-
-		Tomtendo::wtFrameResult fr;
-		nes->GetFrameResult( fr );
-		
-		if( fr.currentFrame > lastFrame )
+		for ( uint32_t i = 0; i < EmuInstances; ++i )
 		{
-			lastFrame = fr.currentFrame;
+			if ( !nes[i].RunEpoch( delta ) ) {
+				emulatorRunning = false;
+				break;
+			}
 
-			Texture& texture = gAssets.textureLib.Find( "CODE_COLOR" )->Get();
-
-			const uint32_t width = fr.frameBuffer->GetWidth();
-			const uint32_t height = fr.frameBuffer->GetHeight();
-
-			for ( uint32_t y = 0; y < height; ++y )
+			for ( uint32_t k = 0; k < ButtonCount; ++k )
 			{
-				for ( uint32_t x = 0; x < width; ++x )
-				{
-					const uint32_t pixelIx = y * width + x;
-					Tomtendo::Pixel pixel = fr.frameBuffer->Get( pixelIx );
-
-					texture.bytes[ pixelIx * 4 + 0 ] = pixel.rgba.red;
-					texture.bytes[ pixelIx * 4 + 1 ] = pixel.rgba.green;
-					texture.bytes[ pixelIx * 4 + 2 ] = pixel.rgba.blue;
-					texture.bytes[ pixelIx * 4 + 3 ] = pixel.rgba.alpha;
+				if ( gWindow.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
+					nes[0].input.StoreKey( ControllerBinds[ k ].key );
+				} else {
+					nes[0].input.ReleaseKey( ControllerBinds[ k ].key );
 				}
-				texture.dirty = true;
+			}
+
+			nes[i].GetFrameResult( fr );
+			if ( fr.currentFrame > lastFrame[i] )
+			{
+				lastFrame[i] = fr.currentFrame;
+				CopyFrameBuffer( fr, AssetLibImages::Handle( textureBuffers[i] ) );
 			}
 		}
 	}
