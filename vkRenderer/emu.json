@@ -143,6 +143,54 @@
 	  }
     },
 	{
+      "name": "TV0",
+      "shaders": {
+		  "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      }
+	  "textures": {
+		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_0"
+	  }
+    },
+	{
+      "name": "TV1",
+      "shaders": {
+		  "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      }
+	  "textures": {
+		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_1"
+	  }
+    },
+	{
+      "name": "TV2",
+      "shaders": {
+		  "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      }
+	  "textures": {
+		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_2"
+	  }
+    },
+	{
+      "name": "TV3",
+      "shaders": {
+		  "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      }
+	  "textures": {
+		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_3"
+	  }
+    },
+	{
       "name": "TERRAIN",
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
@@ -176,6 +224,10 @@
       "model" : "axis.obj",
     },
 	{
+      "name" : "tubetv",
+      "model" : "tubetv.obj",
+    },
+	{
       "name" : "grid",
       "model" : "_terrain",
 	  "argStr0" : "Grid",
@@ -187,16 +239,32 @@
 	{
       "name" : "plane0",
       "model" : "_terrain",
-	  "argStr0" : "Grid",
+	  "argStr0" : "TV0",
 	  "argInt0" : 1,
 	  "argInt1" : 1,
 	  "argFlt0" : 1.0,
-	  "argFlt1" : 100.0,
+	  "argFlt1" : 1.0,
     },
 	{
       "name" : "plane1",
       "model" : "_terrain",
-	  "argStr0" : "Grid",
+	  "argStr0" : "TV1",
+	  "argInt0" : 1,
+	  "argInt1" : 1,
+	  "argFlt0" : 1.0,
+	},
+	{
+      "name" : "plane2",
+      "model" : "_terrain",
+	  "argStr0" : "TV2",
+	  "argInt0" : 1,
+	  "argInt1" : 1,
+	  "argFlt0" : 1.0,
+	},
+	{
+      "name" : "plane3",
+      "model" : "_terrain",
+	  "argStr0" : "TV3",
 	  "argInt0" : 1,
 	  "argInt1" : 1,
 	  "argFlt0" : 1.0,
@@ -219,6 +287,46 @@
 	{
       "name" : "grid",
       "model" : "grid",
+    },
+	{
+      "name" : "tv_0",
+      "model" : "tubetv",
+	  "sx" : 0.01,
+	  "sy" : 0.01,
+	  "sz" : 0.01,
+	  "x" : -4.0,
+	  "y" : 0.0,
+	  "z" : 2.0,
+	  "ry" : -80.0,
+	  "rz" : -90.0,
+    },
+	{
+      "name" : "plane0",
+      "model" : "plane0",
+	   "x" : 3.0,
+	   "z" : 2.0,
+	   "rx" : 90.0,
+    },
+	{
+      "name" : "plane1",
+      "model" : "plane1",
+	   "x" : 4.5,
+	   "z" : 2.0,
+	   "rx" : 90.0,
+    },
+	{
+      "name" : "plane2",
+      "model" : "plane2",
+	   "x" : 6.0,
+	   "z" : 2.0,
+	   "rx" : 90.0,
+    },
+	{
+      "name" : "plane3",
+      "model" : "plane3",
+	   "x" : 7.5,
+	   "z" : 2.0,
+	   "rx" : 90.0,
     },
 	{
       "name" : "car",

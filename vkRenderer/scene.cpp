@@ -15,7 +15,7 @@ void CreateCodeAssets()
 {
 	// Textures
 	{
-		for( uint32_t t = 0; t < 2; ++t )
+		for( uint32_t t = 0; t < 4; ++t )
 		{
 			const RGBA rgba = Color( Color::Gold ).AsRGBA();
 

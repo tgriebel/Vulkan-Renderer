@@ -26,9 +26,9 @@
 
 #include <tomtendo/interface.h>
 
-static const uint32_t EmuInstances = 2;
+static const uint32_t EmuInstances = 4;
 static uint32_t lastFrame[ EmuInstances ] = {};
-static const char* textureBuffers[ EmuInstances ] = { "CODE_COLOR_0", "CODE_COLOR_1" };
+static const char* textureBuffers[ EmuInstances ] = { "CODE_COLOR_0", "CODE_COLOR_1", "CODE_COLOR_2", "CODE_COLOR_3" };
 static Tomtendo::Emulator nes[ EmuInstances ];
 static Tomtendo::config_t nesCfg;
 static Tomtendo::wtFrameResult fr;
@@ -83,7 +83,9 @@ void NesScene::Init()
 	std::wstring filePaths[ EmuInstances ] =
 	{
 		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super Mario Bros.nes",
-		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super C.nes"
+		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super C.nes",
+		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Ninja Gaiden.nes",
+		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Metroid.nes"
 	};
 	Tomtendo::InitConfig( nesCfg );
 
@@ -115,9 +117,9 @@ void NesScene::Update( const std::chrono::nanoseconds delta )
 			for ( uint32_t k = 0; k < ButtonCount; ++k )
 			{
 				if ( gWindow.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
-					nes[0].input.StoreKey( ControllerBinds[ k ].key );
+					nes[i].input.StoreKey( ControllerBinds[ k ].key );
 				} else {
-					nes[0].input.ReleaseKey( ControllerBinds[ k ].key );
+					nes[i].input.ReleaseKey( ControllerBinds[ k ].key );
 				}
 			}
 
