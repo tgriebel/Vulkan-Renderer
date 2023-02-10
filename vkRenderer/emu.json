@@ -46,6 +46,11 @@
       "vs": "simpleVS.spv",
       "ps": "litPS.spv"
     },
+	{
+      "name": "LitCRT",
+      "vs": "simpleVS.spv",
+      "ps": "crtPS.spv"
+    },
     {
       "name": "LitTree",
       "vs": "treeVS.spv",
@@ -147,7 +152,7 @@
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_OPAQUE": "LitCrt",
           "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
 	  "textures": {

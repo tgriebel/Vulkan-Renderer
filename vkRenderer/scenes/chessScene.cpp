@@ -165,12 +165,7 @@ void ChessScene::Update( const std::chrono::nanoseconds delta )
 {
 	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( delta ).count();
 
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
-
-	lights[ 0 ].lightPos = vec4f( 5.0f * cos( time ), 5.0f * sin( time ), 8.0f, 0.0f );
+	lights[ 0 ].lightPos = vec4f( 5.0f * cos( dt ), 5.0f * sin( dt ), 8.0f, 0.0f );
 
 	const mouse_t& mouse = gWindow.input.GetMouse();
 	if ( ( mouse.centered == false ) && mouse.leftDown )
@@ -259,7 +254,7 @@ void ChessScene::Update( const std::chrono::nanoseconds delta )
 
 	Material& glowMat = gAssets.materialLib.Find( "GlowSquare" )->Get();
 	glowMat.Kd( rgbTuplef_t( 0.1f, 0.1f, 1.0f ) );
-	glowMat.Tr( 0.5f * cos( 3.0f * time ) + 0.5f );
+	glowMat.Tr( 0.5f * cos( 3.0f * dt ) + 0.5f );
 
 	for ( int i = 0; i < MaxLights; ++i )
 	{

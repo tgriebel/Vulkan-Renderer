@@ -38,4 +38,5 @@ public:
 
 	void Update( const std::chrono::nanoseconds dt ) override;
 	void Init() override;
+	void Shutdown() override;
 };

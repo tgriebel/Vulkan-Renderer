@@ -208,6 +208,9 @@
     <None Include="shaders\pixelSimple.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\crt.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

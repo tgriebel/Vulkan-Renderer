@@ -27,7 +27,8 @@
 #include <tomtendo/interface.h>
 
 static const uint32_t EmuInstances = 4;
-static uint32_t lastFrame[ EmuInstances ] = {};
+static uint64_t lastFrame[ EmuInstances ] = {};
+static bool paused[ EmuInstances ] = { false, true, true, true };
 static const char* textureBuffers[ EmuInstances ] = { "CODE_COLOR_0", "CODE_COLOR_1", "CODE_COLOR_2", "CODE_COLOR_3" };
 static Tomtendo::Emulator nes[ EmuInstances ];
 static Tomtendo::config_t nesCfg;
@@ -101,6 +102,15 @@ void NesScene::Init()
 		}
 	}
 }
+
+
+void NesScene::Shutdown()
+{
+	for ( uint32_t i = 0; i < EmuInstances; ++i )
+	{
+	}
+}
+
 
 void NesScene::Update( const std::chrono::nanoseconds delta )
 {
