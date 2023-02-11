@@ -88,7 +88,7 @@ void NesScene::Init()
 		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Ninja Gaiden.nes",
 		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Metroid.nes"
 	};
-	Tomtendo::InitConfig( nesCfg );
+	nesCfg = Tomtendo::DefaultConfig();
 
 	for( uint32_t i = 0; i < EmuInstances; ++i )
 	{
