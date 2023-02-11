@@ -146,37 +146,38 @@ void ShutdownScene( Scene* scene )
 }
 
 
-void UpdateScene( Scene* scene, const std::chrono::nanoseconds delta )
+void UpdateScene( Scene* scene )
 {
-	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( delta ).count();
+	const float dt = scene->DeltaTime();
+	const float cameraSpeed = 5.0f;
 
 	if( gWindow.IsFocused() == false )
 	{
 		// FIXME: race conditions
 		// Need to do a ping-pong update
 		if ( gWindow.input.IsKeyPressed( 'D' ) ) {
-			scene->camera.MoveRight( dt * 0.01f );
+			scene->camera.MoveRight( cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( 'A' ) ) {
-			scene->camera.MoveRight( dt * -0.01f );
+			scene->camera.MoveRight( -cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( 'W' ) ) {
-			scene->camera.MoveForward( dt * 0.01f );
+			scene->camera.MoveForward( cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( 'S' ) ) {
-			scene->camera.MoveForward( dt * -0.01f );
+			scene->camera.MoveForward( -cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( '8' ) ) {
-			scene->camera.AdjustPitch( -dt * 0.01f );
+			scene->camera.AdjustPitch( -cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( '2' ) ) {
-			scene->camera.AdjustPitch( dt * 0.01f );
+			scene->camera.AdjustPitch( cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( '4' ) ) {
-			scene->camera.AdjustYaw( dt * 0.01f );
+			scene->camera.AdjustYaw( cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( '6' ) ) {
-			scene->camera.AdjustYaw( -dt * 0.01f );
+			scene->camera.AdjustYaw( -cameraSpeed * dt );
 		}
 		if ( gWindow.input.IsKeyPressed( '+' ) ) {
 			scene->camera.SetFov( scene->camera.GetFov() + Radians( 0.1f ) );
@@ -184,8 +185,8 @@ void UpdateScene( Scene* scene, const std::chrono::nanoseconds delta )
 		if ( gWindow.input.IsKeyPressed( '-' ) ) {
 			scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
 		}
-		scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
 	}
+	scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = gWindow.input.GetMouse();
 	if ( mouse.centered )
@@ -249,5 +250,5 @@ void UpdateScene( Scene* scene, const std::chrono::nanoseconds delta )
 		}
 	}
 
-	scene->Update( delta );
+	scene->Update();
 }

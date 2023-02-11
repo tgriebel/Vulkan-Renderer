@@ -61,18 +61,9 @@ imguiControls_t gImguiControls;
 #endif
 
 void CreateCodeAssets();
-void UpdateScene( Scene* scene, const std::chrono::nanoseconds dt );
+void UpdateScene( Scene* scene );
 void InitScene( Scene* scene );
 void ShutdownScene( Scene* scene );
-
-static std::chrono::nanoseconds AdvanceTime()
-{
-	static auto prevTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	const std::chrono::nanoseconds dt = ( currentTime - prevTime );
-	prevTime = currentTime;
-	return dt;
-}
 
 void RenderThread()
 {
@@ -196,12 +187,13 @@ int main( int argc, char* argv[] )
 				gImguiControls.reloadScene = true;
 			}
 
-			UpdateScene( gScene, AdvanceTime() );
+			UpdateScene( gScene );
 			gWindow.input.NewFrame();
 			gRenderer.RenderScene( gScene );
 #if defined( USE_IMGUI )
 			ImGui_ImplGlfw_NewFrame();
 #endif
+			gScene->AdvanceFrame();
 		}
 		gRenderer.Destroy();
 	}

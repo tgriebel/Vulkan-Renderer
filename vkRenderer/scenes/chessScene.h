@@ -71,6 +71,6 @@ public:
 	{
 	}
 
-	void Update( const std::chrono::nanoseconds dt ) override;
+	void Update() override;
 	void Init() override;
 };

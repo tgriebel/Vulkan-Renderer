@@ -112,14 +112,14 @@ void NesScene::Shutdown()
 }
 
 
-void NesScene::Update( const std::chrono::nanoseconds delta )
+void NesScene::Update()
 {
 	static bool emulatorRunning = true;
 	if( emulatorRunning )
 	{
 		for ( uint32_t i = 0; i < EmuInstances; ++i )
 		{
-			if ( !nes[i].RunEpoch( delta ) ) {
+			if ( !nes[i].RunEpoch( DeltaNano() ) ) {
 				emulatorRunning = false;
 				break;
 			}
