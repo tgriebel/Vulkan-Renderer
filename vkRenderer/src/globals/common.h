@@ -355,6 +355,7 @@ struct imguiControls_t
 	int			selectedEntityId;
 	bool		rebuildShaders;
 	bool		raytraceScene;
+	bool		rasterizeScene;
 	bool		rebuildRaytraceScene;
 	bool		openModelImportFileDialog;
 	bool		openSceneFileDialog;

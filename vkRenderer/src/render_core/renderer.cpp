@@ -75,10 +75,30 @@ static void BuildRayTraceScene( Scene* scene )
 	{
 		rtScene.lights.push_back( scene->lights[ i ] );
 	}
+
+	const uint32_t texCount = gAssets.textureLib.Count();
+	for ( uint32_t i = 0; i < texCount; ++i )
+	{
+		Asset<Texture>* texAsset = gAssets.textureLib.Find( i );
+		Texture& texture = texAsset->Get();
+
+		texture.cpuImage.Init( texture.info.width, texture.info.height );
+
+		for ( int py = 0; py < texture.info.height; ++py ) {
+			for ( int px = 0; px < texture.info.width; ++px ) {
+				RGBA rgba;
+				rgba.r = texture.bytes[ ( py * texture.info.width + px ) * 4 + 0 ];
+				rgba.g = texture.bytes[ ( py * texture.info.width + px ) * 4 + 1 ];
+				rgba.b = texture.bytes[ ( py * texture.info.width + px ) * 4 + 2 ];
+				rgba.a = texture.bytes[ ( py * texture.info.width + px ) * 4 + 3 ];
+				texture.cpuImage.SetPixel( px, py, rgba );
+			}
+		}
+	}
 }
 
 
-static void TraceScene()
+static void TraceScene( const bool rasterize = false )
 {
 	gImguiControls.raytraceScene = false;
 
@@ -93,9 +113,11 @@ static void TraceScene()
 		rtview.projView = rtview.projTransform * rtview.viewTransform;
 	}
 
-	// Need to turn cpu images back on
-	TraceScene( rtview, rtScene, rtimage );
-	//RasterScene( rtimage, rtview, rtScene, true );
+	if ( rasterize ) {
+		RasterScene( rtimage, rtview, rtScene, true );		
+	} else {
+		TraceScene( rtview, rtScene, rtimage );
+	}
 
 	{
 		std::stringstream ss;
@@ -357,7 +379,11 @@ void Renderer::RenderScene( Scene* scene )
 	}
 
 	if ( gImguiControls.raytraceScene ) {
-		TraceScene();
+		TraceScene( false );
+	}
+
+	if ( gImguiControls.rasterizeScene ) {
+		TraceScene( true );
 	}
 
 	localMemory.Pack();
@@ -1674,10 +1700,11 @@ void Renderer::DrawDebugMenu()
 		if ( ImGui::BeginTabItem( "Debug" ) )
 		{
 			gImguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
-			ImGui::SameLine();
 			gImguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
 			ImGui::SameLine();
 			gImguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+			ImGui::SameLine();
+			gImguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
 
 			ImGui::InputFloat( "Heightmap Height", &gImguiControls.heightMapHeight, 0.1f, 1.0f );
 			ImGui::SliderFloat( "Roughness", &gImguiControls.roughness, 0.1f, 1.0f );
