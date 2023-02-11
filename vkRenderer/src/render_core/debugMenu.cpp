@@ -42,6 +42,11 @@ static bool EditRgb( rgbTuplef_t& rgb )
 	ImGui::SameLine();
 	edited = edited || ImGui::InputFloat( "##B", &rgb.b, 0.1f, 1.0f );
 	ImGui::PopItemWidth();
+	//float col[3] = { rgb.r, rgb.g, rgb.b };
+	//ImGui::ColorPicker3( "##RGB0", col );
+	//rgb.r = col[0];
+	//rgb.g = col[1];
+	//rgb.b = col[2];
 
 	return edited;
 }
@@ -243,8 +248,9 @@ void DebugMenuModelTreeNode( Asset<Model>* modelAsset )
 					ImGui::TableSetColumnIndex( 0 );
 					ImGui::Text( "%u", s );
 					ImGui::TableSetColumnIndex( 1 );
-					const char* modelName = gAssets.materialLib.FindName( model.surfs[ s ].materialHdl );
-					ImGui::Text( modelName );
+					hdl_t& handle = model.surfs[ s ].materialHdl;
+					std::string modelName = "##" + std::string( gAssets.materialLib.FindName( handle ) );
+					DebugMenuLibComboEdit( modelName, handle, gAssets.materialLib );
 					ImGui::TableSetColumnIndex( 2 );
 					ImGui::Text( "%i", (int)model.surfs[ s ].vertices.size() );
 					ImGui::TableSetColumnIndex( 3 );
