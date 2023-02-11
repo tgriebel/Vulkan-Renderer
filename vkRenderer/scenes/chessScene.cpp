@@ -163,9 +163,11 @@ void ChessScene::Init()
 
 void ChessScene::Update( const std::chrono::nanoseconds delta )
 {
-	const float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( delta ).count();
+	static float dt = 0.0f;
+	dt += std::chrono::duration<float, std::chrono::seconds::period>( delta ).count();
+	const float periodsPerSecond = 2.0f;
 
-	lights[ 0 ].lightPos = vec4f( 5.0f * cos( dt ), 5.0f * sin( dt ), 8.0f, 0.0f );
+	lights[ 0 ].lightPos = vec4f( 5.0f * cos( periodsPerSecond * dt ), 5.0f * sin( periodsPerSecond * dt ), 8.0f, 0.0f );
 
 	const mouse_t& mouse = gWindow.input.GetMouse();
 	if ( ( mouse.centered == false ) && mouse.leftDown )
