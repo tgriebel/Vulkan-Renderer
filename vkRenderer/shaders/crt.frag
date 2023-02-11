@@ -24,9 +24,9 @@ PS_LAYOUT_STANDARD( sampler2D )
 
 vec2 dim = vec2( 256.0f, 240.0f );
 // Emulated input resolution.
-#if 0
+#if 1
   // Fix resolution to set amount.
-#define res (vec2(320.0/1.0,160.0/1.0))
+#define res (vec2(256.0/1.0,240.0/1.0))
 #else
   // Optimize for resize.
 #define res (dim.xy/6.0)
@@ -53,35 +53,34 @@ float maskLight = 1.5;
 
 //------------------------------------------------------------------------
 
-// sRGB to Linear.
-// Assuing using sRGB typed textures this should not be needed.
-float ToLinear1( float c ) { return( c <= 0.04045 ) ? c / 12.92 : pow( ( c + 0.055 ) / 1.055, 2.4 ); }
-vec3 ToLinear( vec3 c ) { return vec3( ToLinear1( c.r ), ToLinear1( c.g ), ToLinear1( c.b ) ); }
-
-// Linear to sRGB.
-// Assuing using sRGB typed textures this should not be needed.
-float ToSrgb1( float c ) { return( c < 0.0031308 ? c * 12.92 : 1.055 * pow( c, 0.41666 ) - 0.055 ); }
-vec3 ToSrgb( vec3 c ) { return vec3( ToSrgb1( c.r ), ToSrgb1( c.g ), ToSrgb1( c.b ) ); }
-
 // Nearest emulated sample given floating point position and texel offset.
 // Also zero's off screen.
-vec3 Fetch( vec2 pos, vec2 off ) {
+vec3 Fetch( vec2 pos, vec2 off )
+{
     pos = floor( pos * res + off ) / res;
     if ( max( abs( pos.x - 0.5 ), abs( pos.y - 0.5 ) ) > 0.5 )return vec3( 0.0, 0.0, 0.0 );
 
     const uint materialId = pushConstants.materialId;
     const uint textureId0 = materialUbo.materials[ materialId ].textureId0;
-    return ToLinear( texture( texSampler[ textureId0 ], pos.xy, -16.0 ).rgb );
+    return SrgbToLinear( texture( texSampler[ textureId0 ], pos.xy, -16.0 ).rgb );
 }
 
 // Distance in emulated pixels to nearest texel.
-vec2 Dist( vec2 pos ) { pos = pos * res; return -( ( pos - floor( pos ) ) - vec2( 0.5 ) ); }
+vec2 Dist( vec2 pos )
+{
+    pos = pos * res;
+    return -( ( pos - floor( pos ) ) - vec2( 0.5 ) );
+}
 
 // 1D Gaussian.
-float Gaus( float pos, float scale ) { return exp2( scale * pos * pos ); }
+float Gaus( float pos, float scale )
+{
+    return exp2( scale * pos * pos );
+}
 
 // 3-tap Gaussian filter along horz line.
-vec3 Horz3( vec2 pos, float off ) {
+vec3 Horz3( vec2 pos, float off )
+{
     vec3 b = Fetch( pos, vec2( -1.0, off ) );
     vec3 c = Fetch( pos, vec2( 0.0, off ) );
     vec3 d = Fetch( pos, vec2( 1.0, off ) );
@@ -96,13 +95,15 @@ vec3 Horz3( vec2 pos, float off ) {
 }
 
 // 5-tap Gaussian filter along horz line.
-vec3 Horz5( vec2 pos, float off ) {
+vec3 Horz5( vec2 pos, float off )
+{
     vec3 a = Fetch( pos, vec2( -2.0, off ) );
     vec3 b = Fetch( pos, vec2( -1.0, off ) );
     vec3 c = Fetch( pos, vec2( 0.0, off ) );
     vec3 d = Fetch( pos, vec2( 1.0, off ) );
     vec3 e = Fetch( pos, vec2( 2.0, off ) );
     float dst = Dist( pos ).x;
+
     // Convert distance to weight.
     float scale = hardPix;
     float wa = Gaus( dst - 2.0, scale );
@@ -121,31 +122,40 @@ float Scan( vec2 pos, float off ) {
 }
 
 // Allow nearest three lines to effect pixel.
-vec3 Tri( vec2 pos ) {
-    vec3 a = Horz3( pos, -1.0 );
-    vec3 b = Horz5( pos, 0.0 );
-    vec3 c = Horz3( pos, 1.0 );
-    float wa = Scan( pos, -1.0 );
-    float wb = Scan( pos, 0.0 );
-    float wc = Scan( pos, 1.0 );
-    return a * wa + b * wb + c * wc;
+vec3 Tri( vec2 pos )
+{
+    const vec3 a = Horz3( pos, -1.0f );
+    const vec3 b = Horz5( pos, 0.0f );
+    const vec3 c = Horz3( pos, 1.0f );
+    const float wa = Scan( pos, -1.0f );
+    const float wb = Scan( pos, 0.0f );
+    const float wc = Scan( pos, 1.0f );
+
+    return ( a * wa ) + ( b * wb ) + ( c * wc );
 }
 
 // Distortion of scanlines, and end of screen alpha.
-vec2 Warp( vec2 pos ) {
-    pos = pos * 2.0 - 1.0;
-    pos *= vec2( 1.0 + ( pos.y * pos.y ) * warp.x, 1.0 + ( pos.x * pos.x ) * warp.y );
-    return pos * 0.5 + 0.5;
+vec2 Warp( vec2 pos )
+{
+    vec2 distorted = pos * 2.0f - 1.0f;
+    distorted *= vec2( 1.0f + ( distorted.y * distorted.y ) * warp.x, 1.0f + ( distorted.x * distorted.x ) * warp.y );
+    return ( distorted * 0.5f + 0.5f );
 }
 
 // Shadow mask.
-vec3 Mask( vec2 pos ) {
-    pos.x += pos.y * 3.0;
+vec3 Mask( vec2 pos )
+{
     vec3 mask = vec3( maskDark, maskDark, maskDark );
-    pos.x = fract( pos.x / 6.0 );
-    if ( pos.x < 0.333 )mask.r = maskLight;
-    else if ( pos.x < 0.666 )mask.g = maskLight;
-    else mask.b = maskLight;
+    pos.x += pos.y * 3.0f;
+    pos.x = fract( pos.x / 6.0f );
+
+    if ( pos.x < 0.333f )
+        mask.r = maskLight;
+    else if ( pos.x < 0.666f )
+        mask.g = maskLight;
+    else
+        mask.b = maskLight;
+
     return mask;
 }
 
@@ -154,8 +164,8 @@ float Bar( float pos, float bar ) { pos -= bar; return pos * pos < 4.0 ? 0.0 : 1
 
 // Entry.
 void main() {
-    vec2 pos = Warp( fragTexCoord.xy / dim.xy );
-    outColor.rgb = Tri( pos ) * Mask( fragTexCoord.xy );
+    vec2 pos = Warp( fragTexCoord.xy );
+    outColor.rgb = Tri( pos ) * Mask( fragTexCoord.xy / res );
     outColor.a = 1.0;
-    outColor.rgb = ToSrgb( outColor.rgb );
+    outColor.rgb = outColor.rgb;
 }

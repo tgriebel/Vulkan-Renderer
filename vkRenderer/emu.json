@@ -152,7 +152,7 @@
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitCrt",
+          "DRAWPASS_OPAQUE": "LitCRT",
           "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
 	  "textures": {
