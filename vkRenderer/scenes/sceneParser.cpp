@@ -76,9 +76,29 @@ struct objectTuple_t
 };
 
 
-template<class T>
 void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object );
 void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32_t objectCount );
+
+
+void InitSceneType( const std::string type, Scene** scene )
+{
+	if ( type == "chess" ) {
+		*scene = new ChessScene();
+	}
+	else if ( type == "nes" ) {
+		*scene = new NesScene();
+	}
+	else {
+		*scene = new Scene();
+	}
+}
+
+
+std::string ParseToken( parseState_t& st )
+{
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	return std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
+}
 
 
 int ParseStringObject( parseState_t& st, void* value )
@@ -507,14 +527,32 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 
 	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
+		bool found = false;
 		for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 		{
 			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) != 0 ) {
 				continue;
 			}
-			( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr );
+			if ( st.tokens[ st.tx + 1 ].type == JSMN_ARRAY )
+			{
+				st.tx += 1;
+				ParseArray( st, objectMap[ mapIx ].func, objectMap[ mapIx ].ptr );
+			}
+			else
+			{
+				( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr );
+			}
+
 			++itemsFound;
+			found = true;
 			break;
+		}
+
+		if( found == false )
+		{
+			const std::string s = ParseToken( st );
+			std::cout << "No matching parse function for '" << s << ";" << std::endl;
+			st.tx += 1;
 		}
 	}
 }
@@ -539,8 +577,6 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 			++itemsFound;
 		}
 	}
-
-	st.tx -= 1;
 }
 
 
@@ -559,19 +595,14 @@ void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 		std::cout << "Object expected" << std::endl;
 	}
 
-	for ( int i = 1; i < r; ++i ) {
+	int i;
+	for ( i = 1; i < r; ++i ) {
 		if ( jsoneq( file.data(), &t[ i ], "scene" ) == 0 )
 		{
 			const uint32_t valueLen = ( t[ i + 1 ].end - t[ i + 1 ].start );
 			std::string s = std::string( file.data() + t[ i + 1 ].start, valueLen );
 
-			if ( s == "chess" ) {
-				*scene = new ChessScene();
-			} else if ( s == "nes" ) {
-				*scene = new NesScene();
-			} else {
-			*scene = new Scene();
-		}
+			InitSceneType( s, scene );
 			break;
 		}
 	}
@@ -580,52 +611,21 @@ void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 	st.file = &file;
 	st.r = r;
 	st.tokens = t;
-	st.tx = 1;
+	st.tx = 0;
 	st.assets = assets;
 	st.scene = *scene;
 
-	for ( ; st.tx < st.r; ++st.tx ) {
-		if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "shaders" ) == 0 )
-		{
-			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
-				continue;
-			}
-			st.tx += 1;
-			ParseArray( st, ParseShaderObject, &st.assets->gpuPrograms );
-		}
-		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "images" ) == 0 )
-		{
-			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
-				continue;
-			}
-			st.tx += 1;
-			ParseArray( st, ParseImageObject, &st.assets->textureLib );
-		}
-		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "materials" ) == 0 )
-		{
-			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
-				continue;
-			}
-			st.tx += 1;
-			ParseArray( st, ParseMaterialObject, &st.assets->materialLib );
-		}
-		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "models" ) == 0 )
-		{
-			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
-				continue;
-			}
-			st.tx += 1;
-			ParseArray( st, ParseModelObject, &st.assets->modelLib );
-		}
-		else if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], "entities" ) == 0 )
-		{
-			if ( st.tokens[ st.tx + 1 ].type != JSMN_ARRAY ) {
-				continue;
-			}
-			st.tx += 1;
-			ParseArray( st, ParseEntityObject, &st.scene->entities );
-		}
-	}
+	const uint32_t objectCount = 5;
+	static const objectTuple_t objectMap[ objectCount ] =
+	{
+		{ "shaders", &st.assets->gpuPrograms, &ParseShaderObject },
+		{ "images", &st.assets->textureLib, &ParseImageObject },
+		{ "materials", &st.assets->materialLib, &ParseMaterialObject },
+		{ "models", &st.assets->modelLib, &ParseModelObject },
+		{ "entities", &st.scene->entities, &ParseEntityObject },
+	};
+
+	ParseObject( st, objectMap, objectCount );
 
 	gAssets.RunLoadLoop();
 }
