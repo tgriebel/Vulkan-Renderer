@@ -22,8 +22,17 @@
 */
 
 #pragma once
+#include <cstdint>
 #include <scene/scene.h>
 #include "common.h"
+
+enum class renderViewRegion_t : uint32_t
+{
+	UNKNOWN,
+	SHADOW,
+	MAIN,
+	POST
+};
 
 class RenderView
 {
@@ -39,18 +48,27 @@ public:
 
 		committedModelCnt = 0;
 		mergedModelCnt = 0;
+
+		region = renderViewRegion_t::UNKNOWN;
+
+		memset( surfaces, 0, MaxSurfaces );
+		memset( merged, 0, MaxSurfaces );
+		memset( instances, 0, MaxSurfaces );
+		memset( instanceCounts, 0, MaxSurfaces );
 	}
 
-	mat4x4f										viewMatrix;
-	mat4x4f										projMatrix;
-	mat4x4f										viewprojMatrix;
-	viewport_t									viewport;
-	light_t										lights[ MaxLights ];
+	const char*				name;
+	renderViewRegion_t		region;
+	mat4x4f					viewMatrix;
+	mat4x4f					projMatrix;
+	mat4x4f					viewprojMatrix;
+	viewport_t				viewport;
+	light_t					lights[ MaxLights ];
 
-	uint32_t									committedModelCnt;
-	uint32_t									mergedModelCnt;
-	drawSurf_t									surfaces[ MaxSurfaces ];
-	drawSurf_t									merged[ MaxSurfaces ];
-	drawSurfInstance_t							instances[ MaxSurfaces ];
-	uint32_t									instanceCounts[ MaxSurfaces ];
+	uint32_t				committedModelCnt;
+	uint32_t				mergedModelCnt;
+	drawSurf_t				surfaces[ MaxSurfaces ];
+	drawSurf_t				merged[ MaxSurfaces ];
+	drawSurfInstance_t		instances[ MaxSurfaces ];
+	uint32_t				instanceCounts[ MaxSurfaces ];
 };

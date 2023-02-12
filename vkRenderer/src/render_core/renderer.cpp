@@ -104,7 +104,7 @@ static void TraceScene( const bool rasterize = false )
 
 	rtview.targetSize[ 0 ] = 320;
 	rtview.targetSize[ 1 ] = 180;
-	//window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
+	//gWindow.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
 	Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::Black, "testRayTrace" );
 	{
 		rtview.camera = rtScene.scene->camera;
@@ -169,15 +169,7 @@ void Renderer::Commit( const Scene* scene )
 	}
 	MergeSurfaces( shadowView );
 
-	renderView.viewMatrix = scene->camera.GetViewMatrix();
-	renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
-	renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
-
-	for ( int i = 0; i < MaxLights; ++i ) {
-		renderView.lights[ i ] = scene->lights[ i ];
-	}
-
-	UpdateView();
+	UpdateViews( scene );
 }
 
 
@@ -601,13 +593,22 @@ void Renderer::SubmitFrame()
 }
 
 
-void Renderer::UpdateView()
+void Renderer::UpdateViews( const Scene* scene )
 {
 	int width;
 	int height;
 	gWindow.GetWindowSize( width, height );
 	renderView.viewport.width = static_cast<float>( width );
 	renderView.viewport.height = static_cast<float>( height );
+	renderView.viewMatrix = scene->camera.GetViewMatrix();
+	renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
+	renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
+	renderView.region = renderViewRegion_t::MAIN;
+	renderView.name = "Main Pass";
+
+	for ( int i = 0; i < MaxLights; ++i ) {
+		renderView.lights[ i ] = scene->lights[ i ];
+	}
 
 	vec3f shadowLightDir;
 	shadowLightDir[ 0 ] = -renderView.lights[ 0 ].lightDir[ 0 ];
@@ -627,6 +628,8 @@ void Renderer::UpdateView()
 	shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
 	shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
 	shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
+	shadowView.region = renderViewRegion_t::SHADOW;
+	renderView.name = "Shadow Pass";
 
 	Camera shadowCam;
 	shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
@@ -1425,6 +1428,55 @@ static const char* GetPassDebugName( const drawPass_t pass )
 }
 
 
+void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer )
+{
+	for ( size_t surfIx = 0; surfIx < shadowView.mergedModelCnt; surfIx++ )
+	{
+		drawSurf_t& surface = shadowView.merged[ surfIx ];
+
+		pipelineObject_t* pipelineObject = nullptr;
+		if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) {
+			continue;
+		}
+		if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
+			continue;
+		}
+		GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
+		if ( pipelineObject == nullptr ) {
+			continue;
+		}
+
+		// vkCmdSetDepthBias
+		vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+		//vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
+		assert(0); // FIXME: above line
+
+		VkViewport viewport{ };
+		viewport.x = shadowView.viewport.x;
+		viewport.y = shadowView.viewport.y;
+		viewport.width = shadowView.viewport.width;
+		viewport.height = shadowView.viewport.height;
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
+
+		VkRect2D rect{ };
+		rect.extent.width = static_cast<uint32_t>( shadowView.viewport.width );
+		rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
+		vkCmdSetScissor( commandBuffer, 0, 1, &rect );
+
+		pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+		vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+		MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
+		vkCmdDrawIndexed( commandBuffer, surface.indicesCnt, shadowView.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+	}
+	vkCmdEndRenderPass( commandBuffer );
+
+	MarkerEndRegion( commandBuffer );
+}
+
+
 void Renderer::Render( RenderView& view )
 {
 	const uint32_t i = bufferId;
@@ -1464,7 +1516,7 @@ void Renderer::Render( RenderView& view )
 		shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
 		shadowPassInfo.pClearValues = shadowClearValues.data();
 
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Shadow Pass", ColorToVector( Color::White ) );
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
 
 		// TODO: how to handle views better?
 		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
@@ -1531,7 +1583,7 @@ void Renderer::Render( RenderView& view )
 		renderPassInfo.pClearValues = clearValues.data();
 		renderPassInfo.clearValueCount = 2;
 
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Main Pass", ColorToVector( Color::White ) );
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
 
 		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 

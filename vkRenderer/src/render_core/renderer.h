@@ -285,6 +285,7 @@ private:
 	void						CreateCommandPools();
 
 	// Draw Frame
+	void						RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
 	void						Render( RenderView& view );
 	void						Commit( const Scene* scene );
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
@@ -305,7 +306,7 @@ private:
 	void						PickPhysicalDevice();
 
 	// Update
-	void						UpdateView();
+	void						UpdateViews( const Scene* scene );
 	void						UpdateTextures();
 	void						UploadTextures();
 	void						UpdateGpuMaterials();

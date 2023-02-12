@@ -1,20 +1,2 @@
-﻿  scene.cpp
-  chessScene.cpp
-  nesScene.cpp
-  sceneParser.cpp
-  render_util.cpp
-  io.cpp
-  gpuTransfer.cpp
-  pipeline.cpp
-  debugMenu.cpp
-  renderCommand.cpp
-  renderInit.cpp
-  renderShutdown.cpp
-  renderer.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderer.cpp(87,24): warning C4018: '<': signed/unsigned mismatch
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderer.cpp(88,25): warning C4018: '<': signed/unsigned mismatch
-  deviceContext.cpp
-  vulkinTestApp.cpp
-  window.cpp
-  Generating Code...
+﻿  sceneParser.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
