@@ -1,5 +1,6 @@
 {
-  "scene": "lego",
+  "sceneClass": "lego",
+  "type": "scene",
   "shaders": [
     {
       "name": "Basic",

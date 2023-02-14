@@ -1,5 +1,6 @@
 {
-  "scene": "nes",
+  "sceneClass": "nes",
+  "type": "scene",
   "shaders": [
     {
       "name": "Basic",

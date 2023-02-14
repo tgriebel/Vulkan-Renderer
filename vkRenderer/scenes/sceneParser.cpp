@@ -33,12 +33,13 @@
 #include <resource_types/gpuProgram.h>
 #include <resource_types/model.h>
 #include <io/io.h>
+
+//#define JSMN_PARENT_LINKS
 #include <SysCore/jsmn.h>
 #include "chessScene.h"
 #include "nesScene.h"
 
-static jsmn_parser p;
-static jsmntok_t t[ 1024 ];
+static const int TOKEN_LEN = 128;
 
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
@@ -56,6 +57,7 @@ struct parseState_t
 	int					tx;
 	Scene*				scene;
 	AssetManager*		assets;
+	jsmn_parser*		p;
 };
 
 struct enumString_t
@@ -103,9 +105,15 @@ std::string ParseToken( parseState_t& st )
 
 int ParseStringObject( parseState_t& st, void* value )
 {
-	std::string* s = reinterpret_cast<std::string*>( value );
+	char* s = reinterpret_cast<char*>( value );
 	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-	*s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+
+	assert( valueLen > 0 );
+	assert( valueLen < TOKEN_LEN );
+	memset( s, '\0', TOKEN_LEN );
+	memcpy( s, st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	s[valueLen] = '\0';
+
 	st.tx += 2;
 	return 0;
 }
@@ -173,11 +181,11 @@ int ParseImageObject( parseState_t& st, void* object )
 
 	AssetLibImages& textureLib = st.assets->textureLib;
 
-	std::string name;
-	std::string type;
+	char name[TOKEN_LEN] = "<undefined>";
+	char type[TOKEN_LEN] = "<undefined>";
 
 	const uint32_t objectCount = 2;
-	static objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
 		{ "type", &type, &ParseStringObject },
@@ -188,9 +196,9 @@ int ParseImageObject( parseState_t& st, void* object )
 	TextureLoader* loader = new TextureLoader();
 	loader->SetBasePath( TexturePath );
 	loader->SetTextureFile( name );
-	loader->LoadAsCubemap( type == "CUBE" ? true : false );
+	loader->LoadAsCubemap( strcmp( type, "CUBE" ) == 0 ? true : false );
 
-	textureLib.AddDeferred( name.c_str(), Asset<Texture>::loadHandlerPtr_t( loader ) );
+	textureLib.AddDeferred( name, Asset<Texture>::loadHandlerPtr_t( loader ) );
 
 	return st.tx;
 }
@@ -206,7 +214,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 	Material* material = reinterpret_cast<Material*>( object );
 
 	const uint32_t objectCount = 9;
-	std::string s[ objectCount ];
+	char s[ objectCount ][TOKEN_LEN] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
 	{
@@ -221,7 +229,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 		MAKE_ENUM_STRING( DRAWPASS_DEBUG_SOLID ),
 	};
 
-	static const objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ enumMap[ 0 ].name, &s[ 0 ], &ParseStringObject },
 		{ enumMap[ 1 ].name, &s[ 1 ], &ParseStringObject },
@@ -240,10 +248,10 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 
 	for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 	{
-		if ( s[ mapIx ] == "" ) {
+		if ( s[ mapIx ][0] == '\0' ) {
 			continue;
 		}
-		material->AddShader( enumMap[ mapIx ].value, AssetLibGpuProgram::Handle( s[ mapIx ].c_str() ) );
+		material->AddShader( enumMap[ mapIx ].value, AssetLibGpuProgram::Handle( s[ mapIx ] ) );
 	}
 	return 0;
 }
@@ -259,7 +267,7 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 	Material* material = reinterpret_cast<Material*>( object );
 
 	const uint32_t objectCount = 12;
-	std::string s[ objectCount ];
+	char s[ objectCount ][TOKEN_LEN] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
 	{
@@ -297,10 +305,10 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 
 	for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 	{
-		if ( s[ mapIx ] == "" ) {
+		if ( s[ mapIx ][0] == '\0' ) {
 			continue;
 		}
-		material->AddTexture( enumMap[ mapIx ].value, AssetLibImages::Handle( s[ mapIx ].c_str() ) );
+		material->AddTexture( enumMap[ mapIx ].value, AssetLibImages::Handle( s[ mapIx ] ) );
 	}
 	return 0;
 }
@@ -314,9 +322,9 @@ int ParseModelObject( parseState_t& st, void* object )
 
 	struct modelObjectData_t
 	{
-		std::string	name;
-		std::string	modelName;
-		std::string	s[3];
+		char		name[ TOKEN_LEN ];
+		char		modelName[ TOKEN_LEN ];
+		char		s[3][ TOKEN_LEN ];
 		float		f[3];
 		int			i[3];
 	};
@@ -324,7 +332,7 @@ int ParseModelObject( parseState_t& st, void* object )
 	modelObjectData_t od;
 
 	const uint32_t objectCount = 11;
-	static const objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &od.name, &ParseStringObject },
 		{ "model", &od.modelName, &ParseStringObject },
@@ -341,13 +349,13 @@ int ParseModelObject( parseState_t& st, void* object )
 
 	ParseObject( st, objectMap, objectCount );
 
-	if ( od.modelName == "_skybox" ) {
-		st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( new SkyBoxLoader() ) );
+	if ( strcmp( od.modelName, "_skybox" ) == 0 ) {
+		st.assets->modelLib.AddDeferred( od.name, loader_t( new SkyBoxLoader() ) );
 	}
-	else if ( od.modelName == "_terrain" )
+	else if ( strcmp( od.modelName, "_terrain" ) == 0 )
 	{
-		hdl_t handle = AssetLibMaterials::Handle( od.s[0].c_str() );
-		st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( new TerrainLoader( od.i[0], od.i[1], od.f[0], od.f[1], handle ) ) );
+		hdl_t handle = AssetLibMaterials::Handle( od.s[0] );
+		st.assets->modelLib.AddDeferred( od.name, loader_t( new TerrainLoader( od.i[0], od.i[1], od.f[0], od.f[1], handle ) ) );
 	}
 	else 
 	{
@@ -356,7 +364,7 @@ int ParseModelObject( parseState_t& st, void* object )
 		loader->SetTexturePath( TexturePath );
 		loader->SetModelName( od.modelName );
 		loader->SetAssetRef( st.assets );
-		st.assets->modelLib.AddDeferred( od.name.c_str(), loader_t( loader ) );
+		st.assets->modelLib.AddDeferred( od.name, loader_t( loader ) );
 	}
 	return st.tx;
 }
@@ -368,9 +376,9 @@ int ParseEntityObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	std::string name;
-	std::string modelName;
-	std::string materialName;
+	char name[ TOKEN_LEN ] = "<undefined>";
+	char modelName[ TOKEN_LEN ] = "<undefined>";
+	char materialName[ TOKEN_LEN ] = "<undefined>";
 	std::vector<Entity*>& entities = st.scene->entities;
 
 	float x = 0.0f, y = 0.0f, z = 0.0f;
@@ -379,7 +387,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 	bool hidden = false, wireframe = false;
 
 	const uint32_t objectCount = 14;
-	static const objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
 		{ "model", &modelName, &ParseStringObject },
@@ -401,10 +409,10 @@ int ParseEntityObject( parseState_t& st, void* object )
 
 	Entity* ent = new Entity();
 	ent->name = name;
-	ent->modelHdl = AssetLibModels::Handle( modelName.c_str() );
+	ent->modelHdl = AssetLibModels::Handle( modelName );
 	
-	if ( modelName == "_skybox" ) {
-		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName.c_str(), loader_t( new SkyBoxLoader() ) );
+	if ( strcmp( modelName, "_skybox" ) == 0 ) {
+		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName, loader_t( new SkyBoxLoader() ) );
 	}
 	else if( st.assets->modelLib.Find( ent->modelHdl ) == st.assets->modelLib.GetDefault() )
 	{
@@ -413,13 +421,13 @@ int ParseEntityObject( parseState_t& st, void* object )
 		loader->SetTexturePath( TexturePath );
 		loader->SetModelName( modelName );
 		loader->SetAssetRef( st.assets );
-		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
+		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName, loader_t( loader ) );
 	}
 	ent->SetOrigin( vec3f( x, y, z ) );
 	ent->SetRotation( vec3f( rx, ry, rz ) );
 	ent->SetScale( vec3f( sx, sy, sz ) );
-	if ( materialName != "" ) {
-		ent->materialHdl = AssetLibMaterials::Handle( materialName.c_str() );
+	if ( strcmp( materialName, "<undefined>" ) != 0 ) {
+		ent->materialHdl = AssetLibMaterials::Handle( materialName );
 	}
 	if ( hidden ) {
 		ent->SetFlag( ENT_FLAG_NO_DRAW );
@@ -443,11 +451,11 @@ int ParseMaterialObject( parseState_t& st, void* object )
 
 	Material m;
 	materialParms_t mParms;
-	std::string name;
+	char name[ TOKEN_LEN ] = "<undefined>";
 
 	// TODO: allow parse functions that aren't just primitives. Need objects/array reading
 	const uint32_t objectCount = 23;
-	static const objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
 		{ "KaR", &mParms.Ka.r, &ParseFloatObject },
@@ -478,7 +486,7 @@ int ParseMaterialObject( parseState_t& st, void* object )
 
 	ParseObject( st, objectMap, objectCount );
 
-	materials->Add( name.c_str(), m );
+	materials->Add( name, m );
 
 	return st.tx;
 }
@@ -490,17 +498,17 @@ int ParseShaderObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	std::string name;
-	std::string vsShader;
-	std::string psShader;
+	char name[ TOKEN_LEN ] = "<undefined>";
+	char vsShader[ TOKEN_LEN ] = "<undefined>";
+	char psShader[ TOKEN_LEN ] = "<undefined>";
 	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
 
 	const uint32_t objectCount = 3;
-	static const objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, &ParseStringObject },
-		{ "vs", &vsShader, &ParseStringObject },
-		{ "ps", &psShader, &ParseStringObject },
+		{ "name", reinterpret_cast<void*>( name ), &ParseStringObject },
+		{ "vs", reinterpret_cast<void*>( vsShader ), &ParseStringObject },
+		{ "ps", reinterpret_cast<void*>( psShader ), &ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -508,7 +516,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 	GpuProgramLoader* loader = new GpuProgramLoader();
 	loader->SetBasePath( "shaders_bin/" );
 	loader->AddRasterPath( vsShader, psShader );
-	shaders->AddDeferred( name.c_str(), Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
+	shaders->AddDeferred( name, Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 
 	return st.tx;
 }
@@ -566,6 +574,8 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 	int itemsFound = 0;
 	int itemsCount = st.tokens[ st.tx ].size;
 
+	std::string arrayName = ParseToken( st );
+
 	st.tx += 1;
 
 	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
@@ -580,43 +590,55 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 }
 
 
-void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
+void ParseJson( std::string fileName, Scene** scene, AssetManager* assets, const bool isRoot )
 {
 	std::vector<char> file = ReadFile( fileName );
 
-	jsmn_init( &p );
-	int r = jsmn_parse( &p, file.data(), static_cast<uint32_t>( file.size() ), t,
-		sizeof( t ) / sizeof( t[ 0 ] ) );
-	if ( r < 0 ) {
-		std::cout << "Failed to parse JSON" << std::endl;
-	}
-
-	if ( r < 1 || t[ 0 ].type != JSMN_OBJECT ) {
-		std::cout << "Object expected" << std::endl;
-	}
-
-	int i;
-	for ( i = 1; i < r; ++i ) {
-		if ( jsoneq( file.data(), &t[ i ], "scene" ) == 0 )
-		{
-			const uint32_t valueLen = ( t[ i + 1 ].end - t[ i + 1 ].start );
-			std::string s = std::string( file.data() + t[ i + 1 ].start, valueLen );
-
-			InitSceneType( s, scene );
-			break;
-		}
-	}
+	const int maxTokens = 1024;
 
 	parseState_t st;
 	st.file = &file;
-	st.r = r;
-	st.tokens = t;
-	st.tx = 0;
+	st.p = new jsmn_parser;
+	st.tokens = new jsmntok_t[ maxTokens ];
+	st.tx = 1;
 	st.assets = assets;
+
+	jsmn_init( st.p );
+	st.r = jsmn_parse( st.p, st.file->data(), static_cast<uint32_t>( st.file->size() ), st.tokens, maxTokens );
+	if ( st.r < 0 ) {
+		std::cout << "Failed to parse JSON" << std::endl;
+	}
+
+	if ( st.r < 1 || st.tokens[ 0 ].type != JSMN_OBJECT ) {
+		std::cout << "Object expected" << std::endl;
+	}
+
+	if( isRoot )
+	{
+		while( st.tx < st.r )
+		{
+			const int items = st.tokens[ st.tx ].size;
+			if ( jsoneq( file.data(), &st.tokens[ st.tx ], "sceneClass" ) == 0 )
+			{
+				st.tx += 1;
+				InitSceneType( ParseToken( st ), scene );
+			}
+			else if ( jsoneq( file.data(), &st.tokens[ st.tx ], "reflink" ) == 0 )
+			{
+				st.tx += 1;
+				ParseJson( ParseToken( st ), scene, assets, false );
+			} else {
+				st.tx += 1;
+			}
+			st.tx += items;
+		}
+	}
+
+	st.tx = 0;
 	st.scene = *scene;
 
 	const uint32_t objectCount = 5;
-	static const objectTuple_t objectMap[ objectCount ] =
+	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "shaders", &st.assets->gpuPrograms, &ParseShaderObject },
 		{ "images", &st.assets->textureLib, &ParseImageObject },
@@ -626,6 +648,15 @@ void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 	};
 
 	ParseObject( st, objectMap, objectCount );
+
+	delete st.p;
+	delete[] st.tokens;
+}
+
+
+void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
+{
+	ParseJson( fileName, scene, assets, true );
 
 	gAssets.RunLoadLoop();
 }
