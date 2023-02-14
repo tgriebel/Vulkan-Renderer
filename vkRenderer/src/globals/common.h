@@ -143,6 +143,7 @@ struct globalUboConstants_t
 	vec4f		shadowParms;
 	vec4f		tonemap;
 	uint32_t	numSamples;
+	uint32_t	numLights;
 	// uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
 };
 

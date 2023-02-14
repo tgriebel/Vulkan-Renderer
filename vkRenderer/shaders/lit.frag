@@ -119,7 +119,7 @@ void main()
     F0 = mix( F0, albedoColor.rgb, metallic );
 	
     vec3 Lo = vec3( 0.0f, 0.0f, 0.0f );
-    for( int i = 0; i < 3; ++i ) {
+    for( int i = 0; i < globals.numLights; ++i ) {
 	    const vec3 l = normalize( lightUbo.lights[ i ].lightPos.xyz - worldPosition.xyz );
         const vec3 h = normalize( v + l );
 

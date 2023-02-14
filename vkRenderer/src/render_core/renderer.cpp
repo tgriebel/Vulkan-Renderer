@@ -606,7 +606,8 @@ void Renderer::UpdateViews( const Scene* scene )
 	renderView.region = renderViewRegion_t::MAIN;
 	renderView.name = "Main Pass";
 
-	for ( int i = 0; i < MaxLights; ++i ) {
+	renderView.numLights = 3;
+	for ( int i = 0; i < renderView.numLights; ++i ) {
 		renderView.lights[ i ] = scene->lights[ i ];
 	}
 
@@ -1117,6 +1118,7 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		globals.tonemap = vec4f( gImguiControls.toneMapColor[ 0 ], gImguiControls.toneMapColor[ 1 ], gImguiControls.toneMapColor[ 2 ], gImguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, gImguiControls.shadowStrength );
 		globals.numSamples = msaaSamples;
+		globals.numLights = renderView.numLights;
 		globalsBuffer = globals;
 	}
 

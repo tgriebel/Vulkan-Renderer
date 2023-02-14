@@ -21,7 +21,7 @@
 * SOFTWARE.
 */
 
-#define MaxLights		3
+#define MaxLights		128
 #define MaxMaterials	256
 #define MaxViews		2
 #define MaxSurfaces		1000
@@ -82,6 +82,7 @@ struct view_t
 										vec4        shadowParms;												\
 										vec4        toneMap;													\
 										uint		numSamples;													\
+										uint		numLights;													\
 									} globals;
 
 #define VIEW_LAYOUT( S, N )			layout( set = S, binding = N ) uniform ViewUniformBuffer					\

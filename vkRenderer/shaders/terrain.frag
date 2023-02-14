@@ -44,7 +44,7 @@ void main()
     const vec4 texColor1 = SrgbToLinear( texture( texSampler[ textureId1 ], fragTexCoord.xy ) );
     const vec4 texColor = mix( texColor1, texColor0, smoothstep( 0.0f, 0.4f, blendValue ) );
     outColor = AMBIENT * texColor;
-    for( int i = 0; i < 3; ++i ) {
+    for( int i = 0; i < globals.numLights; ++i ) {
 	    const vec3 lightDist = -normalize( lightUbo.lights[ i ].lightPos.xyz - worldPosition.xyz );
         const float spotAngle = dot( lightDist, lightUbo.lights[ i ].lightDir.xyz );
         const float spotFov = 0.5f;

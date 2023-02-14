@@ -64,6 +64,7 @@ public:
 	mat4x4f					viewprojMatrix;
 	viewport_t				viewport;
 	light_t					lights[ MaxLights ];
+	uint32_t				numLights;
 
 	uint32_t				committedModelCnt;
 	uint32_t				mergedModelCnt;
