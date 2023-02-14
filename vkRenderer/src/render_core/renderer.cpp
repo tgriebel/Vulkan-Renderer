@@ -606,7 +606,7 @@ void Renderer::UpdateViews( const Scene* scene )
 	renderView.region = renderViewRegion_t::MAIN;
 	renderView.name = "Main Pass";
 
-	renderView.numLights = 3;
+	renderView.numLights = static_cast<uint32_t>( scene->lights.size() );
 	for ( int i = 0; i < renderView.numLights; ++i ) {
 		renderView.lights[ i ] = scene->lights[ i ];
 	}
