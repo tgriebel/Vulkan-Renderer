@@ -89,7 +89,7 @@
 	  "type": "2D"
 	},
 	{
-	  "name": "grid.png",
+	  "name": "grid2.png",
 	  "type": "2D"
 	},
 	{
@@ -127,6 +127,10 @@
 	{
 	  "name": "chapel_low.jpg",
 	  "type": "CUBE"
+	},
+	{
+	  "name": "skybox80s.png",
+	  "type": "2D"
 	}
   ],
   "materials": [
@@ -145,7 +149,7 @@
 		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "grid.png"
+		  "GGX_COLOR_MAP_SLOT" : "grid2.png"
 	  }
     },
 	{
@@ -211,12 +215,12 @@
           "DRAWPASS_SKYBOX": "Sky"
       }
       "textures": {
-          "CUBE_RIGHT_SLOT" : "gray.jpg",
-          "CUBE_LEFT_SLOT" : "gray.jpg",
-          "CUBE_TOP_SLOT" : "gray.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "gray.jpg",
-          "CUBE_FRONT_SLOT" : "gray.jpg",
-          "CUBE_BACK_SLOT" : "gray.jpg",
+          "CUBE_RIGHT_SLOT" : "skybox80s.png",
+          "CUBE_LEFT_SLOT" : "skybox80s.png",
+          "CUBE_TOP_SLOT" : "skybox80s.png",	  
+          "CUBE_BOTTOM_SLOT" : "skybox80s.png",
+          "CUBE_FRONT_SLOT" : "skybox80s.png",
+          "CUBE_BACK_SLOT" : "skybox80s.png",
       }
     }
   ],
