@@ -257,7 +257,8 @@ void ChessScene::Update()
 	glowMat.Kd( rgbTuplef_t( 0.1f, 0.1f, 1.0f ) );
 	glowMat.Tr( 0.5f * cos( 3.0f * time ) + 0.5f );
 
-	for ( int i = 0; i < MaxLights; ++i )
+	const uint32_t lightCount = static_cast<uint32_t>( lights.size() );
+	for ( int i = 0; i < lightCount; ++i )
 	{
 		Entity* debugLight = FindEntity( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
 		if ( debugLight == nullptr ) {
