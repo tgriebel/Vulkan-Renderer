@@ -590,8 +590,11 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 }
 
 
-void ParseJson( std::string fileName, Scene** scene, AssetManager* assets, const bool isRoot )
+void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets, const bool isRoot )
 {
+	assert( assets != nullptr );
+	assert( scene != nullptr );
+
 	std::vector<char> file = ReadFile( fileName );
 
 	const int maxTokens = 1024;
