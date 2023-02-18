@@ -1,6 +1,7 @@
 
 #include "../globals/common.h"
 #include <scene/assetManager.h>
+#include <scene/scene.h>
 #include <sstream>
 
 extern AssetManager gAssets;
@@ -34,19 +35,18 @@ static bool EditFloat( float& f )
 
 static bool EditRgb( rgbTuplef_t& rgb )
 {
-	bool edited = false;
-	ImGui::PushItemWidth( defaultWidth );
-	edited = edited || ImGui::InputFloat( "##R", &rgb.r, 0.1f, 1.0f );
-	ImGui::SameLine();
-	edited = edited || ImGui::InputFloat( "##G", &rgb.g, 0.1f, 1.0f );
-	ImGui::SameLine();
-	edited = edited || ImGui::InputFloat( "##B", &rgb.b, 0.1f, 1.0f );
+	ImGui::PushItemWidth( 3 * defaultWidth );
+
+	float col[3] = { rgb.r, rgb.g, rgb.b };
+	const bool edited = ImGui::ColorEdit3( "##RGB0", col );
+	if( edited )
+	{
+		rgb.r = col[0];
+		rgb.g = col[1];
+		rgb.b = col[2];
+	}
+
 	ImGui::PopItemWidth();
-	//float col[3] = { rgb.r, rgb.g, rgb.b };
-	//ImGui::ColorPicker3( "##RGB0", col );
-	//rgb.r = col[0];
-	//rgb.g = col[1];
-	//rgb.b = col[2];
 
 	return edited;
 }
@@ -326,6 +326,36 @@ void DebugMenuTextureTreeNode( Asset<Texture>* texAsset )
 		}
 
 		ImGui::TreePop();
+	}
+}
+
+
+void DebugMenuLightEdit( Scene* scene )
+{
+	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
+	for ( uint32_t i = 0; i < lightCount; ++i )
+	{
+		std::stringstream ss;
+		ss << "##Light" << i;
+		std::string label = ss.str();
+
+		if ( ImGui::TreeNode( label.c_str() + 2 ) )
+		{
+			ImGui::PushID( "##editLight_x" );
+			EditFloat( scene->lights[ i ].lightPos[0] );
+			ImGui::PopID();
+			ImGui::PushID( "##editLight_y" );
+			EditFloat( scene->lights[ i ].lightPos[1] );
+			ImGui::PopID();
+			ImGui::PushID( "##editLight_z" );
+			EditFloat( scene->lights[ i ].lightPos[2] );
+			ImGui::PopID();
+
+			rgbTuplef_t rgb = scene->lights[ i ].color.AsRGBf();
+			EditRgb( rgb );
+
+			ImGui::TreePop();
+		}
 	}
 }
 

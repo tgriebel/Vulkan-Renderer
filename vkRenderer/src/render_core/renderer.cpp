@@ -1979,6 +1979,8 @@ void Renderer::DrawDebugMenu()
 		{
 			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
+			DebugMenuLightEdit( gScene );
+
 			if ( ImGui::BeginTable( "3ways", 3, flags ) )
 			{
 				// The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
