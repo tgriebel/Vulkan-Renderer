@@ -31,7 +31,10 @@ struct light_t
 	vec4	lightPos;
 	vec4	intensity;
 	vec4	lightDir;
-	vec4	padding;
+	uint	shadowViewId;
+	uint	pad0;
+	uint	pad1;
+	uint	pad2;
 };
 
 struct material_t

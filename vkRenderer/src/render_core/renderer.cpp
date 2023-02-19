@@ -1156,10 +1156,12 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	static lightBufferObject_t lightBuffer[ MaxLights ];
 	for ( int i = 0; i < MaxLights; ++i )
 	{
+		// TODO: this should be all committed lights for all views eventually
 		lightBufferObject_t light;
 		light.intensity = renderView.lights[ i ].intensity;
 		light.lightDir = renderView.lights[ i ].lightDir;
 		light.lightPos = renderView.lights[ i ].lightPos;
+		light.shadowViewId = uint32_t(shadowView.region);
 		lightBuffer[i] = light;
 	}
 

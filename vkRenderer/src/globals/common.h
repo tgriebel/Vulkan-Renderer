@@ -170,7 +170,8 @@ struct lightBufferObject_t
 	vec4f		lightPos;
 	vec4f		intensity;
 	vec4f		lightDir;
-	uint32_t	pad[ 4 ];
+	uint32_t	shadowViewId;
+	uint32_t	pad[3];
 };
 
 struct SwapChainSupportDetails
