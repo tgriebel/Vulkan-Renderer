@@ -33,12 +33,13 @@ PS_LAYOUT_STANDARD( sampler2DMS )
 void main()
 {
     const uint materialId = pushConstants.materialId;
+	const uint viewlId = pushConstants.viewId;
 
 	const uint textureId0 = materialUbo.materials[ materialId ].textureId0;
     const uint textureId1 = materialUbo.materials[ materialId ].textureId1;
     const uint textureId2 = materialUbo.materials[ materialId ].textureId2;
 
-	const mat4 viewMat = viewUbo.views[0].view;
+	const mat4 viewMat = viewUbo.views[ viewlId ].view;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
 	const vec3 up = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 1 ][ 0 ], viewMat[ 2 ][ 0 ] ) );	
 	const vec3 right = normalize( vec3( viewMat[ 0 ][ 1 ], viewMat[ 1 ][ 1 ], viewMat[ 2 ][ 1 ] ) );

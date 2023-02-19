@@ -38,7 +38,6 @@ extern Scene* gScene;
 
 static VkDescriptorBufferInfo	vk_globalConstantsInfo;
 static VkDescriptorBufferInfo	vk_viewUbo;
-static VkDescriptorBufferInfo	vk_shadowViewUbo;
 static VkDescriptorBufferInfo	vk_surfaceUbo[ MaxViews ];
 static VkDescriptorImageInfo	vk_image2DInfo[ MaxImageDescriptors ];
 static VkDescriptorImageInfo	vk_shadowImageInfo[ MaxImageDescriptors ];
@@ -294,7 +293,6 @@ void Renderer::ShutdownGPU()
 
 	memset( &vk_globalConstantsInfo, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_viewUbo, 0, sizeof( VkDescriptorBufferInfo ) );
-	memset( &vk_shadowViewUbo, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_surfaceUbo, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_image2DInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
 	memset( &vk_shadowImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
@@ -663,10 +661,6 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	vk_viewUbo.offset = 0;
 	vk_viewUbo.range = MaxViews * sizeof( viewBufferObject_t );
 
-	vk_shadowViewUbo.buffer = frameState[ i ].viewParms.GetVkObject();
-	vk_shadowViewUbo.offset = sizeof( viewBufferObject_t );
-	vk_shadowViewUbo.range = sizeof( viewBufferObject_t );
-
 	for ( uint32_t v = 0; v < MaxViews; ++v )
 	{
 		const VkDeviceSize size = MaxSurfaces * sizeof( uniformBufferObject_t );
@@ -904,7 +898,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_shadowViewUbo;
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1124,11 +1118,17 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 
 	static viewBufferObject_t viewBuffer[MaxViews];
 	{
-		viewBuffer[0].view = renderView.viewMatrix;
-		viewBuffer[0].proj = renderView.projMatrix;
+		viewBuffer[ int(renderView.region) ].view = renderView.viewMatrix;
+		viewBuffer[ int( renderView.region ) ].proj = renderView.projMatrix;
 
-		viewBuffer[1].view = shadowView.viewMatrix;
-		viewBuffer[1].proj = shadowView.projMatrix;
+		viewBuffer[ int( shadowView.region ) ].view = shadowView.viewMatrix;
+		viewBuffer[ int( shadowView.region ) ].proj = shadowView.projMatrix;
+
+		for( uint32_t i = 2; i < MaxViews; ++i )
+		{
+			viewBuffer[i].view = mat4x4f( 1.0f );
+			viewBuffer[i].proj = mat4x4f( 1.0f );
+		}
 	}
 
 	static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
@@ -1437,7 +1437,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 		drawSurf_t& surface = shadowView.merged[ surfIx ];
 
 		pipelineObject_t* pipelineObject = nullptr;
-		if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) {
+		if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) { // TODO: exact passes
 			continue;
 		}
 		if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
@@ -1467,7 +1467,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 		rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
 		vkCmdSetScissor( commandBuffer, 0, 1, &rect );
 
-		pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+		pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( shadowView.region ) };
 		vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 		MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
@@ -1557,7 +1557,7 @@ void Renderer::Render( RenderView& view )
 			rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
 			vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
 
-			pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+			pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( shadowView.region ) };
 			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 			MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
@@ -1638,7 +1638,7 @@ void Renderer::Render( RenderView& view )
 				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
 
-				pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+				pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( view.region ) };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 				MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
@@ -1672,7 +1672,7 @@ void Renderer::Render( RenderView& view )
 		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
-			drawSurf_t& surface = shadowView.merged[ surfIx ];
+			drawSurf_t& surface = view.merged[ surfIx ];
 			if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HDL ) {
 				continue;
 			}
@@ -1684,7 +1684,7 @@ void Renderer::Render( RenderView& view )
 			vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 			vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
 
-			pushConstants_t pushConstants = { surface.objectId, surface.materialId };
+			pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( view.region ) };
 			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );

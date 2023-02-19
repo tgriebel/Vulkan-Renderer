@@ -23,7 +23,7 @@
 
 #define MaxLights		128
 #define MaxMaterials	256
-#define MaxViews		2
+#define MaxViews		6
 #define MaxSurfaces		1000
 
 struct light_t
@@ -112,6 +112,7 @@ struct view_t
 									{																			\
 										layout( offset = 0 ) uint objectId;										\
 										layout( offset = 4 ) uint materialId;									\
+										layout( offset = 8 ) uint viewId;										\
 									} pushConstants;
 
 #define VS_IN		layout( set = 0, location = 0 ) in vec3 inPosition;											\

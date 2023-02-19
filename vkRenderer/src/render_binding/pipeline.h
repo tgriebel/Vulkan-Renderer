@@ -84,6 +84,7 @@ struct pushConstants_t
 {
 	uint32_t objectId;
 	uint32_t materialId;
+	uint32_t viewId;
 };
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );

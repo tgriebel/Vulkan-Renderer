@@ -34,10 +34,11 @@ void main()
 {
 	objectId = pushConstants.objectId + gl_InstanceIndex;
 	const uint materialId = pushConstants.materialId;
+	const uint viewlId = pushConstants.viewId;
 
 	vec3 position = inPosition;
 	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
-    gl_Position = viewUbo.views[0].proj * viewUbo.views[0].view * worldPosition;
+    gl_Position = viewUbo.views[ viewlId ].proj * viewUbo.views[ viewlId ].view * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 	fragNormal = inNormal;

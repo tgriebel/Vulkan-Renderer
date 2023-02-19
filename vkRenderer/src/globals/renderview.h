@@ -28,10 +28,10 @@
 
 enum class renderViewRegion_t : uint32_t
 {
+	SHADOW	= 0,
+	MAIN	= 1,
+	POST	= 2,
 	UNKNOWN,
-	SHADOW,
-	MAIN,
-	POST
 };
 
 class RenderView
