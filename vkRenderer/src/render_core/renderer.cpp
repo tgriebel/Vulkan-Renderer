@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <numeric>
 #include <map>
 #include "renderer.h"
 #include <scene/scene.h>
@@ -83,8 +84,8 @@ static void BuildRayTraceScene( Scene* scene )
 
 		texture.cpuImage.Init( texture.info.width, texture.info.height );
 
-		for ( int py = 0; py < texture.info.height; ++py ) {
-			for ( int px = 0; px < texture.info.width; ++px ) {
+		for ( uint32_t py = 0; py < texture.info.height; ++py ) {
+			for ( uint32_t px = 0; px < texture.info.width; ++px ) {
 				RGBA rgba;
 				rgba.r = texture.bytes[ ( py * texture.info.width + px ) * 4 + 0 ];
 				rgba.g = texture.bytes[ ( py * texture.info.width + px ) * 4 + 1 ];
@@ -139,15 +140,6 @@ static void TraceScene( const bool rasterize = false )
 	}
 }
 
-static bool CompareSortKey( drawSurf_t& surf0, drawSurf_t& surf1 )
-{
-	if( surf0.materialId == surf1.materialId ) {
-		return ( surf0.objectId < surf1.objectId );
-	} else {
-		return ( surf0.materialId < surf1.materialId );
-	}
-}
-
 
 void Renderer::Commit( const Scene* scene )
 {
@@ -174,34 +166,68 @@ void Renderer::Commit( const Scene* scene )
 
 void Renderer::MergeSurfaces( RenderView& view )
 {
-	view.mergedModelCnt = 0;
-	std::unordered_map< uint32_t, uint32_t > uniqueSurfs;
-	uniqueSurfs.reserve( view.committedModelCnt );
-	for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
-		drawSurfInstance_t& instance = view.instances[ i ];
-		auto it = uniqueSurfs.find( view.surfaces[ i ].hash );
-		if ( it == uniqueSurfs.end() ) {
-			const uint32_t surfId = view.mergedModelCnt;
-			uniqueSurfs[ view.surfaces[ i ].hash ] = surfId;
+	// Sort Surfaces
+	{
+		class Comparator
+		{
+		private:
+			RenderView* view;
+		public:
+			Comparator( RenderView* view ) : view( view ) {}
+			bool operator()( const uint32_t ix0, const uint32_t ix1 )
+			{
+				const auto lhs = view->surfaces[ ix0 ].sortKey.key;
+				const auto rhs = view->surfaces[ ix1 ].sortKey.key;
+				return ( lhs < rhs );
+			}
+		};
 
-			view.instanceCounts[ surfId ] = 1;
-			view.merged[ surfId ] = view.surfaces[ i ];
+		std::vector<uint32_t> sortIndices( view.committedModelCnt );
+		std::iota( sortIndices.begin(), sortIndices.end(), 0 );
 
-			instance.id = 0;
-			instance.surfId = surfId;
+		std::sort( sortIndices.begin(), sortIndices.end(), Comparator( &view ) );
 
-			++view.mergedModelCnt;
-		}
-		else {
-			instance.id = view.instanceCounts[ it->second ];
-			instance.surfId = it->second;
-			view.instanceCounts[ it->second ]++;
+		uint32_t dstIndex = 0;
+		for( auto it = sortIndices.begin(); it != sortIndices.end(); ++it )
+		{
+			const uint32_t index = *it;
+			view.sortedSurfaces[ dstIndex ] = view.surfaces[ index ];
+			view.sortedInstances[ dstIndex ] = view.instances[ index ];
+			++dstIndex;
 		}
 	}
-	uint32_t totalCount = 0;
-	for ( uint32_t i = 0; i < view.mergedModelCnt; ++i ) {
-		view.merged[ i ].objectId += totalCount;
-		totalCount += view.instanceCounts[ i ];
+
+	// Merge Surfaces
+	{
+		view.mergedModelCnt = 0;
+		std::unordered_map< uint32_t, uint32_t > uniqueSurfs;
+		uniqueSurfs.reserve( view.committedModelCnt );
+		for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
+			drawSurfInstance_t& instance = view.sortedInstances[ i ];
+			auto it = uniqueSurfs.find( view.sortedSurfaces[ i ].hash );
+			if ( it == uniqueSurfs.end() ) {
+				const uint32_t surfId = view.mergedModelCnt;
+				uniqueSurfs[ view.sortedSurfaces[ i ].hash ] = surfId;
+
+				view.instanceCounts[ surfId ] = 1;
+				view.merged[ surfId ] = view.sortedSurfaces[ i ];
+
+				instance.id = 0;
+				instance.surfId = surfId;
+
+				++view.mergedModelCnt;
+			}
+			else {
+				instance.id = view.instanceCounts[ it->second ];
+				instance.surfId = it->second;
+				view.instanceCounts[ it->second ]++;
+			}
+		}
+		uint32_t totalCount = 0;
+		for ( uint32_t i = 0; i < view.mergedModelCnt; ++i ) {
+			view.merged[ i ].objectId += totalCount;
+			totalCount += view.instanceCounts[ i ];
+		}
 	}
 }
 
@@ -237,7 +263,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.vertexOffset = upload.vertexOffset;
 		surf.firstIndex = upload.firstIndex;
 		surf.indicesCnt = upload.indexCount;
-		surf.materialId = material.uploadId;
+		surf.sortKey.materialId = material.uploadId;
 		surf.objectId = objectOffset;
 		surf.flags = renderFlags;
 		surf.stencilBit = ent.outline ? 0x01 : 0;
@@ -605,7 +631,7 @@ void Renderer::UpdateViews( const Scene* scene )
 	renderView.name = "Main Pass";
 
 	renderView.numLights = static_cast<uint32_t>( scene->lights.size() );
-	for ( int i = 0; i < renderView.numLights; ++i ) {
+	for ( uint32_t i = 0; i < renderView.numLights; ++i ) {
 		renderView.lights[ i ] = scene->lights[ i ];
 	}
 
@@ -1136,9 +1162,9 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	for ( uint32_t i = 0; i < renderView.committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
-		ubo.model = renderView.instances[ i ].modelMatrix;
-		const drawSurf_t& surf = renderView.merged[ renderView.instances[ i ].surfId ];
-		const uint32_t objectId = ( renderView.instances[ i ].id + surf.objectId );
+		ubo.model = renderView.sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = renderView.merged[ renderView.sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( renderView.sortedInstances[ i ].id + surf.objectId );
 		uboBuffer[ objectId ] = ubo;
 	}
 
@@ -1147,9 +1173,9 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
-		ubo.model = shadowView.instances[ i ].modelMatrix;
-		const drawSurf_t& surf = shadowView.merged[ shadowView.instances[ i ].surfId ];
-		const uint32_t objectId = ( shadowView.instances[ i ].id + surf.objectId );
+		ubo.model = shadowView.sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = shadowView.merged[ shadowView.sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( shadowView.sortedInstances[ i ].id + surf.objectId );
 		shadowUboBuffer[ objectId ] = ubo;
 	}
 
@@ -1469,7 +1495,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 		rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
 		vkCmdSetScissor( commandBuffer, 0, 1, &rect );
 
-		pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( shadowView.region ) };
+		pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( shadowView.region ) };
 		vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 		MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
@@ -1559,7 +1585,7 @@ void Renderer::Render( RenderView& view )
 			rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
 			vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
 
-			pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( shadowView.region ) };
+			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( shadowView.region ) };
 			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 			MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
@@ -1640,7 +1666,7 @@ void Renderer::Render( RenderView& view )
 				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
 
-				pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( view.region ) };
+				pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
 				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 				MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
@@ -1686,7 +1712,7 @@ void Renderer::Render( RenderView& view )
 			vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 			vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
 
-			pushConstants_t pushConstants = { surface.objectId, surface.materialId, uint32_t( view.region ) };
+			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
 			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );

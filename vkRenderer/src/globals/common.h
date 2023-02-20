@@ -264,6 +264,13 @@ using AllocatorVkMemory = Allocator< VkDeviceMemory >;
 using AllocationVk = alloc_t< AllocatorVkMemory >;
 
 
+union sortKey_t
+{
+	uint32_t	materialId : 32;
+	uint32_t	key;
+};
+
+
 struct drawSurf_t
 {
 	uint32_t			vertexOffset;
@@ -271,7 +278,7 @@ struct drawSurf_t
 	uint32_t			firstIndex;
 	uint32_t			indicesCnt;
 	uint32_t			objectId;
-	uint32_t			materialId;
+	sortKey_t			sortKey;
 	renderFlags_t		flags;
 	uint8_t				stencilBit;
 	uint32_t			hash;
@@ -314,10 +321,10 @@ inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
 
 inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
 {
-	if ( surf0.materialId == surf1.materialId ) {
+	if ( surf0.sortKey.materialId == surf1.sortKey.materialId ) {
 		return ( surf0.objectId < surf1.objectId );
 	} else {
-		return ( surf0.materialId < surf1.materialId );
+		return ( surf0.sortKey.materialId < surf1.sortKey.materialId );
 	}
 }
 

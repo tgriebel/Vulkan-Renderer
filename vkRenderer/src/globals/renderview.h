@@ -52,7 +52,9 @@ public:
 		region = renderViewRegion_t::UNKNOWN;
 
 		memset( surfaces, 0, MaxSurfaces );
+		memset( sortedSurfaces, 0, MaxSurfaces );
 		memset( merged, 0, MaxSurfaces );
+		memset( sortedInstances, 0, MaxSurfaces );
 		memset( instances, 0, MaxSurfaces );
 		memset( instanceCounts, 0, MaxSurfaces );
 	}
@@ -69,7 +71,9 @@ public:
 	uint32_t				committedModelCnt;
 	uint32_t				mergedModelCnt;
 	drawSurf_t				surfaces[ MaxSurfaces ];
-	drawSurf_t				merged[ MaxSurfaces ];
+	drawSurf_t				sortedSurfaces[ MaxSurfaces ];
 	drawSurfInstance_t		instances[ MaxSurfaces ];
+	drawSurfInstance_t		sortedInstances[ MaxSurfaces ];
+	drawSurf_t				merged[ MaxSurfaces ];
 	uint32_t				instanceCounts[ MaxSurfaces ];
 };
