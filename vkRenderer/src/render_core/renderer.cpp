@@ -654,7 +654,7 @@ void Renderer::UpdateViews( const Scene* scene )
 	shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
 	shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
 	shadowView.region = renderViewRegion_t::SHADOW;
-	renderView.name = "Shadow Pass";
+	shadowView.name = "Shadow Pass";
 
 	Camera shadowCam;
 	shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
@@ -1719,7 +1719,7 @@ void Renderer::Render( RenderView& view )
 		}
 
 #ifdef USE_IMGUI
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Debug Menus", ColorToVector( Color::DGrey ) );
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Debug Menus", ColorToVector( Color::White ) );
 		ImGui_ImplVulkan_NewFrame();
 		ImGui::NewFrame();
 
