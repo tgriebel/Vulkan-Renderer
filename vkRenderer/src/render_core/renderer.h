@@ -75,6 +75,12 @@ public:
 	{
 		InitVulkan();
 		InitImGui();
+
+		renderView.region = renderViewRegion_t::MAIN;
+		renderView.name = "Main Pass";
+
+		shadowView.region = renderViewRegion_t::SHADOW;
+		shadowView.name = "Shadow Pass";
 	}
 
 	void RenderScene( Scene* scene );

@@ -254,6 +254,37 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_WIREFRAME ) ? WIREFRAME | SKIP_OPAQUE : NONE ) );
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_DEBUG ) ? DEBUG_SOLID | SKIP_OPAQUE : NONE ) );
 
+		// TODO: Make InRegion() function
+		if( view.region == renderViewRegion_t::SHADOW ) {
+			if( material.GetShader( DRAWPASS_SHADOW ) == INVALID_HDL ) {
+				continue;
+			}
+			if ( ( renderFlags & SKIP_OPAQUE ) != 0 ) {
+				continue;
+			}
+		} else if ( view.region == renderViewRegion_t::MAIN ) {
+			const drawPass_t mainPasses[] = {	DRAWPASS_DEPTH,
+												DRAWPASS_TERRAIN,
+												DRAWPASS_OPAQUE,
+												DRAWPASS_SKYBOX,
+												DRAWPASS_TRANS,
+												DRAWPASS_DEBUG_SOLID,
+												DRAWPASS_DEBUG_WIREFRAME,
+												DRAWPASS_POST_2D // TODO: add render view for this
+											};
+			const uint32_t passCount = COUNTARRAY( mainPasses );
+
+			uint32_t passId = 0;
+			for( passId = 0; passId < passCount; ++passId ) {
+				if ( material.GetShader( mainPasses[ passId ] ) != INVALID_HDL ) {
+					break;
+				}
+			}
+			if( passId >= passCount ) {
+				continue;
+			}
+		}
+
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
@@ -625,8 +656,6 @@ void Renderer::UpdateViews( const Scene* scene )
 	renderView.viewMatrix = scene->camera.GetViewMatrix();
 	renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
 	renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
-	renderView.region = renderViewRegion_t::MAIN;
-	renderView.name = "Main Pass";
 
 	renderView.numLights = static_cast<uint32_t>( scene->lights.size() );
 	for ( uint32_t i = 0; i < renderView.numLights; ++i ) {
@@ -651,8 +680,6 @@ void Renderer::UpdateViews( const Scene* scene )
 	shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
 	shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
 	shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
-	shadowView.region = renderViewRegion_t::SHADOW;
-	shadowView.name = "Shadow Pass";
 
 	Camera shadowCam;
 	shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
@@ -1554,12 +1581,9 @@ void Renderer::Render( RenderView& view )
 			drawSurf_t& surface = shadowView.merged[ surfIx ];
 
 			pipelineObject_t* pipelineObject = nullptr;
-			if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) {
-				continue;
-			}
-			if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
-				continue;
-			}
+			assert( surface.pipelineObject[ DRAWPASS_SHADOW ] != INVALID_HDL );
+			assert( ( surface.flags & SKIP_OPAQUE ) == 0 );
+
 			GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
 			if ( pipelineObject == nullptr ) {
 				continue;
