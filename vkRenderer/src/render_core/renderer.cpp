@@ -187,13 +187,11 @@ void Renderer::MergeSurfaces( RenderView& view )
 
 		std::sort( sortIndices.begin(), sortIndices.end(), Comparator( &view ) );
 
-		uint32_t dstIndex = 0;
-		for( auto it = sortIndices.begin(); it != sortIndices.end(); ++it )
+		for( uint32_t srcIndex = 0; srcIndex < view.committedModelCnt; ++srcIndex )
 		{
-			const uint32_t index = *it;
-			view.sortedSurfaces[ dstIndex ] = view.surfaces[ index ];
-			view.sortedInstances[ dstIndex ] = view.instances[ index ];
-			++dstIndex;
+			const uint32_t dstIndex = sortIndices[ srcIndex ];
+			view.sortedSurfaces[ dstIndex ] = view.surfaces[ srcIndex ];
+			view.sortedInstances[ dstIndex ] = view.instances[ srcIndex ];
 		}
 	}
 
