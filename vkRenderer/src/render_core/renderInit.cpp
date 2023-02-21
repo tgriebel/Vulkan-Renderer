@@ -506,6 +506,10 @@ void Renderer::CreateRenderPasses()
 		renderPassInfo.dependencyCount = static_cast<uint32_t>( dependencies.size() );
 		renderPassInfo.pDependencies = dependencies.data();
 
+		mainPassState.clearColor = vec4f( 0.0f, 0.1f, 0.5f, 1.0f );
+		mainPassState.clearDepth = 0.0f;
+		mainPassState.clearStencil = 0x00;
+
 		mainPassState.pass = NULL;
 		if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &mainPassState.pass ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create render pass!" );
@@ -576,6 +580,10 @@ void Renderer::CreateRenderPasses()
 		renderPassInfo.dependencyCount = static_cast<uint32_t>( dependencies.size() );
 		renderPassInfo.pDependencies = dependencies.data();
 
+		shadowPassState.clearColor = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		shadowPassState.clearDepth = 1.0f;
+		shadowPassState.clearStencil = 0x00;
+
 		shadowPassState.pass = NULL;
 		if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &shadowPassState.pass ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create render pass!" );
@@ -622,6 +630,10 @@ void Renderer::CreateRenderPasses()
 		renderPassInfo.dependencyCount = 1;
 		renderPassInfo.pDependencies = &dependency;
 
+		postPassState.clearColor = vec4f( 0.1f, 0.0f, 0.5f, 1.0f );
+		postPassState.clearDepth = 0.0f;
+		postPassState.clearStencil = 0x00;
+
 		postPassState.pass = NULL;
 		if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &postPassState.pass ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create render pass!" );
@@ -667,6 +679,11 @@ void Renderer::CreateFramebuffers()
 		framebufferInfo.height = ShadowMapHeight;
 		framebufferInfo.layers = 1;
 
+		shadowPassState.x = 0;
+		shadowPassState.y = 0;
+		shadowPassState.width = ShadowMapWidth;
+		shadowPassState.height = ShadowMapHeight;
+
 		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowPassState.fb[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create framebuffer!" );
 		}
@@ -708,6 +725,11 @@ void Renderer::CreateFramebuffers()
 		framebufferInfo.height = height;
 		framebufferInfo.layers = 1;
 
+		mainPassState.x = 0;
+		mainPassState.y = 0;
+		mainPassState.width = width;
+		mainPassState.height = height;
+
 		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &mainPassState.fb[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create scene framebuffer!" );
 		}
@@ -730,6 +752,11 @@ void Renderer::CreateFramebuffers()
 		framebufferInfo.width = swapChain.vk_swapChainExtent.width;
 		framebufferInfo.height = swapChain.vk_swapChainExtent.height;
 		framebufferInfo.layers = 1;
+
+		postPassState.x = 0;
+		postPassState.y = 0;
+		postPassState.width = swapChain.vk_swapChainExtent.width;
+		postPassState.height = swapChain.vk_swapChainExtent.height;
 
 		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &swapChain.vk_framebuffers[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create swap chain framebuffer!" );

@@ -337,6 +337,15 @@ template<> struct std::hash<drawSurf_t> {
 
 struct DrawPassState
 {
+	vec4f				clearColor;
+	float				clearDepth;
+	uint32_t			clearStencil;
+
+	int32_t				x;
+	int32_t				y;
+	uint32_t			width;
+	uint32_t			height;
+
 	VkRenderPass		pass;
 	VkDescriptorSet		descriptorSets[ MAX_FRAMES_STATES ];
 	VkFramebuffer		fb[ MAX_FRAMES_STATES ];

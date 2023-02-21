@@ -291,14 +291,18 @@ private:
 	void						CreateCommandPools();
 
 	// Draw Frame
+	static bool					SkipPass( const drawSurf_t& surf, const drawPass_t pass );
+	static drawPass_t			ViewRegionPassBegin( const renderViewRegion_t region );
+	static drawPass_t			ViewRegionPassEnd( const renderViewRegion_t region );
 	void						RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
 	void						Render( RenderView& view );
 	void						Commit( const Scene* scene );
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
 	void						MergeSurfaces( RenderView& view );
-	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
 	VkFormat					GetVkTextureFormat( textureFmt_t fmt );
+	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
+	const DrawPassState*		GetPassState( const drawPass_t pass );
 	void						DrawDebugMenu();
 	void						FlushGPU();
 	void						WaitForEndFrame();

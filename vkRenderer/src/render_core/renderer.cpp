@@ -1483,51 +1483,151 @@ static const char* GetPassDebugName( const drawPass_t pass )
 }
 
 
+const DrawPassState* Renderer::GetPassState( const drawPass_t pass )
+{
+	switch( pass )
+	{
+		case DRAWPASS_DEPTH:
+		case DRAWPASS_TERRAIN:
+		case DRAWPASS_OPAQUE:
+		case DRAWPASS_TRANS:
+		case DRAWPASS_SKYBOX:
+		case DRAWPASS_DEBUG_SOLID:
+		case DRAWPASS_DEBUG_WIREFRAME:	return &mainPassState;
+		case DRAWPASS_SHADOW:			return &shadowPassState;
+		case DRAWPASS_POST_2D:			return &postPassState;
+	}
+	return nullptr;
+}
+
+
+bool Renderer::SkipPass( const drawSurf_t& surf, const drawPass_t pass )
+{
+	if ( surf.pipelineObject[ pass ] == INVALID_HDL ) {
+		return true;
+	}
+
+	if ( ( surf.flags & SKIP_OPAQUE ) != 0 )
+	{
+		if( ( pass == DRAWPASS_SHADOW ) ||
+			( pass == DRAWPASS_DEPTH ) ||
+			( pass == DRAWPASS_TERRAIN ) ||
+			( pass == DRAWPASS_OPAQUE ) ||
+			( pass == DRAWPASS_SKYBOX ) ||
+			( pass == DRAWPASS_DEBUG_SOLID )
+		) {
+			return true;
+		}
+	}
+
+	if ( ( pass == DRAWPASS_DEBUG_SOLID ) && ( ( surf.flags & DEBUG_SOLID ) == 0 ) ) {
+		return true;
+	}
+
+	if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surf.flags & WIREFRAME ) == 0 ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+
+drawPass_t Renderer::ViewRegionPassBegin( const renderViewRegion_t region )
+{
+	switch( region )
+	{
+		case renderViewRegion_t::SHADOW:	return DRAWPASS_SHADOW_BEGIN;
+		case renderViewRegion_t::MAIN:		return DRAWPASS_MAIN_BEGIN;
+		case renderViewRegion_t::POST:		return DRAWPASS_POST_BEGIN;
+	}
+	return DRAWPASS_COUNT;
+}
+
+
+drawPass_t Renderer::ViewRegionPassEnd( const renderViewRegion_t region )
+{
+	switch ( region )
+	{
+		case renderViewRegion_t::SHADOW:	return DRAWPASS_SHADOW_END;
+		case renderViewRegion_t::MAIN:		return DRAWPASS_MAIN_END;
+		case renderViewRegion_t::POST:		return DRAWPASS_POST_END;
+	}
+	return DRAWPASS_COUNT;
+}
+
+
 void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer )
 {
-	for ( size_t surfIx = 0; surfIx < shadowView.mergedModelCnt; surfIx++ )
-	{
-		drawSurf_t& surface = shadowView.merged[ surfIx ];
+	MarkerBeginRegion( commandBuffer, view.name, ColorToVector( Color::White ) );
 
-		pipelineObject_t* pipelineObject = nullptr;
-		if ( surface.pipelineObject[ DRAWPASS_SHADOW ] == INVALID_HDL ) { // TODO: exact passes
-			continue;
-		}
-		if ( ( surface.flags & SKIP_OPAQUE ) != 0 ) {
-			continue;
-		}
-		GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
-		if ( pipelineObject == nullptr ) {
-			continue;
-		}
+	const drawPass_t passBegin = ViewRegionPassBegin( view.region );
+	const drawPass_t passEnd = ViewRegionPassEnd( view.region );
 
-		// vkCmdSetDepthBias
-		vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-		//vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
-		assert(0); // FIXME: above line
-
-		VkViewport viewport{ };
-		viewport.x = shadowView.viewport.x;
-		viewport.y = shadowView.viewport.y;
-		viewport.width = shadowView.viewport.width;
-		viewport.height = shadowView.viewport.height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
-
-		VkRect2D rect{ };
-		rect.extent.width = static_cast<uint32_t>( shadowView.viewport.width );
-		rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
-		vkCmdSetScissor( commandBuffer, 0, 1, &rect );
-
-		pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( shadowView.region ) };
-		vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
-
-		MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
-		vkCmdDrawIndexed( commandBuffer, surface.indicesCnt, shadowView.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+	// For now the pass state is the same for the entire view region
+	const DrawPassState* passState = GetPassState( passBegin );
+	if ( passState == nullptr ) {
+		throw std::runtime_error( "Missing pass state!" );
 	}
-	vkCmdEndRenderPass( commandBuffer );
 
+	VkRenderPassBeginInfo passInfo{ };
+	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	passInfo.renderPass = passState->pass;
+	passInfo.framebuffer = passState->fb[ bufferId ];
+	passInfo.renderArea.offset = { passState->x, passState->y };
+	passInfo.renderArea.extent = { passState->width, passState->height };
+
+	std::array<VkClearValue, 2> clearValues{ };
+	clearValues[ 0 ].color = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
+	clearValues[ 1 ].depthStencil = { passState->clearDepth, passState->clearStencil };
+
+	passInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
+	passInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass( commandBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+	for ( uint32_t pass = passBegin; pass <= passEnd; ++pass )
+	{
+		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
+		{
+			drawSurf_t& surface = view.merged[ surfIx ];	
+
+			if ( SkipPass( surface, drawPass_t( pass ) ) ) {
+				continue;
+			}
+
+			pipelineObject_t* pipelineObject = nullptr;
+			GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
+			if ( pipelineObject == nullptr ) {
+				continue;
+			}
+
+			// vkCmdSetDepthBias
+			vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+			vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &passState->descriptorSets[bufferId], 0, nullptr );
+
+			VkViewport viewport{ };
+			viewport.x = view.viewport.x;
+			viewport.y = view.viewport.y;
+			viewport.width = view.viewport.width;
+			viewport.height = view.viewport.height;
+			viewport.minDepth = 0.0f;
+			viewport.maxDepth = 1.0f;
+			vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
+
+			VkRect2D rect{ };
+			rect.extent.width = static_cast<uint32_t>( view.viewport.width );
+			rect.extent.height = static_cast<uint32_t>( view.viewport.height );
+			vkCmdSetScissor( commandBuffer, 0, 1, &rect );
+
+			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
+			vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+
+			MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
+			vkCmdDrawIndexed( commandBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+		}	
+	}
+
+	vkCmdEndRenderPass( commandBuffer );
 	MarkerEndRegion( commandBuffer );
 }
 
@@ -1561,12 +1661,12 @@ void Renderer::Render( RenderView& view )
 		shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		shadowPassInfo.renderPass = shadowPassState.pass;
 		shadowPassInfo.framebuffer = shadowPassState.fb[ i ];
-		shadowPassInfo.renderArea.offset = { 0, 0 };
-		shadowPassInfo.renderArea.extent = { ShadowMapWidth, ShadowMapHeight };
+		shadowPassInfo.renderArea.offset = { shadowPassState.x, shadowPassState.y };
+		shadowPassInfo.renderArea.extent = { shadowPassState.width, shadowPassState.height };
 
 		std::array<VkClearValue, 2> shadowClearValues{ };
-		shadowClearValues[ 0 ].color = { 1.0f, 1.0f, 1.0f, 1.0f };
-		shadowClearValues[ 1 ].depthStencil = { 1.0f, 0 };
+		shadowClearValues[ 0 ].color = { shadowPassState.clearColor[0], shadowPassState.clearColor[1], shadowPassState.clearColor[2], shadowPassState.clearColor[3] };
+		shadowClearValues[ 1 ].depthStencil = { shadowPassState.clearDepth, shadowPassState.clearStencil };
 
 		shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
 		shadowPassInfo.pClearValues = shadowClearValues.data();
@@ -1584,6 +1684,9 @@ void Renderer::Render( RenderView& view )
 			assert( surface.pipelineObject[ DRAWPASS_SHADOW ] != INVALID_HDL );
 			assert( ( surface.flags & SKIP_OPAQUE ) == 0 );
 
+			if ( SkipPass( surface, DRAWPASS_SHADOW ) ) {
+				continue;
+			}
 			GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
 			if ( pipelineObject == nullptr ) {
 				continue;
@@ -1624,12 +1727,12 @@ void Renderer::Render( RenderView& view )
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = mainPassState.pass;
 		renderPassInfo.framebuffer = mainPassState.fb[ i ];
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
+		renderPassInfo.renderArea.offset = { mainPassState.x, mainPassState.y };
+		renderPassInfo.renderArea.extent = { mainPassState.width, mainPassState.height };
 
 		std::array<VkClearValue, 2> clearValues{ };
-		clearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
-		clearValues[ 1 ].depthStencil = { 0.0f, 0x00 };
+		clearValues[ 0 ].color = { mainPassState.clearColor[0], mainPassState.clearColor[1], mainPassState.clearColor[2], mainPassState.clearColor[3] };
+		clearValues[ 1 ].depthStencil = { mainPassState.clearDepth, mainPassState.clearStencil };
 
 		renderPassInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
 		renderPassInfo.pClearValues = clearValues.data();
@@ -1659,23 +1762,11 @@ void Renderer::Render( RenderView& view )
 			for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 			{
 				drawSurf_t& surface = view.merged[ surfIx ];
-
+		
+				if( SkipPass( surface, drawPass_t( pass ) ) ) {
+					continue;
+				}
 				pipelineObject_t* pipelineObject = nullptr;
-				if ( surface.pipelineObject[ pass ] == INVALID_HDL ) {
-					continue;
-				}
-				if ( ( pass == DRAWPASS_OPAQUE ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
-					continue;
-				}
-				if ( ( pass == DRAWPASS_DEPTH ) && ( ( surface.flags & SKIP_OPAQUE ) != 0 ) ) {
-					continue;
-				}
-				if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surface.flags & WIREFRAME ) == 0 ) ) {
-					continue;
-				}
-				if ( ( pass == DRAWPASS_DEBUG_SOLID ) && ( ( surface.flags & DEBUG_SOLID ) == 0 ) ) {
-					continue;
-				}
 				GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
 				if ( pipelineObject == nullptr ) {
 					continue;
@@ -1707,12 +1798,12 @@ void Renderer::Render( RenderView& view )
 		postProcessPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		postProcessPassInfo.renderPass = postPassState.pass;
 		postProcessPassInfo.framebuffer = postPassState.fb[ i ];
-		postProcessPassInfo.renderArea.offset = { 0, 0 };
-		postProcessPassInfo.renderArea.extent = swapChain.vk_swapChainExtent;
+		postProcessPassInfo.renderArea.offset = { postPassState.x, postPassState.y };
+		postProcessPassInfo.renderArea.extent = { postPassState.width, postPassState.height };
 
 		std::array<VkClearValue, 2> postProcessClearValues{ };
-		postProcessClearValues[ 0 ].color = { 0.0f, 0.1f, 0.5f, 1.0f };
-		postProcessClearValues[ 1 ].depthStencil = { 0.0f, 0 };
+		postProcessClearValues[ 0 ].color = { postPassState.clearColor[0], postPassState.clearColor[1], postPassState.clearColor[2], postPassState.clearColor[3] };
+		postProcessClearValues[ 1 ].depthStencil = { postPassState.clearDepth, postPassState.clearStencil };
 
 		postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
 		postProcessPassInfo.pClearValues = postProcessClearValues.data();
@@ -1723,7 +1814,8 @@ void Renderer::Render( RenderView& view )
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];
-			if ( surface.pipelineObject[ DRAWPASS_POST_2D ] == INVALID_HDL ) {
+
+			if ( SkipPass( surface, DRAWPASS_POST_2D ) ) {
 				continue;
 			}
 			pipelineObject_t* pipelineObject = nullptr;
