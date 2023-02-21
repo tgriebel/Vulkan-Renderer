@@ -1558,8 +1558,6 @@ drawPass_t Renderer::ViewRegionPassEnd( const renderViewRegion_t region )
 
 void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer )
 {
-	MarkerBeginRegion( commandBuffer, view.name, ColorToVector( Color::White ) );
-
 	const drawPass_t passBegin = ViewRegionPassBegin( view.region );
 	const drawPass_t passEnd = ViewRegionPassEnd( view.region );
 
@@ -1585,6 +1583,20 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 	vkCmdBeginRenderPass( commandBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
+	VkViewport viewport{ };
+	viewport.x = view.viewport.x;
+	viewport.y = view.viewport.y;
+	viewport.width = view.viewport.width;
+	viewport.height = view.viewport.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
+
+	VkRect2D rect{ };
+	rect.extent.width = static_cast<uint32_t>( view.viewport.width );
+	rect.extent.height = static_cast<uint32_t>( view.viewport.height );
+	vkCmdSetScissor( commandBuffer, 0, 1, &rect );
+
 	for ( uint32_t pass = passBegin; pass <= passEnd; ++pass )
 	{
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
@@ -1601,23 +1613,13 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 				continue;
 			}
 
+			if ( pass == DRAWPASS_DEPTH ) {
+				vkCmdSetStencilReference( commandBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+			}
+
 			// vkCmdSetDepthBias
 			vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 			vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &passState->descriptorSets[bufferId], 0, nullptr );
-
-			VkViewport viewport{ };
-			viewport.x = view.viewport.x;
-			viewport.y = view.viewport.y;
-			viewport.width = view.viewport.width;
-			viewport.height = view.viewport.height;
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
-			vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
-
-			VkRect2D rect{ };
-			rect.extent.width = static_cast<uint32_t>( view.viewport.width );
-			rect.extent.height = static_cast<uint32_t>( view.viewport.height );
-			vkCmdSetScissor( commandBuffer, 0, 1, &rect );
 
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
 			vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
@@ -1628,7 +1630,6 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	}
 
 	vkCmdEndRenderPass( commandBuffer );
-	MarkerEndRegion( commandBuffer );
 }
 
 
@@ -1657,139 +1658,20 @@ void Renderer::Render( RenderView& view )
 
 	// Shadow Passes
 	{
-		VkRenderPassBeginInfo shadowPassInfo{ };
-		shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		shadowPassInfo.renderPass = shadowPassState.pass;
-		shadowPassInfo.framebuffer = shadowPassState.fb[ i ];
-		shadowPassInfo.renderArea.offset = { shadowPassState.x, shadowPassState.y };
-		shadowPassInfo.renderArea.extent = { shadowPassState.width, shadowPassState.height };
-
-		std::array<VkClearValue, 2> shadowClearValues{ };
-		shadowClearValues[ 0 ].color = { shadowPassState.clearColor[0], shadowPassState.clearColor[1], shadowPassState.clearColor[2], shadowPassState.clearColor[3] };
-		shadowClearValues[ 1 ].depthStencil = { shadowPassState.clearDepth, shadowPassState.clearStencil };
-
-		shadowPassInfo.clearValueCount = static_cast<uint32_t>( shadowClearValues.size() );
-		shadowPassInfo.pClearValues = shadowClearValues.data();
-
 		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
 
-		// TODO: how to handle views better?
-		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-
-		for ( size_t surfIx = 0; surfIx < shadowView.mergedModelCnt; surfIx++ )
-		{
-			drawSurf_t& surface = shadowView.merged[ surfIx ];
-
-			pipelineObject_t* pipelineObject = nullptr;
-			assert( surface.pipelineObject[ DRAWPASS_SHADOW ] != INVALID_HDL );
-			assert( ( surface.flags & SKIP_OPAQUE ) == 0 );
-
-			if ( SkipPass( surface, DRAWPASS_SHADOW ) ) {
-				continue;
-			}
-			GetPipelineObject( surface.pipelineObject[ DRAWPASS_SHADOW ], &pipelineObject );
-			if ( pipelineObject == nullptr ) {
-				continue;
-			}
-
-			// vkCmdSetDepthBias
-			vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-			vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &shadowPassState.descriptorSets[ i ], 0, nullptr );
-
-			VkViewport viewport{ };
-			viewport.x = shadowView.viewport.x;
-			viewport.y = shadowView.viewport.y;
-			viewport.width = shadowView.viewport.width;
-			viewport.height = shadowView.viewport.height;
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
-			vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
-
-			VkRect2D rect{ };
-			rect.extent.width = static_cast<uint32_t>( shadowView.viewport.width );
-			rect.extent.height = static_cast<uint32_t>( shadowView.viewport.height );
-			vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
-
-			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( shadowView.region ) };
-			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
-
-			MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
-			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, shadowView.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
-		}
-		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		RenderViewSurfaces( shadowView, graphicsQueue.commandBuffers[ i ] );
 
 		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
 
 	// Main Passes
 	{
-		VkRenderPassBeginInfo renderPassInfo{ };
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = mainPassState.pass;
-		renderPassInfo.framebuffer = mainPassState.fb[ i ];
-		renderPassInfo.renderArea.offset = { mainPassState.x, mainPassState.y };
-		renderPassInfo.renderArea.extent = { mainPassState.width, mainPassState.height };
-
-		std::array<VkClearValue, 2> clearValues{ };
-		clearValues[ 0 ].color = { mainPassState.clearColor[0], mainPassState.clearColor[1], mainPassState.clearColor[2], mainPassState.clearColor[3] };
-		clearValues[ 1 ].depthStencil = { mainPassState.clearDepth, mainPassState.clearStencil };
-
-		renderPassInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
-		renderPassInfo.pClearValues = clearValues.data();
-		renderPassInfo.clearValueCount = 2;
-
 		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
 
-		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-
-		VkViewport viewport{ };
-		viewport.x = view.viewport.x;
-		viewport.y = view.viewport.y;
-		viewport.width = view.viewport.width;
-		viewport.height = view.viewport.height;
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		vkCmdSetViewport( graphicsQueue.commandBuffers[ i ], 0, 1, &viewport );
-
-		VkRect2D rect{ };
-		rect.extent.width = static_cast<uint32_t>( view.viewport.width );
-		rect.extent.height = static_cast<uint32_t>( view.viewport.height );
-		vkCmdSetScissor( graphicsQueue.commandBuffers[ i ], 0, 1, &rect );
-
-		for ( uint32_t pass = DRAWPASS_DEPTH; pass < DRAWPASS_POST_2D; ++pass )
-		{
-			MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], GetPassDebugName( (drawPass_t)pass ), ColorToVector( Color::White ) );
-			for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
-			{
-				drawSurf_t& surface = view.merged[ surfIx ];
+		RenderViewSurfaces( view, graphicsQueue.commandBuffers[ i ] );
 		
-				if( SkipPass( surface, drawPass_t( pass ) ) ) {
-					continue;
-				}
-				pipelineObject_t* pipelineObject = nullptr;
-				GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
-				if ( pipelineObject == nullptr ) {
-					continue;
-				}
-
-				if ( pass == DRAWPASS_DEPTH ) {
-					vkCmdSetStencilReference( graphicsQueue.commandBuffers[ i ], VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
-				}
-
-				vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-				vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &mainPassState.descriptorSets[ i ], 0, nullptr );
-
-				pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
-				vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
-
-				MarkerInsert( graphicsQueue.commandBuffers[ i ], surface.dbgName, ColorToVector( Color::LGrey ) );
-				vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
-			}
-			MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
-		}
-		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
 		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
-
 	}
 
 	// Post Process Passes
