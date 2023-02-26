@@ -143,6 +143,8 @@ static void TraceScene( const bool rasterize = false )
 
 void Renderer::Commit( const Scene* scene )
 {
+	// TODO: the scene needs to filter into views
+
 	renderView.committedModelCnt = 0;
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {
@@ -159,6 +161,13 @@ void Renderer::Commit( const Scene* scene )
 		CommitModel( shadowView, *scene->entities[i], 0 );
 	}
 	MergeSurfaces( shadowView );
+
+	view2D.committedModelCnt = 0;
+	for ( uint32_t i = 0; i < entCount; ++i )
+	{
+		CommitModel( view2D, *scene->entities[ i ], 0 );
+	}
+	MergeSurfaces( view2D );
 
 	UpdateViews( scene );
 }
@@ -255,22 +264,30 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_DEBUG ) ? DEBUG_SOLID | SKIP_OPAQUE : NONE ) );
 
 		// TODO: Make InRegion() function
-		if( view.region == renderViewRegion_t::SHADOW ) {
+		if( view.region == renderViewRegion_t::SHADOW )
+		{
 			if( material.GetShader( DRAWPASS_SHADOW ) == INVALID_HDL ) {
 				continue;
 			}
 			if ( ( renderFlags & SKIP_OPAQUE ) != 0 ) {
 				continue;
 			}
-		} else if ( view.region == renderViewRegion_t::MAIN ) {
+		}
+		else if ( view.region == renderViewRegion_t::POST )
+		{
+			if ( material.GetShader( DRAWPASS_POST_2D ) == INVALID_HDL ) {
+				continue;
+			}
+		}
+		else if ( view.region == renderViewRegion_t::MAIN )
+		{
 			const drawPass_t mainPasses[] = {	DRAWPASS_DEPTH,
 												DRAWPASS_TERRAIN,
 												DRAWPASS_OPAQUE,
 												DRAWPASS_SKYBOX,
 												DRAWPASS_TRANS,
 												DRAWPASS_DEBUG_SOLID,
-												DRAWPASS_DEBUG_WIREFRAME,
-												DRAWPASS_POST_2D // TODO: add render view for this
+												DRAWPASS_DEBUG_WIREFRAME
 											};
 			const uint32_t passCount = COUNTARRAY( mainPasses );
 
@@ -651,44 +668,65 @@ void Renderer::UpdateViews( const Scene* scene )
 	int width;
 	int height;
 	gWindow.GetWindowSize( width, height );
-	renderView.viewport.width = static_cast<float>( width );
-	renderView.viewport.height = static_cast<float>( height );
-	renderView.viewMatrix = scene->camera.GetViewMatrix();
-	renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
-	renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
 
-	renderView.numLights = static_cast<uint32_t>( scene->lights.size() );
-	for ( uint32_t i = 0; i < renderView.numLights; ++i ) {
-		renderView.lights[ i ] = scene->lights[ i ];
+	// Main view
+	{
+		renderView.viewport.width = static_cast<float>( width );
+		renderView.viewport.height = static_cast<float>( height );
+		renderView.viewMatrix = scene->camera.GetViewMatrix();
+		renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
+		renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
+
+		renderView.numLights = static_cast<uint32_t>( scene->lights.size() );
+		for ( uint32_t i = 0; i < renderView.numLights; ++i ) {
+			renderView.lights[ i ] = scene->lights[ i ];
+		}
 	}
 
-	vec3f shadowLightDir;
-	shadowLightDir[ 0 ] = -renderView.lights[ 0 ].lightDir[ 0 ];
-	shadowLightDir[ 1 ] = -renderView.lights[ 0 ].lightDir[ 1 ];
-	shadowLightDir[ 2 ] = -renderView.lights[ 0 ].lightDir[ 2 ];
+	// Shadow views
+	{
+		vec3f shadowLightDir;
+		shadowLightDir[ 0 ] = -renderView.lights[ 0 ].lightDir[ 0 ];
+		shadowLightDir[ 1 ] = -renderView.lights[ 0 ].lightDir[ 1 ];
+		shadowLightDir[ 2 ] = -renderView.lights[ 0 ].lightDir[ 2 ];
 
-	// Temp shadow map set-up
-	shadowView.viewport.x = 0.0f;
-	shadowView.viewport.y = 0.0f;
-	shadowView.viewport.near = 0.0f;
-	shadowView.viewport.far = 1.0f;
-	shadowView.viewport.width = ShadowMapWidth;
-	shadowView.viewport.height = ShadowMapHeight;
-	shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
-	shadowView.viewMatrix = shadowView.viewMatrix;
-	const vec4f shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
-	shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
-	shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
-	shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
+		// Temp shadow map set-up
+		shadowView.viewport.x = 0.0f;
+		shadowView.viewport.y = 0.0f;
+		shadowView.viewport.near = 0.0f;
+		shadowView.viewport.far = 1.0f;
+		shadowView.viewport.width = ShadowMapWidth;
+		shadowView.viewport.height = ShadowMapHeight;
+		shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
+		shadowView.viewMatrix = shadowView.viewMatrix;
+		const vec4f shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
+		shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
+		shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
+		shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
 
-	Camera shadowCam;
-	shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-	shadowCam.near = shadowNearPlane;
-	shadowCam.far = shadowFarPlane;
-	shadowCam.focalLength = shadowCam.far;
-	shadowCam.SetFov( Radians( 90.0f ) );
-	shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
-	shadowView.projMatrix = shadowCam.GetPerspectiveMatrix( false );
+		Camera shadowCam;
+		shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+		shadowCam.near = shadowNearPlane;
+		shadowCam.far = shadowFarPlane;
+		shadowCam.focalLength = shadowCam.far;
+		shadowCam.SetFov( Radians( 90.0f ) );
+		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+		shadowView.projMatrix = shadowCam.GetPerspectiveMatrix( false );
+		shadowView.viewprojMatrix = shadowView.projMatrix * shadowView.viewMatrix;
+	}
+
+	// Post view
+	{
+		view2D.viewport.x = 0.0f;
+		view2D.viewport.y = 0.0f;
+		view2D.viewport.near = 0.0f;
+		view2D.viewport.far = 1.0f;
+		view2D.viewport.width = static_cast<float>( width );
+		view2D.viewport.height = static_cast<float>( height );
+		view2D.viewMatrix = mat4x4f( 1.0f );
+		view2D.projMatrix = mat4x4f( 1.0f );
+		shadowView.viewprojMatrix = mat4x4f( 1.0f );
+	}
 }
 
 
@@ -1175,7 +1213,10 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		viewBuffer[ int( shadowView.region ) ].view = shadowView.viewMatrix;
 		viewBuffer[ int( shadowView.region ) ].proj = shadowView.projMatrix;
 
-		for( uint32_t i = 2; i < MaxViews; ++i )
+		viewBuffer[ int( view2D.region ) ].view = view2D.viewMatrix;
+		viewBuffer[ int( view2D.region ) ].proj = view2D.projMatrix;
+
+		for( uint32_t i = 3; i < MaxViews; ++i )
 		{
 			viewBuffer[i].view = mat4x4f( 1.0f );
 			viewBuffer[i].proj = mat4x4f( 1.0f );
@@ -1204,6 +1245,17 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		shadowUboBuffer[ objectId ] = ubo;
 	}
 
+	static uniformBufferObject_t postUboBuffer[ MaxSurfaces ];
+	assert( view2D.committedModelCnt < MaxSurfaces );
+	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
+	{
+		uniformBufferObject_t ubo;
+		ubo.model = view2D.sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = view2D.merged[ view2D.sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( view2D.sortedInstances[ i ].id + surf.objectId );
+		postUboBuffer[ objectId ] = ubo;
+	}
+
 	static lightBufferObject_t lightBuffer[ MaxLights ];
 	for ( int i = 0; i < MaxLights; ++i )
 	{
@@ -1225,6 +1277,7 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 	frameState[ currentImage ].surfParms.Reset();
 	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	frameState[ currentImage ].surfParms.CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParms.CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
 	frameState[ currentImage ].materialBuffers.Reset();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
@@ -1629,6 +1682,22 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 		}	
 	}
 
+	if( view.region == renderViewRegion_t::POST )
+	{
+#ifdef USE_IMGUI
+		MarkerBeginRegion( commandBuffer, "Debug Menus", ColorToVector( Color::White ) );
+		ImGui_ImplVulkan_NewFrame();
+		ImGui::NewFrame();
+
+		DrawDebugMenu();
+
+		// Render dear imgui into screen
+		ImGui::Render();
+		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), commandBuffer );
+		MarkerEndRegion( commandBuffer );
+#endif
+	}
+
 	vkCmdEndRenderPass( commandBuffer );
 }
 
@@ -1642,10 +1711,6 @@ void Renderer::Render( RenderView& view )
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
-
-	int width = 0;
-	int height = 0;
-	gWindow.GetWindowSize( width, height );
 
 	if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
@@ -1676,58 +1741,10 @@ void Renderer::Render( RenderView& view )
 
 	// Post Process Passes
 	{
-		VkRenderPassBeginInfo postProcessPassInfo{ };
-		postProcessPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		postProcessPassInfo.renderPass = postPassState.pass;
-		postProcessPassInfo.framebuffer = postPassState.fb[ i ];
-		postProcessPassInfo.renderArea.offset = { postPassState.x, postPassState.y };
-		postProcessPassInfo.renderArea.extent = { postPassState.width, postPassState.height };
-
-		std::array<VkClearValue, 2> postProcessClearValues{ };
-		postProcessClearValues[ 0 ].color = { postPassState.clearColor[0], postPassState.clearColor[1], postPassState.clearColor[2], postPassState.clearColor[3] };
-		postProcessClearValues[ 1 ].depthStencil = { postPassState.clearDepth, postPassState.clearStencil };
-
-		postProcessPassInfo.clearValueCount = static_cast<uint32_t>( postProcessClearValues.size() );
-		postProcessPassInfo.pClearValues = postProcessClearValues.data();
-
 		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Post-Process Pass", ColorToVector( Color::White ) );
 
-		vkCmdBeginRenderPass( graphicsQueue.commandBuffers[ i ], &postProcessPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
-		{
-			drawSurf_t& surface = view.merged[ surfIx ];
-
-			if ( SkipPass( surface, DRAWPASS_POST_2D ) ) {
-				continue;
-			}
-			pipelineObject_t* pipelineObject = nullptr;
-			GetPipelineObject( surface.pipelineObject[ DRAWPASS_POST_2D ], &pipelineObject );
-			if ( pipelineObject == nullptr ) {
-				continue;
-			}
-			vkCmdBindPipeline( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-			vkCmdBindDescriptorSets( graphicsQueue.commandBuffers[ i ], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &postPassState.descriptorSets[ i ], 0, nullptr );
-
-			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
-			vkCmdPushConstants( graphicsQueue.commandBuffers[ i ], pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
-
-			vkCmdDrawIndexed( graphicsQueue.commandBuffers[ i ], surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
-		}
-
-#ifdef USE_IMGUI
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Debug Menus", ColorToVector( Color::White ) );
-		ImGui_ImplVulkan_NewFrame();
-		ImGui::NewFrame();
-
-		DrawDebugMenu();
-
-		// Render dear imgui into screen
-		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), graphicsQueue.commandBuffers[ i ] );
-		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
-#endif
-
-		vkCmdEndRenderPass( graphicsQueue.commandBuffers[ i ] );
+		RenderViewSurfaces( view2D, graphicsQueue.commandBuffers[ i ] );
+		
 		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
 

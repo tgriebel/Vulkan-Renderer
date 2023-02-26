@@ -77,10 +77,13 @@ public:
 		InitImGui();
 
 		renderView.region = renderViewRegion_t::MAIN;
-		renderView.name = "Main Pass";
+		renderView.name = "Main View";
 
 		shadowView.region = renderViewRegion_t::SHADOW;
-		shadowView.name = "Shadow Pass";
+		shadowView.name = "Shadow View";
+
+		view2D.region = renderViewRegion_t::POST;
+		view2D.name = "Post View";
 	}
 
 	void RenderScene( Scene* scene );
@@ -116,6 +119,7 @@ private:
 	renderConstants_t					rc;
 	RenderView							renderView;
 	RenderView							shadowView;
+	RenderView							view2D;
 
 	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
