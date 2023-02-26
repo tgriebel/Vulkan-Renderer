@@ -610,7 +610,7 @@ void Renderer::SubmitFrame()
 
 	UpdateBufferContents( bufferId );
 	UpdateFrameDescSet( bufferId );
-	Render( renderView );
+	RenderViews();
 
 	VkSubmitInfo submitInfo{ };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1704,7 +1704,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 }
 
 
-void Renderer::Render( RenderView& view )
+void Renderer::RenderViews()
 {
 	const uint32_t i = bufferId;
 	vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
@@ -1736,7 +1736,7 @@ void Renderer::Render( RenderView& view )
 	{
 		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( view, graphicsQueue.commandBuffers[ i ] );
+		RenderViewSurfaces( renderView, graphicsQueue.commandBuffers[ i ] );
 		
 		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
