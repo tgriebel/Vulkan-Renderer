@@ -1652,6 +1652,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 	for ( uint32_t pass = passBegin; pass <= passEnd; ++pass )
 	{
+		MarkerBeginRegion( commandBuffer, GetPassDebugName( drawPass_t( pass ) ), ColorToVector( Color::White ) );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];	
@@ -1679,7 +1680,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 			MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
 			vkCmdDrawIndexed( commandBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
-		}	
+		}
+		MarkerEndRegion( commandBuffer );
 	}
 
 	if( view.region == renderViewRegion_t::POST )
@@ -1721,7 +1723,7 @@ void Renderer::Render( RenderView& view )
 	vkCmdBindVertexBuffers( graphicsQueue.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
 	vkCmdBindIndexBuffer( graphicsQueue.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
-	// Shadow Passes
+	// Shadow View
 	{
 		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
 
@@ -1730,7 +1732,7 @@ void Renderer::Render( RenderView& view )
 		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
 
-	// Main Passes
+	// Main View
 	{
 		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
 
@@ -1739,9 +1741,9 @@ void Renderer::Render( RenderView& view )
 		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
 	}
 
-	// Post Process Passes
+	// 2D View
 	{
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], "Post-Process Pass", ColorToVector( Color::White ) );
+		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], view2D.name, ColorToVector( Color::White ) );
 
 		RenderViewSurfaces( view2D, graphicsQueue.commandBuffers[ i ] );
 		
