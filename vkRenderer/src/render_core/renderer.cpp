@@ -1636,6 +1636,26 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 	vkCmdBeginRenderPass( commandBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
+	// Clear
+	{
+		std::array<VkClearAttachment, 1> attachment{ };
+		attachment[0].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		attachment[0].clearValue.color = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
+
+		//attachment[1].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+		//attachment[1].clearValue.depthStencil = { passState->clearDepth, passState->clearStencil };
+
+		std::array<VkClearRect, 1> rects = {};
+		rects[0].layerCount = 1;
+		rects[0].rect.offset = { passState->x, passState->y };
+		rects[0].rect.extent = { passState->width, passState->height };
+		//rects[1].layerCount = 1;
+		//rects[1].rect.offset = { passState->x, passState->y };
+		//rects[1].rect.extent = { passState->width, passState->height };
+
+		vkCmdClearAttachments( commandBuffer, static_cast<uint32_t>( attachment.size() ), attachment.data(), static_cast<uint32_t>( rects.size() ), rects.data() );
+	}
+
 	VkViewport viewport{ };
 	viewport.x = view.viewport.x;
 	viewport.y = view.viewport.y;
@@ -1652,6 +1672,9 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 	for ( uint32_t pass = passBegin; pass <= passEnd; ++pass )
 	{
+		sortKey_t lastKey = {};
+		lastKey.materialId = INVALID_HDL.Get();
+
 		MarkerBeginRegion( commandBuffer, GetPassDebugName( drawPass_t( pass ) ), ColorToVector( Color::White ) );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
@@ -1668,12 +1691,13 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 			}
 
 			if ( pass == DRAWPASS_DEPTH ) {
+				// vkCmdSetDepthBias
 				vkCmdSetStencilReference( commandBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
 			}
 
-			// vkCmdSetDepthBias
 			vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 			vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, 1, &passState->descriptorSets[bufferId], 0, nullptr );
+			lastKey = surface.sortKey;
 
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
 			vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
