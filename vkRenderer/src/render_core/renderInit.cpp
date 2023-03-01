@@ -100,6 +100,17 @@ void Renderer::InitVulkan()
 	}
 
 	{
+		vk_mainColorFmt = FindSupportedFormat( {VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },
+												VK_IMAGE_TILING_OPTIMAL,
+												VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
+		);
+		vk_depthFmt = FindSupportedFormat( {VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+											VK_IMAGE_TILING_OPTIMAL,
+											VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+	}
+
+	{
 		// Passes
 		CreateRenderPasses();
 	}
@@ -432,7 +443,7 @@ void Renderer::CreateRenderPasses()
 	{
 		// Main View Pass
 		VkAttachmentDescription colorAttachment{ };
-		colorAttachment.format = FindColorFormat();
+		colorAttachment.format = vk_mainColorFmt;
 		colorAttachment.samples = msaaSamples;
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -446,7 +457,7 @@ void Renderer::CreateRenderPasses()
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		VkAttachmentDescription depthAttachment{ };
-		depthAttachment.format = FindDepthFormat();
+		depthAttachment.format = vk_depthFmt;
 		depthAttachment.samples = msaaSamples;
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -460,7 +471,7 @@ void Renderer::CreateRenderPasses()
 		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		VkAttachmentDescription stencilAttachment{ };
-		stencilAttachment.format = FindDepthFormat();
+		stencilAttachment.format = vk_depthFmt;
 		stencilAttachment.samples = msaaSamples;
 		stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		stencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -700,12 +711,12 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 		info.layers = 1;
 
-		VkFormat colorFormat = FindColorFormat();
+		VkFormat colorFormat = vk_mainColorFmt;
 
 		CreateImage( info, colorFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
 		frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-		VkFormat depthFormat = FindDepthFormat();
+		VkFormat depthFormat = vk_depthFmt;
 		CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
 		frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
@@ -891,7 +902,7 @@ void Renderer::CreateImage( const textureInfo_t& info, VkFormat format, VkImageT
 	imageInfo.samples = numSamples;
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
-	if ( format == FindDepthFormat() )
+	if ( format == vk_depthFmt )
 	{
 		stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 		stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;

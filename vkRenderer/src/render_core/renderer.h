@@ -172,6 +172,9 @@ private:
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
 
+	VkFormat						vk_mainColorFmt;
+	VkFormat						vk_depthFmt;
+
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
 	PFN_vkDebugMarkerSetObjectNameEXT	vk_fnDebugMarkerSetObjectName = VK_NULL_HANDLE;
@@ -216,24 +219,6 @@ private:
 		swapChain.Create( &gWindow, width, height );
 		CreateRenderPasses();
 		CreateFramebuffers();
-	}
-
-	VkFormat FindColorFormat()
-	{
-		return FindSupportedFormat(
-			{ VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
-		);
-	}
-
-	VkFormat FindDepthFormat()
-	{
-		return FindSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
 	}
 
 	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, AllocatorVkMemory& outAllocation )
