@@ -334,6 +334,7 @@ template<> struct std::hash<drawSurf_t> {
 	}
 };
 
+class FrameBuffer;
 
 struct DrawPassState
 {
@@ -348,7 +349,7 @@ struct DrawPassState
 
 	VkRenderPass		pass;
 	VkDescriptorSet		descriptorSets[ MAX_FRAMES_STATES ];
-	VkFramebuffer		fb[ MAX_FRAMES_STATES ];
+	FrameBuffer*			fb;
 };
 
 

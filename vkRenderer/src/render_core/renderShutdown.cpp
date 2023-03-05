@@ -82,28 +82,30 @@ void Renderer::DestroyFrameResources()
 	vkDestroyRenderPass( context.device, shadowPassState.pass, nullptr );
 	vkDestroyRenderPass( context.device, postPassState.pass, nullptr );
 
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
+	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
 		// Views
-		vkDestroyImageView( context.device, frameState[ i ].viewColorImage.vk_view, nullptr );
-		vkDestroyImageView( context.device, frameState[ i ].shadowMapImage.vk_view, nullptr );
-		vkDestroyImageView( context.device, frameState[ i ].depthImage.vk_view, nullptr );
-		vkDestroyImageView( context.device, frameState[ i ].stencilImage.vk_view, nullptr );
+		vkDestroyImageView( context.device, frameState[ frameId ].viewColorImage.vk_view, nullptr );
+		vkDestroyImageView( context.device, frameState[ frameId ].shadowMapImage.vk_view, nullptr );
+		vkDestroyImageView( context.device, frameState[ frameId ].depthImage.vk_view, nullptr );
+		vkDestroyImageView( context.device, frameState[ frameId ].stencilImage.vk_view, nullptr );
 
 		// Images
-		vkDestroyImage( context.device, frameState[ i ].viewColorImage.vk_image, nullptr );
-		vkDestroyImage( context.device, frameState[ i ].shadowMapImage.vk_image, nullptr );
-		vkDestroyImage( context.device, frameState[ i ].depthImage.vk_image, nullptr );
-		vkDestroyImage( context.device, frameState[ i ].stencilImage.vk_image, nullptr );
+		vkDestroyImage( context.device, frameState[ frameId ].viewColorImage.vk_image, nullptr );
+		vkDestroyImage( context.device, frameState[ frameId ].shadowMapImage.vk_image, nullptr );
+		vkDestroyImage( context.device, frameState[ frameId ].depthImage.vk_image, nullptr );
+		vkDestroyImage( context.device, frameState[ frameId ].stencilImage.vk_image, nullptr );
 
-		// Passes
-		vkDestroyFramebuffer( context.device, shadowPassState.fb[ i ], nullptr );
-		vkDestroyFramebuffer( context.device, mainPassState.fb[ i ], nullptr );
-		vkDestroyFramebuffer( context.device, postPassState.fb[ i ], nullptr );
+		// Allocations
+		frameState[ frameId ].viewColorImage.allocation.Free();
+		frameState[ frameId ].shadowMapImage.allocation.Free();
+		frameState[ frameId ].depthImage.allocation.Free();
+		frameState[ frameId ].stencilImage.allocation.Free();
 
-		frameState[ i ].viewColorImage.allocation.Free();
-		frameState[ i ].shadowMapImage.allocation.Free();
-		frameState[ i ].depthImage.allocation.Free();
+		// Buffers
+		vkDestroyFramebuffer( context.device, shadowMap.buffer[ frameId ], nullptr );
+		vkDestroyFramebuffer( context.device, mainColor.buffer[ frameId ], nullptr );
+		vkDestroyFramebuffer( context.device, viewColor.buffer[ frameId ], nullptr );
 	}
 
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );

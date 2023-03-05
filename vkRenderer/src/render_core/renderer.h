@@ -62,11 +62,19 @@ extern imguiControls_t gImguiControls;
 #endif
 
 typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
-typedef AssetLib<GpuImage>			AssetLibGpuImages;
 
 extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						gWindow;
+
+class FrameBuffer
+{
+public:
+	GpuImage*		color[ MAX_FRAMES_STATES ];
+	GpuImage*		depth[ MAX_FRAMES_STATES ];
+	GpuImage*		stencil[ MAX_FRAMES_STATES ];
+	VkFramebuffer	buffer[ MAX_FRAMES_STATES ];
+};
 
 class Renderer
 {
@@ -148,7 +156,6 @@ private:
 	VkDescriptorSetLayout			postProcessLayout;
 	VkDescriptorPool				descriptorPool;
 	VkSampleCountFlagBits			msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-	FrameState						frameState[ MAX_FRAMES_STATES ];
 	size_t							frameId = 0;
 	uint32_t						bufferId = 0;
 	uint32_t						frameNumber = 0;
@@ -157,6 +164,11 @@ private:
 	GpuBuffer						ib;
 	GpuImage						gpuImages[ MaxImageDescriptors ];
 	materialBufferObject_t			materialBuffer[ MaxMaterials ];
+
+	FrameState						frameState[ MAX_FRAMES_STATES ];
+	FrameBuffer						shadowMap;
+	FrameBuffer						mainColor;
+	FrameBuffer						viewColor;
 
 	uint32_t						imageFreeSlot = 0;
 	uint32_t						materialFreeSlot = 0;

@@ -651,15 +651,19 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 		info.layers = 1;
 		info.fmt = TEXTURE_FMT_D_32;
-		CreateImage( info, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].shadowMapImage, frameBufferMemory );
-		frameState[ i ].shadowMapImage.vk_view = CreateImageView( frameState[ i ].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		CreateImage( info, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[i].shadowMapImage, frameBufferMemory );
+		frameState[i].shadowMapImage.vk_view = CreateImageView( frameState[i].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 	{
+		shadowMap.color[ i ] = nullptr;
+		shadowMap.depth[ i ] = &frameState[ i ].shadowMapImage;
+		shadowMap.stencil[ i ] = nullptr;
+
 		std::array<VkImageView, 2> attachments = {
 			rc.whiteImage.vk_view,
-			frameState[ i ].shadowMapImage.vk_view,
+			frameState[i].shadowMapImage.vk_view,
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{ };
@@ -675,8 +679,9 @@ void Renderer::CreateFramebuffers()
 		shadowPassState.y = 0;
 		shadowPassState.width = ShadowMapWidth;
 		shadowPassState.height = ShadowMapHeight;
+		shadowPassState.fb = &shadowMap;
 
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowPassState.fb[ i ] ) != VK_SUCCESS ) {
+		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowMap.buffer[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create framebuffer!" );
 		}
 	}
@@ -721,8 +726,9 @@ void Renderer::CreateFramebuffers()
 		mainPassState.y = 0;
 		mainPassState.width = width;
 		mainPassState.height = height;
+		mainPassState.fb = &mainColor;
 
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &mainPassState.fb[ i ] ) != VK_SUCCESS ) {
+		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &mainColor.buffer[i] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create scene framebuffer!" );
 		}
 	}
@@ -749,11 +755,12 @@ void Renderer::CreateFramebuffers()
 		postPassState.y = 0;
 		postPassState.width = swapChain.vk_swapChainExtent.width;
 		postPassState.height = swapChain.vk_swapChainExtent.height;
+		postPassState.fb = &viewColor;
 
 		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &swapChain.vk_framebuffers[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create swap chain framebuffer!" );
 		}
-		postPassState.fb[ i ] = swapChain.vk_framebuffers[ i ];
+		viewColor.buffer[i] = swapChain.vk_framebuffers[ i ];
 	}
 }
 
