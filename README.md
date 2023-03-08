@@ -1,6 +1,8 @@
 # Vulkan-Renderer
 
-Work-in-progress.
+Calling this "Extensa" after Descartes Res Extensa--"a thing extended in space". I've always conceived of 3D rendering as giving shape to abstract logical worlds so felt the name fit.
+
+Work-in-progress. Some parts are rough yet, but it's taking shape. The Gfx-Core repo is essential for repo.
 
 Features:
 * Depth-prepass
@@ -25,5 +27,3 @@ To-Do:
 * Bin files for models
 * Individual shader reload
 * Fix release build
-
-Still a work-in-progress
