@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <resource_types/texture.h>
 #include "../globals/common.h"
 
 enum gfxStateBits_t : uint64_t
@@ -48,11 +49,11 @@ enum gfxStateBits_t : uint64_t
 
 struct pipelineState_t
 {
-	const char*		tag;
-	gfxStateBits_t	stateBits;
-	uint32_t		samplingRate;
-	GpuProgram*		shaders;
-	viewport_t		viewport;
+	const char*			tag;
+	gfxStateBits_t		stateBits;
+	textureSamples_t	samplingRate;
+	GpuProgram*			shaders;
+	viewport_t			viewport;
 };
 
 // TODO: replace, scales very poorly

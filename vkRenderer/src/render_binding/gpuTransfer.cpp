@@ -104,7 +104,7 @@ void Renderer::UploadTextures()
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 			VK_IMAGE_USAGE_SAMPLED_BIT;
 
-		CreateImage( texture.info, VK_SAMPLE_COUNT_1_BIT, flags, texture.gpuImage, localMemory );
+		CreateImage( texture.info, flags, texture.gpuImage, localMemory );
 
 		TransitionImageLayout( commandBuffer, texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 

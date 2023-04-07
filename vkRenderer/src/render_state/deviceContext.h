@@ -29,7 +29,7 @@ struct deviceContext_t
 	VkDevice					device;
 	VkPhysicalDevice			physicalDevice;
 	VkInstance					instance;
-	VkPhysicalDeviceLimits		limits;
+	VkPhysicalDeviceProperties	deviceProperties;
 	VkQueue						graphicsQueue;
 	VkQueue						presentQueue;
 	VkQueue						computeQueue;

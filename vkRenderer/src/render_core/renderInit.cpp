@@ -359,7 +359,7 @@ void Renderer::CreatePipelineObjects()
 			pipelineState_t state;
 			state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
 			state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
-			state.samplingRate = msaaSamples;
+			state.samplingRate = config.mainColorSubSamples;
 			state.shaders = &prog->Get();
 			state.tag = gAssets.gpuPrograms.FindName( m.GetShader( passIx ) );
 
@@ -440,11 +440,12 @@ void Renderer::CreateTextureSamplers()
 
 void Renderer::CreateRenderPasses()
 {
+	const VkSampleCountFlagBits samples = vk_GetSampleCount( config.mainColorSubSamples );
 	{
 		// Main View Pass
 		VkAttachmentDescription colorAttachment{ };
 		colorAttachment.format = vk_mainColorFmt;
-		colorAttachment.samples = msaaSamples;
+		colorAttachment.samples = samples;
 		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -458,7 +459,7 @@ void Renderer::CreateRenderPasses()
 
 		VkAttachmentDescription depthAttachment{ };
 		depthAttachment.format = vk_depthFmt;
-		depthAttachment.samples = msaaSamples;
+		depthAttachment.samples = samples;
 		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -472,7 +473,7 @@ void Renderer::CreateRenderPasses()
 
 		VkAttachmentDescription stencilAttachment{ };
 		stencilAttachment.format = vk_depthFmt;
-		stencilAttachment.samples = msaaSamples;
+		stencilAttachment.samples = samples;
 		stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		stencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		stencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -650,11 +651,11 @@ void Renderer::CreateFramebuffers()
 		info.height = ShadowMapHeight;
 		info.mipLevels = 1;
 		info.layers = 1;
-		info.subsamples = 1;
+		info.subsamples = TEXTURE_SMP_1;
 		info.fmt = TEXTURE_FMT_D_32;
 		info.type = TEXTURE_TYPE_DEPTH;
 		info.tiling = TEXTURE_TILING_MORTON;
-		CreateImage( info, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[i].shadowMapImage, frameBufferMemory );
+		CreateImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[i].shadowMapImage, frameBufferMemory );
 		frameState[i].shadowMapImage.vk_view = CreateImageView( frameState[i].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
@@ -699,21 +700,21 @@ void Renderer::CreateFramebuffers()
 		info.height = height;
 		info.mipLevels = 1;
 		info.layers = 1;
-		info.subsamples = 1;
+		info.subsamples = config.mainColorSubSamples;
 		info.fmt = TEXTURE_FMT_RGBA_16;
 		info.type = TEXTURE_TYPE_2D;
 		info.tiling = TEXTURE_TILING_MORTON;
 
 		VkFormat colorFormat = vk_mainColorFmt;
 
-		CreateImage( info, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		CreateImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
 		frameState[ i ].viewColorImage.gpuImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.gpuImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		VkFormat depthFormat = vk_depthFmt;
 		info.fmt = TEXTURE_FMT_D_32_S8;
 		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
 
-		CreateImage( info, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].depthImage, frameBufferMemory );
+		CreateImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].depthImage, frameBufferMemory );
 		frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
@@ -842,39 +843,41 @@ void Renderer::CreateDescSetLayouts()
 
 void Renderer::CreateUniformBuffers()
 {
+	const VkDeviceSize alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
+
 	for ( size_t i = 0; i < swapChain.GetBufferCount(); ++i )
 	{
 		// Globals Buffer
 		{
-			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( globalUboConstants_t ) );
+			const VkDeviceSize stride = std::max( alignment, sizeof( globalUboConstants_t ) );
 			const VkDeviceSize bufferSize = stride;
 			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].globalConstants, sharedMemory );
 		}
 
 		// View Buffer
 		{
-			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( viewBufferObject_t ) );
+			const VkDeviceSize stride = std::max( alignment, sizeof( viewBufferObject_t ) );
 			const VkDeviceSize bufferSize = MaxViews * stride;
 			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].viewParms, sharedMemory );
 		}
 
 		// Model Buffer
 		{
-			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( uniformBufferObject_t ) );
+			const VkDeviceSize stride = std::max( alignment, sizeof( uniformBufferObject_t ) );
 			const VkDeviceSize bufferSize = MaxViews * MaxSurfaces * stride;
 			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].surfParms, sharedMemory );
 		}
 
 		// Material Buffer
 		{
-			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( materialBufferObject_t ) );
+			const VkDeviceSize stride = std::max( alignment, sizeof( materialBufferObject_t ) );
 			const VkDeviceSize materialBufferSize = MaxMaterials * stride;
 			CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].materialBuffers, sharedMemory );
 		}
 
 		// Light Buffer
 		{
-			const VkDeviceSize stride = std::max( context.limits.minUniformBufferOffsetAlignment, sizeof( lightBufferObject_t ) );
+			const VkDeviceSize stride = std::max( alignment, sizeof( lightBufferObject_t ) );
 			const VkDeviceSize lightBufferSize = MaxLights * stride;
 			CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].lightParms, sharedMemory );
 		}
@@ -882,7 +885,7 @@ void Renderer::CreateUniformBuffers()
 }
 
 
-void Renderer::CreateImage( const textureInfo_t& info, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory )
+void Renderer::CreateImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory )
 {
 	VkImageCreateInfo imageInfo{ };
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -892,12 +895,12 @@ void Renderer::CreateImage( const textureInfo_t& info, VkSampleCountFlagBits num
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = info.mipLevels;
 	imageInfo.arrayLayers = info.layers;
-	imageInfo.format = GetVkTextureFormat( info.fmt );
+	imageInfo.format = vk_GetTextureFormat( info.fmt );
 	imageInfo.tiling = ( info.tiling == TEXTURE_TILING_LINEAR ) ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.usage = usage;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	imageInfo.samples = numSamples;
+	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
 	if ( ( info.type == TEXTURE_TYPE_DEPTH_STENCIL ) || ( info.type == TEXTURE_TYPE_STENCIL ) )
@@ -939,16 +942,16 @@ void Renderer::CreateCodeTextures() {
 	info.height = ShadowMapHeight;
 	info.mipLevels = 1;
 	info.layers = 1;
-	info.subsamples = 1;
+	info.subsamples = TEXTURE_SMP_1;
 	info.fmt = TEXTURE_FMT_BGRA_8;
 	info.type = TEXTURE_TYPE_2D;
 	info.tiling = TEXTURE_TILING_MORTON;
 
 	// Default Images
-	CreateImage( info, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.whiteImage, localMemory );
+	CreateImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.whiteImage, localMemory );
 	rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-	CreateImage( info, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.blackImage, localMemory );
+	CreateImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.blackImage, localMemory );
 	rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 }
 

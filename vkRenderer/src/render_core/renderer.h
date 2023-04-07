@@ -67,6 +67,11 @@ extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						gWindow;
 
+struct renderConfig_t
+{
+	textureSamples_t mainColorSubSamples;
+};
+
 class Renderer
 {
 public:
@@ -105,6 +110,22 @@ public:
 	void		CreatePipelineObjects();
 
 	void		UploadAssets();
+
+	static textureSamples_t GetMaxUsableSampleCount()
+	{
+		VkSampleCountFlags counts = context.deviceProperties.limits.framebufferColorSampleCounts & context.deviceProperties.limits.framebufferDepthSampleCounts;
+		if ( counts & VK_SAMPLE_COUNT_64_BIT ) { return TEXTURE_SMP_64; }
+		if ( counts & VK_SAMPLE_COUNT_32_BIT ) { return TEXTURE_SMP_32; }
+		if ( counts & VK_SAMPLE_COUNT_16_BIT ) { return TEXTURE_SMP_16; }
+		if ( counts & VK_SAMPLE_COUNT_8_BIT ) { return TEXTURE_SMP_8; }
+		if ( counts & VK_SAMPLE_COUNT_4_BIT ) { return TEXTURE_SMP_4; }
+		if ( counts & VK_SAMPLE_COUNT_2_BIT ) { return TEXTURE_SMP_2; }
+
+		return TEXTURE_SMP_1;
+	}
+
+	static VkFormat						vk_GetTextureFormat( textureFmt_t fmt );
+	static VkSampleCountFlagBits		vk_GetSampleCount( const textureSamples_t sampleCount );
 
 private:
 
@@ -146,7 +167,7 @@ private:
 	VkDescriptorSetLayout			globalLayout;
 	VkDescriptorSetLayout			postProcessLayout;
 	VkDescriptorPool				descriptorPool;
-	VkSampleCountFlagBits			msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+	renderConfig_t					config;
 	size_t							frameId = 0;
 	uint32_t						bufferId = 0;
 	uint32_t						frameNumber = 0;
@@ -170,8 +191,6 @@ private:
 	AllocatorVkMemory				frameBufferMemory;
 	AllocatorVkMemory				sharedMemory;
 
-	VkPhysicalDeviceProperties		deviceProperties;
-
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
 
@@ -188,22 +207,6 @@ private:
 	float							shadowNearPlane = 0.1f;
 	float							shadowFarPlane = 1000.0f;
 	bool							restart = false;
-
-	VkSampleCountFlagBits GetMaxUsableSampleCount()
-	{
-		VkPhysicalDeviceProperties physicalDeviceProperties;
-		vkGetPhysicalDeviceProperties( context.physicalDevice, &physicalDeviceProperties );
-		
-		VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-		if ( counts & VK_SAMPLE_COUNT_64_BIT ) { return VK_SAMPLE_COUNT_64_BIT; }
-		if ( counts & VK_SAMPLE_COUNT_32_BIT ) { return VK_SAMPLE_COUNT_32_BIT; }
-		if ( counts & VK_SAMPLE_COUNT_16_BIT ) { return VK_SAMPLE_COUNT_16_BIT; }
-		if ( counts & VK_SAMPLE_COUNT_8_BIT ) { return VK_SAMPLE_COUNT_8_BIT; }
-		if ( counts & VK_SAMPLE_COUNT_4_BIT ) { return VK_SAMPLE_COUNT_4_BIT; }
-		if ( counts & VK_SAMPLE_COUNT_2_BIT ) { return VK_SAMPLE_COUNT_2_BIT; }
-
-		return VK_SAMPLE_COUNT_1_BIT;
-	}
 
 	void RecreateSwapChain()
 	{
@@ -267,7 +270,7 @@ private:
 
 	// API Creation Functions
 	void						CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory );
-	void						CreateImage( const textureInfo_t& info, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
+	void						CreateImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
 	void						CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
 	void						CreateDescSetLayouts();
 	void						CreateDescriptorPool();
@@ -291,7 +294,6 @@ private:
 	void						Commit( const Scene* scene );
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
 	void						MergeSurfaces( RenderView& view );
-	VkFormat					GetVkTextureFormat( textureFmt_t fmt );
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
 	const DrawPassState*		GetPassState( const drawPass_t pass );
