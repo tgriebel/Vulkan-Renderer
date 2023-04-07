@@ -538,10 +538,12 @@ VkFormat Renderer::GetVkTextureFormat( textureFmt_t fmt )
 		case TEXTURE_FMT_D_16:		return VK_FORMAT_D16_UNORM;				break;
 		case TEXTURE_FMT_D24S8:		return VK_FORMAT_D24_UNORM_S8_UINT;		break;
 		case TEXTURE_FMT_D_32:		return VK_FORMAT_D32_SFLOAT;			break;
+		case TEXTURE_FMT_D_32_S8:	return VK_FORMAT_D32_SFLOAT_S8_UINT;	break;
 		case TEXTURE_FMT_RGB_8:		return VK_FORMAT_R8G8B8_SRGB;			break;
 		case TEXTURE_FMT_RGBA_8:	return VK_FORMAT_R8G8B8A8_SRGB;			break;
 		case TEXTURE_FMT_ABGR_8:	return VK_FORMAT_A8B8G8R8_SRGB_PACK32;	break;
 		case TEXTURE_FMT_BGR_8:		return VK_FORMAT_B8G8R8_SRGB;			break;
+		case TEXTURE_FMT_BGRA_8:	return VK_FORMAT_B8G8R8A8_SRGB;			break;
 		case TEXTURE_FMT_RGB_16:	return VK_FORMAT_R16G16B16_SFLOAT;		break;
 		case TEXTURE_FMT_RGBA_16:	return VK_FORMAT_R16G16B16A16_SFLOAT;	break;
 		default: assert( false );	break;
@@ -1064,7 +1066,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	// View Color Map
 	{
-		VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
+		VkImageView& imageView = frameState[ currentImage ].viewColorImage.gpuImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;

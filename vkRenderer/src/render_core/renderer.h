@@ -67,15 +67,6 @@ extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						gWindow;
 
-class FrameBuffer
-{
-public:
-	GpuImage*		color[ MAX_FRAMES_STATES ];
-	GpuImage*		depth[ MAX_FRAMES_STATES ];
-	GpuImage*		stencil[ MAX_FRAMES_STATES ];
-	VkFramebuffer	buffer[ MAX_FRAMES_STATES ];
-};
-
 class Renderer
 {
 public:
@@ -276,7 +267,7 @@ private:
 
 	// API Creation Functions
 	void						CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory );
-	void						CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory );
+	void						CreateImage( const textureInfo_t& info, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
 	void						CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
 	void						CreateDescSetLayouts();
 	void						CreateDescriptorPool();

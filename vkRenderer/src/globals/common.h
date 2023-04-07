@@ -349,7 +349,7 @@ struct DrawPassState
 
 	VkRenderPass		pass;
 	VkDescriptorSet		descriptorSets[ MAX_FRAMES_STATES ];
-	FrameBuffer*			fb;
+	FrameBuffer*		fb;
 };
 
 

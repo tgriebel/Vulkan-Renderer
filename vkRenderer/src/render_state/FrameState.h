@@ -29,13 +29,37 @@
 class FrameState
 {
 public:
-	GpuImage		viewColorImage;
+	Texture			viewColorImage;
 	GpuImage		shadowMapImage;
 	GpuImage		depthImage;
 	GpuImage		stencilImage;
+
 	GpuBuffer		globalConstants;
 	GpuBuffer		viewParms;
 	GpuBuffer		surfParms;
 	GpuBuffer		materialBuffers;
 	GpuBuffer		lightParms;
+};
+
+
+class FrameBuffer
+{
+public:
+	textureInfo_t	info;
+	GpuImage*		color[ MAX_FRAMES_STATES ];
+	GpuImage*		color1[ MAX_FRAMES_STATES ];
+	GpuImage*		color2[ MAX_FRAMES_STATES ];
+	GpuImage*		depth[ MAX_FRAMES_STATES ];
+	GpuImage*		stencil[ MAX_FRAMES_STATES ];
+	VkFramebuffer	buffer[ MAX_FRAMES_STATES ];
+
+	inline uint32_t GetWidth( const uint32_t layer )
+	{
+		return info.width;
+	}
+
+	inline uint32_t GetHeight( const uint32_t layer )
+	{
+		return info.height;
+	}
 };

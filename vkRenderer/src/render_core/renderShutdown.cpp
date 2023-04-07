@@ -85,19 +85,19 @@ void Renderer::DestroyFrameResources()
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
 		// Views
-		vkDestroyImageView( context.device, frameState[ frameId ].viewColorImage.vk_view, nullptr );
+		vkDestroyImageView( context.device, frameState[ frameId ].viewColorImage.gpuImage.vk_view, nullptr );
 		vkDestroyImageView( context.device, frameState[ frameId ].shadowMapImage.vk_view, nullptr );
 		vkDestroyImageView( context.device, frameState[ frameId ].depthImage.vk_view, nullptr );
 		vkDestroyImageView( context.device, frameState[ frameId ].stencilImage.vk_view, nullptr );
 
 		// Images
-		vkDestroyImage( context.device, frameState[ frameId ].viewColorImage.vk_image, nullptr );
+		vkDestroyImage( context.device, frameState[ frameId ].viewColorImage.gpuImage.vk_image, nullptr );
 		vkDestroyImage( context.device, frameState[ frameId ].shadowMapImage.vk_image, nullptr );
 		vkDestroyImage( context.device, frameState[ frameId ].depthImage.vk_image, nullptr );
 		vkDestroyImage( context.device, frameState[ frameId ].stencilImage.vk_image, nullptr );
 
 		// Allocations
-		frameState[ frameId ].viewColorImage.allocation.Free();
+		frameState[ frameId ].viewColorImage.gpuImage.allocation.Free();
 		frameState[ frameId ].shadowMapImage.allocation.Free();
 		frameState[ frameId ].depthImage.allocation.Free();
 		frameState[ frameId ].stencilImage.allocation.Free();

@@ -650,8 +650,11 @@ void Renderer::CreateFramebuffers()
 		info.height = ShadowMapHeight;
 		info.mipLevels = 1;
 		info.layers = 1;
+		info.subsamples = 1;
 		info.fmt = TEXTURE_FMT_D_32;
-		CreateImage( info, VK_FORMAT_D32_SFLOAT, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[i].shadowMapImage, frameBufferMemory );
+		info.type = TEXTURE_TYPE_DEPTH;
+		info.tiling = TEXTURE_TILING_MORTON;
+		CreateImage( info, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[i].shadowMapImage, frameBufferMemory );
 		frameState[i].shadowMapImage.vk_view = CreateImageView( frameState[i].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
@@ -696,19 +699,26 @@ void Renderer::CreateFramebuffers()
 		info.height = height;
 		info.mipLevels = 1;
 		info.layers = 1;
+		info.subsamples = 1;
+		info.fmt = TEXTURE_FMT_RGBA_16;
+		info.type = TEXTURE_TYPE_2D;
+		info.tiling = TEXTURE_TILING_MORTON;
 
 		VkFormat colorFormat = vk_mainColorFmt;
 
-		CreateImage( info, colorFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
-		frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		CreateImage( info, msaaSamples, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		frameState[ i ].viewColorImage.gpuImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.gpuImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		VkFormat depthFormat = vk_depthFmt;
-		CreateImage( info, depthFormat, VK_IMAGE_TILING_OPTIMAL, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameState[ i ].depthImage, frameBufferMemory );
+		info.fmt = TEXTURE_FMT_D_32_S8;
+		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
+
+		CreateImage( info, msaaSamples, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].depthImage, frameBufferMemory );
 		frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
 		std::array<VkImageView, 3> attachments = {
-			frameState[ i ].viewColorImage.vk_view,
+			frameState[ i ].viewColorImage.gpuImage.vk_view,
 			frameState[ i ].depthImage.vk_view,
 			frameState[ i ].stencilImage.vk_view,
 		};
@@ -872,7 +882,7 @@ void Renderer::CreateUniformBuffers()
 }
 
 
-void Renderer::CreateImage( const textureInfo_t& info, VkFormat format, VkImageTiling tiling, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, GpuImage& image, AllocatorVkMemory& memory )
+void Renderer::CreateImage( const textureInfo_t& info, VkSampleCountFlagBits numSamples, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory )
 {
 	VkImageCreateInfo imageInfo{ };
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -882,15 +892,15 @@ void Renderer::CreateImage( const textureInfo_t& info, VkFormat format, VkImageT
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = info.mipLevels;
 	imageInfo.arrayLayers = info.layers;
-	imageInfo.format = format;
-	imageInfo.tiling = tiling;
+	imageInfo.format = GetVkTextureFormat( info.fmt );
+	imageInfo.tiling = ( info.tiling == TEXTURE_TILING_LINEAR ) ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.usage = usage;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = numSamples;
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
-	if ( format == vk_depthFmt )
+	if ( ( info.type == TEXTURE_TYPE_DEPTH_STENCIL ) || ( info.type == TEXTURE_TYPE_STENCIL ) )
 	{
 		stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 		stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -911,7 +921,7 @@ void Renderer::CreateImage( const textureInfo_t& info, VkFormat format, VkImageT
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
+	allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ); // TODO: add VkMemoryPropertyFlags to memory param
 
 	AllocationVk alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
@@ -929,12 +939,16 @@ void Renderer::CreateCodeTextures() {
 	info.height = ShadowMapHeight;
 	info.mipLevels = 1;
 	info.layers = 1;
+	info.subsamples = 1;
+	info.fmt = TEXTURE_FMT_BGRA_8;
+	info.type = TEXTURE_TYPE_2D;
+	info.tiling = TEXTURE_TILING_MORTON;
 
 	// Default Images
-	CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.whiteImage, localMemory );
+	CreateImage( info, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.whiteImage, localMemory );
 	rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-	CreateImage( info, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, rc.blackImage, localMemory );
+	CreateImage( info, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.blackImage, localMemory );
 	rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 }
 
