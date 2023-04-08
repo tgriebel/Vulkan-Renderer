@@ -163,6 +163,8 @@ void Renderer::ShutdownShaderResources()
 		const Texture& texture = gAssets.textureLib.Find( i )->Get();
 		vkDestroyImageView( context.device, texture.gpuImage->vk_view, nullptr );
 		vkDestroyImage( context.device, texture.gpuImage->vk_image, nullptr );
+
+		delete texture.gpuImage;
 	}
 
 	// PSO
