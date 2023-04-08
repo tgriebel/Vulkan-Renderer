@@ -21,8 +21,96 @@
 * SOFTWARE.
 */
 
+template< class AllocatorType >
+struct alloc_t;
+
+template< class ResourceType >
+class Allocator;
+
+class AllocatorVkMemory;
+using AllocationVk = alloc_t<AllocatorVkMemory>;
+
 #pragma once
 #include "../globals/common.h"
+
+template< class ResourceType > class Allocator;
+
+struct allocRecord_t
+{
+	uint64_t	offset;
+	uint64_t	size;
+	uint64_t	alignment;
+	bool		isValid;
+};
+
+template< class AllocatorType >
+struct alloc_t
+{
+public:
+	alloc_t() {
+		allocator = nullptr;
+	}
+
+	uint64_t GetOffset() const {
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
+				return record->offset;
+			}
+		}
+		return 0;
+	}
+
+	uint64_t GetSize() const {
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
+				return record->size;
+			}
+		}
+		return 0;
+	}
+
+	uint64_t GetAlignment() const {
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
+				return record->alignment;
+			}
+		}
+		return 0;
+	}
+
+	void* GetPtr() {
+		if ( IsValid() )
+		{
+			const allocRecord_t* record = allocator->GetRecord( handle );
+			if ( record != nullptr ) {
+				return allocator->GetMemoryMapPtr( *record );
+			}
+		}
+		return nullptr;
+	}
+
+	void Free() {
+		if ( IsValid() ) {
+			allocator->Free( handle );
+		}
+	}
+
+private:
+	bool IsValid() const {
+		return ( allocator != nullptr ) && ( handle.Get() >= 0 );
+	}
+
+	hdl_t			handle;
+	AllocatorType* allocator;
+
+	friend AllocatorType;
+};
 
 template< class ResourceType >
 class Allocator
@@ -186,5 +274,3 @@ class AllocatorVkMemory : public Allocator<VkDeviceMemory>
 public:
 	VkMemoryPropertyFlagBits memoryProperties;
 };
-
-using AllocationVk = alloc_t<AllocatorVkMemory>;
