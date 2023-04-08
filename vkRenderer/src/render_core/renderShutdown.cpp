@@ -84,23 +84,11 @@ void Renderer::DestroyFrameResources()
 
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
-		// Views
-		vkDestroyImageView( context.device, frameState[ frameId ].viewColorImage.vk_view, nullptr );
-		vkDestroyImageView( context.device, frameState[ frameId ].shadowMapImage.vk_view, nullptr );
-		vkDestroyImageView( context.device, frameState[ frameId ].depthImage.vk_view, nullptr );
-		vkDestroyImageView( context.device, frameState[ frameId ].stencilImage.vk_view, nullptr );
-
 		// Images
-		vkDestroyImage( context.device, frameState[ frameId ].viewColorImage.vk_image, nullptr );
-		vkDestroyImage( context.device, frameState[ frameId ].shadowMapImage.vk_image, nullptr );
-		vkDestroyImage( context.device, frameState[ frameId ].depthImage.vk_image, nullptr );
-		vkDestroyImage( context.device, frameState[ frameId ].stencilImage.vk_image, nullptr );
-
-		// Allocations
-		frameState[ frameId ].viewColorImage.allocation.Free();
-		frameState[ frameId ].shadowMapImage.allocation.Free();
-		frameState[ frameId ].depthImage.allocation.Free();
-		frameState[ frameId ].stencilImage.allocation.Free();
+		frameState[ frameId ].viewColorImage.Destroy();
+		frameState[ frameId ].shadowMapImage.Destroy();
+		frameState[ frameId ].depthImage.Destroy();
+		frameState[ frameId ].stencilImage.Destroy();
 
 		// Buffers
 		vkDestroyFramebuffer( context.device, shadowMap.buffer[ frameId ], nullptr );
@@ -151,19 +139,14 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// Images
-	vkDestroyImage( context.device, rc.whiteImage.vk_image, nullptr );
-	vkDestroyImageView( context.device, rc.whiteImage.vk_view, nullptr );
-
-	vkDestroyImage( context.device, rc.blackImage.vk_image, nullptr );
-	vkDestroyImageView( context.device, rc.blackImage.vk_view, nullptr );
+	rc.whiteImage.Destroy();
+	rc.blackImage.Destroy();
 
 	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
 		const Texture& texture = gAssets.textureLib.Find( i )->Get();
-		vkDestroyImageView( context.device, texture.gpuImage->vk_view, nullptr );
-		vkDestroyImage( context.device, texture.gpuImage->vk_image, nullptr );
-
+		texture.gpuImage->Destroy();
 		delete texture.gpuImage;
 	}
 

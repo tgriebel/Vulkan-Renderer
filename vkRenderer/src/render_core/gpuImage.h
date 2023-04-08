@@ -10,4 +10,12 @@ public:
 	VkImageView		vk_view;
 	AllocationVk	allocation;
 #endif
+	GpuImage::~GpuImage()
+	{
+		Destroy();
+	}
+	void Destroy();
 };
+
+// TODO: for cases where only a different view is needed
+//class GpuImageView;
