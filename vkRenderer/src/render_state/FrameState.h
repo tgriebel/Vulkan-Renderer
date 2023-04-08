@@ -25,6 +25,7 @@
 
 #include "../globals/common.h"
 #include "../render_binding/gpuResources.h"
+#include "../render_core/gpuImage.h"
 
 class FrameState
 {

@@ -74,6 +74,9 @@
     <ClCompile Include="scenes\nesScene.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\gpuImage.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="scenes\nesScene.h">
       <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\gpuImage.h">
+      <Filter>render core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -30,6 +30,7 @@
 #include <scene/entity.h>
 #include <sstream>
 #include "debugMenu.h"
+#include "gpuImage.h"
 
 #include <io/io.h>
 static RtView rtview;
@@ -786,7 +787,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 			continue;
 		}
 
-		VkImageView& imageView = texture.gpuImage.vk_view;
+		VkImageView& imageView = texture.gpuImage->vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -798,7 +799,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info2d.imageView = gAssets.textureLib.GetDefault()->Get().gpuImage.vk_view;
+			info2d.imageView = gAssets.textureLib.GetDefault()->Get().gpuImage->vk_view;
 			info2d.sampler = vk_bilinearSampler;
 			vk_image2DInfo[ texture.uploadId ] = info2d;
 		}
@@ -812,7 +813,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		const Texture& default2DTexture = gAssets.textureLib.GetDefault()->Get();
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			const VkImageView& imageView = default2DTexture.gpuImage.vk_view;
+			const VkImageView& imageView = default2DTexture.gpuImage->vk_view;
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -958,7 +959,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
 		Texture& texture = gAssets.textureLib.Find( i )->Get();
-		VkImageView& imageView = texture.gpuImage.vk_view;
+		VkImageView& imageView = texture.gpuImage->vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -969,7 +970,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 	{
 		const Texture& texture = gAssets.textureLib.GetDefault()->Get();
-		const VkImageView& imageView = texture.gpuImage.vk_view;
+		const VkImageView& imageView = texture.gpuImage->vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -980,7 +981,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	for ( size_t j = 0; j < MaxCodeImages; ++j )
 	{
 		const Texture& texture = gAssets.textureLib.GetDefault()->Get();
-		const VkImageView& imageView = texture.gpuImage.vk_view;
+		const VkImageView& imageView = texture.gpuImage->vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -1083,7 +1084,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	// View Color Map
 	{
-		VkImageView& imageView = frameState[ currentImage ].viewColorImage.gpuImage.vk_view;
+		VkImageView& imageView = frameState[ currentImage ].viewColorImage.gpuImage->vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;

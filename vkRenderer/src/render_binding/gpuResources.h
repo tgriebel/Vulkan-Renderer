@@ -27,7 +27,7 @@
 
 struct GpuBuffer
 {
-	AllocationVk alloc;
+	alloc_t<Allocator<VkDeviceMemory>> alloc;
 
 	void Reset() {
 		offset = 0;

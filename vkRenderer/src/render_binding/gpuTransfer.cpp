@@ -74,12 +74,12 @@ void Renderer::UpdateTextures()
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );
 
-		TransitionImageLayout( commandBuffer, texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
+		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 
 		const uint32_t layers = texture.info.layers;
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage.vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
+		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage->vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
 	
-		TransitionImageLayout( commandBuffer, texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
+		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
 	}
 	EndSingleTimeCommands( commandBuffer );
 }
@@ -104,15 +104,17 @@ void Renderer::UploadTextures()
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
 			VK_IMAGE_USAGE_SAMPLED_BIT;
 
-		CreateImage( texture.info, flags, texture.gpuImage, localMemory );
+		texture.gpuImage = new GpuImage();
 
-		TransitionImageLayout( commandBuffer, texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
+		CreateImage( texture.info, flags, *texture.gpuImage, localMemory );
+
+		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
-		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );
+		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );		
 
 		const uint32_t layers = texture.info.layers;
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage.vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
+		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage->vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.uploadId = imageFreeSlot++;
@@ -126,7 +128,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Texture& texture = textureAsset->Get();
-		GenerateMipmaps( commandBuffer, texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.info );
+		GenerateMipmaps( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
 	EndSingleTimeCommands( commandBuffer );
 
@@ -144,7 +146,7 @@ void Renderer::UploadTextures()
 		case TEXTURE_TYPE_2D:	type = VK_IMAGE_VIEW_TYPE_2D;		break;
 		case TEXTURE_TYPE_CUBE:	type = VK_IMAGE_VIEW_TYPE_CUBE;		break;
 		}
-		texture.gpuImage.vk_view = CreateImageView( texture.gpuImage.vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
+		texture.gpuImage->vk_view = CreateImageView( texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
 	}
 
 	uploadTextures.clear();

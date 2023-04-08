@@ -218,8 +218,7 @@ private:
 		DestroyFrameResources();
 		swapChain.Destroy();
 
-		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-		AllocateDeviceMemory( MaxFrameBufferMemory, type, frameBufferMemory );
+		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
 		frameBufferMemory.Reset();
 
 		swapChain.Create( &gWindow, width, height );
@@ -227,8 +226,10 @@ private:
 		CreateFramebuffers();
 	}
 
-	void AllocateDeviceMemory( const uint32_t allocSize, const uint32_t typeIndex, AllocatorVkMemory& outAllocation )
+	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorVkMemory& outAllocation )
 	{
+		uint32_t typeIndex = FindMemoryType( ~0x00, typeBits );
+
 		VkMemoryAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = allocSize;

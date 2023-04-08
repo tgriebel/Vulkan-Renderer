@@ -191,6 +191,7 @@
     <ClInclude Include="src\render_binding\gpuResources.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />
     <ClInclude Include="src\render_core\debugMenu.h" />
+    <ClInclude Include="src\render_core\gpuImage.h" />
     <ClInclude Include="src\render_core\renderer.h" />
     <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="src\render_state\deviceContext.h" />
@@ -221,6 +222,7 @@
     <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
     <ClCompile Include="src\render_binding\pipeline.cpp" />
     <ClCompile Include="src\render_core\debugMenu.cpp" />
+    <ClCompile Include="src\render_core\gpuImage.cpp" />
     <ClCompile Include="src\render_core\renderCommand.cpp" />
     <ClCompile Include="src\render_core\renderer.cpp" />
     <ClCompile Include="src\render_core\renderInit.cpp" />

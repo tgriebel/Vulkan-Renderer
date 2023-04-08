@@ -154,7 +154,6 @@ public:
 		}
 	}
 
-private:
 	[[nodiscard]]
 	bool IsValidIndex( const uint64_t index ) const {
 		return ( index >= 0 ) && ( index < allocations.size() );
@@ -170,6 +169,7 @@ private:
 		return nullptr;
 	}
 
+private:
 	uint32_t						type;
 	uint64_t						size;
 	uint64_t						offset;
@@ -180,3 +180,11 @@ private:
 
 	friend alloc_t;
 };
+
+class AllocatorVkMemory : public Allocator<VkDeviceMemory>
+{
+public:
+	VkMemoryPropertyFlagBits memoryProperties;
+};
+
+using AllocationVk = alloc_t<AllocatorVkMemory>;

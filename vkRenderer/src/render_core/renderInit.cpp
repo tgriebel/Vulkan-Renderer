@@ -132,8 +132,7 @@ void Renderer::InitVulkan()
 
 	{
 		// Create Frame Resources
-		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-		AllocateDeviceMemory( MaxFrameBufferMemory, type, frameBufferMemory );
+		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
 
 		CreateSyncObjects();
 		CreateFramebuffers();
@@ -146,9 +145,9 @@ void Renderer::InitShaderResources()
 {
 	{
 		// Memory Allocations
-		uint32_t type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
+		VkMemoryPropertyFlagBits type = VkMemoryPropertyFlagBits(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
-		type = FindMemoryType( ~0x00, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
 	}
 
@@ -707,8 +706,10 @@ void Renderer::CreateFramebuffers()
 
 		VkFormat colorFormat = vk_mainColorFmt;
 
-		CreateImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
-		frameState[ i ].viewColorImage.gpuImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.gpuImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		frameState[ i ].viewColorImage.gpuImage = new GpuImage();
+
+		CreateImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		frameState[ i ].viewColorImage.gpuImage->vk_view = CreateImageView( frameState[ i ].viewColorImage.gpuImage->vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		VkFormat depthFormat = vk_depthFmt;
 		info.fmt = TEXTURE_FMT_D_32_S8;
@@ -719,7 +720,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
 		std::array<VkImageView, 3> attachments = {
-			frameState[ i ].viewColorImage.gpuImage.vk_view,
+			frameState[ i ].viewColorImage.gpuImage->vk_view,
 			frameState[ i ].depthImage.vk_view,
 			frameState[ i ].stencilImage.vk_view,
 		};
@@ -926,7 +927,7 @@ void Renderer::CreateImage( const textureInfo_t& info, VkImageUsageFlags usage, 
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ); // TODO: add VkMemoryPropertyFlags to memory param
 
-	AllocationVk alloc;
+	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
 		vkBindImageMemory( context.device, image.vk_image, memory.GetMemoryResource(), alloc.GetOffset() );
 	}

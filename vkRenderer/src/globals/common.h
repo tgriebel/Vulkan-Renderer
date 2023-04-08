@@ -260,9 +260,6 @@ private:
 	friend AllocatorType;
 };
 
-using AllocatorVkMemory = Allocator< VkDeviceMemory >;
-using AllocationVk = alloc_t< AllocatorVkMemory >;
-
 
 union sortKey_t
 {
