@@ -29,8 +29,10 @@
 
 extern AssetManager gAssets;
 
-void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, VkImage& image, const uint32_t width, const uint32_t height, const uint32_t layers )
+void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Texture& texture )
 {
+	const uint32_t layers = texture.info.layers;
+
 	VkBufferImageCopy region{ };
 	memset( &region, 0, sizeof( region ) );
 	region.bufferOffset = bufferOffset;
@@ -42,15 +44,15 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 
 	region.imageOffset = { 0, 0, 0 };
 	region.imageExtent = {
-		width,
-		height,
+		texture.info.width,
+		texture.info.height,
 		1
 	};
 
 	vkCmdCopyBufferToImage(
 		commandBuffer,
 		buffer,
-		image,
+		texture.gpuImage->vk_image,
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1,
 		&region
@@ -76,8 +78,7 @@ void Renderer::UpdateTextures()
 
 		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 
-		const uint32_t layers = texture.info.layers;
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage->vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
+		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture );
 	
 		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
 	}
@@ -113,8 +114,7 @@ void Renderer::UploadTextures()
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );		
 
-		const uint32_t layers = texture.info.layers;
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture.gpuImage->vk_image, static_cast<uint32_t>( texture.info.width ), static_cast<uint32_t>( texture.info.height ), layers );
+		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.uploadId = imageFreeSlot++;
