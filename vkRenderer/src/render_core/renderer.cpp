@@ -1084,7 +1084,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	// View Color Map
 	{
-		VkImageView& imageView = frameState[ currentImage ].viewColorImage.gpuImage->vk_view;
+		VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;

@@ -30,7 +30,7 @@
 class FrameState
 {
 public:
-	Texture			viewColorImage;
+	GpuImage		viewColorImage;
 	GpuImage		shadowMapImage;
 	GpuImage		depthImage;
 	GpuImage		stencilImage;
