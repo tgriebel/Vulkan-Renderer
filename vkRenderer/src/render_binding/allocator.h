@@ -272,5 +272,5 @@ private:
 class AllocatorVkMemory : public Allocator<VkDeviceMemory>
 {
 public:
-	VkMemoryPropertyFlagBits memoryProperties;
+	uint32_t memoryTypeIndex;
 };

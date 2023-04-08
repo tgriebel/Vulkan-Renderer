@@ -159,8 +159,8 @@ void Renderer::InitShaderResources()
 
 	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
 	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vb, localMemory );
-	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, ib, localMemory );
+	CreateBuffer( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, vb, localMemory );
+	CreateBuffer( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, ib, localMemory );
 
 	CreateResourceBuffers();
 }
@@ -305,7 +305,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 }
 
 
-void Renderer::CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory )
+void Renderer::CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory )
 {
 	VkBufferCreateInfo bufferInfo{ };
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -323,7 +323,7 @@ void Renderer::CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, VkMemo
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, properties );
+	allocInfo.memoryTypeIndex = bufferMemory.memoryTypeIndex;
 
 	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, buffer.alloc ) ) {
 		vkBindBufferMemory( context.device, buffer.GetVkObject(), bufferMemory.GetMemoryResource(), buffer.alloc.GetOffset() );
@@ -338,7 +338,7 @@ void Renderer::CreateResourceBuffers()
 {
 	stagingBuffer.Reset();
 	const uint64_t size = 256 * MB_1;
-	CreateBuffer( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, sharedMemory );
+	CreateBuffer( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer, sharedMemory );
 }
 
 
@@ -850,35 +850,35 @@ void Renderer::CreateUniformBuffers()
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( globalUboConstants_t ) );
 			const VkDeviceSize bufferSize = stride;
-			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].globalConstants, sharedMemory );
+			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].globalConstants, sharedMemory );
 		}
 
 		// View Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( viewBufferObject_t ) );
 			const VkDeviceSize bufferSize = MaxViews * stride;
-			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].viewParms, sharedMemory );
+			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].viewParms, sharedMemory );
 		}
 
 		// Model Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( uniformBufferObject_t ) );
 			const VkDeviceSize bufferSize = MaxViews * MaxSurfaces * stride;
-			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].surfParms, sharedMemory );
+			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].surfParms, sharedMemory );
 		}
 
 		// Material Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( materialBufferObject_t ) );
 			const VkDeviceSize materialBufferSize = MaxMaterials * stride;
-			CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].materialBuffers, sharedMemory );
+			CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].materialBuffers, sharedMemory );
 		}
 
 		// Light Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( lightBufferObject_t ) );
 			const VkDeviceSize lightBufferSize = MaxLights * stride;
-			CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, frameState[ i ].lightParms, sharedMemory );
+			CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].lightParms, sharedMemory );
 		}
 	}
 }
@@ -923,7 +923,7 @@ void Renderer::CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usag
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType( memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ); // TODO: add VkMemoryPropertyFlags to memory param
+	allocInfo.memoryTypeIndex = memory.memoryTypeIndex;
 
 	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
