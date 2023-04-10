@@ -26,6 +26,7 @@
 #include "pipeline.h"
 #include "../render_core/renderer.h"
 #include "../render_state/deviceContext.h"
+#include "../render_state/rhi.h"
 #include <core/assetLib.h>
 #include <scene/scene.h>
 
@@ -278,7 +279,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	if ( state.stateBits & GFX_STATE_MSAA_ENABLE ) {
 		multisampling.sampleShadingEnable = VK_TRUE;
-		multisampling.rasterizationSamples = Renderer::vk_GetSampleCount( state.samplingRate );
+		multisampling.rasterizationSamples = vk_GetSampleCount( state.samplingRate );
 	} else {
 		multisampling.sampleShadingEnable = VK_FALSE;
 		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;

@@ -26,6 +26,7 @@
 #include <map>
 #include "renderer.h"
 #include <scene/entity.h>
+#include "../render_state/rhi.h"
 
 void Renderer::CreateInstance()
 {

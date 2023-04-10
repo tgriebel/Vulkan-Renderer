@@ -28,7 +28,6 @@
 #include "../globals/common.h"
 #include "../../window.h"
 #include "../../input.h"
-#include "../globals/common.h"
 #include "../globals/render_util.h"
 #include "../render_state/deviceContext.h"
 #include "../render_binding/pipeline.h"
@@ -123,9 +122,6 @@ public:
 
 		return TEXTURE_SMP_1;
 	}
-
-	static VkFormat						vk_GetTextureFormat( textureFmt_t fmt );
-	static VkSampleCountFlagBits		vk_GetSampleCount( const textureSamples_t sampleCount );
 
 private:
 

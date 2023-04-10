@@ -196,6 +196,7 @@
     <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="src\render_state\deviceContext.h" />
     <ClInclude Include="src\render_state\FrameState.h" />
+    <ClInclude Include="src\render_state\rhi.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
