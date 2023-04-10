@@ -99,17 +99,17 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 
 	VkDescriptorSetLayoutBinding viewLayoutBinding{ };
 	viewLayoutBinding.binding = 1;
-	viewLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	viewLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	viewLayoutBinding.descriptorCount = 1;
 	viewLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
 	viewLayoutBinding.pImmutableSamplers = nullptr;
 
-	VkDescriptorSetLayoutBinding uboLayoutBinding{ };
-	uboLayoutBinding.binding = 2;
-	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount = 1;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	uboLayoutBinding.pImmutableSamplers = nullptr;
+	VkDescriptorSetLayoutBinding objectLayoutBinding{ };
+	objectLayoutBinding.binding = 2;
+	objectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	objectLayoutBinding.descriptorCount = 1;
+	objectLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
+	objectLayoutBinding.pImmutableSamplers = nullptr;
 
 	VkDescriptorSetLayoutBinding sampler2dLayoutBinding{ };
 	sampler2dLayoutBinding.binding = 3;
@@ -128,14 +128,14 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 	VkDescriptorSetLayoutBinding materialBinding{ };
 	materialBinding.binding = 5;
 	materialBinding.descriptorCount = 1;
-	materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	materialBinding.pImmutableSamplers = nullptr;
 	materialBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
 	VkDescriptorSetLayoutBinding lightBinding{ };
 	lightBinding.binding = 6;
 	lightBinding.descriptorCount = 1;
-	lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	lightBinding.pImmutableSamplers = nullptr;
 	lightBinding.stageFlags = VK_SHADER_STAGE_ALL;
 
@@ -155,7 +155,7 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 
 	std::array<VkDescriptorSetLayoutBinding, 9> bindings = {	globalsLayoutBinding,
 																viewLayoutBinding,
-																uboLayoutBinding,
+																objectLayoutBinding,
 																sampler2dLayoutBinding,
 																samplerCubeLayoutBinding,
 																materialBinding,

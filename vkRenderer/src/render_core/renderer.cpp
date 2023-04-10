@@ -40,7 +40,7 @@ extern Scene* gScene;
 
 static VkDescriptorBufferInfo	vk_globalConstantsInfo;
 static VkDescriptorBufferInfo	vk_viewUbo;
-static VkDescriptorBufferInfo	vk_surfaceUbo[ MaxViews ];
+static VkDescriptorBufferInfo	vk_surfaceBuffer[ MaxViews ];
 static VkDescriptorImageInfo	vk_image2DInfo[ MaxImageDescriptors ];
 static VkDescriptorImageInfo	vk_shadowImageInfo[ MaxImageDescriptors ];
 static VkDescriptorImageInfo	vk_codeImageInfo[ MaxCodeImages ];
@@ -366,7 +366,7 @@ void Renderer::ShutdownGPU()
 
 	memset( &vk_globalConstantsInfo, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_viewUbo, 0, sizeof( VkDescriptorBufferInfo ) );
-	memset( &vk_surfaceUbo, 0, sizeof( VkDescriptorBufferInfo ) );
+	memset( &vk_surfaceBuffer, 0, sizeof( VkDescriptorBufferInfo ) );
 	memset( &vk_image2DInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
 	memset( &vk_shadowImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxImageDescriptors );
 	memset( &vk_codeImageInfo[0], 0, sizeof( VkDescriptorBufferInfo ) * MaxCodeImages );
@@ -773,9 +773,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	for ( uint32_t v = 0; v < MaxViews; ++v )
 	{
 		const VkDeviceSize size = MaxSurfaces * sizeof( uniformBufferObject_t );
-		vk_surfaceUbo[v].buffer = frameState[ i ].surfParms.GetVkObject();
-		vk_surfaceUbo[v].offset = v * size;
-		vk_surfaceUbo[v].range = size;
+		vk_surfaceBuffer[v].buffer = frameState[ i ].surfParms.GetVkObject();
+		vk_surfaceBuffer[v].offset = v * size;
+		vk_surfaceBuffer[v].range = size;
 	}
 
 	int firstCube = -1;
@@ -878,7 +878,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 	descriptorWrites[ descriptorId ].dstBinding = 1;
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
 	descriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
 	++descriptorId;
@@ -887,9 +887,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 	descriptorWrites[ descriptorId ].dstBinding = 2;
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[0];
+	descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
 	++descriptorId;
 
 	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -914,7 +914,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 	descriptorWrites[ descriptorId ].dstBinding = 5;
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
 	descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
 	++descriptorId;
@@ -923,7 +923,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
 	descriptorWrites[ descriptorId ].dstBinding = 6;
 	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	descriptorWrites[ descriptorId ].descriptorCount = 1;
 	descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
 	++descriptorId;
@@ -1005,7 +1005,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 	shadowDescriptorWrites[ descriptorId ].dstBinding = 1;
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
 	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
 	++descriptorId;
@@ -1014,9 +1014,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 	shadowDescriptorWrites[ descriptorId ].dstBinding = 2;
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[1];
+	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[1];
 	++descriptorId;
 
 	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1041,7 +1041,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 	shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
 	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
 	++descriptorId;
@@ -1050,7 +1050,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
 	shadowDescriptorWrites[ descriptorId ].dstBinding = 6;
 	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
 	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
 	++descriptorId;
@@ -1128,7 +1128,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 	postDescriptorWrites[ descriptorId ].dstBinding = 1;
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
 	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
 	++descriptorId;
@@ -1137,9 +1137,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 	postDescriptorWrites[ descriptorId ].dstBinding = 1;
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceUbo[0];
+	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
 	++descriptorId;
 
 	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1164,7 +1164,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 	postDescriptorWrites[ descriptorId ].dstBinding = 5;
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
 	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
 	++descriptorId;
@@ -1173,7 +1173,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
 	postDescriptorWrites[ descriptorId ].dstBinding = 6;
 	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
 	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
 	++descriptorId;

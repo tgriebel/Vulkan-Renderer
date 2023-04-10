@@ -857,28 +857,28 @@ void Renderer::CreateUniformBuffers()
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( viewBufferObject_t ) );
 			const VkDeviceSize bufferSize = MaxViews * stride;
-			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].viewParms, sharedMemory );
+			CreateBuffer( bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, frameState[ i ].viewParms, sharedMemory );
 		}
 
 		// Model Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( uniformBufferObject_t ) );
 			const VkDeviceSize bufferSize = MaxViews * MaxSurfaces * stride;
-			CreateBuffer( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].surfParms, sharedMemory );
+			CreateBuffer( bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, frameState[ i ].surfParms, sharedMemory );
 		}
 
 		// Material Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( materialBufferObject_t ) );
 			const VkDeviceSize materialBufferSize = MaxMaterials * stride;
-			CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].materialBuffers, sharedMemory );
+			CreateBuffer( materialBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, frameState[ i ].materialBuffers, sharedMemory );
 		}
 
 		// Light Buffer
 		{
 			const VkDeviceSize stride = std::max( alignment, sizeof( lightBufferObject_t ) );
 			const VkDeviceSize lightBufferSize = MaxLights * stride;
-			CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, frameState[ i ].lightParms, sharedMemory );
+			CreateBuffer( lightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, frameState[ i ].lightParms, sharedMemory );
 		}
 	}
 }

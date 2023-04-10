@@ -72,7 +72,7 @@ struct view_t
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
-#define MODEL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform UniformBufferObject					\
+#define MODEL_LAYOUT( S, N )		layout( set = S, binding = N ) buffer UniformBufferObject					\
 									{																			\
 										mat4        model[MaxSurfaces];											\
 									} ubo;
@@ -88,7 +88,7 @@ struct view_t
 										uint		numLights;													\
 									} globals;
 
-#define VIEW_LAYOUT( S, N )			layout( set = S, binding = N ) uniform ViewUniformBuffer					\
+#define VIEW_LAYOUT( S, N )			layout( set = S, binding = N ) buffer ViewUniformBuffer						\
 									{																			\
 										view_t		views[MaxViews];											\
 									} viewUbo;
@@ -101,12 +101,12 @@ struct view_t
 
 #define STENCIL_LAYOUT( S, N, SAMPLER )		layout( set = S, binding = N ) uniform SAMPLER stencilImage;
 
-#define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) uniform MaterialBuffer						\
+#define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) buffer MaterialBuffer						\
 									{																			\
 										material_t materials[MaxMaterials];										\
 									} materialUbo;
 
-#define LIGHT_LAYOUT( S, N )		layout( set = S, binding = N ) uniform LightBuffer							\
+#define LIGHT_LAYOUT( S, N )		layout( set = S, binding = N ) buffer LightBuffer							\
 									{																			\
 										light_t lights[MaxLights];												\
 									} lightUbo;
