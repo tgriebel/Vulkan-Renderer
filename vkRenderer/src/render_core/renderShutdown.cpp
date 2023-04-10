@@ -112,10 +112,8 @@ void Renderer::ShutdownImGui()
 
 void Renderer::ShutdownShaderResources()
 {
-	vkDestroyBuffer( context.device, ib.GetVkObject(), nullptr );
-	vkDestroyBuffer( context.device, vb.GetVkObject(), nullptr );
-	ib.Reset();
-	vb.Reset();
+	ib.Destroy();
+	vb.Destroy();
 
 	// Memory
 	vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
@@ -126,16 +124,15 @@ void Renderer::ShutdownShaderResources()
 	sharedMemory.Reset();
 
 	// Staging
-	vkDestroyBuffer( context.device, stagingBuffer.GetVkObject(), nullptr );
-	stagingBuffer.Reset();
+	stagingBuffer.Destroy();
 
-	// UBOs
+	// Buffers
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-		vkDestroyBuffer( context.device, frameState[ i ].globalConstants.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].viewParms.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].surfParms.GetVkObject(), nullptr );	
-		vkDestroyBuffer( context.device, frameState[ i ].materialBuffers.GetVkObject(), nullptr );
-		vkDestroyBuffer( context.device, frameState[ i ].lightParms.GetVkObject(), nullptr );
+		frameState[ i ].globalConstants.Destroy();
+		frameState[ i ].viewParms.Destroy();
+		frameState[ i ].surfParms.Destroy();
+		frameState[ i ].materialBuffers.Destroy();
+		frameState[ i ].lightParms.Destroy();
 	}
 
 	// Images

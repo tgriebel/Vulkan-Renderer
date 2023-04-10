@@ -271,7 +271,6 @@ private:
 	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	// API Creation Functions
-	void						CreateBuffer( VkDeviceSize size, VkBufferUsageFlags usage, GpuBuffer& buffer, AllocatorVkMemory& bufferMemory );
 	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
 	void						CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
 	void						CreateDescSetLayouts();

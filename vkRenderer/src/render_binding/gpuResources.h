@@ -25,29 +25,75 @@
 #include "../globals/common.h"
 #include "allocator.h"
 
-struct GpuBuffer
+class GpuBuffer
 {
-	alloc_t<Allocator<VkDeviceMemory>> alloc;
+public:
 
 	void Reset() {
 		offset = 0;
 	}
 
+
 	uint64_t GetSize() const {
 		return offset;
 	}
+
 
 	uint64_t GetMaxSize() const {
 		return alloc.GetSize();
 	}
 
+
 	void Allocate( const uint64_t size ) {
 		offset += size;
 	}
 
+
 	VkBuffer& GetVkObject() {
 		return buffer;
 	}
+
+
+	void Create( VkDeviceSize size, VkBufferUsageFlags usage, AllocatorVkMemory& bufferMemory )
+	{
+		VkBufferCreateInfo bufferInfo{ };
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = size;
+		bufferInfo.usage = usage;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &GetVkObject() ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create buffer!" );
+		}
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements( context.device, GetVkObject(), &memRequirements );
+
+		VkMemoryAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = bufferMemory.memoryTypeIndex;
+
+		if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
+			vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetMemoryResource(), alloc.GetOffset() );
+		}
+		else {
+			throw std::runtime_error( "Buffer could not allocate!" );
+		}
+	}
+
+	void Destroy()
+	{
+		if( context.device == VK_NULL_HANDLE ) {
+			throw std::runtime_error( "GPU Buffer: Destroy: No device context!" );
+		}
+		VkBuffer vkBuffer = GetVkObject();
+		if( vkBuffer == VK_NULL_HANDLE ) {
+			vkDestroyBuffer( context.device, vkBuffer, nullptr );
+		}
+		Reset();
+	}
+
 
 	void CopyData( void* data, const size_t sizeInBytes )
 	{
@@ -61,6 +107,7 @@ struct GpuBuffer
 	}
 
 private:
+	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	uint64_t	offset;
 	VkBuffer	buffer;
 };
