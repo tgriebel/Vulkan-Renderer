@@ -292,6 +292,7 @@ private:
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
 	void						MergeSurfaces( RenderView& view );
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
+	textureSamples_t			GetSampleCountForDrawPass( const drawPass_t pass );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
 	const DrawPassState*		GetPassState( const drawPass_t pass );
 	void						DrawDebugMenu();

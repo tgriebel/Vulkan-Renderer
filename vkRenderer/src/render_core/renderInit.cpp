@@ -327,10 +327,12 @@ void Renderer::CreatePipelineObjects()
 				continue;
 			}
 
+			const drawPass_t drawPass = drawPass_t( passIx );
+
 			pipelineState_t state;
-			state.viewport = GetDrawPassViewport( (drawPass_t)passIx );
-			state.stateBits = GetStateBitsForDrawPass( (drawPass_t)passIx );
-			state.samplingRate = config.mainColorSubSamples;
+			state.viewport = GetDrawPassViewport( drawPass );
+			state.stateBits = GetStateBitsForDrawPass( drawPass );
+			state.samplingRate = GetSampleCountForDrawPass( drawPass );
 			state.shaders = &prog->Get();
 			state.tag = gAssets.gpuPrograms.FindName( m.GetShader( passIx ) );
 
@@ -411,9 +413,10 @@ void Renderer::CreateTextureSamplers()
 
 void Renderer::CreateRenderPasses()
 {
-	const VkSampleCountFlagBits samples = vk_GetSampleCount( config.mainColorSubSamples );
 	{
 		// Main View Pass
+		const VkSampleCountFlagBits samples = vk_GetSampleCount( config.mainColorSubSamples );
+
 		VkAttachmentDescription colorAttachment{ };
 		colorAttachment.format = vk_mainColorFmt;
 		colorAttachment.samples = samples;

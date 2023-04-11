@@ -530,6 +530,17 @@ gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
 }
 
 
+textureSamples_t Renderer::GetSampleCountForDrawPass( const drawPass_t pass )
+{
+	uint64_t stateBits = 0;
+	if ( ( pass == DRAWPASS_SHADOW ) || ( pass == DRAWPASS_POST_2D ) ) {
+		return textureSamples_t::TEXTURE_SMP_1;
+	} else {
+		return config.mainColorSubSamples;
+	}
+}
+
+
 viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 {
 	if ( pass == DRAWPASS_SHADOW ) {
