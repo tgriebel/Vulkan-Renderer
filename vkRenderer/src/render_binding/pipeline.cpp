@@ -441,24 +441,11 @@ void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t&
 	computeShaderStageInfo.pName = "main";
 	computeShaderStageInfo.pNext = nullptr;
 
-	// TODO: think about details
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	{
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 1;
-
-		VkDescriptorSetLayout layouts[] = { layout };
-		pipelineLayoutInfo.pSetLayouts = layouts;
-
-		pipelineLayoutInfo.pushConstantRangeCount = 1;
-
-		VkPushConstantRange pushRanges;
-		pushRanges.offset = 0;
-		pushRanges.size = sizeof( pushConstants_t );
-		pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
-		pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 	}
-	//
 
 	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create pipeline layout!" );
