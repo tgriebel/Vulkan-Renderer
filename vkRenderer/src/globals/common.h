@@ -79,7 +79,7 @@ const uint32_t	MaxMaterials					= 256;
 const uint32_t	MaxCodeImages					= 2;
 const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
-const uint64_t	MaxFrameBufferMemory			= MB( 512 );
+const uint64_t	MaxFrameBufferMemory			= GB( 2 );
 
 const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
 const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;

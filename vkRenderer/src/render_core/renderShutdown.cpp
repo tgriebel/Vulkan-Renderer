@@ -98,6 +98,7 @@ void Renderer::DestroyFrameResources()
 
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
 	frameBufferMemory.Unbind();
+	//vkUnmapMemory
 }
 
 
