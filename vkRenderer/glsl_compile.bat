@@ -12,3 +12,4 @@ C:\VulkanSDK\1.2.189.2\Bin\glslangValidator.exe -l -V shaders\emissive.frag -o s
 C:\VulkanSDK\1.2.189.2\Bin\glslangValidator.exe -l -V shaders\tree.vert -o shaders_bin\treeVS.spv -g
 C:\VulkanSDK\1.2.189.2\Bin\glslangValidator.exe -l -V shaders\pixelSimple.frag -o shaders_bin\simplePS.spv -g
 C:\VulkanSDK\1.2.189.2\Bin\glslangValidator.exe -l -V shaders\crt.frag -o shaders_bin\crtPS.spv -g
+C:\VulkanSDK\1.2.189.2\Bin\glslangValidator.exe -l -V shaders\clear.comp -o shaders_bin\clearCS.spv -g
