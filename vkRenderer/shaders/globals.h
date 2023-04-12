@@ -72,108 +72,120 @@ struct view_t
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
-#define MODEL_LAYOUT( S, N )		layout( set = S, binding = N ) buffer UniformBufferObject					\
-									{																			\
-										mat4        model[MaxSurfaces];											\
-									} ubo;
+#define MODEL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer UniformBufferObject				\
+											{																		\
+												mat4        model[MaxSurfaces];										\
+											} ubo;
 
-#define GLOBALS_LAYOUT( S, N )		layout( set = S, binding = N ) uniform GlobalConstants						\
-									{																			\
-										vec4        time;														\
-										vec4        generic;													\
-										vec4        dimensions;													\
-										vec4        shadowParms;												\
-										vec4        toneMap;													\
-										uint		numSamples;													\
-										uint		numLights;													\
-									} globals;
+#define GLOBALS_LAYOUT( S, N )				layout( set = S, binding = N ) uniform GlobalConstants					\
+											{																		\
+												vec4        time;													\
+												vec4        generic;												\
+												vec4        dimensions;												\
+												vec4        shadowParms;											\
+												vec4        toneMap;												\
+												uint		numSamples;												\
+												uint		numLights;												\
+											} globals;
 
-#define VIEW_LAYOUT( S, N )			layout( set = S, binding = N ) buffer ViewUniformBuffer						\
-									{																			\
-										view_t		views[MaxViews];											\
-									} viewUbo;
+#define VIEW_LAYOUT( S, N )					layout( set = S, binding = N ) buffer ViewUniformBuffer					\
+											{																		\
+												view_t		views[MaxViews];										\
+											} viewUbo;
 
-#define SAMPLER_2D_LAYOUT( S, N )	layout( set = S, binding = N ) uniform sampler2D texSampler[];
+#define READ_BUFFER_LAYOUT( SET, SLOT, TYPE, NAME )																	\
+											layout( std140, set = SET, binding = SLOT ) readonly buffer ReadBuffer##SLOT	\
+											{																		\
+												TYPE		NAME[];													\
+											};
 
-#define SAMPLER_CUBE_LAYOUT( S, N )	layout( set = S, binding = N ) uniform samplerCube cubeSamplers[];
+#define WRITE_BUFFER_LAYOUT( SET, SLOT, TYPE, NAME )																\
+											layout( std140, set = SET, binding = SLOT ) buffer WriteBuffer##SLOT	\
+											{																		\
+												TYPE	NAME[];														\
+											};
+
+#define SAMPLER_2D_LAYOUT( S, N )			layout( set = S, binding = N ) uniform sampler2D texSampler[];
+
+#define SAMPLER_CUBE_LAYOUT( S, N )			layout( set = S, binding = N ) uniform samplerCube cubeSamplers[];
 
 #define CODE_IMAGE_LAYOUT( S, N, SAMPLER )	layout( set = S, binding = N ) uniform SAMPLER codeSamplers[];
 
 #define STENCIL_LAYOUT( S, N, SAMPLER )		layout( set = S, binding = N ) uniform SAMPLER stencilImage;
 
-#define MATERIAL_LAYOUT( S, N )		layout( set = S, binding = N ) buffer MaterialBuffer						\
-									{																			\
-										material_t materials[MaxMaterials];										\
-									} materialUbo;
+#define MATERIAL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer MaterialBuffer					\
+											{																		\
+												material_t materials[MaxMaterials];									\
+											} materialUbo;
 
-#define LIGHT_LAYOUT( S, N )		layout( set = S, binding = N ) buffer LightBuffer							\
-									{																			\
-										light_t lights[MaxLights];												\
-									} lightUbo;
+#define LIGHT_LAYOUT( S, N )				layout( set = S, binding = N ) buffer LightBuffer						\
+											{																		\
+												light_t lights[MaxLights];											\
+											} lightUbo;
 
-#define PUSH_CONSTANTS				layout( push_constant ) uniform fragmentPushConstants						\
-									{																			\
-										layout( offset = 0 ) uint objectId;										\
-										layout( offset = 4 ) uint materialId;									\
-										layout( offset = 8 ) uint viewId;										\
-									} pushConstants;
+#define PUSH_CONSTANTS						layout( push_constant ) uniform fragmentPushConstants					\
+											{																		\
+												layout( offset = 0 ) uint objectId;									\
+												layout( offset = 4 ) uint materialId;								\
+												layout( offset = 8 ) uint viewId;									\
+											} pushConstants;
 
-#define VS_IN		layout( set = 0, location = 0 ) in vec3 inPosition;											\
-					layout( set = 0, location = 1 ) in vec4 inColor;											\
-					layout( set = 0, location = 2 ) in vec3 inNormal;											\
-					layout( set = 0, location = 3 ) in vec3 inTangent;											\
-					layout( set = 0, location = 4 ) in vec3 inBitangent;										\
-					layout( set = 0, location = 5 ) in vec4 inTexCoord;
+#define VS_IN								layout( set = 0, location = 0 ) in vec3 inPosition;						\
+											layout( set = 0, location = 1 ) in vec4 inColor;						\
+											layout( set = 0, location = 2 ) in vec3 inNormal;						\
+											layout( set = 0, location = 3 ) in vec3 inTangent;						\
+											layout( set = 0, location = 4 ) in vec3 inBitangent;					\
+											layout( set = 0, location = 5 ) in vec4 inTexCoord;
 
-#define VS_OUT		layout( set = 0, location = 0 ) out vec4 fragColor;											\
-					layout( set = 0, location = 1 ) out vec3 fragNormal;										\
-					layout( set = 0, location = 2 ) out mat3 fragTangentBasis;									\
-					layout( set = 0, location = 5 ) out vec4 fragTexCoord;										\
-					layout( set = 0, location = 6 ) out vec4 clipPosition;										\
-					layout( set = 0, location = 7 ) out vec4 worldPosition;										\
-					layout( set = 0, location = 8 ) out flat uint objectId;
+#define VS_OUT								layout( set = 0, location = 0 ) out vec4 fragColor;						\
+											layout( set = 0, location = 1 ) out vec3 fragNormal;					\
+											layout( set = 0, location = 2 ) out mat3 fragTangentBasis;				\
+											layout( set = 0, location = 5 ) out vec4 fragTexCoord;					\
+											layout( set = 0, location = 6 ) out vec4 clipPosition;					\
+											layout( set = 0, location = 7 ) out vec4 worldPosition;					\
+											layout( set = 0, location = 8 ) out flat uint objectId;
 
-#define VS_LAYOUT_BASIC_IO	VS_IN																				\
-							VS_OUT
+#define VS_LAYOUT_BASIC_IO					VS_IN																	\
+											VS_OUT
 
-#define VS_LAYOUT_STANDARD( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
-										VIEW_LAYOUT( 0, 1)														\
-										MODEL_LAYOUT( 0, 2 )													\
-										SAMPLER_2D_LAYOUT( 0, 3 )												\
-										SAMPLER_CUBE_LAYOUT( 0, 4 )												\
-										MATERIAL_LAYOUT( 0, 5 )													\
-										LIGHT_LAYOUT( 0, 6 )													\
-										CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
-										STENCIL_LAYOUT( 0, 8, SAMPLER )											\
-										PUSH_CONSTANTS															\
-										VS_IN																	\
-										VS_OUT
+#define VS_LAYOUT_STANDARD( SAMPLER )		GLOBALS_LAYOUT( 0, 0 )													\
+											VIEW_LAYOUT( 0, 1)														\
+											MODEL_LAYOUT( 0, 2 )													\
+											SAMPLER_2D_LAYOUT( 0, 3 )												\
+											SAMPLER_CUBE_LAYOUT( 0, 4 )												\
+											MATERIAL_LAYOUT( 0, 5 )													\
+											LIGHT_LAYOUT( 0, 6 )													\
+											CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
+											STENCIL_LAYOUT( 0, 8, SAMPLER )											\
+											PUSH_CONSTANTS															\
+											VS_IN																	\
+											VS_OUT
 
-#define PS_IN		layout( set = 0, location = 0 ) in vec4 fragColor;											\
-					layout( set = 0, location = 1 ) in vec3 fragNormal;											\
-					layout( set = 0, location = 2 ) in mat3 fragTangentBasis;									\
-					layout( set = 0, location = 5 ) in vec4 fragTexCoord;										\
-					layout( set = 0, location = 6 ) in vec4 clipPosition;										\
-					layout( set = 0, location = 7 ) in vec4 worldPosition;										\
-					layout( set = 0, location = 8 ) in flat uint objectId;
+#define PS_IN								layout( set = 0, location = 0 ) in vec4 fragColor;						\
+											layout( set = 0, location = 1 ) in vec3 fragNormal;						\
+											layout( set = 0, location = 2 ) in mat3 fragTangentBasis;				\
+											layout( set = 0, location = 5 ) in vec4 fragTexCoord;					\
+											layout( set = 0, location = 6 ) in vec4 clipPosition;					\
+											layout( set = 0, location = 7 ) in vec4 worldPosition;					\
+											layout( set = 0, location = 8 ) in flat uint objectId;
 
-#define PS_OUT		layout( set = 0, location = 0 ) out vec4 outColor;
+#define PS_OUT								layout( set = 0, location = 0 ) out vec4 outColor;
 
-#define PS_LAYOUT_BASIC_IO	PS_IN																				\
-							PS_OUT
+#define PS_LAYOUT_BASIC_IO					PS_IN																	\
+											PS_OUT
 
-#define PS_LAYOUT_STANDARD( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
-										VIEW_LAYOUT( 0, 1)														\
-										MODEL_LAYOUT( 0, 2 )													\
-										SAMPLER_2D_LAYOUT( 0, 3 )												\
-										SAMPLER_CUBE_LAYOUT( 0, 4 )												\
-										MATERIAL_LAYOUT( 0, 5 )													\
-										LIGHT_LAYOUT( 0, 6 )													\
-										CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
-										STENCIL_LAYOUT( 0, 8, SAMPLER )											\
-										PUSH_CONSTANTS															\
-										PS_IN																	\
-										PS_OUT
+#define PS_LAYOUT_STANDARD( SAMPLER )		GLOBALS_LAYOUT( 0, 0 )													\
+											VIEW_LAYOUT( 0, 1)														\
+											MODEL_LAYOUT( 0, 2 )													\
+											SAMPLER_2D_LAYOUT( 0, 3 )												\
+											SAMPLER_CUBE_LAYOUT( 0, 4 )												\
+											MATERIAL_LAYOUT( 0, 5 )													\
+											LIGHT_LAYOUT( 0, 6 )													\
+											CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
+											STENCIL_LAYOUT( 0, 8, SAMPLER )											\
+											PUSH_CONSTANTS															\
+											PS_IN																	\
+											PS_OUT
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
