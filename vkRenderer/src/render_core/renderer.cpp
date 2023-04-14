@@ -1194,7 +1194,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		uint32_t descriptorId = 0;
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[ descriptorId ].dstSet = particleState.descriptorSets[ i ];
-		descriptorWrites[ descriptorId ].dstBinding = 1;
+		descriptorWrites[ descriptorId ].dstBinding = 0;
 		descriptorWrites[ descriptorId ].dstArrayElement = 0;
 		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		descriptorWrites[ descriptorId ].descriptorCount = 1;
