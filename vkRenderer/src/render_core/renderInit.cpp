@@ -606,6 +606,13 @@ void Renderer::CreateRenderPasses()
 			throw std::runtime_error( "Failed to create render pass!" );
 		}
 	}
+
+	// Particle State
+	{
+		particleState.x = 1;
+		particleState.y = 1;
+		particleState.z = 1;
+	}
 }
 
 
@@ -809,9 +816,11 @@ void Renderer::CreateDescSetLayouts()
 {
 	CreateSceneRenderDescriptorSetLayout( globalLayout );
 	CreateSceneRenderDescriptorSetLayout( postProcessLayout );
+	CreateComputeDescriptorSetLayout( computeLayout );
 	CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
 	CreateDescriptorSets( globalLayout, shadowPassState.descriptorSets );
 	CreateDescriptorSets( postProcessLayout, postPassState.descriptorSets );
+	CreateDescriptorSets( computeLayout, particleState.descriptorSets );
 }
 
 
@@ -854,6 +863,13 @@ void Renderer::CreateUniformBuffers()
 			const VkDeviceSize stride = std::max( alignment, sizeof( lightBufferObject_t ) );
 			const VkDeviceSize lightBufferSize = MaxLights * stride;
 			frameState[ i ].lightParms.Create( lightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
+		}
+
+		// Particle Buffer
+		{
+			const VkDeviceSize stride = std::max( alignment, sizeof( particleBufferObject_t ) );
+			const VkDeviceSize particleBufferSize = MaxParticles * stride;
+			frameState[ i ].particleBuffer.Create( particleBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
 	}
 }

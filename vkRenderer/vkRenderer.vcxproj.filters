@@ -220,6 +220,9 @@
     <None Include="shaders\crt.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\clear.comp">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

@@ -40,6 +40,7 @@ public:
 	GpuBuffer		surfParms;
 	GpuBuffer		materialBuffers;
 	GpuBuffer		lightParms;
+	GpuBuffer		particleBuffer;
 };
 
 

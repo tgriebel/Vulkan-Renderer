@@ -160,8 +160,10 @@ private:
 	DrawPassState					shadowPassState;
 	DrawPassState					mainPassState;
 	DrawPassState					postPassState;
+	ComputeState					particleState;
 	VkDescriptorSetLayout			globalLayout;
 	VkDescriptorSetLayout			postProcessLayout;
+	VkDescriptorSetLayout			computeLayout;
 	VkDescriptorPool				descriptorPool;
 	renderConfig_t					config;
 	size_t							frameId = 0;

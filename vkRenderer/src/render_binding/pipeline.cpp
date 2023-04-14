@@ -168,9 +168,34 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
 	layoutInfo.pBindings = bindings.data();
 
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS )
-	{
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create descriptor set layout!" );
+	}
+}
+
+
+void CreateComputeDescriptorSetLayout( VkDescriptorSetLayout& layout )
+{
+	std::array<VkDescriptorSetLayoutBinding, 2> layoutBindings{};
+	layoutBindings[ 0 ].binding = 0;
+	layoutBindings[ 0 ].descriptorCount = 1;
+	layoutBindings[ 0 ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	layoutBindings[ 0 ].pImmutableSamplers = nullptr;
+	layoutBindings[ 0 ].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+	layoutBindings[ 1 ].binding = 1;
+	layoutBindings[ 1 ].descriptorCount = 1;
+	layoutBindings[ 1 ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	layoutBindings[ 1 ].pImmutableSamplers = nullptr;
+	layoutBindings[ 1 ].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = layoutBindings.size();
+	layoutInfo.pBindings = layoutBindings.data();
+
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create compute descriptor set layout!" );
 	}
 }
 

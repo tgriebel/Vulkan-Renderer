@@ -821,353 +821,395 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		vk_lightBufferInfo = info;
 	}
 
-	// Shadow Map
-	for ( int j = 0; j < MaxCodeImages; ++j )
-	{
-		VkImageView& imageView = frameState[ currentImage ].shadowMapImage.vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_depthShadowSampler;
-		vk_codeImageInfo[j] = info;
-	}
-
 	const uint32_t descriptorSetCnt = 9;
-	std::array<VkWriteDescriptorSet, descriptorSetCnt> descriptorWrites{ };
 
-	uint32_t descriptorId = 0;
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 0;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
-	++descriptorId;
+	{
+		// Shadow Map
+		for ( int j = 0; j < MaxCodeImages; ++j )
+		{
+			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_depthShadowSampler;
+			vk_codeImageInfo[j] = info;
+		}
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 1;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
-	++descriptorId;
+		std::array<VkWriteDescriptorSet, descriptorSetCnt> descriptorWrites{ };
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 2;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
-	++descriptorId;
+		uint32_t descriptorId = 0;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 0;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
+		++descriptorId;
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 3;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	descriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
-	++descriptorId;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 1;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
+		++descriptorId;
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 4;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	descriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
-	++descriptorId;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 2;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
+		++descriptorId;
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 5;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
-	++descriptorId;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 3;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		descriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
+		++descriptorId;
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 6;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
-	++descriptorId;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 4;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		descriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
+		++descriptorId;
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 7;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-	descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
-	++descriptorId;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 5;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
+		++descriptorId;
 
-	descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-	descriptorWrites[ descriptorId ].dstBinding = 8;
-	descriptorWrites[ descriptorId ].dstArrayElement = 0;
-	descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptorWrites[ descriptorId ].descriptorCount = 1;
-	descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
-	++descriptorId;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 6;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
+		++descriptorId;
 
-	assert( descriptorId == descriptorSetCnt );
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 7;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
+		descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
+		++descriptorId;
 
-	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 8;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
+		++descriptorId;
+
+		assert( descriptorId == descriptorSetCnt );
+
+		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
+	}
 
 	//////////////////////////////////////////////////////
 	//													//
 	// Shadow Descriptor Sets							//
 	//													//
 	//////////////////////////////////////////////////////
-
-	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Texture& texture = gAssets.textureLib.Find( i )->Get();
-		VkImageView& imageView = texture.gpuImage->vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_bilinearSampler;
-		vk_shadowImageInfo[i] = info;
+		for ( uint32_t i = 0; i < textureCount; ++i )
+		{
+			Texture& texture = gAssets.textureLib.Find( i )->Get();
+			VkImageView& imageView = texture.gpuImage->vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			vk_shadowImageInfo[i] = info;
+		}
+		// Defaults
+		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
+		{
+			const Texture& texture = gAssets.textureLib.GetDefault()->Get();
+			const VkImageView& imageView = texture.gpuImage->vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			vk_shadowImageInfo[j] = info;
+		}
+
+		for ( size_t j = 0; j < MaxCodeImages; ++j )
+		{
+			const Texture& texture = gAssets.textureLib.GetDefault()->Get();
+			const VkImageView& imageView = texture.gpuImage->vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			vk_shadowCodeImageInfo[j] = info;
+		}
+
+		std::array<VkWriteDescriptorSet, descriptorSetCnt> shadowDescriptorWrites{ };
+
+		uint32_t descriptorId = 0;
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 0;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 1;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 2;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[1];
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 3;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowImageInfo[ 0 ];
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 4;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowImageInfo[ 0 ];
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 6;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 7;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
+		shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowCodeImageInfo[ 0 ];
+		++descriptorId;
+
+		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
+		shadowDescriptorWrites[ descriptorId ].dstBinding = 8;
+		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowCodeImageInfo[ 0 ];
+		++descriptorId;
+
+		assert( descriptorId == descriptorSetCnt );
+		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( shadowDescriptorWrites.size() ), shadowDescriptorWrites.data(), 0, nullptr );
 	}
-	// Defaults
-	for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
-	{
-		const Texture& texture = gAssets.textureLib.GetDefault()->Get();
-		const VkImageView& imageView = texture.gpuImage->vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_bilinearSampler;
-		vk_shadowImageInfo[j] = info;
-	}
-
-	for ( size_t j = 0; j < MaxCodeImages; ++j )
-	{
-		const Texture& texture = gAssets.textureLib.GetDefault()->Get();
-		const VkImageView& imageView = texture.gpuImage->vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_bilinearSampler;
-		vk_shadowCodeImageInfo[j] = info;
-	}
-
-	std::array<VkWriteDescriptorSet, descriptorSetCnt> shadowDescriptorWrites{ };
-
-	descriptorId = 0;
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 0;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 1;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 2;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[1];
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 3;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowImageInfo[ 0 ];
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 4;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowImageInfo[ 0 ];
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 5;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 6;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 7;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowCodeImageInfo[ 0 ];
-	++descriptorId;
-
-	shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	shadowDescriptorWrites[ descriptorId ].dstSet = shadowPassState.descriptorSets[ i ];
-	shadowDescriptorWrites[ descriptorId ].dstBinding = 8;
-	shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	shadowDescriptorWrites[ descriptorId ].pImageInfo = &vk_shadowCodeImageInfo[ 0 ];
-	++descriptorId;
-
-	assert( descriptorId == descriptorSetCnt );
-	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( shadowDescriptorWrites.size() ), shadowDescriptorWrites.data(), 0, nullptr );
 
 	//////////////////////////////////////////////////////
 	//													//
 	// Post Descriptor Sets								//
 	//													//
 	//////////////////////////////////////////////////////
-
-	// View Color Map
 	{
-		VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_bilinearSampler;
-		vk_postImageInfo[0] = info;
+		// View Color Map
+		{
+			VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			vk_postImageInfo[0] = info;
+		}
+
+		// View Depth Map
+		{
+			VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			vk_postImageInfo[ 1 ] = info;
+		}
+
+		// View Stencil Map
+		{
+			VkImageView& imageView = frameState[ currentImage ].stencilImage.vk_view;
+			VkDescriptorImageInfo info{ };
+			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			info.imageView = imageView;
+			info.sampler = vk_bilinearSampler;
+			vk_postImageInfo[ 2 ] = info;
+		}
+
+		std::array<VkWriteDescriptorSet, 9> postDescriptorWrites{ };
+
+		uint32_t descriptorId = 0;
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 0;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 1;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 1;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 3;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		postDescriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 4;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
+		postDescriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 5;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 6;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 7;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
+		postDescriptorWrites[ descriptorId ].pImageInfo = &vk_postImageInfo[ 0 ];
+		++descriptorId;
+
+		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
+		postDescriptorWrites[ descriptorId ].dstBinding = 8;
+		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
+		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
+		postDescriptorWrites[ descriptorId ].pImageInfo = &vk_postImageInfo[ 2 ];
+		++descriptorId;
+
+		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( postDescriptorWrites.size() ), postDescriptorWrites.data(), 0, nullptr );
 	}
 
-	// View Depth Map
+	//////////////////////////////////////////////////////
+	//													//
+	// Compute											//
+	//													//
+	//////////////////////////////////////////////////////
 	{
-		VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_bilinearSampler;
-		vk_postImageInfo[ 1 ] = info;
+		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+		VkDescriptorBufferInfo storageBufferInfoCurrentFrame{};
+		{		
+			storageBufferInfoCurrentFrame.buffer = frameState[ currentImage ].particleBuffer.GetVkObject();
+			storageBufferInfoCurrentFrame.offset = 0;
+			storageBufferInfoCurrentFrame.range = sizeof( particleBufferObject_t ) * MaxParticles;
+		}
+
+		uint32_t descriptorId = 0;
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = particleState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 1;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
+		++descriptorId;
+
+		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[ descriptorId ].dstSet = particleState.descriptorSets[ i ];
+		descriptorWrites[ descriptorId ].dstBinding = 1;
+		descriptorWrites[ descriptorId ].dstArrayElement = 0;
+		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrites[ descriptorId ].descriptorCount = 1;
+		descriptorWrites[ descriptorId ].pBufferInfo = &storageBufferInfoCurrentFrame;
+		++descriptorId;
+
+		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
 	}
-
-	// View Stencil Map
-	{
-		VkImageView& imageView = frameState[ currentImage ].stencilImage.vk_view;
-		VkDescriptorImageInfo info{ };
-		info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-		info.imageView = imageView;
-		info.sampler = vk_bilinearSampler;
-		vk_postImageInfo[ 2 ] = info;
-	}
-
-	std::array<VkWriteDescriptorSet, 9> postDescriptorWrites{ };
-
-	descriptorId = 0;
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 0;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 1;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 1;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 3;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 4;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 5;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 6;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 7;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_postImageInfo[ 0 ];
-	++descriptorId;
-
-	postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	postDescriptorWrites[ descriptorId ].dstSet = postPassState.descriptorSets[ i ];
-	postDescriptorWrites[ descriptorId ].dstBinding = 8;
-	postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
-	postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-	postDescriptorWrites[ descriptorId ].pImageInfo = &vk_postImageInfo[ 2 ];
-	++descriptorId;
-
-	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( postDescriptorWrites.size() ), postDescriptorWrites.data(), 0, nullptr );
 }
 
 

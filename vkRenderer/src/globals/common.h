@@ -68,6 +68,7 @@ const uint32_t	MaxImageDescriptors				= 100;
 const uint32_t	MaxPostImageDescriptors			= 3;
 const uint32_t	MaxUboDescriptors				= 4;
 const uint32_t	MaxLights						= 128;
+const uint32_t	MaxParticles					= 1024;
 const uint32_t	MaxViews						= 6;
 const uint32_t	MaxModels						= 1000;
 const uint32_t	ShadowObjectOffset				= MaxModels;
@@ -174,6 +175,14 @@ struct lightBufferObject_t
 	uint32_t	pad[3];
 };
 
+
+struct particleBufferObject_t
+{
+	vec2f	position;
+	vec2f	velocity;
+	vec4f	color;
+};
+
 struct SwapChainSupportDetails
 {
 	VkSurfaceCapabilitiesKHR		capabilities;
@@ -268,6 +277,15 @@ struct DrawPassState
 	VkRenderPass		pass;
 	VkDescriptorSet		descriptorSets[ MAX_FRAMES_STATES ];
 	FrameBuffer*		fb;
+};
+
+
+struct ComputeState
+{
+	int32_t			x;
+	int32_t			y;
+	int32_t			z;
+	VkDescriptorSet	descriptorSets[ MAX_FRAMES_STATES ];
 };
 
 

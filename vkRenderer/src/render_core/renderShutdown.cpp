@@ -134,6 +134,7 @@ void Renderer::ShutdownShaderResources()
 		frameState[ i ].surfParms.Destroy();
 		frameState[ i ].materialBuffers.Destroy();
 		frameState[ i ].lightParms.Destroy();
+		frameState[ i ].particleBuffer.Destroy();
 	}
 
 	// Images
