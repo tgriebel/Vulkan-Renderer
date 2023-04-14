@@ -181,8 +181,8 @@ int ParseImageObject( parseState_t& st, void* object )
 
 	AssetLibImages& textureLib = st.assets->textureLib;
 
-	char name[TOKEN_LEN] = "<undefined>";
-	char type[TOKEN_LEN] = "<undefined>";
+	char name[TOKEN_LEN] = "";
+	char type[TOKEN_LEN] = "";
 
 	const uint32_t objectCount = 2;
 	const objectTuple_t objectMap[ objectCount ] =
@@ -376,9 +376,9 @@ int ParseEntityObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	char name[ TOKEN_LEN ] = "<undefined>";
-	char modelName[ TOKEN_LEN ] = "<undefined>";
-	char materialName[ TOKEN_LEN ] = "<undefined>";
+	char name[ TOKEN_LEN ] = "";
+	char modelName[ TOKEN_LEN ] = "";
+	char materialName[ TOKEN_LEN ] = "";
 	std::vector<Entity*>& entities = st.scene->entities;
 
 	float x = 0.0f, y = 0.0f, z = 0.0f;
@@ -426,7 +426,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 	ent->SetOrigin( vec3f( x, y, z ) );
 	ent->SetRotation( vec3f( rx, ry, rz ) );
 	ent->SetScale( vec3f( sx, sy, sz ) );
-	if ( strcmp( materialName, "<undefined>" ) != 0 ) {
+	if ( strcmp( materialName, "" ) != 0 ) {
 		ent->materialHdl = AssetLibMaterials::Handle( materialName );
 	}
 	if ( hidden ) {
@@ -451,7 +451,7 @@ int ParseMaterialObject( parseState_t& st, void* object )
 
 	Material m;
 	materialParms_t mParms;
-	char name[ TOKEN_LEN ] = "<undefined>";
+	char name[ TOKEN_LEN ] = "";
 
 	// TODO: allow parse functions that aren't just primitives. Need objects/array reading
 	const uint32_t objectCount = 23;
@@ -498,24 +498,26 @@ int ParseShaderObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	char name[ TOKEN_LEN ] = "<undefined>";
-	char vsShader[ TOKEN_LEN ] = "<undefined>";
-	char psShader[ TOKEN_LEN ] = "<undefined>";
+	char name[ TOKEN_LEN ] = "";
+	char vsShader[ TOKEN_LEN ] = "";
+	char psShader[ TOKEN_LEN ] = "";
+	char csShader[ TOKEN_LEN ] = "";
 	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
 
-	const uint32_t objectCount = 3;
+	const uint32_t objectCount = 4;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", reinterpret_cast<void*>( name ), &ParseStringObject },
 		{ "vs", reinterpret_cast<void*>( vsShader ), &ParseStringObject },
 		{ "ps", reinterpret_cast<void*>( psShader ), &ParseStringObject },
+		{ "cs", reinterpret_cast<void*>( csShader ), &ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
 
 	GpuProgramLoader* loader = new GpuProgramLoader();
 	loader->SetBasePath( "shaders_bin/" );
-	loader->AddRasterPath( vsShader, psShader );
+	loader->AddFilePaths( vsShader, psShader, csShader );
 	shaders->AddDeferred( name, Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 
 	return st.tx;

@@ -74,6 +74,10 @@
       "name": "Image2D",
       "vs": "defaultVS.spv",
       "ps": "simplePS.spv"
-    }
+    },
+	{
+      "name": "ClearParticles",
+      "cs": "clearCS.spv",
+    },
   ]
 }

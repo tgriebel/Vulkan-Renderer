@@ -299,7 +299,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 	for ( uint32_t i = 0; i < programCount; ++i )
 	{
 		GpuProgram& prog = lib.Find( i )->Get();
-		for ( int i = 0; i < GpuProgram::MaxShaders; ++i ) {
+		for ( int i = 0; i < prog.shaderCount; ++i ) {
 			prog.vk_shaders[ i ] = CreateShaderModule( prog.shaders[ i ].blob );
 		}
 	}
@@ -354,6 +354,7 @@ void Renderer::CreatePipelineObjects()
 			CreateGraphicsPipeline( layout, pass, state, prog->Get().pipeline );
 		}
 	}
+	//CreateComputePipeline( computeLayout, state, )
 }
 
 

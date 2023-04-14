@@ -601,6 +601,8 @@ void Renderer::SubmitFrame()
 
 	UpdateBufferContents( bufferId );
 	UpdateFrameDescSet( bufferId );
+
+
 	RenderViews();
 
 	VkSubmitInfo submitInfo{ };
