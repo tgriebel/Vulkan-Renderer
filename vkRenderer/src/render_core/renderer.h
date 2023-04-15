@@ -87,6 +87,8 @@ public:
 
 		view2D.region = renderViewRegion_t::POST;
 		view2D.name = "Post View";
+
+		particleShader = gAssets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 	}
 
 	void RenderScene( Scene* scene );
@@ -136,6 +138,8 @@ private:
 	RenderView							renderView;
 	RenderView							shadowView;
 	RenderView							view2D;
+
+	hdl_t								particleShader;
 
 	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };

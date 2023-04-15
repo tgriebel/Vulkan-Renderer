@@ -615,13 +615,20 @@ void Renderer::SubmitFrame()
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
-		//vkCmdBindPipeline( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline );
-		//vkCmdBindDescriptorSets( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, computeLayout, 0, 1, &computeDescriptorSets[ i ], 0, 0 );
+		GpuProgram& prog = gAssets.gpuPrograms.Find( particleShader )->Get();
 
-		//vkCmdDispatch( computeQueue.commandBuffers[ bufferId ], MaxParticles / 256, 1, 1 );
+		pipelineObject_t* pipelineObject = nullptr;
+		GetPipelineObject( prog.pipeline, &pipelineObject );
+		if ( pipelineObject != nullptr )
+		{
+			vkCmdBindPipeline( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
+			vkCmdBindDescriptorSets( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &particleState.descriptorSets[ bufferId ], 0, 0 );
 
-		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to record command buffer!" );
+			vkCmdDispatch( computeQueue.commandBuffers[ bufferId ], MaxParticles / 256, 1, 1 );
+
+			if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
+				throw std::runtime_error( "Failed to record command buffer!" );
+			}
 		}
 	}
 
@@ -629,12 +636,14 @@ void Renderer::SubmitFrame()
 
 	// Compute queue submit
 	{
-		//VkSubmitInfo submitInfo{ };
-		//submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		VkSubmitInfo submitInfo{ };
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &computeQueue.commandBuffers[ bufferId ];
 
-		//if ( vkQueueSubmit( context.computeQueue, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
-		//	throw std::runtime_error( "Failed to submit compute command buffers!" );
-		//}
+		if ( vkQueueSubmit( context.computeQueue, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to submit compute command buffers!" );
+		}
 	}
 
 	// Graphics queue submit
