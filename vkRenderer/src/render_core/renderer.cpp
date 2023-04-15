@@ -602,53 +602,88 @@ void Renderer::SubmitFrame()
 	UpdateBufferContents( bufferId );
 	UpdateFrameDescSet( bufferId );
 
+	// Compute
+	{
+		vkResetCommandBuffer( computeQueue.commandBuffers[ bufferId ], 0 );
+
+		VkCommandBufferBeginInfo beginInfo{ };
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = 0; // Optional
+		beginInfo.pInheritanceInfo = nullptr; // Optional
+
+		if ( vkBeginCommandBuffer( computeQueue.commandBuffers[ bufferId ], &beginInfo ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to begin recording command buffer!" );
+		}
+
+		//vkCmdBindPipeline( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, computePipeline );
+		//vkCmdBindDescriptorSets( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, computeLayout, 0, 1, &computeDescriptorSets[ i ], 0, 0 );
+
+		//vkCmdDispatch( computeQueue.commandBuffers[ bufferId ], MaxParticles / 256, 1, 1 );
+
+		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to record command buffer!" );
+		}
+	}
 
 	RenderViews();
 
-	VkSubmitInfo submitInfo{ };
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	// Compute queue submit
+	{
+		//VkSubmitInfo submitInfo{ };
+		//submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-	VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = waitSemaphores;
-	submitInfo.pWaitDstStageMask = waitStages;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
-
-	VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = signalSemaphores;
-
-	vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
-
-	if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to submit draw command buffer!" );
+		//if ( vkQueueSubmit( context.computeQueue, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
+		//	throw std::runtime_error( "Failed to submit compute command buffers!" );
+		//}
 	}
 
-	VkPresentInfoKHR presentInfo{ };
-	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = signalSemaphores;
-
-	VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
-	presentInfo.swapchainCount = 1;
-	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &bufferId;
-	presentInfo.pResults = nullptr; // Optional
-
-	result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
-
-	if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || gWindow.IsResizeRequested() )
+	// Graphics queue submit
 	{
-		RecreateSwapChain();
-		gWindow.AcceptImageResize();
-		return;
-	}
-	else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
-	{
-		throw std::runtime_error( "Failed to acquire swap chain image!" );
+		VkSubmitInfo submitInfo{ };
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
+
+		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
+
+		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to submit draw command buffers!" );
+		}
+
+		VkPresentInfoKHR presentInfo{ };
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+
+		VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.pImageIndices = &bufferId;
+		presentInfo.pResults = nullptr; // Optional
+
+		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
+
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || gWindow.IsResizeRequested() )
+		{
+			RecreateSwapChain();
+			gWindow.AcceptImageResize();
+			return;
+		}
+		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
+		{
+			throw std::runtime_error( "Failed to acquire swap chain image!" );
+		}
 	}
 
 	frameId = ( frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;

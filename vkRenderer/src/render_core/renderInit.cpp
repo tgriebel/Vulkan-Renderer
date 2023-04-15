@@ -354,7 +354,25 @@ void Renderer::CreatePipelineObjects()
 			CreateGraphicsPipeline( layout, pass, state, prog->Get().pipeline );
 		}
 	}
-	//CreateComputePipeline( computeLayout, state, )
+	for ( uint32_t i = 0; i < gAssets.gpuPrograms.Count(); ++i )
+	{
+		Asset<GpuProgram>* prog = gAssets.gpuPrograms.Find( i );
+		if ( prog == nullptr ) {
+			continue;
+		}
+		if( prog->Get().shaderCount != 1 ) {
+			continue;
+		}
+		if ( prog->Get().shaders[0].type != shaderType_t::COMPUTE ) {
+			continue;
+		}
+
+		pipelineState_t state;
+		state.shaders = &prog->Get();
+		state.tag = prog->GetName().c_str();
+
+		CreateComputePipeline( computeLayout, state, prog->Get().pipeline );
+	}
 }
 
 
@@ -966,7 +984,7 @@ void Renderer::CreateSyncObjects()
 		}
 	}
 
-	if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &computeQueue.semaphore ) ) {
+	if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, computeQueue.semaphores ) ) {
 		throw std::runtime_error( "Failed to create compute semaphore!" );
 	}
 }
@@ -995,11 +1013,13 @@ void Renderer::CreateCommandBuffers()
 	{
 		allocInfo.commandPool = computeQueue.commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = 1;
+		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, &computeQueue.commandBuffer ) != VK_SUCCESS ) {
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, computeQueue.commandBuffers ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to allocate compute command buffers!" );
 		}
-		vkResetCommandBuffer( computeQueue.commandBuffer, 0 );
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+			vkResetCommandBuffer( computeQueue.commandBuffers[i], 0 );
+		}
 	}
 }

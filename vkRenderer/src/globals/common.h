@@ -385,6 +385,6 @@ struct computeQueue_t
 {
 	VkQueue						queue;
 	VkCommandPool				commandPool;
-	VkCommandBuffer				commandBuffer;
-	VkSemaphore					semaphore;
+	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
+	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
 };

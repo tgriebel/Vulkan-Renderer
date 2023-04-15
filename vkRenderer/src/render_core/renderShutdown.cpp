@@ -41,7 +41,7 @@ void Renderer::Cleanup()
 
 	// Buffers
 	vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
-	vkFreeCommandBuffers( context.device, computeQueue.commandPool, 1, &computeQueue.commandBuffer );
+	vkFreeCommandBuffers( context.device, computeQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), computeQueue.commandBuffers );
 
 	ShutdownShaderResources();
 
@@ -57,8 +57,9 @@ void Renderer::Cleanup()
 		vkDestroySemaphore( context.device, graphicsQueue.renderFinishedSemaphores[ i ], nullptr );
 		vkDestroySemaphore( context.device, graphicsQueue.imageAvailableSemaphores[ i ], nullptr );
 		vkDestroyFence( context.device, graphicsQueue.inFlightFences[ i ], nullptr );
+
+		vkDestroySemaphore( context.device, computeQueue.semaphores[ i ], nullptr );
 	}
-	vkDestroySemaphore( context.device, computeQueue.semaphore, nullptr );
 
 	vkDestroyCommandPool( context.device, graphicsQueue.commandPool, nullptr );
 	vkDestroyCommandPool( context.device, computeQueue.commandPool, nullptr );
