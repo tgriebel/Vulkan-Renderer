@@ -625,10 +625,10 @@ void Renderer::SubmitFrame()
 			vkCmdBindDescriptorSets( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &particleState.descriptorSets[ bufferId ], 0, 0 );
 
 			vkCmdDispatch( computeQueue.commandBuffers[ bufferId ], MaxParticles / 256, 1, 1 );
+		}
 
-			if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
-				throw std::runtime_error( "Failed to record command buffer!" );
-			}
+		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to record command buffer!" );
 		}
 	}
 
