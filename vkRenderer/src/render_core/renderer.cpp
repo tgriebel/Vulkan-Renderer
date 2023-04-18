@@ -576,7 +576,6 @@ void Renderer::FlushGPU()
 }
 
 
-
 void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
@@ -615,7 +614,7 @@ void Renderer::SubmitFrame()
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
-		GpuProgram& prog = gAssets.gpuPrograms.Find( particleShader )->Get();
+		GpuProgram& prog = particleShader.GetProgram()->Get();
 
 		pipelineObject_t* pipelineObject = nullptr;
 		GetPipelineObject( prog.pipeline, &pipelineObject );
@@ -893,14 +892,17 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
 		++descriptorId;
 
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
-		descriptorWrites[ descriptorId ].dstBinding = 1;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
-		++descriptorId;
+		if( vk_viewUbo.range > 0 )
+		{
+			descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
+			descriptorWrites[ descriptorId ].dstBinding = 1;
+			descriptorWrites[ descriptorId ].dstArrayElement = 0;
+			descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			descriptorWrites[ descriptorId ].descriptorCount = 1;
+			descriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
+			++descriptorId;
+		}
 
 		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[ descriptorId ].dstSet = mainPassState.descriptorSets[ i ];
@@ -965,9 +967,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
 		++descriptorId;
 
-		assert( descriptorId == descriptorSetCnt );
+		assert( descriptorId <= descriptorSetCnt );
 
-		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
+		vkUpdateDescriptorSets( context.device, descriptorId, descriptorWrites.data(), 0, nullptr );
 	}
 
 	//////////////////////////////////////////////////////
@@ -1232,7 +1234,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		{		
 			storageBufferInfoCurrentFrame.buffer = frameState[ currentImage ].particleBuffer.GetVkObject();
 			storageBufferInfoCurrentFrame.offset = 0;
-			storageBufferInfoCurrentFrame.range = sizeof( particleBufferObject_t ) * MaxParticles;
+			storageBufferInfoCurrentFrame.range = frameState[ currentImage ].particleBuffer.GetMaxSize();
 		}
 
 		uint32_t descriptorId = 0;
@@ -1245,16 +1247,19 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
 		++descriptorId;
 
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = particleState.descriptorSets[ i ];
-		descriptorWrites[ descriptorId ].dstBinding = 1;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pBufferInfo = &storageBufferInfoCurrentFrame;
-		++descriptorId;
+		if( storageBufferInfoCurrentFrame.range > 0 )
+		{
+			descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[ descriptorId ].dstSet = particleState.descriptorSets[ i ];
+			descriptorWrites[ descriptorId ].dstBinding = 1;
+			descriptorWrites[ descriptorId ].dstArrayElement = 0;
+			descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			descriptorWrites[ descriptorId ].descriptorCount = 1;
+			descriptorWrites[ descriptorId ].pBufferInfo = &storageBufferInfoCurrentFrame;
+			++descriptorId;
+		}
 
-		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
+		vkUpdateDescriptorSets( context.device, descriptorId, descriptorWrites.data(), 0, nullptr );
 	}
 }
 
@@ -1347,21 +1352,21 @@ void Renderer::UpdateBufferContents( uint32_t currentImage )
 		lightBuffer[i] = light;
 	}
 
-	frameState[ currentImage ].globalConstants.Reset();
+	frameState[ currentImage ].globalConstants.SetPos();
 	frameState[ currentImage ].globalConstants.CopyData( &globalsBuffer, sizeof( globalUboConstants_t ) );
 
-	frameState[ currentImage ].viewParms.Reset();
+	frameState[ currentImage ].viewParms.SetPos();
 	frameState[ currentImage ].viewParms.CopyData( &viewBuffer, sizeof( viewBufferObject_t ) * MaxViews );
 
-	frameState[ currentImage ].surfParms.Reset();
+	frameState[ currentImage ].surfParms.SetPos();
 	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	frameState[ currentImage ].surfParms.CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	frameState[ currentImage ].surfParms.CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
-	frameState[ currentImage ].materialBuffers.Reset();
+	frameState[ currentImage ].materialBuffers.SetPos();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
 
-	frameState[ currentImage ].lightParms.Reset();
+	frameState[ currentImage ].lightParms.SetPos();
 	frameState[ currentImage ].lightParms.CopyData( lightBuffer, sizeof( lightBufferObject_t ) * MaxLights );
 }
 

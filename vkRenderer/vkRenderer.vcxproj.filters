@@ -173,6 +173,12 @@
     <ClInclude Include="src\render_state\rhi.h">
       <Filter>render state</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_binding\compute.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_binding\bindings.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

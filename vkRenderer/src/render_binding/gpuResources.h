@@ -29,27 +29,32 @@ class GpuBuffer
 {
 public:
 
-	void Reset() {
-		offset = 0;
+	void SetPos( const uint32_t pos = 0 )
+	{
+		offset = pos;
 	}
 
 
-	uint64_t GetSize() const {
+	uint64_t GetSize() const
+	{
 		return offset;
 	}
 
 
-	uint64_t GetMaxSize() const {
+	uint64_t GetMaxSize() const
+	{
 		return alloc.GetSize();
 	}
 
 
-	void Allocate( const uint64_t size ) {
+	void Allocate( const uint64_t size )
+	{
 		offset += size;
 	}
 
 
-	VkBuffer& GetVkObject() {
+	VkBuffer& GetVkObject()
+	{
 		return buffer;
 	}
 
@@ -82,6 +87,7 @@ public:
 		}
 	}
 
+
 	void Destroy()
 	{
 		if( context.device == VK_NULL_HANDLE ) {
@@ -91,7 +97,7 @@ public:
 		if( vkBuffer == VK_NULL_HANDLE ) {
 			vkDestroyBuffer( context.device, vkBuffer, nullptr );
 		}
-		Reset();
+		SetPos();
 	}
 
 

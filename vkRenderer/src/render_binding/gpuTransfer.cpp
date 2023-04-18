@@ -66,7 +66,7 @@ void Renderer::UpdateTextures()
 	if( textureCount == 0 ) {
 		return;
 	}
-	stagingBuffer.Reset();
+	stagingBuffer.SetPos();
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
@@ -252,7 +252,7 @@ void Renderer::UploadModelsToGPU()
 
 				// Copy stream to staging buffer
 				VkDeviceSize vbCopySize = sizeof( vertexStream[0] ) * vertexCount;
-				stagingBuffer.Reset();
+				stagingBuffer.SetPos();
 				stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
 
 				VkBufferCopy vbCopyRegion{ };
@@ -271,7 +271,7 @@ void Renderer::UploadModelsToGPU()
 			{
 				// IB Copy
 				VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
-				stagingBuffer.Reset();
+				stagingBuffer.SetPos();
 				stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
 				VkBufferCopy ibCopyRegion{ };

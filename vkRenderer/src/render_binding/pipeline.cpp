@@ -27,10 +27,26 @@
 #include "../render_core/renderer.h"
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
+#include "compute.h"
 #include <core/assetLib.h>
 #include <scene/scene.h>
 
 AssetLib< pipelineObject_t > pipelineLib;
+
+static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
+{
+	switch( type )
+	{
+		case CONSTANT_BUFFER:		return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case READ_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case WRITE_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case READ_IMAGE_BUFFER:		return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		case WRITE_IMAGE_BUFFER:	return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		default: break;
+	}
+	assert(0);
+	return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+}
 
 static VkVertexInputBindingDescription GetVertexBindingDescription()
 {
@@ -196,6 +212,46 @@ void CreateComputeDescriptorSetLayout( VkDescriptorSetLayout& layout )
 
 	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create compute descriptor set layout!" );
+	}
+}
+
+
+void CreateBindingLayout( ComputeShader& shader, VkDescriptorSetLayout& layout )
+{
+	const uint32_t bindingCount = shader.GetBindCount();
+	if( bindingCount == 0 )
+	{
+		assert( 0 );
+		return;
+	}
+
+	std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+	layoutBindings.resize( bindingCount + 1 );
+
+	layoutBindings[0].binding = 0;
+	layoutBindings[0].descriptorCount = 1;
+	layoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	layoutBindings[0].pImmutableSamplers = nullptr;
+	layoutBindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+	for( uint32_t i = 0; i < bindingCount; ++i )
+	{
+		const ShaderBinding& binding = shader.GetBinding(i);
+		
+		layoutBindings[ i + 1 ].binding = binding.GetSlot();
+		layoutBindings[ i + 1 ].descriptorCount = binding.GetDescriptorCount();
+		layoutBindings[ i + 1 ].descriptorType = vk_GetDescriptorType( binding.GetType() );
+		layoutBindings[ i + 1 ].pImmutableSamplers = nullptr;
+		layoutBindings[ i + 1 ].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+	}
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = layoutBindings.size();
+	layoutInfo.pBindings = layoutBindings.data();
+
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {
+		throw std::runtime_error( "CreateBindingLayout: Failed to create compute descriptor set layout!" );
 	}
 }
 

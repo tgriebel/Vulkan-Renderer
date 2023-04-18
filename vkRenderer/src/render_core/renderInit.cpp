@@ -27,6 +27,8 @@
 #include "renderer.h"
 #include <scene/entity.h>
 #include "../render_state/rhi.h"
+#include "../render_binding/pipeline.h"
+#include "../render_binding/bindings.h"
 
 void Renderer::CreateInstance()
 {
@@ -156,14 +158,11 @@ void Renderer::InitShaderResources()
 	CreatePipelineObjects();
 
 	CreateCodeTextures();
-	CreateUniformBuffers();
+	CreateBuffers();
 
-	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
-	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-	vb.Create( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, localMemory );
-	ib.Create( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, localMemory );
+	const ShaderBinding bindings[2] = { globalsBuffer, particleWriteBuffer };
 
-	CreateResourceBuffers();
+	particleShader = ComputeShader( gAssets.gpuPrograms.Find( "ClearParticles" ), bindings, COUNTARRAY( bindings ) );
 }
 
 
@@ -303,14 +302,6 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 			prog.vk_shaders[ i ] = CreateShaderModule( prog.shaders[ i ].blob );
 		}
 	}
-}
-
-
-void Renderer::CreateResourceBuffers()
-{
-	stagingBuffer.Reset();
-	const uint64_t size = 256 * MB_1;
-	stagingBuffer.Create( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sharedMemory );
 }
 
 
@@ -843,7 +834,7 @@ void Renderer::CreateDescSetLayouts()
 }
 
 
-void Renderer::CreateUniformBuffers()
+void Renderer::CreateBuffers()
 {
 	const VkDeviceSize alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
 
@@ -891,6 +882,15 @@ void Renderer::CreateUniformBuffers()
 			frameState[ i ].particleBuffer.Create( particleBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
 	}
+
+	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
+	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
+	vb.Create( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, localMemory );
+	ib.Create( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, localMemory );
+
+	stagingBuffer.SetPos( 0 );
+	const uint64_t size = 256 * MB_1;
+	stagingBuffer.Create( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sharedMemory );
 }
 
 

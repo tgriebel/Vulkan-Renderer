@@ -188,6 +188,8 @@
     <ClInclude Include="src\globals\render_util.h" />
     <ClInclude Include="src\io\io.h" />
     <ClInclude Include="src\render_binding\allocator.h" />
+    <ClInclude Include="src\render_binding\bindings.h" />
+    <ClInclude Include="src\render_binding\compute.h" />
     <ClInclude Include="src\render_binding\gpuResources.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />
     <ClInclude Include="src\render_core\debugMenu.h" />

@@ -31,6 +31,7 @@
 #include "../globals/render_util.h"
 #include "../render_state/deviceContext.h"
 #include "../render_binding/pipeline.h"
+#include "../render_binding/compute.h"
 #include "swapChain.h"
 #include "../render_state/FrameState.h"
 #include "../globals/renderConstants.h"
@@ -87,8 +88,6 @@ public:
 
 		view2D.region = renderViewRegion_t::POST;
 		view2D.name = "Post View";
-
-		particleShader = gAssets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 	}
 
 	void RenderScene( Scene* scene );
@@ -138,8 +137,6 @@ private:
 	RenderView							renderView;
 	RenderView							shadowView;
 	RenderView							view2D;
-
-	hdl_t								particleShader;
 
 	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
@@ -198,6 +195,8 @@ private:
 
 	VkFormat						vk_mainColorFmt;
 	VkFormat						vk_depthFmt;
+
+	ComputeShader					particleShader;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
@@ -278,12 +277,11 @@ private:
 	void						CreateDescSetLayouts();
 	void						CreateDescriptorPool();
 	void						CreateInstance();
-	void						CreateResourceBuffers();
 	void						CreateLogicalDevice();
 	void						CreateSyncObjects();
 	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
-	void						CreateUniformBuffers();
+	void						CreateBuffers();
 	void						CreateRenderPasses();
 	void						CreateFramebuffers();
 	void						CreateCommandPools();

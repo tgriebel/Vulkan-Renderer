@@ -47,6 +47,52 @@ enum gfxStateBits_t : uint64_t
 };
 
 
+enum bindType_t
+{
+	CONSTANT_BUFFER,
+	READ_BUFFER,
+	WRITE_BUFFER,
+	READ_IMAGE_BUFFER,
+	WRITE_IMAGE_BUFFER,
+};
+
+class ShaderBinding
+{
+private:
+	bindType_t	type;
+	uint32_t	slot;
+	uint32_t	descriptorCount;
+public:
+
+	ShaderBinding( const uint32_t slot, const bindType_t type, const uint32_t descriptorCount = 1 ) :
+		slot( slot ),
+		type( type ),
+		descriptorCount( descriptorCount )
+	{}
+
+	inline uint32_t GetSlot() const
+	{
+		return slot;
+	}
+
+	inline bindType_t GetType() const
+	{
+		return type;
+	}
+
+	uint32_t GetDescriptorCount() const
+	{
+		return descriptorCount;
+	}
+
+	uint64_t GetHash() const
+	{
+		assert(0);
+		return 0;
+	}
+};
+
+
 struct pipelineState_t
 {
 	const char*			tag;
