@@ -134,8 +134,10 @@ struct pushConstants_t
 	uint32_t viewId;
 };
 
+class ComputeShader;
+
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
-void CreateComputeDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
+void CreateBindingLayout( ComputeShader& shader, VkDescriptorSetLayout& layout );
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineObject );
 void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl );

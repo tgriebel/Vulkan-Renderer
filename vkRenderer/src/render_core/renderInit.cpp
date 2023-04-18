@@ -124,6 +124,11 @@ void Renderer::InitVulkan()
 		CreateCommandPools();
 	}
 
+	{
+		const ShaderBinding bindings[ 2 ] = { globalsBuffer, particleWriteBuffer };
+		particleShader = ComputeShader( gAssets.gpuPrograms.Find( "ClearParticles" ), bindings, COUNTARRAY( bindings ) );
+	}
+
 	CreateDescSetLayouts();
 
 	InitShaderResources();
@@ -159,10 +164,6 @@ void Renderer::InitShaderResources()
 
 	CreateCodeTextures();
 	CreateBuffers();
-
-	const ShaderBinding bindings[2] = { globalsBuffer, particleWriteBuffer };
-
-	particleShader = ComputeShader( gAssets.gpuPrograms.Find( "ClearParticles" ), bindings, COUNTARRAY( bindings ) );
 }
 
 
@@ -826,7 +827,8 @@ void Renderer::CreateDescSetLayouts()
 {
 	CreateSceneRenderDescriptorSetLayout( globalLayout );
 	CreateSceneRenderDescriptorSetLayout( postProcessLayout );
-	CreateComputeDescriptorSetLayout( computeLayout );
+	CreateBindingLayout( particleShader, computeLayout );
+
 	CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
 	CreateDescriptorSets( globalLayout, shadowPassState.descriptorSets );
 	CreateDescriptorSets( postProcessLayout, postPassState.descriptorSets );
