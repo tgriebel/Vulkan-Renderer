@@ -576,6 +576,22 @@ void Renderer::FlushGPU()
 }
 
 
+void Renderer::Dispatch( VkCommandBuffer commandBuffer, ShaderDispatch& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
+{
+	GpuProgram& prog = shader.GetProgram()->Get();
+
+	pipelineObject_t* pipelineObject = nullptr;
+	GetPipelineObject( prog.pipeline, &pipelineObject );
+	if ( pipelineObject != nullptr )
+	{
+		vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
+		vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &descSet, 0, 0 );
+
+		vkCmdDispatch( commandBuffer, x, y, z );
+	}
+}
+
+
 void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
@@ -614,17 +630,7 @@ void Renderer::SubmitFrame()
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
-		GpuProgram& prog = particleShader.GetProgram()->Get();
-
-		pipelineObject_t* pipelineObject = nullptr;
-		GetPipelineObject( prog.pipeline, &pipelineObject );
-		if ( pipelineObject != nullptr )
-		{
-			vkCmdBindPipeline( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
-			vkCmdBindDescriptorSets( computeQueue.commandBuffers[ bufferId ], VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &particleState.descriptorSets[ bufferId ], 0, 0 );
-
-			vkCmdDispatch( computeQueue.commandBuffers[ bufferId ], MaxParticles / 256, 1, 1 );
-		}
+		Dispatch( computeQueue.commandBuffers[ bufferId ], particleShader, particleState.descriptorSets[ bufferId ], MaxParticles / 256 );
 
 		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );
@@ -1228,6 +1234,12 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	//													//
 	//////////////////////////////////////////////////////
 	{
+		//particleShader.Bind( globalsBuffer, frameState[ i ].globalConstants );
+
+		//vk_globalConstantsInfo.buffer = frameState[ i ].globalConstants.GetVkObject();
+		//vk_globalConstantsInfo.offset = 0;
+		//vk_globalConstantsInfo.range = sizeof( globalUboConstants_t );
+
 		std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
 		VkDescriptorBufferInfo storageBufferInfoCurrentFrame{};

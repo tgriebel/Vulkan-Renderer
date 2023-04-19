@@ -62,13 +62,23 @@ private:
 	bindType_t	type;
 	uint32_t	slot;
 	uint32_t	descriptorCount;
+	uint32_t	hash;
 public:
+
+	ShaderBinding() {}
 
 	ShaderBinding( const uint32_t slot, const bindType_t type, const uint32_t descriptorCount = 1 ) :
 		slot( slot ),
 		type( type ),
 		descriptorCount( descriptorCount )
-	{}
+	{
+		const uint32_t sizeBytes = offsetof( ShaderBinding, hash );
+		assert( sizeBytes <= 128 );
+
+		uint8_t hashBytes[128];
+		memcpy( hashBytes, this, sizeBytes );
+		hash = Hash( hashBytes, COUNTARRAY( hashBytes ) );
+	}
 
 	inline uint32_t GetSlot() const
 	{
@@ -87,8 +97,7 @@ public:
 
 	uint64_t GetHash() const
 	{
-		assert(0);
-		return 0;
+		return hash;
 	}
 };
 
@@ -134,10 +143,10 @@ struct pushConstants_t
 	uint32_t viewId;
 };
 
-class ComputeShader;
+class ShaderDispatch;
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& globalLayout );
-void CreateBindingLayout( ComputeShader& shader, VkDescriptorSetLayout& layout );
+void CreateBindingLayout( ShaderDispatch& shader, VkDescriptorSetLayout& layout );
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineObject );
 void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl );

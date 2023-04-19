@@ -190,7 +190,7 @@ void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
 }
 
 
-void CreateBindingLayout( ComputeShader& shader, VkDescriptorSetLayout& layout )
+void CreateBindingLayout( ShaderDispatch& shader, VkDescriptorSetLayout& layout )
 {
 	const uint32_t bindingCount = shader.GetBindCount();
 	if( bindingCount == 0 )

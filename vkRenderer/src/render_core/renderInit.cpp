@@ -126,7 +126,7 @@ void Renderer::InitVulkan()
 
 	{
 		const ShaderBinding bindings[ 2 ] = { globalsBuffer, particleWriteBuffer };
-		particleShader = ComputeShader( gAssets.gpuPrograms.Find( "ClearParticles" ), bindings, COUNTARRAY( bindings ) );
+		particleShader = ShaderDispatch( gAssets.gpuPrograms.Find( "ClearParticles" ), bindings, COUNTARRAY( bindings ) );
 	}
 
 	CreateDescSetLayouts();
