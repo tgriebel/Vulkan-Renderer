@@ -196,7 +196,8 @@ private:
 	VkFormat						vk_mainColorFmt;
 	VkFormat						vk_depthFmt;
 
-	ShaderDispatch					particleShader;
+	ShaderParmSet					defaultParmSet;
+	ShaderParmSet					particleShaderParms;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
@@ -291,7 +292,7 @@ private:
 	static drawPass_t			ViewRegionPassBegin( const renderViewRegion_t region );
 	static drawPass_t			ViewRegionPassEnd( const renderViewRegion_t region );
 	void						RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
-	void						Dispatch( VkCommandBuffer commandBuffer, ShaderDispatch& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
+	void						Dispatch( VkCommandBuffer commandBuffer, GpuProgram& prog, ShaderParmSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void						RenderViews();
 	void						Commit( const Scene* scene );
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );

@@ -76,3 +76,51 @@ public:
 		return bindSlots[ slot ];
 	}
 };
+
+class ShaderParmSet
+{
+private:
+	std::vector<const ShaderBinding*>	bindSlots;
+	std::vector<const GpuBuffer*>		attachments;
+
+	void AddBind( const ShaderBinding* binding )
+	{
+		bindSlots[ binding->GetSlot() ] = binding;
+	}
+public:
+
+	ShaderParmSet()
+	{}
+
+	ShaderParmSet( const ShaderBinding* bindings[], const uint32_t bindCount )
+	{
+		bindSlots.resize( bindCount );
+
+		for ( uint32_t i = 0; i < bindCount; ++i ) {
+			AddBind( bindings[ i ] );
+		}
+	}
+
+	bool Bind( const ShaderBinding* binding, const GpuBuffer& buffer )
+	{
+		const uint32_t slot = binding->GetSlot();
+		if ( bindSlots[ slot ]->GetHash() == binding->GetHash() )
+		{
+			attachments[ slot ] = &buffer;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	const uint32_t GetBindCount()
+	{
+		return static_cast<uint32_t>( bindSlots.size() );
+	}
+
+	const ShaderBinding* GetBinding( uint32_t slot )
+	{
+		return bindSlots[ slot ];
+	}
+};

@@ -38,6 +38,9 @@ static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
 	switch( type )
 	{
 		case CONSTANT_BUFFER:		return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case IMAGE_2D:				return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case IMAGE_3D:				return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case IMAGE_CUBE:			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		case READ_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		case WRITE_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		case READ_IMAGE_BUFFER:		return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
@@ -48,6 +51,32 @@ static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
 	return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 }
 
+
+static VkShaderStageFlagBits vk_GetStageFlags( const bindStateFlag_t flags )
+{
+	uint32_t count = 0;
+	uint32_t bits = flags;
+
+	uint32_t vkFlags = 0;
+
+	while ( bits )
+	{
+		uint32_t bitFlag = bits & 0x1;
+		switch ( bitFlag )
+		{
+			case BIND_STATE_VS:		vkFlags |= VK_SHADER_STAGE_VERTEX_BIT;		break;
+			case BIND_STATE_PS:		vkFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;	break;
+			case BIND_STATE_CS:		vkFlags |= VK_SHADER_STAGE_COMPUTE_BIT;		break;
+			default:
+			case BIND_STATE_ALL:	vkFlags |= VK_SHADER_STAGE_ALL;				break;
+		}
+		bits &= ( bits - 1 );
+		count++;
+	}
+	return VkShaderStageFlagBits( vkFlags );
+}
+
+
 static VkVertexInputBindingDescription GetVertexBindingDescription()
 {
 	VkVertexInputBindingDescription bindingDescription{ };
@@ -57,6 +86,7 @@ static VkVertexInputBindingDescription GetVertexBindingDescription()
 
 	return bindingDescription;
 }
+
 
 static const uint32_t MaxVertexAttribs = 6;
 static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertexAttributeDescriptions()
@@ -105,94 +135,10 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 	return attributeDescriptions;
 }
 
-void CreateSceneRenderDescriptorSetLayout( VkDescriptorSetLayout& layout )
+
+void CreateBindingLayout( ShaderParmSet& parms, VkDescriptorSetLayout& layout )
 {
-	VkDescriptorSetLayoutBinding globalsLayoutBinding{ };
-	globalsLayoutBinding.binding = 0;
-	globalsLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	globalsLayoutBinding.descriptorCount = 1;
-	globalsLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	globalsLayoutBinding.pImmutableSamplers = nullptr;
-
-	VkDescriptorSetLayoutBinding viewLayoutBinding{ };
-	viewLayoutBinding.binding = 1;
-	viewLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	viewLayoutBinding.descriptorCount = 1;
-	viewLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	viewLayoutBinding.pImmutableSamplers = nullptr;
-
-	VkDescriptorSetLayoutBinding objectLayoutBinding{ };
-	objectLayoutBinding.binding = 2;
-	objectLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	objectLayoutBinding.descriptorCount = 1;
-	objectLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-	objectLayoutBinding.pImmutableSamplers = nullptr;
-
-	VkDescriptorSetLayoutBinding sampler2dLayoutBinding{ };
-	sampler2dLayoutBinding.binding = 3;
-	sampler2dLayoutBinding.descriptorCount = MaxImageDescriptors;
-	sampler2dLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	sampler2dLayoutBinding.pImmutableSamplers = nullptr;
-	sampler2dLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-
-	VkDescriptorSetLayoutBinding samplerCubeLayoutBinding{ };
-	samplerCubeLayoutBinding.binding = 4;
-	samplerCubeLayoutBinding.descriptorCount = MaxImageDescriptors;
-	samplerCubeLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	samplerCubeLayoutBinding.pImmutableSamplers = nullptr;
-	samplerCubeLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
-
-	VkDescriptorSetLayoutBinding materialBinding{ };
-	materialBinding.binding = 5;
-	materialBinding.descriptorCount = 1;
-	materialBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	materialBinding.pImmutableSamplers = nullptr;
-	materialBinding.stageFlags = VK_SHADER_STAGE_ALL;
-
-	VkDescriptorSetLayoutBinding lightBinding{ };
-	lightBinding.binding = 6;
-	lightBinding.descriptorCount = 1;
-	lightBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-	lightBinding.pImmutableSamplers = nullptr;
-	lightBinding.stageFlags = VK_SHADER_STAGE_ALL;
-
-	VkDescriptorSetLayoutBinding codeImageBinding{ };
-	codeImageBinding.binding = 7;
-	codeImageBinding.descriptorCount = MaxCodeImages;
-	codeImageBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	codeImageBinding.pImmutableSamplers = nullptr;
-	codeImageBinding.stageFlags = VK_SHADER_STAGE_ALL;
-
-	VkDescriptorSetLayoutBinding stencilBinding{ };
-	stencilBinding.binding = 8;
-	stencilBinding.descriptorCount = 1;
-	stencilBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	stencilBinding.pImmutableSamplers = nullptr;
-	stencilBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-	std::array<VkDescriptorSetLayoutBinding, 9> bindings = {	globalsLayoutBinding,
-																viewLayoutBinding,
-																objectLayoutBinding,
-																sampler2dLayoutBinding,
-																samplerCubeLayoutBinding,
-																materialBinding,
-																lightBinding,
-																codeImageBinding,
-																stencilBinding };
-	VkDescriptorSetLayoutCreateInfo layoutInfo{ };
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>( bindings.size() );
-	layoutInfo.pBindings = bindings.data();
-
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create descriptor set layout!" );
-	}
-}
-
-
-void CreateBindingLayout( ShaderDispatch& shader, VkDescriptorSetLayout& layout )
-{
-	const uint32_t bindingCount = shader.GetBindCount();
+	const uint32_t bindingCount = parms.GetBindCount();
 	if( bindingCount == 0 )
 	{
 		assert( 0 );
@@ -204,18 +150,19 @@ void CreateBindingLayout( ShaderDispatch& shader, VkDescriptorSetLayout& layout 
 
 	for( uint32_t i = 0; i < bindingCount; ++i )
 	{
-		const ShaderBinding& binding = shader.GetBinding(i);
+		const ShaderBinding* binding = parms.GetBinding(i);
 		
-		layoutBindings[i].binding = binding.GetSlot();
-		layoutBindings[i].descriptorCount = binding.GetDescriptorCount();
-		layoutBindings[i].descriptorType = vk_GetDescriptorType( binding.GetType() );
+		layoutBindings[i] = {};
+		layoutBindings[i].binding = binding->GetSlot();
+		layoutBindings[i].descriptorCount = binding->GetDescriptorCount();
+		layoutBindings[i].descriptorType = vk_GetDescriptorType( binding->GetType() );
 		layoutBindings[i].pImmutableSamplers = nullptr;
-		layoutBindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		layoutBindings[i].stageFlags = vk_GetStageFlags( binding->GetBindFlags() );
 	}
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo{};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = layoutBindings.size();
+	layoutInfo.bindingCount = static_cast<uint32_t>( layoutBindings.size() );
 	layoutInfo.pBindings = layoutBindings.data();
 
 	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {

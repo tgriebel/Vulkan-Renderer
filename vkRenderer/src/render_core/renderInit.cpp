@@ -125,8 +125,22 @@ void Renderer::InitVulkan()
 	}
 
 	{
-		const ShaderBinding bindings[ 2 ] = { globalsBuffer, particleWriteBuffer };
-		particleShader = ShaderDispatch( gAssets.gpuPrograms.Find( "ClearParticles" ), bindings, COUNTARRAY( bindings ) );
+		const ShaderBinding* bindings[ 2 ] = { &bind_globalsBuffer, &bind_particleWriteBuffer };
+		particleShaderParms = ShaderParmSet( bindings, COUNTARRAY( bindings ) );
+	}
+
+	{
+		const ShaderBinding* bindings[ 9 ] = {	&bind_globalsBuffer,
+												&bind_viewBuffer,
+												&bind_modelBuffer,
+												&bind_image2DArray,
+												&bind_imageCubeArray,
+												&bind_materialBuffer,
+												&bind_lightBuffer,
+												&bind_imageCodeArray,
+												&bind_imageStencil };
+
+		defaultParmSet = ShaderParmSet( bindings, COUNTARRAY( bindings ) );
 	}
 
 	CreateDescSetLayouts();
@@ -299,7 +313,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 	for ( uint32_t i = 0; i < programCount; ++i )
 	{
 		GpuProgram& prog = lib.Find( i )->Get();
-		for ( int i = 0; i < prog.shaderCount; ++i ) {
+		for ( uint32_t i = 0; i < prog.shaderCount; ++i ) {
 			prog.vk_shaders[ i ] = CreateShaderModule( prog.shaders[ i ].blob );
 		}
 	}
@@ -825,9 +839,9 @@ void Renderer::CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptor
 
 void Renderer::CreateDescSetLayouts()
 {
-	CreateSceneRenderDescriptorSetLayout( globalLayout );
-	CreateSceneRenderDescriptorSetLayout( postProcessLayout );
-	CreateBindingLayout( particleShader, computeLayout );
+	CreateBindingLayout( defaultParmSet, globalLayout );
+	CreateBindingLayout( defaultParmSet, postProcessLayout );
+	CreateBindingLayout( particleShaderParms, computeLayout );
 
 	CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
 	CreateDescriptorSets( globalLayout, shadowPassState.descriptorSets );
