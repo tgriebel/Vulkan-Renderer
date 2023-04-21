@@ -47,81 +47,6 @@ enum gfxStateBits_t : uint64_t
 };
 
 
-enum bindType_t
-{
-	CONSTANT_BUFFER,
-	IMAGE_2D,
-	IMAGE_3D,
-	IMAGE_CUBE,
-	READ_BUFFER,
-	WRITE_BUFFER,
-	READ_IMAGE_BUFFER,
-	WRITE_IMAGE_BUFFER,
-};
-
-
-enum bindStateFlag_t
-{
-	BIND_STATE_VS	= ( 1 << 0 ),
-	BIND_STATE_PS	= ( 1 << 1 ),
-	BIND_STATE_CS	= ( 1 << 2 ),
-	BIND_STATE_ALL	= ( 1 << 3 ) - 1
-};
-
-
-class ShaderBinding
-{
-private:
-	bindType_t		type;
-	uint32_t		slot;
-	uint32_t		descriptorCount;
-	bindStateFlag_t	flags;
-	uint32_t		hash;
-public:
-
-	ShaderBinding() {}
-
-	ShaderBinding( const uint32_t slot, const bindType_t type, const uint32_t descriptorCount, const bindStateFlag_t flags ) :
-		slot( slot ),
-		type( type ),
-		descriptorCount( descriptorCount ),
-		flags( flags )
-	{
-		const uint32_t sizeBytes = offsetof( ShaderBinding, hash );
-		assert( sizeBytes <= 128 );
-
-		uint8_t hashBytes[128];
-		memcpy( hashBytes, this, sizeBytes );
-		hash = Hash( hashBytes, COUNTARRAY( hashBytes ) );
-	}
-
-	inline uint32_t GetSlot() const
-	{
-		return slot;
-	}
-
-	inline bindType_t GetType() const
-	{
-		return type;
-	}
-
-	uint32_t GetDescriptorCount() const
-	{
-		return descriptorCount;
-	}
-
-	bindStateFlag_t GetBindFlags() const
-	{
-		return flags;
-	}
-
-	uint64_t GetHash() const
-	{
-		return hash;
-	}
-};
-
-
 struct pipelineState_t
 {
 	const char*			tag;
@@ -163,9 +88,9 @@ struct pushConstants_t
 	uint32_t viewId;
 };
 
-class ShaderParmSet;
+class ShaderBindSet;
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
-void CreateBindingLayout( ShaderParmSet& parms, VkDescriptorSetLayout& layout );
+void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineObject );
 void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl );

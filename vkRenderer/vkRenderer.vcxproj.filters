@@ -77,6 +77,15 @@
     <ClCompile Include="src\render_core\gpuImage.cpp">
       <Filter>render core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\shaderBinding.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_binding\gpuResources.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_binding\binding.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -173,10 +182,10 @@
     <ClInclude Include="src\render_state\rhi.h">
       <Filter>render state</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_binding\compute.h">
+    <ClInclude Include="src\render_binding\bindings.h">
       <Filter>render binding</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_binding\bindings.h">
+    <ClInclude Include="src\render_binding\shaderBinding.h">
       <Filter>render binding</Filter>
     </ClInclude>
   </ItemGroup>

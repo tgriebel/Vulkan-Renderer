@@ -126,7 +126,7 @@ void Renderer::InitVulkan()
 
 	{
 		const ShaderBinding* bindings[ 2 ] = { &bind_globalsBuffer, &bind_particleWriteBuffer };
-		particleShaderParms = ShaderParmSet( bindings, COUNTARRAY( bindings ) );
+		particleShaderParms = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
 	}
 
 	{
@@ -140,7 +140,7 @@ void Renderer::InitVulkan()
 												&bind_imageCodeArray,
 												&bind_imageStencil };
 
-		defaultParmSet = ShaderParmSet( bindings, COUNTARRAY( bindings ) );
+		defaultParmSet = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
 	}
 
 	CreateDescSetLayouts();

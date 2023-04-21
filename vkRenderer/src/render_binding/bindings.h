@@ -1,18 +1,18 @@
 #pragma once
 
-#include "pipeline.h"
+#include "shaderBinding.h"
 
-ShaderBinding	bind_globalsBuffer( 0, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
+extern ShaderBinding	bind_globalsBuffer;
 
 // Compute Resources
-ShaderBinding	bind_particleWriteBuffer( 1, WRITE_BUFFER, 1, BIND_STATE_CS );
+extern ShaderBinding	bind_particleWriteBuffer;
 
 // Raster Resources
-ShaderBinding	bind_viewBuffer( 1, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_modelBuffer( 2, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_image2DArray( 3, IMAGE_2D, MaxImageDescriptors, BIND_STATE_ALL );
-ShaderBinding	bind_imageCubeArray( 4, IMAGE_CUBE, MaxImageDescriptors, BIND_STATE_ALL );
-ShaderBinding	bind_materialBuffer( 5, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_lightBuffer( 6, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_imageCodeArray( 7, IMAGE_2D, MaxCodeImages, BIND_STATE_ALL );
-ShaderBinding	bind_imageStencil( 8, IMAGE_2D, 1, BIND_STATE_ALL );
+extern ShaderBinding	bind_viewBuffer;
+extern ShaderBinding	bind_modelBuffer;
+extern ShaderBinding	bind_image2DArray;
+extern ShaderBinding	bind_imageCubeArray;
+extern ShaderBinding	bind_materialBuffer;
+extern ShaderBinding	bind_lightBuffer;
+extern ShaderBinding	bind_imageCodeArray;
+extern ShaderBinding	bind_imageStencil;

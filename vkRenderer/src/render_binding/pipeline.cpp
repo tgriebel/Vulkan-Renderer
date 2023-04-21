@@ -27,7 +27,7 @@
 #include "../render_core/renderer.h"
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
-#include "compute.h"
+#include "shaderBinding.h"
 #include <core/assetLib.h>
 #include <scene/scene.h>
 
@@ -136,7 +136,7 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 }
 
 
-void CreateBindingLayout( ShaderParmSet& parms, VkDescriptorSetLayout& layout )
+void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout )
 {
 	const uint32_t bindingCount = parms.GetBindCount();
 	if( bindingCount == 0 )

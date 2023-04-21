@@ -576,7 +576,7 @@ void Renderer::FlushGPU()
 }
 
 
-void Renderer::Dispatch( VkCommandBuffer commandBuffer, GpuProgram& prog, ShaderParmSet& parms, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
+void Renderer::Dispatch( VkCommandBuffer commandBuffer, GpuProgram& prog, ShaderBindSet& parms, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( prog.pipeline, &pipelineObject );
