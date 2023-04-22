@@ -24,6 +24,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <unordered_map>
 
 class GpuBuffer;
 
@@ -52,10 +53,13 @@ enum bindStateFlag_t
 class ShaderBinding
 {
 private:
-	bindType_t		type;
-	uint32_t		slot;
-	uint32_t		descriptorCount;
-	bindStateFlag_t	flags;
+	struct bindState_t
+	{
+		bindType_t		type;
+		uint32_t		slot;
+		uint32_t		descriptorCount;
+		bindStateFlag_t	flags;
+	} state;
 	uint32_t		hash;
 public:
 
@@ -67,17 +71,25 @@ public:
 	bindType_t		GetType() const;
 	uint32_t		GetDescriptorCount() const;
 	bindStateFlag_t	GetBindFlags() const;
-	uint64_t		GetHash() const;
+	uint32_t		GetHash() const;
+};
+
+
+class ShaderAttachment
+{
+private:
+	union attachType_t
+	{
+		const GpuBuffer* buffer;
+	};
+public:
 };
 
 
 class ShaderBindSet
 {
 private:
-	std::vector<const ShaderBinding*>	bindSlots;
-	std::vector<const GpuBuffer*>		attachments;
-
-	void	AddBind( const ShaderBinding* binding );
+	std::unordered_map<uint32_t, const ShaderBinding*> bindMap;
 public:
 
 	ShaderBindSet()
@@ -85,6 +97,25 @@ public:
 
 	ShaderBindSet( const ShaderBinding* bindings[], const uint32_t bindCount );
 
-	const uint32_t			GetBindCount();
-	const ShaderBinding*	GetBinding( uint32_t slot );
+	const uint32_t			GetBindCount() const;
+	const ShaderBinding*	GetBinding( const uint32_t id ) const;
+	bool					HasBinding( const uint32_t id ) const;
+	bool					HasBinding( const ShaderBinding& binding ) const;
+};
+
+
+class ShaderBindParms
+{
+private:
+	const ShaderBindSet*							bindSet;
+	std::unordered_map<uint32_t, ShaderAttachment>	attachments;
+public:
+
+	ShaderBindParms()
+	{}
+
+	ShaderBindParms( const ShaderBindSet* bindSet );
+
+	void Bind( const ShaderBinding& binding, const ShaderAttachment& attachment );
+	const ShaderAttachment* GetAttachment( const ShaderBinding& binding ) const;
 };

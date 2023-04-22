@@ -26,45 +26,48 @@
 #include "gpuResources.h"
 
 ShaderBinding::ShaderBinding( const uint32_t slot, const bindType_t type, const uint32_t descriptorCount, const bindStateFlag_t flags )
-	:	slot( slot ),
-		type( type ),
-		descriptorCount( descriptorCount ),
-		flags( flags )
 {
-	const uint32_t sizeBytes = offsetof( ShaderBinding, hash );
-	assert( sizeBytes <= 128 );
+	state.slot = slot;
+	state.type = type;
+	state.descriptorCount = descriptorCount;
+	state.flags = flags;
 
-	uint8_t hashBytes[ 128 ];
-	memcpy( hashBytes, this, sizeBytes );
-	hash = Hash( hashBytes, COUNTARRAY( hashBytes ) );
+	const uint32_t bufSize = 128;
+
+	const uint32_t sizeBytes = sizeof( bindState_t );
+	assert( sizeBytes <= bufSize );
+
+	uint8_t hashBytes[ bufSize ];
+	memcpy( hashBytes, &state, sizeBytes );
+	hash = Hash( hashBytes, sizeBytes );
 }
 
 
 uint32_t ShaderBinding::GetSlot() const
 {
-	return slot;
+	return state.slot;
 }
 
 
 bindType_t ShaderBinding::GetType() const
 {
-	return type;
+	return state.type;
 }
 
 
 uint32_t ShaderBinding::GetDescriptorCount() const
 {
-	return descriptorCount;
+	return state.descriptorCount;
 }
 
 
 bindStateFlag_t ShaderBinding::GetBindFlags() const
 {
-	return flags;
+	return state.flags;
 }
 
 
-uint64_t ShaderBinding::GetHash() const
+uint32_t ShaderBinding::GetHash() const
 {
 	return hash;
 }
@@ -72,27 +75,62 @@ uint64_t ShaderBinding::GetHash() const
 
 ShaderBindSet::ShaderBindSet( const ShaderBinding* bindings[], const uint32_t bindCount )
 {
-	bindSlots.resize( bindCount );
+	bindMap.reserve( bindCount );
 
 	for ( uint32_t i = 0; i < bindCount; ++i ) {
-		AddBind( bindings[ i ] );
+		bindMap[ bindings[i]->GetHash() ] = bindings[i];
 	}
 }
 
 
-void ShaderBindSet::AddBind( const ShaderBinding* binding )
+const uint32_t ShaderBindSet::GetBindCount() const
 {
-	bindSlots[ binding->GetSlot() ] = binding;
+	return static_cast<uint32_t>( bindMap.size() );
 }
 
 
-const uint32_t ShaderBindSet::GetBindCount()
+const ShaderBinding* ShaderBindSet::GetBinding( const uint32_t id ) const
 {
-	return static_cast<uint32_t>( bindSlots.size() );
+	auto it = bindMap.begin();
+	std::advance( it, id );
+
+	if ( it != bindMap.end() ) {
+		return it->second;
+	}
+	return nullptr;
 }
 
 
-const ShaderBinding* ShaderBindSet::GetBinding( uint32_t slot )
+bool ShaderBindSet::HasBinding( const uint32_t id ) const
 {
-	return bindSlots[ slot ];
+	return ( GetBinding( id ) != nullptr );
+}
+
+
+bool ShaderBindSet::HasBinding( const ShaderBinding& binding ) const
+{
+	const uint32_t hash = binding.GetHash();
+	auto it = bindMap.find( hash );
+	if ( it != bindMap.end() ) {
+		return true;
+	}
+	return false;
+}
+
+
+void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment& attachment )
+{
+	if( bindSet->HasBinding( binding ) ) {
+		attachments[ binding.GetHash() ] = attachment;
+	}
+}
+
+
+const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding& binding ) const
+{
+	auto it = attachments.find( binding.GetHash() );
+	if ( it != attachments.end() ) {
+		return &it->second;
+	}
+	return nullptr;
 }
