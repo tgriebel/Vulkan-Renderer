@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
+#include "../globals/common.h"
 
 class GpuBuffer;
 
@@ -101,12 +102,27 @@ class ShaderBindSet
 {
 private:
 	std::unordered_map<uint32_t, ShaderBinding> bindMap;
+	bool										valid;
 public:
+
+#ifdef USE_VULKAN
+	VkDescriptorSetLayout						vk_layout;
+#endif
 
 	ShaderBindSet()
 	{}
 
+#ifdef USE_VULKAN
+	inline VkDescriptorSetLayout GetVkObject()
+	{
+		return vk_layout;
+	}
+#endif
+
 	ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount );
+
+	void Create();
+	void Destroy();
 
 	const uint32_t			GetBindCount() const;
 	const ShaderBinding*	GetBinding( const uint32_t id ) const;

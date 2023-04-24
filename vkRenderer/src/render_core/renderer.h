@@ -162,9 +162,6 @@ private:
 	DrawPassState					mainPassState;
 	DrawPassState					postPassState;
 	ComputeState					particleState;
-	VkDescriptorSetLayout			globalLayout;
-	VkDescriptorSetLayout			postProcessLayout;
-	VkDescriptorSetLayout			computeLayout;
 	VkDescriptorPool				descriptorPool;
 	renderConfig_t					config;
 	size_t							frameId = 0;
@@ -274,8 +271,7 @@ private:
 
 	// API Creation Functions
 	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
-	void						CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
-	void						CreateDescSetLayouts();
+	void						CreateDescriptorSets( VkDescriptorSetLayout layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
 	void						CreateDescriptorPool();
 	void						CreateInstance();
 	void						CreateLogicalDevice();

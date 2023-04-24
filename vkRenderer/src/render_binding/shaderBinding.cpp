@@ -24,6 +24,7 @@
 #include "shaderBinding.h"
 #include "bindings.h"
 #include "gpuResources.h"
+#include "../render_state/rhi.h"
 
 ShaderBinding::ShaderBinding( const char* name, const bindType_t type, const uint32_t descriptorCount, const bindStateFlag_t flags )
 {
@@ -83,6 +84,61 @@ ShaderBindSet::ShaderBindSet( const ShaderBinding bindings[], const uint32_t bin
 		binding = bindings[i];
 		binding.SetSlot( i );
 	}
+
+	valid = false;
+}
+
+
+void ShaderBindSet::Create()
+{
+	const uint32_t bindingCount = GetBindCount();
+	if ( bindingCount == 0 )
+	{
+		assert( 0 );
+		return;
+	}
+	assert( valid == false );
+
+#ifdef USE_VULKAN
+	std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+	layoutBindings.resize( bindingCount );
+
+	for ( uint32_t i = 0; i < bindingCount; ++i )
+	{
+		const ShaderBinding* binding = GetBinding( i );
+
+		layoutBindings[ i ] = {};
+		layoutBindings[ i ].binding = binding->GetSlot();
+		layoutBindings[ i ].descriptorCount = binding->GetDescriptorCount();
+		layoutBindings[ i ].descriptorType = vk_GetDescriptorType( binding->GetType() );
+		layoutBindings[ i ].pImmutableSamplers = nullptr;
+		layoutBindings[ i ].stageFlags = vk_GetStageFlags( binding->GetBindFlags() );
+	}
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = static_cast<uint32_t>( layoutBindings.size() );
+	layoutInfo.pBindings = layoutBindings.data();
+
+	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &vk_layout ) != VK_SUCCESS ) {
+		throw std::runtime_error( "CreateBindingLayout: Failed to create compute descriptor set layout!" );
+	}
+#else
+	assert(0);
+#endif
+
+	valid = true;
+}
+
+
+void ShaderBindSet::Destroy()
+{
+	if( valid == false ) {
+		return;
+	}
+#ifdef USE_VULKAN
+	vkDestroyDescriptorSetLayout( context.device, vk_layout, nullptr );
+#endif
 }
 
 

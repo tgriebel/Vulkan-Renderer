@@ -48,8 +48,9 @@ void Renderer::Cleanup()
 	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
 	vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
 
-	vkDestroyDescriptorSetLayout( context.device, globalLayout, nullptr );
-	vkDestroyDescriptorSetLayout( context.device, postProcessLayout, nullptr );
+	// Shader binding resources
+	defaultBindSet.Destroy();
+	particleShaderBinds.Destroy();
 
 	// Sync
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )

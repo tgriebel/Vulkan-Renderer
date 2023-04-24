@@ -2,6 +2,7 @@
 
 #include <resource_types/texture.h>
 #include "../render_state/deviceContext.h"
+#include "../render_binding/shaderBinding.h"
 
 static inline VkFormat vk_GetTextureFormat( textureFmt_t fmt )
 {
@@ -41,4 +42,48 @@ static inline VkSampleCountFlagBits vk_GetSampleCount( const textureSamples_t sa
 		default: assert( false );	break;
 	}
 	return VK_SAMPLE_COUNT_1_BIT;
+}
+
+
+static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
+{
+	switch ( type )
+	{
+		case CONSTANT_BUFFER:		return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		case IMAGE_2D:				return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case IMAGE_3D:				return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case IMAGE_CUBE:			return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		case READ_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case WRITE_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		case READ_IMAGE_BUFFER:		return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		case WRITE_IMAGE_BUFFER:	return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		default: break;
+	}
+	assert( 0 );
+	return VK_DESCRIPTOR_TYPE_MAX_ENUM;
+}
+
+
+static VkShaderStageFlagBits vk_GetStageFlags( const bindStateFlag_t flags )
+{
+	uint32_t count = 0;
+	uint32_t bits = flags;
+
+	uint32_t vkFlags = 0;
+
+	while ( bits )
+	{
+		uint32_t bitFlag = bits & 0x1;
+		switch ( bitFlag )
+		{
+		case BIND_STATE_VS:		vkFlags |= VK_SHADER_STAGE_VERTEX_BIT;		break;
+		case BIND_STATE_PS:		vkFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;	break;
+		case BIND_STATE_CS:		vkFlags |= VK_SHADER_STAGE_COMPUTE_BIT;		break;
+		default:
+		case BIND_STATE_ALL:	vkFlags |= VK_SHADER_STAGE_ALL;				break;
+		}
+		bits &= ( bits - 1 );
+		count++;
+	}
+	return VkShaderStageFlagBits( vkFlags );
 }

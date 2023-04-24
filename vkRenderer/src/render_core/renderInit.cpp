@@ -126,13 +126,16 @@ void Renderer::InitVulkan()
 
 	{
 		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
-	}
-
-	{
 		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
-	}
 
-	CreateDescSetLayouts();
+		defaultBindSet.Create();
+		particleShaderBinds.Create();
+
+		CreateDescriptorSets( defaultBindSet.GetVkObject(), mainPassState.descriptorSets );
+		CreateDescriptorSets( defaultBindSet.GetVkObject(), shadowPassState.descriptorSets );
+		CreateDescriptorSets( defaultBindSet.GetVkObject(), postPassState.descriptorSets );
+		CreateDescriptorSets( particleShaderBinds.GetVkObject(), particleState.descriptorSets );
+	}
 
 	InitShaderResources();
 
@@ -335,15 +338,15 @@ void Renderer::CreatePipelineObjects()
 			VkDescriptorSetLayout layout;
 			if ( passIx == DRAWPASS_SHADOW ) {
 				pass = shadowPassState.pass;
-				layout = globalLayout;
+				layout = defaultBindSet.GetVkObject();
 			}
 			else if ( passIx == DRAWPASS_POST_2D ) {
 				pass = postPassState.pass;
-				layout = postProcessLayout;
+				layout = defaultBindSet.GetVkObject();
 			}
 			else {
 				pass = mainPassState.pass;
-				layout = globalLayout;
+				layout = defaultBindSet.GetVkObject();
 			}
 
 			CreateGraphicsPipeline( layout, pass, state, prog->Get().pipeline );
@@ -366,7 +369,7 @@ void Renderer::CreatePipelineObjects()
 		state.shaders = &prog->Get();
 		state.tag = prog->GetName().c_str();
 
-		CreateComputePipeline( computeLayout, state, prog->Get().pipeline );
+		CreateComputePipeline( particleShaderBinds.GetVkObject(), state, prog->Get().pipeline );
 	}
 }
 
@@ -811,7 +814,7 @@ void Renderer::CreateDescriptorPool()
 }
 
 
-void Renderer::CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
+void Renderer::CreateDescriptorSets( VkDescriptorSetLayout layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
 {
 	std::vector<VkDescriptorSetLayout> layouts( swapChain.GetBufferCount(), layout );
 	VkDescriptorSetAllocateInfo allocInfo{ };
@@ -823,19 +826,6 @@ void Renderer::CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptor
 	if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to allocate descriptor sets!" );
 	}
-}
-
-
-void Renderer::CreateDescSetLayouts()
-{
-	CreateBindingLayout( defaultBindSet, globalLayout );
-	CreateBindingLayout( defaultBindSet, postProcessLayout );
-	CreateBindingLayout( particleShaderBinds, computeLayout );
-
-	CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
-	CreateDescriptorSets( globalLayout, shadowPassState.descriptorSets );
-	CreateDescriptorSets( postProcessLayout, postPassState.descriptorSets );
-	CreateDescriptorSets( computeLayout, particleState.descriptorSets );
 }
 
 
