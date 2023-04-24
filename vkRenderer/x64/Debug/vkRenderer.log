@@ -1,4 +1,5 @@
-﻿  shaderBinding.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_binding\shaderBinding.cpp(37,43): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_binding\shaderBinding.cpp(37,43): warning C4267: 'initializing': conversion from 'size_t' to 'const uint32_t', possible loss of data
+﻿  binding.cpp
+  shaderBinding.cpp
+  renderInit.cpp
+  Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

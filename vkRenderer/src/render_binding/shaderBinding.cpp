@@ -34,7 +34,7 @@ ShaderBinding::ShaderBinding( const char* name, const bindType_t type, const uin
 
 	const uint32_t bufSize = 128;
 
-	const uint32_t sizeBytes = strlen( name );
+	const uint32_t sizeBytes = static_cast<uint32_t>( strlen( name ) );
 	assert( sizeBytes <= bufSize );
 
 	uint8_t hashBytes[ bufSize ];

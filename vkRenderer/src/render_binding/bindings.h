@@ -16,3 +16,9 @@ extern ShaderBinding	bind_materialBuffer;
 extern ShaderBinding	bind_lightBuffer;
 extern ShaderBinding	bind_imageCodeArray;
 extern ShaderBinding	bind_imageStencil;
+
+const uint32_t g_defaultBindCount = 9;
+extern const ShaderBinding g_defaultBindings[ g_defaultBindCount ];
+
+const uint32_t g_particleCsBindCount = 2;
+extern const ShaderBinding g_particleCsBindings[ g_particleCsBindCount ];

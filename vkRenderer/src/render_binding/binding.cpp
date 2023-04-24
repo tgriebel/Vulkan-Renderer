@@ -17,3 +17,23 @@ BINDING( materialBuffer, READ_BUFFER, 1, BIND_STATE_ALL );
 BINDING( lightBuffer, READ_BUFFER, 1, BIND_STATE_ALL );
 BINDING( imageCodeArray, IMAGE_2D, MaxCodeImages, BIND_STATE_ALL );
 BINDING( imageStencil, IMAGE_2D, 1, BIND_STATE_ALL );
+
+
+const ShaderBinding g_defaultBindings[ g_defaultBindCount ] =
+											{	
+												bind_globalsBuffer,
+												bind_viewBuffer,
+												bind_modelBuffer,
+												bind_image2DArray,
+												bind_imageCubeArray,
+												bind_materialBuffer,
+												bind_lightBuffer,
+												bind_imageCodeArray,
+												bind_imageStencil
+											};
+
+const ShaderBinding g_particleCsBindings[ g_particleCsBindCount ] =
+											{
+												bind_globalsBuffer,
+												bind_particleWriteBuffer 
+											};

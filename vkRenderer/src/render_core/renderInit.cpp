@@ -125,22 +125,11 @@ void Renderer::InitVulkan()
 	}
 
 	{
-		const ShaderBinding bindings[ 2 ] = { bind_globalsBuffer, bind_particleWriteBuffer };
-		particleShaderBinds = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
+		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
 	}
 
 	{
-		const ShaderBinding bindings[ 9 ] = {	bind_globalsBuffer,
-												bind_viewBuffer,
-												bind_modelBuffer,
-												bind_image2DArray,
-												bind_imageCubeArray,
-												bind_materialBuffer,
-												bind_lightBuffer,
-												bind_imageCodeArray,
-												bind_imageStencil };
-
-		defaultBindSet = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
+		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
 	}
 
 	CreateDescSetLayouts();
