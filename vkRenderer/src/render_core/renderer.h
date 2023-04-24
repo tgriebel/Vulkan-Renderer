@@ -196,8 +196,8 @@ private:
 	VkFormat						vk_mainColorFmt;
 	VkFormat						vk_depthFmt;
 
-	ShaderBindSet					defaultParmSet;
-	ShaderBindSet					particleShaderParms;
+	ShaderBindSet					defaultBindSet;
+	ShaderBindSet					particleShaderBinds;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;

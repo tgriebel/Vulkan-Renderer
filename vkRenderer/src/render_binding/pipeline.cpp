@@ -136,9 +136,9 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 }
 
 
-void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout )
+void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout )
 {
-	const uint32_t bindingCount = parms.GetBindCount();
+	const uint32_t bindingCount = bindSet.GetBindCount();
 	if( bindingCount == 0 )
 	{
 		assert( 0 );
@@ -150,7 +150,7 @@ void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout )
 
 	for( uint32_t i = 0; i < bindingCount; ++i )
 	{
-		const ShaderBinding* binding = parms.GetBinding(i);
+		const ShaderBinding* binding = bindSet.GetBinding(i);
 		
 		layoutBindings[i] = {};
 		layoutBindings[i].binding = binding->GetSlot();

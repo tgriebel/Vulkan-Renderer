@@ -576,7 +576,7 @@ void Renderer::FlushGPU()
 }
 
 
-void Renderer::Dispatch( VkCommandBuffer commandBuffer, GpuProgram& prog, ShaderBindSet& parms, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
+void Renderer::Dispatch( VkCommandBuffer commandBuffer, GpuProgram& prog, ShaderBindSet& bindSet, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( prog.pipeline, &pipelineObject );
@@ -630,7 +630,7 @@ void Renderer::SubmitFrame()
 
 		GpuProgram& prog = gAssets.gpuPrograms.Find( "ClearParticles" )->Get();
 
-		Dispatch( computeQueue.commandBuffers[ bufferId ], prog, particleShaderParms, particleState.descriptorSets[ bufferId ], MaxParticles / 256 );
+		Dispatch( computeQueue.commandBuffers[ bufferId ], prog, particleShaderBinds, particleState.descriptorSets[ bufferId ], MaxParticles / 256 );
 
 		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );

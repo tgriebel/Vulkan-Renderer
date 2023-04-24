@@ -49,29 +49,40 @@ enum bindStateFlag_t
 	BIND_STATE_ALL = ( 1 << 3 ) - 1
 };
 
+class ShaderBindSet;
 
 class ShaderBinding
 {
 private:
 	struct bindState_t
 	{
+	private:
 		bindType_t		type;
 		uint32_t		slot;
 		uint32_t		descriptorCount;
 		bindStateFlag_t	flags;
+
+		friend ShaderBinding;
 	} state;
 	uint32_t		hash;
+
+	inline void SetSlot( const uint32_t slot )
+	{
+		state.slot = slot;
+	}
 public:
 
 	ShaderBinding() {}
 
-	ShaderBinding( const uint32_t slot, const bindType_t type, const uint32_t descriptorCount, const bindStateFlag_t flags );
+	ShaderBinding( const char* name, const bindType_t type, const uint32_t count, const bindStateFlag_t flags );
 
 	uint32_t		GetSlot() const;
 	bindType_t		GetType() const;
 	uint32_t		GetDescriptorCount() const;
 	bindStateFlag_t	GetBindFlags() const;
 	uint32_t		GetHash() const;
+
+	friend class ShaderBindSet;
 };
 
 
@@ -89,13 +100,13 @@ public:
 class ShaderBindSet
 {
 private:
-	std::unordered_map<uint32_t, const ShaderBinding*> bindMap;
+	std::unordered_map<uint32_t, ShaderBinding> bindMap;
 public:
 
 	ShaderBindSet()
 	{}
 
-	ShaderBindSet( const ShaderBinding* bindings[], const uint32_t bindCount );
+	ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount );
 
 	const uint32_t			GetBindCount() const;
 	const ShaderBinding*	GetBinding( const uint32_t id ) const;

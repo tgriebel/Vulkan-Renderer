@@ -1,17 +1,19 @@
 #include "bindings.h"
 #include "../globals/common.h"
 
-ShaderBinding	bind_globalsBuffer( 0, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
+#define BINDING( NAME, TYPE, COUNT, FLAGS )	ShaderBinding bind_##NAME( #NAME, TYPE, COUNT, FLAGS )
+
+BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 
 // Compute Resources
-ShaderBinding	bind_particleWriteBuffer( 1, WRITE_BUFFER, 1, BIND_STATE_CS );
+BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
 
 // Raster Resources
-ShaderBinding	bind_viewBuffer( 1, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_modelBuffer( 2, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_image2DArray( 3, IMAGE_2D, MaxImageDescriptors, BIND_STATE_ALL );
-ShaderBinding	bind_imageCubeArray( 4, IMAGE_CUBE, MaxImageDescriptors, BIND_STATE_ALL );
-ShaderBinding	bind_materialBuffer( 5, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_lightBuffer( 6, READ_BUFFER, 1, BIND_STATE_ALL );
-ShaderBinding	bind_imageCodeArray( 7, IMAGE_2D, MaxCodeImages, BIND_STATE_ALL );
-ShaderBinding	bind_imageStencil( 8, IMAGE_2D, 1, BIND_STATE_ALL );
+BINDING( viewBuffer, READ_BUFFER, 1, BIND_STATE_ALL );
+BINDING( modelBuffer, READ_BUFFER, 1, BIND_STATE_ALL );
+BINDING( image2DArray, IMAGE_2D, MaxImageDescriptors, BIND_STATE_ALL );
+BINDING( imageCubeArray, IMAGE_CUBE, MaxImageDescriptors, BIND_STATE_ALL );
+BINDING( materialBuffer, READ_BUFFER, 1, BIND_STATE_ALL );
+BINDING( lightBuffer, READ_BUFFER, 1, BIND_STATE_ALL );
+BINDING( imageCodeArray, IMAGE_2D, MaxCodeImages, BIND_STATE_ALL );
+BINDING( imageStencil, IMAGE_2D, 1, BIND_STATE_ALL );

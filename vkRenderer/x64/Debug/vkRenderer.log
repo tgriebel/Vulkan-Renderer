@@ -1,3 +1,4 @@
-﻿  renderInit.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderInit.cpp(302,22): warning C4018: '<': signed/unsigned mismatch
+﻿  shaderBinding.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_binding\shaderBinding.cpp(37,43): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_binding\shaderBinding.cpp(37,43): warning C4267: 'initializing': conversion from 'size_t' to 'const uint32_t', possible loss of data
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

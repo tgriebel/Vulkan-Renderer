@@ -125,22 +125,22 @@ void Renderer::InitVulkan()
 	}
 
 	{
-		const ShaderBinding* bindings[ 2 ] = { &bind_globalsBuffer, &bind_particleWriteBuffer };
-		particleShaderParms = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
+		const ShaderBinding bindings[ 2 ] = { bind_globalsBuffer, bind_particleWriteBuffer };
+		particleShaderBinds = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
 	}
 
 	{
-		const ShaderBinding* bindings[ 9 ] = {	&bind_globalsBuffer,
-												&bind_viewBuffer,
-												&bind_modelBuffer,
-												&bind_image2DArray,
-												&bind_imageCubeArray,
-												&bind_materialBuffer,
-												&bind_lightBuffer,
-												&bind_imageCodeArray,
-												&bind_imageStencil };
+		const ShaderBinding bindings[ 9 ] = {	bind_globalsBuffer,
+												bind_viewBuffer,
+												bind_modelBuffer,
+												bind_image2DArray,
+												bind_imageCubeArray,
+												bind_materialBuffer,
+												bind_lightBuffer,
+												bind_imageCodeArray,
+												bind_imageStencil };
 
-		defaultParmSet = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
+		defaultBindSet = ShaderBindSet( bindings, COUNTARRAY( bindings ) );
 	}
 
 	CreateDescSetLayouts();
@@ -839,9 +839,9 @@ void Renderer::CreateDescriptorSets( VkDescriptorSetLayout& layout, VkDescriptor
 
 void Renderer::CreateDescSetLayouts()
 {
-	CreateBindingLayout( defaultParmSet, globalLayout );
-	CreateBindingLayout( defaultParmSet, postProcessLayout );
-	CreateBindingLayout( particleShaderParms, computeLayout );
+	CreateBindingLayout( defaultBindSet, globalLayout );
+	CreateBindingLayout( defaultBindSet, postProcessLayout );
+	CreateBindingLayout( particleShaderBinds, computeLayout );
 
 	CreateDescriptorSets( globalLayout, mainPassState.descriptorSets );
 	CreateDescriptorSets( globalLayout, shadowPassState.descriptorSets );
