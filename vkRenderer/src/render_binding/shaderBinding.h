@@ -103,11 +103,11 @@ class ShaderBindSet
 private:
 	std::unordered_map<uint32_t, ShaderBinding> bindMap;
 	bool										valid;
-public:
 
 #ifdef USE_VULKAN
 	VkDescriptorSetLayout						vk_layout;
 #endif
+public:
 
 	ShaderBindSet()
 	{}
