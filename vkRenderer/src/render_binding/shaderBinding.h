@@ -112,17 +112,19 @@ public:
 	ShaderBindSet()
 	{}
 
+
+
+	ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount );
+
+	void Create();
+	void Destroy();
+
 #ifdef USE_VULKAN
 	inline VkDescriptorSetLayout GetVkObject()
 	{
 		return vk_layout;
 	}
 #endif
-
-	ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount );
-
-	void Create();
-	void Destroy();
 
 	const uint32_t			GetBindCount() const;
 	const ShaderBinding*	GetBinding( const uint32_t id ) const;
@@ -136,12 +138,27 @@ class ShaderBindParms
 private:
 	const ShaderBindSet*							bindSet;
 	std::unordered_map<uint32_t, ShaderAttachment>	attachments;
+
+#ifdef USE_VULKAN
+	VkDescriptorSet									vk_descriptorSets;
+#endif
+
 public:
 
 	ShaderBindParms()
 	{}
 
 	ShaderBindParms( const ShaderBindSet* bindSet );
+
+	void Create();
+	void Destroy();
+
+#ifdef USE_VULKAN
+	inline VkDescriptorSet GetVkObject()
+	{
+		return vk_descriptorSets;
+	}
+#endif
 
 	void Bind( const ShaderBinding& binding, const ShaderAttachment& attachment );
 	const ShaderAttachment* GetAttachment( const ShaderBinding& binding ) const;
