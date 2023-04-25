@@ -91,7 +91,7 @@ void GpuBuffer::Destroy()
 		throw std::runtime_error( "GPU Buffer: Destroy: No device context!" );
 	}
 	VkBuffer vkBuffer = GetVkObject();
-	if ( vkBuffer == VK_NULL_HANDLE ) {
+	if ( vkBuffer != VK_NULL_HANDLE ) {
 		vkDestroyBuffer( context.device, vkBuffer, nullptr );
 	}
 	SetPos();
