@@ -1,4 +1,4 @@
-# Vulkan-Renderer
+# Extensa: Vulkan-Renderer
 
 Calling this "Extensa" after Descartes Res Extensa--"a thing extended in space". I've always conceived of 3D rendering as giving shape to abstract logical worlds so felt the name fit.
 
