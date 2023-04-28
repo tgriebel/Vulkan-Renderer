@@ -26,4 +26,3 @@ To-Do:
 * Depth-of-Field
 * Bin files for models
 * Individual shader reload
-* Fix release build
