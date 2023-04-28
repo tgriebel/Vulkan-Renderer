@@ -612,8 +612,7 @@ void Renderer::SubmitFrame()
 	// Mark the image as now being in use by this frame
 	graphicsQueue.imagesInFlight[ bufferId ] = graphicsQueue.inFlightFences[ frameId ];
 
-	UpdateBufferContents( bufferId );
-	UpdateFrameDescSet( bufferId );
+	UpdateBuffers( bufferId );
 
 	// Compute
 	{
@@ -1276,7 +1275,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 }
 
 
-void Renderer::UpdateBufferContents( uint32_t currentImage )
+void Renderer::UpdateBuffers( uint32_t currentImage )
 {
 	static globalUboConstants_t globalsBuffer;
 	{
