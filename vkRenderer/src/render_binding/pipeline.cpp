@@ -94,7 +94,7 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 
 void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout )
 {
-	const uint32_t bindingCount = bindSet.GetBindCount();
+	const uint32_t bindingCount = bindSet.Count();
 	if( bindingCount == 0 )
 	{
 		assert( 0 );

@@ -91,7 +91,7 @@ ShaderBindSet::ShaderBindSet( const ShaderBinding bindings[], const uint32_t bin
 
 void ShaderBindSet::Create()
 {
-	const uint32_t bindingCount = GetBindCount();
+	const uint32_t bindingCount = Count();
 	if ( bindingCount == 0 )
 	{
 		assert( 0 );
@@ -142,7 +142,7 @@ void ShaderBindSet::Destroy()
 }
 
 
-const uint32_t ShaderBindSet::GetBindCount() const
+const uint32_t ShaderBindSet::Count() const
 {
 	return static_cast<uint32_t>( bindMap.size() );
 }

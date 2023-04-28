@@ -120,13 +120,13 @@ public:
 	void Destroy();
 
 #ifdef USE_VULKAN
-	inline VkDescriptorSetLayout GetVkObject()
+	inline VkDescriptorSetLayout GetVkObject() const
 	{
 		return vk_layout;
 	}
 #endif
 
-	const uint32_t			GetBindCount() const;
+	const uint32_t			Count() const;
 	const ShaderBinding*	GetBinding( const uint32_t id ) const;
 	bool					HasBinding( const uint32_t id ) const;
 	bool					HasBinding( const ShaderBinding& binding ) const;
@@ -140,25 +140,50 @@ private:
 	std::unordered_map<uint32_t, ShaderAttachment>	attachments;
 
 #ifdef USE_VULKAN
-	VkDescriptorSet									vk_descriptorSets;
+	VkDescriptorSet									vk_descriptorSet;
 #endif
 
 public:
 
-	ShaderBindParms()
-	{}
-
-	ShaderBindParms( const ShaderBindSet* bindSet );
-
-	void Create();
-	void Destroy();
-
 #ifdef USE_VULKAN
+	ShaderBindParms()
+	{
+		vk_descriptorSet = VK_NULL_HANDLE;
+	}
+
+	ShaderBindParms::ShaderBindParms( const ShaderBindSet* set )
+	{
+		bindSet = set;
+		attachments.reserve( bindSet->Count() );
+
+		InitApiObjects();
+	}
+
 	inline VkDescriptorSet GetVkObject()
 	{
-		return vk_descriptorSets;
+		return vk_descriptorSet;
+	}
+
+	inline void SetVkObject( const VkDescriptorSet descSet )
+	{
+		vk_descriptorSet = descSet;
+	}
+
+	void InitApiObjects()
+	{
+		vk_descriptorSet = VK_NULL_HANDLE;
+	}
+
+	inline bool IsValid()
+	{
+		return ( vk_descriptorSet != VK_NULL_HANDLE );
 	}
 #endif
+
+	inline const ShaderBindSet* GetSet()
+	{
+		return bindSet;
+	}
 
 	void Bind( const ShaderBinding& binding, const ShaderAttachment& attachment );
 	const ShaderAttachment* GetAttachment( const ShaderBinding& binding ) const;
