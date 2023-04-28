@@ -131,10 +131,15 @@ void Renderer::InitVulkan()
 		defaultBindSet.Create();
 		particleShaderBinds.Create();
 
-		CreateDescriptorSets( defaultBindSet.GetVkObject(), mainPassState.descriptorSets );
-		CreateDescriptorSets( defaultBindSet.GetVkObject(), shadowPassState.descriptorSets );
-		CreateDescriptorSets( defaultBindSet.GetVkObject(), postPassState.descriptorSets );
-		CreateDescriptorSets( particleShaderBinds.GetVkObject(), particleState.descriptorSets );
+		for( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
+		{
+			mainPassState.parms[i] = RegisterBindParm( &defaultBindSet );
+			shadowPassState.parms[i] = RegisterBindParm( &defaultBindSet );
+			postPassState.parms[i] = RegisterBindParm( &defaultBindSet );
+			particleState.parms[i] = RegisterBindParm( &particleShaderBinds );
+		}
+
+		AllocRegisteredBindParms();
 	}
 
 	InitShaderResources();
@@ -814,17 +819,48 @@ void Renderer::CreateDescriptorPool()
 }
 
 
-void Renderer::CreateDescriptorSets( VkDescriptorSetLayout layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] )
+ShaderBindParms* Renderer::RegisterBindParm( const ShaderBindSet* set )
 {
-	std::vector<VkDescriptorSetLayout> layouts( swapChain.GetBufferCount(), layout );
+	ShaderBindParms parms = ShaderBindParms( set );
+
+	bindParmsList[ bindParmCount ] = parms;
+	++bindParmCount;
+
+	return &bindParmsList[ bindParmCount - 1 ];
+}
+
+
+void Renderer::AllocRegisteredBindParms()
+{
+	std::vector<VkDescriptorSetLayout> layouts;
+	std::vector<VkDescriptorSet> descSets;
+
+	layouts.reserve( bindParmCount );
+	descSets.reserve( bindParmCount );
+
+	for ( uint32_t i = 0; i < bindParmCount; ++i )
+	{
+		ShaderBindParms& parms = bindParmsList[i];
+		const ShaderBindSet* set = parms.GetSet();
+
+		layouts.push_back( set->GetVkObject() );
+		descSets.push_back( VK_NULL_HANDLE );
+	}
+
 	VkDescriptorSetAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	allocInfo.descriptorPool = descriptorPool;
-	allocInfo.descriptorSetCount = MAX_FRAMES_STATES;
+	allocInfo.descriptorSetCount = static_cast<uint32_t>( layouts.size() );
 	allocInfo.pSetLayouts = layouts.data();
 
-	if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets ) != VK_SUCCESS ) {
+	if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets.data() ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to allocate descriptor sets!" );
+	}
+
+	for ( uint32_t i = 0; i < bindParmCount; ++i )
+	{
+		ShaderBindParms& parms = bindParmsList[ i ];
+		parms.SetVkObject( descSets[i] );
 	}
 }
 
