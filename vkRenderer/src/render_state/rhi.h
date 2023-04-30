@@ -28,6 +28,21 @@ static inline VkFormat vk_GetTextureFormat( textureFmt_t fmt )
 }
 
 
+static inline VkImageViewType vk_GetTextureType( textureType_t type )
+{
+	switch ( type ) {
+		default:
+		case TEXTURE_TYPE_2D:			return VK_IMAGE_VIEW_TYPE_2D;
+		case TEXTURE_TYPE_2D_ARRAY:		return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+		case TEXTURE_TYPE_3D:			return VK_IMAGE_VIEW_TYPE_3D;
+		case TEXTURE_TYPE_CUBE:			return VK_IMAGE_VIEW_TYPE_CUBE;
+		case TEXTURE_TYPE_CUBE_ARRAY:	return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+	}
+	assert(0);
+	return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
+}
+
+
 static inline VkSampleCountFlagBits vk_GetSampleCount( const textureSamples_t sampleCount )
 {
 	switch ( sampleCount )

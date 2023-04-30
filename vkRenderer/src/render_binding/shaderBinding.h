@@ -28,6 +28,7 @@
 #include "../globals/common.h"
 
 class GpuBuffer;
+class GpuImage;
 
 enum bindType_t
 {
@@ -92,9 +93,28 @@ class ShaderAttachment
 private:
 	union attachType_t
 	{
-		const GpuBuffer* buffer;
-	};
+		const GpuBuffer*		buffer;
+		const GpuImage*			image;
+		const GpuImage**		imageArray;
+	} u;
 public:
+	ShaderAttachment()
+	{}
+
+	ShaderAttachment( const GpuBuffer* buffer )
+	{
+		u.buffer = buffer;
+	}
+
+	ShaderAttachment( const GpuImage* image )
+	{
+		u.image = image;
+	}
+
+	ShaderAttachment( const GpuImage* imageArray[] )
+	{
+		u.imageArray = imageArray;
+	}
 };
 
 

@@ -72,6 +72,34 @@ struct renderConfig_t
 	textureSamples_t mainColorSubSamples;
 };
 
+
+struct DrawPassState
+{
+	vec4f				clearColor;
+	float				clearDepth;
+	uint32_t			clearStencil;
+
+	int32_t				x;
+	int32_t				y;
+	uint32_t			width;
+	uint32_t			height;
+
+	VkRenderPass		pass;
+	const GpuImage*		codeImages[ MAX_FRAMES_STATES ][ MaxCodeImages ];
+	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
+	FrameBuffer*		fb;
+};
+
+
+struct ComputeState
+{
+	int32_t				x;
+	int32_t				y;
+	int32_t				z;
+	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
+};
+
+
 class Renderer
 {
 public:
@@ -170,7 +198,8 @@ private:
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
-	GpuImage						gpuImages[ MaxImageDescriptors ];
+	const GpuImage*					gpuImages2D[ MaxImageDescriptors ];
+	const GpuImage*					gpuImagesCube[ MaxImageDescriptors ];
 	materialBufferObject_t			materialBuffer[ MaxMaterials ];
 
 	FrameState						frameState[ MAX_FRAMES_STATES ];
@@ -186,6 +215,9 @@ private:
 	AllocatorVkMemory				localMemory;
 	AllocatorVkMemory				frameBufferMemory;
 	AllocatorVkMemory				sharedMemory;
+
+	ShaderBindParms					bindParmsList[ DescriptorPoolMaxSets ];
+	uint32_t						bindParmCount = 0;
 
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
@@ -271,7 +303,8 @@ private:
 
 	// API Creation Functions
 	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
-	void						CreateDescriptorSets( VkDescriptorSetLayout layout, VkDescriptorSet descSets[ MAX_FRAMES_STATES ] );
+	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
+	void						AllocRegisteredBindParms();
 	void						CreateDescriptorPool();
 	void						CreateInstance();
 	void						CreateLogicalDevice();
@@ -315,7 +348,7 @@ private:
 	void						UploadTextures();
 	void						UpdateGpuMaterials();
 	void						UploadModelsToGPU();
-	void						UpdateBufferContents( uint32_t currentImage );
+	void						UpdateBuffers( uint32_t currentImage );
 	void						UpdateFrameDescSet( const int currentImage );
 	void						UpdateDescriptorSets();
 

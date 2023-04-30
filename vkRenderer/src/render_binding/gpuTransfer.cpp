@@ -25,6 +25,7 @@
 #include <iterator>
 #include <map>
 #include "../render_core/renderer.h"
+#include "../render_state/rhi.h"
 #include <scene/assetManager.h>
 
 extern AssetManager gAssets;
@@ -92,6 +93,8 @@ void Renderer::UploadTextures()
 	if ( textureCount == 0 ) {
 		return;
 	}
+
+	// 1. Upload Data
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
@@ -118,9 +121,9 @@ void Renderer::UploadTextures()
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.uploadId = imageFreeSlot++;
-		gpuImages[texture.uploadId];
 	}
 
+	// 2. Generate MIPS
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
@@ -132,6 +135,7 @@ void Renderer::UploadTextures()
 	}
 	EndSingleTimeCommands( commandBuffer );
 
+	// 3. Create Views
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
@@ -140,13 +144,28 @@ void Renderer::UploadTextures()
 		}
 		Texture& texture = textureAsset->Get();
 
-		VkImageViewType type;
-		switch ( texture.info.type ) {
-		default:
-		case TEXTURE_TYPE_2D:	type = VK_IMAGE_VIEW_TYPE_2D;		break;
-		case TEXTURE_TYPE_CUBE:	type = VK_IMAGE_VIEW_TYPE_CUBE;		break;
-		}
+		VkImageViewType type = vk_GetTextureType( texture.info.type );
 		texture.gpuImage->vk_view = CreateImageView( texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
+	}
+
+	// 4. Add to resource type lists
+	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
+	{
+		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+		if ( textureAsset->IsLoaded() == false ) {
+			continue;
+		}
+		Texture& texture = textureAsset->Get();
+
+		switch ( texture.info.type )
+		{
+			case TEXTURE_TYPE_2D:
+				gpuImages2D[ texture.uploadId ] = texture.gpuImage;
+				break;
+			case TEXTURE_TYPE_CUBE:
+				gpuImagesCube[ texture.uploadId ] = texture.gpuImage;
+				break;			
+		}
 	}
 
 	uploadTextures.clear();

@@ -25,6 +25,7 @@
 #include "bindings.h"
 #include "gpuResources.h"
 #include "../render_state/rhi.h"
+#include "../render_core/gpuImage.h"
 
 ShaderBinding::ShaderBinding( const char* name, const bindType_t type, const uint32_t descriptorCount, const bindStateFlag_t flags )
 {
