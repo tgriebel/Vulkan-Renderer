@@ -28,14 +28,17 @@
 class GpuBuffer
 {
 public:
+	static uint64_t	GetPadding( const uint64_t size, const uint64_t alignment );
 
 	void			SetPos( const uint32_t pos = 0 );
 	uint64_t		GetSize() const;
 	uint64_t		GetMaxSize() const;
 	void			Allocate( const uint64_t size );
-	VkBuffer&		GetVkObject();
-	void			Create( VkDeviceSize size, VkBufferUsageFlags usage, AllocatorVkMemory& bufferMemory );
+	VkBuffer&		VkObject();
+	VkBuffer		GetVkObject() const;
+	void			Create( const uint64_t size, VkBufferUsageFlags usage, AllocatorVkMemory& bufferMemory );
 	void			Destroy();
+	bool			VisibleToCpu() const;
 	void			CopyData( void* data, const size_t sizeInBytes );
 
 private:

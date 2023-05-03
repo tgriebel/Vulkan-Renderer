@@ -50,7 +50,13 @@ void GpuBuffer::Allocate( const uint64_t size )
 }
 
 
-VkBuffer& GpuBuffer::GetVkObject()
+VkBuffer GpuBuffer::GetVkObject() const
+{
+	return buffer;
+}
+
+
+VkBuffer& GpuBuffer::VkObject()
 {
 	return buffer;
 }
@@ -64,7 +70,7 @@ void GpuBuffer::Create( VkDeviceSize size, VkBufferUsageFlags usage, AllocatorVk
 	bufferInfo.usage = usage;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &GetVkObject() ) != VK_SUCCESS ) {
+	if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &VkObject() ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create buffer!" );
 	}
 
@@ -98,6 +104,19 @@ void GpuBuffer::Destroy()
 }
 
 
+uint64_t GpuBuffer::GetPadding( const uint64_t size, const uint64_t alignment )
+{
+	return static_cast<uint32_t>( ( size + ( alignment - 1 ) ) & ~( alignment - 1 ) );
+}
+
+
+bool GpuBuffer::VisibleToCpu() const
+{
+	const void* mappedData = alloc.GetPtr();
+	return ( mappedData != nullptr );
+}
+
+
 void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 {
 	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
@@ -105,6 +124,6 @@ void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 	if ( mappedData != nullptr )
 	{
 		memcpy( (uint8_t*)mappedData + offset, data, sizeInBytes );
-		offset += static_cast<uint32_t>( ( sizeInBytes + ( alloc.GetAlignment() - 1 ) ) & ~( alloc.GetAlignment() - 1 ) );
+		offset += GetPadding( sizeInBytes, alloc.GetAlignment() );
 	}
 }

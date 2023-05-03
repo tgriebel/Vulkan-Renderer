@@ -90,30 +90,63 @@ public:
 
 class ShaderAttachment
 {
+public:
+	enum class type_t
+	{
+		BUFFER,
+		IMAGE,
+		IMAGE_ARRAY,
+	};
 private:
-	union attachType_t
+	union attach_t
 	{
 		const GpuBuffer*		buffer;
 		const GpuImage*			image;
 		const GpuImage**		imageArray;
 	} u;
+	type_t type;
 public:
+
+
 	ShaderAttachment()
 	{}
 
 	ShaderAttachment( const GpuBuffer* buffer )
 	{
 		u.buffer = buffer;
+		type = type_t::BUFFER;
 	}
 
 	ShaderAttachment( const GpuImage* image )
 	{
 		u.image = image;
+		type = type_t::IMAGE;
 	}
 
 	ShaderAttachment( const GpuImage* imageArray[] )
 	{
 		u.imageArray = imageArray;
+		type = type_t::IMAGE_ARRAY;
+	}
+
+	inline type_t GetType() const
+	{
+		return type;
+	}
+
+	inline const GpuBuffer* GetBuffer() const
+	{
+		return ( type == type_t::BUFFER ) ? u.buffer : nullptr;
+	}
+
+	inline const GpuImage* GetImage() const
+	{
+		return ( type == type_t::IMAGE ) ? u.image : nullptr;
+	}
+
+	inline const GpuImage** GetImageArray() const
+	{
+		return ( type == type_t::IMAGE_ARRAY ) ? u.imageArray : nullptr;
 	}
 };
 
@@ -200,11 +233,12 @@ public:
 	}
 #endif
 
-	inline const ShaderBindSet* GetSet()
+	inline const ShaderBindSet* GetSet() const
 	{
 		return bindSet;
 	}
 
 	void Bind( const ShaderBinding& binding, const ShaderAttachment& attachment );
-	const ShaderAttachment* GetAttachment( const ShaderBinding& binding ) const;
+	const ShaderAttachment* GetAttachment( const ShaderBinding* binding ) const;
+	const ShaderAttachment* GetAttachment( const uint32_t id ) const;
 };

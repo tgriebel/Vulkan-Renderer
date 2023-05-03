@@ -351,6 +351,7 @@ private:
 	void						UpdateBuffers( uint32_t currentImage );
 	void						UpdateFrameDescSet( const int currentImage );
 	void						UpdateDescriptorSets();
+	void						AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites );
 
 	// Debug
 	static VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(

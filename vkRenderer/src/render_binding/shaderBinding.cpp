@@ -186,9 +186,22 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment
 }
 
 
-const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding& binding ) const
+const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding* binding ) const
 {
-	auto it = attachments.find( binding.GetHash() );
+	auto it = attachments.find( binding->GetHash() );
+	if ( it != attachments.end() ) {
+		return &it->second;
+	}
+	return nullptr;
+}
+
+
+const ShaderAttachment* ShaderBindParms::GetAttachment( const uint32_t id ) const
+{
+	assert(0); // UNTESTED
+	auto it = attachments.begin();
+	std::advance( it, id );
+
 	if ( it != attachments.end() ) {
 		return &it->second;
 	}

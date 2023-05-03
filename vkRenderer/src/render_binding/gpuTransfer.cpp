@@ -53,7 +53,7 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 	vkCmdCopyBufferToImage(
 		commandBuffer,
 		buffer,
-		texture.gpuImage->vk_image,
+		texture.gpuImage->GetVkImage(),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1,
 		&region
@@ -77,11 +77,11 @@ void Renderer::UpdateTextures()
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );
 
-		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
+		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture );
+		CopyBufferToImage( commandBuffer, stagingBuffer.VkObject(), currentOffset, texture );
 	
-		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
+		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
 	}
 	EndSingleTimeCommands( commandBuffer );
 }
@@ -112,12 +112,12 @@ void Renderer::UploadTextures()
 
 		CreateGpuImage( texture.info, flags, *texture.gpuImage, localMemory );
 
-		TransitionImageLayout( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
+		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );		
 
-		CopyBufferToImage( commandBuffer, stagingBuffer.GetVkObject(), currentOffset, texture );
+		CopyBufferToImage( commandBuffer, stagingBuffer.VkObject(), currentOffset, texture );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.uploadId = imageFreeSlot++;
@@ -131,7 +131,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Texture& texture = textureAsset->Get();
-		GenerateMipmaps( commandBuffer, texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, texture.info );
+		GenerateMipmaps( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
 	EndSingleTimeCommands( commandBuffer );
 
@@ -145,7 +145,7 @@ void Renderer::UploadTextures()
 		Texture& texture = textureAsset->Get();
 
 		VkImageViewType type = vk_GetTextureType( texture.info.type );
-		texture.gpuImage->vk_view = CreateImageView( texture.gpuImage->vk_image, VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
+		texture.gpuImage->VkImageView() = CreateImageView( texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
 	}
 
 	// 4. Add to resource type lists

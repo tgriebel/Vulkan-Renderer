@@ -47,11 +47,13 @@ template< class AllocatorType >
 struct alloc_t
 {
 public:
-	alloc_t() {
+	alloc_t()
+	{
 		allocator = nullptr;
 	}
 
-	uint64_t GetOffset() const {
+	uint64_t GetOffset() const
+	{
 		if ( IsValid() )
 		{
 			const allocRecord_t* record = allocator->GetRecord( handle );
@@ -62,7 +64,8 @@ public:
 		return 0;
 	}
 
-	uint64_t GetSize() const {
+	uint64_t GetSize() const
+	{
 		if ( IsValid() )
 		{
 			const allocRecord_t* record = allocator->GetRecord( handle );
@@ -73,7 +76,8 @@ public:
 		return 0;
 	}
 
-	uint64_t GetAlignment() const {
+	uint64_t GetAlignment() const
+	{
 		if ( IsValid() )
 		{
 			const allocRecord_t* record = allocator->GetRecord( handle );
@@ -84,7 +88,8 @@ public:
 		return 0;
 	}
 
-	void* GetPtr() {
+	void* GetPtr() const
+	{
 		if ( IsValid() )
 		{
 			const allocRecord_t* record = allocator->GetRecord( handle );
@@ -95,14 +100,16 @@ public:
 		return nullptr;
 	}
 
-	void Free() {
+	void Free()
+	{
 		if ( IsValid() ) {
 			allocator->Free( handle );
 		}
 	}
 
 private:
-	bool IsValid() const {
+	bool IsValid() const
+	{
 		return ( allocator != nullptr ) && ( handle.Get() >= 0 );
 	}
 
@@ -120,7 +127,8 @@ private:
 	using alloc_t = alloc_t< allocator_t >;
 public:
 
-	Allocator() {
+	Allocator()
+	{
 		Unbind();
 	}
 
@@ -150,15 +158,18 @@ public:
 		ptr = nullptr;
 	}
 
-	ResourceType& GetMemoryResource() {
+	ResourceType& GetMemoryResource()
+	{
 		return resource;
 	}
 
-	bool IsMemoryCompatible( const uint32_t memoryType ) const {
+	bool IsMemoryCompatible( const uint32_t memoryType ) const
+	{
 		return ( type == memoryType );
 	}
 
-	void* GetMemoryMapPtr( const allocRecord_t& record ) const {
+	void* GetMemoryMapPtr( const allocRecord_t& record ) const
+	{
 		if ( ptr == nullptr ) {
 			return nullptr;
 		}
@@ -169,7 +180,8 @@ public:
 		return reinterpret_cast< void * >( bytes + record.offset );
 	}
 
-	uint64_t GetSize() const {
+	uint64_t GetSize() const
+	{
 		return offset;
 	}
 

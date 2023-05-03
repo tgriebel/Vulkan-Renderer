@@ -39,6 +39,85 @@ static RtScene rtScene;
 
 extern Scene* gScene;
 
+union descriptorInfo_t
+{
+	VkDescriptorBufferInfo bufferInfo;
+	VkDescriptorImageInfo imageInfo;
+};
+
+class DescriptorWritesBuilder
+{
+private:
+	static const uint32_t MaxPoolSize = 100;
+	uint32_t bufferInfoPoolFreeList = 0;
+	uint32_t imageInfoPoolFreeList = 0;
+	uint32_t bufferInfoArrayPoolFreeList = 0;
+	uint32_t imageInfoArrayPoolFreeList = 0;
+	VkDescriptorBufferInfo bufferInfoPool[ MaxPoolSize ];
+	VkDescriptorImageInfo imageInfoPool[ MaxPoolSize ];
+	std::vector<VkDescriptorBufferInfo> bufferInfoArrayPool[ MaxPoolSize ];
+	std::vector<VkDescriptorImageInfo> imageInfoArrayPool[ MaxPoolSize ];
+public:
+	DescriptorWritesBuilder()
+	{
+		const uint32_t reservationSize = 128;
+		for ( uint32_t i = 0; i < MaxPoolSize; ++i )
+		{
+			bufferInfoArrayPool[i].reserve( reservationSize );
+			imageInfoArrayPool[i].reserve( reservationSize );
+		}
+		bufferInfoPoolFreeList = 0;
+		imageInfoPoolFreeList = 0;
+		bufferInfoArrayPoolFreeList = 0;
+		imageInfoArrayPoolFreeList = 0;
+	}
+
+	void Reset()
+	{
+		for ( uint32_t i = 0; i < MaxPoolSize; ++i )
+		{
+			bufferInfoArrayPool[i].resize( 0 );
+			imageInfoArrayPool[i].resize( 0 );
+		}
+		bufferInfoPoolFreeList = 0;
+		imageInfoPoolFreeList = 0;
+		bufferInfoArrayPoolFreeList = 0;
+		imageInfoArrayPoolFreeList = 0;
+	}
+
+	[[nodiscard]]
+	std::vector<VkDescriptorBufferInfo>& NextBufferInfoArray()
+	{
+		return bufferInfoArrayPool[ bufferInfoArrayPoolFreeList++ ];
+	}
+
+	[[nodiscard]]
+	std::vector<VkDescriptorImageInfo>& NextImageInfoArray()
+	{
+		return imageInfoArrayPool[ imageInfoArrayPoolFreeList++ ];
+	}
+
+	[[nodiscard]]
+	VkDescriptorBufferInfo& NextBufferInfo()
+	{
+		bufferInfoPool[ bufferInfoPoolFreeList ] = {};
+		return bufferInfoPool[ bufferInfoPoolFreeList++ ];
+	}
+
+	[[nodiscard]]
+	VkDescriptorImageInfo& NextImageInfo()
+	{
+		imageInfoPool[ imageInfoPoolFreeList ] = {};
+		return imageInfoPool[ imageInfoPoolFreeList++ ];
+	}
+};
+
+static DescriptorWritesBuilder writeBuilder;
+
+static const uint32_t MaxDescriptorInfos = 3 * ( MaxViews + MaxImageDescriptors + MaxCodeImages + MaxPostImageDescriptors );
+static descriptorInfo_t	vk_decriptorInfo[ MaxDescriptorInfos ];
+static uint32_t infoCount = 0;
+
 static VkDescriptorBufferInfo	vk_globalConstantsInfo;
 static VkDescriptorBufferInfo	vk_viewUbo;
 static VkDescriptorBufferInfo	vk_surfaceBuffer[ MaxViews ];
@@ -555,9 +634,10 @@ viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 void Renderer::UpdateDescriptorSets()
 {
 	const uint32_t frameBufferCount = static_cast<uint32_t>( swapChain.GetBufferCount() );
-	for ( size_t i = 0; i < frameBufferCount; i++ )
+	for ( uint32_t i = 0; i < frameBufferCount; i++ )
 	{
-		UpdateFrameDescSet( static_cast<uint32_t>( i ) );
+		UpdateBuffers( i );
+		UpdateFrameDescSet(i );
 	}
 }
 
@@ -771,6 +851,61 @@ void Renderer::UpdateViews( const Scene* scene )
 }
 
 
+void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites )
+{
+	const ShaderBindSet* set = parms.GetSet();
+
+	const uint32_t count = set->Count();
+	descSetWrites.reserve( descSetWrites.size() + count );
+
+	for( uint32_t i = 0; i < count; ++i )
+	{
+		const ShaderBinding* binding = set->GetBinding( i );
+		const ShaderAttachment* attachment = parms.GetAttachment( binding );
+
+		VkWriteDescriptorSet writeInfo = {};
+		writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeInfo.descriptorCount = binding->GetDescriptorCount();
+		writeInfo.descriptorType = vk_GetDescriptorType( binding->GetType() );
+		writeInfo.dstArrayElement = 0;
+		writeInfo.dstBinding = binding->GetSlot();	
+		
+		if ( attachment->GetType() == ShaderAttachment::type_t::BUFFER ) {
+			// TODO: can not have on stack
+			VkDescriptorBufferInfo& info = writeBuilder.NextBufferInfo();
+
+			info.buffer = attachment->GetBuffer()->GetVkObject();
+
+			// TODO: check
+			info.offset = 0;
+			info.range = attachment->GetBuffer()->GetMaxSize();
+		}
+		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE ) {
+			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
+			info.sampler = vk_bilinearSampler;
+			info.imageView = attachment->GetImage()->GetVkImageView();
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
+		}
+		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE_ARRAY ) {
+			const uint32_t imageCount = 1;
+			for ( uint32_t imageIx = 0; imageIx < imageCount; ++imageIx )
+			{
+			}
+
+			VkDescriptorImageInfo info = {};
+			info.sampler = vk_bilinearSampler;
+			info.imageView = attachment->GetImage()->GetVkImageView();
+			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
+		}
+
+		//writeInfo.pBufferInfo = &vk_decriptorInfo[ infoCount ];
+		++infoCount;
+
+		descSetWrites.push_back( writeInfo );
+	}
+}
+
+
 void Renderer::UpdateFrameDescSet( const int currentImage )
 {
 	const int i = currentImage;
@@ -789,7 +924,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	vk_viewUbo.buffer = frameState[ i ].viewParms.GetVkObject();
 	vk_viewUbo.offset = 0;
-	vk_viewUbo.range = MaxViews * sizeof( viewBufferObject_t );
+	vk_viewUbo.range = frameState[ i ].viewParms.GetSize();
 
 	for ( uint32_t v = 0; v < MaxViews; ++v )
 	{
@@ -808,7 +943,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 			continue;
 		}
 
-		VkImageView& imageView = texture.gpuImage->vk_view;
+		VkImageView& imageView = texture.gpuImage->VkImageView();
 		VkDescriptorImageInfo info{ };
 		info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		info.imageView = imageView;
@@ -820,7 +955,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 			VkDescriptorImageInfo info2d{ };
 			info2d.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			info2d.imageView = gAssets.textureLib.GetDefault()->Get().gpuImage->vk_view;
+			info2d.imageView = gAssets.textureLib.GetDefault()->Get().gpuImage->VkImageView();
 			info2d.sampler = vk_bilinearSampler;
 			vk_image2DInfo[ texture.uploadId ] = info2d;
 		}
@@ -834,7 +969,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		const Texture& default2DTexture = gAssets.textureLib.GetDefault()->Get();
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
-			const VkImageView& imageView = default2DTexture.gpuImage->vk_view;
+			const VkImageView& imageView = default2DTexture.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -877,7 +1012,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		// Shadow Map
 		for ( int j = 0; j < MaxCodeImages; ++j )
 		{
-			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.vk_view;
+			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -986,7 +1121,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		for ( uint32_t i = 0; i < textureCount; ++i )
 		{
 			Texture& texture = gAssets.textureLib.Find( i )->Get();
-			VkImageView& imageView = texture.gpuImage->vk_view;
+			VkImageView& imageView = texture.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -997,7 +1132,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		for ( size_t j = textureCount; j < MaxImageDescriptors; ++j )
 		{
 			const Texture& texture = gAssets.textureLib.GetDefault()->Get();
-			const VkImageView& imageView = texture.gpuImage->vk_view;
+			const VkImageView& imageView = texture.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1008,7 +1143,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		for ( size_t j = 0; j < MaxCodeImages; ++j )
 		{
 			const Texture& texture = gAssets.textureLib.GetDefault()->Get();
-			const VkImageView& imageView = texture.gpuImage->vk_view;
+			const VkImageView& imageView = texture.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1112,7 +1247,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	{
 		// View Color Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].viewColorImage.vk_view;
+			VkImageView& imageView = frameState[ currentImage ].viewColorImage.VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1122,7 +1257,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 		// View Depth Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].depthImage.vk_view;
+			VkImageView& imageView = frameState[ currentImage ].depthImage.VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1132,7 +1267,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 		// View Stencil Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].stencilImage.vk_view;
+			VkImageView& imageView = frameState[ currentImage ].stencilImage.VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;

@@ -721,7 +721,7 @@ void Renderer::CreateFramebuffers()
 		info.type = TEXTURE_TYPE_DEPTH;
 		info.tiling = TEXTURE_TILING_MORTON;
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[i].shadowMapImage, frameBufferMemory );
-		frameState[i].shadowMapImage.vk_view = CreateImageView( frameState[i].shadowMapImage.vk_image, VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		frameState[i].shadowMapImage.VkImageView() = CreateImageView( frameState[i].shadowMapImage.GetVkImage(), VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
@@ -731,8 +731,8 @@ void Renderer::CreateFramebuffers()
 		shadowMap.stencil[ i ] = nullptr;
 
 		std::array<VkImageView, 2> attachments = {
-			rc.whiteImage.vk_view,
-			frameState[i].shadowMapImage.vk_view,
+			rc.whiteImage.GetVkImageView(),
+			frameState[i].shadowMapImage.GetVkImageView(),
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{ };
@@ -773,20 +773,20 @@ void Renderer::CreateFramebuffers()
 		VkFormat colorFormat = vk_mainColorFmt;
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
-		frameState[ i ].viewColorImage.vk_view = CreateImageView( frameState[ i ].viewColorImage.vk_image, colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		frameState[ i ].viewColorImage.VkImageView() = CreateImageView( frameState[ i ].viewColorImage.GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		VkFormat depthFormat = vk_depthFmt;
 		info.fmt = TEXTURE_FMT_D_32_S8;
 		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].depthImage, frameBufferMemory );
-		frameState[ i ].depthImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
-		frameState[ i ].stencilImage.vk_view = CreateImageView( frameState[ i ].depthImage.vk_image, depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
+		frameState[ i ].depthImage.VkImageView() = CreateImageView( frameState[ i ].depthImage.GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		frameState[ i ].stencilImage.VkImageView() = CreateImageView( frameState[ i ].depthImage.GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
 		std::array<VkImageView, 3> attachments = {
-			frameState[ i ].viewColorImage.vk_view,
-			frameState[ i ].depthImage.vk_view,
-			frameState[ i ].stencilImage.vk_view,
+			frameState[ i ].viewColorImage.GetVkImageView(),
+			frameState[ i ].depthImage.GetVkImageView(),
+			frameState[ i ].stencilImage.GetVkImageView(),
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{ };
@@ -929,48 +929,49 @@ void Renderer::AllocRegisteredBindParms()
 
 void Renderer::CreateBuffers()
 {
-	const VkDeviceSize alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
+	const VkDeviceSize alignmentUBO = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
+	const VkDeviceSize alignmentSSBO = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
 
 	for ( size_t i = 0; i < swapChain.GetBufferCount(); ++i )
 	{
 		// Globals Buffer
 		{
-			const VkDeviceSize stride = std::max( alignment, sizeof( globalUboConstants_t ) );
+			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( viewBufferObject_t ), alignmentUBO );
 			const VkDeviceSize bufferSize = stride;
 			frameState[ i ].globalConstants.Create( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sharedMemory );
 		}
 
 		// View Buffer
 		{
-			const VkDeviceSize stride = std::max( alignment, sizeof( viewBufferObject_t ) );
+			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( viewBufferObject_t ), alignmentSSBO );
 			const VkDeviceSize bufferSize = MaxViews * stride;
 			frameState[ i ].viewParms.Create( bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
 
 		// Model Buffer
 		{
-			const VkDeviceSize stride = std::max( alignment, sizeof( uniformBufferObject_t ) );
+			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( uniformBufferObject_t ), alignmentSSBO );
 			const VkDeviceSize bufferSize = MaxViews * MaxSurfaces * stride;
 			frameState[ i ].surfParms.Create( bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
 
 		// Material Buffer
 		{
-			const VkDeviceSize stride = std::max( alignment, sizeof( materialBufferObject_t ) );
+			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( materialBufferObject_t ), alignmentSSBO );
 			const VkDeviceSize materialBufferSize = MaxMaterials * stride;
 			frameState[ i ].materialBuffers.Create( materialBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
 
 		// Light Buffer
 		{
-			const VkDeviceSize stride = std::max( alignment, sizeof( lightBufferObject_t ) );
+			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( lightBufferObject_t ), alignmentSSBO );
 			const VkDeviceSize lightBufferSize = MaxLights * stride;
 			frameState[ i ].lightParms.Create( lightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
 
 		// Particle Buffer
 		{
-			const VkDeviceSize stride = std::max( alignment, sizeof( particleBufferObject_t ) );
+			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( particleBufferObject_t ), alignmentSSBO );
 			const VkDeviceSize particleBufferSize = MaxParticles * stride;
 			frameState[ i ].particleBuffer.Create( particleBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
 		}
@@ -1016,12 +1017,12 @@ void Renderer::CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usag
 		imageInfo.flags = ( info.type == TEXTURE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
-	if ( vkCreateImage( context.device, &imageInfo, nullptr, &image.vk_image ) != VK_SUCCESS ) {
+	if ( vkCreateImage( context.device, &imageInfo, nullptr, &image.VkImage() ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create image!" );
 	}
 
 	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements( context.device, image.vk_image, &memRequirements );
+	vkGetImageMemoryRequirements( context.device, image.GetVkImage(), &memRequirements );
 
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -1030,7 +1031,7 @@ void Renderer::CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usag
 
 	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
-		vkBindImageMemory( context.device, image.vk_image, memory.GetMemoryResource(), alloc.GetOffset() );
+		vkBindImageMemory( context.device, image.GetVkImage(), memory.GetMemoryResource(), alloc.GetOffset() );
 	}
 	else {
 		throw std::runtime_error( "Buffer could not be allocated!" );
@@ -1051,10 +1052,10 @@ void Renderer::CreateCodeTextures() {
 
 	// Default Images
 	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.whiteImage, localMemory );
-	rc.whiteImage.vk_view = CreateImageView( rc.whiteImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+	rc.whiteImage.VkImageView() = CreateImageView( rc.whiteImage.GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.blackImage, localMemory );
-	rc.blackImage.vk_view = CreateImageView( rc.blackImage.vk_image, VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+	rc.blackImage.VkImageView() = CreateImageView( rc.blackImage.GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 }
 
 
