@@ -878,7 +878,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 
 			// TODO: check
 			info.offset = 0;
-			info.range = attachment->GetBuffer()->GetMaxSize();
+			info.range = attachment->GetBuffer()->GetSize();
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE ) {
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
@@ -919,19 +919,23 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	{
 		vk_globalConstantsInfo.buffer = frameState[ i ].globalConstants.GetVkObject();
 		vk_globalConstantsInfo.offset = 0;
-		vk_globalConstantsInfo.range = sizeof( globalUboConstants_t );
+		vk_globalConstantsInfo.range = frameState[ i ].globalConstants.GetSize();
 	}
 
 	vk_viewUbo.buffer = frameState[ i ].viewParms.GetVkObject();
 	vk_viewUbo.offset = 0;
 	vk_viewUbo.range = frameState[ i ].viewParms.GetSize();
 
+	assert( frameState[ i ].surfParms.GetSize() % MaxViews == 0 );
+	const VkDeviceSize surfaceViewSize = frameState[ i ].surfParms.GetSize() / MaxViews;
+
+	GpuBufferView bufferView = frameState[ i ].surfParms.GetView( 0 * surfaceViewSize, surfaceViewSize );
+
 	for ( uint32_t v = 0; v < MaxViews; ++v )
-	{
-		const VkDeviceSize size = MaxSurfaces * sizeof( uniformBufferObject_t );
+	{		
 		vk_surfaceBuffer[v].buffer = frameState[ i ].surfParms.GetVkObject();
-		vk_surfaceBuffer[v].offset = v * size;
-		vk_surfaceBuffer[v].range = size;
+		vk_surfaceBuffer[v].offset = v * surfaceViewSize;
+		vk_surfaceBuffer[v].range = surfaceViewSize;
 	}
 
 	int firstCube = -1;
@@ -994,7 +998,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].materialBuffers.GetVkObject();
 		info.offset = 0;
-		info.range = VK_WHOLE_SIZE;
+		info.range = frameState[ i ].materialBuffers.GetSize();
 		vk_materialBufferInfo = info;
 	}
 
@@ -1002,7 +1006,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		VkDescriptorBufferInfo info{ };
 		info.buffer = frameState[ i ].lightParms.GetVkObject();
 		info.offset = 0;
-		info.range = VK_WHOLE_SIZE;
+		info.range = frameState[ i ].lightParms.GetSize();
 		vk_lightBufferInfo = info;
 	}
 

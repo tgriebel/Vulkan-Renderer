@@ -34,24 +34,44 @@ enum class bufferType_t
 	STAGING
 };
 
+class GpuBufferView;
+
 class GpuBuffer
 {
 public:
-	static uint64_t	GetPadding( const uint64_t size, const uint64_t alignment );
+	static uint64_t	GetAlignedSize( const uint64_t size, const uint64_t alignment );
 
-	void			SetPos( const uint32_t pos = 0 );
-	uint64_t		GetSize() const;
-	uint64_t		GetMaxSize() const;
-	void			Allocate( const uint64_t size );
+	virtual void	SetPos( const uint64_t pos = 0 );
+	virtual uint64_t GetMaxSize() const;
+
+	uint64_t		GetSize() const;	
+	uint64_t		GetElementSize() const;
+	uint64_t		GetElementSizeAligned() const;
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
 	void			Create( const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorVkMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
+	void			Allocate( const uint64_t size );
 	void			CopyData( void* data, const size_t sizeInBytes );
 
+	GpuBufferView	GetView( const uint64_t offset, const uint64_t size );
+
+protected:
+	alloc_t<Allocator<VkDeviceMemory>> m_alloc;
+	VkBuffer	m_buffer;
+	uint64_t	m_baseOffset;
+	uint64_t	m_offset;
+	uint64_t	m_size;
+	uint64_t	m_elementSize;
+	uint64_t	m_elementPadding;
+
+	friend class GpuBufferView;
+};
+
+class GpuBufferView : public GpuBuffer
+{
 private:
-	alloc_t<Allocator<VkDeviceMemory>> alloc;
-	uint64_t	offset;
-	VkBuffer	buffer;
+	using GpuBuffer::Create;
+	using GpuBuffer::Destroy;
 };

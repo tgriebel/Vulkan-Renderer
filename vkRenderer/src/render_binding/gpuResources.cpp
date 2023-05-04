@@ -26,46 +26,58 @@
 
 extern deviceContext_t context;
 
-void GpuBuffer::SetPos( const uint32_t pos )
+void GpuBuffer::SetPos( const uint64_t pos )
 {
-	offset = pos;
+	m_offset = Clamp( pos, m_baseOffset, GetMaxSize() );
 }
 
 
 uint64_t GpuBuffer::GetSize() const
 {
-	return offset;
+	return m_offset;
+}
+
+
+uint64_t GpuBuffer::GetElementSize() const
+{
+	return m_elementSize;
+}
+
+
+uint64_t GpuBuffer::GetElementSizeAligned() const
+{
+	return m_elementPadding;
 }
 
 
 uint64_t GpuBuffer::GetMaxSize() const
 {
-	return alloc.GetSize();
+	return m_alloc.GetSize();
 }
 
 
 void GpuBuffer::Allocate( const uint64_t size )
 {
-	offset += size;
+	SetPos( m_offset + size );
 }
 
 
 VkBuffer GpuBuffer::GetVkObject() const
 {
-	return buffer;
+	return m_buffer;
 }
 
 
 VkBuffer& GpuBuffer::VkObject()
 {
-	return buffer;
+	return m_buffer;
 }
 
 
 void GpuBuffer::Create( const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorVkMemory& bufferMemory )
 {
 	VkBufferUsageFlags usage = 0;
-	VkDeviceSize size = VkDeviceSize( elements ) * elementSizeBytes;
+	VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
 	VkDeviceSize alignment = elementSizeBytes;
 
 	if( type == bufferType_t::STORAGE ) {
@@ -84,12 +96,15 @@ void GpuBuffer::Create( const uint32_t elements, const uint32_t elementSizeBytes
 		assert(0);
 	}
 
-	VkDeviceSize stride = GpuBuffer::GetPadding( elementSizeBytes, alignment );
-	size = stride * elements;
+	m_elementSize = elementSizeBytes;
+	m_elementPadding = GpuBuffer::GetAlignedSize( elementSizeBytes, alignment );
+
+	VkDeviceSize stride = elementSizeBytes + m_elementPadding;
+	bufferSize = stride * elements;
 
 	VkBufferCreateInfo bufferInfo{ };
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = size;
+	bufferInfo.size = bufferSize;
 	bufferInfo.usage = usage;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -105,14 +120,16 @@ void GpuBuffer::Create( const uint32_t elements, const uint32_t elementSizeBytes
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex = bufferMemory.memoryTypeIndex;
 
-	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
-		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetMemoryResource(), alloc.GetOffset() );
+	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_alloc ) ) {
+		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetMemoryResource(), m_alloc.GetOffset() );
 	}
 	else {
 		throw std::runtime_error( "Buffer could not allocate!" );
 	}
 
-	SetPos( 0 );
+	m_size = m_alloc.GetSize();
+	m_baseOffset = 0;
+	SetPos( m_baseOffset );
 }
 
 
@@ -129,7 +146,7 @@ void GpuBuffer::Destroy()
 }
 
 
-uint64_t GpuBuffer::GetPadding( const uint64_t size, const uint64_t alignment )
+uint64_t GpuBuffer::GetAlignedSize( const uint64_t size, const uint64_t alignment )
 {
 	return static_cast<uint32_t>( ( size + ( alignment - 1 ) ) & ~( alignment - 1 ) );
 }
@@ -137,7 +154,7 @@ uint64_t GpuBuffer::GetPadding( const uint64_t size, const uint64_t alignment )
 
 bool GpuBuffer::VisibleToCpu() const
 {
-	const void* mappedData = alloc.GetPtr();
+	const void* mappedData = m_alloc.GetPtr();
 	return ( mappedData != nullptr );
 }
 
@@ -145,10 +162,28 @@ bool GpuBuffer::VisibleToCpu() const
 void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 {
 	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
-	void* mappedData = alloc.GetPtr();
+	void* mappedData = m_alloc.GetPtr();
 	if ( mappedData != nullptr )
 	{
-		memcpy( (uint8_t*)mappedData + offset, data, sizeInBytes );
-		offset += GetPadding( sizeInBytes, alloc.GetAlignment() );
+		memcpy( (uint8_t*)mappedData + m_offset, data, sizeInBytes );
+		m_offset += GetAlignedSize( sizeInBytes, m_alloc.GetAlignment() );
 	}
+}
+
+
+GpuBufferView GpuBuffer::GetView( const uint64_t offset, const uint64_t size )
+{
+	GpuBufferView view;
+
+	const uint64_t maxSize = GetMaxSize();
+
+	view.m_baseOffset = Clamp( offset, m_baseOffset, maxSize );
+	view.m_alloc = m_alloc;
+	view.m_buffer = m_buffer;
+	view.m_offset = m_baseOffset;
+	view.m_size = Min( view.m_baseOffset + size, maxSize ) - view.m_baseOffset;
+	view.m_elementSize = m_elementSize;
+	view.m_elementPadding = m_elementPadding;
+
+	return view;
 }
