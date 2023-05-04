@@ -929,9 +929,6 @@ void Renderer::AllocRegisteredBindParms()
 
 void Renderer::CreateBuffers()
 {
-	const VkDeviceSize alignmentUBO = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
-	const VkDeviceSize alignmentSSBO = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
-
 	for ( size_t i = 0; i < swapChain.GetBufferCount(); ++i )
 	{
 		frameState[ i ].globalConstants.Create( 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, sharedMemory );
