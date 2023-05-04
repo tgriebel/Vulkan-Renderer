@@ -62,8 +62,31 @@ VkBuffer& GpuBuffer::VkObject()
 }
 
 
-void GpuBuffer::Create( VkDeviceSize size, VkBufferUsageFlags usage, AllocatorVkMemory& bufferMemory )
+void GpuBuffer::Create( const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorVkMemory& bufferMemory )
 {
+	VkBufferUsageFlags usage = 0;
+	VkDeviceSize size = VkDeviceSize( elements ) * elementSizeBytes;
+	VkDeviceSize alignment = elementSizeBytes;
+
+	if( type == bufferType_t::STORAGE ) {
+		alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
+		usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+	} else if ( type == bufferType_t::UNIFORM ) {
+		alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
+		usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+	} else if ( type == bufferType_t::VERTEX ) {
+		usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	} else if ( type == bufferType_t::INDEX ) {
+		usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+	} else if ( type == bufferType_t::STAGING ) {
+		usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	} else {
+		assert(0);
+	}
+
+	VkDeviceSize stride = GpuBuffer::GetPadding( elementSizeBytes, alignment );
+	size = stride * elements;
+
 	VkBufferCreateInfo bufferInfo{ };
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.size = size;
@@ -88,6 +111,8 @@ void GpuBuffer::Create( VkDeviceSize size, VkBufferUsageFlags usage, AllocatorVk
 	else {
 		throw std::runtime_error( "Buffer could not allocate!" );
 	}
+
+	SetPos( 0 );
 }
 
 

@@ -25,6 +25,15 @@
 #include "../globals/common.h"
 #include "allocator.h"
 
+enum class bufferType_t
+{
+	UNIFORM,
+	STORAGE,
+	VERTEX,
+	INDEX,
+	STAGING
+};
+
 class GpuBuffer
 {
 public:
@@ -36,7 +45,7 @@ public:
 	void			Allocate( const uint64_t size );
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
-	void			Create( const uint64_t size, VkBufferUsageFlags usage, AllocatorVkMemory& bufferMemory );
+	void			Create( const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorVkMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			CopyData( void* data, const size_t sizeInBytes );

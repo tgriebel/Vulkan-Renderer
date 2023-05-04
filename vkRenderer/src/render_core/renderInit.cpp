@@ -934,57 +934,18 @@ void Renderer::CreateBuffers()
 
 	for ( size_t i = 0; i < swapChain.GetBufferCount(); ++i )
 	{
-		// Globals Buffer
-		{
-			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( viewBufferObject_t ), alignmentUBO );
-			const VkDeviceSize bufferSize = stride;
-			frameState[ i ].globalConstants.Create( bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sharedMemory );
-		}
-
-		// View Buffer
-		{
-			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( viewBufferObject_t ), alignmentSSBO );
-			const VkDeviceSize bufferSize = MaxViews * stride;
-			frameState[ i ].viewParms.Create( bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
-		}
-
-		// Model Buffer
-		{
-			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( uniformBufferObject_t ), alignmentSSBO );
-			const VkDeviceSize bufferSize = MaxViews * MaxSurfaces * stride;
-			frameState[ i ].surfParms.Create( bufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
-		}
-
-		// Material Buffer
-		{
-			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( materialBufferObject_t ), alignmentSSBO );
-			const VkDeviceSize materialBufferSize = MaxMaterials * stride;
-			frameState[ i ].materialBuffers.Create( materialBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
-		}
-
-		// Light Buffer
-		{
-			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( lightBufferObject_t ), alignmentSSBO );
-			const VkDeviceSize lightBufferSize = MaxLights * stride;
-			frameState[ i ].lightParms.Create( lightBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
-		}
-
-		// Particle Buffer
-		{
-			const VkDeviceSize stride = GpuBuffer::GetPadding( sizeof( particleBufferObject_t ), alignmentSSBO );
-			const VkDeviceSize particleBufferSize = MaxParticles * stride;
-			frameState[ i ].particleBuffer.Create( particleBufferSize, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, sharedMemory );
-		}
+		frameState[ i ].globalConstants.Create( 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, sharedMemory );
+		frameState[ i ].viewParms.Create( MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].surfParms.Create( MaxViews * MaxSurfaces, sizeof( uniformBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].materialBuffers.Create( MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].lightParms.Create( MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].particleBuffer.Create( MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 	}
 
-	const VkDeviceSize vbSize = sizeof( vsInput_t ) * MaxVertices;
-	const VkDeviceSize ibSize = sizeof( uint32_t ) * MaxIndices;
-	vb.Create( vbSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, localMemory );
-	ib.Create( ibSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, localMemory );
+	vb.Create( MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, localMemory );
+	ib.Create( MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, localMemory );
 
-	stagingBuffer.SetPos( 0 );
-	const uint64_t size = 256 * MB_1;
-	stagingBuffer.Create( size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sharedMemory );
+	stagingBuffer.Create( 1, 256 * MB_1, bufferType_t::STAGING, sharedMemory );
 }
 
 
