@@ -30,10 +30,13 @@
 class FrameState
 {
 public:
-	GpuImage		viewColorImage;
-	GpuImage		shadowMapImage;
-	GpuImage		depthImage;
-	GpuImage		stencilImage;
+	Texture			viewColorImage;
+	Texture			shadowMapImage;
+	Texture			depthImage;
+	Texture			stencilImage;
+
+	// FIXME: Lights and surfaces should be relative to a given render view.
+	// Textures, materials, and view parms are all global
 
 	GpuBuffer		globalConstants;
 	GpuBuffer		viewParms;
