@@ -45,6 +45,7 @@ public:
 	virtual uint64_t GetMaxSize() const;
 
 	uint64_t		GetSize() const;	
+	uint64_t		GetBaseOffset() const;
 	uint64_t		GetElementSize() const;
 	uint64_t		GetElementSizeAligned() const;
 	VkBuffer&		VkObject();

@@ -932,7 +932,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	{		
 		const VkDeviceSize surfaceViewSize = frameState[ i ].surfParmPartitions[v].GetSize();
 		vk_surfaceBuffer[v].buffer = frameState[ i ].surfParmPartitions[v].GetVkObject();
-		vk_surfaceBuffer[v].offset = 0;
+		vk_surfaceBuffer[v].offset = frameState[ i ].surfParmPartitions[ v ].GetBaseOffset();
 		vk_surfaceBuffer[v].range = surfaceViewSize;
 	}
 

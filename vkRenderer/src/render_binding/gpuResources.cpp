@@ -38,6 +38,12 @@ uint64_t GpuBuffer::GetSize() const
 }
 
 
+uint64_t GpuBuffer::GetBaseOffset() const
+{
+	return m_baseOffset;
+}
+
+
 uint64_t GpuBuffer::GetElementSize() const
 {
 	return m_elementSize;
