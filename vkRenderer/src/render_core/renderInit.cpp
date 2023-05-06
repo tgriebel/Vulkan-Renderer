@@ -147,7 +147,7 @@ void Renderer::InitVulkan()
 
 				shadowPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				shadowPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				shadowPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParms );
+				shadowPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( shadowView.region ) ] );
 				shadowPassState.parms[ i ]->Bind( bind_image2DArray, gpuImages2D );
 				shadowPassState.parms[ i ]->Bind( bind_imageCubeArray, gpuImagesCube );
 				shadowPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
@@ -162,7 +162,7 @@ void Renderer::InitVulkan()
 
 				mainPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				mainPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				mainPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParms );
+				mainPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( renderView.region ) ] );
 				mainPassState.parms[ i ]->Bind( bind_image2DArray, gpuImages2D );
 				mainPassState.parms[ i ]->Bind( bind_imageCubeArray, gpuImagesCube );
 				mainPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
@@ -177,7 +177,7 @@ void Renderer::InitVulkan()
 
 				postPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				postPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				postPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParms );
+				postPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( view2D.region ) ] );
 				postPassState.parms[ i ]->Bind( bind_image2DArray, gpuImages2D );
 				postPassState.parms[ i ]->Bind( bind_imageCubeArray, gpuImagesCube );
 				postPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
@@ -189,7 +189,7 @@ void Renderer::InitVulkan()
 			{
 				particleState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				particleState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				particleState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParms );
+				particleState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( renderView.region ) ] );
 				particleState.parms[ i ]->Bind( bind_image2DArray, gpuImages2D );
 				particleState.parms[ i ]->Bind( bind_imageCubeArray, gpuImagesCube );
 				particleState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
