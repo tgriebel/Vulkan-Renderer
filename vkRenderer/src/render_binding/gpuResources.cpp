@@ -52,7 +52,7 @@ uint64_t GpuBuffer::GetElementSizeAligned() const
 
 uint64_t GpuBuffer::GetMaxSize() const
 {
-	return m_alloc.GetSize();
+	return m_end;
 }
 
 
@@ -127,7 +127,7 @@ void GpuBuffer::Create( const uint32_t elements, const uint32_t elementSizeBytes
 		throw std::runtime_error( "Buffer could not allocate!" );
 	}
 
-	m_size = m_alloc.GetSize();
+	m_end = m_alloc.GetSize();
 	m_baseOffset = 0;
 	SetPos( m_baseOffset );
 }
@@ -171,17 +171,18 @@ void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 }
 
 
-GpuBufferView GpuBuffer::GetView( const uint64_t offset, const uint64_t size )
+GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t elementCount )
 {
 	GpuBufferView view;
 
 	const uint64_t maxSize = GetMaxSize();
 
-	view.m_baseOffset = Clamp( offset, m_baseOffset, maxSize );
+	view.m_baseOffset = baseElementIx * m_elementPadding;
+	view.m_baseOffset = Clamp( view.m_baseOffset, m_baseOffset, maxSize );
 	view.m_alloc = m_alloc;
 	view.m_buffer = m_buffer;
-	view.m_offset = m_baseOffset;
-	view.m_size = Min( view.m_baseOffset + size, maxSize ) - view.m_baseOffset;
+	view.m_offset = view.m_baseOffset;
+	view.m_end = Min( view.m_baseOffset + elementCount * m_elementPadding, maxSize );
 	view.m_elementSize = m_elementSize;
 	view.m_elementPadding = m_elementPadding;
 

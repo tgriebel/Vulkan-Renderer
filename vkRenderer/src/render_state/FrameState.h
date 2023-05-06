@@ -41,6 +41,8 @@ public:
 	GpuBuffer		materialBuffers;
 	GpuBuffer		lightParms;
 	GpuBuffer		particleBuffer;
+
+	GpuBufferView	surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 };
 
 

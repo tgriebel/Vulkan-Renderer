@@ -55,14 +55,14 @@ public:
 	void			Allocate( const uint64_t size );
 	void			CopyData( void* data, const size_t sizeInBytes );
 
-	GpuBufferView	GetView( const uint64_t offset, const uint64_t size );
+	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount );
 
 protected:
 	alloc_t<Allocator<VkDeviceMemory>> m_alloc;
 	VkBuffer	m_buffer;
 	uint64_t	m_baseOffset;
 	uint64_t	m_offset;
-	uint64_t	m_size;
+	uint64_t	m_end;
 	uint64_t	m_elementSize;
 	uint64_t	m_elementPadding;
 

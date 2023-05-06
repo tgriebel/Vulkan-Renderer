@@ -937,6 +937,10 @@ void Renderer::CreateBuffers()
 		frameState[ i ].materialBuffers.Create( MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 		frameState[ i ].lightParms.Create( MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 		frameState[ i ].particleBuffer.Create( MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+
+		for ( size_t v = 0; v < swapChain.GetBufferCount(); ++v ) {
+			frameState[ i ].surfParmPartitions[ v ] = frameState[ i ].surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
+		}
 	}
 
 	vb.Create( MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, localMemory );

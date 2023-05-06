@@ -927,14 +927,11 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	vk_viewUbo.range = frameState[ i ].viewParms.GetSize();
 
 	assert( frameState[ i ].surfParms.GetSize() % MaxViews == 0 );
-	const VkDeviceSize surfaceViewSize = frameState[ i ].surfParms.GetSize() / MaxViews;
-
-	GpuBufferView bufferView = frameState[ i ].surfParms.GetView( 0 * surfaceViewSize, surfaceViewSize );
-
 	for ( uint32_t v = 0; v < MaxViews; ++v )
 	{		
-		vk_surfaceBuffer[v].buffer = frameState[ i ].surfParms.GetVkObject();
-		vk_surfaceBuffer[v].offset = v * surfaceViewSize;
+		const VkDeviceSize surfaceViewSize = frameState[ i ].surfParmPartitions[v].GetSize();
+		vk_surfaceBuffer[v].buffer = frameState[ i ].surfParmPartitions[v].GetVkObject();
+		vk_surfaceBuffer[v].offset = 0;
 		vk_surfaceBuffer[v].range = surfaceViewSize;
 	}
 
@@ -1508,10 +1505,12 @@ void Renderer::UpdateBuffers( uint32_t currentImage )
 	frameState[ currentImage ].viewParms.SetPos();
 	frameState[ currentImage ].viewParms.CopyData( &viewBuffer, sizeof( viewBufferObject_t ) * MaxViews );
 
-	frameState[ currentImage ].surfParms.SetPos();
-	frameState[ currentImage ].surfParms.CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParms.CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParms.CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ 0 ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ 0 ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ 1 ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ 1 ].CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ 2 ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ 2 ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
 	frameState[ currentImage ].materialBuffers.SetPos();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
