@@ -157,8 +157,8 @@ void Renderer::InitVulkan()
 			}
 
 			{
-				mainPassState.codeImages[ i ][ 0 ] = &frameState[ i ].shadowMapImage;
-				mainPassState.codeImages[ i ][ 1 ] = &frameState[ i ].shadowMapImage;
+				mainPassState.codeImages[ i ][ 0 ] = frameState[ i ].shadowMapImage.gpuImage;
+				mainPassState.codeImages[ i ][ 1 ] = frameState[ i ].shadowMapImage.gpuImage;
 
 				mainPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				mainPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
@@ -172,8 +172,8 @@ void Renderer::InitVulkan()
 			}
 
 			{
-				postPassState.codeImages[ i ][ 0 ] = &frameState[ i ].viewColorImage;
-				postPassState.codeImages[ i ][ 1 ] = &frameState[ i ].depthImage;
+				postPassState.codeImages[ i ][ 0 ] = frameState[ i ].viewColorImage.gpuImage;
+				postPassState.codeImages[ i ][ 1 ] = frameState[ i ].depthImage.gpuImage;
 
 				postPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				postPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
@@ -183,7 +183,7 @@ void Renderer::InitVulkan()
 				postPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
 				postPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
 				postPassState.parms[ i ]->Bind( bind_imageCodeArray, postPassState.codeImages[ i ] );
-				postPassState.parms[ i ]->Bind( bind_imageStencil, &frameState[ i ].stencilImage );
+				postPassState.parms[ i ]->Bind( bind_imageStencil, frameState[ i ].stencilImage.gpuImage );
 			}
 
 			{
@@ -720,19 +720,22 @@ void Renderer::CreateFramebuffers()
 		info.fmt = TEXTURE_FMT_D_32;
 		info.type = TEXTURE_TYPE_DEPTH;
 		info.tiling = TEXTURE_TILING_MORTON;
-		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[i].shadowMapImage, frameBufferMemory );
-		frameState[i].shadowMapImage.VkImageView() = CreateImageView( frameState[i].shadowMapImage.GetVkImage(), VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+
+		frameState[ i ].shadowMapImage.gpuImage = new GpuImage();
+
+		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
+		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage.gpuImage->GetVkImage(), VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 	{
 		shadowMap.color[ i ] = nullptr;
-		shadowMap.depth[ i ] = &frameState[ i ].shadowMapImage;
+		shadowMap.depth[ i ] = frameState[ i ].shadowMapImage.gpuImage;
 		shadowMap.stencil[ i ] = nullptr;
 
 		std::array<VkImageView, 2> attachments = {
-			rc.whiteImage.GetVkImageView(),
-			frameState[i].shadowMapImage.GetVkImageView(),
+			rc.whiteImage.gpuImage->GetVkImageView(),
+			frameState[i].shadowMapImage.gpuImage->GetVkImageView(),
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{ };
@@ -772,21 +775,28 @@ void Renderer::CreateFramebuffers()
 
 		VkFormat colorFormat = vk_mainColorFmt;
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].viewColorImage, frameBufferMemory );
-		frameState[ i ].viewColorImage.VkImageView() = CreateImageView( frameState[ i ].viewColorImage.GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		frameState[ i ].viewColorImage.bytes = nullptr;
+		frameState[ i ].viewColorImage.info = info;
+		frameState[ i ].viewColorImage.gpuImage = new GpuImage();
+
+		CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage.gpuImage->GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
 		VkFormat depthFormat = vk_depthFmt;
 		info.fmt = TEXTURE_FMT_D_32_S8;
 		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, frameState[ i ].depthImage, frameBufferMemory );
-		frameState[ i ].depthImage.VkImageView() = CreateImageView( frameState[ i ].depthImage.GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
-		frameState[ i ].stencilImage.VkImageView() = CreateImageView( frameState[ i ].depthImage.GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
+		frameState[ i ].depthImage.gpuImage = new GpuImage();
+		frameState[ i ].stencilImage.gpuImage = new GpuImage();
+
+		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
+		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		frameState[ i ].stencilImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
 
 		std::array<VkImageView, 3> attachments = {
-			frameState[ i ].viewColorImage.GetVkImageView(),
-			frameState[ i ].depthImage.GetVkImageView(),
-			frameState[ i ].stencilImage.GetVkImageView(),
+			frameState[ i ].viewColorImage.gpuImage->GetVkImageView(),
+			frameState[ i ].depthImage.gpuImage->GetVkImageView(),
+			frameState[ i ].stencilImage.gpuImage->GetVkImageView(),
 		};
 
 		VkFramebufferCreateInfo framebufferInfo{ };
@@ -950,6 +960,17 @@ void Renderer::CreateBuffers()
 }
 
 
+void Renderer::CreateFrameBufferImage( const textureInfo_t& info, Texture& texture )
+{
+	texture.bytes = nullptr;
+	texture.info = info;
+	texture.gpuImage = new GpuImage();
+
+//	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *texture.gpuImage, frameBufferMemory );
+//	texture.gpuImage->VkImageView() = CreateImageView( texture.gpuImage->GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+}
+
+
 void Renderer::CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory )
 {
 	VkImageCreateInfo imageInfo{ };
@@ -1012,12 +1033,15 @@ void Renderer::CreateCodeTextures() {
 	info.type = TEXTURE_TYPE_2D;
 	info.tiling = TEXTURE_TILING_MORTON;
 
-	// Default Images
-	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.whiteImage, localMemory );
-	rc.whiteImage.VkImageView() = CreateImageView( rc.whiteImage.GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+	rc.whiteImage.gpuImage = new GpuImage();
+	rc.blackImage.gpuImage = new GpuImage();
 
-	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, rc.blackImage, localMemory );
-	rc.blackImage.VkImageView() = CreateImageView( rc.blackImage.GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+	// Default Images
+	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, *rc.whiteImage.gpuImage, localMemory );
+	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage.gpuImage->GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+
+	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, *rc.blackImage.gpuImage, localMemory );
+	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage.gpuImage->GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 }
 
 

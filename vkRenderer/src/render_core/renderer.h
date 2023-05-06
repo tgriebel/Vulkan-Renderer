@@ -303,6 +303,7 @@ private:
 
 	// API Creation Functions
 	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
+	void						CreateFrameBufferImage( const textureInfo_t& info, Texture& texture );
 	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
 	void						AllocRegisteredBindParms();
 	void						CreateDescriptorPool();

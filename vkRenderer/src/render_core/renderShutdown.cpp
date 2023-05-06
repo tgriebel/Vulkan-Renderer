@@ -87,10 +87,15 @@ void Renderer::DestroyFrameResources()
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
 		// Images
-		frameState[ frameId ].viewColorImage.Destroy();
-		frameState[ frameId ].shadowMapImage.Destroy();
-		frameState[ frameId ].depthImage.Destroy();
-		frameState[ frameId ].stencilImage.Destroy();
+		frameState[ frameId ].viewColorImage.gpuImage->Destroy();
+		frameState[ frameId ].shadowMapImage.gpuImage->Destroy();
+		frameState[ frameId ].depthImage.gpuImage->Destroy();
+		frameState[ frameId ].stencilImage.gpuImage->Destroy();
+
+		delete frameState[ frameId ].viewColorImage.gpuImage;
+		delete frameState[ frameId ].shadowMapImage.gpuImage;
+		delete frameState[ frameId ].depthImage.gpuImage;
+		delete frameState[ frameId ].stencilImage.gpuImage;
 
 		// Buffers
 		vkDestroyFramebuffer( context.device, shadowMap.buffer[ frameId ], nullptr );
@@ -140,8 +145,11 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// Images
-	rc.whiteImage.Destroy();
-	rc.blackImage.Destroy();
+	rc.whiteImage.gpuImage->Destroy();
+	rc.blackImage.gpuImage->Destroy();
+
+	delete rc.whiteImage.gpuImage;
+	delete rc.blackImage.gpuImage;
 
 	const uint32_t textureCount = gAssets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
