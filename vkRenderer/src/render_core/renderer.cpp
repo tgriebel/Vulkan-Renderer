@@ -871,12 +871,10 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 		writeInfo.dstBinding = binding->GetSlot();	
 		
 		if ( attachment->GetType() == ShaderAttachment::type_t::BUFFER ) {
-			// TODO: can not have on stack
 			VkDescriptorBufferInfo& info = writeBuilder.NextBufferInfo();
 
 			info.buffer = attachment->GetBuffer()->GetVkObject();
 
-			// TODO: check
 			info.offset = 0;
 			info.range = attachment->GetBuffer()->GetSize();
 		}
@@ -884,7 +882,10 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = vk_bilinearSampler;
 			info.imageView = attachment->GetImage()->GetVkImageView();
+
+			//binding->GetType() == 
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
+		//	info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE_ARRAY ) {
 			const uint32_t imageCount = 1;
@@ -1013,7 +1014,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		// Shadow Map
 		for ( int j = 0; j < MaxCodeImages; ++j )
 		{
-			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.VkImageView();
+			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1248,7 +1249,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	{
 		// View Color Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].viewColorImage.VkImageView();
+			VkImageView& imageView = frameState[ currentImage ].viewColorImage.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1258,7 +1259,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 		// View Depth Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].depthImage.VkImageView();
+			VkImageView& imageView = frameState[ currentImage ].depthImage.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
@@ -1268,7 +1269,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 		// View Stencil Map
 		{
-			VkImageView& imageView = frameState[ currentImage ].stencilImage.VkImageView();
+			VkImageView& imageView = frameState[ currentImage ].stencilImage.gpuImage->VkImageView();
 			VkDescriptorImageInfo info{ };
 			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			info.imageView = imageView;
