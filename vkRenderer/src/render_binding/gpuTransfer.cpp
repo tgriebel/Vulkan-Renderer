@@ -160,10 +160,10 @@ void Renderer::UploadTextures()
 		switch ( texture.info.type )
 		{
 			case TEXTURE_TYPE_2D:
-				gpuImages2D[ texture.uploadId ] = texture.gpuImage;
+				gpuImages2D[ texture.uploadId ] = &texture;
 				break;
 			case TEXTURE_TYPE_CUBE:
-				gpuImagesCube[ texture.uploadId ] = texture.gpuImage;
+				gpuImagesCube[ texture.uploadId ] = &texture;
 				break;			
 		}
 	}

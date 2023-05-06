@@ -871,32 +871,63 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 		writeInfo.dstBinding = binding->GetSlot();	
 		
 		if ( attachment->GetType() == ShaderAttachment::type_t::BUFFER ) {
+			const GpuBuffer* buffer = attachment->GetBuffer();
+
 			VkDescriptorBufferInfo& info = writeBuilder.NextBufferInfo();
-
-			info.buffer = attachment->GetBuffer()->GetVkObject();
-
-			info.offset = 0;
-			info.range = attachment->GetBuffer()->GetSize();
+			info.buffer = buffer->GetVkObject();
+			info.offset = buffer->GetBaseOffset();
+			info.range = buffer->GetSize();
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE ) {
+			const Texture* image = attachment->GetImage();
+
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = vk_bilinearSampler;
-			info.imageView = attachment->GetImage()->GetVkImageView();
+			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
 
-			//binding->GetType() == 
-			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
-		//	info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
+			switch( image->info.type )
+			{
+				case TEXTURE_TYPE_DEPTH:
+					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+				break;
+
+				case TEXTURE_TYPE_2D:
+					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				break;
+
+				default: assert(0); break;
+			}
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE_ARRAY ) {
+			std::vector<VkDescriptorImageInfo>& infos = writeBuilder.NextImageInfoArray();
+
+			const Texture** images = attachment->GetImageArray();
+
+			assert(0); // FIXME: array size
 			const uint32_t imageCount = 1;
+			infos.resize( imageCount );
+			
 			for ( uint32_t imageIx = 0; imageIx < imageCount; ++imageIx )
 			{
-			}
+				const Texture* image = images[ imageIx ];
+				VkDescriptorImageInfo& info = infos[ imageIx ];
 
-			VkDescriptorImageInfo info = {};
-			info.sampler = vk_bilinearSampler;
-			info.imageView = attachment->GetImage()->GetVkImageView();
-			info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // TODO: need to look at bind type
+				info.sampler = vk_bilinearSampler;
+				info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
+				
+				switch ( image->info.type )
+				{
+					case TEXTURE_TYPE_DEPTH:
+						info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					break;
+
+					case TEXTURE_TYPE_2D:
+						info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						break;
+
+					default: assert( 0 ); break;
+				}
+			}
 		}
 
 		//writeInfo.pBufferInfo = &vk_decriptorInfo[ infoCount ];
@@ -1009,6 +1040,11 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	}
 
 	const uint32_t descriptorSetCnt = 9;
+
+	{
+	//	std::vector<VkWriteDescriptorSet> descriptorWrites;
+	//	AppendDescriptorWrites( *postPassState.parms[ currentImage ], descriptorWrites );
+	}
 
 	{
 		// Shadow Map

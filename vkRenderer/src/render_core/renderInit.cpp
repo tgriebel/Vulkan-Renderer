@@ -157,8 +157,8 @@ void Renderer::InitVulkan()
 			}
 
 			{
-				mainPassState.codeImages[ i ][ 0 ] = frameState[ i ].shadowMapImage.gpuImage;
-				mainPassState.codeImages[ i ][ 1 ] = frameState[ i ].shadowMapImage.gpuImage;
+				mainPassState.codeImages[ i ][ 0 ] = &frameState[ i ].shadowMapImage;
+				mainPassState.codeImages[ i ][ 1 ] = &frameState[ i ].shadowMapImage;
 
 				mainPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				mainPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
@@ -172,8 +172,8 @@ void Renderer::InitVulkan()
 			}
 
 			{
-				postPassState.codeImages[ i ][ 0 ] = frameState[ i ].viewColorImage.gpuImage;
-				postPassState.codeImages[ i ][ 1 ] = frameState[ i ].depthImage.gpuImage;
+				postPassState.codeImages[ i ][ 0 ] = &frameState[ i ].viewColorImage;
+				postPassState.codeImages[ i ][ 1 ] = &frameState[ i ].depthImage;
 
 				postPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 				postPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
@@ -183,7 +183,7 @@ void Renderer::InitVulkan()
 				postPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
 				postPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
 				postPassState.parms[ i ]->Bind( bind_imageCodeArray, postPassState.codeImages[ i ] );
-				postPassState.parms[ i ]->Bind( bind_imageStencil, frameState[ i ].stencilImage.gpuImage );
+				postPassState.parms[ i ]->Bind( bind_imageStencil, &frameState[ i ].stencilImage );
 			}
 
 			{

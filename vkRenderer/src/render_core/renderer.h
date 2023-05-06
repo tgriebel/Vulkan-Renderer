@@ -85,7 +85,7 @@ struct DrawPassState
 	uint32_t			height;
 
 	VkRenderPass		pass;
-	const GpuImage*		codeImages[ MAX_FRAMES_STATES ][ MaxCodeImages ];
+	const Texture*		codeImages[ MAX_FRAMES_STATES ][ MaxCodeImages ];
 	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
 	FrameBuffer*		fb;
 };
@@ -198,8 +198,8 @@ private:
 	GpuBuffer						stagingBuffer;
 	GpuBuffer						vb;	// move
 	GpuBuffer						ib;
-	const GpuImage*					gpuImages2D[ MaxImageDescriptors ];
-	const GpuImage*					gpuImagesCube[ MaxImageDescriptors ];
+	const Texture*					gpuImages2D[ MaxImageDescriptors ];
+	const Texture*					gpuImagesCube[ MaxImageDescriptors ];
 	materialBufferObject_t			materialBuffer[ MaxMaterials ];
 
 	FrameState						frameState[ MAX_FRAMES_STATES ];
