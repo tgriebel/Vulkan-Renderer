@@ -85,7 +85,7 @@ struct DrawPassState
 	uint32_t			height;
 
 	VkRenderPass		pass;
-	ImageArray			codeImages[ MAX_FRAMES_STATES ];
+	Array<Texture*, 100> codeImages[ MAX_FRAMES_STATES ];
 	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
 	FrameBuffer*		fb;
 };
@@ -349,7 +349,8 @@ private:
 	void						UploadTextures();
 	void						UpdateGpuMaterials();
 	void						UploadModelsToGPU();
-	void						UpdateBuffers( uint32_t currentImage );
+	void						UpdateBindSets( const uint32_t currentImage );
+	void						UpdateBuffers( const uint32_t currentImage );
 	void						UpdateFrameDescSet( const int currentImage );
 	void						UpdateDescriptorSets();
 	void						AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites );

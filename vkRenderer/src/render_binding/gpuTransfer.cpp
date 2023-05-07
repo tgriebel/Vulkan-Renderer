@@ -149,6 +149,9 @@ void Renderer::UploadTextures()
 	}
 
 	// 4. Add to resource type lists
+	gpuImages2D.Resize( uint32_t( uploadTextures.size() ) );
+	gpuImagesCube.Resize( uint32_t( uploadTextures.size() ) );
+
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );

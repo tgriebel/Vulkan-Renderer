@@ -139,64 +139,6 @@ void Renderer::InitVulkan()
 			particleState.parms[i] = RegisterBindParm( &particleShaderBinds );
 		}
 
-		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
-		{
-			{
-				shadowPassState.codeImages[ i ][ 0 ] = gpuImages2D[0];
-				shadowPassState.codeImages[ i ][ 1 ] = gpuImages2D[0];
-
-				shadowPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-				shadowPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				shadowPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( shadowView.region ) ] );
-				shadowPassState.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-				shadowPassState.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-				shadowPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-				shadowPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-				shadowPassState.parms[ i ]->Bind( bind_imageCodeArray, &shadowPassState.codeImages[ i ] );
-				shadowPassState.parms[ i ]->Bind( bind_imageStencil, &shadowPassState.codeImages[ i ] );
-			}
-
-			{
-				mainPassState.codeImages[ i ][ 0 ] = &frameState[ i ].shadowMapImage;
-				mainPassState.codeImages[ i ][ 1 ] = &frameState[ i ].shadowMapImage;
-
-				mainPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-				mainPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				mainPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( renderView.region ) ] );
-				mainPassState.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-				mainPassState.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-				mainPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-				mainPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-				mainPassState.parms[ i ]->Bind( bind_imageCodeArray, &mainPassState.codeImages[ i ] );
-				mainPassState.parms[ i ]->Bind( bind_imageStencil, &mainPassState.codeImages[ i ] );
-			}
-
-			{
-				postPassState.codeImages[ i ][ 0 ] = &frameState[ i ].viewColorImage;
-				postPassState.codeImages[ i ][ 1 ] = &frameState[ i ].depthImage;
-
-				postPassState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-				postPassState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				postPassState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( view2D.region ) ] );
-				postPassState.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-				postPassState.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-				postPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-				postPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-				postPassState.parms[ i ]->Bind( bind_imageCodeArray, &postPassState.codeImages[ i ] );
-				postPassState.parms[ i ]->Bind( bind_imageStencil, &frameState[ i ].stencilImage );
-			}
-
-			{
-				particleState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-				particleState.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-				particleState.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( renderView.region ) ] );
-				particleState.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-				particleState.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-				particleState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-				particleState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-			}
-		}
-
 		AllocRegisteredBindParms();
 	}
 
@@ -226,10 +168,6 @@ void Renderer::InitShaderResources()
 		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
 		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
-	}
-
-	for( uint32_t i = 0; i < MaxImageDescriptors; ++i ) {
-		gpuImages2D[i] = nullptr;
 	}
 
 	GenerateGpuPrograms( gAssets.gpuPrograms );

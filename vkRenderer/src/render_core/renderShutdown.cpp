@@ -159,6 +159,12 @@ void Renderer::ShutdownShaderResources()
 		delete texture.gpuImage;
 	}
 
+	for ( uint32_t i = 0; i < MaxImageDescriptors; ++i )
+	{
+		gpuImages2D[ i ] = nullptr;
+		gpuImagesCube[ i ] = nullptr;
+	}
+
 	// PSO
 	const uint32_t psoCount = pipelineLib.Count();
 	for ( uint32_t i = 0; i < psoCount; ++i )
