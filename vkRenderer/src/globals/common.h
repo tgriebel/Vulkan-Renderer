@@ -58,6 +58,7 @@
 #include <scene/camera.h>
 #include <resource_types/gpuProgram.h>
 #include <syscore/common.h>
+#include <sysCore/array.h>
 
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1000;
 const uint32_t	DescriptorPoolMaxSamplers		= 3;
@@ -94,6 +95,8 @@ const std::string BakePath = ".\\baked\\";
 const std::string BakedModelExtension = ".mdl";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
+
+using ImageArray = Array<Texture*, MaxImageDescriptors>;
 
 class Renderer;
 class Serializer;

@@ -44,5 +44,6 @@ public:
 	void Destroy();
 };
 
+
 // TODO: for cases where only a different view is needed
 //class GpuImageView;

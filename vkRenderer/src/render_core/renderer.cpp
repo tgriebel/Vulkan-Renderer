@@ -901,7 +901,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE_ARRAY ) {
 			std::vector<VkDescriptorImageInfo>& infos = writeBuilder.NextImageInfoArray();
 
-			const Texture** images = attachment->GetImageArray();
+			const ImageArray& images = *attachment->GetImageArray();
 
 			assert(0); // FIXME: array size
 			const uint32_t imageCount = 1;
