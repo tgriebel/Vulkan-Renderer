@@ -63,16 +63,18 @@ private:
 	private:
 		bindType_t		type;
 		uint32_t		slot;
-		uint32_t		descriptorCount;
+		uint32_t		maxDescriptorCount;
 		bindStateFlag_t	flags;
 
 		friend ShaderBinding;
-	} state;
-	uint32_t		hash;
+	};
+	bindState_t		m_state;
+	uint32_t		m_hash;
+	const char*		m_name;
 
 	inline void SetSlot( const uint32_t slot )
 	{
-		state.slot = slot;
+		m_state.slot = slot;
 	}
 public:
 
@@ -82,7 +84,7 @@ public:
 
 	uint32_t		GetSlot() const;
 	bindType_t		GetType() const;
-	uint32_t		GetDescriptorCount() const;
+	uint32_t		GetMaxDescriptorCount() const;
 	bindStateFlag_t	GetBindFlags() const;
 	uint32_t		GetHash() const;
 
@@ -214,7 +216,7 @@ public:
 		InitApiObjects();
 	}
 
-	inline VkDescriptorSet GetVkObject()
+	inline VkDescriptorSet GetVkObject() const
 	{
 		return vk_descriptorSet;
 	}

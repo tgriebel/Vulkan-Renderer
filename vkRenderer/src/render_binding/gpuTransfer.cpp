@@ -149,25 +149,53 @@ void Renderer::UploadTextures()
 	}
 
 	// 4. Add to resource type lists
-	gpuImages2D.Resize( uint32_t( uploadTextures.size() ) );
-	gpuImagesCube.Resize( uint32_t( uploadTextures.size() ) );
-
-	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
-		if ( textureAsset->IsLoaded() == false ) {
-			continue;
-		}
-		Texture& texture = textureAsset->Get();
+		gpuImages2D.Resize( MaxImageDescriptors );
+		gpuImagesCube.Resize( MaxImageDescriptors );
 
-		switch ( texture.info.type )
+		// Find first cubemap. FIXME: Hacky, just done so there aren't nulls in the list
+		Texture* firstCube = nullptr;
+		for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 		{
-			case TEXTURE_TYPE_2D:
-				gpuImages2D[ texture.uploadId ] = &texture;
+			Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+			if ( textureAsset->IsLoaded() == false ) {
+				continue;
+			}
+			if ( textureAsset->Get().info.type == TEXTURE_TYPE_CUBE )
+			{
+				firstCube = &textureAsset->Get();
 				break;
-			case TEXTURE_TYPE_CUBE:
-				gpuImagesCube[ texture.uploadId ] = &texture;
-				break;			
+			}
+		}
+		assert( firstCube != nullptr );
+
+		// Fill assigned slots
+		for ( uint32_t i = 0; i < imageFreeSlot; ++i )
+		{
+			Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
+			if ( textureAsset->IsLoaded() == false ) {
+				continue;
+			}
+			Texture& texture = textureAsset->Get();
+
+			switch ( texture.info.type )
+			{
+				case TEXTURE_TYPE_2D:
+					gpuImages2D[ texture.uploadId ] = &texture;
+					gpuImagesCube[ texture.uploadId ] = firstCube;
+					break;
+				case TEXTURE_TYPE_CUBE:
+					gpuImages2D[ texture.uploadId ] = &gAssets.textureLib.GetDefault()->Get();
+					gpuImagesCube[ texture.uploadId ] = &texture;
+					break;
+			}
+		}
+
+		// Fill defaults
+		for ( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
+		{
+			gpuImages2D[ i ] = &gAssets.textureLib.GetDefault()->Get();
+			gpuImagesCube[ i ] = firstCube;
 		}
 	}
 

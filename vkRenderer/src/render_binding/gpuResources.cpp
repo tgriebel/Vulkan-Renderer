@@ -34,7 +34,7 @@ void GpuBuffer::SetPos( const uint64_t pos )
 
 uint64_t GpuBuffer::GetSize() const
 {
-	return m_offset;
+	return ( m_offset - m_baseOffset );
 }
 
 

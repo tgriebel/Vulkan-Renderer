@@ -116,8 +116,6 @@ public:
 static DescriptorWritesBuilder writeBuilder;
 
 static const uint32_t MaxDescriptorInfos = 3 * ( MaxViews + MaxImageDescriptors + MaxCodeImages + MaxPostImageDescriptors );
-static descriptorInfo_t	vk_decriptorInfo[ MaxDescriptorInfos ];
-static uint32_t infoCount = 0;
 
 static VkDescriptorBufferInfo	vk_globalConstantsInfo;
 static VkDescriptorBufferInfo	vk_viewUbo;
@@ -867,7 +865,8 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 
 		VkWriteDescriptorSet writeInfo = {};
 		writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		writeInfo.descriptorCount = binding->GetDescriptorCount();
+		writeInfo.descriptorCount = binding->GetMaxDescriptorCount();
+		writeInfo.dstSet = parms.GetVkObject();
 		writeInfo.descriptorType = vk_GetDescriptorType( binding->GetType() );
 		writeInfo.dstArrayElement = 0;
 		writeInfo.dstBinding = binding->GetSlot();	
@@ -879,6 +878,10 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 			info.buffer = buffer->GetVkObject();
 			info.offset = buffer->GetBaseOffset();
 			info.range = buffer->GetSize();
+
+			assert( info.buffer != nullptr );
+
+			writeInfo.pBufferInfo = &info;
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE ) {
 			const Texture* image = attachment->GetImage();
@@ -886,54 +889,74 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = vk_bilinearSampler;
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
+			assert( info.imageView != nullptr );
 
 			switch( image->info.type )
 			{
 				case TEXTURE_TYPE_DEPTH:
+				case TEXTURE_TYPE_STENCIL:
+				case TEXTURE_TYPE_DEPTH_STENCIL:
 					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 				break;
 
 				case TEXTURE_TYPE_2D:
+				case TEXTURE_TYPE_2D_ARRAY:
+				case TEXTURE_TYPE_3D:
+				case TEXTURE_TYPE_3D_ARRAY:
+				case TEXTURE_TYPE_CUBE:
+				case TEXTURE_TYPE_CUBE_ARRAY:
 					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				break;
 
 				default: assert(0); break;
 			}
+
+			writeInfo.pImageInfo = &info;
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE_ARRAY ) {
 			std::vector<VkDescriptorImageInfo>& infos = writeBuilder.NextImageInfoArray();
 
 			const ImageArray& images = *attachment->GetImageArray();
 
-			assert(0); // FIXME: array size
-			const uint32_t imageCount = 1;
+			const uint32_t imageCount = images.Count();
 			infos.resize( imageCount );
-			
+			writeInfo.descriptorCount = imageCount;
+
+			assert( imageCount <= binding->GetMaxDescriptorCount() );
+	
 			for ( uint32_t imageIx = 0; imageIx < imageCount; ++imageIx )
 			{
 				const Texture* image = images[ imageIx ];
 				VkDescriptorImageInfo& info = infos[ imageIx ];
 
-				info.sampler = vk_bilinearSampler;
-				info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
+				info = {};
+				info.imageView = images[ imageIx ]->gpuImage->GetVkImageView();
+				assert( info.imageView != nullptr );
 				
 				switch ( image->info.type )
 				{
 					case TEXTURE_TYPE_DEPTH:
+					case TEXTURE_TYPE_STENCIL:
+					case TEXTURE_TYPE_DEPTH_STENCIL:
+						info.sampler = vk_depthShadowSampler;
 						info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 					break;
 
 					case TEXTURE_TYPE_2D:
+					case TEXTURE_TYPE_2D_ARRAY:
+					case TEXTURE_TYPE_3D:
+					case TEXTURE_TYPE_3D_ARRAY:
+					case TEXTURE_TYPE_CUBE:
+					case TEXTURE_TYPE_CUBE_ARRAY:
+						info.sampler = vk_bilinearSampler;
 						info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-						break;
+					break;
 
 					default: assert( 0 ); break;
 				}
 			}
+			writeInfo.pImageInfo = infos.data();
 		}
-
-		//writeInfo.pBufferInfo = &vk_decriptorInfo[ infoCount ];
-		++infoCount;
 
 		descSetWrites.push_back( writeInfo );
 	}
@@ -1044,112 +1067,11 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	const uint32_t descriptorSetCnt = 9;
 
 	{
-	//	std::vector<VkWriteDescriptorSet> descriptorWrites;
-	//	AppendDescriptorWrites( *postPassState.parms[ currentImage ], descriptorWrites );
-	}
+		writeBuilder.Reset();
+		std::vector<VkWriteDescriptorSet> descriptorWrites;
+		AppendDescriptorWrites( *mainPassState.parms[ currentImage ], descriptorWrites );
 
-	{
-		// Shadow Map
-		for ( int j = 0; j < MaxCodeImages; ++j )
-		{
-			VkImageView& imageView = frameState[ currentImage ].shadowMapImage.gpuImage->VkImageView();
-			VkDescriptorImageInfo info{ };
-			info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-			info.imageView = imageView;
-			info.sampler = vk_depthShadowSampler;
-			vk_codeImageInfo[j] = info;
-		}
-
-		std::array<VkWriteDescriptorSet, descriptorSetCnt> descriptorWrites{ };
-
-		uint32_t descriptorId = 0;
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 0;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pBufferInfo = &vk_globalConstantsInfo;
-		++descriptorId;
-
-		if( vk_viewUbo.range > 0 )
-		{
-			descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-			descriptorWrites[ descriptorId ].dstBinding = 1;
-			descriptorWrites[ descriptorId ].dstArrayElement = 0;
-			descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			descriptorWrites[ descriptorId ].descriptorCount = 1;
-			descriptorWrites[ descriptorId ].pBufferInfo = &vk_viewUbo;
-			++descriptorId;
-		}
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 2;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
-		++descriptorId;
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 3;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-		descriptorWrites[ descriptorId ].pImageInfo = &vk_image2DInfo[ 0 ];
-		++descriptorId;
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 4;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[ descriptorId ].descriptorCount = MaxImageDescriptors;
-		descriptorWrites[ descriptorId ].pImageInfo = &vk_imageCubeInfo[ 0 ];
-		++descriptorId;
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 5;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pBufferInfo = &vk_materialBufferInfo;
-		++descriptorId;
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 6;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pBufferInfo = &vk_lightBufferInfo;
-		++descriptorId;
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 7;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[ descriptorId ].descriptorCount = MaxCodeImages;
-		descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
-		++descriptorId;
-
-		descriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		descriptorWrites[ descriptorId ].dstSet = mainPassState.parms[ i ]->GetVkObject();
-		descriptorWrites[ descriptorId ].dstBinding = 8;
-		descriptorWrites[ descriptorId ].dstArrayElement = 0;
-		descriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptorWrites[ descriptorId ].descriptorCount = 1;
-		descriptorWrites[ descriptorId ].pImageInfo = &vk_codeImageInfo[ 0 ];
-		++descriptorId;
-
-		assert( descriptorId <= descriptorSetCnt );
-
-		vkUpdateDescriptorSets( context.device, descriptorId, descriptorWrites.data(), 0, nullptr );
+		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
 	}
 
 	//////////////////////////////////////////////////////
@@ -1218,7 +1140,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		shadowDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		shadowDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		shadowDescriptorWrites[ descriptorId ].descriptorCount = 1;
-		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[1];
+		shadowDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[ int( shadowView.region ) ];
 		++descriptorId;
 
 		shadowDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1342,7 +1264,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		postDescriptorWrites[ descriptorId ].dstArrayElement = 0;
 		postDescriptorWrites[ descriptorId ].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		postDescriptorWrites[ descriptorId ].descriptorCount = 1;
-		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[0];
+		postDescriptorWrites[ descriptorId ].pBufferInfo = &vk_surfaceBuffer[ int( view2D.region ) ];
 		++descriptorId;
 
 		postDescriptorWrites[ descriptorId ].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -1467,7 +1389,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 		shadowPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
 		shadowPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
 		shadowPassState.parms[ i ]->Bind( bind_imageCodeArray, &shadowPassState.codeImages[ i ] );
-		shadowPassState.parms[ i ]->Bind( bind_imageStencil, &shadowPassState.codeImages[ i ] );
+		shadowPassState.parms[ i ]->Bind( bind_imageStencil, shadowPassState.codeImages[ i ][ 0 ] );
 	}
 
 	{
@@ -1483,7 +1405,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 		mainPassState.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
 		mainPassState.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
 		mainPassState.parms[ i ]->Bind( bind_imageCodeArray, &mainPassState.codeImages[ i ] );
-		mainPassState.parms[ i ]->Bind( bind_imageStencil, &mainPassState.codeImages[ i ] );
+		mainPassState.parms[ i ]->Bind( bind_imageStencil, mainPassState.codeImages[ i ][ 0 ] );
 	}
 
 	{
@@ -1608,12 +1530,12 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	frameState[ currentImage ].viewParms.SetPos();
 	frameState[ currentImage ].viewParms.CopyData( &viewBuffer, sizeof( viewBufferObject_t ) * MaxViews );
 
-	frameState[ currentImage ].surfParmPartitions[ 0 ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ 0 ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParmPartitions[ 1 ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ 1 ].CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParmPartitions[ 2 ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ 2 ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ int( renderView.region ) ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ int( renderView.region ) ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ int( shadowView.region ) ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ int( shadowView.region ) ].CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ int( view2D.region ) ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ int( view2D.region ) ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
 	frameState[ currentImage ].materialBuffers.SetPos();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );

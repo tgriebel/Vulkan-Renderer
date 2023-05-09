@@ -29,10 +29,10 @@
 
 ShaderBinding::ShaderBinding( const char* name, const bindType_t type, const uint32_t descriptorCount, const bindStateFlag_t flags )
 {
-	state.slot = ~0x00;
-	state.type = type;
-	state.descriptorCount = descriptorCount;
-	state.flags = flags;
+	m_state.slot = ~0x00;
+	m_state.type = type;
+	m_state.maxDescriptorCount = descriptorCount;
+	m_state.flags = flags;
 
 	const uint32_t bufSize = 128;
 
@@ -40,38 +40,40 @@ ShaderBinding::ShaderBinding( const char* name, const bindType_t type, const uin
 	assert( sizeBytes <= bufSize );
 
 	uint8_t hashBytes[ bufSize ];
-	memcpy( hashBytes, &state, sizeBytes );
-	hash = Hash( reinterpret_cast<const uint8_t*>( name ), sizeBytes );
+	memcpy( hashBytes, &m_state, sizeBytes );
+
+	m_hash = Hash( reinterpret_cast<const uint8_t*>( name ), sizeBytes );
+	m_name = name;
 }
 
 
 uint32_t ShaderBinding::GetSlot() const
 {
-	return state.slot;
+	return m_state.slot;
 }
 
 
 bindType_t ShaderBinding::GetType() const
 {
-	return state.type;
+	return m_state.type;
 }
 
 
-uint32_t ShaderBinding::GetDescriptorCount() const
+uint32_t ShaderBinding::GetMaxDescriptorCount() const
 {
-	return state.descriptorCount;
+	return m_state.maxDescriptorCount;
 }
 
 
 bindStateFlag_t ShaderBinding::GetBindFlags() const
 {
-	return state.flags;
+	return m_state.flags;
 }
 
 
 uint32_t ShaderBinding::GetHash() const
 {
-	return hash;
+	return m_hash;
 }
 
 
@@ -110,7 +112,7 @@ void ShaderBindSet::Create()
 
 		layoutBindings[ i ] = {};
 		layoutBindings[ i ].binding = binding->GetSlot();
-		layoutBindings[ i ].descriptorCount = binding->GetDescriptorCount();
+		layoutBindings[ i ].descriptorCount = binding->GetMaxDescriptorCount();
 		layoutBindings[ i ].descriptorType = vk_GetDescriptorType( binding->GetType() );
 		layoutBindings[ i ].pImmutableSamplers = nullptr;
 		layoutBindings[ i ].stageFlags = vk_GetStageFlags( binding->GetBindFlags() );

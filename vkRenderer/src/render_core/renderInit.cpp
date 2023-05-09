@@ -659,6 +659,7 @@ void Renderer::CreateFramebuffers()
 		info.type = TEXTURE_TYPE_DEPTH;
 		info.tiling = TEXTURE_TILING_MORTON;
 
+		frameState[ i ].shadowMapImage.info = info;
 		frameState[ i ].shadowMapImage.gpuImage = new GpuImage();
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
@@ -724,7 +725,12 @@ void Renderer::CreateFramebuffers()
 		info.fmt = TEXTURE_FMT_D_32_S8;
 		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
 
+		frameState[ i ].depthImage.info = info;
+		frameState[ i ].depthImage.bytes = nullptr;
 		frameState[ i ].depthImage.gpuImage = new GpuImage();
+
+		frameState[ i ].stencilImage.info = info;
+		frameState[ i ].stencilImage.bytes = nullptr;
 		frameState[ i ].stencilImage.gpuImage = new GpuImage();
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
@@ -971,7 +977,12 @@ void Renderer::CreateCodeTextures() {
 	info.type = TEXTURE_TYPE_2D;
 	info.tiling = TEXTURE_TILING_MORTON;
 
+	rc.whiteImage.info = info;
+	rc.whiteImage.bytes = nullptr;
 	rc.whiteImage.gpuImage = new GpuImage();
+
+	rc.blackImage.info = info;
+	rc.blackImage.bytes = nullptr;
 	rc.blackImage.gpuImage = new GpuImage();
 
 	// Default Images

@@ -110,7 +110,7 @@ void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout 
 		
 		layoutBindings[i] = {};
 		layoutBindings[i].binding = binding->GetSlot();
-		layoutBindings[i].descriptorCount = binding->GetDescriptorCount();
+		layoutBindings[i].descriptorCount = binding->GetMaxDescriptorCount();
 		layoutBindings[i].descriptorType = vk_GetDescriptorType( binding->GetType() );
 		layoutBindings[i].pImmutableSamplers = nullptr;
 		layoutBindings[i].stageFlags = vk_GetStageFlags( binding->GetBindFlags() );
