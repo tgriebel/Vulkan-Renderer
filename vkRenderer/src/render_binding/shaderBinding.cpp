@@ -184,6 +184,8 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment
 {
 	if( bindSet->HasBinding( binding ) ) {
 		attachments[ binding.GetHash() ] = attachment;
+	} else {
+		assert( 0 );
 	}
 }
 
