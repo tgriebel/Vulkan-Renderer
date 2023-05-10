@@ -1396,7 +1396,7 @@ static const char* GetPassDebugName( const drawPass_t pass )
 }
 
 
-const DrawPassState* Renderer::GetPassState( const drawPass_t pass )
+const DrawPass* Renderer::GetPassState( const drawPass_t pass )
 {
 	switch( pass )
 	{
@@ -1475,7 +1475,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	const drawPass_t passEnd = ViewRegionPassEnd( view.region );
 
 	// For now the pass state is the same for the entire view region
-	const DrawPassState* passState = GetPassState( passBegin );
+	const DrawPass* passState = GetPassState( passBegin );
 	if ( passState == nullptr ) {
 		throw std::runtime_error( "Missing pass state!" );
 	}

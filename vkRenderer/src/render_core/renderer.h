@@ -73,8 +73,9 @@ struct renderConfig_t
 };
 
 
-struct DrawPassState
+class DrawPass
 {
+public:
 	vec4f				clearColor;
 	float				clearDepth;
 	uint32_t			clearStencil;
@@ -186,9 +187,9 @@ private:
 	SwapChain						swapChain;
 	graphicsQueue_t					graphicsQueue;
 	computeQueue_t					computeQueue;
-	DrawPassState					shadowPassState;
-	DrawPassState					mainPassState;
-	DrawPassState					postPassState;
+	DrawPass					shadowPassState;
+	DrawPass					mainPassState;
+	DrawPass					postPassState;
 	ComputeState					particleState;
 	VkDescriptorPool				descriptorPool;
 	renderConfig_t					config;
@@ -330,7 +331,7 @@ private:
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
 	textureSamples_t			GetSampleCountForDrawPass( const drawPass_t pass );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
-	const DrawPassState*		GetPassState( const drawPass_t pass );
+	const DrawPass*		GetPassState( const drawPass_t pass );
 	void						DrawDebugMenu();
 	void						FlushGPU();
 	void						WaitForEndFrame();
