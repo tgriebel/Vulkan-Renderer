@@ -315,7 +315,7 @@ private:
 	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
 	void						CreateBuffers();
-	VkRenderPass				CreateRenderPass( const vkRenderPassBits_t& stateBits );
+	VkRenderPass				CreateRenderPass( const vk_RenderPassBits_t& stateBits );
 	void						CreateRenderPasses();
 	void						CreateFramebuffers();
 	void						CreateCommandPools();

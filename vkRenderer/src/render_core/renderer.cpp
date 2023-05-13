@@ -1551,6 +1551,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 				continue;
 			}
 
+			MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
+
 			if ( pass == DRAWPASS_DEPTH ) {
 				// vkCmdSetDepthBias
 				vkCmdSetStencilReference( commandBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
@@ -1566,7 +1568,6 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
 			vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
 			vkCmdDrawIndexed( commandBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 		}
 		MarkerEndRegion( commandBuffer );
