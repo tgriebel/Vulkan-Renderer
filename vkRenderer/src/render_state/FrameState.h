@@ -27,7 +27,7 @@
 #include "../render_binding/gpuResources.h"
 #include "../render_core/gpuImage.h"
 
-enum vkRenderPassAttachmentMask_t : uint8_t
+enum vk_RenderPassAttachmentMask_t : uint8_t
 {
 	RENDER_PASS_MASK_COLOR0 = ( 1 << 0 ),
 	RENDER_PASS_MASK_COLOR1 = ( 1 << 1 ),
@@ -36,35 +36,36 @@ enum vkRenderPassAttachmentMask_t : uint8_t
 	RENDER_PASS_MASK_STENCIL = ( 1 << 4 ),
 };
 
-struct vkRenderPassAttachmentBits_t
+struct vk_RenderPassAttachmentBits_t
 {
 	textureSamples_t	samples			: 8;
 	textureFmt_t		fmt				: 8;
 	uint8_t				clear			: 1;
 	uint8_t				store			: 1;
 	uint8_t				readAfter		: 1;
+	uint8_t				presentAfter	: 1;
 };
 static_assert( sizeof( textureSamples_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( textureFmt_t ) == 1, "Bits overflowed" );
-static_assert( sizeof( vkRenderPassAttachmentBits_t ) == 3, "Bits overflowed" );
+static_assert( sizeof( vk_RenderPassAttachmentBits_t ) == 3, "Bits overflowed" );
 
-struct vkRenderPassBits_t
+struct vk_RenderPassBits_t
 {
 	union
 	{
 		struct vkRenderPassState_t
 		{
-			vkRenderPassAttachmentBits_t	colorAttach0;
-			vkRenderPassAttachmentBits_t	colorAttach1;
-			vkRenderPassAttachmentBits_t	colorAttach2;
-			vkRenderPassAttachmentBits_t	depthAttach;
-			vkRenderPassAttachmentBits_t	stencilAttach;
-			vkRenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
+			vk_RenderPassAttachmentBits_t	colorAttach0;
+			vk_RenderPassAttachmentBits_t	colorAttach1;
+			vk_RenderPassAttachmentBits_t	colorAttach2;
+			vk_RenderPassAttachmentBits_t	depthAttach;
+			vk_RenderPassAttachmentBits_t	stencilAttach;
+			vk_RenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
 		} semantic;
 		uint8_t bytes[11];
 	};
 };
-static_assert( sizeof( vkRenderPassBits_t ) == 16, "Bits overflowed" );
+static_assert( sizeof( vk_RenderPassBits_t ) == 16, "Bits overflowed" );
 
 class FrameState
 {

@@ -104,7 +104,7 @@ void Renderer::InitVulkan()
 
 	{
 		// Passes
-		vkRenderPassBits_t passBits;
+		vk_RenderPassBits_t passBits;
 		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
 		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
 		passBits.semantic.colorAttach0.clear = 0;
@@ -450,7 +450,7 @@ void Renderer::CreateTextureSamplers()
 }
 
 
-VkRenderPass Renderer::CreateRenderPass( const vkRenderPassBits_t& passState )
+VkRenderPass Renderer::CreateRenderPass( const vk_RenderPassBits_t& passState )
 {
 	VkRenderPass pass = VK_NULL_HANDLE;
 
@@ -471,7 +471,11 @@ VkRenderPass Renderer::CreateRenderPass( const vkRenderPassBits_t& passState )
 
 	if( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0  )
 	{
-		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
+		if( passState.semantic.colorAttach0.presentAfter ) {
+			attachments[ count ].format = swapChain.GetBackBufferFormat();
+		} else {
+			attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
+		}
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach0.samples );
 		attachments[ count ].loadOp = passState.semantic.colorAttach0.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].storeOp = passState.semantic.colorAttach0.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -479,7 +483,9 @@ VkRenderPass Renderer::CreateRenderPass( const vkRenderPassBits_t& passState )
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		
-		if( passState.semantic.colorAttach0.readAfter ) {
+		if( passState.semantic.colorAttach0.presentAfter ) {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		} else if ( passState.semantic.colorAttach0.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -605,7 +611,7 @@ void Renderer::CreateRenderPasses()
 {
 	{
 		// Main View Pass
-		vkRenderPassBits_t passBits;
+		vk_RenderPassBits_t passBits = {};
 		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
 		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
 		passBits.semantic.colorAttach0.clear = 1;
@@ -624,7 +630,7 @@ void Renderer::CreateRenderPasses()
 		passBits.semantic.stencilAttach.store = 1;
 		passBits.semantic.stencilAttach.readAfter = 1;
 
-		passBits.semantic.attachmentMask = static_cast<vkRenderPassAttachmentMask_t>( RENDER_PASS_MASK_STENCIL | RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
+		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_STENCIL | RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
 
 		mainPassState.pass = CreateRenderPass( passBits );
 		mainPassState.clearColor = vec4f( 0.0f, 0.1f, 0.5f, 1.0f );
@@ -634,7 +640,7 @@ void Renderer::CreateRenderPasses()
 
 	{
 		// Shadow Pass
-		vkRenderPassBits_t passBits = {};
+		vk_RenderPassBits_t passBits = {};
 		passBits.semantic.colorAttach0.samples = TEXTURE_SMP_1;
 		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_BGRA_8;
 
@@ -644,7 +650,7 @@ void Renderer::CreateRenderPasses()
 		passBits.semantic.depthAttach.store = 1;
 		passBits.semantic.depthAttach.readAfter = 1;
 
-		passBits.semantic.attachmentMask = static_cast<vkRenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
+		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
 
 		shadowPassState.pass = CreateRenderPass( passBits );
 		shadowPassState.clearColor = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -654,50 +660,18 @@ void Renderer::CreateRenderPasses()
 
 	{
 		// Post-Process Pass
-		VkAttachmentDescription colorAttachment{ };
-		colorAttachment.format = swapChain.GetBackBufferFormat();
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		vk_RenderPassBits_t passBits = {};
+		passBits.semantic.colorAttach0.samples = TEXTURE_SMP_1;
+		passBits.semantic.colorAttach0.clear = 1;
+		passBits.semantic.colorAttach0.store = 1;
+		passBits.semantic.colorAttach0.presentAfter = 1;
 
-		VkAttachmentReference colorAttachmentRef{ };
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_COLOR0 );
 
-		VkSubpassDescription subpass{ };
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		subpass.pDepthStencilAttachment = nullptr;
-
-		VkSubpassDependency dependency{ };
-		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		std::array<VkAttachmentDescription, 1> attachments = { colorAttachment };
-		VkRenderPassCreateInfo renderPassInfo{ };
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
-		renderPassInfo.pAttachments = attachments.data();
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpass;
-
+		postPassState.pass = CreateRenderPass( passBits );
 		postPassState.clearColor = vec4f( 0.1f, 0.0f, 0.5f, 1.0f );
 		postPassState.clearDepth = 0.0f;
 		postPassState.clearStencil = 0x00;
-
-		postPassState.pass = NULL;
-		if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &postPassState.pass ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create render pass!" );
-		}
 	}
 
 	// Particle State
