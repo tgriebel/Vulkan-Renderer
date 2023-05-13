@@ -103,18 +103,35 @@ void Renderer::InitVulkan()
 	}
 
 	{
-		vk_mainColorFmt = FindSupportedFormat( {VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT },
-												VK_IMAGE_TILING_OPTIMAL,
-												VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
-		);
-		vk_depthFmt = FindSupportedFormat( {VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-											VK_IMAGE_TILING_OPTIMAL,
-											VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
-	}
-
-	{
 		// Passes
+		vkRenderPassBits_t passBits;
+		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
+		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
+		passBits.semantic.colorAttach0.clear = 0;
+		passBits.semantic.colorAttach0.store = 1;
+
+		passBits.semantic.colorAttach1.samples = config.mainColorSubSamples;
+		passBits.semantic.colorAttach1.fmt = TEXTURE_FMT_RGBA_16;
+		passBits.semantic.colorAttach1.clear = 0;
+		passBits.semantic.colorAttach1.store = 1;
+
+		passBits.semantic.colorAttach2.samples = config.mainColorSubSamples;
+		passBits.semantic.colorAttach2.fmt = TEXTURE_FMT_RGBA_16;
+		passBits.semantic.colorAttach2.clear = 0;
+		passBits.semantic.colorAttach2.store = 1;
+
+		passBits.semantic.depthAttach.samples = config.mainColorSubSamples;
+		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32_S8;
+		passBits.semantic.depthAttach.clear = 0;
+		passBits.semantic.depthAttach.store = 1;
+
+		passBits.semantic.stencilAttach.samples = config.mainColorSubSamples;
+		passBits.semantic.stencilAttach.fmt = TEXTURE_FMT_D_32_S8;
+		passBits.semantic.stencilAttach.clear = 0;
+		passBits.semantic.stencilAttach.store = 1;
+
+		//CreateRenderPass( passBits );
+
 		CreateRenderPasses();
 	}
 
@@ -433,150 +450,206 @@ void Renderer::CreateTextureSamplers()
 }
 
 
+VkRenderPass Renderer::CreateRenderPass( const vkRenderPassBits_t& passState )
+{
+	VkRenderPass pass = VK_NULL_HANDLE;
+
+	VkAttachmentReference colorAttachmentRef[ 3 ] = { };
+	VkAttachmentReference depthAttachmentRef{ };
+	VkAttachmentReference stencilAttachmentRef{ };
+
+	uint32_t count = 0;
+	uint32_t colorCount = 0;
+
+	colorAttachmentRef[ 0 ].attachment = VK_ATTACHMENT_UNUSED;
+	colorAttachmentRef[ 1 ].attachment = VK_ATTACHMENT_UNUSED;
+	colorAttachmentRef[ 2 ].attachment = VK_ATTACHMENT_UNUSED;
+	depthAttachmentRef.attachment = VK_ATTACHMENT_UNUSED;
+	stencilAttachmentRef.attachment = VK_ATTACHMENT_UNUSED;
+
+	VkAttachmentDescription attachments[ 5 ] = {};
+
+	if( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0  )
+	{
+		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
+		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach0.samples );
+		attachments[ count ].loadOp = passState.semantic.colorAttach0.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].storeOp = passState.semantic.colorAttach0.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		
+		if( passState.semantic.colorAttach0.readAfter ) {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		}
+
+		colorAttachmentRef[ count ].attachment = count;
+		colorAttachmentRef[ count ].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		++count;
+	}
+
+	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR1 ) != 0 )
+	{		
+		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach1.fmt );
+		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach1.samples );
+		attachments[ count ].loadOp = passState.semantic.colorAttach1.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.colorAttach1.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if ( passState.semantic.colorAttach1.readAfter ) {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		}
+
+		colorAttachmentRef[ count ].attachment = count;
+		colorAttachmentRef[ count ].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		++count;
+	}
+
+	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR2 ) != 0  )
+	{
+		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach2.fmt );
+		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach2.samples );
+		attachments[ count ].loadOp = passState.semantic.colorAttach2.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.colorAttach2.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if ( passState.semantic.colorAttach1.readAfter ) {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		}
+
+		colorAttachmentRef[ count ].attachment = count;
+		colorAttachmentRef[ count ].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		++count;
+	}
+
+	colorCount = count;
+
+	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_DEPTH ) != 0 )
+	{
+		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.depthAttach.fmt );
+		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.depthAttach.samples );
+		attachments[ count ].loadOp = passState.semantic.depthAttach.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.depthAttach.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = passState.semantic.depthAttach.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].stencilStoreOp = passState.semantic.depthAttach.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if ( passState.semantic.depthAttach.readAfter ) {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		} else {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+
+		depthAttachmentRef.attachment = count;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		++count;
+	}
+
+	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_STENCIL ) != 0 )
+	{
+		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.stencilAttach.fmt );
+		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.stencilAttach.samples );
+		attachments[ count ].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = passState.semantic.stencilAttach.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].stencilStoreOp = passState.semantic.stencilAttach.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if ( passState.semantic.stencilAttach.readAfter ) {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		} else {
+			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+
+		stencilAttachmentRef.attachment = count;
+		stencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		++count;
+	}
+
+	VkSubpassDescription subpass{ };
+	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass.colorAttachmentCount = colorCount;
+	subpass.pColorAttachments = colorAttachmentRef;
+	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+	VkRenderPassCreateInfo renderPassInfo{ };
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	renderPassInfo.attachmentCount = count;
+	renderPassInfo.pAttachments = attachments;
+	renderPassInfo.subpassCount = 1;
+	renderPassInfo.pSubpasses = &subpass;
+
+	if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &pass ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create render pass!" );
+	}
+	return pass;
+}
+
+
 void Renderer::CreateRenderPasses()
 {
 	{
 		// Main View Pass
-		const VkSampleCountFlagBits samples = vk_GetSampleCount( config.mainColorSubSamples );
+		vkRenderPassBits_t passBits;
+		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
+		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
+		passBits.semantic.colorAttach0.clear = 1;
+		passBits.semantic.colorAttach0.store = 1;
+		passBits.semantic.colorAttach0.readAfter = 1;
 
-		VkAttachmentDescription colorAttachment{ };
-		colorAttachment.format = vk_mainColorFmt;
-		colorAttachment.samples = samples;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		passBits.semantic.depthAttach.samples = config.mainColorSubSamples;
+		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32_S8;
+		passBits.semantic.depthAttach.clear = 1;
+		passBits.semantic.depthAttach.store = 1;
+		passBits.semantic.depthAttach.readAfter = 1;
 
-		VkAttachmentReference colorAttachmentRef{ };
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		passBits.semantic.stencilAttach.samples = config.mainColorSubSamples;
+		passBits.semantic.stencilAttach.fmt = TEXTURE_FMT_D_32_S8;
+		passBits.semantic.stencilAttach.clear = 1;
+		passBits.semantic.stencilAttach.store = 1;
+		passBits.semantic.stencilAttach.readAfter = 1;
 
-		VkAttachmentDescription depthAttachment{ };
-		depthAttachment.format = vk_depthFmt;
-		depthAttachment.samples = samples;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		passBits.semantic.attachmentMask = static_cast<vkRenderPassAttachmentMask_t>( RENDER_PASS_MASK_STENCIL | RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
 
-		VkAttachmentReference depthAttachmentRef{ };
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkAttachmentDescription stencilAttachment{ };
-		stencilAttachment.format = vk_depthFmt;
-		stencilAttachment.samples = samples;
-		stencilAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		stencilAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		stencilAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		stencilAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		stencilAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		stencilAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-
-		VkAttachmentReference stencilAttachmentRef{ };
-		stencilAttachmentRef.attachment = 1;
-		stencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpass{ };
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-		std::array<VkSubpassDependency, 2> dependencies;
-		dependencies[ 0 ].srcSubpass = VK_SUBPASS_EXTERNAL;
-		dependencies[ 0 ].dstSubpass = 0;
-		dependencies[ 0 ].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		dependencies[ 0 ].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependencies[ 0 ].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		dependencies[ 0 ].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		dependencies[ 0 ].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-		dependencies[ 1 ].srcSubpass = 0;
-		dependencies[ 1 ].dstSubpass = VK_SUBPASS_EXTERNAL;
-		dependencies[ 1 ].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependencies[ 1 ].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		dependencies[ 1 ].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		dependencies[ 1 ].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		dependencies[ 1 ].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-		std::array<VkAttachmentDescription, 3> attachments = { colorAttachment, depthAttachment, stencilAttachment };
-		VkRenderPassCreateInfo renderPassInfo{ };
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
-		renderPassInfo.pAttachments = attachments.data();
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = static_cast<uint32_t>( dependencies.size() );
-		renderPassInfo.pDependencies = dependencies.data();
-
+		mainPassState.pass = CreateRenderPass( passBits );
 		mainPassState.clearColor = vec4f( 0.0f, 0.1f, 0.5f, 1.0f );
 		mainPassState.clearDepth = 0.0f;
 		mainPassState.clearStencil = 0x00;
-
-		mainPassState.pass = NULL;
-		if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &mainPassState.pass ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create render pass!" );
-		}
 	}
 
 	{
 		// Shadow Pass
-		VkAttachmentDescription colorAttachment{ };
-		colorAttachment.format = swapChain.GetBackBufferFormat();
-		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		vkRenderPassBits_t passBits = {};
+		passBits.semantic.colorAttach0.samples = TEXTURE_SMP_1;
+		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_BGRA_8;
 
-		VkAttachmentReference colorAttachmentRef{ };
-		colorAttachmentRef.attachment = 0;
-		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		passBits.semantic.depthAttach.samples = TEXTURE_SMP_1;
+		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32;
+		passBits.semantic.depthAttach.clear = 1;
+		passBits.semantic.depthAttach.store = 1;
+		passBits.semantic.depthAttach.readAfter = 1;
 
-		VkAttachmentDescription depthAttachment{ };
-		depthAttachment.format = VK_FORMAT_D32_SFLOAT;
-		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		passBits.semantic.attachmentMask = static_cast<vkRenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
 
-		VkAttachmentReference depthAttachmentRef{ };
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-		VkSubpassDescription subpass{ };
-		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colorAttachmentRef;
-		subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-		std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
-		VkRenderPassCreateInfo renderPassInfo{ };
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
-		renderPassInfo.pAttachments = attachments.data();
-		renderPassInfo.subpassCount = 1;
-		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = 0;
-
+		shadowPassState.pass = CreateRenderPass( passBits );
 		shadowPassState.clearColor = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		shadowPassState.clearDepth = 1.0f;
 		shadowPassState.clearStencil = 0x00;
-
-		shadowPassState.pass = NULL;
-		if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &shadowPassState.pass ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create render pass!" );
-		}
 	}
 
 	{
@@ -616,8 +689,6 @@ void Renderer::CreateRenderPasses()
 		renderPassInfo.pAttachments = attachments.data();
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpass;
-		renderPassInfo.dependencyCount = 1;
-		renderPassInfo.pDependencies = &dependency;
 
 		postPassState.clearColor = vec4f( 0.1f, 0.0f, 0.5f, 1.0f );
 		postPassState.clearDepth = 0.0f;
@@ -669,7 +740,7 @@ void Renderer::CreateFramebuffers()
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 	{
 		shadowMap.color[ i ] = nullptr;
-		shadowMap.depth[ i ] = frameState[ i ].shadowMapImage.gpuImage;
+		shadowMap.depth[ i ] = &frameState[ i ].shadowMapImage;
 		shadowMap.stencil[ i ] = nullptr;
 
 		std::array<VkImageView, 2> attachments = {
@@ -712,7 +783,7 @@ void Renderer::CreateFramebuffers()
 		info.type = TEXTURE_TYPE_2D;
 		info.tiling = TEXTURE_TILING_MORTON;
 
-		VkFormat colorFormat = vk_mainColorFmt;
+		VkFormat colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
 
 		frameState[ i ].viewColorImage.bytes = nullptr;
 		frameState[ i ].viewColorImage.info = info;
@@ -721,7 +792,7 @@ void Renderer::CreateFramebuffers()
 		CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
 		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage.gpuImage->GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
 
-		VkFormat depthFormat = vk_depthFmt;
+		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 		info.fmt = TEXTURE_FMT_D_32_S8;
 		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
 

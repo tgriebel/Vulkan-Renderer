@@ -27,6 +27,45 @@
 #include "../render_binding/gpuResources.h"
 #include "../render_core/gpuImage.h"
 
+enum vkRenderPassAttachmentMask_t : uint8_t
+{
+	RENDER_PASS_MASK_COLOR0 = ( 1 << 0 ),
+	RENDER_PASS_MASK_COLOR1 = ( 1 << 1 ),
+	RENDER_PASS_MASK_COLOR2 = ( 1 << 2 ),
+	RENDER_PASS_MASK_DEPTH = ( 1 << 3 ),
+	RENDER_PASS_MASK_STENCIL = ( 1 << 4 ),
+};
+
+struct vkRenderPassAttachmentBits_t
+{
+	textureSamples_t	samples			: 8;
+	textureFmt_t		fmt				: 8;
+	uint8_t				clear			: 1;
+	uint8_t				store			: 1;
+	uint8_t				readAfter		: 1;
+};
+static_assert( sizeof( textureSamples_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( textureFmt_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( vkRenderPassAttachmentBits_t ) == 3, "Bits overflowed" );
+
+struct vkRenderPassBits_t
+{
+	union
+	{
+		struct vkRenderPassState_t
+		{
+			vkRenderPassAttachmentBits_t	colorAttach0;
+			vkRenderPassAttachmentBits_t	colorAttach1;
+			vkRenderPassAttachmentBits_t	colorAttach2;
+			vkRenderPassAttachmentBits_t	depthAttach;
+			vkRenderPassAttachmentBits_t	stencilAttach;
+			vkRenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
+		} semantic;
+		uint8_t bytes[11];
+	};
+};
+static_assert( sizeof( vkRenderPassBits_t ) == 16, "Bits overflowed" );
+
 class FrameState
 {
 public:
@@ -49,24 +88,76 @@ public:
 };
 
 
+struct frameBufferCreateInfo_t
+{
+	uint32_t width;
+	uint32_t height;
+	Texture* color;
+	Texture* color1;
+	Texture* color2;
+	Texture* depth;
+	Texture* stencil;
+};
+
+
 class FrameBuffer
 {
 public:
-	textureInfo_t	info;
-	GpuImage*		color[ MAX_FRAMES_STATES ];
-	GpuImage*		color1[ MAX_FRAMES_STATES ];
-	GpuImage*		color2[ MAX_FRAMES_STATES ];
-	GpuImage*		depth[ MAX_FRAMES_STATES ];
-	GpuImage*		stencil[ MAX_FRAMES_STATES ];
+	Texture*		color[ MAX_FRAMES_STATES ];
+	Texture*		color1[ MAX_FRAMES_STATES ];
+	Texture*		color2[ MAX_FRAMES_STATES ];
+	Texture*		depth[ MAX_FRAMES_STATES ];
+	Texture*		stencil[ MAX_FRAMES_STATES ];
+
+#ifdef USE_VULKAN
 	VkFramebuffer	buffer[ MAX_FRAMES_STATES ];
+#endif
+
+	uint32_t		width;
+	uint32_t		height;
+
+	FrameBuffer()
+	{
+		//color = nullptr;
+		//color1 = nullptr;
+		//color2 = nullptr;
+		//depth = nullptr;
+		//stencil = nullptr;
+
+		width = 0;
+		height = 0;
+	}
 
 	inline uint32_t GetWidth( const uint32_t layer )
 	{
-		return info.width;
+		return width;
 	}
 
 	inline uint32_t GetHeight( const uint32_t layer )
 	{
-		return info.height;
+		return height;
+	}
+
+	void Create( const frameBufferCreateInfo_t& createInfo )
+	{
+		// Can specify clear options, etc. Assigned to cached render pass that matches
+
+		//VkImageView attachments[5];
+		//
+		//uint32_t attachmentCount = 1;
+		//attachments[0] = createInfo.color->gpuImage->GetVkImageView();
+
+		//VkFramebufferCreateInfo framebufferInfo{ };
+		//framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		//framebufferInfo.renderPass = shadowPassState.pass;
+		//framebufferInfo.attachmentCount = attachmentCount;
+		//framebufferInfo.pAttachments = attachments;
+		//framebufferInfo.width = ShadowMapWidth;
+		//framebufferInfo.height = ShadowMapHeight;
+		//framebufferInfo.layers = 1;
+
+		//if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &shadowMap.buffer[ i ] ) != VK_SUCCESS ) {
+		//	throw std::runtime_error( "Failed to create framebuffer!" );
+		//}
 	}
 };

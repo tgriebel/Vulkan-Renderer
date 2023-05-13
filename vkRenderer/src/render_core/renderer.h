@@ -63,6 +63,8 @@ extern imguiControls_t gImguiControls;
 
 typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
 
+using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
+
 extern AssetLibPipelines			pipelineLib;
 extern Scene						scene;
 extern Window						gWindow;
@@ -187,9 +189,9 @@ private:
 	SwapChain						swapChain;
 	graphicsQueue_t					graphicsQueue;
 	computeQueue_t					computeQueue;
-	DrawPass					shadowPassState;
-	DrawPass					mainPassState;
-	DrawPass					postPassState;
+	DrawPass						shadowPassState;
+	DrawPass						mainPassState;
+	DrawPass						postPassState;
 	ComputeState					particleState;
 	VkDescriptorPool				descriptorPool;
 	renderConfig_t					config;
@@ -223,8 +225,7 @@ private:
 	VkSampler						vk_bilinearSampler;
 	VkSampler						vk_depthShadowSampler;
 
-	VkFormat						vk_mainColorFmt;
-	VkFormat						vk_depthFmt;
+	renderPassMap_t					vk_renderPassCache;
 
 	ShaderBindSet					defaultBindSet;
 	ShaderBindSet					particleShaderBinds;
@@ -314,6 +315,7 @@ private:
 	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
 	void						CreateBuffers();
+	VkRenderPass				CreateRenderPass( const vkRenderPassBits_t& stateBits );
 	void						CreateRenderPasses();
 	void						CreateFramebuffers();
 	void						CreateCommandPools();

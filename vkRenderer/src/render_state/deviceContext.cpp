@@ -104,23 +104,18 @@ QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surf
 	return indices;
 }
 
-VkFormat FindSupportedFormat( const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features )
+bool vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features )
 {
-	for ( VkFormat format : candidates )
-	{
-		VkFormatProperties props;
-		vkGetPhysicalDeviceFormatProperties( context.physicalDevice, format, &props );
+	VkFormatProperties props;
+	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, format, &props );
 
-		if ( tiling == VK_IMAGE_TILING_LINEAR && ( props.linearTilingFeatures & features ) == features )
-		{
-			return format;
-		}
-		else if ( tiling == VK_IMAGE_TILING_OPTIMAL && ( props.optimalTilingFeatures & features ) == features )
-		{
-			return format;
-		}
+	if ( tiling == VK_IMAGE_TILING_LINEAR && ( props.linearTilingFeatures & features ) == features ) {
+		return true;
 	}
-	throw std::runtime_error( "Failed to find supported format!" );
+	else if ( tiling == VK_IMAGE_TILING_OPTIMAL && ( props.optimalTilingFeatures & features ) == features ) {
+		return true;
+	}
+	return false;
 }
 
 uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )

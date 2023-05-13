@@ -1487,9 +1487,10 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	passInfo.renderArea.offset = { passState->x, passState->y };
 	passInfo.renderArea.extent = { passState->width, passState->height };
 
-	std::array<VkClearValue, 2> clearValues{ };
+	std::array<VkClearValue, 3> clearValues{ };
 	clearValues[ 0 ].color = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
 	clearValues[ 1 ].depthStencil = { passState->clearDepth, passState->clearStencil };
+	clearValues[ 2 ].depthStencil = { passState->clearDepth, passState->clearStencil };
 
 	passInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
 	passInfo.pClearValues = clearValues.data();
