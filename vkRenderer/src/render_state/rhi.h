@@ -4,6 +4,60 @@
 #include "../render_state/deviceContext.h"
 #include "../render_binding/shaderBinding.h"
 
+enum vk_RenderPassAttachmentMask_t : uint8_t
+{
+	RENDER_PASS_MASK_COLOR0 = ( 1 << 0 ),
+	RENDER_PASS_MASK_COLOR1 = ( 1 << 1 ),
+	RENDER_PASS_MASK_COLOR2 = ( 1 << 2 ),
+	RENDER_PASS_MASK_DEPTH = ( 1 << 3 ),
+	RENDER_PASS_MASK_STENCIL = ( 1 << 4 ),
+};
+//
+//inline void operator|=( vk_RenderPassAttachmentMask_t& lhs, const vk_RenderPassAttachmentMask_t& rhs )
+//{
+//	lhs = static_cast<vk_RenderPassAttachmentMask_t>( static_cast<uint8_t>( lhs ) | static_cast<uint8_t>( rhs ) );
+//}
+DEFINE_ENUM_OPERATORS( vk_RenderPassAttachmentMask_t, uint8_t )
+
+struct vk_RenderPassAttachmentBits_t
+{
+	textureSamples_t	samples : 8;
+	textureFmt_t		fmt : 8;
+	uint8_t				clear : 1;
+	uint8_t				store : 1;
+	uint8_t				readAfter : 1;
+	uint8_t				presentAfter : 1;
+};
+static_assert( sizeof( textureSamples_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( textureFmt_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( vk_RenderPassAttachmentBits_t ) == 3, "Bits overflowed" );
+
+static const uint32_t VK_PASS_BITS_SIZE = 16;
+struct vk_RenderPassBits_t
+{
+	union
+	{
+		struct vkRenderPassState_t
+		{
+			vk_RenderPassAttachmentBits_t	colorAttach0;
+			vk_RenderPassAttachmentBits_t	colorAttach1;
+			vk_RenderPassAttachmentBits_t	colorAttach2;
+			vk_RenderPassAttachmentBits_t	depthAttach;
+			vk_RenderPassAttachmentBits_t	stencilAttach;
+			vk_RenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
+		} semantic;
+		uint8_t bytes[ VK_PASS_BITS_SIZE ];
+	};
+
+	vk_RenderPassBits_t()
+	{
+		memset( bytes, 0, VK_PASS_BITS_SIZE );
+	}
+};
+static_assert( sizeof( vk_RenderPassBits_t ) == VK_PASS_BITS_SIZE, "Bits overflowed" );
+
+VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
+
 static inline VkFormat vk_GetTextureFormat( textureFmt_t fmt )
 {
 	switch ( fmt )

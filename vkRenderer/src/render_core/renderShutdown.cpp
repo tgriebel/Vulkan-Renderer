@@ -98,9 +98,9 @@ void Renderer::DestroyFrameResources()
 		delete frameState[ frameId ].stencilImage.gpuImage;
 
 		// Buffers
-		vkDestroyFramebuffer( context.device, shadowMap.buffer[ frameId ], nullptr );
-		vkDestroyFramebuffer( context.device, mainColor.buffer[ frameId ], nullptr );
-		vkDestroyFramebuffer( context.device, viewColor.buffer[ frameId ], nullptr );
+		shadowMap[ frameId ].Destroy();
+		mainColor[ frameId ].Destroy();
+		viewColor[ frameId ].Destroy();
 	}
 
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );

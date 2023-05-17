@@ -359,7 +359,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 				continue;
 			}
 		}
-		else if ( view.region == renderViewRegion_t::MAIN )
+		else if ( view.region == renderViewRegion_t::STANDARD_RASTER )
 		{
 			const drawPass_t mainPasses[] = {	DRAWPASS_DEPTH,
 												DRAWPASS_TERRAIN,
@@ -1449,9 +1449,9 @@ drawPass_t Renderer::ViewRegionPassBegin( const renderViewRegion_t region )
 {
 	switch( region )
 	{
-		case renderViewRegion_t::SHADOW:	return DRAWPASS_SHADOW_BEGIN;
-		case renderViewRegion_t::MAIN:		return DRAWPASS_MAIN_BEGIN;
-		case renderViewRegion_t::POST:		return DRAWPASS_POST_BEGIN;
+		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
+		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
+		case renderViewRegion_t::POST:				return DRAWPASS_POST_BEGIN;
 	}
 	return DRAWPASS_COUNT;
 }
@@ -1461,9 +1461,9 @@ drawPass_t Renderer::ViewRegionPassEnd( const renderViewRegion_t region )
 {
 	switch ( region )
 	{
-		case renderViewRegion_t::SHADOW:	return DRAWPASS_SHADOW_END;
-		case renderViewRegion_t::MAIN:		return DRAWPASS_MAIN_END;
-		case renderViewRegion_t::POST:		return DRAWPASS_POST_END;
+		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
+		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
+		case renderViewRegion_t::POST:				return DRAWPASS_POST_END;
 	}
 	return DRAWPASS_COUNT;
 }
@@ -1483,7 +1483,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = passState->pass;
-	passInfo.framebuffer = passState->fb->buffer[ bufferId ];
+	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkObject();
 	passInfo.renderArea.offset = { passState->x, passState->y };
 	passInfo.renderArea.extent = { passState->width, passState->height };
 

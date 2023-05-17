@@ -28,9 +28,9 @@
 
 enum class renderViewRegion_t : uint32_t
 {
-	SHADOW	= 0,
-	MAIN	= 1,
-	POST	= 2,
+	SHADOW			= 0,
+	STANDARD_RASTER = 1,
+	POST			= 2,
 	UNKNOWN,
 };
 
@@ -67,6 +67,7 @@ public:
 	viewport_t				viewport;
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
+	FrameBuffer*			fb;
 
 	uint32_t				committedModelCnt;
 	uint32_t				mergedModelCnt;

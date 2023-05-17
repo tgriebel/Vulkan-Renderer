@@ -234,6 +234,7 @@
     <ClCompile Include="src\render_core\renderInit.cpp" />
     <ClCompile Include="src\render_core\renderShutdown.cpp" />
     <ClCompile Include="src\render_state\deviceContext.cpp" />
+    <ClCompile Include="src\render_state\frameState.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp">

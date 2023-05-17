@@ -34,6 +34,7 @@
 #include "../render_binding/shaderBinding.h"
 #include "swapChain.h"
 #include "../render_state/FrameState.h"
+#include "../render_state/rhi.h"
 #include "../globals/renderConstants.h"
 #include "../globals/renderview.h"
 #include "../io/io.h"
@@ -90,7 +91,7 @@ public:
 	VkRenderPass		pass;
 	Array<Texture*, 100> codeImages[ MAX_FRAMES_STATES ];
 	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
-	FrameBuffer*		fb;
+	FrameBuffer*		fb[ MAX_FRAMES_STATES ];
 };
 
 
@@ -111,7 +112,7 @@ public:
 		InitVulkan();
 		InitImGui();
 
-		renderView.region = renderViewRegion_t::MAIN;
+		renderView.region = renderViewRegion_t::STANDARD_RASTER;
 		renderView.name = "Main View";
 
 		shadowView.region = renderViewRegion_t::SHADOW;
@@ -206,9 +207,9 @@ private:
 	materialBufferObject_t			materialBuffer[ MaxMaterials ];
 
 	FrameState						frameState[ MAX_FRAMES_STATES ];
-	FrameBuffer						shadowMap;
-	FrameBuffer						mainColor;
-	FrameBuffer						viewColor;
+	FrameBuffer						shadowMap[ MAX_FRAMES_STATES ];
+	FrameBuffer						mainColor[ MAX_FRAMES_STATES ];
+	FrameBuffer						viewColor[ MAX_FRAMES_STATES ];
 
 	uint32_t						imageFreeSlot = 0;
 	uint32_t						materialFreeSlot = 0;
@@ -315,7 +316,6 @@ private:
 	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
 	void						CreateBuffers();
-	VkRenderPass				CreateRenderPass( const vk_RenderPassBits_t& stateBits );
 	void						CreateRenderPasses();
 	void						CreateFramebuffers();
 	void						CreateCommandPools();

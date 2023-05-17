@@ -86,6 +86,9 @@
     <ClCompile Include="src\render_binding\binding.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_state\frameState.cpp">
+      <Filter>render state</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
