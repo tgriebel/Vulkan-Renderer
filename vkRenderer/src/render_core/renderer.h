@@ -65,8 +65,9 @@ extern imguiControls_t gImguiControls;
 typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
 
 using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
+using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 
-extern AssetLibPipelines			pipelineLib;
+extern pipelineMap_t				g_pipelineLib;
 extern Scene						scene;
 extern Window						gWindow;
 

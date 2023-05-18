@@ -44,4 +44,4 @@ QueueFamilyIndices	FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surf
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			CreateImageView( VkImage image, VkFormat format, VkImageViewType type, VkImageAspectFlags aspectFlags, uint32_t mipLevels );
-VkShaderModule		CreateShaderModule( const std::vector<char>& code );
+VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );

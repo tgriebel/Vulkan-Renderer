@@ -27,7 +27,7 @@
 #include "renderer.h"
 #include <scene/entity.h>
 
-extern AssetLib< pipelineObject_t > pipelineLib; // TODO: move to renderer
+extern std::unordered_map<uint64_t, pipelineObject_t> g_pipelineLib; // TODO: move to renderer
 
 void Renderer::Cleanup()
 {
@@ -166,13 +166,12 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// PSO
-	const uint32_t psoCount = pipelineLib.Count();
-	for ( uint32_t i = 0; i < psoCount; ++i )
+	for ( auto it = g_pipelineLib.begin(); it != g_pipelineLib.end(); ++it )
 	{
-		Asset<pipelineObject_t>* psoAsset = pipelineLib.Find( i );
-		vkDestroyPipeline( context.device, psoAsset->Get().pipeline, nullptr );
-		vkDestroyPipelineLayout( context.device, psoAsset->Get().pipelineLayout, nullptr );
+		vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
+		vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
 	}
+	g_pipelineLib.clear();
 
 	const uint32_t shaderCount = gAssets.gpuPrograms.Count();
 	for ( uint32_t i = 0; i < shaderCount; ++i )

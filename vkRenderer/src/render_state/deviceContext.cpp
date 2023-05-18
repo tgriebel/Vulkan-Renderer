@@ -156,7 +156,7 @@ VkImageView CreateImageView( VkImage image, VkFormat format, VkImageViewType typ
 	return imageView;
 }
 
-VkShaderModule CreateShaderModule( const std::vector<char>& code )
+VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 {
 	VkShaderModuleCreateInfo createInfo{ };
 	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

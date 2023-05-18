@@ -31,7 +31,7 @@
 #include <core/assetLib.h>
 #include <scene/scene.h>
 
-AssetLib< pipelineObject_t > pipelineLib;
+std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 
 static VkVertexInputBindingDescription GetVertexBindingDescription()
 {
@@ -134,10 +134,9 @@ void CreateDescriptorSets( GpuProgram& program )
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 {
-	Asset<pipelineObject_t>* object = pipelineLib.Find( hdl );
-	if( object != nullptr )
-	{
-		*pipelineObject = &object->Get();
+	auto it = g_pipelineLib.find( hdl.Get() );
+	if ( it != g_pipelineLib.end() ) {
+		*pipelineObject = &it->second;
 		return true;
 	}
 	return false;
@@ -146,15 +145,14 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 
 void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
-	hdl_t assetHdl = pipelineLib.RetrieveHdl( state.tag );
-	if ( assetHdl.IsValid() ) {
-		pipelineHdl = assetHdl;
+	pipelineHdl = state.hash;
+
+	auto it = g_pipelineLib.find( pipelineHdl.Get() );
+	if ( it != g_pipelineLib.end() ) {
 		return;
 	}
 
-	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
-
-	pipelineObject_t& pipelineObject = pipelineLib.Find( pipelineHdl )->Get();
+	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
@@ -377,13 +375,20 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	if ( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create graphics pipeline!" );
 	}
+
+	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }
 
 void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
-	pipelineHdl = pipelineLib.Add( state.tag, pipelineObject_t() );
+	pipelineHdl = state.hash;
 
-	pipelineObject_t& pipelineObject = pipelineLib.Find( pipelineHdl )->Get();
+	auto it = g_pipelineLib.find( state.hash );
+	if ( it != g_pipelineLib.end() ) {
+		return;
+	}
+
+	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};
@@ -414,4 +419,6 @@ void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t&
 	if ( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create compute pipeline!" );
 	}
+
+	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }

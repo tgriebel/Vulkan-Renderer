@@ -328,7 +328,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 	{
 		GpuProgram& prog = lib.Find( i )->Get();
 		for ( uint32_t i = 0; i < prog.shaderCount; ++i ) {
-			prog.vk_shaders[ i ] = CreateShaderModule( prog.shaders[ i ].blob );
+			prog.vk_shaders[ i ] = vk_CreateShaderModule( prog.shaders[ i ].blob );
 		}
 	}
 }
@@ -336,7 +336,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 
 void Renderer::CreatePipelineObjects()
 {
-	pipelineLib.Clear();
+	g_pipelineLib.clear();
 	for ( uint32_t i = 0; i < gAssets.materialLib.Count(); ++i )
 	{
 		const Material& m = gAssets.materialLib.Find( i )->Get();
@@ -354,7 +354,7 @@ void Renderer::CreatePipelineObjects()
 			state.stateBits = GetStateBitsForDrawPass( drawPass );
 			state.samplingRate = GetSampleCountForDrawPass( drawPass );
 			state.shaders = &prog->Get();
-			state.tag = gAssets.gpuPrograms.FindName( m.GetShader( passIx ) );
+			state.hash = prog->Handle().Get();
 
 			VkRenderPass pass;
 			VkDescriptorSetLayout layout;
@@ -389,7 +389,7 @@ void Renderer::CreatePipelineObjects()
 
 		pipelineState_t state;
 		state.shaders = &prog->Get();
-		state.tag = prog->GetName().c_str();
+		state.hash = prog->Handle().Get();
 
 		CreateComputePipeline( particleShaderBinds.GetVkObject(), state, prog->Get().pipeline );
 	}

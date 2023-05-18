@@ -25,6 +25,7 @@
 
 #include <resource_types/texture.h>
 #include "../globals/common.h"
+#include "../render_state/rhi.h"
 
 enum gfxStateBits_t : uint64_t
 {
@@ -49,11 +50,14 @@ enum gfxStateBits_t : uint64_t
 
 struct pipelineState_t
 {
-	const char*			tag;
+	uint64_t			hash;
 	gfxStateBits_t		stateBits;
 	textureSamples_t	samplingRate;
 	GpuProgram*			shaders;
 	viewport_t			viewport;
+#ifdef USE_VULKAN
+	vk_RenderPassBits_t	passBits;
+#endif
 };
 
 // TODO: replace, scales very poorly
