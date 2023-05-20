@@ -674,7 +674,7 @@ void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
 
-	VkResult result = vkAcquireNextImageKHR( context.device, swapChain.vk_swapChain, UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
+	VkResult result = vkAcquireNextImageKHR( context.device, swapChain.GetVkObject(), UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
 	if ( result == VK_ERROR_OUT_OF_DATE_KHR )
 	{
 		RecreateSwapChain();
@@ -759,7 +759,7 @@ void Renderer::SubmitFrame()
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = signalSemaphores;
 
-		VkSwapchainKHR swapChains[] = { swapChain.GetApiObject() };
+		VkSwapchainKHR swapChains[] = { swapChain.GetVkObject() };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
 		presentInfo.pImageIndices = &bufferId;

@@ -87,6 +87,30 @@ static inline VkFormat vk_GetTextureFormat( textureFmt_t fmt )
 }
 
 
+static inline textureFmt_t vk_GetTextureFormat( VkFormat fmt )
+{
+	switch ( fmt )
+	{
+		case VK_FORMAT_UNDEFINED:				return TEXTURE_FMT_UNKNOWN;
+		case VK_FORMAT_R8_SRGB:					return TEXTURE_FMT_R_8;
+		case VK_FORMAT_R16_SFLOAT:				return TEXTURE_FMT_R_16;
+		case VK_FORMAT_D16_UNORM:				return TEXTURE_FMT_D_16;
+		case VK_FORMAT_D24_UNORM_S8_UINT:		return TEXTURE_FMT_D24S8;
+		case VK_FORMAT_D32_SFLOAT:				return TEXTURE_FMT_D_32;
+		case VK_FORMAT_D32_SFLOAT_S8_UINT:		return TEXTURE_FMT_D_32_S8;
+		case VK_FORMAT_R8G8B8_SRGB:				return TEXTURE_FMT_RGB_8;
+		case VK_FORMAT_R8G8B8A8_SRGB:			return TEXTURE_FMT_RGBA_8;
+		case VK_FORMAT_A8B8G8R8_SRGB_PACK32:	return TEXTURE_FMT_ABGR_8;
+		case VK_FORMAT_B8G8R8_SRGB:				return TEXTURE_FMT_BGR_8;
+		case VK_FORMAT_B8G8R8A8_SRGB:			return TEXTURE_FMT_BGRA_8;
+		case VK_FORMAT_R16G16B16_SFLOAT:		return TEXTURE_FMT_RGB_16;
+		case VK_FORMAT_R16G16B16A16_SFLOAT:		return TEXTURE_FMT_RGBA_16;
+		default: assert( false );	break;
+	}
+	return TEXTURE_FMT_RGBA_8;
+}
+
+
 static inline VkImageViewType vk_GetTextureType( textureType_t type )
 {
 	switch ( type ) {

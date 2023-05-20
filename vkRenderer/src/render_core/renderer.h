@@ -210,7 +210,6 @@ private:
 	FrameState						frameState[ MAX_FRAMES_STATES ];
 	FrameBuffer						shadowMap[ MAX_FRAMES_STATES ];
 	FrameBuffer						mainColor[ MAX_FRAMES_STATES ];
-	FrameBuffer						viewColor[ MAX_FRAMES_STATES ];
 
 	uint32_t						imageFreeSlot = 0;
 	uint32_t						materialFreeSlot = 0;

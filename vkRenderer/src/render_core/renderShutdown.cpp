@@ -100,7 +100,6 @@ void Renderer::DestroyFrameResources()
 		// Buffers
 		shadowMap[ frameId ].Destroy();
 		mainColor[ frameId ].Destroy();
-		viewColor[ frameId ].Destroy();
 	}
 
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );

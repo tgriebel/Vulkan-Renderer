@@ -270,6 +270,14 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 void FrameBuffer::Destroy()
 {
-	vkDestroyFramebuffer( context.device, buffer, nullptr );
-	vkDestroyRenderPass( context.device, renderPass, nullptr );
+	assert( context.device != VK_NULL_HANDLE );
+	if ( context.device != VK_NULL_HANDLE )
+	{
+		if ( buffer != VK_NULL_HANDLE ) {
+			vkDestroyFramebuffer( context.device, buffer, nullptr );
+		}
+		if( renderPass != VK_NULL_HANDLE ) {
+			vkDestroyRenderPass( context.device, renderPass, nullptr );
+		}
+	}
 }

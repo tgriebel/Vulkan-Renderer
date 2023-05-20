@@ -535,9 +535,7 @@ void Renderer::CreateFramebuffers()
 	int height = 0;
 	gWindow.GetWindowFrameBufferSize( width, height );
 
-	/////////////////////////////////
-	//       Shadow Map Render     //
-	/////////////////////////////////
+	// Shadow images
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
 	{
 		textureInfo_t info{};
@@ -557,28 +555,8 @@ void Renderer::CreateFramebuffers()
 		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage.gpuImage->GetVkImage(), VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 	}
 
+	// Main images
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
-	{
-		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.color0 = &rc.whiteImage;
-		fbInfo.depth = &frameState[ i ].shadowMapImage;
-		fbInfo.stencil = nullptr;
-		fbInfo.width = frameState[ i ].shadowMapImage.info.width;
-		fbInfo.height = frameState[ i ].shadowMapImage.info.height;
-
-		shadowMap[ i ].Create( fbInfo );
-
-		shadowPassState.x = 0;
-		shadowPassState.y = 0;
-		shadowPassState.width = shadowMap[ i ].width;
-		shadowPassState.height = shadowMap[ i ].height;
-		shadowPassState.fb[i] = &shadowMap[i];
-	}
-
-	/////////////////////////////////
-	//     Main Scene 3D Render    //
-	/////////////////////////////////
-	for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
 	{
 		textureInfo_t info{};
 		info.width = width;
@@ -614,61 +592,54 @@ void Renderer::CreateFramebuffers()
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
 		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
 		frameState[ i ].stencilImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
+	}
 
-		std::array<VkImageView, 3> attachments = {
-			frameState[ i ].viewColorImage.gpuImage->GetVkImageView(),
-			frameState[ i ].depthImage.gpuImage->GetVkImageView(),
-			frameState[ i ].stencilImage.gpuImage->GetVkImageView(),
-		};
+	// Shadow map
+	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
+	{
+		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.color0 = &rc.whiteImage;
+		fbInfo.depth = &frameState[ i ].shadowMapImage;
+		fbInfo.width = frameState[ i ].shadowMapImage.info.width;
+		fbInfo.height = frameState[ i ].shadowMapImage.info.height;
 
-		VkFramebufferCreateInfo framebufferInfo{ };
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = mainPassState.pass;
-		framebufferInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
-		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = width;
-		framebufferInfo.height = height;
-		framebufferInfo.layers = 1;
+		shadowMap[ i ].Create( fbInfo );
+
+		shadowPassState.x = 0;
+		shadowPassState.y = 0;
+		shadowPassState.width = shadowMap[ i ].width;
+		shadowPassState.height = shadowMap[ i ].height;
+		shadowPassState.fb[i] = &shadowMap[i];
+	}
+
+	// Main Scene 3D Render
+	for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
+	{
+		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.color0 = &frameState[ i ].viewColorImage;
+		fbInfo.depth = &frameState[ i ].depthImage;
+		fbInfo.stencil = &frameState[ i ].stencilImage;
+		fbInfo.width = frameState[ i ].viewColorImage.info.width;
+		fbInfo.height = frameState[ i ].viewColorImage.info.height;
+
+		mainColor[ i ].Create( fbInfo );
 
 		mainPassState.x = 0;
 		mainPassState.y = 0;
 		mainPassState.width = width;
 		mainPassState.height = height;
 		mainPassState.fb[i] = &mainColor[i];
-
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &mainColor[i].buffer ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create scene framebuffer!" );
-		}
 	}
-	/////////////////////////////////
-	//       Swap Chain Images     //
-	/////////////////////////////////
-	swapChain.vk_framebuffers.resize( swapChain.GetBufferCount() );
-	for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
+
+	// Swap Chain Images
+	const uint32_t swapChainCount = swapChain.GetBufferCount();
+	for ( size_t i = 0; i < swapChainCount; i++ )
 	{
-		std::array<VkImageView, 1> attachments = {
-			swapChain.vk_swapChainImageViews[ i ]
-		};
-
-		VkFramebufferCreateInfo framebufferInfo{ };
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = postPassState.pass;
-		framebufferInfo.attachmentCount = static_cast<uint32_t>( attachments.size() );
-		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = swapChain.vk_swapChainExtent.width;
-		framebufferInfo.height = swapChain.vk_swapChainExtent.height;
-		framebufferInfo.layers = 1;
-
 		postPassState.x = 0;
 		postPassState.y = 0;
-		postPassState.width = swapChain.vk_swapChainExtent.width;
-		postPassState.height = swapChain.vk_swapChainExtent.height;
-		postPassState.fb[i] = &viewColor[i];
-
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &swapChain.vk_framebuffers[ i ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create swap chain framebuffer!" );
-		}
-		viewColor[i].buffer = swapChain.vk_framebuffers[ i ];
+		postPassState.width = swapChain.GetWidth();
+		postPassState.height = swapChain.GetHeight();
+		postPassState.fb[ i ] = &swapChain.framebuffers[ i ];
 	}
 }
 

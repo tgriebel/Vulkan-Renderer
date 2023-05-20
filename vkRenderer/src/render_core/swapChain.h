@@ -23,39 +23,86 @@
 
 #pragma once
 
+#include <resource_types/texture.h>
 #include "../globals/common.h"
 #include "../../window.h"
 #include "../render_state/deviceContext.h"
+#include "../render_state/rhi.h"
+#include "../render_core/gpuImage.h"
+#include "../render_state/FrameState.h"
 
 QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 
 class SwapChain
 {
+	static const uint32_t MaxSwapChainBuffers = MAX_FRAMES_STATES;
+
+private:
+	const Window*				m_window;
+	uint32_t					m_imageCount;
+	textureFmt_t				m_swapChainImageFormat;
+	Texture						m_swapChainImages[ MaxSwapChainBuffers ];
+#ifdef USE_VULKAN
+	VkSwapchainKHR				vk_swapChain;
+#endif
 public:
-	void CreateImageViews()
+	FrameBuffer					framebuffers[ MaxSwapChainBuffers ];
+
+public:
+	inline textureFmt_t GetBackBufferFormat() const
 	{
+		return m_swapChainImageFormat;
+	}
+
+#ifdef USE_VULKAN
+	inline VkSwapchainKHR GetVkObject() const
+	{
+		return vk_swapChain;
+	}
+#endif
+
+	inline uint32_t GetBufferCount() const
+	{
+		return m_imageCount;
+	}
+	
+
+	inline const FrameBuffer* GetFrameBuffer( const uint32_t i ) const
+	{
+		return &framebuffers[ i ];
+	}
+
+
+	inline uint32_t GetWidth() const
+	{
+		return m_swapChainImages[ 0 ].info.width;
+	}
+
+
+	inline uint32_t GetHeight() const
+	{
+		return m_swapChainImages[ 0 ].info.height;
 	}
 
 	void Create( const Window* _window, const int displayWidth, const int displayHeight )
 	{
-		window = _window;
-		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice, window->vk_surface );
+		m_window = _window;
+		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice, m_window->vk_surface );
 
 		VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat( swapChainSupport.formats );
 		VkPresentModeKHR presentMode = ChooseSwapPresentMode( swapChainSupport.presentModes );
 		VkExtent2D extent = ChooseSwapExtent( swapChainSupport.capabilities, displayWidth, displayHeight );
 
-		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-		if ( swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount )
-		{
-			imageCount = swapChainSupport.capabilities.maxImageCount;
+		m_imageCount = swapChainSupport.capabilities.minImageCount + 1;
+		if ( swapChainSupport.capabilities.maxImageCount > 0 && m_imageCount > swapChainSupport.capabilities.maxImageCount ) {
+			m_imageCount = swapChainSupport.capabilities.maxImageCount;
 		}
 
 		VkSwapchainCreateInfoKHR createInfo{ };
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		createInfo.surface = window->vk_surface;
+		createInfo.surface = m_window->vk_surface;
 		createInfo.oldSwapchain = vk_swapChain;
-		createInfo.minImageCount = imageCount;
+		createInfo.minImageCount = m_imageCount;
 		createInfo.imageFormat = surfaceFormat.format;
 		createInfo.imageColorSpace = surfaceFormat.colorSpace;
 		createInfo.imageExtent = extent;
@@ -85,39 +132,52 @@ public:
 			throw std::runtime_error( "Failed to create swap chain!" );
 		}
 
-		vkGetSwapchainImagesKHR( context.device, vk_swapChain, &imageCount, nullptr );
-		vk_swapChainImages.resize( imageCount );
-		vkGetSwapchainImagesKHR( context.device, vk_swapChain, &imageCount, vk_swapChainImages.data() );
+		VkImage vk_swapChainImages[ MaxSwapChainBuffers ];
+		vkGetSwapchainImagesKHR( context.device, vk_swapChain, &m_imageCount, nullptr );
+		assert( m_imageCount <= MaxSwapChainBuffers );
+		vkGetSwapchainImagesKHR( context.device, vk_swapChain, &m_imageCount, vk_swapChainImages );
 
-		vk_swapChainImageFormat = surfaceFormat.format;
-		vk_swapChainExtent = extent;
+		m_swapChainImageFormat = vk_GetTextureFormat( surfaceFormat.format );
 
-		vk_swapChainImageViews.resize( vk_swapChainImages.size() );
-
-		for ( size_t i = 0; i < vk_swapChainImages.size(); i++ )
+		for( uint32_t i = 0; i < m_imageCount; ++i )
 		{
-			vk_swapChainImageViews[ i ] = CreateImageView( vk_swapChainImages[ i ], vk_swapChainImageFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+			m_swapChainImages[ i ].info.fmt = m_swapChainImageFormat;
+			m_swapChainImages[ i ].info.width = extent.width;
+			m_swapChainImages[ i ].info.height = extent.height;
+			m_swapChainImages[ i ].info.layers = 1;
+			m_swapChainImages[ i ].info.mipLevels = 1;
+			m_swapChainImages[ i ].info.channels = 4;
+			m_swapChainImages[ i ].info.subsamples = TEXTURE_SMP_1;
+			m_swapChainImages[ i ].info.tiling = TEXTURE_TILING_LINEAR;
+			m_swapChainImages[ i ].info.type = TEXTURE_TYPE_2D;
+			
+			m_swapChainImages[ i ].gpuImage = new GpuImage();
+			m_swapChainImages[ i ].gpuImage->VkImage() = vk_swapChainImages[ i ];
+			m_swapChainImages[ i ].gpuImage->VkImageView() = CreateImageView( vk_swapChainImages[ i ], surfaceFormat.format, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+
+			frameBufferCreateInfo_t fbInfo = {};
+			fbInfo.color0 = &m_swapChainImages[ i ];
+			fbInfo.width = m_swapChainImages[ i ].info.width;
+			fbInfo.height = m_swapChainImages[ i ].info.height;
+
+			framebuffers[ i ].Create( fbInfo );
 		}
 	}
 
 	void Destroy()
 	{
-		for ( size_t i = 0; i < vk_framebuffers.size(); i++ ) {
-		//	Destroyed by render pass right now
-		//	vkDestroyFramebuffer( context.device, vk_framebuffers[ i ], nullptr );
+		for ( size_t i = 0; i < m_imageCount; i++ ) {
+			framebuffers[ i ].Destroy();
 		}
 
-		for ( size_t i = 0; i < vk_swapChainImageViews.size(); i++ ) {
-			vkDestroyImageView( context.device, vk_swapChainImageViews[ i ], nullptr );
+		for ( size_t i = 0; i < m_imageCount; i++ )
+		{
+			// Vulkan swapchain images are a bit special since they need to be destroyed with the swapchain
+			m_swapChainImages[ i ].gpuImage->VkImage() = nullptr;
+			delete m_swapChainImages[ i ].gpuImage;
 		}
 
 		vkDestroySwapchainKHR( context.device, vk_swapChain, nullptr );
-	}
-
-
-	void CreateSurface()
-	{
-	
 	}
 
 	void Recreate()
@@ -151,6 +211,7 @@ public:
 		return details;
 	}
 
+
 	VkPresentModeKHR ChooseSwapPresentMode( const std::vector<VkPresentModeKHR>& availablePresentModes )
 	{
 		for ( const auto& availablePresentMode : availablePresentModes )
@@ -163,32 +224,6 @@ public:
 
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
-
-	VkFormat GetBackBufferFormat() const {
-		return vk_swapChainImageFormat;
-	}
-
-	VkSwapchainKHR GetApiObject() const {
-		return vk_swapChain;
-	}
-
-	uint32_t GetBufferCount() const {
-		return static_cast<uint32_t>( vk_swapChainImageViews.size() );
-	}
-
-	static const uint32_t MaxSwapChainBuffers = 4;
-
-//private:
-	uint32_t					currentImage;
-	uint32_t					imageCount;
-
-	const Window*				window;
-	VkSwapchainKHR				vk_swapChain;
-	std::vector<VkImage>		vk_swapChainImages;
-	std::vector<VkImageView>	vk_swapChainImageViews;
-	std::vector<VkFramebuffer>	vk_framebuffers;
-	VkFormat					vk_swapChainImageFormat;
-	VkExtent2D					vk_swapChainExtent;
 
 private:
 	static VkSurfaceFormatKHR ChooseSwapSurfaceFormat( const std::vector<VkSurfaceFormatKHR>& availableFormats )
