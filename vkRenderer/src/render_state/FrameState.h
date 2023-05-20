@@ -83,7 +83,11 @@ public:
 
 #ifdef USE_VULKAN
 	VkFramebuffer	buffer;
+	VkFramebuffer	bufferReadAfter;
+	VkFramebuffer	bufferPresentAfter;
 	VkRenderPass	renderPass;
+	VkRenderPass	renderPassReadAfter;
+	VkRenderPass	renderPassPresentAfter;
 #endif
 
 	uint32_t		width;
@@ -117,14 +121,26 @@ public:
 	}
 
 #ifdef USE_VULKAN
-	VkFramebuffer& VkObject()
+	VkFramebuffer GetVkObject( const bool readAfter = false, const bool presentAfter = false ) const
 	{
+		if ( presentAfter ) {
+			return bufferPresentAfter;
+		}
+		if ( readAfter ) {
+			return bufferReadAfter;
+		}
 		return buffer;
 	}
 
-	VkFramebuffer GetVkObject() const
+	VkRenderPass GetRenderPass( const bool readAfter = false, const bool presentAfter = false )
 	{
-		return buffer;
+		if( presentAfter ) {
+			return renderPassPresentAfter;
+		}
+		if ( readAfter ) {
+			return renderPassReadAfter;
+		}
+		return renderPass;
 	}
 #endif
 

@@ -607,6 +607,7 @@ void Renderer::CreateFramebuffers()
 		shadowPassState.width = shadowMap[ i ].width;
 		shadowPassState.height = shadowMap[ i ].height;
 		shadowPassState.fb[i] = &shadowMap[i];
+		shadowPassState.readAfter = true;
 	}
 
 	// Main Scene 3D Render
@@ -626,6 +627,7 @@ void Renderer::CreateFramebuffers()
 		mainPassState.width = width;
 		mainPassState.height = height;
 		mainPassState.fb[i] = &mainColor[i];
+		mainPassState.readAfter = true;
 	}
 
 	// Swap Chain Images
@@ -637,6 +639,7 @@ void Renderer::CreateFramebuffers()
 		postPassState.width = swapChain.GetWidth();
 		postPassState.height = swapChain.GetHeight();
 		postPassState.fb[ i ] = &swapChain.framebuffers[ i ];
+		postPassState.presentAfter = true;
 	}
 }
 

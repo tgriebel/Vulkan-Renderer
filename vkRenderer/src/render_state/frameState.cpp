@@ -23,7 +23,8 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0 )
 	{
 		if ( passState.semantic.colorTrans0.presentAfter ) {
-			attachments[ count ].format = vk_GetTextureFormat( TEXTURE_FMT_BGRA_8 ); // FIXME
+			assert( 0 );
+			attachments[ count ].format = vk_GetTextureFormat( TEXTURE_FMT_BGRA_8 );
 		}
 		else {
 			attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
@@ -166,97 +167,118 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
-	// Can specify clear options, etc. Assigned to cached render pass that matches
-	VkImageView attachments[ 5 ] = {};
-	uint32_t attachmentCount = 0;
-	uint32_t colorCount = 0;
-	uint32_t dsCount = 0;
-
-	vk_RenderPassBits_t passBits = {};
-
-	if( createInfo.color0 != nullptr )
+	const uint32_t permutationCount = 3;
+	struct permutationState_t
 	{
-		passBits.semantic.colorAttach0.samples = createInfo.color0->info.subsamples;
-		passBits.semantic.colorAttach0.fmt = createInfo.color0->info.fmt;
-		passBits.semantic.colorTrans0.clear = 1;
-		passBits.semantic.colorTrans0.store = 1;
-		passBits.semantic.colorTrans0.readAfter = 1;
-		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
+		bool readAfter;
+		bool presentAfter;
+	};
+	const permutationState_t perms[ permutationCount ] = { { false, false }, { true, false }, { false, true } };
+	VkRenderPass* permPasses[ permutationCount ] = { &renderPass, &renderPassReadAfter, &renderPassPresentAfter };
+	VkFramebuffer* permBuffers[ permutationCount ] = { &buffer, &bufferReadAfter, &bufferPresentAfter };
 
-		attachments[ colorCount ] = createInfo.color0->gpuImage->GetVkImageView();
-		++colorCount;
-	}
-
-	if ( createInfo.color1 != nullptr )
+	for( uint32_t i = 0; i < permutationCount; ++i )
 	{
-		passBits.semantic.colorAttach1.samples = createInfo.color1->info.subsamples;
-		passBits.semantic.colorAttach1.fmt = createInfo.color1->info.fmt;
-		passBits.semantic.colorTrans1.clear = 1;
-		passBits.semantic.colorTrans1.store = 1;
-		passBits.semantic.colorTrans1.readAfter = 1;
-		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
+		const permutationState_t& state = perms[ i ];
 
-		attachments[ colorCount ] = createInfo.color1->gpuImage->GetVkImageView();
-		++colorCount;
-	}
+		// Can specify clear options, etc. Assigned to cached render pass that matches
+		attachmentCount = 0;
+		VkImageView attachments[ 5 ] = {};
 
-	if ( createInfo.color2 != nullptr )
-	{
-		passBits.semantic.colorAttach2.samples = createInfo.color2->info.subsamples;
-		passBits.semantic.colorAttach2.fmt = createInfo.color2->info.fmt;
-		passBits.semantic.colorTrans2.clear = 1;
-		passBits.semantic.colorTrans2.store = 1;
-		passBits.semantic.colorTrans2.readAfter = 1;
-		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
+		uint32_t colorCount = 0;
+		uint32_t dsCount = 0;
 
-		attachments[ colorCount ] = createInfo.color2->gpuImage->GetVkImageView();
-		++colorCount;
-	}
+		vk_RenderPassBits_t passBits = {};
 
-	if ( createInfo.depth != nullptr )
-	{
-		passBits.semantic.depthAttach.samples = createInfo.depth->info.subsamples;
-		passBits.semantic.depthAttach.fmt = createInfo.depth->info.fmt;
-		passBits.semantic.depthTrans.clear = 1;
-		passBits.semantic.depthTrans.store = 1;
-		passBits.semantic.depthTrans.readAfter = 1;
-		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
+		if( createInfo.color0 != nullptr )
+		{
+			passBits.semantic.colorAttach0.samples = createInfo.color0->info.subsamples;
+			passBits.semantic.colorAttach0.fmt = createInfo.color0->info.fmt;
+			passBits.semantic.colorTrans0.clear = 1;
+			passBits.semantic.colorTrans0.store = 1;
+			passBits.semantic.colorTrans0.readAfter = state.readAfter;
+			passBits.semantic.colorTrans0.presentAfter = state.presentAfter;
+			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
 
-		attachments[ colorCount ] = createInfo.depth->gpuImage->GetVkImageView();
-		++dsCount;
-	}
+			attachments[ colorCount ] = createInfo.color0->gpuImage->GetVkImageView();
+			++colorCount;
+		}
 
-	if ( createInfo.stencil != nullptr )
-	{
-		passBits.semantic.stencilAttach.samples = createInfo.stencil->info.subsamples;
-		passBits.semantic.stencilAttach.fmt = createInfo.stencil->info.fmt;
-		passBits.semantic.stencilTrans.clear = 1;
-		passBits.semantic.stencilTrans.store = 1;
-		passBits.semantic.stencilTrans.readAfter = 1;
-		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
+		if ( createInfo.color1 != nullptr )
+		{
+			passBits.semantic.colorAttach1.samples = createInfo.color1->info.subsamples;
+			passBits.semantic.colorAttach1.fmt = createInfo.color1->info.fmt;
+			passBits.semantic.colorTrans1.clear = 1;
+			passBits.semantic.colorTrans1.store = 1;
+			passBits.semantic.colorTrans1.readAfter = state.readAfter;
+			passBits.semantic.colorTrans1.presentAfter = state.presentAfter;
+			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
 
-		attachments[ colorCount + dsCount ] = createInfo.stencil->gpuImage->GetVkImageView();
-		++dsCount;
-	}
+			attachments[ colorCount ] = createInfo.color1->gpuImage->GetVkImageView();
+			++colorCount;
+		}
 
-	attachmentCount = colorCount + dsCount;
+		if ( createInfo.color2 != nullptr )
+		{
+			passBits.semantic.colorAttach2.samples = createInfo.color2->info.subsamples;
+			passBits.semantic.colorAttach2.fmt = createInfo.color2->info.fmt;
+			passBits.semantic.colorTrans2.clear = 1;
+			passBits.semantic.colorTrans2.store = 1;
+			passBits.semantic.colorTrans2.readAfter = state.readAfter;
+			passBits.semantic.colorTrans2.presentAfter = state.presentAfter;
+			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
 
-	renderPass = vk_CreateRenderPass( passBits );
-	if ( renderPass == VK_NULL_HANDLE ) {
-		throw std::runtime_error( "Failed to create framebuffer!" );
-	}
+			attachments[ colorCount ] = createInfo.color2->gpuImage->GetVkImageView();
+			++colorCount;
+		}
 
-	VkFramebufferCreateInfo framebufferInfo{ };
-	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	framebufferInfo.renderPass = renderPass;
-	framebufferInfo.attachmentCount = attachmentCount;
-	framebufferInfo.pAttachments = attachments;
-	framebufferInfo.width = createInfo.width;
-	framebufferInfo.height = createInfo.height;
-	framebufferInfo.layers = 1;
+		if ( createInfo.depth != nullptr )
+		{
+			passBits.semantic.depthAttach.samples = createInfo.depth->info.subsamples;
+			passBits.semantic.depthAttach.fmt = createInfo.depth->info.fmt;
+			passBits.semantic.depthTrans.clear = 1;
+			passBits.semantic.depthTrans.store = 1;
+			passBits.semantic.depthTrans.readAfter = state.readAfter;
+			passBits.semantic.depthTrans.presentAfter = state.presentAfter;
+			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
 
-	if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffer ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create framebuffer!" );
+			attachments[ colorCount ] = createInfo.depth->gpuImage->GetVkImageView();
+			++dsCount;
+		}
+
+		if ( createInfo.stencil != nullptr )
+		{
+			passBits.semantic.stencilAttach.samples = createInfo.stencil->info.subsamples;
+			passBits.semantic.stencilAttach.fmt = createInfo.stencil->info.fmt;
+			passBits.semantic.stencilTrans.clear = 1;
+			passBits.semantic.stencilTrans.store = 1;
+			passBits.semantic.stencilTrans.readAfter = state.readAfter;
+			passBits.semantic.stencilTrans.presentAfter = state.presentAfter;
+			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
+
+			attachments[ colorCount + dsCount ] = createInfo.stencil->gpuImage->GetVkImageView();
+			++dsCount;
+		}
+
+		attachmentCount = colorCount + dsCount;
+
+		*permPasses[ i ] = vk_CreateRenderPass( passBits );
+		if ( *permPasses[ i ] == VK_NULL_HANDLE ) {
+			throw std::runtime_error( "Failed to create framebuffer! Render pass invalid" );
+		}
+
+		VkFramebufferCreateInfo framebufferInfo{ };
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = *permPasses[ i ];
+		framebufferInfo.attachmentCount = attachmentCount;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = createInfo.width;
+		framebufferInfo.height = createInfo.height;
+		framebufferInfo.layers = 1;
+
+		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &*permBuffers[ i ] ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create framebuffer!" );
+		}
 	}
 
 	color0 = createInfo.color0;
@@ -277,8 +299,21 @@ void FrameBuffer::Destroy()
 		if ( buffer != VK_NULL_HANDLE ) {
 			vkDestroyFramebuffer( context.device, buffer, nullptr );
 		}
+		if ( bufferReadAfter != VK_NULL_HANDLE ) {
+			vkDestroyFramebuffer( context.device, bufferReadAfter, nullptr );
+		}
+		if ( bufferPresentAfter != VK_NULL_HANDLE ) {
+			vkDestroyFramebuffer( context.device, bufferPresentAfter, nullptr );
+		}
+
 		if( renderPass != VK_NULL_HANDLE ) {
 			vkDestroyRenderPass( context.device, renderPass, nullptr );
+		}
+		if ( renderPassReadAfter != VK_NULL_HANDLE ) {
+			vkDestroyRenderPass( context.device, renderPassReadAfter, nullptr );
+		}
+		if ( renderPassPresentAfter != VK_NULL_HANDLE ) {
+			vkDestroyRenderPass( context.device, renderPassPresentAfter, nullptr );
 		}
 	}
 }
