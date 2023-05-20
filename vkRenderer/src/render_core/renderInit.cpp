@@ -107,28 +107,28 @@ void Renderer::InitVulkan()
 		vk_RenderPassBits_t passBits;
 		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
 		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorAttach0.clear = 0;
-		passBits.semantic.colorAttach0.store = 1;
+		passBits.semantic.colorTrans0.clear = 0;
+		passBits.semantic.colorTrans0.store = 1;
 
 		passBits.semantic.colorAttach1.samples = config.mainColorSubSamples;
 		passBits.semantic.colorAttach1.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorAttach1.clear = 0;
-		passBits.semantic.colorAttach1.store = 1;
+		passBits.semantic.colorTrans1.clear = 0;
+		passBits.semantic.colorTrans1.store = 1;
 
 		passBits.semantic.colorAttach2.samples = config.mainColorSubSamples;
 		passBits.semantic.colorAttach2.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorAttach2.clear = 0;
-		passBits.semantic.colorAttach2.store = 1;
+		passBits.semantic.colorTrans2.clear = 0;
+		passBits.semantic.colorTrans2.store = 1;
 
 		passBits.semantic.depthAttach.samples = config.mainColorSubSamples;
 		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.depthAttach.clear = 0;
-		passBits.semantic.depthAttach.store = 1;
+		passBits.semantic.depthTrans.clear = 0;
+		passBits.semantic.depthTrans.store = 1;
 
 		passBits.semantic.stencilAttach.samples = config.mainColorSubSamples;
 		passBits.semantic.stencilAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.stencilAttach.clear = 0;
-		passBits.semantic.stencilAttach.store = 1;
+		passBits.semantic.stencilTrans.clear = 0;
+		passBits.semantic.stencilTrans.store = 1;
 
 		//CreateRenderPass( passBits );
 
@@ -329,6 +329,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 		GpuProgram& prog = lib.Find( i )->Get();
 		for ( uint32_t i = 0; i < prog.shaderCount; ++i ) {
 			prog.vk_shaders[ i ] = vk_CreateShaderModule( prog.shaders[ i ].blob );
+			prog.pipeline = INVALID_HDL;
 		}
 	}
 }
@@ -371,6 +372,8 @@ void Renderer::CreatePipelineObjects()
 				layout = defaultBindSet.GetVkObject();
 			}
 
+			// FIXME: the drawpass essentially splits the shader asset
+			//assert( prog->Get().pipeline == INVALID_HDL );
 			CreateGraphicsPipeline( layout, pass, state, prog->Get().pipeline );
 		}
 	}
@@ -457,21 +460,21 @@ void Renderer::CreateRenderPasses()
 		vk_RenderPassBits_t passBits = {};
 		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
 		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorAttach0.clear = 1;
-		passBits.semantic.colorAttach0.store = 1;
-		passBits.semantic.colorAttach0.readAfter = 1;
+		passBits.semantic.colorTrans0.clear = 1;
+		passBits.semantic.colorTrans0.store = 1;
+		passBits.semantic.colorTrans0.readAfter = 1;
 
 		passBits.semantic.depthAttach.samples = config.mainColorSubSamples;
 		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.depthAttach.clear = 1;
-		passBits.semantic.depthAttach.store = 1;
-		passBits.semantic.depthAttach.readAfter = 1;
+		passBits.semantic.depthTrans.clear = 1;
+		passBits.semantic.depthTrans.store = 1;
+		passBits.semantic.depthTrans.readAfter = 1;
 
 		passBits.semantic.stencilAttach.samples = config.mainColorSubSamples;
 		passBits.semantic.stencilAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.stencilAttach.clear = 1;
-		passBits.semantic.stencilAttach.store = 1;
-		passBits.semantic.stencilAttach.readAfter = 1;
+		passBits.semantic.stencilTrans.clear = 1;
+		passBits.semantic.stencilTrans.store = 1;
+		passBits.semantic.stencilTrans.readAfter = 1;
 
 		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_STENCIL | RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
 
@@ -489,9 +492,9 @@ void Renderer::CreateRenderPasses()
 
 		passBits.semantic.depthAttach.samples = TEXTURE_SMP_1;
 		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32;
-		passBits.semantic.depthAttach.clear = 1;
-		passBits.semantic.depthAttach.store = 1;
-		passBits.semantic.depthAttach.readAfter = 1;
+		passBits.semantic.depthTrans.clear = 1;
+		passBits.semantic.depthTrans.store = 1;
+		passBits.semantic.depthTrans.readAfter = 1;
 
 		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
 
@@ -505,9 +508,9 @@ void Renderer::CreateRenderPasses()
 		// Post-Process Pass
 		vk_RenderPassBits_t passBits = {};
 		passBits.semantic.colorAttach0.samples = TEXTURE_SMP_1;
-		passBits.semantic.colorAttach0.clear = 1;
-		passBits.semantic.colorAttach0.store = 1;
-		passBits.semantic.colorAttach0.presentAfter = 1;
+		passBits.semantic.colorTrans0.clear = 1;
+		passBits.semantic.colorTrans0.store = 1;
+		passBits.semantic.colorTrans0.presentAfter = 1;
 
 		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_COLOR0 );
 

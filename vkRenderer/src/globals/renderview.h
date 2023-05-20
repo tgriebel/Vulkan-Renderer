@@ -67,7 +67,7 @@ public:
 	viewport_t				viewport;
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
-	FrameBuffer*			fb;
+	FrameBuffer*			fb; // TODO: Put in render pass?
 
 	uint32_t				committedModelCnt;
 	uint32_t				mergedModelCnt;

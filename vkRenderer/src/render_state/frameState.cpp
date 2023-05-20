@@ -24,23 +24,23 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0 )
 	{
-		if ( passState.semantic.colorAttach0.presentAfter ) {
+		if ( passState.semantic.colorTrans0.presentAfter ) {
 			attachments[ count ].format = vk_GetTextureFormat( TEXTURE_FMT_BGRA_8 ); // FIXME
 		}
 		else {
 			attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
 		}
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach0.samples );
-		attachments[ count ].loadOp = passState.semantic.colorAttach0.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachments[ count ].storeOp = passState.semantic.colorAttach0.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans0.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].storeOp = passState.semantic.colorTrans0.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorAttach0.presentAfter ) {
+		if ( passState.semantic.colorTrans0.presentAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		}
-		else if ( passState.semantic.colorAttach0.readAfter ) {
+		else if ( passState.semantic.colorTrans0.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -57,13 +57,13 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	{
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach1.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach1.samples );
-		attachments[ count ].loadOp = passState.semantic.colorAttach1.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].storeOp = passState.semantic.colorAttach1.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans1.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.colorTrans1.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorAttach1.readAfter ) {
+		if ( passState.semantic.colorTrans1.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -80,13 +80,13 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	{
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach2.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach2.samples );
-		attachments[ count ].loadOp = passState.semantic.colorAttach2.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].storeOp = passState.semantic.colorAttach2.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans2.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.colorTrans2.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorAttach1.readAfter ) {
+		if ( passState.semantic.colorTrans1.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -105,13 +105,13 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	{
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.depthAttach.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.depthAttach.samples );
-		attachments[ count ].loadOp = passState.semantic.depthAttach.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].storeOp = passState.semantic.depthAttach.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[ count ].stencilLoadOp = passState.semantic.depthAttach.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].stencilStoreOp = passState.semantic.depthAttach.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.depthTrans.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.depthTrans.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = passState.semantic.depthTrans.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].stencilStoreOp = passState.semantic.depthTrans.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.depthAttach.readAfter ) {
+		if ( passState.semantic.depthTrans.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -130,11 +130,11 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.stencilAttach.samples );
 		attachments[ count ].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[ count ].stencilLoadOp = passState.semantic.stencilAttach.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].stencilStoreOp = passState.semantic.stencilAttach.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = passState.semantic.stencilTrans.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].stencilStoreOp = passState.semantic.stencilTrans.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.stencilAttach.readAfter ) {
+		if ( passState.semantic.stencilTrans.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -179,9 +179,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	{
 		passBits.semantic.colorAttach0.samples = createInfo.color0->info.subsamples;
 		passBits.semantic.colorAttach0.fmt = createInfo.color0->info.fmt;
-		passBits.semantic.colorAttach0.clear = 1;
-		passBits.semantic.colorAttach0.store = 1;
-		passBits.semantic.colorAttach0.readAfter = 1;
+		passBits.semantic.colorTrans0.clear = 1;
+		passBits.semantic.colorTrans0.store = 1;
+		passBits.semantic.colorTrans0.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
 
 		attachments[ attachmentCount ] = createInfo.color0->gpuImage->GetVkImageView();
@@ -192,9 +192,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	{
 		passBits.semantic.colorAttach1.samples = createInfo.color1->info.subsamples;
 		passBits.semantic.colorAttach1.fmt = createInfo.color1->info.fmt;
-		passBits.semantic.colorAttach1.clear = 1;
-		passBits.semantic.colorAttach1.store = 1;
-		passBits.semantic.colorAttach1.readAfter = 1;
+		passBits.semantic.colorTrans1.clear = 1;
+		passBits.semantic.colorTrans1.store = 1;
+		passBits.semantic.colorTrans1.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
 
 		attachments[ attachmentCount ] = createInfo.color1->gpuImage->GetVkImageView();
@@ -205,9 +205,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	{
 		passBits.semantic.colorAttach2.samples = createInfo.color2->info.subsamples;
 		passBits.semantic.colorAttach2.fmt = createInfo.color2->info.fmt;
-		passBits.semantic.colorAttach2.clear = 1;
-		passBits.semantic.colorAttach2.store = 1;
-		passBits.semantic.colorAttach2.readAfter = 1;
+		passBits.semantic.colorTrans2.clear = 1;
+		passBits.semantic.colorTrans2.store = 1;
+		passBits.semantic.colorTrans2.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
 
 		attachments[ attachmentCount ] = createInfo.color2->gpuImage->GetVkImageView();
@@ -218,9 +218,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	{
 		passBits.semantic.depthAttach.samples = createInfo.depth->info.subsamples;
 		passBits.semantic.depthAttach.fmt = createInfo.depth->info.fmt;
-		passBits.semantic.depthAttach.clear = 1;
-		passBits.semantic.depthAttach.store = 1;
-		passBits.semantic.depthAttach.readAfter = 1;
+		passBits.semantic.depthTrans.clear = 1;
+		passBits.semantic.depthTrans.store = 1;
+		passBits.semantic.depthTrans.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
 
 		attachments[ attachmentCount ] = createInfo.depth->gpuImage->GetVkImageView();
@@ -231,9 +231,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	{
 		passBits.semantic.stencilAttach.samples = createInfo.stencil->info.subsamples;
 		passBits.semantic.stencilAttach.fmt = createInfo.stencil->info.fmt;
-		passBits.semantic.stencilAttach.clear = 1;
-		passBits.semantic.stencilAttach.store = 1;
-		passBits.semantic.stencilAttach.readAfter = 1;
+		passBits.semantic.stencilTrans.clear = 1;
+		passBits.semantic.stencilTrans.store = 1;
+		passBits.semantic.stencilTrans.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
 
 		attachments[ attachmentCount ] = createInfo.stencil->gpuImage->GetVkImageView();
