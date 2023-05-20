@@ -8,8 +8,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	VkRenderPass pass = VK_NULL_HANDLE;
 
 	VkAttachmentReference colorAttachmentRef[ 3 ] = { };
-	VkAttachmentReference depthAttachmentRef{ };
-	VkAttachmentReference stencilAttachmentRef{ };
+	VkAttachmentReference dsAttachmentRef{ };
 
 	uint32_t count = 0;
 	uint32_t colorCount = 0;
@@ -17,8 +16,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	colorAttachmentRef[ 0 ].attachment = VK_ATTACHMENT_UNUSED;
 	colorAttachmentRef[ 1 ].attachment = VK_ATTACHMENT_UNUSED;
 	colorAttachmentRef[ 2 ].attachment = VK_ATTACHMENT_UNUSED;
-	depthAttachmentRef.attachment = VK_ATTACHMENT_UNUSED;
-	stencilAttachmentRef.attachment = VK_ATTACHMENT_UNUSED;
+	dsAttachmentRef.attachment = VK_ATTACHMENT_UNUSED;
 
 	VkAttachmentDescription attachments[ 5 ] = {};
 
@@ -118,14 +116,16 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
-		depthAttachmentRef.attachment = count;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		dsAttachmentRef.attachment = count;
+		dsAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		++count;
 	}
 
 	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_STENCIL ) != 0 )
 	{
+		assert( ( passState.semantic.attachmentMask& RENDER_PASS_MASK_DEPTH ) != 0 );
+
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.stencilAttach.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.stencilAttach.samples );
 		attachments[ count ].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -141,9 +141,6 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
-		stencilAttachmentRef.attachment = count;
-		stencilAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
 		++count;
 	}
 
@@ -151,7 +148,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 	subpass.colorAttachmentCount = colorCount;
 	subpass.pColorAttachments = colorAttachmentRef;
-	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+	subpass.pDepthStencilAttachment = &dsAttachmentRef;
 
 	VkRenderPassCreateInfo renderPassInfo{ };
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -172,6 +169,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	// Can specify clear options, etc. Assigned to cached render pass that matches
 	VkImageView attachments[ 5 ] = {};
 	uint32_t attachmentCount = 0;
+	uint32_t colorCount = 0;
+	uint32_t dsCount = 0;
 
 	vk_RenderPassBits_t passBits = {};
 
@@ -184,8 +183,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.colorTrans0.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
 
-		attachments[ attachmentCount ] = createInfo.color0->gpuImage->GetVkImageView();
-		++attachmentCount;
+		attachments[ colorCount ] = createInfo.color0->gpuImage->GetVkImageView();
+		++colorCount;
 	}
 
 	if ( createInfo.color1 != nullptr )
@@ -197,8 +196,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.colorTrans1.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
 
-		attachments[ attachmentCount ] = createInfo.color1->gpuImage->GetVkImageView();
-		++attachmentCount;
+		attachments[ colorCount ] = createInfo.color1->gpuImage->GetVkImageView();
+		++colorCount;
 	}
 
 	if ( createInfo.color2 != nullptr )
@@ -210,8 +209,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.colorTrans2.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
 
-		attachments[ attachmentCount ] = createInfo.color2->gpuImage->GetVkImageView();
-		++attachmentCount;
+		attachments[ colorCount ] = createInfo.color2->gpuImage->GetVkImageView();
+		++colorCount;
 	}
 
 	if ( createInfo.depth != nullptr )
@@ -223,8 +222,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.depthTrans.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
 
-		attachments[ attachmentCount ] = createInfo.depth->gpuImage->GetVkImageView();
-		++attachmentCount;
+		attachments[ colorCount ] = createInfo.depth->gpuImage->GetVkImageView();
+		++dsCount;
 	}
 
 	if ( createInfo.stencil != nullptr )
@@ -236,9 +235,11 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.stencilTrans.readAfter = 1;
 		passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
 
-		attachments[ attachmentCount ] = createInfo.stencil->gpuImage->GetVkImageView();
-		++attachmentCount;
+		attachments[ colorCount + dsCount ] = createInfo.stencil->gpuImage->GetVkImageView();
+		++dsCount;
 	}
+
+	attachmentCount = colorCount + dsCount;
 
 	renderPass = vk_CreateRenderPass( passBits );
 	if ( renderPass == VK_NULL_HANDLE ) {

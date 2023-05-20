@@ -88,9 +88,15 @@ public:
 
 	uint32_t		width;
 	uint32_t		height;
+	uint32_t		attachmentCount;
+	uint32_t		colorCount;
+	uint32_t		dsCount;
 
 	FrameBuffer()
 	{
+		attachmentCount = 0;
+		colorCount = 0;
+		dsCount = 0;
 		width = 0;
 		height = 0;
 	}

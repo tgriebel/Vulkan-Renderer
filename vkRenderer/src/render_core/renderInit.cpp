@@ -487,16 +487,13 @@ void Renderer::CreateRenderPasses()
 	{
 		// Shadow Pass
 		vk_RenderPassBits_t passBits = {};
-		passBits.semantic.colorAttach0.samples = TEXTURE_SMP_1;
-		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_BGRA_8;
-
 		passBits.semantic.depthAttach.samples = TEXTURE_SMP_1;
 		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32;
 		passBits.semantic.depthTrans.clear = 1;
 		passBits.semantic.depthTrans.store = 1;
 		passBits.semantic.depthTrans.readAfter = 1;
 
-		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
+		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH );
 
 		shadowPassState.pass = vk_CreateRenderPass( passBits );
 		shadowPassState.clearColor = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -598,7 +595,7 @@ void Renderer::CreateFramebuffers()
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 	{
 		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.color0 = &rc.whiteImage;
+		//fbInfo.color0 = &rc.whiteImage;
 		fbInfo.depth = &frameState[ i ].shadowMapImage;
 		fbInfo.width = frameState[ i ].shadowMapImage.info.width;
 		fbInfo.height = frameState[ i ].shadowMapImage.info.height;

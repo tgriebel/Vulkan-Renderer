@@ -1487,35 +1487,27 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	passInfo.renderArea.offset = { passState->x, passState->y };
 	passInfo.renderArea.extent = { passState->width, passState->height };
 
-	std::array<VkClearValue, 3> clearValues{ };
-	clearValues[ 0 ].color = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
-	clearValues[ 1 ].depthStencil = { passState->clearDepth, passState->clearStencil };
-	clearValues[ 2 ].depthStencil = { passState->clearDepth, passState->clearStencil };
+	const VkClearColorValue clearColor = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
+	const VkClearDepthStencilValue clearDepth = { passState->clearDepth, passState->clearStencil };
+
+	const uint32_t colorAttachmentsCount = passState->fb[ bufferId ]->colorCount;
+	const uint32_t attachmentsCount = passState->fb[ bufferId ]->attachmentCount;
+
+	std::array<VkClearValue, 5> clearValues{ };
+	assert( attachmentsCount <= 5 );
+
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+		clearValues[ i ].color = clearColor;
+	}
+
+	for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
+		clearValues[ i ].depthStencil = clearDepth;
+	}
 
 	passInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
 	passInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass( commandBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
-
-	// Clear
-	{
-		std::array<VkClearAttachment, 1> attachment{ };
-		attachment[0].aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		attachment[0].clearValue.color = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
-
-		//attachment[1].aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-		//attachment[1].clearValue.depthStencil = { passState->clearDepth, passState->clearStencil };
-
-		std::array<VkClearRect, 1> rects = {};
-		rects[0].layerCount = 1;
-		rects[0].rect.offset = { passState->x, passState->y };
-		rects[0].rect.extent = { passState->width, passState->height };
-		//rects[1].layerCount = 1;
-		//rects[1].rect.offset = { passState->x, passState->y };
-		//rects[1].rect.extent = { passState->width, passState->height };
-
-		vkCmdClearAttachments( commandBuffer, static_cast<uint32_t>( attachment.size() ), attachment.data(), static_cast<uint32_t>( rects.size() ), rects.data() );
-	}
 
 	VkViewport viewport{ };
 	viewport.x = view.viewport.x;
