@@ -216,7 +216,7 @@ void Renderer::InitImGui()
 	vkInfo.MinImageCount = 2;
 	vkInfo.ImageCount = 2;
 	vkInfo.CheckVkResultFn = nullptr;
-	ImGui_ImplVulkan_Init( &vkInfo, postPassState.pass );
+	ImGui_ImplVulkan_Init( &vkInfo, postPassState.fb[ 0 ]->GetVkRenderPass( false, true ) );
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
@@ -482,6 +482,8 @@ void Renderer::CreateRenderPasses()
 		mainPassState.clearColor = vec4f( 0.0f, 0.1f, 0.5f, 1.0f );
 		mainPassState.clearDepth = 0.0f;
 		mainPassState.clearStencil = 0x00;
+		mainPassState.presentAfter = false;
+		mainPassState.readAfter = true;
 	}
 
 	{
@@ -499,6 +501,8 @@ void Renderer::CreateRenderPasses()
 		shadowPassState.clearColor = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		shadowPassState.clearDepth = 1.0f;
 		shadowPassState.clearStencil = 0x00;
+		shadowPassState.presentAfter = false;
+		shadowPassState.readAfter = true;
 	}
 
 	{
@@ -515,6 +519,8 @@ void Renderer::CreateRenderPasses()
 		postPassState.clearColor = vec4f( 0.1f, 0.0f, 0.5f, 1.0f );
 		postPassState.clearDepth = 0.0f;
 		postPassState.clearStencil = 0x00;
+		postPassState.presentAfter = true;
+		postPassState.readAfter = false;
 	}
 
 	// Particle State
@@ -608,6 +614,7 @@ void Renderer::CreateFramebuffers()
 		shadowPassState.height = shadowMap[ i ].height;
 		shadowPassState.fb[i] = &shadowMap[i];
 		shadowPassState.readAfter = true;
+		shadowPassState.presentAfter = false;
 	}
 
 	// Main Scene 3D Render
@@ -628,6 +635,7 @@ void Renderer::CreateFramebuffers()
 		mainPassState.height = height;
 		mainPassState.fb[i] = &mainColor[i];
 		mainPassState.readAfter = true;
+		mainPassState.presentAfter = false;
 	}
 
 	// Swap Chain Images
@@ -639,6 +647,7 @@ void Renderer::CreateFramebuffers()
 		postPassState.width = g_swapChain.GetWidth();
 		postPassState.height = g_swapChain.GetHeight();
 		postPassState.fb[ i ] = &g_swapChain.framebuffers[ i ];
+		postPassState.readAfter = false;
 		postPassState.presentAfter = true;
 	}
 }

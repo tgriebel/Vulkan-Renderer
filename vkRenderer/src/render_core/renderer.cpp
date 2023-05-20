@@ -1484,8 +1484,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = passState->pass;
-	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkObject();
+	passInfo.renderPass = passState->fb[ bufferId ]->GetVkRenderPass( passState->readAfter, passState->presentAfter );
+	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkBuffer( passState->readAfter, passState->presentAfter );
 	passInfo.renderArea.offset = { passState->x, passState->y };
 	passInfo.renderArea.extent = { passState->width, passState->height };
 

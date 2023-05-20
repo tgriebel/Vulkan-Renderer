@@ -121,7 +121,7 @@ public:
 	}
 
 #ifdef USE_VULKAN
-	VkFramebuffer GetVkObject( const bool readAfter = false, const bool presentAfter = false ) const
+	VkFramebuffer GetVkBuffer( const bool readAfter = false, const bool presentAfter = false ) const
 	{
 		if ( presentAfter ) {
 			return bufferPresentAfter;
@@ -132,7 +132,7 @@ public:
 		return buffer;
 	}
 
-	VkRenderPass GetRenderPass( const bool readAfter = false, const bool presentAfter = false )
+	VkRenderPass GetVkRenderPass( const bool readAfter = false, const bool presentAfter = false )
 	{
 		if( presentAfter ) {
 			return renderPassPresentAfter;
