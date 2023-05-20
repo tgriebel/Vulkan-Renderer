@@ -169,15 +169,24 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
-	const uint32_t permutationCount = 3;
+	const uint32_t maxPermutationCount = 3;
 	struct permutationState_t
 	{
 		bool readAfter;
 		bool presentAfter;
 	};
-	const permutationState_t perms[ permutationCount ] = { { false, false }, { true, false }, { false, true } };
-	VkRenderPass* permPasses[ permutationCount ] = { &renderPass, &renderPassReadAfter, &renderPassPresentAfter };
-	VkFramebuffer* permBuffers[ permutationCount ] = { &buffer, &bufferReadAfter, &bufferPresentAfter };
+	const permutationState_t perms[ maxPermutationCount ] = { { false, false }, { true, false }, { false, true } };
+	VkRenderPass* permPasses[ maxPermutationCount ] = { &renderPass, &renderPassReadAfter, &renderPassPresentAfter };
+	VkFramebuffer* permBuffers[ maxPermutationCount ] = { &buffer, &bufferReadAfter, &bufferPresentAfter };
+
+	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
+	const uint32_t permutationCount = canPresent ? maxPermutationCount : ( maxPermutationCount - 1 );
+
+	if( canPresent == false )
+	{
+		bufferPresentAfter = VK_NULL_HANDLE;
+		renderPassPresentAfter = VK_NULL_HANDLE;
+	}
 
 	for( uint32_t i = 0; i < permutationCount; ++i )
 	{
@@ -289,7 +298,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	depth = createInfo.depth;
 	stencil = createInfo.stencil;
 	width = createInfo.width;
-	height = createInfo.height;;
+	height = createInfo.height;
 }
 
 
