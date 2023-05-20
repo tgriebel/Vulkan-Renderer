@@ -40,6 +40,8 @@ static RtScene rtScene;
 
 extern Scene* gScene;
 
+SwapChain g_swapChain;
+
 union descriptorInfo_t
 {
 	VkDescriptorBufferInfo bufferInfo;
@@ -632,7 +634,7 @@ viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
 
 void Renderer::UpdateDescriptorSets()
 {
-	const uint32_t frameBufferCount = static_cast<uint32_t>( swapChain.GetBufferCount() );
+	const uint32_t frameBufferCount = static_cast<uint32_t>( g_swapChain.GetBufferCount() );
 	for ( uint32_t i = 0; i < frameBufferCount; i++ )
 	{
 		UpdateBuffers( i );
@@ -674,7 +676,7 @@ void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
 
-	VkResult result = vkAcquireNextImageKHR( context.device, swapChain.GetVkObject(), UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
+	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
 	if ( result == VK_ERROR_OUT_OF_DATE_KHR )
 	{
 		RecreateSwapChain();
@@ -759,7 +761,7 @@ void Renderer::SubmitFrame()
 		presentInfo.waitSemaphoreCount = 1;
 		presentInfo.pWaitSemaphores = signalSemaphores;
 
-		VkSwapchainKHR swapChains[] = { swapChain.GetVkObject() };
+		VkSwapchainKHR swapChains[] = { g_swapChain.GetVkObject() };
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = swapChains;
 		presentInfo.pImageIndices = &bufferId;

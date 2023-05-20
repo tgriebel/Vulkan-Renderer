@@ -1,7 +1,10 @@
+#include <resource_types/texture.h>
 #include "FrameState.h"
 #include "deviceContext.h"
 #include "rhi.h"
-#include <resource_types/texture.h>
+#include "../render_core/swapChain.h"
+
+extern SwapChain g_swapChain;
 
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 {
@@ -23,8 +26,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0 )
 	{
 		if ( passState.semantic.colorTrans0.presentAfter ) {
-			assert( 0 );
-			attachments[ count ].format = vk_GetTextureFormat( TEXTURE_FMT_BGRA_8 );
+			attachments[ count ].format = vk_GetTextureFormat( g_swapChain.GetBackBufferFormat() );
 		}
 		else {
 			attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );

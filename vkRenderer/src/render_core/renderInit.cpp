@@ -99,7 +99,7 @@ void Renderer::InitVulkan()
 		PickPhysicalDevice();
 		CreateLogicalDevice();
 		SetupMarkers();
-		swapChain.Create( &gWindow, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
+		g_swapChain.Create( &gWindow, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
 	}
 
 	{
@@ -611,7 +611,7 @@ void Renderer::CreateFramebuffers()
 	}
 
 	// Main Scene 3D Render
-	for ( size_t i = 0; i < swapChain.GetBufferCount(); i++ )
+	for ( size_t i = 0; i < g_swapChain.GetBufferCount(); i++ )
 	{
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.color0 = &frameState[ i ].viewColorImage;
@@ -631,14 +631,14 @@ void Renderer::CreateFramebuffers()
 	}
 
 	// Swap Chain Images
-	const uint32_t swapChainCount = swapChain.GetBufferCount();
+	const uint32_t swapChainCount = g_swapChain.GetBufferCount();
 	for ( size_t i = 0; i < swapChainCount; i++ )
 	{
 		postPassState.x = 0;
 		postPassState.y = 0;
-		postPassState.width = swapChain.GetWidth();
-		postPassState.height = swapChain.GetHeight();
-		postPassState.fb[ i ] = &swapChain.framebuffers[ i ];
+		postPassState.width = g_swapChain.GetWidth();
+		postPassState.height = g_swapChain.GetHeight();
+		postPassState.fb[ i ] = &g_swapChain.framebuffers[ i ];
 		postPassState.presentAfter = true;
 	}
 }
@@ -732,7 +732,7 @@ void Renderer::AllocRegisteredBindParms()
 
 void Renderer::CreateBuffers()
 {
-	for ( size_t i = 0; i < swapChain.GetBufferCount(); ++i )
+	for ( size_t i = 0; i < g_swapChain.GetBufferCount(); ++i )
 	{
 		frameState[ i ].globalConstants.Create( "Globals", 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, sharedMemory );
 		frameState[ i ].viewParms.Create( "View", MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
@@ -741,7 +741,7 @@ void Renderer::CreateBuffers()
 		frameState[ i ].lightParms.Create( "Light", MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 		frameState[ i ].particleBuffer.Create( "Particle", MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 
-		for ( size_t v = 0; v < swapChain.GetBufferCount(); ++v ) {
+		for ( size_t v = 0; v < g_swapChain.GetBufferCount(); ++v ) {
 			frameState[ i ].surfParmPartitions[ v ] = frameState[ i ].surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 	}

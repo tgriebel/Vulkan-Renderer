@@ -32,7 +32,7 @@ extern std::unordered_map<uint64_t, pipelineObject_t> g_pipelineLib; // TODO: mo
 void Renderer::Cleanup()
 {
 	DestroyFrameResources();
-	swapChain.Destroy();
+	g_swapChain.Destroy();
 
 	ShutdownImGui();
 

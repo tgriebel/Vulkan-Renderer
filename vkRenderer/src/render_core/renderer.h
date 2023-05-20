@@ -70,6 +70,7 @@ using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 extern pipelineMap_t				g_pipelineLib;
 extern Scene						scene;
 extern Window						gWindow;
+extern SwapChain					g_swapChain;
 
 struct renderConfig_t
 {
@@ -191,7 +192,6 @@ private:
 	std::set<hdl_t>					uploadMaterials;
 
 	VkDebugUtilsMessengerEXT		debugMessenger;
-	SwapChain						swapChain;
 	graphicsQueue_t					graphicsQueue;
 	computeQueue_t					computeQueue;
 	DrawPass						shadowPassState;
@@ -253,12 +253,12 @@ private:
 		vkDeviceWaitIdle( context.device );
 
 		DestroyFrameResources();
-		swapChain.Destroy();
+		g_swapChain.Destroy();
 
 		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
 		frameBufferMemory.Reset();
 
-		swapChain.Create( &gWindow, width, height );
+		g_swapChain.Create( &gWindow, width, height );
 		CreateRenderPasses();
 		CreateFramebuffers();
 	}
