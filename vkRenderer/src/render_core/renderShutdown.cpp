@@ -80,10 +80,6 @@ void Renderer::Cleanup()
 
 void Renderer::DestroyFrameResources()
 {
-	vkDestroyRenderPass( context.device, mainPassState.pass, nullptr );
-	vkDestroyRenderPass( context.device, shadowPassState.pass, nullptr );
-	vkDestroyRenderPass( context.device, postPassState.pass, nullptr );
-
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
 		// Images

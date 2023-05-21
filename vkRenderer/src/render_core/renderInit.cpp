@@ -103,39 +103,6 @@ void Renderer::InitVulkan()
 	}
 
 	{
-		// Passes
-		vk_RenderPassBits_t passBits;
-		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
-		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorTrans0.clear = 0;
-		passBits.semantic.colorTrans0.store = 1;
-
-		passBits.semantic.colorAttach1.samples = config.mainColorSubSamples;
-		passBits.semantic.colorAttach1.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorTrans1.clear = 0;
-		passBits.semantic.colorTrans1.store = 1;
-
-		passBits.semantic.colorAttach2.samples = config.mainColorSubSamples;
-		passBits.semantic.colorAttach2.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorTrans2.clear = 0;
-		passBits.semantic.colorTrans2.store = 1;
-
-		passBits.semantic.depthAttach.samples = config.mainColorSubSamples;
-		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.depthTrans.clear = 0;
-		passBits.semantic.depthTrans.store = 1;
-
-		passBits.semantic.stencilAttach.samples = config.mainColorSubSamples;
-		passBits.semantic.stencilAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.stencilTrans.clear = 0;
-		passBits.semantic.stencilTrans.store = 1;
-
-		//CreateRenderPass( passBits );
-
-		CreateRenderPasses();
-	}
-
-	{
 		// Pool Creation
 		CreateDescriptorPool();
 		CreateCommandPools();
@@ -156,6 +123,20 @@ void Renderer::InitVulkan()
 			particleState.parms[i] = RegisterBindParm( &particleShaderBinds );
 		}
 
+		const uint32_t programCount = gAssets.gpuPrograms.Count();
+		for ( uint32_t i = 0; i < programCount; ++i )
+		{
+			GpuProgram& prog = gAssets.gpuPrograms.Find( i )->Get();
+			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
+			{
+				if( prog.shaders[ i ].type == shaderType_t::COMPUTE ) {
+					prog.bindset = &particleShaderBinds;
+				} else {
+					prog.bindset = &defaultBindSet;
+				}
+			}
+		}
+
 		AllocRegisteredBindParms();
 	}
 
@@ -172,6 +153,7 @@ void Renderer::InitVulkan()
 
 		CreateSyncObjects();
 		CreateFramebuffers();
+		CreatePipelineObjects();
 		CreateCommandBuffers();
 	}
 }
@@ -188,7 +170,6 @@ void Renderer::InitShaderResources()
 	}
 
 	GenerateGpuPrograms( gAssets.gpuPrograms );
-	CreatePipelineObjects();
 
 	CreateCodeTextures();
 	CreateBuffers();
@@ -360,17 +341,17 @@ void Renderer::CreatePipelineObjects()
 			VkRenderPass pass;
 			VkDescriptorSetLayout layout;
 			if ( passIx == DRAWPASS_SHADOW ) {
-				pass = shadowPassState.pass;
-				layout = defaultBindSet.GetVkObject();
+				pass = shadowPassState.fb[ 0 ]->GetVkRenderPass();
 			}
 			else if ( passIx == DRAWPASS_POST_2D ) {
-				pass = postPassState.pass;
-				layout = defaultBindSet.GetVkObject();
+				pass = postPassState.fb[ 0 ]->GetVkRenderPass();
 			}
 			else {
-				pass = mainPassState.pass;
-				layout = defaultBindSet.GetVkObject();
+				pass = mainPassState.fb[ 0 ]->GetVkRenderPass();
 			}
+			assert( pass != VK_NULL_HANDLE );
+
+			layout = prog->Get().bindset->GetVkObject();
 
 			// FIXME: the drawpass essentially splits the shader asset
 			//assert( prog->Get().pipeline == INVALID_HDL );
@@ -449,85 +430,6 @@ void Renderer::CreateTextureSamplers()
 		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_depthShadowSampler ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create depth sampler!" );
 		}
-	}
-}
-
-
-void Renderer::CreateRenderPasses()
-{
-	{
-		// Main View Pass
-		vk_RenderPassBits_t passBits = {};
-		passBits.semantic.colorAttach0.samples = config.mainColorSubSamples;
-		passBits.semantic.colorAttach0.fmt = TEXTURE_FMT_RGBA_16;
-		passBits.semantic.colorTrans0.clear = 1;
-		passBits.semantic.colorTrans0.store = 1;
-		passBits.semantic.colorTrans0.readAfter = 1;
-
-		passBits.semantic.depthAttach.samples = config.mainColorSubSamples;
-		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.depthTrans.clear = 1;
-		passBits.semantic.depthTrans.store = 1;
-		passBits.semantic.depthTrans.readAfter = 1;
-
-		passBits.semantic.stencilAttach.samples = config.mainColorSubSamples;
-		passBits.semantic.stencilAttach.fmt = TEXTURE_FMT_D_32_S8;
-		passBits.semantic.stencilTrans.clear = 1;
-		passBits.semantic.stencilTrans.store = 1;
-		passBits.semantic.stencilTrans.readAfter = 1;
-
-		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_STENCIL | RENDER_PASS_MASK_DEPTH | RENDER_PASS_MASK_COLOR0 );
-
-		mainPassState.pass = vk_CreateRenderPass( passBits );
-		mainPassState.clearColor = vec4f( 0.0f, 0.1f, 0.5f, 1.0f );
-		mainPassState.clearDepth = 0.0f;
-		mainPassState.clearStencil = 0x00;
-		mainPassState.presentAfter = false;
-		mainPassState.readAfter = true;
-	}
-
-	{
-		// Shadow Pass
-		vk_RenderPassBits_t passBits = {};
-		passBits.semantic.depthAttach.samples = TEXTURE_SMP_1;
-		passBits.semantic.depthAttach.fmt = TEXTURE_FMT_D_32;
-		passBits.semantic.depthTrans.clear = 1;
-		passBits.semantic.depthTrans.store = 1;
-		passBits.semantic.depthTrans.readAfter = 1;
-
-		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_DEPTH );
-
-		shadowPassState.pass = vk_CreateRenderPass( passBits );
-		shadowPassState.clearColor = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		shadowPassState.clearDepth = 1.0f;
-		shadowPassState.clearStencil = 0x00;
-		shadowPassState.presentAfter = false;
-		shadowPassState.readAfter = true;
-	}
-
-	{
-		// Post-Process Pass
-		vk_RenderPassBits_t passBits = {};
-		passBits.semantic.colorAttach0.samples = TEXTURE_SMP_1;
-		passBits.semantic.colorTrans0.clear = 1;
-		passBits.semantic.colorTrans0.store = 1;
-		passBits.semantic.colorTrans0.presentAfter = 1;
-
-		passBits.semantic.attachmentMask = static_cast<vk_RenderPassAttachmentMask_t>( RENDER_PASS_MASK_COLOR0 );
-
-		postPassState.pass = vk_CreateRenderPass( passBits );
-		postPassState.clearColor = vec4f( 0.1f, 0.0f, 0.5f, 1.0f );
-		postPassState.clearDepth = 0.0f;
-		postPassState.clearStencil = 0x00;
-		postPassState.presentAfter = true;
-		postPassState.readAfter = false;
-	}
-
-	// Particle State
-	{
-		particleState.x = 1;
-		particleState.y = 1;
-		particleState.z = 1;
 	}
 }
 

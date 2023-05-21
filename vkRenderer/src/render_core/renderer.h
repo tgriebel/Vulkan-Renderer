@@ -93,7 +93,6 @@ public:
 	uint32_t			width;
 	uint32_t			height;
 
-	VkRenderPass		pass;
 	Array<Texture*, 100> codeImages[ MAX_FRAMES_STATES ];
 	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
 	FrameBuffer*		fb[ MAX_FRAMES_STATES ];
@@ -259,7 +258,6 @@ private:
 		frameBufferMemory.Reset();
 
 		g_swapChain.Create( &gWindow, width, height );
-		CreateRenderPasses();
 		CreateFramebuffers();
 	}
 
@@ -319,7 +317,6 @@ private:
 	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
 	void						CreateBuffers();
-	void						CreateRenderPasses();
 	void						CreateFramebuffers();
 	void						CreateCommandPools();
 
