@@ -259,6 +259,7 @@ private:
 
 		g_swapChain.Create( &gWindow, width, height );
 		CreateFramebuffers();
+		UpdateDescriptorSets();
 	}
 
 	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorVkMemory& outAllocation )
