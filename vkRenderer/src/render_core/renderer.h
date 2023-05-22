@@ -218,9 +218,9 @@ private:
 	uint32_t						vbBufElements = 0;
 	uint32_t						ibBufElements = 0;
 
-	AllocatorVkMemory				localMemory;
-	AllocatorVkMemory				frameBufferMemory;
-	AllocatorVkMemory				sharedMemory;
+	AllocatorMemory					localMemory;
+	AllocatorMemory					frameBufferMemory;
+	AllocatorMemory					sharedMemory;
 
 	ShaderBindParms					bindParmsList[ DescriptorPoolMaxSets ];
 	uint32_t						bindParmCount = 0;
@@ -262,7 +262,7 @@ private:
 		UpdateDescriptorSets();
 	}
 
-	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorVkMemory& outAllocation )
+	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )
 	{
 		uint32_t typeIndex = FindMemoryType( ~0x00, typeBits );
 
@@ -307,7 +307,7 @@ private:
 	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	// API Creation Functions
-	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory );
+	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorMemory& memory );
 	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
 	void						AllocRegisteredBindParms();
 	void						CreateDescriptorPool();

@@ -27,8 +27,8 @@ struct alloc_t;
 template< class ResourceType >
 class Allocator;
 
-class AllocatorVkMemory;
-using AllocationVk = alloc_t<AllocatorVkMemory>;
+class AllocatorMemory;
+using Allocation = alloc_t<AllocatorMemory>;
 
 #pragma once
 #include "../globals/common.h"
@@ -281,7 +281,7 @@ private:
 	friend alloc_t;
 };
 
-class AllocatorVkMemory : public Allocator<VkDeviceMemory>
+class AllocatorMemory : public Allocator<VkDeviceMemory>
 {
 public:
 	uint32_t memoryTypeIndex;

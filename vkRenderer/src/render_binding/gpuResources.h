@@ -50,7 +50,7 @@ public:
 	uint64_t		GetElementSizeAligned() const;
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
-	void			Create( const char* name, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorVkMemory& bufferMemory );
+	void			Create( const char* name, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			Allocate( const uint64_t size );

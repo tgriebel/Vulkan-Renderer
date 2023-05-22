@@ -8,7 +8,7 @@ private:
 #ifdef USE_VULKAN
 	VkImage			vk_image;
 	VkImageView		vk_view;
-	AllocationVk	allocation;
+	Allocation		allocation;
 #endif
 
 public:

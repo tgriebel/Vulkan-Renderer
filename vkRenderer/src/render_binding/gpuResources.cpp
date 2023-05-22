@@ -80,7 +80,7 @@ VkBuffer& GpuBuffer::VkObject()
 }
 
 
-void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorVkMemory& bufferMemory )
+void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
 {
 	VkBufferUsageFlags usage = 0;
 	VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
