@@ -893,24 +893,10 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
 			assert( info.imageView != nullptr );
 
-			switch( image->info.type )
-			{
-				case TEXTURE_TYPE_DEPTH:
-				case TEXTURE_TYPE_STENCIL:
-				case TEXTURE_TYPE_DEPTH_STENCIL:
-					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-				break;
-
-				case TEXTURE_TYPE_2D:
-				case TEXTURE_TYPE_2D_ARRAY:
-				case TEXTURE_TYPE_3D:
-				case TEXTURE_TYPE_3D_ARRAY:
-				case TEXTURE_TYPE_CUBE:
-				case TEXTURE_TYPE_CUBE_ARRAY:
-					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-				break;
-
-				default: assert(0); break;
+			if( ( image->info.aspect & ( TEXTURE_ASPECT_DEPTH_FLAG | TEXTURE_ASPECT_STENCIL_FLAG ) ) != 0 ) {
+				info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			} else {
+				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 
 			writeInfo.pImageInfo = &info;
@@ -935,26 +921,15 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 				info.imageView = images[ imageIx ]->gpuImage->GetVkImageView();
 				assert( info.imageView != nullptr );
 				
-				switch ( image->info.type )
+				if ( ( image->info.aspect & ( TEXTURE_ASPECT_DEPTH_FLAG | TEXTURE_ASPECT_STENCIL_FLAG ) ) != 0 )
 				{
-					case TEXTURE_TYPE_DEPTH:
-					case TEXTURE_TYPE_STENCIL:
-					case TEXTURE_TYPE_DEPTH_STENCIL:
-						info.sampler = vk_depthShadowSampler;
-						info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-					break;
-
-					case TEXTURE_TYPE_2D:
-					case TEXTURE_TYPE_2D_ARRAY:
-					case TEXTURE_TYPE_3D:
-					case TEXTURE_TYPE_3D_ARRAY:
-					case TEXTURE_TYPE_CUBE:
-					case TEXTURE_TYPE_CUBE_ARRAY:
-						info.sampler = vk_bilinearSampler;
-						info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-					break;
-
-					default: assert( 0 ); break;
+					info.sampler = vk_depthShadowSampler;
+					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+				}
+				else
+				{
+					info.sampler = vk_bilinearSampler;
+					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				}
 			}
 			writeInfo.pImageInfo = infos.data();

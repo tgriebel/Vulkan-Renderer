@@ -143,9 +143,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Texture& texture = textureAsset->Get();
-
-		VkImageViewType type = vk_GetTextureType( texture.info.type );
-		texture.gpuImage->VkImageView() = CreateImageView( texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, type, VK_IMAGE_ASPECT_COLOR_BIT, texture.info.mipLevels );
+		texture.gpuImage->VkImageView() = CreateImageView( texture );
 	}
 
 	// 4. Add to resource type lists

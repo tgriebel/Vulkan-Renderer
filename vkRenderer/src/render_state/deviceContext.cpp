@@ -134,18 +134,23 @@ uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 	throw std::runtime_error( "Failed to find suitable memory type!" );
 }
 
-VkImageView CreateImageView( VkImage image, VkFormat format, VkImageViewType type, VkImageAspectFlags aspectFlags, uint32_t mipLevels )
+VkImageView CreateImageView( const Texture& texture )
 {
+	VkImageAspectFlags aspectFlags = 0;
+	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
+	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
+	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+
 	VkImageViewCreateInfo viewInfo{ };
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = image;
-	viewInfo.viewType = type;
-	viewInfo.format = format;
+	viewInfo.image = texture.gpuImage->GetVkImage();
+	viewInfo.viewType = vk_GetTextureType( texture.info.type );
+	viewInfo.format = vk_GetTextureFormat( texture.info.fmt );
 	viewInfo.subresourceRange.aspectMask = aspectFlags;
 	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = mipLevels;
+	viewInfo.subresourceRange.levelCount = texture.info.mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = ( type == VK_IMAGE_VIEW_TYPE_CUBE ) ? 6 : 1;
+	viewInfo.subresourceRange.layerCount = ( texture.info.type == TEXTURE_TYPE_CUBE ) ? 6 : 1;
 
 	VkImageView imageView;
 	if ( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS )

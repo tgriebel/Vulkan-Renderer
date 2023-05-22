@@ -450,14 +450,15 @@ void Renderer::CreateFramebuffers()
 		info.layers = 1;
 		info.subsamples = TEXTURE_SMP_1;
 		info.fmt = TEXTURE_FMT_D_32;
-		info.type = TEXTURE_TYPE_DEPTH;
+		info.type = TEXTURE_TYPE_2D;
+		info.aspect = TEXTURE_ASPECT_DEPTH_FLAG;
 		info.tiling = TEXTURE_TILING_MORTON;
 
 		frameState[ i ].shadowMapImage.info = info;
 		frameState[ i ].shadowMapImage.gpuImage = new GpuImage();
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
-		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage.gpuImage->GetVkImage(), VK_FORMAT_D32_SFLOAT, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
+		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage );
 	}
 
 	// Main images
@@ -471,6 +472,7 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = config.mainColorSubSamples;
 		info.fmt = TEXTURE_FMT_RGBA_16;
 		info.type = TEXTURE_TYPE_2D;
+		info.aspect = TEXTURE_ASPECT_COLOR_FLAG;
 		info.tiling = TEXTURE_TILING_MORTON;
 
 		VkFormat colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
@@ -480,11 +482,12 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].viewColorImage.gpuImage = new GpuImage();
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
-		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage.gpuImage->GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage );
 
 		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 		info.fmt = TEXTURE_FMT_D_32_S8;
-		info.type = TEXTURE_TYPE_DEPTH_STENCIL;
+		info.type = TEXTURE_TYPE_2D;
+		info.aspect = textureAspectFlags_t( TEXTURE_ASPECT_DEPTH_FLAG | TEXTURE_ASPECT_STENCIL_FLAG );
 
 		frameState[ i ].depthImage.info = info;
 		frameState[ i ].depthImage.bytes = nullptr;
@@ -495,8 +498,12 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].stencilImage.gpuImage = new GpuImage();
 
 		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
-		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_DEPTH_BIT, 1 );
-		frameState[ i ].stencilImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), depthFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_STENCIL_BIT, 1 );
+		
+		frameState[ i ].depthImage.info.aspect = TEXTURE_ASPECT_DEPTH_FLAG;
+		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
+
+		frameState[ i ].depthImage.info.aspect = TEXTURE_ASPECT_STENCIL_FLAG;
+		frameState[ i ].stencilImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
 	}
 
 	// Shadow map
@@ -664,17 +671,6 @@ void Renderer::CreateBuffers()
 }
 
 
-void Renderer::CreateFrameBufferImage( const textureInfo_t& info, Texture& texture )
-{
-	texture.bytes = nullptr;
-	texture.info = info;
-	texture.gpuImage = new GpuImage();
-
-//	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *texture.gpuImage, frameBufferMemory );
-//	texture.gpuImage->VkImageView() = CreateImageView( texture.gpuImage->GetVkImage(), colorFormat, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
-}
-
-
 void Renderer::CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorVkMemory& memory )
 {
 	VkImageCreateInfo imageInfo{ };
@@ -693,7 +689,7 @@ void Renderer::CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usag
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
-	if ( ( info.type == TEXTURE_TYPE_DEPTH_STENCIL ) || ( info.type == TEXTURE_TYPE_STENCIL ) )
+	if ( ( info.aspect & ( TEXTURE_ASPECT_DEPTH_FLAG | TEXTURE_ASPECT_STENCIL_FLAG ) ) != 0 )
 	{
 		stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 		stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -734,6 +730,7 @@ void Renderer::CreateCodeTextures() {
 	info.layers = 1;
 	info.subsamples = TEXTURE_SMP_1;
 	info.fmt = TEXTURE_FMT_BGRA_8;
+	info.aspect = TEXTURE_ASPECT_COLOR_FLAG;
 	info.type = TEXTURE_TYPE_2D;
 	info.tiling = TEXTURE_TILING_MORTON;
 
@@ -747,10 +744,10 @@ void Renderer::CreateCodeTextures() {
 
 	// Default Images
 	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, *rc.whiteImage.gpuImage, localMemory );
-	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage.gpuImage->GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage );
 
 	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, *rc.blackImage.gpuImage, localMemory );
-	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage.gpuImage->GetVkImage(), VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT, 1 );
+	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage );
 }
 
 
