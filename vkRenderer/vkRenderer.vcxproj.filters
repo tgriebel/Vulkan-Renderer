@@ -89,6 +89,9 @@
     <ClCompile Include="src\render_state\frameState.cpp">
       <Filter>render state</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\descriptorWrites.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -190,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="src\render_binding\shaderBinding.h">
       <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\raytracerInterface.h">
+      <Filter>render core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
