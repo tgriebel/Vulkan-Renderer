@@ -78,7 +78,7 @@ static KeyPair GlfwKeyMap[] =
 void FramebufferResizeCallback( GLFWwindow* window, int width, int height )
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
-	app->needsImageResize = true;
+	app->RequestImageResize();
 }
 
 

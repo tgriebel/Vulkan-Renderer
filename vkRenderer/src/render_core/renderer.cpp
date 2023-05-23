@@ -270,6 +270,13 @@ void Renderer::ShutdownGPU()
 }
 
 
+void Renderer::Resize()
+{
+	RecreateSwapChain();
+	UpdateDescriptorSets();
+}
+
+
 void Renderer::UploadAssets()
 {
 	const uint32_t materialCount = g_assets.materialLib.Count();
@@ -483,13 +490,7 @@ void Renderer::SubmitFrame()
 	WaitForEndFrame();
 
 	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
-	if ( result == VK_ERROR_OUT_OF_DATE_KHR )
-	{
-		RecreateSwapChain();
-		return;
-	}
-	else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
-	{
+	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
 
@@ -575,10 +576,9 @@ void Renderer::SubmitFrame()
 
 		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || g_window.IsResizeRequested() )
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
 		{
-			RecreateSwapChain();
-			g_window.AcceptImageResize();
+			g_window.RequestImageResize();
 			return;
 		}
 		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )

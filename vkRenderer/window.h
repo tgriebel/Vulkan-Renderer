@@ -31,7 +31,8 @@ public:
 	void					GetWindowFrameBufferSize( int & width, int & height, const bool wait = false );
 	float					GetWindowFrameBufferAspect( const bool wait = false );
 	bool					IsResizeRequested() const { return needsImageResize; }
-	void					AcceptImageResize() { needsImageResize = false; }
+	void					CompleteImageResize() { needsImageResize = false; }
+	void					RequestImageResize() { needsImageResize = true; }
 
 private:
 	bool					needsImageResize;

@@ -140,6 +140,7 @@ public:
 
 	void		InitGPU();
 	void		ShutdownGPU();
+	void		Resize();
 
 	static void	GenerateGpuPrograms( AssetLibGpuProgram& lib );
 
@@ -259,7 +260,6 @@ private:
 
 		g_swapChain.Create( &g_window, width, height );
 		CreateFramebuffers();
-		UpdateDescriptorSets();
 	}
 
 	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )

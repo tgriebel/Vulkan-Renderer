@@ -127,6 +127,12 @@ int main( int argc, char* argv[] )
 
 			g_window.PumpMessages();
 
+			if( g_window.IsResizeRequested() )
+			{
+				g_renderer.Resize();
+				g_window.CompleteImageResize();
+			}
+
 			if ( g_imguiControls.openModelImportFileDialog )
 			{
 				std::vector<const char*> filters;
@@ -178,6 +184,7 @@ int main( int argc, char* argv[] )
 		
 				g_renderer.InitGPU();
 				g_renderer.UploadAssets();
+				g_renderer.Resize();
 
 				g_imguiControls.openSceneFileDialog = false;
 			}
