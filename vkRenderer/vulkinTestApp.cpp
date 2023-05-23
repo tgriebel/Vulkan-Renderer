@@ -184,7 +184,7 @@ int main( int argc, char* argv[] )
 		
 				g_renderer.InitGPU();
 				g_renderer.UploadAssets();
-				g_renderer.Resize();
+				g_renderer.CreatePipelineObjects();
 
 				g_imguiControls.openSceneFileDialog = false;
 			}

@@ -310,6 +310,7 @@ private:
 	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorMemory& memory );
 	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
 	void						AllocRegisteredBindParms();
+	void						FreeRegisteredBindParms();
 	void						CreateDescriptorPool();
 	void						CreateInstance();
 	void						CreateLogicalDevice();

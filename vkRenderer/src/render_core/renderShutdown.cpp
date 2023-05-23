@@ -36,9 +36,6 @@ void Renderer::Cleanup()
 
 	ShutdownImGui();
 
-	// Memory
-	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
-
 	// Buffers
 	vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
 	vkFreeCommandBuffers( context.device, computeQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), computeQueue.commandBuffers );
@@ -47,10 +44,6 @@ void Renderer::Cleanup()
 
 	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
 	vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
-
-	// Shader binding resources
-	defaultBindSet.Destroy();
-	particleShaderBinds.Destroy();
 
 	// Sync
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
@@ -61,6 +54,9 @@ void Renderer::Cleanup()
 
 		vkDestroySemaphore( context.device, computeQueue.semaphores[ i ], nullptr );
 	}
+
+	// Memory
+	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
 	vkDestroyCommandPool( context.device, graphicsQueue.commandPool, nullptr );
 	vkDestroyCommandPool( context.device, computeQueue.commandPool, nullptr );
@@ -175,4 +171,11 @@ void Renderer::ShutdownShaderResources()
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 0 ], nullptr );
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 1 ], nullptr );
 	}
+
+	// Shader binding resources
+	defaultBindSet.Destroy();
+	particleShaderBinds.Destroy();
+
+	FreeRegisteredBindParms();
+	bindParmCount = 0;
 }

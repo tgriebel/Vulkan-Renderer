@@ -108,38 +108,6 @@ void Renderer::InitVulkan()
 		CreateCommandPools();
 	}
 
-	{
-		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
-		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
-
-		defaultBindSet.Create();
-		particleShaderBinds.Create();
-
-		for( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
-		{
-			mainPassState.parms[i] = RegisterBindParm( &defaultBindSet );
-			shadowPassState.parms[i] = RegisterBindParm( &defaultBindSet );
-			postPassState.parms[i] = RegisterBindParm( &defaultBindSet );
-			particleState.parms[i] = RegisterBindParm( &particleShaderBinds );
-		}
-
-		const uint32_t programCount = g_assets.gpuPrograms.Count();
-		for ( uint32_t i = 0; i < programCount; ++i )
-		{
-			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
-			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
-			{
-				if( prog.shaders[ i ].type == shaderType_t::COMPUTE ) {
-					prog.bindset = &particleShaderBinds;
-				} else {
-					prog.bindset = &defaultBindSet;
-				}
-			}
-		}
-
-		AllocRegisteredBindParms();
-	}
-
 	InitShaderResources();
 
 	CreateTextureSamplers();
@@ -167,6 +135,39 @@ void Renderer::InitShaderResources()
 		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
 		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
+	}
+
+	{
+		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
+		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
+
+		defaultBindSet.Create();
+		particleShaderBinds.Create();
+
+		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
+		{
+			mainPassState.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			shadowPassState.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			postPassState.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
+		}
+
+		const uint32_t programCount = g_assets.gpuPrograms.Count();
+		for ( uint32_t i = 0; i < programCount; ++i )
+		{
+			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
+			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
+			{
+				if ( prog.shaders[ i ].type == shaderType_t::COMPUTE ) {
+					prog.bindset = &particleShaderBinds;
+				}
+				else {
+					prog.bindset = &defaultBindSet;
+				}
+			}
+		}
+
+		AllocRegisteredBindParms();
 	}
 
 	GenerateGpuPrograms( g_assets.gpuPrograms );
@@ -594,6 +595,7 @@ void Renderer::CreateDescriptorPool()
 	poolInfo.poolSizeCount = static_cast<uint32_t>( poolSizes.size() );
 	poolInfo.pPoolSizes = poolSizes.data();
 	poolInfo.maxSets = DescriptorPoolMaxSets;
+	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 	if ( vkCreateDescriptorPool( context.device, &poolInfo, nullptr, &descriptorPool ) != VK_SUCCESS )
 	{
@@ -645,6 +647,22 @@ void Renderer::AllocRegisteredBindParms()
 		ShaderBindParms& parms = bindParmsList[ i ];
 		parms.SetVkObject( descSets[i] );
 	}
+}
+
+
+void Renderer::FreeRegisteredBindParms()
+{
+	std::vector<VkDescriptorSet> descSets;
+	descSets.reserve( bindParmCount );
+
+
+	for ( uint32_t i = 0; i < bindParmCount; ++i )
+	{
+		ShaderBindParms& parms = bindParmsList[ i ];
+		descSets.push_back( parms.GetVkObject() );
+	}
+
+	vkFreeDescriptorSets( context.device, descriptorPool, static_cast<uint32_t>( descSets.size() ), descSets.data() );
 }
 
 
