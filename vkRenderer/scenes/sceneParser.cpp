@@ -663,5 +663,5 @@ void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 {
 	ParseJson( fileName, scene, assets, true );
 
-	gAssets.RunLoadLoop();
+	g_assets.RunLoadLoop();
 }

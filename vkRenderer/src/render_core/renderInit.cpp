@@ -95,11 +95,11 @@ void Renderer::InitVulkan()
 		// Device Set-up
 		CreateInstance();
 		SetupDebugMessenger();
-		gWindow.CreateSurface();
+		g_window.CreateSurface();
 		PickPhysicalDevice();
 		CreateLogicalDevice();
 		SetupMarkers();
-		g_swapChain.Create( &gWindow, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
+		g_swapChain.Create( &g_window, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
 	}
 
 	{
@@ -123,10 +123,10 @@ void Renderer::InitVulkan()
 			particleState.parms[i] = RegisterBindParm( &particleShaderBinds );
 		}
 
-		const uint32_t programCount = gAssets.gpuPrograms.Count();
+		const uint32_t programCount = g_assets.gpuPrograms.Count();
 		for ( uint32_t i = 0; i < programCount; ++i )
 		{
-			GpuProgram& prog = gAssets.gpuPrograms.Find( i )->Get();
+			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
 			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
 			{
 				if( prog.shaders[ i ].type == shaderType_t::COMPUTE ) {
@@ -169,7 +169,7 @@ void Renderer::InitShaderResources()
 		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
 	}
 
-	GenerateGpuPrograms( gAssets.gpuPrograms );
+	GenerateGpuPrograms( g_assets.gpuPrograms );
 
 	CreateCodeTextures();
 	CreateBuffers();
@@ -183,7 +183,7 @@ void Renderer::InitImGui()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForVulkan( gWindow.window, true );
+	ImGui_ImplGlfw_InitForVulkan( g_window.window, true );
 
 	ImGui_ImplVulkan_InitInfo vkInfo = {};
 	vkInfo.Instance = context.instance;
@@ -211,26 +211,26 @@ void Renderer::InitImGui()
 	}
 	ImGui_ImplGlfw_NewFrame();
 #endif
-	gImguiControls.raytraceScene = false;
-	gImguiControls.rasterizeScene = false;
-	gImguiControls.rebuildRaytraceScene = false;
-	gImguiControls.rebuildShaders = false;
-	gImguiControls.heightMapHeight = 1.0f;
-	gImguiControls.roughness = 0.9f;
-	gImguiControls.shadowStrength = 0.99f;
-	gImguiControls.toneMapColor[ 0 ] = 1.0f;
-	gImguiControls.toneMapColor[ 1 ] = 1.0f;
-	gImguiControls.toneMapColor[ 2 ] = 1.0f;
-	gImguiControls.toneMapColor[ 3 ] = 1.0f;
-	gImguiControls.dbgImageId = -1;
-	gImguiControls.selectedEntityId = -1;
-	gImguiControls.selectedModelOrigin = vec3f( 0.0f );
+	g_imguiControls.raytraceScene = false;
+	g_imguiControls.rasterizeScene = false;
+	g_imguiControls.rebuildRaytraceScene = false;
+	g_imguiControls.rebuildShaders = false;
+	g_imguiControls.heightMapHeight = 1.0f;
+	g_imguiControls.roughness = 0.9f;
+	g_imguiControls.shadowStrength = 0.99f;
+	g_imguiControls.toneMapColor[ 0 ] = 1.0f;
+	g_imguiControls.toneMapColor[ 1 ] = 1.0f;
+	g_imguiControls.toneMapColor[ 2 ] = 1.0f;
+	g_imguiControls.toneMapColor[ 3 ] = 1.0f;
+	g_imguiControls.dbgImageId = -1;
+	g_imguiControls.selectedEntityId = -1;
+	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
 }
 
 
 void Renderer::CreateLogicalDevice()
 {
-	QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, gWindow.vk_surface );
+	QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, g_window.vk_surface );
 	context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
 	context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
 	context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
@@ -267,7 +267,7 @@ void Renderer::CreateLogicalDevice()
 		enabledExtensions.push_back( ext );
 	}
 	std::vector<const char*> captureExtensions = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
-	if( IsDeviceSuitable( context.physicalDevice, gWindow.vk_surface, captureExtensions ) ) {
+	if( IsDeviceSuitable( context.physicalDevice, g_window.vk_surface, captureExtensions ) ) {
 		for ( const char* ext : captureExtensions ) {
 			enabledExtensions.push_back( ext );
 		}
@@ -319,12 +319,12 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 void Renderer::CreatePipelineObjects()
 {
 	g_pipelineLib.clear();
-	for ( uint32_t i = 0; i < gAssets.materialLib.Count(); ++i )
+	for ( uint32_t i = 0; i < g_assets.materialLib.Count(); ++i )
 	{
-		const Material& m = gAssets.materialLib.Find( i )->Get();
+		const Material& m = g_assets.materialLib.Find( i )->Get();
 
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-			Asset<GpuProgram>* prog = gAssets.gpuPrograms.Find( m.GetShader( passIx ) );
+			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( m.GetShader( passIx ) );
 			if ( prog == nullptr ) {
 				continue;
 			}
@@ -358,9 +358,9 @@ void Renderer::CreatePipelineObjects()
 			CreateGraphicsPipeline( layout, pass, state, prog->Get().pipeline );
 		}
 	}
-	for ( uint32_t i = 0; i < gAssets.gpuPrograms.Count(); ++i )
+	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
 	{
-		Asset<GpuProgram>* prog = gAssets.gpuPrograms.Find( i );
+		Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( i );
 		if ( prog == nullptr ) {
 			continue;
 		}
@@ -438,7 +438,7 @@ void Renderer::CreateFramebuffers()
 {
 	int width = 0;
 	int height = 0;
-	gWindow.GetWindowFrameBufferSize( width, height );
+	g_window.GetWindowFrameBufferSize( width, height );
 
 	// Shadow images
 	for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )

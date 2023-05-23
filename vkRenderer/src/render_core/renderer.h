@@ -59,7 +59,7 @@
 
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
-extern imguiControls_t gImguiControls;
+extern imguiControls_t g_imguiControls;
 #endif
 
 typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
@@ -69,7 +69,7 @@ using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 
 extern pipelineMap_t				g_pipelineLib;
 extern Scene						scene;
-extern Window						gWindow;
+extern Window						g_window;
 extern SwapChain					g_swapChain;
 
 struct renderConfig_t
@@ -247,7 +247,7 @@ private:
 	void RecreateSwapChain()
 	{
 		int width = 0, height = 0;
-		gWindow.GetWindowFrameBufferSize( width, height, true );
+		g_window.GetWindowFrameBufferSize( width, height, true );
 
 		vkDeviceWaitIdle( context.device );
 
@@ -257,7 +257,7 @@ private:
 		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
 		frameBufferMemory.Reset();
 
-		g_swapChain.Create( &gWindow, width, height );
+		g_swapChain.Create( &g_window, width, height );
 		CreateFramebuffers();
 		UpdateDescriptorSets();
 	}

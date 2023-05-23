@@ -71,10 +71,10 @@ void Renderer::Cleanup()
 		DestroyDebugUtilsMessengerEXT( context.instance, debugMessenger, nullptr );
 	}
 
-	vkDestroySurfaceKHR( context.instance, gWindow.vk_surface, nullptr );
+	vkDestroySurfaceKHR( context.instance, g_window.vk_surface, nullptr );
 	vkDestroyInstance( context.instance, nullptr );
 
-	gWindow.~Window();
+	g_window.~Window();
 }
 
 
@@ -146,10 +146,10 @@ void Renderer::ShutdownShaderResources()
 	delete rc.whiteImage.gpuImage;
 	delete rc.blackImage.gpuImage;
 
-	const uint32_t textureCount = gAssets.textureLib.Count();
+	const uint32_t textureCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		const Texture& texture = gAssets.textureLib.Find( i )->Get();
+		const Texture& texture = g_assets.textureLib.Find( i )->Get();
 		texture.gpuImage->Destroy();
 		delete texture.gpuImage;
 	}
@@ -168,10 +168,10 @@ void Renderer::ShutdownShaderResources()
 	}
 	g_pipelineLib.clear();
 
-	const uint32_t shaderCount = gAssets.gpuPrograms.Count();
+	const uint32_t shaderCount = g_assets.gpuPrograms.Count();
 	for ( uint32_t i = 0; i < shaderCount; ++i )
 	{
-		Asset<GpuProgram>* shaderAsset = gAssets.gpuPrograms.Find( i );
+		Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( i );
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 0 ], nullptr );
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 1 ], nullptr );
 	}

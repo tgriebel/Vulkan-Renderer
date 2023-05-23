@@ -54,11 +54,11 @@ static bind_t ControllerBinds[ ButtonCount ] =
 	bind_t{ KEY_S, Tomtendo::ButtonFlags::BUTTON_DOWN },
 };
 
-extern Window gWindow;
+extern Window g_window;
 
 void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 {
-	Texture& texture = gAssets.textureLib.Find( texHandle )->Get();
+	Texture& texture = g_assets.textureLib.Find( texHandle )->Get();
 
 	const uint32_t width = fr.frameBuffer->GetWidth();
 	const uint32_t height = fr.frameBuffer->GetHeight();
@@ -126,7 +126,7 @@ void NesScene::Update()
 
 			for ( uint32_t k = 0; k < ButtonCount; ++k )
 			{
-				if ( gWindow.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
+				if ( g_window.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
 					nes[i].input.StoreKey( ControllerBinds[ k ].key );
 				} else {
 					nes[i].input.ReleaseKey( ControllerBinds[ k ].key );

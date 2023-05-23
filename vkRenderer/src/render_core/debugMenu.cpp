@@ -4,14 +4,14 @@
 #include <scene/scene.h>
 #include <sstream>
 
-extern AssetManager gAssets;
+extern AssetManager g_assets;
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
 #include "../../external/imgui/backends/imgui_impl_glfw.h"
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
 
-extern imguiControls_t gImguiControls;
+extern imguiControls_t g_imguiControls;
 
 static const int defaultWidth = 100;
 
@@ -72,7 +72,7 @@ void DebugMenuMaterial( const Material& mat )
 		}
 		else
 		{
-			const char* texName = gAssets.textureLib.FindName( texHdl );
+			const char* texName = g_assets.textureLib.FindName( texHdl );
 			ImGui::Text( texName );
 		}
 	}
@@ -159,7 +159,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 			ImGui::SameLine();
 
 			hdl_t texHdl = mat.GetTexture( t );
-			DebugMenuLibComboEdit( label, texHdl, gAssets.textureLib );
+			DebugMenuLibComboEdit( label, texHdl, g_assets.textureLib );
 			mat.AddTexture( t, texHdl );
 		}
 		ImGui::TreePop();
@@ -178,7 +178,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 			}
 			else
 			{
-				const char* shaderName = gAssets.gpuPrograms.FindName( shaderHdl );
+				const char* shaderName = g_assets.gpuPrograms.FindName( shaderHdl );
 				ImGui::Text( shaderName );
 			}
 		}
@@ -249,8 +249,8 @@ void DebugMenuModelTreeNode( Asset<Model>* modelAsset )
 					ImGui::Text( "%u", s );
 					ImGui::TableSetColumnIndex( 1 );
 					hdl_t& handle = model.surfs[ s ].materialHdl;
-					std::string modelName = "##" + std::string( gAssets.materialLib.FindName( handle ) );
-					DebugMenuLibComboEdit( modelName, handle, gAssets.materialLib );
+					std::string modelName = "##" + std::string( g_assets.materialLib.FindName( handle ) );
+					DebugMenuLibComboEdit( modelName, handle, g_assets.materialLib );
 					ImGui::TableSetColumnIndex( 2 );
 					ImGui::Text( "%i", (int)model.surfs[ s ].vertices.size() );
 					ImGui::TableSetColumnIndex( 3 );

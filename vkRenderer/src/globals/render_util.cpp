@@ -30,7 +30,7 @@
 #include <resource_types/gpuProgram.h>
 #include "render_util.h"
 
-extern AssetManager gAssets;
+extern AssetManager g_assets;
 
 
 mat4x4f MatrixFromVector( const vec3f& v )

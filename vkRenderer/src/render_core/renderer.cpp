@@ -37,7 +37,7 @@
 
 #include <io/io.h>
 
-extern Scene* gScene;
+extern Scene* g_scene;
 
 SwapChain g_swapChain;
 
@@ -147,14 +147,14 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 
 	assert( DRAWPASS_COUNT <= Material::MaxMaterialShaders );
 
-	Model& source = gAssets.modelLib.Find( ent.modelHdl )->Get();
+	Model& source = g_assets.modelLib.Find( ent.modelHdl )->Get();
 	for ( uint32_t i = 0; i < source.surfCount; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
 		surfaceUpload_t& upload = source.upload[ i ];
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl;
-		const Asset<Material>* materialAsset = gAssets.materialLib.Find( materialHdl );
+		const Asset<Material>* materialAsset = g_assets.materialLib.Find( materialHdl );
 		const Material& material = materialAsset->Get();
 
 		renderFlags_t renderFlags = NONE;
@@ -223,7 +223,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() ) {
-				Texture& texture = gAssets.textureLib.Find( texHandle )->Get();
+				Texture& texture = g_assets.textureLib.Find( texHandle )->Get();
 				if( texture.uploadId < 0 ) {
 					uploadTextures.insert( texHandle );
 				}
@@ -235,7 +235,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 
 		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
 			if ( material.GetShader( pass ).IsValid() ) {
-				Asset<GpuProgram>* prog = gAssets.gpuPrograms.Find( material.GetShader( pass ) );
+				Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( material.GetShader( pass ) );
 				if ( prog == nullptr ) {
 					continue;
 				}
@@ -272,10 +272,10 @@ void Renderer::ShutdownGPU()
 
 void Renderer::UploadAssets()
 {
-	const uint32_t materialCount = gAssets.materialLib.Count();
+	const uint32_t materialCount = g_assets.materialLib.Count();
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
-		Asset<Material>* materialAsset = gAssets.materialLib.Find( i );
+		Asset<Material>* materialAsset = g_assets.materialLib.Find( i );
 		if ( materialAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -286,10 +286,10 @@ void Renderer::UploadAssets()
 		uploadMaterials.insert( materialAsset->Handle() );
 	}
 
-	const uint32_t textureCount = gAssets.textureLib.Count();
+	const uint32_t textureCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
+		Asset<Texture>* textureAsset = g_assets.textureLib.Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -324,15 +324,15 @@ void Renderer::RenderScene( Scene* scene )
 	frameTimer.Stop();
 	renderTime = static_cast<float>( frameTimer.GetElapsed() );
 
-	if( gImguiControls.rebuildRaytraceScene ) {
+	if( g_imguiControls.rebuildRaytraceScene ) {
 		BuildRayTraceScene( scene );
 	}
 
-	if ( gImguiControls.raytraceScene ) {
+	if ( g_imguiControls.raytraceScene ) {
 		TraceScene( false );
 	}
 
-	if ( gImguiControls.rasterizeScene ) {
+	if ( g_imguiControls.rasterizeScene ) {
 		TraceScene( true );
 	}
 
@@ -515,7 +515,7 @@ void Renderer::SubmitFrame()
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
-		GpuProgram& prog = gAssets.gpuPrograms.Find( "ClearParticles" )->Get();
+		GpuProgram& prog = g_assets.gpuPrograms.Find( "ClearParticles" )->Get();
 
 		Dispatch( computeQueue.commandBuffers[ bufferId ], prog, particleShaderBinds, particleState.parms[ bufferId ]->GetVkObject(), MaxParticles / 256 );
 
@@ -575,10 +575,10 @@ void Renderer::SubmitFrame()
 
 		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || gWindow.IsResizeRequested() )
+		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || g_window.IsResizeRequested() )
 		{
 			RecreateSwapChain();
-			gWindow.AcceptImageResize();
+			g_window.AcceptImageResize();
 			return;
 		}
 		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
@@ -596,7 +596,7 @@ void Renderer::UpdateViews( const Scene* scene )
 {
 	int width;
 	int height;
-	gWindow.GetWindowSize( width, height );
+	g_window.GetWindowSize( width, height );
 
 	// Main view
 	{
@@ -734,10 +734,10 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		const float viewHeight = renderView.viewport.height;
 
 		globals.time = vec4f( time, intPart, fracPart, 1.0f );
-		globals.generic = vec4f( gImguiControls.heightMapHeight, gImguiControls.roughness, 0.0f, 0.0f );
+		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
 		globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
-		globals.tonemap = vec4f( gImguiControls.toneMapColor[ 0 ], gImguiControls.toneMapColor[ 1 ], gImguiControls.toneMapColor[ 2 ], gImguiControls.toneMapColor[ 3 ] );
-		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, gImguiControls.shadowStrength );
+		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
+		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.numLights = renderView.numLights;
 		globalsBuffer = globals;
@@ -844,7 +844,7 @@ void Renderer::PickPhysicalDevice()
 
 	for ( const auto& device : devices )
 	{
-		if ( IsDeviceSuitable( device, gWindow.vk_surface, deviceExtensions ) )
+		if ( IsDeviceSuitable( device, g_window.vk_surface, deviceExtensions ) )
 		{
 			vkGetPhysicalDeviceProperties( device, &context.deviceProperties );
 			context.physicalDevice = device;
@@ -1332,13 +1332,13 @@ void Renderer::DrawDebugMenu()
 		if ( ImGui::BeginMenu( "File" ) )
 		{
 			if ( ImGui::MenuItem( "Open Scene", "CTRL+O" ) ) {
-				gImguiControls.openSceneFileDialog = true;
+				g_imguiControls.openSceneFileDialog = true;
 			}
 			if ( ImGui::MenuItem( "Reload", "CTRL+R" ) ) {
-				gImguiControls.reloadScene = true;
+				g_imguiControls.reloadScene = true;
 			}
 			if ( ImGui::MenuItem( "Import Obj", "CTRL+I" ) ) {
-				gImguiControls.openModelImportFileDialog = true;
+				g_imguiControls.openModelImportFileDialog = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -1360,20 +1360,20 @@ void Renderer::DrawDebugMenu()
 	{
 		if ( ImGui::BeginTabItem( "Debug" ) )
 		{
-			gImguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
-			gImguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
+			g_imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+			g_imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
 			ImGui::SameLine();
-			gImguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+			g_imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
 			ImGui::SameLine();
-			gImguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
+			g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
 
-			ImGui::InputFloat( "Heightmap Height", &gImguiControls.heightMapHeight, 0.1f, 1.0f );
-			ImGui::SliderFloat( "Roughness", &gImguiControls.roughness, 0.1f, 1.0f );
-			ImGui::SliderFloat( "Shadow Strength", &gImguiControls.shadowStrength, 0.0f, 1.0f );
-			ImGui::InputFloat( "Tone Map R", &gImguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map G", &gImguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map B", &gImguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
-			ImGui::InputFloat( "Tone Map A", &gImguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Roughness", &g_imguiControls.roughness, 0.1f, 1.0f );
+			ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
+			ImGui::InputFloat( "Tone Map R", &g_imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map B", &g_imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+			ImGui::InputFloat( "Tone Map A", &g_imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
 			ImGui::EndTabItem();
 		}
 		if ( ImGui::BeginTabItem( "Device" ) )
@@ -1383,14 +1383,14 @@ void Renderer::DrawDebugMenu()
 		}
 		if ( ImGui::BeginTabItem( "Assets" ) )
 		{
-			const uint32_t matCount = gAssets.materialLib.Count();
+			const uint32_t matCount = g_assets.materialLib.Count();
 			if( ImGui::TreeNode( "Materials", "Materials (%i)", matCount ) )
 			{
 				for ( uint32_t m = 0; m < matCount; ++m )
 				{
-					Asset<Material>* matAsset = gAssets.materialLib.Find( m );
+					Asset<Material>* matAsset = g_assets.materialLib.Find( m );
 					Material& mat = matAsset->Get();
-					const char* matName = gAssets.materialLib.FindName(m);
+					const char* matName = g_assets.materialLib.FindName(m);
 
 					if ( ImGui::TreeNode( matAsset->GetName().c_str() ) )
 					{
@@ -1401,32 +1401,32 @@ void Renderer::DrawDebugMenu()
 				}
 				ImGui::TreePop();
 			}
-			const uint32_t modelCount = gAssets.modelLib.Count();
+			const uint32_t modelCount = g_assets.modelLib.Count();
 			if ( ImGui::TreeNode( "Models", "Models (%i)", modelCount ) )
 			{
 				for ( uint32_t m = 0; m < modelCount; ++m )
 				{
-					Asset<Model>* modelAsset = gAssets.modelLib.Find( m );
+					Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
 					DebugMenuModelTreeNode( modelAsset );
 				}
 				ImGui::TreePop();
 			}
-			const uint32_t texCount = gAssets.textureLib.Count();
+			const uint32_t texCount = g_assets.textureLib.Count();
 			if ( ImGui::TreeNode( "Textures", "Textures (%i)", texCount ) )
 			{
 				for ( uint32_t t = 0; t < texCount; ++t )
 				{
-					Asset<Texture>* texAsset = gAssets.textureLib.Find( t );
+					Asset<Texture>* texAsset = g_assets.textureLib.Find( t );
 					DebugMenuTextureTreeNode( texAsset );
 				}
 				ImGui::TreePop();
 			}
-			const uint32_t shaderCount = gAssets.gpuPrograms.Count();
+			const uint32_t shaderCount = g_assets.gpuPrograms.Count();
 			if ( ImGui::TreeNode( "Shaders", "Shaders (%i)", shaderCount ) )
 			{
 				for ( uint32_t s = 0; s < shaderCount; ++s )
 				{
-					Asset<GpuProgram>* shaderAsset = gAssets.gpuPrograms.Find( s );
+					Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( s );
 					GpuProgram& shader = shaderAsset->Get();
 					const char* shaderName = shaderAsset->GetName().c_str();
 					ImGui::Text( shaderName );
@@ -1438,14 +1438,14 @@ void Renderer::DrawDebugMenu()
 		if ( ImGui::BeginTabItem( "Manip" ) )
 		{
 			static uint32_t currentIdx = 0;
-			Entity* ent = gScene->FindEntity( currentIdx );
+			Entity* ent = g_scene->FindEntity( currentIdx );
 			const char* previewValue = ent->name.c_str();
 			if ( ImGui::BeginCombo( "Entity", previewValue ) )
 			{
-				const uint32_t modelCount = gAssets.modelLib.Count();
-				for ( uint32_t e = 0; e < gScene->EntityCount(); ++e )
+				const uint32_t modelCount = g_assets.modelLib.Count();
+				for ( uint32_t e = 0; e < g_scene->EntityCount(); ++e )
 				{
-					Entity* comboEnt = gScene->FindEntity( e );
+					Entity* comboEnt = g_scene->FindEntity( e );
 
 					const bool selected = ( currentIdx == e );
 					if ( ImGui::Selectable( comboEnt->name.c_str(), selected ) ) {
@@ -1510,16 +1510,16 @@ void Renderer::DrawDebugMenu()
 					Entity* boundEnt = new Entity( *ent );
 					boundEnt->name = ent->name + "_bounds";
 					boundEnt->SetFlag( ENT_FLAG_WIREFRAME );
-					boundEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+					boundEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
 
-					gScene->entities.push_back( boundEnt );
-					gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "cube" ), *boundEnt );
+					g_scene->entities.push_back( boundEnt );
+					g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "cube" ), *boundEnt );
 				}
 
 				ImGui::SameLine();
 				if( ImGui::Button( "Export Model" ) )
 				{
-					Asset<Model>* asset = gAssets.modelLib.Find( ent->modelHdl );
+					Asset<Model>* asset = g_assets.modelLib.Find( ent->modelHdl );
 					WriteModel( asset, BakePath + asset->GetName() + BakedModelExtension );
 				}
 				ImGui::SameLine();
@@ -1549,13 +1549,13 @@ void Renderer::DrawDebugMenu()
 		{
 			static char name[ 128 ] = {};
 			static uint32_t currentIdx = 0;
-			const char* previewValue = gAssets.modelLib.FindName( currentIdx );
+			const char* previewValue = g_assets.modelLib.FindName( currentIdx );
 			if ( ImGui::BeginCombo( "Model", previewValue ) )
 			{
-				const uint32_t modelCount = gAssets.modelLib.Count();
+				const uint32_t modelCount = g_assets.modelLib.Count();
 				for ( uint32_t m = 0; m < modelCount; ++m )
 				{
-					Asset<Model>* modelAsset = gAssets.modelLib.Find( m );
+					Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
 
 					const bool selected = ( currentIdx == m );
 					if ( ImGui::Selectable( modelAsset->GetName().c_str(), selected ) ) {
@@ -1576,8 +1576,8 @@ void Renderer::DrawDebugMenu()
 				Entity* ent = new Entity();
 				ent->name = name;
 				ent->SetFlag( ENT_FLAG_DEBUG );
-				gScene->entities.push_back( ent );
-				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( gAssets.modelLib.FindName( currentIdx ) ), *ent );
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( g_assets.modelLib.FindName( currentIdx ) ), *ent );
 			}
 
 			ImGui::EndTabItem();
@@ -1586,7 +1586,7 @@ void Renderer::DrawDebugMenu()
 		{
 			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-			DebugMenuLightEdit( gScene );
+			DebugMenuLightEdit( g_scene );
 
 			if ( ImGui::BeginTable( "3ways", 3, flags ) )
 			{
@@ -1670,18 +1670,18 @@ void Renderer::DrawDebugMenu()
 
 	ImGui::Separator();
 
-	ImGui::InputInt( "Image Id", &gImguiControls.dbgImageId );
-	gImguiControls.dbgImageId = Clamp( gImguiControls.dbgImageId, -1, int(gAssets.textureLib.Count() - 1) );
+	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
+	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int(g_assets.textureLib.Count() - 1) );
 
-	ImGui::Text( "Mouse: (%f, %f)", (float)gWindow.input.GetMouse().x, (float)gWindow.input.GetMouse().y );
-	ImGui::Text( "Mouse Dt: (%f, %f)", (float)gWindow.input.GetMouse().dx, (float)gWindow.input.GetMouse().dy );
-	const vec4f cameraOrigin = gScene->camera.GetOrigin();
+	ImGui::Text( "Mouse: (%f, %f)", (float)g_window.input.GetMouse().x, (float)g_window.input.GetMouse().y );
+	ImGui::Text( "Mouse Dt: (%f, %f)", (float)g_window.input.GetMouse().dx, (float)g_window.input.GetMouse().dy );
+	const vec4f cameraOrigin = g_scene->camera.GetOrigin();
 	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
-	const vec2f ndc = gWindow.GetNdc( gWindow.input.GetMouse().x, gWindow.input.GetMouse().y );
+	const vec2f ndc = g_window.GetNdc( g_window.input.GetMouse().x, g_window.input.GetMouse().y );
 
 	char entityName[ 256 ];
-	if ( gImguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", gImguiControls.selectedEntityId, gAssets.modelLib.FindName( gScene->entities[ gImguiControls.selectedEntityId ]->modelHdl ) );
+	if ( g_imguiControls.selectedEntityId >= 0 ) {
+		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, g_assets.modelLib.FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
 	}
 	else {
 		memset( &entityName[ 0 ], 0, 256 );

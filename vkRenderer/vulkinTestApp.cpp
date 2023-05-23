@@ -47,17 +47,17 @@
 #include <resource_types/gpuProgram.h>
 #include <SysCore/systemUtils.h>
 
-AssetManager						gAssets;
-Scene*								gScene;
-Renderer							gRenderer;
-Window								gWindow;
+AssetManager						g_assets;
+Scene*								g_scene;
+Renderer							g_renderer;
+Window								g_window;
 
 static SpinLock						acquireNextFrame;
 
 static std::string sceneFile = "chess.json";
 
 #if defined( USE_IMGUI )
-imguiControls_t gImguiControls;
+imguiControls_t g_imguiControls;
 #endif
 
 void CreateCodeAssets();
@@ -71,34 +71,34 @@ void RenderThread()
 
 void CheckReloadAssets()
 {
-	if ( gImguiControls.rebuildShaders ) {
+	if ( g_imguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
-		gAssets.gpuPrograms.UnloadAll();
-		gAssets.gpuPrograms.LoadAll();
-		Renderer::GenerateGpuPrograms( gAssets.gpuPrograms );
-		gRenderer.CreatePipelineObjects();
+		g_assets.gpuPrograms.UnloadAll();
+		g_assets.gpuPrograms.LoadAll();
+		Renderer::GenerateGpuPrograms( g_assets.gpuPrograms );
+		g_renderer.CreatePipelineObjects();
 
-		gImguiControls.rebuildShaders = false;
+		g_imguiControls.rebuildShaders = false;
 	}
 }
 
 
 void LoadNewScene( const std::string fileName )
 {
-	gAssets.Clear();
-	ShutdownScene( gScene );
-	delete gScene;
-	gScene = nullptr;
-	gRenderer.ShutdownGPU();
+	g_assets.Clear();
+	ShutdownScene( g_scene );
+	delete g_scene;
+	g_scene = nullptr;
+	g_renderer.ShutdownGPU();
 
 	CreateCodeAssets();
-	LoadScene( fileName, &gScene, &gAssets );
-	InitScene( gScene );
+	LoadScene( fileName, &g_scene, &g_assets );
+	InitScene( g_scene );
 
 	sceneFile = fileName;
 
-	gRenderer.InitGPU();
-	gRenderer.UploadAssets();
+	g_renderer.InitGPU();
+	g_renderer.UploadAssets();
 }
 
 
@@ -106,32 +106,32 @@ int main( int argc, char* argv[] )
 {
 	CreateCodeAssets();
 	if( argc == 2 ) {
-		LoadScene( argv[1], &gScene, &gAssets );
+		LoadScene( argv[1], &g_scene, &g_assets );
 	} else {
-		LoadScene( sceneFile, &gScene, &gAssets );
+		LoadScene( sceneFile, &g_scene, &g_assets );
 	}
 
 	std::thread renderThread( RenderThread );
 
-	gWindow.Init();
-	InitScene( gScene );
+	g_window.Init();
+	InitScene( g_scene );
 
 	try
 	{
-		gRenderer.Init();
-		gRenderer.UploadAssets();
+		g_renderer.Init();
+		g_renderer.UploadAssets();
 
-		while ( gWindow.IsOpen() )
+		while ( g_window.IsOpen() )
 		{
 			CheckReloadAssets();
 
-			gWindow.PumpMessages();
+			g_window.PumpMessages();
 
-			if ( gImguiControls.openModelImportFileDialog )
+			if ( g_imguiControls.openModelImportFileDialog )
 			{
 				std::vector<const char*> filters;
 				filters.push_back( "*.obj" );
-				std::string path = gWindow.OpenFileDialog( "Import Obj", filters, "Model files (*.obj)" );
+				std::string path = g_window.OpenFileDialog( "Import Obj", filters, "Model files (*.obj)" );
 				std::string dir;
 				std::string file;
 
@@ -143,59 +143,59 @@ int main( int argc, char* argv[] )
 				loader->SetModelPath( dir );
 				loader->SetTexturePath( dir );
 				loader->SetModelName( file );
-				loader->SetAssetRef( &gAssets );
-				gAssets.modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
+				loader->SetAssetRef( &g_assets );
+				g_assets.modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
 
-				gAssets.RunLoadLoop();
+				g_assets.RunLoadLoop();
 				Entity* ent = new Entity();
 				ent->name = path;
 				//ent->SetFlag( ENT_FLAG_DEBUG );
-				gScene->entities.push_back( ent );
-				gScene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
 
-				gImguiControls.openModelImportFileDialog = false;
+				g_imguiControls.openModelImportFileDialog = false;
 			}
 
-			if ( gImguiControls.openSceneFileDialog )
+			if ( g_imguiControls.openSceneFileDialog )
 			{
 				std::vector<const char*> filters;
 				filters.push_back( "*.json" );
-				std::string path = gWindow.OpenFileDialog( "Open Scene", filters, "Scene files" );
+				std::string path = g_window.OpenFileDialog( "Open Scene", filters, "Scene files" );
 				
 				std::string dir;
 				std::string file;
 				SplitPath( path, dir, file );
 		
-				gAssets.Clear();
-				ShutdownScene( gScene );
-				delete gScene;
-				gScene = nullptr;
-				gRenderer.ShutdownGPU();
+				g_assets.Clear();
+				ShutdownScene( g_scene );
+				delete g_scene;
+				g_scene = nullptr;
+				g_renderer.ShutdownGPU();
 
 				CreateCodeAssets();
-				LoadScene( file, &gScene, &gAssets );
-				InitScene( gScene );
+				LoadScene( file, &g_scene, &g_assets );
+				InitScene( g_scene );
 		
-				gRenderer.InitGPU();
-				gRenderer.UploadAssets();
+				g_renderer.InitGPU();
+				g_renderer.UploadAssets();
 
-				gImguiControls.openSceneFileDialog = false;
+				g_imguiControls.openSceneFileDialog = false;
 			}
 
-			if( gImguiControls.reloadScene )
+			if( g_imguiControls.reloadScene )
 			{
-				gImguiControls.reloadScene = true;
+				g_imguiControls.reloadScene = true;
 			}
 
-			UpdateScene( gScene );
-			gWindow.input.NewFrame();
-			gRenderer.RenderScene( gScene );
+			UpdateScene( g_scene );
+			g_window.input.NewFrame();
+			g_renderer.RenderScene( g_scene );
 #if defined( USE_IMGUI )
 			ImGui_ImplGlfw_NewFrame();
 #endif
-			gScene->AdvanceFrame();
+			g_scene->AdvanceFrame();
 		}
-		gRenderer.Destroy();
+		g_renderer.Destroy();
 	}
 	catch (const std::exception& e)
 	{

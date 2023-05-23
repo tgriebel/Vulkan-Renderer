@@ -6,10 +6,10 @@
 #include <scene/scene.h>
 #include "src/globals/render_util.h"
 
-extern AssetManager gAssets;
+extern AssetManager g_assets;
 
-extern imguiControls_t			gImguiControls;
-extern Window					gWindow;
+extern imguiControls_t			g_imguiControls;
+extern Window					g_window;
 
 void CreateCodeAssets()
 {
@@ -23,8 +23,8 @@ void CreateCodeAssets()
 			ss << "CODE_COLOR_" << t;
 			std::string s = ss.str();
 
-			hdl_t handle = gAssets.textureLib.Add( s.c_str(), Texture() );
-			Texture& texture = gAssets.textureLib.Find( handle )->Get();
+			hdl_t handle = g_assets.textureLib.Add( s.c_str(), Texture() );
+			Texture& texture = g_assets.textureLib.Find( handle )->Get();
 
 			texture.info.width = 256;
 			texture.info.height = 240;
@@ -59,26 +59,26 @@ void CreateCodeAssets()
 			for ( uint32_t i = 0; i < Material::MaxMaterialTextures; ++i ) {
 				material.AddTexture( i, i );
 			}
-			gAssets.materialLib.Add( "TONEMAP", material );
+			g_assets.materialLib.Add( "TONEMAP", material );
 		}
 
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
-			gAssets.materialLib.Add( "IMAGE2D", material );
+			g_assets.materialLib.Add( "IMAGE2D", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLibGpuProgram::Handle( "Debug" ) );
-			gAssets.materialLib.Add( "DEBUG_WIRE", material );
+			g_assets.materialLib.Add( "DEBUG_WIRE", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_DEBUG_SOLID, AssetLibGpuProgram::Handle( "DebugSolid" ) );
-			gAssets.materialLib.Add( "DEBUG_SOLID", material );
+			g_assets.materialLib.Add( "DEBUG_SOLID", material );
 		}
 	}
 
@@ -87,12 +87,12 @@ void CreateCodeAssets()
 		{
 			Model model;
 			CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
-			gAssets.modelLib.Add( "_postProcessQuad", model );
+			g_assets.modelLib.Add( "_postProcessQuad", model );
 		}
 		{
 			Model model;
 			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
-			gAssets.modelLib.Add( "_quadTexDebug", model );
+			g_assets.modelLib.Add( "_quadTexDebug", model );
 		}
 	}
 }
@@ -110,14 +110,14 @@ void InitScene( Scene* scene )
 
 	{
 		Entity* ent = new Entity();
-		scene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
+		scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
 		ent->name = "_postProcessQuad";
 		scene->entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
-		scene->CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
+		scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
 		ent->name = "_quadTexDebug";
 		scene->entities.push_back( ent );
 	}
@@ -154,44 +154,44 @@ void UpdateScene( Scene* scene )
 	const float dt = scene->DeltaTime();
 	const float cameraSpeed = 5.0f;
 
-	if( gWindow.IsFocused() == false )
+	if( g_window.IsFocused() == false )
 	{
 		// FIXME: race conditions
 		// Need to do a ping-pong update
-		if ( gWindow.input.IsKeyPressed( 'D' ) ) {
+		if ( g_window.input.IsKeyPressed( 'D' ) ) {
 			scene->camera.MoveRight( cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( 'A' ) ) {
+		if ( g_window.input.IsKeyPressed( 'A' ) ) {
 			scene->camera.MoveRight( -cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( 'W' ) ) {
+		if ( g_window.input.IsKeyPressed( 'W' ) ) {
 			scene->camera.MoveForward( cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( 'S' ) ) {
+		if ( g_window.input.IsKeyPressed( 'S' ) ) {
 			scene->camera.MoveForward( -cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( '8' ) ) {
+		if ( g_window.input.IsKeyPressed( '8' ) ) {
 			scene->camera.AdjustPitch( -cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( '2' ) ) {
+		if ( g_window.input.IsKeyPressed( '2' ) ) {
 			scene->camera.AdjustPitch( cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( '4' ) ) {
+		if ( g_window.input.IsKeyPressed( '4' ) ) {
 			scene->camera.AdjustYaw( cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( '6' ) ) {
+		if ( g_window.input.IsKeyPressed( '6' ) ) {
 			scene->camera.AdjustYaw( -cameraSpeed * dt );
 		}
-		if ( gWindow.input.IsKeyPressed( '+' ) ) {
+		if ( g_window.input.IsKeyPressed( '+' ) ) {
 			scene->camera.SetFov( scene->camera.GetFov() + Radians( 0.1f ) );
 		}
-		if ( gWindow.input.IsKeyPressed( '-' ) ) {
+		if ( g_window.input.IsKeyPressed( '-' ) ) {
 			scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
 		}
 	}
-	scene->camera.SetAspectRatio( gWindow.GetWindowFrameBufferAspect() );
+	scene->camera.SetAspectRatio( g_window.GetWindowFrameBufferAspect() );
 
-	const mouse_t& mouse = gWindow.input.GetMouse();
+	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( mouse.centered )
 	{
 		const float maxSpeed = mouse.speed;
@@ -218,7 +218,7 @@ void UpdateScene( Scene* scene )
 	{
 		Color randomColor( Random(), Random(), Random(), 1.0f );
 		const RGBA rgba = Color( randomColor ).AsRGBA();
-		Texture& texture = gAssets.textureLib.Find( "CODE_COLOR_0" )->Get();
+		Texture& texture = g_assets.textureLib.Find( "CODE_COLOR_0" )->Get();
 
 		const uint32_t pixelCount = texture.info.width * texture.info.height;
 		for ( uint32_t i = 0; i < pixelCount; ++i )
@@ -232,17 +232,17 @@ void UpdateScene( Scene* scene )
 	}
 	
 
-	if ( gImguiControls.dbgImageId >= 0 )
+	if ( g_imguiControls.dbgImageId >= 0 )
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
 		if( ent != nullptr )
 		{
 			ent->ClearFlag( ENT_FLAG_NO_DRAW );
-			Asset<Material>* matAsset = gAssets.materialLib.Find( "IMAGE2D" );
+			Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
 			if( matAsset != nullptr )
 			{
 				Material& mat = matAsset->Get();
-				mat.AddTexture( 0, gImguiControls.dbgImageId );
+				mat.AddTexture( 0, g_imguiControls.dbgImageId );
 			}
 		}
 	}

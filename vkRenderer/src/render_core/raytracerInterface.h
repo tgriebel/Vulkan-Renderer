@@ -10,7 +10,7 @@ static RtScene rtScene;
 static void BuildRayTraceScene( Scene* scene )
 {
 	rtScene.scene = scene;
-	rtScene.assets = &gAssets;
+	rtScene.assets = &g_assets;
 
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	rtScene.lights.clear();
@@ -21,7 +21,7 @@ static void BuildRayTraceScene( Scene* scene )
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
 		RtModel rtModel;
-		CreateRayTraceModel( gAssets, scene->entities[ i ], &rtModel );
+		CreateRayTraceModel( g_assets, scene->entities[ i ], &rtModel );
 		rtScene.models.push_back( rtModel );
 
 		AABB& aabb = rtModel.octree.GetAABB();
@@ -34,10 +34,10 @@ static void BuildRayTraceScene( Scene* scene )
 		rtScene.lights.push_back( scene->lights[ i ] );
 	}
 
-	const uint32_t texCount = gAssets.textureLib.Count();
+	const uint32_t texCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < texCount; ++i )
 	{
-		Asset<Texture>* texAsset = gAssets.textureLib.Find( i );
+		Asset<Texture>* texAsset = g_assets.textureLib.Find( i );
 		Texture& texture = texAsset->Get();
 
 		texture.cpuImage.Init( texture.info.width, texture.info.height );
@@ -58,11 +58,11 @@ static void BuildRayTraceScene( Scene* scene )
 
 static void TraceScene( const bool rasterize = false )
 {
-	gImguiControls.raytraceScene = false;
+	g_imguiControls.raytraceScene = false;
 
 	rtview.targetSize[ 0 ] = 320;
 	rtview.targetSize[ 1 ] = 180;
-	//gWindow.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
+	//g_window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
 	Image<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::Black, "testRayTrace" );
 	{
 		rtview.camera = rtScene.scene->camera;

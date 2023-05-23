@@ -28,7 +28,7 @@
 #include "../render_state/rhi.h"
 #include <scene/assetManager.h>
 
-extern AssetManager gAssets;
+extern AssetManager g_assets;
 
 void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Texture& texture )
 {
@@ -71,7 +71,7 @@ void Renderer::UpdateTextures()
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
 		Texture& texture = textureAsset->Get();
 
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
@@ -98,7 +98,7 @@ void Renderer::UploadTextures()
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
 		if( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -126,7 +126,7 @@ void Renderer::UploadTextures()
 	// 2. Generate MIPS
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -138,7 +138,7 @@ void Renderer::UploadTextures()
 	// 3. Create Views
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -155,7 +155,7 @@ void Renderer::UploadTextures()
 		Texture* firstCube = nullptr;
 		for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 		{
-			Asset<Texture>* textureAsset = gAssets.textureLib.Find( *it );
+			Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
@@ -170,7 +170,7 @@ void Renderer::UploadTextures()
 		// Fill assigned slots
 		for ( uint32_t i = 0; i < imageFreeSlot; ++i )
 		{
-			Asset<Texture>* textureAsset = gAssets.textureLib.Find( i );
+			Asset<Texture>* textureAsset = g_assets.textureLib.Find( i );
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
@@ -183,7 +183,7 @@ void Renderer::UploadTextures()
 					gpuImagesCube[ texture.uploadId ] = firstCube;
 					break;
 				case TEXTURE_TYPE_CUBE:
-					gpuImages2D[ texture.uploadId ] = &gAssets.textureLib.GetDefault()->Get();
+					gpuImages2D[ texture.uploadId ] = &g_assets.textureLib.GetDefault()->Get();
 					gpuImagesCube[ texture.uploadId ] = &texture;
 					break;
 			}
@@ -192,7 +192,7 @@ void Renderer::UploadTextures()
 		// Fill defaults
 		for ( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
 		{
-			gpuImages2D[ i ] = &gAssets.textureLib.GetDefault()->Get();
+			gpuImages2D[ i ] = &g_assets.textureLib.GetDefault()->Get();
 			gpuImagesCube[ i ] = firstCube;
 		}
 	}
@@ -204,7 +204,7 @@ void Renderer::UpdateGpuMaterials()
 {
 	for ( auto it = uploadMaterials.begin(); it != uploadMaterials.end(); ++it )
 	{
-		Asset<Material>* matAsset = gAssets.materialLib.Find( *it );
+		Asset<Material>* matAsset = g_assets.materialLib.Find( *it );
 		Material& m = matAsset->Get();
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialFreeSlot++;
@@ -227,7 +227,7 @@ void Renderer::UpdateGpuMaterials()
 			{
 				const hdl_t handle = m.GetTexture( t );
 				if ( handle.IsValid() ) {
-					const int uploadId = gAssets.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
+					const int uploadId = g_assets.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
 					assert( uploadId >= 0 );
 					ubo.textures[ t ] = uploadId;
 				}
@@ -261,11 +261,11 @@ void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBuff
 
 void Renderer::UploadModelsToGPU()
 {
-	const uint32_t modelCount = gAssets.modelLib.Count();
+	const uint32_t modelCount = g_assets.modelLib.Count();
 
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
-		Model& model = gAssets.modelLib.Find( m )->Get();
+		Model& model = g_assets.modelLib.Find( m )->Get();
 		if ( model.uploaded ) {
 			continue;
 		}

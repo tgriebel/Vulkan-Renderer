@@ -23,8 +23,8 @@
 
 #include "chessScene.h"
 
-extern imguiControls_t	gImguiControls;
-extern Window			gWindow;
+extern imguiControls_t	g_imguiControls;
+extern Window			g_window;
 
 struct pieceMappingInfo_t {
 	const char* name;
@@ -105,19 +105,19 @@ void ChessScene::Init()
 
 	{
 		Entity* ent = new Entity();
-		CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "_skybox" ), *ent );
+		CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "_skybox" ), *ent );
 		ent->name = "_skybox";
 		entities.push_back( ent );
 	}
 
-	gAssets.modelLib.Find( "plane" )->Get().surfs[ 0 ].materialHdl = gAssets.materialLib.RetrieveHdl( "GlowSquare" );
+	g_assets.modelLib.Find( "plane" )->Get().surfs[ 0 ].materialHdl = g_assets.materialLib.RetrieveHdl( "GlowSquare" );
 
 	for ( int i = 0; i < 8; ++i )
 	{
 		for ( int j = 0; j < 8; ++j )
 		{
 			PieceEntity* squareEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			CreateEntityBounds( gAssets.modelLib.RetrieveHdl( "plane" ), *squareEnt );
+			CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "plane" ), *squareEnt );
 			squareEnt->SetOrigin( GetSquareCenterForLocation( squareEnt->file, squareEnt->rank ) + vec3f( 0.0f, 0.0f, 0.01f ) );
 			squareEnt->SetFlag( ENT_FLAG_SELECTABLE );
 			squareEnt->handle = -1;
@@ -133,15 +133,15 @@ void ChessScene::Init()
 				continue;
 			}
 			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			CreateEntityBounds( gAssets.modelLib.RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
+			CreateEntityBounds( g_assets.modelLib.RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
 			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
-				pieceEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "White.001" );
+				pieceEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "White.001" );
 			}
 			else {
 				pieceEnt->SetRotation( vec3f( 0.0f, 0.0f, 180.0f ) );
-				pieceEnt->materialHdl = gAssets.materialLib.RetrieveHdl( "Chess_Black.001" );
+				pieceEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "Chess_Black.001" );
 			}
 			pieceEnt->name = GetName( pieceInfo ).c_str();
 			pieceEntities.push_back( static_cast<uint32_t>( entities.size() ) );
@@ -149,12 +149,12 @@ void ChessScene::Init()
 		}
 	}
 
-	const hdl_t diamondHdl = gAssets.modelLib.RetrieveHdl( "diamond" );
+	const hdl_t diamondHdl = g_assets.modelLib.RetrieveHdl( "diamond" );
 	for ( int i = 0; i < MaxLights; ++i )
 	{
 		Entity* ent = new Entity();
 		CreateEntityBounds( diamondHdl, *ent );
-		ent->materialHdl = gAssets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+		ent->materialHdl = g_assets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
 		ent->SetFlag( ENT_FLAG_WIREFRAME );
 		ent->name = ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str();
 		entities.push_back( ent );
@@ -168,7 +168,7 @@ void ChessScene::Update()
 
 	lights[ 0 ].lightPos = vec4f( 5.0f * cos( periodsPerSecond * time ), 5.0f * sin( periodsPerSecond * time ), 8.0f, 0.0f );
 
-	const mouse_t& mouse = gWindow.input.GetMouse();
+	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( ( mouse.centered == false ) && mouse.leftDown )
 	{
 		Ray ray = camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
@@ -253,7 +253,7 @@ void ChessScene::Update()
 		}
 	}
 
-	Material& glowMat = gAssets.materialLib.Find( "GlowSquare" )->Get();
+	Material& glowMat = g_assets.materialLib.Find( "GlowSquare" )->Get();
 	glowMat.Kd( rgbTuplef_t( 0.1f, 0.1f, 1.0f ) );
 	glowMat.Tr( 0.5f * cos( 3.0f * time ) + 0.5f );
 
