@@ -197,6 +197,9 @@
     <ClInclude Include="src\render_core\raytracerInterface.h">
       <Filter>render core</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_core\drawpass.h">
+      <Filter>render core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

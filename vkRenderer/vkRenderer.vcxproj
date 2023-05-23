@@ -193,6 +193,7 @@
     <ClInclude Include="src\render_binding\pipeline.h" />
     <ClInclude Include="src\render_binding\shaderBinding.h" />
     <ClInclude Include="src\render_core\debugMenu.h" />
+    <ClInclude Include="src\render_core\drawpass.h" />
     <ClInclude Include="src\render_core\gpuImage.h" />
     <ClInclude Include="src\render_core\raytracerInterface.h" />
     <ClInclude Include="src\render_core\renderer.h" />

@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <scene/scene.h>
 #include "common.h"
+#include "../render_core/drawpass.h"
 
 enum class renderViewRegion_t : uint32_t
 {
@@ -68,6 +69,7 @@ public:
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
 	FrameBuffer*			fb; // TODO: Put in render pass?
+	DrawPass*				passes[ DRAWPASS_COUNT ];
 
 	uint32_t				committedModelCnt;
 	uint32_t				mergedModelCnt;
