@@ -26,6 +26,7 @@
 #include "../globals/common.h"
 #include "../render_binding/gpuResources.h"
 #include "../render_core/gpuImage.h"
+#include "rhi.h"
 #include <resource_types/texture.h>
 
 class FrameState
@@ -82,12 +83,8 @@ public:
 	Texture*		stencil;
 
 #ifdef USE_VULKAN
-	VkFramebuffer	buffer;
-	VkFramebuffer	bufferReadAfter;
-	VkFramebuffer	bufferPresentAfter;
-	VkRenderPass	renderPass;
-	VkRenderPass	renderPassReadAfter;
-	VkRenderPass	renderPassPresentAfter;
+	VkFramebuffer	buffers[ PassPermCount ];
+	VkRenderPass	renderPasses[ PassPermCount ];
 #endif
 
 	uint32_t		width;
@@ -107,7 +104,7 @@ public:
 
 	inline bool IsValid() const
 	{
-		return ( buffer != VK_NULL_HANDLE );
+		return ( buffers != VK_NULL_HANDLE );
 	}
 
 	inline uint32_t GetWidth()
@@ -121,26 +118,14 @@ public:
 	}
 
 #ifdef USE_VULKAN
-	VkFramebuffer GetVkBuffer( const bool readAfter = false, const bool presentAfter = false ) const
+	VkFramebuffer GetVkBuffer( renderPassTransitionFlags_t transitionState = {} ) const
 	{
-		if ( presentAfter ) {
-			return bufferPresentAfter;
-		}
-		if ( readAfter ) {
-			return bufferReadAfter;
-		}
-		return buffer;
+		return buffers[ transitionState.bits ];
 	}
 
-	VkRenderPass GetVkRenderPass( const bool readAfter = false, const bool presentAfter = false )
+	VkRenderPass GetVkRenderPass( renderPassTransitionFlags_t transitionState = {} )
 	{
-		if( presentAfter ) {
-			return renderPassPresentAfter;
-		}
-		if ( readAfter ) {
-			return renderPassReadAfter;
-		}
-		return renderPass;
+		return renderPasses[ transitionState.bits ];
 	}
 #endif
 

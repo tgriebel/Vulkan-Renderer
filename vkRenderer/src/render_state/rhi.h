@@ -15,51 +15,57 @@ enum vk_RenderPassAttachmentMask_t : uint8_t
 DEFINE_ENUM_OPERATORS( vk_RenderPassAttachmentMask_t, uint8_t )
 
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
-struct vk_RenderPassAttachmentBits_t
+struct renderPassAttachmentBits_t
 {
 	textureSamples_t	samples : 8;
 	textureFmt_t		fmt		: 8;
 };
-struct vk_RenderPassTransitionBits_t
+union renderPassTransitionFlags_t
 {
-	uint8_t				clear		: 1;
-	uint8_t				store		: 1;
-	uint8_t				readAfter	: 1;
-	uint8_t				presentAfter: 1;
+	struct renderPassTransitionBits_t 
+	{
+		uint8_t				clear		: 1;
+		uint8_t				store		: 1;
+		uint8_t				readAfter	: 1;
+		uint8_t				presentAfter: 1;
+	} flags;
+	uint8_t bits;
 };
 static_assert( sizeof( textureSamples_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( textureFmt_t ) == 1, "Bits overflowed" );
-static_assert( sizeof( vk_RenderPassAttachmentBits_t ) == 2, "Bits overflowed" );
-static_assert( sizeof( vk_RenderPassTransitionBits_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( renderPassAttachmentBits_t ) == 2, "Bits overflowed" );
+static_assert( sizeof( renderPassTransitionFlags_t ) == 1, "Bits overflowed" );
 
-static const uint32_t VK_PASS_BITS_SIZE = 16;
+static const uint32_t PassPermCount = 16;
+
+static const uint32_t VkPassBitsSize = 16;
 struct vk_RenderPassBits_t
 {
 	union
 	{
 		struct vkRenderPassState_t
 		{
-			vk_RenderPassAttachmentBits_t	colorAttach0;			
-			vk_RenderPassAttachmentBits_t	colorAttach1;			
-			vk_RenderPassAttachmentBits_t	colorAttach2;			
-			vk_RenderPassAttachmentBits_t	depthAttach;			
-			vk_RenderPassAttachmentBits_t	stencilAttach;			
-			vk_RenderPassTransitionBits_t	colorTrans0;
-			vk_RenderPassTransitionBits_t	colorTrans1;
-			vk_RenderPassTransitionBits_t	colorTrans2;
-			vk_RenderPassTransitionBits_t	depthTrans;
-			vk_RenderPassTransitionBits_t	stencilTrans;
+			renderPassAttachmentBits_t		colorAttach0;
+			renderPassAttachmentBits_t		colorAttach1;
+			renderPassAttachmentBits_t		colorAttach2;
+			renderPassAttachmentBits_t		depthAttach;
+			renderPassAttachmentBits_t		stencilAttach;
+			renderPassTransitionFlags_t		colorTrans0;
+			renderPassTransitionFlags_t		colorTrans1;
+			renderPassTransitionFlags_t		colorTrans2;
+			renderPassTransitionFlags_t		depthTrans;
+			renderPassTransitionFlags_t		stencilTrans;
 			vk_RenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
 		} semantic;
-		uint8_t bytes[ VK_PASS_BITS_SIZE ];
+		uint8_t bytes[ VkPassBitsSize ];
 	};
 
 	vk_RenderPassBits_t()
 	{
-		memset( bytes, 0, VK_PASS_BITS_SIZE );
+		memset( bytes, 0, VkPassBitsSize );
 	}
 };
-static_assert( sizeof( vk_RenderPassBits_t ) == VK_PASS_BITS_SIZE, "Bits overflowed" );
+static_assert( sizeof( vk_RenderPassBits_t ) == VkPassBitsSize, "Bits overflowed" );
 
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
 

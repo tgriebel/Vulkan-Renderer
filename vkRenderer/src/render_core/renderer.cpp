@@ -1127,10 +1127,16 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 		throw std::runtime_error( "Missing pass state!" );
 	}
 
+	renderPassTransitionFlags_t transitionState = {};
+	transitionState.flags.readAfter = passState->readAfter;
+	transitionState.flags.presentAfter = passState->presentAfter;
+	transitionState.flags.store = true;
+	transitionState.flags.clear = true;
+
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = passState->fb[ bufferId ]->GetVkRenderPass( passState->readAfter, passState->presentAfter );
-	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkBuffer( passState->readAfter, passState->presentAfter );
+	passInfo.renderPass = passState->fb[ bufferId ]->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkBuffer( transitionState );
 	passInfo.renderArea.offset = { passState->x, passState->y };
 	passInfo.renderArea.extent = { passState->width, passState->height };
 

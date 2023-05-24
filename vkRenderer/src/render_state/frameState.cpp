@@ -25,23 +25,23 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0 )
 	{
-		if ( passState.semantic.colorTrans0.presentAfter ) {
+		if ( passState.semantic.colorTrans0.flags.presentAfter ) {
 			attachments[ count ].format = vk_GetTextureFormat( g_swapChain.GetBackBufferFormat() );
 		}
 		else {
 			attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
 		}
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach0.samples );
-		attachments[ count ].loadOp = passState.semantic.colorTrans0.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		attachments[ count ].storeOp = passState.semantic.colorTrans0.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans0.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].storeOp = passState.semantic.colorTrans0.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorTrans0.presentAfter ) {
+		if ( passState.semantic.colorTrans0.flags.presentAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		}
-		else if ( passState.semantic.colorTrans0.readAfter ) {
+		else if ( passState.semantic.colorTrans0.flags.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -58,13 +58,13 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	{
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach1.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach1.samples );
-		attachments[ count ].loadOp = passState.semantic.colorTrans1.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].storeOp = passState.semantic.colorTrans1.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans1.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.colorTrans1.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorTrans1.readAfter ) {
+		if ( passState.semantic.colorTrans1.flags.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -81,13 +81,13 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	{
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach2.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach2.samples );
-		attachments[ count ].loadOp = passState.semantic.colorTrans2.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].storeOp = passState.semantic.colorTrans2.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans2.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.colorTrans2.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorTrans1.readAfter ) {
+		if ( passState.semantic.colorTrans1.flags.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -106,13 +106,13 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	{
 		attachments[ count ].format = vk_GetTextureFormat( passState.semantic.depthAttach.fmt );
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.depthAttach.samples );
-		attachments[ count ].loadOp = passState.semantic.depthTrans.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].storeOp = passState.semantic.depthTrans.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[ count ].stencilLoadOp = passState.semantic.depthTrans.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].stencilStoreOp = passState.semantic.depthTrans.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.depthTrans.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].storeOp = passState.semantic.depthTrans.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = passState.semantic.depthTrans.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].stencilStoreOp = passState.semantic.depthTrans.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.depthTrans.readAfter ) {
+		if ( passState.semantic.depthTrans.flags.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -133,11 +133,11 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.stencilAttach.samples );
 		attachments[ count ].loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[ count ].stencilLoadOp = passState.semantic.stencilTrans.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-		attachments[ count ].stencilStoreOp = passState.semantic.stencilTrans.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[ count ].stencilLoadOp = passState.semantic.stencilTrans.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+		attachments[ count ].stencilStoreOp = passState.semantic.stencilTrans.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.stencilTrans.readAfter ) {
+		if ( passState.semantic.stencilTrans.flags.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		}
 		else {
@@ -169,28 +169,23 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
-	const uint32_t maxPermutationCount = 3;
-	struct permutationState_t
-	{
-		bool readAfter;
-		bool presentAfter;
-	};
-	const permutationState_t perms[ maxPermutationCount ] = { { false, false }, { true, false }, { false, true } };
-	VkRenderPass* permPasses[ maxPermutationCount ] = { &renderPass, &renderPassReadAfter, &renderPassPresentAfter };
-	VkFramebuffer* permBuffers[ maxPermutationCount ] = { &buffer, &bufferReadAfter, &bufferPresentAfter };
-
-	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
-	const uint32_t permutationCount = canPresent ? maxPermutationCount : ( maxPermutationCount - 1 );
-
-	if( canPresent == false )
-	{
-		bufferPresentAfter = VK_NULL_HANDLE;
-		renderPassPresentAfter = VK_NULL_HANDLE;
+	renderPassTransitionFlags_t perms[ PassPermCount ];
+	for ( uint32_t i = 0; i < PassPermCount; ++i ) {
+		perms[ i ].bits = i;
 	}
 
-	for( uint32_t i = 0; i < permutationCount; ++i )
+	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
+
+	for( uint32_t i = 0; i < PassPermCount; ++i )
 	{
-		const permutationState_t& state = perms[ i ];
+		const renderPassTransitionFlags_t& state = perms[ i ];
+
+		if( ( canPresent == false ) && state.flags.presentAfter )
+		{
+			buffers[ i ] = VK_NULL_HANDLE;
+			renderPasses[ i ] = VK_NULL_HANDLE;
+			continue;
+		}
 
 		// Can specify clear options, etc. Assigned to cached render pass that matches
 		attachmentCount = 0;
@@ -205,10 +200,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		{
 			passBits.semantic.colorAttach0.samples = createInfo.color0->info.subsamples;
 			passBits.semantic.colorAttach0.fmt = createInfo.color0->info.fmt;
-			passBits.semantic.colorTrans0.clear = 1;
-			passBits.semantic.colorTrans0.store = 1;
-			passBits.semantic.colorTrans0.readAfter = state.readAfter;
-			passBits.semantic.colorTrans0.presentAfter = state.presentAfter;
+			passBits.semantic.colorTrans0 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
 
 			attachments[ colorCount ] = createInfo.color0->gpuImage->GetVkImageView();
@@ -219,10 +211,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		{
 			passBits.semantic.colorAttach1.samples = createInfo.color1->info.subsamples;
 			passBits.semantic.colorAttach1.fmt = createInfo.color1->info.fmt;
-			passBits.semantic.colorTrans1.clear = 1;
-			passBits.semantic.colorTrans1.store = 1;
-			passBits.semantic.colorTrans1.readAfter = state.readAfter;
-			passBits.semantic.colorTrans1.presentAfter = state.presentAfter;
+			passBits.semantic.colorTrans1 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
 
 			attachments[ colorCount ] = createInfo.color1->gpuImage->GetVkImageView();
@@ -233,10 +222,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		{
 			passBits.semantic.colorAttach2.samples = createInfo.color2->info.subsamples;
 			passBits.semantic.colorAttach2.fmt = createInfo.color2->info.fmt;
-			passBits.semantic.colorTrans2.clear = 1;
-			passBits.semantic.colorTrans2.store = 1;
-			passBits.semantic.colorTrans2.readAfter = state.readAfter;
-			passBits.semantic.colorTrans2.presentAfter = state.presentAfter;
+			passBits.semantic.colorTrans2 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
 
 			attachments[ colorCount ] = createInfo.color2->gpuImage->GetVkImageView();
@@ -247,10 +233,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		{
 			passBits.semantic.depthAttach.samples = createInfo.depth->info.subsamples;
 			passBits.semantic.depthAttach.fmt = createInfo.depth->info.fmt;
-			passBits.semantic.depthTrans.clear = 1;
-			passBits.semantic.depthTrans.store = 1;
-			passBits.semantic.depthTrans.readAfter = state.readAfter;
-			passBits.semantic.depthTrans.presentAfter = state.presentAfter;
+			passBits.semantic.depthTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
 
 			attachments[ colorCount ] = createInfo.depth->gpuImage->GetVkImageView();
@@ -261,10 +244,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		{
 			passBits.semantic.stencilAttach.samples = createInfo.stencil->info.subsamples;
 			passBits.semantic.stencilAttach.fmt = createInfo.stencil->info.fmt;
-			passBits.semantic.stencilTrans.clear = 1;
-			passBits.semantic.stencilTrans.store = 1;
-			passBits.semantic.stencilTrans.readAfter = state.readAfter;
-			passBits.semantic.stencilTrans.presentAfter = state.presentAfter;
+			passBits.semantic.stencilTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
 
 			attachments[ colorCount + dsCount ] = createInfo.stencil->gpuImage->GetVkImageView();
@@ -273,21 +253,21 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 		attachmentCount = colorCount + dsCount;
 
-		*permPasses[ i ] = vk_CreateRenderPass( passBits );
-		if ( *permPasses[ i ] == VK_NULL_HANDLE ) {
+		renderPasses[ i ] = vk_CreateRenderPass( passBits );
+		if ( renderPasses[ i ] == VK_NULL_HANDLE ) {
 			throw std::runtime_error( "Failed to create framebuffer! Render pass invalid" );
 		}
 
 		VkFramebufferCreateInfo framebufferInfo{ };
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = *permPasses[ i ];
+		framebufferInfo.renderPass = renderPasses[ i ];
 		framebufferInfo.attachmentCount = attachmentCount;
 		framebufferInfo.pAttachments = attachments;
 		framebufferInfo.width = createInfo.width;
 		framebufferInfo.height = createInfo.height;
 		framebufferInfo.layers = 1;
 
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &*permBuffers[ i ] ) != VK_SUCCESS ) {
+		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create framebuffer!" );
 		}
 	}
@@ -307,24 +287,14 @@ void FrameBuffer::Destroy()
 	assert( context.device != VK_NULL_HANDLE );
 	if ( context.device != VK_NULL_HANDLE )
 	{
-		if ( buffer != VK_NULL_HANDLE ) {
-			vkDestroyFramebuffer( context.device, buffer, nullptr );
-		}
-		if ( bufferReadAfter != VK_NULL_HANDLE ) {
-			vkDestroyFramebuffer( context.device, bufferReadAfter, nullptr );
-		}
-		if ( bufferPresentAfter != VK_NULL_HANDLE ) {
-			vkDestroyFramebuffer( context.device, bufferPresentAfter, nullptr );
-		}
-
-		if( renderPass != VK_NULL_HANDLE ) {
-			vkDestroyRenderPass( context.device, renderPass, nullptr );
-		}
-		if ( renderPassReadAfter != VK_NULL_HANDLE ) {
-			vkDestroyRenderPass( context.device, renderPassReadAfter, nullptr );
-		}
-		if ( renderPassPresentAfter != VK_NULL_HANDLE ) {
-			vkDestroyRenderPass( context.device, renderPassPresentAfter, nullptr );
+		for ( uint32_t i = 0; i < PassPermCount; ++i )
+		{
+			if ( buffers != VK_NULL_HANDLE ) {
+				vkDestroyFramebuffer( context.device, buffers[ i ], nullptr );
+			}
+			if ( renderPasses != VK_NULL_HANDLE ) {
+				vkDestroyRenderPass( context.device, renderPasses[ i ], nullptr );
+			}
 		}
 	}
 }

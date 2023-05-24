@@ -198,7 +198,11 @@ void Renderer::InitImGui()
 	vkInfo.MinImageCount = 2;
 	vkInfo.ImageCount = 2;
 	vkInfo.CheckVkResultFn = nullptr;
-	ImGui_ImplVulkan_Init( &vkInfo, postPass.fb[ 0 ]->GetVkRenderPass( false, true ) );
+
+	renderPassTransitionFlags_t transitionState = {};
+	transitionState.flags.presentAfter = true;
+
+	ImGui_ImplVulkan_Init( &vkInfo, postPass.fb[ 0 ]->GetVkRenderPass( transitionState ) );
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
