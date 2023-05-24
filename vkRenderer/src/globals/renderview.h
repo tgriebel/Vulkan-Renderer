@@ -50,6 +50,10 @@ public:
 		committedModelCnt = 0;
 		mergedModelCnt = 0;
 
+		for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
+			passes[ i ] = nullptr;
+		}
+
 		region = renderViewRegion_t::UNKNOWN;
 
 		memset( surfaces, 0, MaxSurfaces );
@@ -68,7 +72,6 @@ public:
 	viewport_t				viewport;
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
-	FrameBuffer*			fb; // TODO: Put in render pass?
 	DrawPass*				passes[ DRAWPASS_COUNT ];
 
 	uint32_t				committedModelCnt;

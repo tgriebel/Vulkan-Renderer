@@ -146,9 +146,9 @@ void Renderer::InitShaderResources()
 
 		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
 		{
-			mainPassState.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			shadowPassState.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			postPassState.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			mainPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			shadowPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			postPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
 			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 		}
 
@@ -198,7 +198,7 @@ void Renderer::InitImGui()
 	vkInfo.MinImageCount = 2;
 	vkInfo.ImageCount = 2;
 	vkInfo.CheckVkResultFn = nullptr;
-	ImGui_ImplVulkan_Init( &vkInfo, postPassState.fb[ 0 ]->GetVkRenderPass( false, true ) );
+	ImGui_ImplVulkan_Init( &vkInfo, postPass.fb[ 0 ]->GetVkRenderPass( false, true ) );
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
@@ -342,13 +342,13 @@ void Renderer::CreatePipelineObjects()
 			VkRenderPass pass;
 			VkDescriptorSetLayout layout;
 			if ( passIx == DRAWPASS_SHADOW ) {
-				pass = shadowPassState.fb[ 0 ]->GetVkRenderPass();
+				pass = shadowPass.fb[ 0 ]->GetVkRenderPass();
 			}
 			else if ( passIx == DRAWPASS_POST_2D ) {
-				pass = postPassState.fb[ 0 ]->GetVkRenderPass();
+				pass = postPass.fb[ 0 ]->GetVkRenderPass();
 			}
 			else {
-				pass = mainPassState.fb[ 0 ]->GetVkRenderPass();
+				pass = mainPass.fb[ 0 ]->GetVkRenderPass();
 			}
 			assert( pass != VK_NULL_HANDLE );
 
@@ -518,13 +518,13 @@ void Renderer::CreateFramebuffers()
 
 		shadowMap[ i ].Create( fbInfo );
 
-		shadowPassState.x = 0;
-		shadowPassState.y = 0;
-		shadowPassState.width = shadowMap[ i ].width;
-		shadowPassState.height = shadowMap[ i ].height;
-		shadowPassState.fb[i] = &shadowMap[i];
-		shadowPassState.readAfter = true;
-		shadowPassState.presentAfter = false;
+		shadowPass.x = 0;
+		shadowPass.y = 0;
+		shadowPass.width = shadowMap[ i ].width;
+		shadowPass.height = shadowMap[ i ].height;
+		shadowPass.fb[i] = &shadowMap[i];
+		shadowPass.readAfter = true;
+		shadowPass.presentAfter = false;
 	}
 
 	// Main Scene 3D Render
@@ -539,26 +539,26 @@ void Renderer::CreateFramebuffers()
 
 		mainColor[ i ].Create( fbInfo );
 
-		mainPassState.x = 0;
-		mainPassState.y = 0;
-		mainPassState.width = width;
-		mainPassState.height = height;
-		mainPassState.fb[i] = &mainColor[i];
-		mainPassState.readAfter = true;
-		mainPassState.presentAfter = false;
+		mainPass.x = 0;
+		mainPass.y = 0;
+		mainPass.width = width;
+		mainPass.height = height;
+		mainPass.fb[i] = &mainColor[i];
+		mainPass.readAfter = true;
+		mainPass.presentAfter = false;
 	}
 
 	// Swap Chain Images
 	const uint32_t swapChainCount = g_swapChain.GetBufferCount();
 	for ( size_t i = 0; i < swapChainCount; i++ )
 	{
-		postPassState.x = 0;
-		postPassState.y = 0;
-		postPassState.width = g_swapChain.GetWidth();
-		postPassState.height = g_swapChain.GetHeight();
-		postPassState.fb[ i ] = &g_swapChain.framebuffers[ i ];
-		postPassState.readAfter = false;
-		postPassState.presentAfter = true;
+		postPass.x = 0;
+		postPass.y = 0;
+		postPass.width = g_swapChain.GetWidth();
+		postPass.height = g_swapChain.GetHeight();
+		postPass.fb[ i ] = &g_swapChain.framebuffers[ i ];
+		postPass.readAfter = false;
+		postPass.presentAfter = true;
 	}
 }
 

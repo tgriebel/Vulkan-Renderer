@@ -178,9 +178,9 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 {
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
-	AppendDescriptorWrites( *mainPassState.parms[ currentImage ], descriptorWrites );
-	AppendDescriptorWrites( *shadowPassState.parms[ currentImage ], descriptorWrites );
-	AppendDescriptorWrites( *postPassState.parms[ currentImage ], descriptorWrites );
+	AppendDescriptorWrites( *mainPass.parms[ currentImage ], descriptorWrites );
+	AppendDescriptorWrites( *shadowPass.parms[ currentImage ], descriptorWrites );
+	AppendDescriptorWrites( *postPass.parms[ currentImage ], descriptorWrites );
 	AppendDescriptorWrites( *particleState.parms[ currentImage ], descriptorWrites );
 
 	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );

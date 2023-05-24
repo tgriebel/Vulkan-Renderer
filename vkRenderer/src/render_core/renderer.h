@@ -97,12 +97,21 @@ public:
 
 		renderView.region = renderViewRegion_t::STANDARD_RASTER;
 		renderView.name = "Main View";
+		renderView.passes[ DRAWPASS_DEPTH ] = &mainPass;
+		renderView.passes[ DRAWPASS_TERRAIN ] = &mainPass;
+		renderView.passes[ DRAWPASS_OPAQUE ] = &mainPass;
+		renderView.passes[ DRAWPASS_SKYBOX ] = &mainPass;
+		renderView.passes[ DRAWPASS_TRANS ] = &mainPass;
+		renderView.passes[ DRAWPASS_DEBUG_SOLID ] = &mainPass;
+		renderView.passes[ DRAWPASS_DEBUG_WIREFRAME ] = &mainPass;
 
 		shadowView.region = renderViewRegion_t::SHADOW;
 		shadowView.name = "Shadow View";
+		shadowView.passes[ DRAWPASS_SHADOW ] = &shadowPass;
 
 		view2D.region = renderViewRegion_t::POST;
 		view2D.name = "Post View";
+		view2D.passes[ DRAWPASS_POST_2D ] = &postPass;
 	}
 
 	void RenderScene( Scene* scene );
@@ -173,9 +182,9 @@ private:
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	graphicsQueue_t					graphicsQueue;
 	computeQueue_t					computeQueue;
-	DrawPass						shadowPassState;
-	DrawPass						mainPassState;
-	DrawPass						postPassState;
+	DrawPass						shadowPass;
+	DrawPass						mainPass;
+	DrawPass						postPass;
 	ComputeState					particleState;
 	VkDescriptorPool				descriptorPool;
 	renderConfig_t					config;
@@ -313,7 +322,6 @@ private:
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
 	textureSamples_t			GetSampleCountForDrawPass( const drawPass_t pass );
 	viewport_t					GetDrawPassViewport( const drawPass_t pass );
-	const DrawPass*		GetPassState( const drawPass_t pass );
 	void						DrawDebugMenu();
 	void						FlushGPU();
 	void						WaitForEndFrame();
