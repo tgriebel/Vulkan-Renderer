@@ -68,7 +68,6 @@ typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
 using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
 using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 
-extern pipelineMap_t				g_pipelineLib;
 extern Scene						scene;
 extern Window						g_window;
 extern SwapChain					g_swapChain;

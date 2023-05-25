@@ -94,6 +94,8 @@ struct pushConstants_t
 
 class ShaderBindSet;
 
+void ClearPipelineCache();
+void DestroyPipelineCache();
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 hdl_t FindPipelineObject( const pipelineState_t& state );
 void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );

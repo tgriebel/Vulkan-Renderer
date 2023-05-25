@@ -31,7 +31,7 @@
 #include <core/assetLib.h>
 #include <scene/scene.h>
 
-std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
+static std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 
 static VkVertexInputBindingDescription GetVertexBindingDescription()
 {
@@ -126,11 +126,23 @@ void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout 
 	}
 }
 
-/*
-void CreateDescriptorSets( GpuProgram& program )
+
+void ClearPipelineCache()
 {
+	g_pipelineLib.clear();
 }
-*/
+
+
+void DestroyPipelineCache()
+{
+	for ( auto it = g_pipelineLib.begin(); it != g_pipelineLib.end(); ++it )
+	{
+		vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
+		vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
+	}
+	g_pipelineLib.clear();
+}
+
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 {

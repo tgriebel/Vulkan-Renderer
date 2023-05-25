@@ -322,7 +322,7 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 
 void Renderer::CreatePipelineObjects()
 {
-	g_pipelineLib.clear();
+	ClearPipelineCache();
 	for ( uint32_t i = 0; i < g_assets.materialLib.Count(); ++i )
 	{
 		const Material& m = g_assets.materialLib.Find( i )->Get();

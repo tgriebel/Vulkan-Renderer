@@ -27,8 +27,6 @@
 #include "renderer.h"
 #include <scene/entity.h>
 
-extern std::unordered_map<uint64_t, pipelineObject_t> g_pipelineLib; // TODO: move to renderer
-
 void Renderer::Cleanup()
 {
 	DestroyFrameResources();
@@ -157,12 +155,7 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// PSO
-	for ( auto it = g_pipelineLib.begin(); it != g_pipelineLib.end(); ++it )
-	{
-		vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
-		vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
-	}
-	g_pipelineLib.clear();
+	DestroyPipelineCache();
 
 	const uint32_t shaderCount = g_assets.gpuPrograms.Count();
 	for ( uint32_t i = 0; i < shaderCount; ++i )
