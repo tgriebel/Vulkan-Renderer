@@ -143,7 +143,7 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
-void CreateGraphicsPipeline( const ShaderBindSet* bindset, const DrawPass* pass, const pipelineState_t& state, hdl_t& pipelineHdl )
+void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
 	pipelineHdl = state.hash;
 
@@ -152,21 +152,22 @@ void CreateGraphicsPipeline( const ShaderBindSet* bindset, const DrawPass* pass,
 		return;
 	}
 
-	VkDescriptorSetLayout layout = bindset->GetVkObject();
-
+	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.prog )->Get();
+	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
+	
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = state.shaders->vk_shaders[ 0 ];
+	vertShaderStageInfo.module = prog.vk_shaders[ 0 ];
 	vertShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{ };
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = state.shaders->vk_shaders[ 1 ];
+	fragShaderStageInfo.module = prog.vk_shaders[ 1 ];
 	fragShaderStageInfo.pName = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -381,7 +382,7 @@ void CreateGraphicsPipeline( const ShaderBindSet* bindset, const DrawPass* pass,
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }
 
-void CreateComputePipeline( const ShaderBindSet* bindset, const pipelineState_t& state, hdl_t& pipelineHdl )
+void CreateComputePipeline( const pipelineState_t& state, hdl_t& pipelineHdl )
 {
 	pipelineHdl = state.hash;
 
@@ -390,7 +391,8 @@ void CreateComputePipeline( const ShaderBindSet* bindset, const pipelineState_t&
 		return;
 	}
 
-	VkDescriptorSetLayout layout = bindset->GetVkObject();
+	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.prog )->Get();
+	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
@@ -398,7 +400,7 @@ void CreateComputePipeline( const ShaderBindSet* bindset, const pipelineState_t&
 	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};
 	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-	computeShaderStageInfo.module = state.shaders->vk_shaders[ 0 ];
+	computeShaderStageInfo.module = prog.vk_shaders[ 0 ];
 	computeShaderStageInfo.pName = "main";
 	computeShaderStageInfo.pNext = nullptr;
 
