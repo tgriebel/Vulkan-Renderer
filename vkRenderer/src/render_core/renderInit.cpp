@@ -315,7 +315,6 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 		GpuProgram& prog = lib.Find( i )->Get();
 		for ( uint32_t i = 0; i < prog.shaderCount; ++i ) {
 			prog.vk_shaders[ i ] = vk_CreateShaderModule( prog.shaders[ i ].blob );
-			prog.pipeline = INVALID_HDL;
 		}
 	}
 }
@@ -337,12 +336,11 @@ void Renderer::CreatePipelineObjects()
 
 			const drawPass_t drawPass = drawPass_t( passIx );
 
-			pipelineState_t state;
+			pipelineState_t state = {};
 			state.viewport = GetDrawPassViewport( drawPass );
 			state.stateBits = GetStateBitsForDrawPass( drawPass );
 			state.samplingRate = GetSampleCountForDrawPass( drawPass );
-			state.prog = progHdl;
-			state.hash = prog->Handle().Get();
+			state.progHdl = progHdl;
 
 			const DrawPass* pass = nullptr;
 			if ( passIx == DRAWPASS_SHADOW ) {
@@ -356,7 +354,7 @@ void Renderer::CreatePipelineObjects()
 
 			// FIXME: the drawpass essentially splits the shader asset
 			//assert( prog->Get().pipeline == INVALID_HDL );
-			CreateGraphicsPipeline( pass, state, prog->Get().pipeline );
+			CreateGraphicsPipeline( pass, state );
 		}
 	}
 	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
@@ -372,11 +370,10 @@ void Renderer::CreatePipelineObjects()
 			continue;
 		}
 
-		pipelineState_t state;
-		state.prog = prog->Handle();
-		state.hash = prog->Handle().Get();
+		pipelineState_t state = {};
+		state.progHdl = prog->Handle();
 
-		CreateComputePipeline( state, prog->Get().pipeline );
+		CreateComputePipeline( state );
 	}
 }
 

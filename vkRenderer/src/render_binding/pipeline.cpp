@@ -143,16 +143,28 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
-void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state, hdl_t& pipelineHdl )
+hdl_t FindPipelineObject( const pipelineState_t& state )
 {
-	pipelineHdl = state.hash;
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
+
+	auto it = g_pipelineLib.find( pipelineHdl.Get() );
+	if ( it != g_pipelineLib.end() ) {
+		return pipelineHdl;
+	}
+	return INVALID_HDL;
+}
+
+
+void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state )
+{
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
 	auto it = g_pipelineLib.find( pipelineHdl.Get() );
 	if ( it != g_pipelineLib.end() ) {
 		return;
 	}
 
-	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.prog )->Get();
+	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.progHdl )->Get();
 	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
 	
 	pipelineObject_t pipelineObject;
@@ -382,16 +394,16 @@ void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state,
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }
 
-void CreateComputePipeline( const pipelineState_t& state, hdl_t& pipelineHdl )
+void CreateComputePipeline( const pipelineState_t& state )
 {
-	pipelineHdl = state.hash;
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
-	auto it = g_pipelineLib.find( state.hash );
+	auto it = g_pipelineLib.find( pipelineHdl.Get() );
 	if ( it != g_pipelineLib.end() ) {
 		return;
 	}
 
-	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.prog )->Get();
+	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.progHdl )->Get();
 	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
 
 	pipelineObject_t pipelineObject;

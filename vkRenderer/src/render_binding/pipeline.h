@@ -50,14 +50,11 @@ enum gfxStateBits_t : uint64_t
 
 struct pipelineState_t
 {
-	uint64_t			hash;
-	gfxStateBits_t		stateBits;
-	textureSamples_t	samplingRate;
-	hdl_t				prog;
-	viewport_t			viewport;
-#ifdef USE_VULKAN
-	renderPassAttachmentBits_t passBits;
-#endif
+	gfxStateBits_t				stateBits;
+	textureSamples_t			samplingRate;
+	hdl_t						progHdl;
+	viewport_t					viewport;
+	renderPassAttachmentBits_t	passBits;
 };
 
 class DrawPass;
@@ -74,7 +71,7 @@ static inline bool operator==( const pipelineState_t& lhs, const pipelineState_t
 	equal = equal && ( lhs.viewport.far == rhs.viewport.far );
 	
 	equal = equal && ( lhs.stateBits == rhs.stateBits );
-	equal = equal && ( lhs.prog == rhs.prog );
+	equal = equal && ( lhs.progHdl == rhs.progHdl );
 
 	return equal;
 }
@@ -98,6 +95,7 @@ struct pushConstants_t
 class ShaderBindSet;
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
+hdl_t FindPipelineObject( const pipelineState_t& state );
 void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
-void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state, hdl_t& pipelineObject );
-void CreateComputePipeline( const pipelineState_t& state, hdl_t& pipelineHdl );
+void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state );
+void CreateComputePipeline( const pipelineState_t& state );

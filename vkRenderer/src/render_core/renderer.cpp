@@ -233,18 +233,28 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 			}
 		}
 
-		for ( int pass = 0; pass < DRAWPASS_COUNT; ++pass ) {
-			if ( material.GetShader( pass ).IsValid() ) {
-				Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( material.GetShader( pass ) );
-				if ( prog == nullptr ) {
-					continue;
-				}
+		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			surf.pipelineObject[ passIx ] = INVALID_HDL;
+			if ( material.GetShader( passIx ).IsValid() == false ) {
+				continue;
+			}
 
-				surf.pipelineObject[ pass ] = prog->Get().pipeline; // TODO: replace with lookup, given shader, get pso for state
+			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( material.GetShader( passIx ) );
+			if ( prog == nullptr ) {
+				continue;
 			}
-			else {
-				surf.pipelineObject[ pass ] = INVALID_HDL;
-			}
+
+			drawPass_t pass = drawPass_t( passIx );
+
+			pipelineState_t state = {};
+			state.viewport = GetDrawPassViewport( pass );
+			state.stateBits = GetStateBitsForDrawPass( pass );
+			state.samplingRate = GetSampleCountForDrawPass( pass );
+			state.progHdl = prog->Handle();
+
+			surf.pipelineObject[ passIx ] = FindPipelineObject( state );
+			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
 		}
 
 		++view.committedModelCnt;
@@ -472,10 +482,16 @@ void Renderer::FlushGPU()
 }
 
 
-void Renderer::Dispatch( VkCommandBuffer commandBuffer, GpuProgram& prog, ShaderBindSet& bindSet, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
+void Renderer::Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& bindSet, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
 {
+	pipelineState_t state = {};
+	state.progHdl = progHdl;
+
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
+
 	pipelineObject_t* pipelineObject = nullptr;
-	GetPipelineObject( prog.pipeline, &pipelineObject );
+	GetPipelineObject( pipelineHdl, &pipelineObject );
+
 	if ( pipelineObject != nullptr )
 	{
 		vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
@@ -517,9 +533,9 @@ void Renderer::SubmitFrame()
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
-		GpuProgram& prog = g_assets.gpuPrograms.Find( "ClearParticles" )->Get();
+		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		Dispatch( computeQueue.commandBuffers[ bufferId ], prog, particleShaderBinds, particleState.parms[ bufferId ]->GetVkObject(), MaxParticles / 256 );
+		Dispatch( computeQueue.commandBuffers[ bufferId ], progHdl, particleShaderBinds, particleState.parms[ bufferId ]->GetVkObject(), MaxParticles / 256 );
 
 		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );
