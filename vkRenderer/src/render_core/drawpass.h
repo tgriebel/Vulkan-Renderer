@@ -7,12 +7,17 @@
 class DrawPass
 {
 public:
+	const char*			name;
+
 	vec4f				clearColor;
 	float				clearDepth;
 	uint32_t			clearStencil;
+	gfxStateBits_t		stateBits;
 
 	bool				readAfter;
 	bool				presentAfter;
+	bool				storeResult;
+	bool				clearBefore;
 
 	int32_t				x;
 	int32_t				y;

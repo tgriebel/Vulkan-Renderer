@@ -239,6 +239,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 				if ( prog == nullptr ) {
 					continue;
 				}
+
 				surf.pipelineObject[ pass ] = prog->Get().pipeline; // TODO: replace with lookup, given shader, get pso for state
 			}
 			else {
