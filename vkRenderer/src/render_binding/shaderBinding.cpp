@@ -79,16 +79,21 @@ uint32_t ShaderBinding::GetHash() const
 
 ShaderBindSet::ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount )
 {
-	bindMap.reserve( bindCount );
+	m_bindMap.reserve( bindCount );
+
+	std::vector<uint32_t> hashes;
+	hashes.resize( bindCount );
 
 	for ( uint32_t i = 0; i < bindCount; ++i )
 	{
-		ShaderBinding& binding = bindMap[ bindings[ i ].GetHash() ];
+		ShaderBinding& binding = m_bindMap[ bindings[ i ].GetHash() ];
 		binding = bindings[i];
 		binding.SetSlot( i );
+		hashes[ i ] = binding.GetHash();
 	}
 
-	valid = false;
+	m_hash = Hash( reinterpret_cast<const uint8_t*>( hashes.data() ), bindCount * sizeof( hashes[ 0 ] ) );
+	m_valid = false;
 }
 
 
@@ -100,7 +105,7 @@ void ShaderBindSet::Create()
 		assert( 0 );
 		return;
 	}
-	assert( valid == false );
+	assert( m_valid == false );
 
 #ifdef USE_VULKAN
 	std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
@@ -130,13 +135,13 @@ void ShaderBindSet::Create()
 	assert(0);
 #endif
 
-	valid = true;
+	m_valid = true;
 }
 
 
 void ShaderBindSet::Destroy()
 {
-	if( valid == false ) {
+	if( m_valid == false ) {
 		return;
 	}
 #ifdef USE_VULKAN
@@ -147,16 +152,22 @@ void ShaderBindSet::Destroy()
 
 const uint32_t ShaderBindSet::Count() const
 {
-	return static_cast<uint32_t>( bindMap.size() );
+	return static_cast<uint32_t>( m_bindMap.size() );
+}
+
+
+const uint32_t ShaderBindSet::GetHash() const
+{
+	return m_hash;
 }
 
 
 const ShaderBinding* ShaderBindSet::GetBinding( const uint32_t id ) const
 {
-	auto it = bindMap.begin();
+	auto it = m_bindMap.begin();
 	std::advance( it, id );
 
-	if ( it != bindMap.end() ) {
+	if ( it != m_bindMap.end() ) {
 		return &it->second;
 	}
 	return nullptr;
@@ -172,8 +183,8 @@ bool ShaderBindSet::HasBinding( const uint32_t id ) const
 bool ShaderBindSet::HasBinding( const ShaderBinding& binding ) const
 {
 	const uint32_t hash = binding.GetHash();
-	auto it = bindMap.find( hash );
-	if ( it != bindMap.end() ) {
+	auto it = m_bindMap.find( hash );
+	if ( it != m_bindMap.end() ) {
 		return true;
 	}
 	return false;

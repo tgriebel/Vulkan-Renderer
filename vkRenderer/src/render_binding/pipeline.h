@@ -56,7 +56,7 @@ struct pipelineState_t
 	GpuProgram*			shaders;
 	viewport_t			viewport;
 #ifdef USE_VULKAN
-	vk_RenderPassBits_t	passBits;
+	renderPassAttachmentBits_t passBits;
 #endif
 };
 

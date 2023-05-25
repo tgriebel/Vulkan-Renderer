@@ -158,8 +158,9 @@ public:
 class ShaderBindSet
 {
 private:
-	std::unordered_map<uint32_t, ShaderBinding> bindMap;
-	bool										valid;
+	std::unordered_map<uint32_t, ShaderBinding> m_bindMap;
+	uint32_t									m_hash;
+	bool										m_valid;
 
 #ifdef USE_VULKAN
 	VkDescriptorSetLayout						vk_layout;
@@ -184,6 +185,7 @@ public:
 #endif
 
 	const uint32_t			Count() const;
+	const uint32_t			GetHash() const;
 	const ShaderBinding*	GetBinding( const uint32_t id ) const;
 	bool					HasBinding( const uint32_t id ) const;
 	bool					HasBinding( const ShaderBinding& binding ) const;
