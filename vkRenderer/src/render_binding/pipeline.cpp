@@ -191,16 +191,16 @@ void CreateGraphicsPipeline( const ShaderBindSet* bindset, const DrawPass* pass,
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	VkViewport viewport{ };
-	viewport.x = state.viewport.x;
-	viewport.y = state.viewport.y;
-	viewport.width = state.viewport.width;
-	viewport.height = state.viewport.height;
+	viewport.x = static_cast<float>( state.viewport.x );
+	viewport.y = static_cast<float>( state.viewport.y );
+	viewport.width = static_cast<float>( state.viewport.width );
+	viewport.height = static_cast<float>( state.viewport.height );
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor{ };
-	scissor.offset = { static_cast<int32_t>( state.viewport.x ), static_cast<int32_t>( state.viewport.y ) };
-	scissor.extent = { static_cast<uint32_t>( state.viewport.width ), static_cast<uint32_t>( state.viewport.height ) };
+	scissor.offset = { state.viewport.x, state.viewport.y };
+	scissor.extent = { state.viewport.width, state.viewport.height };
 
 	VkPipelineViewportStateCreateInfo viewportState{ };
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

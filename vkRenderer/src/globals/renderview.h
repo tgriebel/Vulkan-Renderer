@@ -40,10 +40,10 @@ class RenderView
 public:
 	RenderView()
 	{
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = (float)DEFAULT_DISPLAY_WIDTH;
-		viewport.height = (float)DEFAULT_DISPLAY_HEIGHT;
+		viewport.x = 0;
+		viewport.y = 0;
+		viewport.width = DEFAULT_DISPLAY_WIDTH;
+		viewport.height = DEFAULT_DISPLAY_HEIGHT;
 		viewport.near = 1.0f;
 		viewport.far = 0.0f;
 

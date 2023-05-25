@@ -7,26 +7,20 @@
 class DrawPass
 {
 public:
-	const char*			name;
+	const char*					name;
 
-	vec4f				clearColor;
-	float				clearDepth;
-	uint32_t			clearStencil;
-	gfxStateBits_t		stateBits;
+	vec4f						clearColor;
+	float						clearDepth;
+	uint32_t					clearStencil;
 
-	bool				readAfter;
-	bool				presentAfter;
-	bool				storeResult;
-	bool				clearBefore;
+	gfxStateBits_t				stateBits;
+	textureSamples_t			sampleRate;
+	viewport_t					viewport;
+	renderPassTransitionFlags_t transitionState;
 
-	int32_t				x;
-	int32_t				y;
-	uint32_t			width;
-	uint32_t			height;
-
-	Array<Texture*, 100> codeImages[ MAX_FRAMES_STATES ];
-	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
-	FrameBuffer*		fb[ MAX_FRAMES_STATES ];
+	Array<Texture*, 100>		codeImages[ MAX_FRAMES_STATES ];
+	ShaderBindParms*			parms[ MAX_FRAMES_STATES ];
+	FrameBuffer*				fb[ MAX_FRAMES_STATES ];
 };
 
 

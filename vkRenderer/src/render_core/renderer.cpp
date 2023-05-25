@@ -601,8 +601,8 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// Main view
 	{
-		renderView.viewport.width = static_cast<float>( width );
-		renderView.viewport.height = static_cast<float>( height );
+		renderView.viewport.width = width;
+		renderView.viewport.height = height;
 		renderView.viewMatrix = scene->camera.GetViewMatrix();
 		renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
 		renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
@@ -621,8 +621,8 @@ void Renderer::UpdateViews( const Scene* scene )
 		shadowLightDir[ 2 ] = -renderView.lights[ 0 ].lightDir[ 2 ];
 
 		// Temp shadow map set-up
-		shadowView.viewport.x = 0.0f;
-		shadowView.viewport.y = 0.0f;
+		shadowView.viewport.x = 0;
+		shadowView.viewport.y = 0;
 		shadowView.viewport.near = 0.0f;
 		shadowView.viewport.far = 1.0f;
 		shadowView.viewport.width = ShadowMapWidth;
@@ -647,12 +647,12 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// Post view
 	{
-		view2D.viewport.x = 0.0f;
-		view2D.viewport.y = 0.0f;
+		view2D.viewport.x = 0;
+		view2D.viewport.y = 0;
 		view2D.viewport.near = 0.0f;
 		view2D.viewport.far = 1.0f;
-		view2D.viewport.width = static_cast<float>( width );
-		view2D.viewport.height = static_cast<float>( height );
+		view2D.viewport.width = width;
+		view2D.viewport.height = height;
 		view2D.viewMatrix = mat4x4f( 1.0f );
 		view2D.projMatrix = mat4x4f( 1.0f );
 		shadowView.viewprojMatrix = mat4x4f( 1.0f );
@@ -731,8 +731,8 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		float intPart = 0;
 		const float fracPart = modf( time, &intPart );
 
-		const float viewWidth = renderView.viewport.width;
-		const float viewHeight = renderView.viewport.height;
+		const float viewWidth = static_cast<float>( renderView.viewport.width );
+		const float viewHeight = static_cast<float>( renderView.viewport.height );
 
 		globals.time = vec4f( time, intPart, fracPart, 1.0f );
 		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
@@ -1129,8 +1129,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	}
 
 	renderPassTransitionFlags_t transitionState = {};
-	transitionState.flags.readAfter = passState->readAfter;
-	transitionState.flags.presentAfter = passState->presentAfter;
+	transitionState.flags.readAfter = passState->transitionState.flags.readAfter;
+	transitionState.flags.presentAfter = passState->transitionState.flags.presentAfter;
 	transitionState.flags.store = true;
 	transitionState.flags.clear = true;
 
@@ -1138,8 +1138,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = passState->fb[ bufferId ]->GetVkRenderPass( transitionState );
 	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkBuffer( transitionState );
-	passInfo.renderArea.offset = { passState->x, passState->y };
-	passInfo.renderArea.extent = { passState->width, passState->height };
+	passInfo.renderArea.offset = { passState->viewport.x, passState->viewport.y };
+	passInfo.renderArea.extent = { passState->viewport.width, passState->viewport.height };
 
 	const VkClearColorValue clearColor = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
 	const VkClearDepthStencilValue clearDepth = { passState->clearDepth, passState->clearStencil };
@@ -1164,17 +1164,17 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	vkCmdBeginRenderPass( commandBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 	VkViewport viewport{ };
-	viewport.x = view.viewport.x;
-	viewport.y = view.viewport.y;
-	viewport.width = view.viewport.width;
-	viewport.height = view.viewport.height;
+	viewport.x = static_cast<float>( view.viewport.x );
+	viewport.y = static_cast<float>( view.viewport.y );
+	viewport.width = static_cast<float>( view.viewport.width );
+	viewport.height = static_cast<float>( view.viewport.height );
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
 
 	VkRect2D rect{ };
-	rect.extent.width = static_cast<uint32_t>( view.viewport.width );
-	rect.extent.height = static_cast<uint32_t>( view.viewport.height );
+	rect.extent.width = view.viewport.width;
+	rect.extent.height = view.viewport.height;
 	vkCmdSetScissor( commandBuffer, 0, 1, &rect );
 
 	for ( uint32_t pass = passBegin; pass <= passEnd; ++pass )

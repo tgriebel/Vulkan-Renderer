@@ -517,13 +517,13 @@ void Renderer::CreateFramebuffers()
 
 		shadowMap[ i ].Create( fbInfo );
 
-		shadowPass.x = 0;
-		shadowPass.y = 0;
-		shadowPass.width = shadowMap[ i ].width;
-		shadowPass.height = shadowMap[ i ].height;
+		shadowPass.viewport.x = 0;
+		shadowPass.viewport.y = 0;
+		shadowPass.viewport.width = shadowMap[ i ].width;
+		shadowPass.viewport.height = shadowMap[ i ].height;
 		shadowPass.fb[i] = &shadowMap[i];
-		shadowPass.readAfter = true;
-		shadowPass.presentAfter = false;
+		shadowPass.transitionState.flags.readAfter = true;
+		shadowPass.transitionState.flags.presentAfter = false;
 	}
 
 	// Main Scene 3D Render
@@ -538,26 +538,26 @@ void Renderer::CreateFramebuffers()
 
 		mainColor[ i ].Create( fbInfo );
 
-		mainPass.x = 0;
-		mainPass.y = 0;
-		mainPass.width = width;
-		mainPass.height = height;
+		mainPass.viewport.x = 0;
+		mainPass.viewport.y = 0;
+		mainPass.viewport.width = width;
+		mainPass.viewport.height = height;
 		mainPass.fb[i] = &mainColor[i];
-		mainPass.readAfter = true;
-		mainPass.presentAfter = false;
+		mainPass.transitionState.flags.readAfter = true;
+		mainPass.transitionState.flags.presentAfter = false;
 	}
 
 	// Swap Chain Images
 	const uint32_t swapChainCount = g_swapChain.GetBufferCount();
 	for ( size_t i = 0; i < swapChainCount; i++ )
 	{
-		postPass.x = 0;
-		postPass.y = 0;
-		postPass.width = g_swapChain.GetWidth();
-		postPass.height = g_swapChain.GetHeight();
+		postPass.viewport.x = 0;
+		postPass.viewport.y = 0;
+		postPass.viewport.width = g_swapChain.GetWidth();
+		postPass.viewport.height = g_swapChain.GetHeight();
 		postPass.fb[ i ] = &g_swapChain.framebuffers[ i ];
-		postPass.readAfter = false;
-		postPass.presentAfter = true;
+		postPass.transitionState.flags.readAfter = false;
+		postPass.transitionState.flags.presentAfter = true;
 	}
 }
 
