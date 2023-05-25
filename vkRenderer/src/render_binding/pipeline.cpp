@@ -143,7 +143,7 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
-void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineHdl )
+void CreateGraphicsPipeline( const ShaderBindSet* bindset, const DrawPass* pass, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
 	pipelineHdl = state.hash;
 
@@ -151,6 +151,8 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	if ( it != g_pipelineLib.end() ) {
 		return;
 	}
+
+	VkDescriptorSetLayout layout = bindset->GetVkObject();
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
@@ -366,7 +368,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
-	pipelineInfo.renderPass = pass;
+	pipelineInfo.renderPass = pass->fb[ 0 ]->GetVkRenderPass();
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional
@@ -379,7 +381,7 @@ void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, co
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }
 
-void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl )
+void CreateComputePipeline( const ShaderBindSet* bindset, const pipelineState_t& state, hdl_t& pipelineHdl )
 {
 	pipelineHdl = state.hash;
 
@@ -387,6 +389,8 @@ void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t&
 	if ( it != g_pipelineLib.end() ) {
 		return;
 	}
+
+	VkDescriptorSetLayout layout = bindset->GetVkObject();
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;

@@ -343,24 +343,19 @@ void Renderer::CreatePipelineObjects()
 			state.shaders = &prog->Get();
 			state.hash = prog->Handle().Get();
 
-			VkRenderPass pass;
-			VkDescriptorSetLayout layout;
+			const DrawPass* pass = nullptr;
 			if ( passIx == DRAWPASS_SHADOW ) {
-				pass = shadowPass.fb[ 0 ]->GetVkRenderPass();
+				pass = &shadowPass;
+			} else if ( passIx == DRAWPASS_POST_2D ) {
+				pass = &postPass;
+			} else {
+				pass = &mainPass;
 			}
-			else if ( passIx == DRAWPASS_POST_2D ) {
-				pass = postPass.fb[ 0 ]->GetVkRenderPass();
-			}
-			else {
-				pass = mainPass.fb[ 0 ]->GetVkRenderPass();
-			}
-			assert( pass != VK_NULL_HANDLE );
-
-			layout = prog->Get().bindset->GetVkObject();
+			assert( pass != nullptr );
 
 			// FIXME: the drawpass essentially splits the shader asset
 			//assert( prog->Get().pipeline == INVALID_HDL );
-			CreateGraphicsPipeline( layout, pass, state, prog->Get().pipeline );
+			CreateGraphicsPipeline( prog->Get().bindset, pass, state, prog->Get().pipeline );
 		}
 	}
 	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
@@ -380,7 +375,7 @@ void Renderer::CreatePipelineObjects()
 		state.shaders = &prog->Get();
 		state.hash = prog->Handle().Get();
 
-		CreateComputePipeline( particleShaderBinds.GetVkObject(), state, prog->Get().pipeline );
+		CreateComputePipeline( &particleShaderBinds, state, prog->Get().pipeline );
 	}
 }
 

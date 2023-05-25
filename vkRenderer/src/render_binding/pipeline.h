@@ -60,6 +60,9 @@ struct pipelineState_t
 #endif
 };
 
+class DrawPass;
+class ShaderBindSet;
+
 // TODO: replace, scales very poorly
 static inline bool operator==( const pipelineState_t& lhs, const pipelineState_t& rhs )
 {
@@ -96,5 +99,5 @@ class ShaderBindSet;
 
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
-void CreateGraphicsPipeline( VkDescriptorSetLayout layout, VkRenderPass pass, const pipelineState_t& state, hdl_t& pipelineObject );
-void CreateComputePipeline( VkDescriptorSetLayout layout, const pipelineState_t& state, hdl_t& pipelineHdl );
+void CreateGraphicsPipeline( const ShaderBindSet* bindset, const DrawPass* pass, const pipelineState_t& state, hdl_t& pipelineObject );
+void CreateComputePipeline( const ShaderBindSet* bindset, const pipelineState_t& state, hdl_t& pipelineHdl );
