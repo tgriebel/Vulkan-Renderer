@@ -244,7 +244,9 @@ public:
 		return bindSet;
 	}
 
-	void Bind( const ShaderBinding& binding, const ShaderAttachment& attachment );
+	void Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
+	void Bind( const ShaderBinding& binding, const Texture* texture );
+	void Bind( const ShaderBinding& binding, const ImageArray* imageArray );
 	const ShaderAttachment* GetAttachment( const ShaderBinding* binding ) const;
 	const ShaderAttachment* GetAttachment( const uint32_t id ) const;
 };

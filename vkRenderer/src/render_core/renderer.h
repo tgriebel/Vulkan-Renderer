@@ -108,31 +108,12 @@ public:
 		InitRenderPasses( renderView, mainColor );
 		InitRenderPasses( view2D, g_swapChain.framebuffers );
 
-		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
-		{
-			mainPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			shadowPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			postPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
+		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i ) {
 			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 		}
 
 		AllocRegisteredBindParms();
 
-		// FIXME: VERY TEMP!!! mixes dynamic/static and creates mem leaks
-		{
-			renderView.passes[ DRAWPASS_DEPTH ] = &mainPass;
-			renderView.passes[ DRAWPASS_TERRAIN ] = &mainPass;
-			renderView.passes[ DRAWPASS_OPAQUE ] = &mainPass;
-			renderView.passes[ DRAWPASS_SKYBOX ] = &mainPass;
-			renderView.passes[ DRAWPASS_TRANS ] = &mainPass;
-			renderView.passes[ DRAWPASS_DEBUG_SOLID ] = &mainPass;
-			renderView.passes[ DRAWPASS_DEBUG_WIREFRAME ] = &mainPass;
-
-			shadowView.passes[ DRAWPASS_SHADOW ] = &shadowPass;
-
-			view2D.passes[ DRAWPASS_POST_2D ] = &postPass;
-		}
-	
 		CreatePipelineObjects();
 
 		InitImGui( view2D );
@@ -206,9 +187,6 @@ private:
 	VkDebugUtilsMessengerEXT		debugMessenger;
 	graphicsQueue_t					graphicsQueue;
 	computeQueue_t					computeQueue;
-	DrawPass						shadowPass;
-	DrawPass						mainPass;
-	DrawPass						postPass;
 	ComputeState					particleState;
 	VkDescriptorPool				descriptorPool;
 	renderConfig_t					config;

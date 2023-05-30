@@ -191,11 +191,35 @@ bool ShaderBindSet::HasBinding( const ShaderBinding& binding ) const
 }
 
 
-void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment& attachment )
+void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffer )
 {
 	if( bindSet->HasBinding( binding ) ) {
-		attachments[ binding.GetHash() ] = attachment;
+		attachments[ binding.GetHash() ] = buffer;
 	} else {
+		assert( 0 );
+	}
+}
+
+
+void ShaderBindParms::Bind( const ShaderBinding& binding, const Texture* texture )
+{
+	if ( bindSet->HasBinding( binding ) ) {
+		attachments[ binding.GetHash() ] = texture;
+	}
+	else {
+		assert( 0 );
+	}
+}
+
+
+void ShaderBindParms::Bind( const ShaderBinding& binding, const ImageArray* imageArray )
+{
+	if ( bindSet->HasBinding( binding ) )
+	{
+		assert( imageArray->Count() <= binding.GetMaxDescriptorCount() );
+		attachments[ binding.GetHash() ] = imageArray;
+	}
+	else {
 		assert( 0 );
 	}
 }

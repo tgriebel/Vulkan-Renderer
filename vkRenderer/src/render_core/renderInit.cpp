@@ -366,13 +366,21 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
 		DrawPass* pass = new DrawPass();
+
+		if( passIx < ViewRegionPassBegin( view.region ) ) {
+			continue;
+		}
+		if ( passIx > ViewRegionPassEnd( view.region ) ) {
+			continue;
+		}
 		
 		pass->name = GetPassDebugName( drawPass_t( passIx ) );
 		pass->viewport.x = 0;
 		pass->viewport.y = 0;
 		pass->viewport.width = fb[ 0 ].width;
 		pass->viewport.height = fb[ 0 ].height;
-		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
+		for ( uint32_t i = 0; i < frameStateCount; ++i )
+		{
 			pass->fb[ i ] = &fb[ i ];
 			pass->parms[ i ] = RegisterBindParm( &defaultBindSet );
 		}
@@ -415,7 +423,7 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 		{
 			pass->transitionState.flags.clear = false;
 			pass->transitionState.flags.store = true;
-			pass->transitionState.flags.readAfter = false;
+			pass->transitionState.flags.readAfter = true;
 			pass->transitionState.flags.presentAfter = false;
 
 			gfxStateBits_t stateBits = GFX_STATE_NONE;
@@ -467,76 +475,6 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 		}
 
 		view.passes[ passIx ] = pass;
-	}
-
-	for ( size_t i = 0; i < frameStateCount; i++ )
-	{
-		// DRAWPASS_SHADOW
-		{
-			shadowPass.name = "Shadow Pass";
-
-			shadowPass.viewport.x = 0;
-			shadowPass.viewport.y = 0;
-			shadowPass.viewport.width = shadowMap[ 0 ].width;
-			shadowPass.viewport.height = shadowMap[ 0 ].height;
-			shadowPass.fb[ i ] = &shadowMap[ i ];
-			shadowPass.transitionState.flags.readAfter = true;
-			shadowPass.transitionState.flags.presentAfter = false;
-
-			shadowPass.stateBits |= GFX_STATE_DEPTH_TEST;
-			shadowPass.stateBits |= GFX_STATE_DEPTH_WRITE;
-			shadowPass.stateBits |= GFX_STATE_DEPTH_OP_0;
-
-			shadowPass.clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
-			shadowPass.clearDepth = 1.0f;
-			shadowPass.clearStencil = 0;
-
-			shadowPass.sampleRate = textureSamples_t::TEXTURE_SMP_1;
-		}
-
-		// Main Pass
-		{
-			mainPass.name = "";
-
-			mainPass.viewport.x = 0;
-			mainPass.viewport.y = 0;
-			mainPass.viewport.width = width;
-			mainPass.viewport.height = height;
-			mainPass.fb[ i ] = &mainColor[ i ];
-			mainPass.transitionState.flags.readAfter = true;
-			mainPass.transitionState.flags.presentAfter = false;
-
-			mainPass.stateBits |= GFX_STATE_DEPTH_TEST;
-			mainPass.stateBits |= GFX_STATE_DEPTH_WRITE;
-			mainPass.stateBits |= GFX_STATE_CULL_MODE_BACK;
-			mainPass.stateBits |= GFX_STATE_MSAA_ENABLE;
-
-			mainPass.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-			mainPass.clearDepth = 0.0f;
-			mainPass.clearStencil = 0;
-
-			mainPass.sampleRate = config.mainColorSubSamples;
-		}
-
-		// DRAWPASS_POST_2D
-		{
-			postPass.name = "2D Pass";
-
-			postPass.viewport.x = 0;
-			postPass.viewport.y = 0;
-			postPass.viewport.width = g_swapChain.GetWidth();
-			postPass.viewport.height = g_swapChain.GetHeight();
-			postPass.fb[ i ] = &g_swapChain.framebuffers[ i ];
-			postPass.transitionState.flags.readAfter = false;
-			postPass.transitionState.flags.presentAfter = true;
-
-			postPass.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-			postPass.clearDepth = 0.0f;
-			postPass.clearStencil = 0;
-
-			postPass.stateBits |= GFX_STATE_BLEND_ENABLE;
-			postPass.sampleRate = textureSamples_t::TEXTURE_SMP_1;
-		}
 	}
 }
 

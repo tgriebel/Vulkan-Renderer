@@ -178,10 +178,20 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 {
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
-	AppendDescriptorWrites( *mainPass.parms[ currentImage ], descriptorWrites );
-	AppendDescriptorWrites( *shadowPass.parms[ currentImage ], descriptorWrites );
-	AppendDescriptorWrites( *postPass.parms[ currentImage ], descriptorWrites );
 	AppendDescriptorWrites( *particleState.parms[ currentImage ], descriptorWrites );
+
+	for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
+	{
+		if ( shadowView.passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *shadowView.passes[ i ]->parms[ currentImage ], descriptorWrites );
+		}
+		if ( renderView.passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *renderView.passes[ i ]->parms[ currentImage ], descriptorWrites );
+		}
+		if ( view2D.passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *view2D.passes[ i ]->parms[ currentImage ], descriptorWrites );
+		}
+	}
 
 	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
 }

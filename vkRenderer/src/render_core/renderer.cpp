@@ -447,11 +447,11 @@ gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
 DrawPass* Renderer::GetDrawPass( const drawPass_t pass )
 {
 	if ( pass == DRAWPASS_SHADOW ) {
-		return &shadowPass;
+		return shadowView.passes[ pass ];
 	} else if ( pass == DRAWPASS_POST_2D ) {
-		return &postPass;
+		return view2D.passes[ pass ];
 	} else {
-		return &mainPass;
+		return renderView.passes[ pass ];
 	}
 }
 
@@ -680,52 +680,44 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 {
 	const uint32_t i = currentImage;
 
+	RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+
+	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
 	{
-		shadowPass.codeImages[ i ].Resize( 2 );
-		shadowPass.codeImages[ i ][ 0 ] = gpuImages2D[ 0 ];
-		shadowPass.codeImages[ i ][ 1 ] = gpuImages2D[ 0 ];
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			if( pass == nullptr ) {
+				continue;
+			}
 
-		shadowPass.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-		shadowPass.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-		shadowPass.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( shadowView.region ) ] );
-		shadowPass.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-		shadowPass.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-		shadowPass.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-		shadowPass.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-		shadowPass.parms[ i ]->Bind( bind_imageCodeArray, &shadowPass.codeImages[ i ] );
-		shadowPass.parms[ i ]->Bind( bind_imageStencil, shadowPass.codeImages[ i ][ 0 ] );
-	}
+			pass->codeImages[ currentImage ].Resize( 2 );
+			if ( passIx == DRAWPASS_SHADOW )
+			{				
+				pass->codeImages[ currentImage ][ 0 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ currentImage ][ 1 ] = gpuImages2D[ 0 ];
+			}
+			else if ( passIx == DRAWPASS_POST_2D )
+			{
+				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].viewColorImage;
+				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImage;
+			}
+			else
+			{
+				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].shadowMapImage;
+				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].shadowMapImage;
+			}
 
-	{
-		mainPass.codeImages[ i ].Resize( 2 );
-		mainPass.codeImages[ i ][ 0 ] = &frameState[ i ].shadowMapImage;
-		mainPass.codeImages[ i ][ 1 ] = &frameState[ i ].shadowMapImage;
-
-		mainPass.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-		mainPass.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-		mainPass.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( renderView.region ) ] );
-		mainPass.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-		mainPass.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-		mainPass.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-		mainPass.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-		mainPass.parms[ i ]->Bind( bind_imageCodeArray, &mainPass.codeImages[ i ] );
-		mainPass.parms[ i ]->Bind( bind_imageStencil, mainPass.codeImages[ i ][ 0 ] );
-	}
-
-	{
-		postPass.codeImages[ i ].Resize( 2 );
-		postPass.codeImages[ i ][ 0 ] = &frameState[ i ].viewColorImage;
-		postPass.codeImages[ i ][ 1 ] = &frameState[ i ].depthImage;
-
-		postPass.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-		postPass.parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-		postPass.parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( view2D.region ) ] );
-		postPass.parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-		postPass.parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-		postPass.parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-		postPass.parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
-		postPass.parms[ i ]->Bind( bind_imageCodeArray, &postPass.codeImages[ i ] );
-		postPass.parms[ i ]->Bind( bind_imageStencil, &frameState[ i ].stencilImage );
+			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
+			pass->parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
+			pass->parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ int( views[ viewIx ]->region ) ] );
+			pass->parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
+			pass->parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
+			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
+			pass->parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
+			pass->parms[ i ]->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
+			pass->parms[ i ]->Bind( bind_imageStencil, ( passIx == DRAWPASS_POST_2D ) ? &frameState[ currentImage ].stencilImage : pass->codeImages[ i ][ 0 ] );
+		}
 	}
 
 	{
