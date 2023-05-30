@@ -108,7 +108,13 @@ void Renderer::InitApi()
 		CreateCommandPools();
 	}
 
-	InitShaderResources();
+	{
+		// Memory Allocations
+		VkMemoryPropertyFlagBits type = VkMemoryPropertyFlagBits( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
+		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
+		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
+	}
 
 	CreateTextureSamplers();
 
@@ -129,27 +135,11 @@ void Renderer::InitApi()
 void Renderer::InitShaderResources()
 {
 	{
-		// Memory Allocations
-		VkMemoryPropertyFlagBits type = VkMemoryPropertyFlagBits(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
-		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
-	}
-
-	{
 		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
 		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
 
 		defaultBindSet.Create();
 		particleShaderBinds.Create();
-
-		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
-		{
-			mainPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			shadowPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			postPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
-			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
-		}
 
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
 		for ( uint32_t i = 0; i < programCount; ++i )
@@ -165,8 +155,6 @@ void Renderer::InitShaderResources()
 				}
 			}
 		}
-
-		AllocRegisteredBindParms();
 	}
 
 	GenerateGpuPrograms( g_assets.gpuPrograms );
@@ -369,11 +357,117 @@ void Renderer::CreatePipelineObjects()
 }
 
 
-void Renderer::InitRenderPasses( RenderView& view, const FrameBuffer* fb )
+void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] )
 {
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
 	const uint32_t width = g_swapChain.GetWidth();
 	const uint32_t height = g_swapChain.GetHeight();
+
+	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	{
+		DrawPass* pass = new DrawPass();
+		
+		pass->name = GetPassDebugName( drawPass_t( passIx ) );
+		pass->viewport.x = 0;
+		pass->viewport.y = 0;
+		pass->viewport.width = fb[ 0 ].width;
+		pass->viewport.height = fb[ 0 ].height;
+		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
+			pass->fb[ i ] = &fb[ i ];
+			pass->parms[ i ] = RegisterBindParm( &defaultBindSet );
+		}
+
+		pass->transitionState.bits = 0;
+		pass->stateBits = GFX_STATE_NONE;
+
+		if( passIx == DRAWPASS_SHADOW )
+		{
+			pass->transitionState.flags.clear = true;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = true;
+			pass->transitionState.flags.presentAfter = false;
+
+			pass->stateBits |= GFX_STATE_DEPTH_TEST;
+			pass->stateBits |= GFX_STATE_DEPTH_WRITE;
+			pass->stateBits |= GFX_STATE_DEPTH_OP_0;
+
+			pass->clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
+			pass->clearDepth = 1.0f;
+			pass->clearStencil = 0;
+
+			pass->sampleRate = textureSamples_t::TEXTURE_SMP_1;
+		}
+		else if( passIx == DRAWPASS_POST_2D )
+		{
+			pass->transitionState.flags.clear = true;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = false;
+			pass->transitionState.flags.presentAfter = true;
+
+			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+			pass->clearDepth = 0.0f;
+			pass->clearStencil = 0;
+
+			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
+			pass->sampleRate = textureSamples_t::TEXTURE_SMP_1;
+		}
+		else
+		{
+			pass->transitionState.flags.clear = false;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = false;
+			pass->transitionState.flags.presentAfter = false;
+
+			gfxStateBits_t stateBits = GFX_STATE_NONE;
+			if( passIx == DRAWPASS_DEPTH )
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_DEPTH_WRITE;
+				stateBits |= GFX_STATE_COLOR_MASK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_STENCIL_ENABLE;
+
+				pass->transitionState.flags.clear = true;
+			}
+			else if ( passIx == DRAWPASS_TRANS )
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+				stateBits |= GFX_STATE_BLEND_ENABLE;
+			}
+			else if ( passIx == DRAWPASS_DEBUG_WIREFRAME )
+			{
+				stateBits |= GFX_STATE_WIREFRAME_ENABLE;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+
+				pass->transitionState.flags.readAfter = true;
+			}
+			else if ( passIx == DRAWPASS_DEBUG_SOLID )
+			{
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_BLEND_ENABLE;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+			}
+			else
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_DEPTH_WRITE;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+			}
+			pass->stateBits = stateBits;
+
+			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+			pass->clearDepth = 0.0f;
+			pass->clearStencil = 0;
+
+			pass->sampleRate = config.mainColorSubSamples;
+		}
+
+		view.passes[ passIx ] = pass;
+	}
 
 	for ( size_t i = 0; i < frameStateCount; i++ )
 	{
@@ -645,6 +739,7 @@ ShaderBindParms* Renderer::RegisterBindParm( const ShaderBindSet* set )
 {
 	ShaderBindParms parms = ShaderBindParms( set );
 
+	assert( bindParmCount < DescriptorPoolMaxSets );
 	bindParmsList[ bindParmCount ] = parms;
 	++bindParmCount;
 

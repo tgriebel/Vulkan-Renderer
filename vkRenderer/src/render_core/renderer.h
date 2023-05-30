@@ -93,27 +93,46 @@ public:
 	{
 		InitApi();
 
+		InitShaderResources();
+
 		renderView.region = renderViewRegion_t::STANDARD_RASTER;
 		renderView.name = "Main View";
-		renderView.passes[ DRAWPASS_DEPTH ] = &mainPass;
-		renderView.passes[ DRAWPASS_TERRAIN ] = &mainPass;
-		renderView.passes[ DRAWPASS_OPAQUE ] = &mainPass;
-		renderView.passes[ DRAWPASS_SKYBOX ] = &mainPass;
-		renderView.passes[ DRAWPASS_TRANS ] = &mainPass;
-		renderView.passes[ DRAWPASS_DEBUG_SOLID ] = &mainPass;
-		renderView.passes[ DRAWPASS_DEBUG_WIREFRAME ] = &mainPass;
 
 		shadowView.region = renderViewRegion_t::SHADOW;
 		shadowView.name = "Shadow View";
-		shadowView.passes[ DRAWPASS_SHADOW ] = &shadowPass;
-
+		
 		view2D.region = renderViewRegion_t::POST;
 		view2D.name = "Post View";
-		view2D.passes[ DRAWPASS_POST_2D ] = &postPass;
+		
+		InitRenderPasses( shadowView, shadowMap );
+		InitRenderPasses( renderView, mainColor );
+		InitRenderPasses( view2D, g_swapChain.framebuffers );
 
-		InitRenderPasses( shadowView, &shadowMap[ 0 ] );
-		InitRenderPasses( renderView, &mainColor[ 0 ] );
-		InitRenderPasses( view2D, &g_swapChain.framebuffers[ 0 ] );
+		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
+		{
+			mainPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			shadowPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			postPass.parms[ i ] = RegisterBindParm( &defaultBindSet );
+			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
+		}
+
+		AllocRegisteredBindParms();
+
+		// FIXME: VERY TEMP!!! mixes dynamic/static and creates mem leaks
+		{
+			renderView.passes[ DRAWPASS_DEPTH ] = &mainPass;
+			renderView.passes[ DRAWPASS_TERRAIN ] = &mainPass;
+			renderView.passes[ DRAWPASS_OPAQUE ] = &mainPass;
+			renderView.passes[ DRAWPASS_SKYBOX ] = &mainPass;
+			renderView.passes[ DRAWPASS_TRANS ] = &mainPass;
+			renderView.passes[ DRAWPASS_DEBUG_SOLID ] = &mainPass;
+			renderView.passes[ DRAWPASS_DEBUG_WIREFRAME ] = &mainPass;
+
+			shadowView.passes[ DRAWPASS_SHADOW ] = &shadowPass;
+
+			view2D.passes[ DRAWPASS_POST_2D ] = &postPass;
+		}
+	
 		CreatePipelineObjects();
 
 		InitImGui();
@@ -318,7 +337,7 @@ private:
 	static bool					SkipPass( const drawSurf_t& surf, const drawPass_t pass );
 	static drawPass_t			ViewRegionPassBegin( const renderViewRegion_t region );
 	static drawPass_t			ViewRegionPassEnd( const renderViewRegion_t region );
-	void						InitRenderPasses( RenderView& view, const FrameBuffer* fb );
+	void						InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] );
 	void						RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
 	void						Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void						RenderViews();
