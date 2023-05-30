@@ -46,6 +46,7 @@ enum gfxStateBits_t : uint64_t
 	GFX_STATE_STENCIL_ENABLE	= ( 1 << 15 ),
 	GFX_STATE_MSAA_ENABLE		= ( 1 << 16 ),
 };
+DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 
 
 struct pipelineState_t
