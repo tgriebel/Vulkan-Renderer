@@ -1138,7 +1138,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 			}
 
 			const uint32_t descSetCount = 1;
-			VkDescriptorSet descSetArray[ descSetCount ] = { passState->parms[ bufferId ]->GetVkObject() };
+			VkDescriptorSet descSetArray[ descSetCount ] = { view.passes[ passIx ]->parms[ bufferId ]->GetVkObject() };
 
 			vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 			vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
