@@ -251,7 +251,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 
 			pipelineState_t state = {};
 			state.viewport = pass->viewport;
-			state.stateBits = GetStateBitsForDrawPass( drawPass );
+			state.stateBits = pass->stateBits;
 			state.samplingRate = pass->sampleRate;
 			state.progHdl = prog->Handle();
 
@@ -366,81 +366,6 @@ void Renderer::RenderScene( Scene* scene )
 
 	localMemory.Pack();
 	sharedMemory.Pack();
-}
-
-
-gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
-{
-	uint64_t stateBits = 0;
-	if ( pass == DRAWPASS_SKYBOX )
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_DEPTH_WRITE;
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-	}
-	else if ( pass == DRAWPASS_SHADOW )
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_DEPTH_WRITE;
-		//	stateBits |= GFX_STATE_COLOR_MASK;
-		stateBits |= GFX_STATE_DEPTH_OP_0; // FIXME: 3 bits, just set one for now
-	//	stateBits |= GFX_STATE_CULL_MODE_FRONT;
-	}
-	else if ( pass == DRAWPASS_DEPTH )
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_DEPTH_WRITE;
-		stateBits |= GFX_STATE_COLOR_MASK;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-		stateBits |= GFX_STATE_STENCIL_ENABLE;
-	}
-	else if ( pass == DRAWPASS_TERRAIN )
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_DEPTH_WRITE;
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-	}
-	else if ( pass == DRAWPASS_OPAQUE )
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_DEPTH_WRITE;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-	}
-	else if ( pass == DRAWPASS_TRANS )
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-		stateBits |= GFX_STATE_BLEND_ENABLE;
-	}
-	else if ( pass == DRAWPASS_DEBUG_WIREFRAME )
-	{
-		stateBits |= GFX_STATE_WIREFRAME_ENABLE;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-	}
-	else if ( pass == DRAWPASS_DEBUG_SOLID )
-	{
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-		stateBits |= GFX_STATE_BLEND_ENABLE;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-	}
-	else if ( pass == DRAWPASS_POST_2D )
-	{
-		stateBits |= GFX_STATE_BLEND_ENABLE;
-	}
-	else
-	{
-		stateBits |= GFX_STATE_DEPTH_TEST;
-		stateBits |= GFX_STATE_DEPTH_WRITE;
-		stateBits |= GFX_STATE_CULL_MODE_BACK;
-		stateBits |= GFX_STATE_MSAA_ENABLE;
-	}
-
-	return static_cast<gfxStateBits_t>( stateBits );
 }
 
 
@@ -1185,29 +1110,29 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	rect.extent.height = view.viewport.height;
 	vkCmdSetScissor( commandBuffer, 0, 1, &rect );
 
-	for ( uint32_t pass = passBegin; pass <= passEnd; ++pass )
+	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();
 
-		MarkerBeginRegion( commandBuffer, GetPassDebugName( drawPass_t( pass ) ), ColorToVector( Color::White ) );
+		MarkerBeginRegion( commandBuffer, view.passes[ passIx ]->name, ColorToVector( Color::White ) );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];	
 
-			if ( SkipPass( surface, drawPass_t( pass ) ) ) {
+			if ( SkipPass( surface, drawPass_t( passIx ) ) ) {
 				continue;
 			}
 
 			pipelineObject_t* pipelineObject = nullptr;
-			GetPipelineObject( surface.pipelineObject[ pass ], &pipelineObject );
+			GetPipelineObject( surface.pipelineObject[ passIx ], &pipelineObject );
 			if ( pipelineObject == nullptr ) {
 				continue;
 			}
 
 			MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
 
-			if ( pass == DRAWPASS_DEPTH ) {
+			if ( passIx == DRAWPASS_DEPTH ) {
 				// vkCmdSetDepthBias
 				vkCmdSetStencilReference( commandBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
 			}

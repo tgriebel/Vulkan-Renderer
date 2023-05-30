@@ -328,7 +328,7 @@ void Renderer::CreatePipelineObjects()
 
 			pipelineState_t state = {};
 			state.viewport = pass->viewport;
-			state.stateBits = GetStateBitsForDrawPass( drawPass );
+			state.stateBits = pass->stateBits;
 			state.samplingRate = pass->sampleRate;
 			state.progHdl = progHdl;	
 
