@@ -64,6 +64,15 @@ public:
 		memset( instanceCounts, 0, MaxSurfaces );
 	}
 
+	~RenderView()
+	{
+		for ( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
+		{
+			delete passes[ i ];
+			passes[ i ] = nullptr;
+		}
+	}
+
 	const char*				name;
 	renderViewRegion_t		region;
 	mat4x4f					viewMatrix;

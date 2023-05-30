@@ -245,12 +245,14 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 				continue;
 			}
 
-			drawPass_t pass = drawPass_t( passIx );
+			drawPass_t drawPass = drawPass_t( passIx );
+			const DrawPass* pass = GetDrawPass( drawPass );
+			assert( pass != nullptr );
 
 			pipelineState_t state = {};
-			state.viewport = GetDrawPassViewport( pass );
-			state.stateBits = GetStateBitsForDrawPass( pass );
-			state.samplingRate = GetSampleCountForDrawPass( pass );
+			state.viewport = pass->viewport;
+			state.stateBits = GetStateBitsForDrawPass( drawPass );
+			state.samplingRate = pass->sampleRate;
 			state.progHdl = prog->Handle();
 
 			surf.pipelineObject[ passIx ] = FindPipelineObject( state );
@@ -434,24 +436,14 @@ gfxStateBits_t Renderer::GetStateBitsForDrawPass( const drawPass_t pass )
 }
 
 
-textureSamples_t Renderer::GetSampleCountForDrawPass( const drawPass_t pass )
-{
-	uint64_t stateBits = 0;
-	if ( ( pass == DRAWPASS_SHADOW ) || ( pass == DRAWPASS_POST_2D ) ) {
-		return textureSamples_t::TEXTURE_SMP_1;
-	} else {
-		return config.mainColorSubSamples;
-	}
-}
-
-
-viewport_t Renderer::GetDrawPassViewport( const drawPass_t pass )
+DrawPass* Renderer::GetDrawPass( const drawPass_t pass )
 {
 	if ( pass == DRAWPASS_SHADOW ) {
-		return shadowView.viewport;
-	}
-	else {
-		return renderView.viewport;
+		return &shadowPass;
+	} else if ( pass == DRAWPASS_POST_2D ) {
+		return &postPass;
+	} else {
+		return &mainPass;
 	}
 }
 

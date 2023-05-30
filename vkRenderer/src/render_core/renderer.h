@@ -91,8 +91,7 @@ class Renderer
 public:
 	void Init()
 	{
-		InitVulkan();
-		InitImGui();
+		InitApi();
 
 		renderView.region = renderViewRegion_t::STANDARD_RASTER;
 		renderView.name = "Main View";
@@ -111,6 +110,13 @@ public:
 		view2D.region = renderViewRegion_t::POST;
 		view2D.name = "Post View";
 		view2D.passes[ DRAWPASS_POST_2D ] = &postPass;
+
+		InitRenderPasses( shadowView, &shadowMap[ 0 ] );
+		InitRenderPasses( renderView, &mainColor[ 0 ] );
+		InitRenderPasses( view2D, &g_swapChain.framebuffers[ 0 ] );
+		CreatePipelineObjects();
+
+		InitImGui();
 	}
 
 	void RenderScene( Scene* scene );
@@ -279,7 +285,7 @@ private:
 	}
 
 	// Init/Shutdown
-	void						InitVulkan();
+	void						InitApi();
 	void						InitShaderResources();
 	void						InitImGui();
 	void						ShutdownImGui();
@@ -312,7 +318,7 @@ private:
 	static bool					SkipPass( const drawSurf_t& surf, const drawPass_t pass );
 	static drawPass_t			ViewRegionPassBegin( const renderViewRegion_t region );
 	static drawPass_t			ViewRegionPassEnd( const renderViewRegion_t region );
-	void						InitRenderPasses();
+	void						InitRenderPasses( RenderView& view, const FrameBuffer* fb );
 	void						RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
 	void						Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void						RenderViews();
@@ -320,8 +326,7 @@ private:
 	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
 	void						MergeSurfaces( RenderView& view );
 	gfxStateBits_t				GetStateBitsForDrawPass( const drawPass_t pass );
-	textureSamples_t			GetSampleCountForDrawPass( const drawPass_t pass );
-	viewport_t					GetDrawPassViewport( const drawPass_t pass );
+	DrawPass*					GetDrawPass( const drawPass_t pass );
 	void						DrawDebugMenu();
 	void						FlushGPU();
 	void						WaitForEndFrame();

@@ -89,7 +89,7 @@ void Renderer::CreateInstance()
 }
 
 
-void Renderer::InitVulkan()
+void Renderer::InitApi()
 {
 	{
 		// Device Set-up
@@ -121,8 +121,6 @@ void Renderer::InitVulkan()
 
 		CreateSyncObjects();
 		CreateFramebuffers();
-		InitRenderPasses();
-		CreatePipelineObjects();
 		CreateCommandBuffers();
 	}
 }
@@ -337,23 +335,15 @@ void Renderer::CreatePipelineObjects()
 
 			const drawPass_t drawPass = drawPass_t( passIx );
 
-			pipelineState_t state = {};
-			state.viewport = GetDrawPassViewport( drawPass );
-			state.stateBits = GetStateBitsForDrawPass( drawPass );
-			state.samplingRate = GetSampleCountForDrawPass( drawPass );
-			state.progHdl = progHdl;
-
-			const DrawPass* pass = nullptr;
-			if ( passIx == DRAWPASS_SHADOW ) {
-				pass = &shadowPass;
-			} else if ( passIx == DRAWPASS_POST_2D ) {
-				pass = &postPass;
-			} else {
-				pass = &mainPass;
-			}
+			const DrawPass* pass = GetDrawPass( drawPass );
 			assert( pass != nullptr );
 
-			// FIXME: the drawpass essentially splits the shader asset
+			pipelineState_t state = {};
+			state.viewport = pass->viewport;
+			state.stateBits = GetStateBitsForDrawPass( drawPass );
+			state.samplingRate = pass->sampleRate;
+			state.progHdl = progHdl;	
+
 			//assert( prog->Get().pipeline == INVALID_HDL );
 			CreateGraphicsPipeline( pass, state );
 		}
@@ -379,7 +369,7 @@ void Renderer::CreatePipelineObjects()
 }
 
 
-void Renderer::InitRenderPasses()
+void Renderer::InitRenderPasses( RenderView& view, const FrameBuffer* fb )
 {
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
 	const uint32_t width = g_swapChain.GetWidth();
@@ -393,8 +383,8 @@ void Renderer::InitRenderPasses()
 
 			shadowPass.viewport.x = 0;
 			shadowPass.viewport.y = 0;
-			shadowPass.viewport.width = shadowMap[ i ].width;
-			shadowPass.viewport.height = shadowMap[ i ].height;
+			shadowPass.viewport.width = shadowMap[ 0 ].width;
+			shadowPass.viewport.height = shadowMap[ 0 ].height;
 			shadowPass.fb[ i ] = &shadowMap[ i ];
 			shadowPass.transitionState.flags.readAfter = true;
 			shadowPass.transitionState.flags.presentAfter = false;
