@@ -164,7 +164,7 @@ void Renderer::InitShaderResources()
 }
 
 
-void Renderer::InitImGui()
+void Renderer::InitImGui( RenderView& view )
 {
 #if defined( USE_IMGUI )
 	IMGUI_CHECKVERSION();
@@ -186,10 +186,10 @@ void Renderer::InitImGui()
 	vkInfo.ImageCount = 2;
 	vkInfo.CheckVkResultFn = nullptr;
 
-	renderPassTransitionFlags_t transitionState = {};
-	transitionState.flags.presentAfter = true;
+	assert( view.passes[ DRAWPASS_POST_2D ] != nullptr );
+	const renderPassTransitionFlags_t transitionState = view.passes[ DRAWPASS_POST_2D ]->transitionState;
+	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_POST_2D ]->fb[ 0 ]->GetVkRenderPass( transitionState ) );
 
-	ImGui_ImplVulkan_Init( &vkInfo, postPass.fb[ 0 ]->GetVkRenderPass( transitionState ) );
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 

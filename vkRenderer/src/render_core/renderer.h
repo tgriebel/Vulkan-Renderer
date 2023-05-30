@@ -135,7 +135,7 @@ public:
 	
 		CreatePipelineObjects();
 
-		InitImGui();
+		InitImGui( view2D );
 	}
 
 	void RenderScene( Scene* scene );
@@ -306,7 +306,7 @@ private:
 	// Init/Shutdown
 	void						InitApi();
 	void						InitShaderResources();
-	void						InitImGui();
+	void						InitImGui( RenderView& view );
 	void						ShutdownImGui();
 	void						ShutdownShaderResources();
 	void						Cleanup();
