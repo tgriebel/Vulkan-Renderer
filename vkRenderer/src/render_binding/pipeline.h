@@ -54,7 +54,6 @@ struct pipelineState_t
 	gfxStateBits_t				stateBits;
 	textureSamples_t			samplingRate;
 	hdl_t						progHdl;
-	viewport_t					viewport;
 	renderPassAttachmentBits_t	passBits;
 };
 

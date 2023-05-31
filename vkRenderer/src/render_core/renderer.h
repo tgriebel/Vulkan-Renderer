@@ -250,6 +250,21 @@ private:
 
 		g_swapChain.Create( &g_window, width, height );
 		CreateFramebuffers();
+
+		RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+
+		for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+		{
+			for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+			{
+				DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+				if ( pass == nullptr ) {
+					continue;
+				}
+				pass->viewport.width = pass->fb[ 0 ]->GetWidth();
+				pass->viewport.height = pass->fb[ 0 ]->GetHeight();
+			}
+		}
 	}
 
 	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )

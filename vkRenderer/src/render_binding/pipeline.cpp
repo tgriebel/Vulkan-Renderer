@@ -158,7 +158,6 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
-	state.viewport = pass->viewport;
 	state.stateBits = pass->stateBits;
 	state.samplingRate = pass->sampleRate;
 	state.progHdl = progAsset.Handle();
@@ -176,7 +175,6 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
-	state.viewport = pass->viewport;
 	state.stateBits = pass->stateBits;
 	state.samplingRate = pass->sampleRate;
 	state.progHdl = progAsset.Handle();
@@ -228,16 +226,16 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	VkViewport viewport{ };
-	viewport.x = static_cast<float>( state.viewport.x );
-	viewport.y = static_cast<float>( state.viewport.y );
-	viewport.width = static_cast<float>( state.viewport.width );
-	viewport.height = static_cast<float>( state.viewport.height );
+	viewport.x = static_cast<float>( pass->viewport.x );
+	viewport.y = static_cast<float>( pass->viewport.y );
+	viewport.width = static_cast<float>( pass->viewport.width );
+	viewport.height = static_cast<float>( pass->viewport.height );
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor{ };
-	scissor.offset = { state.viewport.x, state.viewport.y };
-	scissor.extent = { state.viewport.width, state.viewport.height };
+	scissor.offset = { pass->viewport.x, pass->viewport.y };
+	scissor.extent = { pass->viewport.width, pass->viewport.height };
 
 	VkPipelineViewportStateCreateInfo viewportState{ };
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
