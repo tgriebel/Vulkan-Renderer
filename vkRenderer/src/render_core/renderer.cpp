@@ -249,13 +249,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 			const DrawPass* pass = GetDrawPass( drawPass );
 			assert( pass != nullptr );
 
-			pipelineState_t state = {};
-			state.viewport = pass->viewport;
-			state.stateBits = pass->stateBits;
-			state.samplingRate = pass->sampleRate;
-			state.progHdl = prog->Handle();
-
-			surf.pipelineObject[ passIx ] = FindPipelineObject( state );
+			surf.pipelineObject[ passIx ] = FindPipelineObject( pass, *prog );
 			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
 		}
 

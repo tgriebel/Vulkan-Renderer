@@ -155,8 +155,14 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
-hdl_t FindPipelineObject( const pipelineState_t& state )
+hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
+	pipelineState_t state = {};
+	state.viewport = pass->viewport;
+	state.stateBits = pass->stateBits;
+	state.samplingRate = pass->sampleRate;
+	state.progHdl = progAsset.Handle();
+
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
 	auto it = g_pipelineLib.find( pipelineHdl.Get() );
@@ -167,8 +173,14 @@ hdl_t FindPipelineObject( const pipelineState_t& state )
 }
 
 
-void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state )
+void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
+	pipelineState_t state = {};
+	state.viewport = pass->viewport;
+	state.stateBits = pass->stateBits;
+	state.samplingRate = pass->sampleRate;
+	state.progHdl = progAsset.Handle();
+
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
 	auto it = g_pipelineLib.find( pipelineHdl.Get() );
@@ -176,7 +188,7 @@ void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state 
 		return;
 	}
 
-	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.progHdl )->Get();
+	const GpuProgram& prog = progAsset.Get();
 	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
 	
 	pipelineObject_t pipelineObject;
@@ -406,8 +418,11 @@ void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }
 
-void CreateComputePipeline( const pipelineState_t& state )
+void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 {
+	pipelineState_t state = {};
+	state.progHdl = progAsset.Handle();
+
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
 	auto it = g_pipelineLib.find( pipelineHdl.Get() );
@@ -415,7 +430,7 @@ void CreateComputePipeline( const pipelineState_t& state )
 		return;
 	}
 
-	const GpuProgram& prog = g_assets.gpuPrograms.Find( state.progHdl )->Get();
+	const GpuProgram& prog = progAsset.Get();
 	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
 
 	pipelineObject_t pipelineObject;

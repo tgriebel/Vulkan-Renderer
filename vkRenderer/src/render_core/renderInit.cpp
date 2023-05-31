@@ -326,14 +326,7 @@ void Renderer::CreatePipelineObjects()
 			const DrawPass* pass = GetDrawPass( drawPass );
 			assert( pass != nullptr );
 
-			pipelineState_t state = {};
-			state.viewport = pass->viewport;
-			state.stateBits = pass->stateBits;
-			state.samplingRate = pass->sampleRate;
-			state.progHdl = progHdl;	
-
-			//assert( prog->Get().pipeline == INVALID_HDL );
-			CreateGraphicsPipeline( pass, state );
+			CreateGraphicsPipeline( pass, *prog );
 		}
 	}
 	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
@@ -349,10 +342,7 @@ void Renderer::CreatePipelineObjects()
 			continue;
 		}
 
-		pipelineState_t state = {};
-		state.progHdl = prog->Handle();
-
-		CreateComputePipeline( state );
+		CreateComputePipeline( *prog );
 	}
 }
 

@@ -61,22 +61,6 @@ struct pipelineState_t
 class DrawPass;
 class ShaderBindSet;
 
-// TODO: replace, scales very poorly
-static inline bool operator==( const pipelineState_t& lhs, const pipelineState_t& rhs )
-{
-	bool equal = ( lhs.viewport.width == rhs.viewport.width );
-	equal = equal && ( lhs.viewport.height == rhs.viewport.height );
-	equal = equal && ( lhs.viewport.x == rhs.viewport.x );
-	equal = equal && ( lhs.viewport.y == rhs.viewport.y );
-	equal = equal && ( lhs.viewport.near == rhs.viewport.near );
-	equal = equal && ( lhs.viewport.far == rhs.viewport.far );
-	
-	equal = equal && ( lhs.stateBits == rhs.stateBits );
-	equal = equal && ( lhs.progHdl == rhs.progHdl );
-
-	return equal;
-}
-
 
 struct pipelineObject_t
 {
@@ -98,7 +82,7 @@ class ShaderBindSet;
 void ClearPipelineCache();
 void DestroyPipelineCache();
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
-hdl_t FindPipelineObject( const pipelineState_t& state );
+hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset );
 void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
-void CreateGraphicsPipeline( const DrawPass* pass, const pipelineState_t& state );
-void CreateComputePipeline( const pipelineState_t& state );
+void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
+void CreateComputePipeline( const Asset<GpuProgram>& prog );
