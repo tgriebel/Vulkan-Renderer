@@ -1056,29 +1056,29 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	const drawPass_t passEnd = ViewRegionPassEnd( view.region );
 
 	// For now the pass state is the same for the entire view region
-	const DrawPass* passState = view.passes[ passBegin ];
-	if ( passState == nullptr ) {
+	const DrawPass* pass = view.passes[ passBegin ];
+	if ( pass == nullptr ) {
 		throw std::runtime_error( "Missing pass state!" );
 	}
 
 	renderPassTransitionFlags_t transitionState = {};
-	transitionState.flags.readAfter = passState->transitionState.flags.readAfter;
-	transitionState.flags.presentAfter = passState->transitionState.flags.presentAfter;
+	transitionState.flags.readAfter = pass->transitionState.flags.readAfter;
+	transitionState.flags.presentAfter = pass->transitionState.flags.presentAfter;
 	transitionState.flags.store = true;
 	transitionState.flags.clear = true;
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = passState->fb[ bufferId ]->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = passState->fb[ bufferId ]->GetVkBuffer( transitionState );
-	passInfo.renderArea.offset = { passState->viewport.x, passState->viewport.y };
-	passInfo.renderArea.extent = { passState->viewport.width, passState->viewport.height };
+	passInfo.renderPass = pass->fb[ bufferId ]->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = pass->fb[ bufferId ]->GetVkBuffer( transitionState );
+	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
+	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
-	const VkClearColorValue clearColor = { passState->clearColor[ 0 ], passState->clearColor[ 1 ], passState->clearColor[ 2 ], passState->clearColor[ 3 ] };
-	const VkClearDepthStencilValue clearDepth = { passState->clearDepth, passState->clearStencil };
+	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
+	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
 
-	const uint32_t colorAttachmentsCount = passState->fb[ bufferId ]->colorCount;
-	const uint32_t attachmentsCount = passState->fb[ bufferId ]->attachmentCount;
+	const uint32_t colorAttachmentsCount = pass->fb[ bufferId ]->colorCount;
+	const uint32_t attachmentsCount = pass->fb[ bufferId ]->attachmentCount;
 
 	std::array<VkClearValue, 5> clearValues{ };
 	assert( attachmentsCount <= 5 );
