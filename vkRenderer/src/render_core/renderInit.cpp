@@ -157,6 +157,23 @@ void Renderer::InitShaderResources()
 		}
 	}
 
+	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
+	RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+	{
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			if ( pass == nullptr ) {
+				continue;
+			}
+			for ( uint32_t i = 0; i < frameStateCount; ++i ) {
+				pass->parms[ i ] = RegisterBindParm( &defaultBindSet );
+			}
+		}
+	}
+	AllocRegisteredBindParms();
+
 	GenerateGpuPrograms( g_assets.gpuPrograms );
 
 	CreateCodeTextures();

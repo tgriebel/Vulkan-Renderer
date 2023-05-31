@@ -112,8 +112,6 @@ public:
 
 		InitShaderResources();
 
-		AllocRegisteredBindParms();
-
 		CreatePipelineObjects();
 
 		InitImGui( view2D );
