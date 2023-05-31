@@ -93,8 +93,6 @@ public:
 	{
 		InitApi();
 
-		InitShaderResources();
-
 		renderView.region = renderViewRegion_t::STANDARD_RASTER;
 		renderView.name = "Main View";
 
@@ -111,6 +109,8 @@ public:
 		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i ) {
 			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 		}
+
+		InitShaderResources();
 
 		AllocRegisteredBindParms();
 
