@@ -172,11 +172,11 @@ int main( int argc, char* argv[] )
 				std::string file;
 				SplitPath( path, dir, file );
 		
-				g_assets.Clear();
 				ShutdownScene( g_scene );
 				delete g_scene;
 				g_scene = nullptr;
 				g_renderer.ShutdownGPU();
+				g_assets.Clear();
 
 				CreateCodeAssets();
 				LoadScene( file, &g_scene, &g_assets );
