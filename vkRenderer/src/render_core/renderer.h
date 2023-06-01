@@ -85,7 +85,6 @@ struct ComputeState
 	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
 };
 
-
 class Renderer
 {
 public:
@@ -105,10 +104,6 @@ public:
 		InitRenderPasses( shadowView, shadowMap );
 		InitRenderPasses( renderView, mainColor );
 		InitRenderPasses( view2D, g_swapChain.framebuffers );
-
-		for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i ) {
-			particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
-		}
 
 		InitShaderResources();
 
@@ -153,7 +148,6 @@ public:
 	}
 
 private:
-
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
 
@@ -162,6 +156,7 @@ private:
 	static const bool					ValidateErrors = true;
 
 	renderConstants_t					rc;
+	RenderView							views[ 3 ];
 	RenderView							renderView;
 	RenderView							shadowView;
 	RenderView							view2D;

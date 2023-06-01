@@ -146,6 +146,7 @@ void ShaderBindSet::Destroy()
 	}
 #ifdef USE_VULKAN
 	vkDestroyDescriptorSetLayout( context.device, vk_layout, nullptr );
+	vk_layout = VK_NULL_HANDLE;
 #endif
 }
 

@@ -172,6 +172,11 @@ void Renderer::InitShaderResources()
 			}
 		}
 	}
+
+	for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i ) {
+		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
+	}
+
 	AllocRegisteredBindParms();
 
 	GenerateGpuPrograms( g_assets.gpuPrograms );
@@ -372,7 +377,7 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
-		DrawPass* pass = new DrawPass();
+		view.passes[ passIx ] = nullptr;
 
 		if( passIx < ViewRegionPassBegin( view.region ) ) {
 			continue;
@@ -380,16 +385,15 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 		if ( passIx > ViewRegionPassEnd( view.region ) ) {
 			continue;
 		}
+		DrawPass* pass = new DrawPass();
 		
 		pass->name = GetPassDebugName( drawPass_t( passIx ) );
 		pass->viewport.x = 0;
 		pass->viewport.y = 0;
 		pass->viewport.width = fb[ 0 ].width;
 		pass->viewport.height = fb[ 0 ].height;
-		for ( uint32_t i = 0; i < frameStateCount; ++i )
-		{
+		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
 			pass->fb[ i ] = &fb[ i ];
-			pass->parms[ i ] = RegisterBindParm( &defaultBindSet );
 		}
 
 		pass->transitionState.bits = 0;
@@ -731,7 +735,6 @@ void Renderer::FreeRegisteredBindParms()
 {
 	std::vector<VkDescriptorSet> descSets;
 	descSets.reserve( bindParmCount );
-
 
 	for ( uint32_t i = 0; i < bindParmCount; ++i )
 	{
