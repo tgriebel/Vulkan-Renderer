@@ -29,7 +29,7 @@
 
 void Renderer::Cleanup()
 {
-	DestroyFrameResources();
+	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
 	ShutdownImGui();
@@ -72,7 +72,7 @@ void Renderer::Cleanup()
 }
 
 
-void Renderer::DestroyFrameResources()
+void Renderer::DestroyFramebuffers()
 {
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
@@ -94,7 +94,6 @@ void Renderer::DestroyFrameResources()
 
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
 	frameBufferMemory.Unbind();
-	//vkUnmapMemory
 }
 
 

@@ -235,7 +235,7 @@ private:
 
 		vkDeviceWaitIdle( context.device );
 
-		DestroyFrameResources();
+		DestroyFramebuffers();
 		g_swapChain.Destroy();
 
 		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
@@ -337,7 +337,7 @@ private:
 	void						SubmitFrame();
 
 	// Misc
-	void						DestroyFrameResources();
+	void						DestroyFramebuffers();
 	void						CreateCodeTextures();
 	VkCommandBuffer				BeginSingleTimeCommands();
 	void						EndSingleTimeCommands( VkCommandBuffer commandBuffer );
