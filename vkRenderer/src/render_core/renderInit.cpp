@@ -565,9 +565,8 @@ void Renderer::CreateFramebuffers()
 		info.tiling = IMAGE_TILING_MORTON;
 
 		frameState[ i ].shadowMapImage.info = info;
-		frameState[ i ].shadowMapImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, GPU_IMAGE_READ, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
+		frameState[ i ].shadowMapImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage );
 	}
 
@@ -589,9 +588,8 @@ void Renderer::CreateFramebuffers()
 
 		frameState[ i ].viewColorImage.bytes = nullptr;
 		frameState[ i ].viewColorImage.info = info;
-		frameState[ i ].viewColorImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, GPU_IMAGE_READ, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		frameState[ i ].viewColorImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage );
 
 		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
@@ -601,13 +599,12 @@ void Renderer::CreateFramebuffers()
 
 		frameState[ i ].depthImage.info = info;
 		frameState[ i ].depthImage.bytes = nullptr;
-		frameState[ i ].depthImage.gpuImage = new GpuImage();
 
 		frameState[ i ].stencilImage.info = info;
 		frameState[ i ].stencilImage.bytes = nullptr;
 		frameState[ i ].stencilImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, GPU_IMAGE_READ, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
+		frameState[ i ].depthImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		
 		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
@@ -769,8 +766,10 @@ void Renderer::CreateBuffers()
 }
 
 
-void Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, GpuImage& image, AllocatorMemory& memory )
+GpuImage* Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
 {
+	GpuImage* image = new GpuImage();
+
 	VkImageCreateInfo imageInfo{ };
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -818,12 +817,14 @@ void Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageStateFlags
 		imageInfo.flags = ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
-	if ( vkCreateImage( context.device, &imageInfo, nullptr, &image.VkImage() ) != VK_SUCCESS ) {
+	if ( vkCreateImage( context.device, &imageInfo, nullptr, &image->VkImage() ) != VK_SUCCESS )
+	{
 		throw std::runtime_error( "Failed to create image!" );
+		return nullptr;
 	}
 
 	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements( context.device, image.GetVkImage(), &memRequirements );
+	vkGetImageMemoryRequirements( context.device, image->GetVkImage(), &memRequirements );
 
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -832,11 +833,15 @@ void Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageStateFlags
 
 	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
-		vkBindImageMemory( context.device, image.GetVkImage(), memory.GetMemoryResource(), alloc.GetOffset() );
+		vkBindImageMemory( context.device, image->GetVkImage(), memory.GetMemoryResource(), alloc.GetOffset() );
 	}
-	else {
+	else
+	{
 		throw std::runtime_error( "Buffer could not be allocated!" );
+		return nullptr;
 	}
+
+	return image;
 }
 
 
@@ -854,17 +859,15 @@ void Renderer::CreateCodeTextures() {
 
 	rc.whiteImage.info = info;
 	rc.whiteImage.bytes = nullptr;
-	rc.whiteImage.gpuImage = new GpuImage();
 
 	rc.blackImage.info = info;
 	rc.blackImage.bytes = nullptr;
-	rc.blackImage.gpuImage = new GpuImage();
 
 	// Default Images
-	CreateGpuImage( info, GPU_IMAGE_READ, *rc.whiteImage.gpuImage, localMemory );
+	rc.whiteImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, localMemory );
 	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage );
 
-	CreateGpuImage( info, GPU_IMAGE_READ, *rc.blackImage.gpuImage, localMemory );
+	rc.blackImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, localMemory );
 	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage );
 }
 
