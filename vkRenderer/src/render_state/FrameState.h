@@ -27,7 +27,7 @@
 #include "../render_binding/gpuResources.h"
 #include "../render_core/gpuImage.h"
 #include "rhi.h"
-#include <resource_types/texture.h>
+#include <gfxcore/asset_types/texture.h>
 
 class FrameState
 {

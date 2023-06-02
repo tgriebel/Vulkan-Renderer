@@ -1,8 +1,8 @@
 #pragma once
 
 #include "renderer.h"
-#include <scene/scene.h>
-#include <scene/entity.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/scene/entity.h>
 
 static RtView rtview;
 static RtScene rtScene;

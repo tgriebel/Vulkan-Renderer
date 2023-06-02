@@ -29,7 +29,7 @@
 #define USE_VULKAN
 #define USE_IMGUI
 
-#include <acceleration/aabb.h>
+#include <gfxcore/acceleration/aabb.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -50,13 +50,13 @@
 #include <math.h>
 #include <atomic>
 
-#include <math/vector.h>
-#include <core/handle.h>
-#include <image/color.h>
-#include <resource_types/material.h>
-#include <primitives/geom.h>
-#include <scene/camera.h>
-#include <resource_types/gpuProgram.h>
+#include <gfxcore/math/vector.h>
+#include <gfxcore/core/handle.h>
+#include <gfxcore/image/color.h>
+#include <gfxcore/asset_types/material.h>
+#include <gfxcore/primitives/geom.h>
+#include <gfxcore/scene/camera.h>
+#include <gfxcore/asset_types/gpuProgram.h>
 #include <syscore/common.h>
 #include <sysCore/array.h>
 

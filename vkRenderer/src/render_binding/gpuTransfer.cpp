@@ -26,7 +26,7 @@
 #include <map>
 #include "../render_core/renderer.h"
 #include "../render_state/rhi.h"
-#include <scene/assetManager.h>
+#include <gfxcore/scene/assetManager.h>
 
 extern AssetManager g_assets;
 

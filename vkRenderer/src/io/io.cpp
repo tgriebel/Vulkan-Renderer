@@ -22,12 +22,12 @@
 */
 
 #include "io.h"
-#include <core/assetlib.h>
+#include <gfxcore/core/assetlib.h>
 #include "../globals/render_util.h"
-#include <scene/scene.h>
-#include <resource_types/gpuProgram.h>
-#include <resource_types/model.h>
-#include <io/io.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/asset_types/model.h>
+#include <gfxcore/io/io.h>
 
 void SerializeStruct( Serializer* s, vertex_t& v );
 

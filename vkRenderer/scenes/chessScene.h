@@ -30,11 +30,11 @@
 #include <chess.h>
 #include <commands.h>
 #include <syscore/timer.h>
-#include <scene/entity.h>
-#include <scene/scene.h>
-#include <resource_types/gpuProgram.h>
-#include <resource_types/model.h>
-#include <io/io.h>
+#include <gfxcore/scene/entity.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/asset_types/model.h>
+#include <gfxcore/io/io.h>
 #include <algorithm>
 
 class PieceEntity : public Entity {

@@ -23,7 +23,7 @@
 
 #pragma once
 #include <cstdint>
-#include <scene/scene.h>
+#include <gfxcore/scene/scene.h>
 #include "common.h"
 #include "../render_core/drawpass.h"
 

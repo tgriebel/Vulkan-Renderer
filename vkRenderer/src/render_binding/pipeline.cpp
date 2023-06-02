@@ -28,8 +28,8 @@
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 #include "shaderBinding.h"
-#include <core/assetLib.h>
-#include <scene/scene.h>
+#include <gfxcore/core/assetLib.h>
+#include <gfxcore/scene/scene.h>
 
 static std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 

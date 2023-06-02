@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\Chess\Chess;..\..\..\SysCore;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\;..\..\..\Chess\Chess;..\..\..\SysCore;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\src;..\..\..\SysCore\;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\..\GfxCore\;..\..\..\SysCore\;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup>

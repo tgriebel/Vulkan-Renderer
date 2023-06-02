@@ -1,6 +1,6 @@
 #pragma once
 
-#include <resource_types/texture.h>
+#include <gfxcore/asset_types/texture.h>
 #include "../render_state/deviceContext.h"
 #include "../render_binding/shaderBinding.h"
 

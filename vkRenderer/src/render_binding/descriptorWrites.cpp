@@ -3,8 +3,8 @@
 #include <numeric>
 #include <map>
 #include "../render_core/renderer.h"
-#include <scene/scene.h>
-#include <scene/entity.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/scene/entity.h>
 #include <sstream>
 #include "../render_core/debugMenu.h"
 #include "../render_core/gpuImage.h"

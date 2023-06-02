@@ -28,10 +28,10 @@
 #include <chrono>
 #include <mutex>
 #include "src/globals/common.h"
-#include <scene/camera.h>
-#include <scene/scene.h>
-#include <scene/assetManager.h>
-#include <core/assetLib.h>
+#include <gfxcore/scene/camera.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/scene/assetManager.h>
+#include <gfxcore/core/assetLib.h>
 #include "src/globals/render_util.h"
 #include "src/render_state/deviceContext.h"
 #include "src/render_binding/pipeline.h"
@@ -44,7 +44,7 @@
 #include "src/render_binding/gpuResources.h"
 #include "scenes/sceneParser.h"
 #include "scenes/chessScene.h"
-#include <resource_types/gpuProgram.h>
+#include <gfxcore/asset_types/gpuProgram.h>
 #include <SysCore/systemUtils.h>
 
 AssetManager						g_assets;

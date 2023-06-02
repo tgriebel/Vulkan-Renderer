@@ -26,8 +26,8 @@
 #include <chrono>
 #include "common.h"
 #include "../../GeoBuilder.h"
-#include <resource_types/texture.h>
-#include <resource_types/model.h>
+#include <gfxcore/asset_types/texture.h>
+#include <gfxcore/asset_types/model.h>
 
 class SpinLock
 {

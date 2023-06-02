@@ -1,7 +1,7 @@
 
 #include "../globals/common.h"
-#include <scene/assetManager.h>
-#include <scene/scene.h>
+#include <gfxcore/scene/assetManager.h>
+#include <gfxcore/scene/scene.h>
 #include <sstream>
 
 extern AssetManager g_assets;

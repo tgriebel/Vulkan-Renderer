@@ -25,9 +25,9 @@
 #include "../render_state/deviceContext.h"
 #include "io.h"
 #include "../../GeoBuilder.h"
-#include <scene/assetManager.h>
-#include <core/assetLib.h>
-#include <resource_types/gpuProgram.h>
+#include <gfxcore/scene/assetManager.h>
+#include <gfxcore/core/assetLib.h>
+#include <gfxcore/asset_types/gpuProgram.h>
 #include "render_util.h"
 
 extern AssetManager g_assets;

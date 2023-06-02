@@ -28,11 +28,11 @@
 
 #include "../src/globals/common.h"
 #include "../src/globals/render_util.h"
-#include <scene/entity.h>
-#include <scene/scene.h>
-#include <resource_types/gpuProgram.h>
-#include <resource_types/model.h>
-#include <io/io.h>
+#include <gfxcore/scene/entity.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/asset_types/model.h>
+#include <gfxcore/io/io.h>
 
 //#define JSMN_PARENT_LINKS
 #include <SysCore/jsmn.h>

@@ -25,7 +25,7 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
-#include <scene/entity.h>
+#include <gfxcore/scene/entity.h>
 
 VkCommandBuffer Renderer::BeginSingleTimeCommands()
 {

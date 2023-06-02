@@ -24,8 +24,8 @@
 */
 
 #pragma once
-#include <scene/entity.h>
-#include <scene/scene.h>
+#include <gfxcore/scene/entity.h>
+#include <gfxcore/scene/scene.h>
 #include <chrono>
 
 class NesScene : public Scene

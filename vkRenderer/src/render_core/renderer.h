@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include <scene/camera.h>
+#include <gfxcore/scene/camera.h>
 
 #include "../globals/common.h"
 #include "../../window.h"
@@ -39,11 +39,11 @@
 #include "../globals/renderview.h"
 #include "../io/io.h"
 #include "../../GeoBuilder.h"
-#include <core/assetLib.h>
-#include <primitives/geom.h>
-#include <resource_types/texture.h>
-#include <resource_types/gpuProgram.h>
-#include <scene/scene.h>
+#include <gfxcore/core/assetLib.h>
+#include <gfxcore/primitives/geom.h>
+#include <gfxcore/asset_types/texture.h>
+#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/scene/scene.h>
 
 #include <raytracer/scene.h>
 #include <raytracer/raytrace.h>
@@ -56,7 +56,7 @@
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
-#include <scene/entity.h>
+#include <gfxcore/scene/entity.h>
 
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;

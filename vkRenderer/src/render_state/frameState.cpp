@@ -1,4 +1,4 @@
-#include <resource_types/texture.h>
+#include <gfxcore/asset_types/texture.h>
 #include "FrameState.h"
 #include "deviceContext.h"
 #include "rhi.h"

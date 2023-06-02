@@ -1,9 +1,9 @@
 #include "common.h"
-#include <core/util.h>
+#include <gfxcore/core/util.h>
 #include "io.h"
 #include "window.h"
-#include <scene/entity.h>
-#include <scene/scene.h>
+#include <gfxcore/scene/entity.h>
+#include <gfxcore/scene/scene.h>
 #include "src/globals/render_util.h"
 
 extern AssetManager g_assets;

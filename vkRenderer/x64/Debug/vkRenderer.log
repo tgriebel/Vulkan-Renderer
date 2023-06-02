@@ -1,2 +1,29 @@
-﻿  renderInit.cpp
+﻿  imgui_impl_glfw.cpp
+  scene.cpp
+  chessScene.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\scenes\chessScene.cpp(261,21): warning C4018: '<': signed/unsigned mismatch
+  nesScene.cpp
+  sceneParser.cpp
+  render_util.cpp
+  io.cpp
+  binding.cpp
+  descriptorWrites.cpp
+  gpuResources.cpp
+  gpuTransfer.cpp
+  pipeline.cpp
+  shaderBinding.cpp
+  debugMenu.cpp
+  gpuImage.cpp
+  renderCommand.cpp
+  renderer.cpp
+  renderInit.cpp
+  renderShutdown.cpp
+  deviceContext.cpp
+  Generating Code...
+  Compiling...
+  frameState.cpp
+  window.cpp
+  vulkinTestApp.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

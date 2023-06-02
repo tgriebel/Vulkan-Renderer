@@ -26,8 +26,8 @@
 #include <numeric>
 #include <map>
 #include "renderer.h"
-#include <scene/scene.h>
-#include <scene/entity.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/scene/entity.h>
 #include <sstream>
 #include "debugMenu.h"
 #include "gpuImage.h"
@@ -35,7 +35,7 @@
 #include "../render_binding/bindings.h"
 #include "raytracerInterface.h"
 
-#include <io/io.h>
+#include <gfxcore/io/io.h>
 
 extern Scene* g_scene;
 

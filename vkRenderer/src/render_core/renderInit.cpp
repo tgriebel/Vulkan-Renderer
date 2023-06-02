@@ -25,7 +25,7 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
-#include <scene/entity.h>
+#include <gfxcore/scene/entity.h>
 #include "../render_state/rhi.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/bindings.h"
