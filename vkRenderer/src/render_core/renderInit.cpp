@@ -567,7 +567,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].shadowMapImage.info = info;
 		frameState[ i ].shadowMapImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
+		CreateGpuImage( info, VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
 		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage );
 	}
 
@@ -591,7 +591,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].viewColorImage.info = info;
 		frameState[ i ].viewColorImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		CreateGpuImage( info, VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
 		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage );
 
 		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
@@ -607,7 +607,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].stencilImage.bytes = nullptr;
 		frameState[ i ].stencilImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
+		CreateGpuImage( info, VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
 		
 		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
@@ -786,6 +786,14 @@ void Renderer::CreateGpuImage( const imageInfo_t& info, VkImageUsageFlags usage,
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
+	if ( ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ) {
+		imageInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	}
+
+	if ( ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ) {
+		imageInfo.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
+
 	VkImageStencilUsageCreateInfo stencilUsage{};
 	if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
 	{
@@ -794,7 +802,8 @@ void Renderer::CreateGpuImage( const imageInfo_t& info, VkImageUsageFlags usage,
 		imageInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 		imageInfo.pNext = &stencilUsage;
 	}
-	else {
+	else
+	{
 		imageInfo.flags = ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
@@ -841,10 +850,10 @@ void Renderer::CreateCodeTextures() {
 	rc.blackImage.gpuImage = new GpuImage();
 
 	// Default Images
-	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, *rc.whiteImage.gpuImage, localMemory );
+	CreateGpuImage( info, 0, *rc.whiteImage.gpuImage, localMemory );
 	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage );
 
-	CreateGpuImage( info, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, *rc.blackImage.gpuImage, localMemory );
+	CreateGpuImage( info, 0, *rc.blackImage.gpuImage, localMemory );
 	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage );
 }
 

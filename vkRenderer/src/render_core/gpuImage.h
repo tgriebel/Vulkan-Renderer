@@ -45,5 +45,29 @@ public:
 };
 
 
-// TODO: for cases where only a different view is needed
-//class GpuImageView;
+class GpuImageView
+{
+private:
+#ifdef USE_VULKAN
+	const VkImage	vk_image;
+	VkImageView		vk_view;
+#endif
+
+public:
+	inline VkImage GetVkImage() const
+	{
+		return vk_image;
+	}
+
+
+	inline VkImageView GetVkImageView() const
+	{
+		return vk_view;
+	}
+
+
+	inline VkImageView& VkImageView()
+	{
+		return vk_view;
+	}
+};
