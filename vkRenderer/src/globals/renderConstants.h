@@ -26,6 +26,6 @@
 
 struct renderConstants_t
 {
-	Texture		whiteImage;
-	Texture		blackImage;
+	Image		whiteImage;
+	Image		blackImage;
 };

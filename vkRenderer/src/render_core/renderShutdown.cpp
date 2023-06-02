@@ -142,7 +142,7 @@ void Renderer::ShutdownShaderResources()
 	const uint32_t textureCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		const Texture& texture = g_assets.textureLib.Find( i )->Get();
+		const Image& texture = g_assets.textureLib.Find( i )->Get();
 		texture.gpuImage->Destroy();
 		delete texture.gpuImage;
 	}

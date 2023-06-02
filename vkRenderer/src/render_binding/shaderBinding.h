@@ -105,7 +105,7 @@ private:
 	union attach_t
 	{
 		const GpuBuffer*	buffer;
-		const Texture*		image;
+		const Image*		image;
 		const ImageArray*	imageArray;
 	} u;
 	type_t type;
@@ -121,7 +121,7 @@ public:
 		type = type_t::BUFFER;
 	}
 
-	ShaderAttachment( const Texture* image )
+	ShaderAttachment( const Image* image )
 	{
 		u.image = image;
 		type = type_t::IMAGE;
@@ -143,7 +143,7 @@ public:
 		return ( type == type_t::BUFFER ) ? u.buffer : nullptr;
 	}
 
-	inline const Texture* GetImage() const
+	inline const Image* GetImage() const
 	{
 		return ( type == type_t::IMAGE ) ? u.image : nullptr;
 	}
@@ -245,7 +245,7 @@ public:
 	}
 
 	void Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
-	void Bind( const ShaderBinding& binding, const Texture* texture );
+	void Bind( const ShaderBinding& binding, const Image* texture );
 	void Bind( const ShaderBinding& binding, const ImageArray* imageArray );
 	const ShaderAttachment* GetAttachment( const ShaderBinding* binding ) const;
 	const ShaderAttachment* GetAttachment( const uint32_t id ) const;

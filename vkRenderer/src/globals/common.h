@@ -96,7 +96,7 @@ const std::string BakedModelExtension = ".mdl";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 
-using ImageArray = Array<Texture*, MaxImageDescriptors>;
+using ImageArray = Array<Image*, MaxImageDescriptors>;
 
 class Renderer;
 class Serializer;

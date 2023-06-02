@@ -30,7 +30,7 @@
 
 extern AssetManager g_assets;
 
-void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Texture& texture )
+void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Image& texture )
 {
 	const uint32_t layers = texture.info.layers;
 
@@ -71,8 +71,8 @@ void Renderer::UpdateTextures()
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
-		Texture& texture = textureAsset->Get();
+		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
+		Image& texture = textureAsset->Get();
 
 		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );
@@ -98,11 +98,11 @@ void Renderer::UploadTextures()
 	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
+		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
 		if( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
-		Texture& texture = textureAsset->Get();
+		Image& texture = textureAsset->Get();
 
 		VkImageUsageFlags flags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
@@ -126,11 +126,11 @@ void Renderer::UploadTextures()
 	// 2. Generate MIPS
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
+		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
-		Texture& texture = textureAsset->Get();
+		Image& texture = textureAsset->Get();
 		GenerateMipmaps( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
 	EndSingleTimeCommands( commandBuffer );
@@ -138,11 +138,11 @@ void Renderer::UploadTextures()
 	// 3. Create Views
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
+		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
-		Texture& texture = textureAsset->Get();
+		Image& texture = textureAsset->Get();
 		texture.gpuImage->VkImageView() = CreateImageView( texture );
 	}
 
@@ -152,10 +152,10 @@ void Renderer::UploadTextures()
 		gpuImagesCube.Resize( MaxImageDescriptors );
 
 		// Find first cubemap. FIXME: Hacky, just done so there aren't nulls in the list
-		Texture* firstCube = nullptr;
+		Image* firstCube = nullptr;
 		for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 		{
-			Asset<Texture>* textureAsset = g_assets.textureLib.Find( *it );
+			Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
@@ -170,11 +170,11 @@ void Renderer::UploadTextures()
 		// Fill assigned slots
 		for ( uint32_t i = 0; i < imageFreeSlot; ++i )
 		{
-			Asset<Texture>* textureAsset = g_assets.textureLib.Find( i );
+			Asset<Image>* textureAsset = g_assets.textureLib.Find( i );
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
-			Texture& texture = textureAsset->Get();
+			Image& texture = textureAsset->Get();
 
 			switch ( texture.info.type )
 			{

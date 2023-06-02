@@ -37,8 +37,8 @@ static void BuildRayTraceScene( Scene* scene )
 	const uint32_t texCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < texCount; ++i )
 	{
-		Asset<Texture>* texAsset = g_assets.textureLib.Find( i );
-		Texture& texture = texAsset->Get();
+		Asset<Image>* texAsset = g_assets.textureLib.Find( i );
+		Image& texture = texAsset->Get();
 
 		texture.cpuImage.Init( texture.info.width, texture.info.height );
 

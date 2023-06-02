@@ -32,10 +32,10 @@
 class FrameState
 {
 public:
-	Texture			viewColorImage;
-	Texture			shadowMapImage;
-	Texture			depthImage;
-	Texture			stencilImage;
+	Image			viewColorImage;
+	Image			shadowMapImage;
+	Image			depthImage;
+	Image			stencilImage;
 
 	// FIXME: Lights and surfaces should be relative to a given render view.
 	// Textures, materials, and view parms are all global
@@ -48,6 +48,9 @@ public:
 	GpuBuffer		particleBuffer;
 
 	GpuBufferView	surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
+
+	void Create();
+	void Destroy();
 };
 
 
@@ -55,11 +58,11 @@ struct frameBufferCreateInfo_t
 {
 	uint32_t	width;
 	uint32_t	height;
-	Texture*	color0;
-	Texture*	color1;
-	Texture*	color2;
-	Texture*	depth;
-	Texture*	stencil;
+	Image*	color0;
+	Image*	color1;
+	Image*	color2;
+	Image*	depth;
+	Image*	stencil;
 
 	frameBufferCreateInfo_t() :
 		width( 0 ),
@@ -76,11 +79,11 @@ struct frameBufferCreateInfo_t
 class FrameBuffer
 {
 public:
-	Texture*		color0;
-	Texture*		color1;
-	Texture*		color2;
-	Texture*		depth;
-	Texture*		stencil;
+	Image*		color0;
+	Image*		color1;
+	Image*		color2;
+	Image*		depth;
+	Image*		stencil;
 
 #ifdef USE_VULKAN
 	VkFramebuffer	buffers[ PassPermCount ];

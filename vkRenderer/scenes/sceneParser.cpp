@@ -198,7 +198,7 @@ int ParseImageObject( parseState_t& st, void* object )
 	loader->SetTextureFile( name );
 	loader->LoadAsCubemap( strcmp( type, "CUBE" ) == 0 ? true : false );
 
-	textureLib.AddDeferred( name, Asset<Texture>::loadHandlerPtr_t( loader ) );
+	textureLib.AddDeferred( name, Asset<Image>::loadHandlerPtr_t( loader ) );
 
 	return st.tx;
 }

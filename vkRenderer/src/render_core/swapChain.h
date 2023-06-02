@@ -41,7 +41,7 @@ private:
 	const Window*				m_window;
 	uint32_t					m_imageCount;
 	textureFmt_t				m_swapChainImageFormat;
-	Texture						m_swapChainImages[ MaxSwapChainBuffers ];
+	Image						m_swapChainImages[ MaxSwapChainBuffers ];
 #ifdef USE_VULKAN
 	VkSwapchainKHR				vk_swapChain;
 #endif

@@ -23,8 +23,8 @@ void CreateCodeAssets()
 			ss << "CODE_COLOR_" << t;
 			std::string s = ss.str();
 
-			hdl_t handle = g_assets.textureLib.Add( s.c_str(), Texture() );
-			Texture& texture = g_assets.textureLib.Find( handle )->Get();
+			hdl_t handle = g_assets.textureLib.Add( s.c_str(), Image() );
+			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
 			texture.info.width = 256;
 			texture.info.height = 240;
@@ -218,7 +218,7 @@ void UpdateScene( Scene* scene )
 	{
 		Color randomColor( Random(), Random(), Random(), 1.0f );
 		const RGBA rgba = Color( randomColor ).AsRGBA();
-		Texture& texture = g_assets.textureLib.Find( "CODE_COLOR_0" )->Get();
+		Image& texture = g_assets.textureLib.Find( "CODE_COLOR_0" )->Get();
 
 		const uint32_t pixelCount = texture.info.width * texture.info.height;
 		for ( uint32_t i = 0; i < pixelCount; ++i )

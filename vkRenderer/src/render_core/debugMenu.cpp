@@ -153,7 +153,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
 		{
 			std::stringstream ss;
-			ss << "##Texture" << t;
+			ss << "##Image" << t;
 			std::string label = ss.str();
 			ImGui::Text( label.c_str() + 2 );
 			ImGui::SameLine();
@@ -267,7 +267,7 @@ void DebugMenuModelTreeNode( Asset<Model>* modelAsset )
 }
 
 
-void DebugMenuTextureTreeNode( Asset<Texture>* texAsset )
+void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 {
 	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
 
@@ -275,7 +275,7 @@ void DebugMenuTextureTreeNode( Asset<Texture>* texAsset )
 
 	if ( ImGui::TreeNode( texName ) )
 	{
-		Texture& texture = texAsset->Get();
+		Image& texture = texAsset->Get();
 		if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
 		{
 			ImGui::TableNextColumn();	ImGui::Text( "Width" );

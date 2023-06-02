@@ -43,5 +43,5 @@ bool				IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const s
 QueueFamilyIndices	FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
-VkImageView			CreateImageView( const Texture& texture );
+VkImageView			CreateImageView( const Image& texture );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );

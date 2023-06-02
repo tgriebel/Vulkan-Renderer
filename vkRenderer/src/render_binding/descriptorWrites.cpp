@@ -119,7 +119,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 			writeInfo.pBufferInfo = &info;
 		}
 		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE ) {
-			const Texture* image = attachment->GetImage();
+			const Image* image = attachment->GetImage();
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = vk_bilinearSampler;
@@ -148,7 +148,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 
 			for ( uint32_t imageIx = 0; imageIx < imageCount; ++imageIx )
 			{
-				const Texture* image = images[ imageIx ];
+				const Image* image = images[ imageIx ];
 				VkDescriptorImageInfo& info = infos[ imageIx ];
 
 				info = {};

@@ -202,7 +202,7 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffe
 }
 
 
-void ShaderBindParms::Bind( const ShaderBinding& binding, const Texture* texture )
+void ShaderBindParms::Bind( const ShaderBinding& binding, const Image* texture )
 {
 	if ( bindSet->HasBinding( binding ) ) {
 		attachments[ binding.GetHash() ] = texture;

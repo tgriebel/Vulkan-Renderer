@@ -134,7 +134,7 @@ uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 	throw std::runtime_error( "Failed to find suitable memory type!" );
 }
 
-VkImageView CreateImageView( const Texture& texture )
+VkImageView CreateImageView( const Image& texture )
 {
 	VkImageAspectFlags aspectFlags = 0;
 	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;

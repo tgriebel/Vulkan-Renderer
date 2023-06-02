@@ -223,7 +223,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() ) {
-				Texture& texture = g_assets.textureLib.Find( texHandle )->Get();
+				Image& texture = g_assets.textureLib.Find( texHandle )->Get();
 				if( texture.uploadId < 0 ) {
 					uploadTextures.insert( texHandle );
 				}
@@ -311,11 +311,11 @@ void Renderer::UploadAssets()
 	const uint32_t textureCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Texture>* textureAsset = g_assets.textureLib.Find( i );
+		Asset<Image>* textureAsset = g_assets.textureLib.Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
-		Texture& texture = textureAsset->Get();
+		Image& texture = textureAsset->Get();
 		if ( texture.uploadId != -1 ) {
 			continue;
 		}
@@ -1314,7 +1314,7 @@ void Renderer::DrawDebugMenu()
 			{
 				for ( uint32_t t = 0; t < texCount; ++t )
 				{
-					Asset<Texture>* texAsset = g_assets.textureLib.Find( t );
+					Asset<Image>* texAsset = g_assets.textureLib.Find( t );
 					DebugMenuTextureTreeNode( texAsset );
 				}
 				ImGui::TreePop();
