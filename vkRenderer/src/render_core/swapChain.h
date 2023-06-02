@@ -40,7 +40,7 @@ class SwapChain
 private:
 	const Window*				m_window;
 	uint32_t					m_imageCount;
-	textureFmt_t				m_swapChainImageFormat;
+	imageFmt_t				m_swapChainImageFormat;
 	Image						m_swapChainImages[ MaxSwapChainBuffers ];
 #ifdef USE_VULKAN
 	VkSwapchainKHR				vk_swapChain;
@@ -49,7 +49,7 @@ public:
 	FrameBuffer					framebuffers[ MaxSwapChainBuffers ];
 
 public:
-	inline textureFmt_t GetBackBufferFormat() const
+	inline imageFmt_t GetBackBufferFormat() const
 	{
 		return m_swapChainImageFormat;
 	}
@@ -147,9 +147,9 @@ public:
 			m_swapChainImages[ i ].info.layers = 1;
 			m_swapChainImages[ i ].info.mipLevels = 1;
 			m_swapChainImages[ i ].info.channels = 4;
-			m_swapChainImages[ i ].info.subsamples = TEXTURE_SMP_1;
-			m_swapChainImages[ i ].info.tiling = TEXTURE_TILING_LINEAR;
-			m_swapChainImages[ i ].info.type = TEXTURE_TYPE_2D;
+			m_swapChainImages[ i ].info.subsamples = IMAGE_SMP_1;
+			m_swapChainImages[ i ].info.tiling = IMAGE_TILING_LINEAR;
+			m_swapChainImages[ i ].info.type = IMAGE_TYPE_2D;
 			
 			m_swapChainImages[ i ].gpuImage = new GpuImage();
 			m_swapChainImages[ i ].gpuImage->VkImage() = vk_swapChainImages[ i ];

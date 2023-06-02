@@ -303,10 +303,10 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 			ImGui::TableNextColumn();
 			switch ( texture.info.type )
 			{
-			case TEXTURE_TYPE_2D:
+			case IMAGE_TYPE_2D:
 				ImGui::Text( "2D" );
 				break;
-			case TEXTURE_TYPE_CUBE:
+			case IMAGE_TYPE_CUBE:
 				ImGui::Text( "CUBE" );
 				break;
 			default:

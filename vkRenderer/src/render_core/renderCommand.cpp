@@ -64,7 +64,7 @@ void Renderer::EndSingleTimeCommands( VkCommandBuffer commandBuffer )
 }
 
 
-void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info )
+void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const imageInfo_t& info )
 {
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -111,7 +111,7 @@ void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage im
 }
 
 
-void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const textureInfo_t& info )
+void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const imageInfo_t& info )
 {
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, imageFormat, &formatProperties );

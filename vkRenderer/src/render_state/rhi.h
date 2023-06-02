@@ -17,8 +17,8 @@ DEFINE_ENUM_OPERATORS( vk_RenderPassAttachmentMask_t, uint8_t )
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
 struct renderPassAttachmentBits_t
 {
-	textureSamples_t	samples : 8;
-	textureFmt_t		fmt		: 8;
+	imageSamples_t	samples : 8;
+	imageFmt_t		fmt		: 8;
 };
 union renderPassTransitionFlags_t
 {
@@ -31,8 +31,8 @@ union renderPassTransitionFlags_t
 	} flags;
 	uint8_t bits;
 };
-static_assert( sizeof( textureSamples_t ) == 1, "Bits overflowed" );
-static_assert( sizeof( textureFmt_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( imageSamples_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( imageFmt_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( renderPassAttachmentBits_t ) == 2, "Bits overflowed" );
 static_assert( sizeof( renderPassTransitionFlags_t ) == 1, "Bits overflowed" );
 
@@ -69,80 +69,80 @@ static_assert( sizeof( vk_RenderPassBits_t ) == VkPassBitsSize, "Bits overflowed
 
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
 
-static inline VkFormat vk_GetTextureFormat( textureFmt_t fmt )
+static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )
 {
 	switch ( fmt )
 	{
-		case TEXTURE_FMT_UNKNOWN:	return VK_FORMAT_UNDEFINED;
-		case TEXTURE_FMT_R_8:		return VK_FORMAT_R8_SRGB;
-		case TEXTURE_FMT_R_16:		return VK_FORMAT_R16_SFLOAT;
-		case TEXTURE_FMT_D_16:		return VK_FORMAT_D16_UNORM;
-		case TEXTURE_FMT_D24S8:		return VK_FORMAT_D24_UNORM_S8_UINT;
-		case TEXTURE_FMT_D_32:		return VK_FORMAT_D32_SFLOAT;
-		case TEXTURE_FMT_D_32_S8:	return VK_FORMAT_D32_SFLOAT_S8_UINT;
-		case TEXTURE_FMT_RGB_8:		return VK_FORMAT_R8G8B8_SRGB;
-		case TEXTURE_FMT_RGBA_8:	return VK_FORMAT_R8G8B8A8_SRGB;
-		case TEXTURE_FMT_ABGR_8:	return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
-		case TEXTURE_FMT_BGR_8:		return VK_FORMAT_B8G8R8_SRGB;
-		case TEXTURE_FMT_BGRA_8:	return VK_FORMAT_B8G8R8A8_SRGB;
-		case TEXTURE_FMT_RGB_16:	return VK_FORMAT_R16G16B16_SFLOAT;
-		case TEXTURE_FMT_RGBA_16:	return VK_FORMAT_R16G16B16A16_SFLOAT;
+		case IMAGE_FMT_UNKNOWN:	return VK_FORMAT_UNDEFINED;
+		case IMAGE_FMT_R_8:		return VK_FORMAT_R8_SRGB;
+		case IMAGE_FMT_R_16:		return VK_FORMAT_R16_SFLOAT;
+		case IMAGE_FMT_D_16:		return VK_FORMAT_D16_UNORM;
+		case IMAGE_FMT_D24S8:		return VK_FORMAT_D24_UNORM_S8_UINT;
+		case IMAGE_FMT_D_32:		return VK_FORMAT_D32_SFLOAT;
+		case IMAGE_FMT_D_32_S8:	return VK_FORMAT_D32_SFLOAT_S8_UINT;
+		case IMAGE_FMT_RGB_8:		return VK_FORMAT_R8G8B8_SRGB;
+		case IMAGE_FMT_RGBA_8:	return VK_FORMAT_R8G8B8A8_SRGB;
+		case IMAGE_FMT_ABGR_8:	return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+		case IMAGE_FMT_BGR_8:		return VK_FORMAT_B8G8R8_SRGB;
+		case IMAGE_FMT_BGRA_8:	return VK_FORMAT_B8G8R8A8_SRGB;
+		case IMAGE_FMT_RGB_16:	return VK_FORMAT_R16G16B16_SFLOAT;
+		case IMAGE_FMT_RGBA_16:	return VK_FORMAT_R16G16B16A16_SFLOAT;
 		default: assert( false );	break;
 	}
 	return VK_FORMAT_R8G8B8A8_SRGB;
 }
 
 
-static inline textureFmt_t vk_GetTextureFormat( VkFormat fmt )
+static inline imageFmt_t vk_GetTextureFormat( VkFormat fmt )
 {
 	switch ( fmt )
 	{
-		case VK_FORMAT_UNDEFINED:				return TEXTURE_FMT_UNKNOWN;
-		case VK_FORMAT_R8_SRGB:					return TEXTURE_FMT_R_8;
-		case VK_FORMAT_R16_SFLOAT:				return TEXTURE_FMT_R_16;
-		case VK_FORMAT_D16_UNORM:				return TEXTURE_FMT_D_16;
-		case VK_FORMAT_D24_UNORM_S8_UINT:		return TEXTURE_FMT_D24S8;
-		case VK_FORMAT_D32_SFLOAT:				return TEXTURE_FMT_D_32;
-		case VK_FORMAT_D32_SFLOAT_S8_UINT:		return TEXTURE_FMT_D_32_S8;
-		case VK_FORMAT_R8G8B8_SRGB:				return TEXTURE_FMT_RGB_8;
-		case VK_FORMAT_R8G8B8A8_SRGB:			return TEXTURE_FMT_RGBA_8;
-		case VK_FORMAT_A8B8G8R8_SRGB_PACK32:	return TEXTURE_FMT_ABGR_8;
-		case VK_FORMAT_B8G8R8_SRGB:				return TEXTURE_FMT_BGR_8;
-		case VK_FORMAT_B8G8R8A8_SRGB:			return TEXTURE_FMT_BGRA_8;
-		case VK_FORMAT_R16G16B16_SFLOAT:		return TEXTURE_FMT_RGB_16;
-		case VK_FORMAT_R16G16B16A16_SFLOAT:		return TEXTURE_FMT_RGBA_16;
+		case VK_FORMAT_UNDEFINED:				return IMAGE_FMT_UNKNOWN;
+		case VK_FORMAT_R8_SRGB:					return IMAGE_FMT_R_8;
+		case VK_FORMAT_R16_SFLOAT:				return IMAGE_FMT_R_16;
+		case VK_FORMAT_D16_UNORM:				return IMAGE_FMT_D_16;
+		case VK_FORMAT_D24_UNORM_S8_UINT:		return IMAGE_FMT_D24S8;
+		case VK_FORMAT_D32_SFLOAT:				return IMAGE_FMT_D_32;
+		case VK_FORMAT_D32_SFLOAT_S8_UINT:		return IMAGE_FMT_D_32_S8;
+		case VK_FORMAT_R8G8B8_SRGB:				return IMAGE_FMT_RGB_8;
+		case VK_FORMAT_R8G8B8A8_SRGB:			return IMAGE_FMT_RGBA_8;
+		case VK_FORMAT_A8B8G8R8_SRGB_PACK32:	return IMAGE_FMT_ABGR_8;
+		case VK_FORMAT_B8G8R8_SRGB:				return IMAGE_FMT_BGR_8;
+		case VK_FORMAT_B8G8R8A8_SRGB:			return IMAGE_FMT_BGRA_8;
+		case VK_FORMAT_R16G16B16_SFLOAT:		return IMAGE_FMT_RGB_16;
+		case VK_FORMAT_R16G16B16A16_SFLOAT:		return IMAGE_FMT_RGBA_16;
 		default: assert( false );	break;
 	}
-	return TEXTURE_FMT_RGBA_8;
+	return IMAGE_FMT_RGBA_8;
 }
 
 
-static inline VkImageViewType vk_GetTextureType( textureType_t type )
+static inline VkImageViewType vk_GetTextureType( imageType_t type )
 {
 	switch ( type ) {
 		default:
-		case TEXTURE_TYPE_2D:			return VK_IMAGE_VIEW_TYPE_2D;
-		case TEXTURE_TYPE_2D_ARRAY:		return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-		case TEXTURE_TYPE_3D:			return VK_IMAGE_VIEW_TYPE_3D;
-		case TEXTURE_TYPE_CUBE:			return VK_IMAGE_VIEW_TYPE_CUBE;
-		case TEXTURE_TYPE_CUBE_ARRAY:	return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+		case IMAGE_TYPE_2D:			return VK_IMAGE_VIEW_TYPE_2D;
+		case IMAGE_TYPE_2D_ARRAY:		return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+		case IMAGE_TYPE_3D:			return VK_IMAGE_VIEW_TYPE_3D;
+		case IMAGE_TYPE_CUBE:			return VK_IMAGE_VIEW_TYPE_CUBE;
+		case IMAGE_TYPE_CUBE_ARRAY:	return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
 	}
 	assert(0);
 	return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
 }
 
 
-static inline VkSampleCountFlagBits vk_GetSampleCount( const textureSamples_t sampleCount )
+static inline VkSampleCountFlagBits vk_GetSampleCount( const imageSamples_t sampleCount )
 {
 	switch ( sampleCount )
 	{
-		case TEXTURE_SMP_1:			return VK_SAMPLE_COUNT_1_BIT;
-		case TEXTURE_SMP_2:			return VK_SAMPLE_COUNT_2_BIT;
-		case TEXTURE_SMP_4:			return VK_SAMPLE_COUNT_4_BIT;
-		case TEXTURE_SMP_8:			return VK_SAMPLE_COUNT_8_BIT;
-		case TEXTURE_SMP_16:		return VK_SAMPLE_COUNT_16_BIT;
-		case TEXTURE_SMP_32:		return VK_SAMPLE_COUNT_32_BIT;
-		case TEXTURE_SMP_64:		return VK_SAMPLE_COUNT_64_BIT;
+		case IMAGE_SMP_1:			return VK_SAMPLE_COUNT_1_BIT;
+		case IMAGE_SMP_2:			return VK_SAMPLE_COUNT_2_BIT;
+		case IMAGE_SMP_4:			return VK_SAMPLE_COUNT_4_BIT;
+		case IMAGE_SMP_8:			return VK_SAMPLE_COUNT_8_BIT;
+		case IMAGE_SMP_16:		return VK_SAMPLE_COUNT_16_BIT;
+		case IMAGE_SMP_32:		return VK_SAMPLE_COUNT_32_BIT;
+		case IMAGE_SMP_64:		return VK_SAMPLE_COUNT_64_BIT;
 		default: assert( false );	break;
 	}
 	return VK_SAMPLE_COUNT_1_BIT;

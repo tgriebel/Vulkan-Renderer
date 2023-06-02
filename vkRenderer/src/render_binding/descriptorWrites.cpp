@@ -126,7 +126,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
 			assert( info.imageView != nullptr );
 
-			if ( ( image->info.aspect & ( TEXTURE_ASPECT_DEPTH_FLAG | TEXTURE_ASPECT_STENCIL_FLAG ) ) != 0 ) {
+			if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 ) {
 				info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			}
 			else {
@@ -155,7 +155,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 				info.imageView = images[ imageIx ]->gpuImage->GetVkImageView();
 				assert( info.imageView != nullptr );
 
-				if ( ( image->info.aspect & ( TEXTURE_ASPECT_DEPTH_FLAG | TEXTURE_ASPECT_STENCIL_FLAG ) ) != 0 )
+				if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
 				{
 					info.sampler = vk_depthShadowSampler;
 					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;

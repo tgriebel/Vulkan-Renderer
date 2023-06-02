@@ -137,9 +137,9 @@ uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 VkImageView CreateImageView( const Image& texture )
 {
 	VkImageAspectFlags aspectFlags = 0;
-	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
-	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
-	aspectFlags |= ( texture.info.aspect & TEXTURE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+	aspectFlags |= ( texture.info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
+	aspectFlags |= ( texture.info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
+	aspectFlags |= ( texture.info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
 
 	VkImageViewCreateInfo viewInfo{ };
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -150,7 +150,7 @@ VkImageView CreateImageView( const Image& texture )
 	viewInfo.subresourceRange.baseMipLevel = 0;
 	viewInfo.subresourceRange.levelCount = texture.info.mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = ( texture.info.type == TEXTURE_TYPE_CUBE ) ? 6 : 1;
+	viewInfo.subresourceRange.layerCount = ( texture.info.type == IMAGE_TYPE_CUBE ) ? 6 : 1;
 
 	VkImageView imageView;
 	if ( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS )

@@ -74,7 +74,7 @@ extern SwapChain					g_swapChain;
 
 struct renderConfig_t
 {
-	textureSamples_t mainColorSubSamples;
+	imageSamples_t mainColorSubSamples;
 };
 
 struct ComputeState
@@ -134,17 +134,17 @@ public:
 
 	void		UploadAssets();
 
-	static textureSamples_t GetMaxUsableSampleCount()
+	static imageSamples_t GetMaxUsableSampleCount()
 	{
 		VkSampleCountFlags counts = context.deviceProperties.limits.framebufferColorSampleCounts & context.deviceProperties.limits.framebufferDepthSampleCounts;
-		if ( counts & VK_SAMPLE_COUNT_64_BIT ) { return TEXTURE_SMP_64; }
-		if ( counts & VK_SAMPLE_COUNT_32_BIT ) { return TEXTURE_SMP_32; }
-		if ( counts & VK_SAMPLE_COUNT_16_BIT ) { return TEXTURE_SMP_16; }
-		if ( counts & VK_SAMPLE_COUNT_8_BIT ) { return TEXTURE_SMP_8; }
-		if ( counts & VK_SAMPLE_COUNT_4_BIT ) { return TEXTURE_SMP_4; }
-		if ( counts & VK_SAMPLE_COUNT_2_BIT ) { return TEXTURE_SMP_2; }
+		if ( counts & VK_SAMPLE_COUNT_64_BIT ) { return IMAGE_SMP_64; }
+		if ( counts & VK_SAMPLE_COUNT_32_BIT ) { return IMAGE_SMP_32; }
+		if ( counts & VK_SAMPLE_COUNT_16_BIT ) { return IMAGE_SMP_16; }
+		if ( counts & VK_SAMPLE_COUNT_8_BIT ) { return IMAGE_SMP_8; }
+		if ( counts & VK_SAMPLE_COUNT_4_BIT ) { return IMAGE_SMP_4; }
+		if ( counts & VK_SAMPLE_COUNT_2_BIT ) { return IMAGE_SMP_2; }
 
-		return TEXTURE_SMP_1;
+		return IMAGE_SMP_1;
 	}
 
 private:
@@ -298,14 +298,14 @@ private:
 	void						Cleanup();
 
 	// Image Functions
-	void						TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const textureInfo_t& info );
+	void						TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const imageInfo_t& info );
 	void						CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Image& texture );
-	void						GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const textureInfo_t& info );
+	void						GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const imageInfo_t& info );
 
 	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	// API Creation Functions
-	void						CreateGpuImage( const textureInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorMemory& memory );
+	void						CreateGpuImage( const imageInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorMemory& memory );
 	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
 	void						AllocRegisteredBindParms();
 	void						FreeRegisteredBindParms();

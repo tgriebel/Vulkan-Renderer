@@ -30,10 +30,10 @@ void CreateCodeAssets()
 			texture.info.height = 240;
 			texture.info.mipLevels = 1;
 			texture.info.layers = 1;
-			texture.info.type = TEXTURE_TYPE_2D;
+			texture.info.type = IMAGE_TYPE_2D;
 			texture.info.channels = 4;
-			texture.info.fmt = TEXTURE_FMT_RGBA_8;
-			texture.info.tiling = TEXTURE_TILING_MORTON;
+			texture.info.fmt = IMAGE_FMT_RGBA_8;
+			texture.info.tiling = IMAGE_TILING_MORTON;
 			texture.sizeBytes = texture.info.channels * texture.info.width * texture.info.height;
 
 			texture.bytes = new uint8_t[ texture.sizeBytes ];

@@ -159,7 +159,7 @@ void Renderer::UploadTextures()
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
-			if ( textureAsset->Get().info.type == TEXTURE_TYPE_CUBE )
+			if ( textureAsset->Get().info.type == IMAGE_TYPE_CUBE )
 			{
 				firstCube = &textureAsset->Get();
 				break;
@@ -178,11 +178,11 @@ void Renderer::UploadTextures()
 
 			switch ( texture.info.type )
 			{
-				case TEXTURE_TYPE_2D:
+				case IMAGE_TYPE_2D:
 					gpuImages2D[ texture.uploadId ] = &texture;
 					gpuImagesCube[ texture.uploadId ] = firstCube;
 					break;
-				case TEXTURE_TYPE_CUBE:
+				case IMAGE_TYPE_CUBE:
 					gpuImages2D[ texture.uploadId ] = &g_assets.textureLib.GetDefault()->Get();
 					gpuImagesCube[ texture.uploadId ] = &texture;
 					break;

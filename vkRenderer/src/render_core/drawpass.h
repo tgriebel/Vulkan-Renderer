@@ -14,7 +14,7 @@ public:
 	uint32_t					clearStencil;
 
 	gfxStateBits_t				stateBits;
-	textureSamples_t			sampleRate;
+	imageSamples_t			sampleRate;
 	viewport_t					viewport;
 	renderPassTransitionFlags_t transitionState;
 

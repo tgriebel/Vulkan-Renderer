@@ -193,7 +193,7 @@ int ParseImageObject( parseState_t& st, void* object )
 
 	ParseObject( st, objectMap, objectCount );
 
-	TextureLoader* loader = new TextureLoader();
+	ImageLoader* loader = new ImageLoader();
 	loader->SetBasePath( TexturePath );
 	loader->SetTextureFile( name );
 	loader->LoadAsCubemap( strcmp( type, "CUBE" ) == 0 ? true : false );
