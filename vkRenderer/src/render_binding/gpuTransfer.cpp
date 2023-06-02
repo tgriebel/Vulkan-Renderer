@@ -104,9 +104,7 @@ void Renderer::UploadTextures()
 		}
 		Image& texture = textureAsset->Get();
 
-		VkImageUsageFlags flags = VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-			VK_IMAGE_USAGE_SAMPLED_BIT;
+		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
 		texture.gpuImage = new GpuImage();
 

@@ -567,7 +567,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].shadowMapImage.info = info;
 		frameState[ i ].shadowMapImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
+		CreateGpuImage( info, GPU_IMAGE_READ, *frameState[i].shadowMapImage.gpuImage, frameBufferMemory );
 		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage );
 	}
 
@@ -591,7 +591,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].viewColorImage.info = info;
 		frameState[ i ].viewColorImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
+		CreateGpuImage( info, GPU_IMAGE_READ, *frameState[ i ].viewColorImage.gpuImage, frameBufferMemory );
 		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage );
 
 		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
@@ -607,7 +607,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].stencilImage.bytes = nullptr;
 		frameState[ i ].stencilImage.gpuImage = new GpuImage();
 
-		CreateGpuImage( info, VK_IMAGE_USAGE_SAMPLED_BIT, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
+		CreateGpuImage( info, GPU_IMAGE_READ, *frameState[ i ].depthImage.gpuImage, frameBufferMemory );
 		
 		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
@@ -769,7 +769,7 @@ void Renderer::CreateBuffers()
 }
 
 
-void Renderer::CreateGpuImage( const imageInfo_t& info, VkImageUsageFlags usage, GpuImage& image, AllocatorMemory& memory )
+void Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, GpuImage& image, AllocatorMemory& memory )
 {
 	VkImageCreateInfo imageInfo{ };
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -782,7 +782,6 @@ void Renderer::CreateGpuImage( const imageInfo_t& info, VkImageUsageFlags usage,
 	imageInfo.format = vk_GetTextureFormat( info.fmt );
 	imageInfo.tiling = ( info.tiling == IMAGE_TILING_LINEAR ) ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	imageInfo.usage = usage;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
@@ -792,6 +791,18 @@ void Renderer::CreateGpuImage( const imageInfo_t& info, VkImageUsageFlags usage,
 
 	if ( ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ) {
 		imageInfo.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
+
+	if( ( flags & GPU_IMAGE_READ ) != 0 ) {
+		imageInfo.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+	}
+
+	if ( ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
+		imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+	}
+
+	if ( ( flags & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
+		imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	}
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
@@ -850,10 +861,10 @@ void Renderer::CreateCodeTextures() {
 	rc.blackImage.gpuImage = new GpuImage();
 
 	// Default Images
-	CreateGpuImage( info, 0, *rc.whiteImage.gpuImage, localMemory );
+	CreateGpuImage( info, GPU_IMAGE_READ, *rc.whiteImage.gpuImage, localMemory );
 	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage );
 
-	CreateGpuImage( info, 0, *rc.blackImage.gpuImage, localMemory );
+	CreateGpuImage( info, GPU_IMAGE_READ, *rc.blackImage.gpuImage, localMemory );
 	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage );
 }
 
