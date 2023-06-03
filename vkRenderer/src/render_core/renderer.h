@@ -305,7 +305,6 @@ private:
 	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	// API Creation Functions
-	GpuImage*					CreateGpuImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory );
 	void						CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
 	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
 	void						AllocRegisteredBindParms();

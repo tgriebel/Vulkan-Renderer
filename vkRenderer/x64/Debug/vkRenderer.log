@@ -2,6 +2,8 @@
   gpuTransfer.cpp
   imageView.cpp
   pipeline.cpp
+  shaderBinding.cpp
+  gpuImage.cpp
   renderCommand.cpp
   renderInit.cpp
   renderShutdown.cpp

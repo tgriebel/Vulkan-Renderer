@@ -2,6 +2,9 @@
 
 #include "../render_binding/allocator.h"
 
+struct imageInfo_t;
+class AllocatorMemory;
+
 enum gpuImageStateFlags_t : uint8_t
 {
 	GPU_IMAGE_NONE			= 0,
@@ -52,5 +55,6 @@ public:
 	}
 #endif
 
+	void Create( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory );
 	virtual void Destroy();
 };
