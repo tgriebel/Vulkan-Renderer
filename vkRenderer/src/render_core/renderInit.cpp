@@ -564,10 +564,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		frameState[ i ].shadowMapImage.info = info;
-
-		frameState[ i ].shadowMapImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
-		CreateImageView( frameState[i].shadowMapImage.gpuImage, frameState[ i ].shadowMapImage.info );
+		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].shadowMapImage );
 	}
 
 	// Main images
@@ -584,13 +581,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		VkFormat colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-
-		frameState[ i ].viewColorImage.bytes = nullptr;
-		frameState[ i ].viewColorImage.info = info;
-
-		frameState[ i ].viewColorImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
-		CreateImageView( frameState[ i ].viewColorImage.gpuImage, frameState[ i ].viewColorImage.info );
+		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].viewColorImage );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
@@ -837,8 +828,6 @@ GpuImage* Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageState
 		return nullptr;
 	}
 
-	//image->VkImageView() = CreateImageView()
-
 	return image;
 }
 
@@ -851,7 +840,7 @@ void Renderer::CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t 
 	outImage.uploadId = -1;
 	outImage.info = info;
 	outImage.gpuImage = CreateGpuImage( outImage.info, flags, memory );
-	//outImage.gpuImage = 
+	CreateImageView( outImage.gpuImage, outImage.info );
 }
 
 
@@ -867,18 +856,9 @@ void Renderer::CreateCodeTextures() {
 	info.type = IMAGE_TYPE_2D;
 	info.tiling = IMAGE_TILING_MORTON;
 
-	rc.whiteImage.info = info;
-	rc.whiteImage.bytes = nullptr;
-
-	rc.blackImage.info = info;
-	rc.blackImage.bytes = nullptr;
-
 	// Default Images
-	rc.whiteImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, localMemory );
-	CreateImageView( rc.whiteImage.gpuImage, rc.whiteImage.info );
-
-	rc.blackImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, localMemory );
-	CreateImageView( rc.blackImage.gpuImage, rc.blackImage.info );
+	CreateImage( info, GPU_IMAGE_READ, localMemory, rc.whiteImage );
+	CreateImage( info, GPU_IMAGE_READ, localMemory, rc.blackImage );
 }
 
 
