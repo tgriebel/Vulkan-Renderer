@@ -5,19 +5,27 @@
 class ImageView : public Image
 {
 private:
-
-public:
-	ImageView( const Image* image ) : Image()
+	void Init( const Image& image )
 	{
-		
-		info = image->info;
+		info = image.info;
 		gpuImage = new GpuImage();
 #ifdef USE_VULKAN
-		gpuImage->VkImage() = image->gpuImage->GetVkImage();
-		gpuImage->VkImageView() = image->gpuImage->GetVkImageView();
+		gpuImage->VkImage() = image.gpuImage->GetVkImage();
+		gpuImage->VkImageView() = image.gpuImage->GetVkImageView();
 #endif
 	}
 
+public:
+	ImageView() : Image()
+	{}
+
+
+	ImageView( const Image& image ) : Image()
+	{
+		Init( image );
+	}
+
+	
 	~ImageView()
 	{
 		if( gpuImage != nullptr )
@@ -25,5 +33,12 @@ public:
 			delete gpuImage;
 			gpuImage = nullptr;
 		}
+	}
+
+
+	ImageView& operator=( const Image& image )
+	{
+		Init( image );
+		return *this;
 	}
 };

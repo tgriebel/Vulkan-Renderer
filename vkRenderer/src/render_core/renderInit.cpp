@@ -592,24 +592,19 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].viewColorImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		CreateImageView( frameState[ i ].viewColorImage.gpuImage, frameState[ i ].viewColorImage.info );
 
-		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
 		frameState[ i ].depthImage.info = info;
 		frameState[ i ].depthImage.bytes = nullptr;
-
-		frameState[ i ].stencilImage.info = info;
-		frameState[ i ].stencilImage.bytes = nullptr;
-		frameState[ i ].stencilImage.gpuImage = new GpuImage();
-
 		frameState[ i ].depthImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		
 		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		CreateImageView( frameState[ i ].depthImage.gpuImage, frameState[ i ].depthImage.info );
 
-		frameState[ i ].stencilImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
+		frameState[ i ].stencilImage = frameState[ i ].depthImage;
+
 		frameState[ i ].stencilImage.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
 		CreateImageView( frameState[ i ].stencilImage.gpuImage, frameState[ i ].stencilImage.info );
 	}

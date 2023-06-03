@@ -28,6 +28,7 @@
 #include "../render_core/gpuImage.h"
 #include "rhi.h"
 #include <gfxcore/asset_types/texture.h>
+#include "../render_binding/imageView.h"
 
 class FrameState
 {
@@ -35,7 +36,7 @@ public:
 	Image			viewColorImage;
 	Image			shadowMapImage;
 	Image			depthImage;
-	Image			stencilImage;
+	ImageView		stencilImage;
 
 	// FIXME: Lights and surfaces should be relative to a given render view.
 	// Textures, materials, and view parms are all global
