@@ -587,17 +587,19 @@ void Renderer::CreateFramebuffers()
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		frameState[ i ].depthImage.info = info;
-		frameState[ i ].depthImage.bytes = nullptr;
-		frameState[ i ].depthImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
+		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].depthStencilImage );
 		
-		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		frameState[ i ].depthImage.gpuImage->VkImageView() = vk_CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), frameState[ i ].depthImage.info );
+		frameState[ i ].depthImageView = frameState[ i ].depthStencilImage;
+		frameState[ i ].depthImageView.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 
-		frameState[ i ].stencilImage = frameState[ i ].depthImage;
+		GpuImage* depthImage = frameState[ i ].depthImageView.gpuImage;
+		depthImage->VkImageView() = vk_CreateImageView( depthImage->GetVkImage(), frameState[ i ].depthImageView.info );
 
-		frameState[ i ].stencilImage.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		frameState[ i ].stencilImage.gpuImage->VkImageView() = vk_CreateImageView( frameState[ i ].stencilImage.gpuImage->GetVkImage(), frameState[ i ].stencilImage.info );
+		frameState[ i ].stencilImageView = frameState[ i ].depthStencilImage;
+		frameState[ i ].stencilImageView.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
+
+		GpuImage* stencilImage = frameState[ i ].stencilImageView.gpuImage;
+		stencilImage->VkImageView() = vk_CreateImageView( stencilImage->GetVkImage(), frameState[ i ].stencilImageView.info );
 	}
 
 	// Shadow map
@@ -617,8 +619,8 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.color0 = &frameState[ i ].viewColorImage;
-		fbInfo.depth = &frameState[ i ].depthImage;
-		fbInfo.stencil = &frameState[ i ].stencilImage;
+		fbInfo.depth = &frameState[ i ].depthImageView;
+		fbInfo.stencil = &frameState[ i ].stencilImageView;
 		fbInfo.width = frameState[ i ].viewColorImage.info.width;
 		fbInfo.height = frameState[ i ].viewColorImage.info.height;
 

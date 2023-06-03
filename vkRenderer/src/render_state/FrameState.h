@@ -35,8 +35,9 @@ class FrameState
 public:
 	Image			viewColorImage;
 	Image			shadowMapImage;
-	Image			depthImage;
-	ImageView		stencilImage;
+	Image			depthStencilImage;
+	ImageView		depthImageView;
+	ImageView		stencilImageView;
 
 	// FIXME: Lights and surfaces should be relative to a given render view.
 	// Textures, materials, and view parms are all global

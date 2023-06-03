@@ -79,13 +79,13 @@ void Renderer::DestroyFramebuffers()
 		// Images
 		frameState[ frameId ].viewColorImage.gpuImage->Destroy();
 		frameState[ frameId ].shadowMapImage.gpuImage->Destroy();
-		frameState[ frameId ].depthImage.gpuImage->Destroy();
-		frameState[ frameId ].stencilImage.gpuImage->Destroy();
+		frameState[ frameId ].depthImageView.gpuImage->Destroy();
+		frameState[ frameId ].stencilImageView.gpuImage->Destroy();
 
 		delete frameState[ frameId ].viewColorImage.gpuImage;
 		delete frameState[ frameId ].shadowMapImage.gpuImage;
-		delete frameState[ frameId ].depthImage.gpuImage;
-		delete frameState[ frameId ].stencilImage.gpuImage;
+		delete frameState[ frameId ].depthImageView.gpuImage;
+		delete frameState[ frameId ].stencilImageView.gpuImage;
 
 		// Buffers
 		shadowMap[ frameId ].Destroy();

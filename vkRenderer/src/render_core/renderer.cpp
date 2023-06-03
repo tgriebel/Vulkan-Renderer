@@ -619,7 +619,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 			else if ( passIx == DRAWPASS_POST_2D )
 			{
 				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].viewColorImage;
-				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImage;
+				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImageView;
 			}
 			else
 			{
@@ -635,7 +635,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
 			pass->parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
 			pass->parms[ i ]->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
-			pass->parms[ i ]->Bind( bind_imageStencil, ( passIx == DRAWPASS_POST_2D ) ? &frameState[ currentImage ].stencilImage : pass->codeImages[ i ][ 0 ] );
+			pass->parms[ i ]->Bind( bind_imageStencil, ( passIx == DRAWPASS_POST_2D ) ? &frameState[ currentImage ].stencilImageView : pass->codeImages[ i ][ 0 ] );
 		}
 	}
 
