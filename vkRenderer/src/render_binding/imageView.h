@@ -29,7 +29,7 @@ public:
 		{
 #ifdef USE_VULKAN
 			// Views do not own the image, only the view
-			gpuImage->VkImage() = VK_NULL_HANDLE;
+			gpuImage->DetachVkImage();
 #endif
 			delete gpuImage;
 			gpuImage = nullptr;
@@ -47,10 +47,11 @@ public:
 	void Init( const Image& image, const imageInfo_t& imageInfo )
 	{
 		info = imageInfo;
-		gpuImage = new GpuImage();
 #ifdef USE_VULKAN
-		gpuImage->VkImage() = image.gpuImage->GetVkImage();
-		gpuImage->VkImageView() = vk_CreateImageView( gpuImage->GetVkImage(), info );
+		const VkImage img = image.gpuImage->GetVkImage();
+		const VkImageView view = vk_CreateImageView( image.gpuImage->GetVkImage(), info );
+
+		gpuImage = new GpuImage( img, view );
 #endif
 	}
 };

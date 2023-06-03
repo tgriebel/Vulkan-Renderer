@@ -25,23 +25,33 @@ protected:
 #endif
 
 public:
+
+	GpuImage()
+	{
+#ifdef USE_VULKAN
+		vk_image = VK_NULL_HANDLE;
+		vk_view = VK_NULL_HANDLE;
+#endif
+	}
+
+
 	virtual GpuImage::~GpuImage()
 	{
 		Destroy();
 	}
 
 #ifdef USE_VULKAN
+	GpuImage( const VkImage image, const VkImageView view )
+	{
+		vk_image = image;
+		vk_view = view;
+	}
+
+
 	inline VkImage GetVkImage() const
 	{
 		return vk_image;
 	}
-
-
-	inline VkImage& VkImage()
-	{
-		return vk_image;
-	}
-
 
 	inline VkImageView GetVkImageView() const
 	{
@@ -49,9 +59,15 @@ public:
 	}
 
 
-	inline VkImageView& VkImageView()
+	inline void DetachVkImage()
 	{
-		return vk_view;
+		vk_image = VK_NULL_HANDLE;
+	}
+
+
+	inline void DetachVkImageView()
+	{
+		vk_view = VK_NULL_HANDLE;
 	}
 #endif
 

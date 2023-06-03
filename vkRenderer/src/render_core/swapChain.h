@@ -153,11 +153,7 @@ public:
 			info.tiling = IMAGE_TILING_LINEAR;
 			info.type = IMAGE_TYPE_2D;
 			
-			GpuImage* image = new GpuImage();
-			image->VkImage() = vk_swapChainImages[ i ];
-			image->VkImageView() = vk_CreateImageView( vk_swapChainImages[ i ], info );
-
-			m_swapChainImages[ i ].gpuImage = image;
+			m_swapChainImages[ i ].gpuImage = new GpuImage( vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
 
 			frameBufferCreateInfo_t fbInfo = {};
 			fbInfo.color0 = &m_swapChainImages[ i ];
@@ -177,7 +173,7 @@ public:
 		for ( size_t i = 0; i < m_imageCount; i++ )
 		{
 			// Vulkan swapchain images are a bit special since they need to be destroyed with the swapchain
-			m_swapChainImages[ i ].gpuImage->VkImage() = nullptr;
+			m_swapChainImages[ i ].gpuImage->DetachVkImage();
 			delete m_swapChainImages[ i ].gpuImage;
 		}
 
