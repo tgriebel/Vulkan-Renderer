@@ -107,6 +107,7 @@ void Renderer::UploadTextures()
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
 		texture.gpuImage = CreateGpuImage( texture.info, flags, localMemory );
+		vk_CreateImageView( texture.gpuImage, texture.info );
 
 		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
 
@@ -131,18 +132,7 @@ void Renderer::UploadTextures()
 	}
 	EndSingleTimeCommands( commandBuffer );
 
-	// 3. Create Views
-	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
-	{
-		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
-		if ( textureAsset->IsLoaded() == false ) {
-			continue;
-		}
-		Image& texture = textureAsset->Get();
-		vk_CreateImageView( texture.gpuImage, texture.info );
-	}
-
-	// 4. Add to resource type lists
+	// 3. Add to resource type lists
 	{
 		gpuImages2D.Resize( MaxImageDescriptors );
 		gpuImagesCube.Resize( MaxImageDescriptors );
