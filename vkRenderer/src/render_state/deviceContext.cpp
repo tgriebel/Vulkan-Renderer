@@ -134,31 +134,29 @@ uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 	throw std::runtime_error( "Failed to find suitable memory type!" );
 }
 
-VkImageView CreateImageView( const Image& texture )
+void CreateImageView( GpuImage* image, const imageInfo_t& info )
 {
 	VkImageAspectFlags aspectFlags = 0;
-	aspectFlags |= ( texture.info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
-	aspectFlags |= ( texture.info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
-	aspectFlags |= ( texture.info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+	aspectFlags |= ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
+	aspectFlags |= ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
+	aspectFlags |= ( info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
 
 	VkImageViewCreateInfo viewInfo{ };
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = texture.gpuImage->GetVkImage();
-	viewInfo.viewType = vk_GetTextureType( texture.info.type );
-	viewInfo.format = vk_GetTextureFormat( texture.info.fmt );
+	viewInfo.image = image->GetVkImage();
+	viewInfo.viewType = vk_GetTextureType( info.type );
+	viewInfo.format = vk_GetTextureFormat( info.fmt );
 	viewInfo.subresourceRange.aspectMask = aspectFlags;
 	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = texture.info.mipLevels;
+	viewInfo.subresourceRange.levelCount = info.mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = ( texture.info.type == IMAGE_TYPE_CUBE ) ? 6 : 1;
+	viewInfo.subresourceRange.layerCount = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : 1;
 
 	VkImageView imageView;
-	if ( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS )
-	{
+	if ( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create texture image view!" );
 	}
-
-	return imageView;
+	image->VkImageView() = imageView;
 }
 
 VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )

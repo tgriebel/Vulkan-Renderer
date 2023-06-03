@@ -14,7 +14,7 @@ DEFINE_ENUM_OPERATORS( gpuImageStateFlags_t, uint8_t )
 
 class GpuImage
 {
-private:
+protected:
 #ifdef USE_VULKAN
 	VkImage			vk_image;
 	VkImageView		vk_view;
@@ -22,7 +22,7 @@ private:
 #endif
 
 public:
-	GpuImage::~GpuImage()
+	virtual GpuImage::~GpuImage()
 	{
 		Destroy();
 	}
@@ -39,6 +39,7 @@ public:
 		return vk_image;
 	}
 
+
 	inline VkImageView GetVkImageView() const
 	{
 		return vk_view;
@@ -51,33 +52,5 @@ public:
 	}
 #endif
 
-	void Destroy();
-};
-
-
-class GpuImageView
-{
-private:
-#ifdef USE_VULKAN
-	const VkImage	vk_image;
-	VkImageView		vk_view;
-#endif
-
-public:
-	inline VkImage GetVkImage() const
-	{
-		return vk_image;
-	}
-
-
-	inline VkImageView GetVkImageView() const
-	{
-		return vk_view;
-	}
-
-
-	inline VkImageView& VkImageView()
-	{
-		return vk_view;
-	}
+	virtual void Destroy();
 };

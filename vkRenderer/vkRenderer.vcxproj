@@ -190,6 +190,7 @@
     <ClInclude Include="src\render_binding\allocator.h" />
     <ClInclude Include="src\render_binding\bindings.h" />
     <ClInclude Include="src\render_binding\gpuResources.h" />
+    <ClInclude Include="src\render_binding\imageView.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />
     <ClInclude Include="src\render_binding\shaderBinding.h" />
     <ClInclude Include="src\render_core\debugMenu.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="src\render_binding\descriptorWrites.cpp" />
     <ClCompile Include="src\render_binding\gpuResources.cpp" />
     <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
+    <ClCompile Include="src\render_binding\imageView.cpp" />
     <ClCompile Include="src\render_binding\pipeline.cpp" />
     <ClCompile Include="src\render_binding\shaderBinding.cpp" />
     <ClCompile Include="src\render_core\debugMenu.cpp" />

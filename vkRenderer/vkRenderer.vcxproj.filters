@@ -92,6 +92,9 @@
     <ClCompile Include="src\render_binding\descriptorWrites.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\imageView.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -199,6 +202,9 @@
     </ClInclude>
     <ClInclude Include="src\render_core\drawpass.h">
       <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_binding\imageView.h">
+      <Filter>render binding</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

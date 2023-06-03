@@ -38,10 +38,13 @@ struct deviceContext_t
 
 extern deviceContext_t context;
 
+struct imageInfo_t;
+class GpuImage;
+
 bool				CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
 QueueFamilyIndices	FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
-VkImageView			CreateImageView( const Image& texture );
+void				CreateImageView( GpuImage* image, const imageInfo_t& info );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );

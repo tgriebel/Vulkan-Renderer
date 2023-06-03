@@ -567,7 +567,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].shadowMapImage.info = info;
 
 		frameState[ i ].shadowMapImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
-		frameState[i].shadowMapImage.gpuImage->VkImageView() = CreateImageView( frameState[i].shadowMapImage );
+		CreateImageView( frameState[i].shadowMapImage.gpuImage, frameState[ i ].shadowMapImage.info );
 	}
 
 	// Main images
@@ -590,7 +590,7 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].viewColorImage.info = info;
 
 		frameState[ i ].viewColorImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
-		frameState[ i ].viewColorImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].viewColorImage );
+		CreateImageView( frameState[ i ].viewColorImage.gpuImage, frameState[ i ].viewColorImage.info );
 
 		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 		info.fmt = IMAGE_FMT_D_32_S8;
@@ -607,10 +607,11 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].depthImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		
 		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		frameState[ i ].depthImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
+		CreateImageView( frameState[ i ].depthImage.gpuImage, frameState[ i ].depthImage.info );
 
-		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		frameState[ i ].stencilImage.gpuImage->VkImageView() = CreateImageView( frameState[ i ].depthImage );
+		frameState[ i ].stencilImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
+		frameState[ i ].stencilImage.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
+		CreateImageView( frameState[ i ].stencilImage.gpuImage, frameState[ i ].stencilImage.info );
 	}
 
 	// Shadow map
@@ -841,7 +842,21 @@ GpuImage* Renderer::CreateGpuImage( const imageInfo_t& info, const gpuImageState
 		return nullptr;
 	}
 
+	//image->VkImageView() = CreateImageView()
+
 	return image;
+}
+
+
+void Renderer::CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
+{
+	outImage.bytes = nullptr;
+	outImage.sizeBytes = 0;
+	outImage.dirty = false;
+	outImage.uploadId = -1;
+	outImage.info = info;
+	outImage.gpuImage = CreateGpuImage( outImage.info, flags, memory );
+	//outImage.gpuImage = 
 }
 
 
@@ -865,10 +880,10 @@ void Renderer::CreateCodeTextures() {
 
 	// Default Images
 	rc.whiteImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, localMemory );
-	rc.whiteImage.gpuImage->VkImageView() = CreateImageView( rc.whiteImage );
+	CreateImageView( rc.whiteImage.gpuImage, rc.whiteImage.info );
 
 	rc.blackImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, localMemory );
-	rc.blackImage.gpuImage->VkImageView() = CreateImageView( rc.blackImage );
+	CreateImageView( rc.blackImage.gpuImage, rc.blackImage.info );
 }
 
 
