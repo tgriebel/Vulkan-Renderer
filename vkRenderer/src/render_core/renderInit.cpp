@@ -589,17 +589,13 @@ void Renderer::CreateFramebuffers()
 
 		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].depthStencilImage );
 		
-		frameState[ i ].depthImageView = frameState[ i ].depthStencilImage;
-		frameState[ i ].depthImageView.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+		imageInfo_t depthInfo = frameState[ i ].depthStencilImage.info;
+		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+		frameState[ i ].depthImageView.Init( frameState[ i ].depthStencilImage, depthInfo );
 
-		GpuImage* depthImage = frameState[ i ].depthImageView.gpuImage;
-		depthImage->VkImageView() = vk_CreateImageView( depthImage->GetVkImage(), frameState[ i ].depthImageView.info );
-
-		frameState[ i ].stencilImageView = frameState[ i ].depthStencilImage;
-		frameState[ i ].stencilImageView.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-
-		GpuImage* stencilImage = frameState[ i ].stencilImageView.gpuImage;
-		stencilImage->VkImageView() = vk_CreateImageView( stencilImage->GetVkImage(), frameState[ i ].stencilImageView.info );
+		imageInfo_t stencilInfo = frameState[ i ].depthStencilImage.info;
+		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
+		frameState[ i ].stencilImageView.Init( frameState[ i ].depthStencilImage, stencilInfo );
 	}
 
 	// Shadow map
