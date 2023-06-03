@@ -139,7 +139,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
-		CreateImageView( texture.gpuImage, texture.info );
+		vk_CreateImageView( texture.gpuImage, texture.info );
 	}
 
 	// 4. Add to resource type lists

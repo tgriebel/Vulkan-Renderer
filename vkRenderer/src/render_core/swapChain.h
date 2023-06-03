@@ -153,7 +153,7 @@ public:
 			
 			m_swapChainImages[ i ].gpuImage = new GpuImage();
 			m_swapChainImages[ i ].gpuImage->VkImage() = vk_swapChainImages[ i ];
-			CreateImageView( m_swapChainImages[ i ].gpuImage, m_swapChainImages[ i ].info );
+			vk_CreateImageView( m_swapChainImages[ i ].gpuImage, m_swapChainImages[ i ].info );
 
 			frameBufferCreateInfo_t fbInfo = {};
 			fbInfo.color0 = &m_swapChainImages[ i ];
