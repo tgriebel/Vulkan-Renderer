@@ -141,24 +141,28 @@ public:
 
 		for( uint32_t i = 0; i < m_imageCount; ++i )
 		{
-			m_swapChainImages[ i ].info.fmt = m_swapChainImageFormat;
-			m_swapChainImages[ i ].info.width = extent.width;
-			m_swapChainImages[ i ].info.height = extent.height;
-			m_swapChainImages[ i ].info.layers = 1;
-			m_swapChainImages[ i ].info.mipLevels = 1;
-			m_swapChainImages[ i ].info.channels = 4;
-			m_swapChainImages[ i ].info.subsamples = IMAGE_SMP_1;
-			m_swapChainImages[ i ].info.tiling = IMAGE_TILING_LINEAR;
-			m_swapChainImages[ i ].info.type = IMAGE_TYPE_2D;
+			imageInfo_t& info = m_swapChainImages[ i ].info;
+
+			info.fmt = m_swapChainImageFormat;
+			info.width = extent.width;
+			info.height = extent.height;
+			info.layers = 1;
+			info.mipLevels = 1;
+			info.channels = 4;
+			info.subsamples = IMAGE_SMP_1;
+			info.tiling = IMAGE_TILING_LINEAR;
+			info.type = IMAGE_TYPE_2D;
 			
-			m_swapChainImages[ i ].gpuImage = new GpuImage();
-			m_swapChainImages[ i ].gpuImage->VkImage() = vk_swapChainImages[ i ];
-			vk_CreateImageView( m_swapChainImages[ i ].gpuImage, m_swapChainImages[ i ].info );
+			GpuImage* image = new GpuImage();
+			image->VkImage() = vk_swapChainImages[ i ];
+			image->VkImageView() = vk_CreateImageView( vk_swapChainImages[ i ], info );
+
+			m_swapChainImages[ i ].gpuImage = image;
 
 			frameBufferCreateInfo_t fbInfo = {};
 			fbInfo.color0 = &m_swapChainImages[ i ];
-			fbInfo.width = m_swapChainImages[ i ].info.width;
-			fbInfo.height = m_swapChainImages[ i ].info.height;
+			fbInfo.width = info.width;
+			fbInfo.height = info.height;
 
 			framebuffers[ i ].Create( fbInfo );
 		}

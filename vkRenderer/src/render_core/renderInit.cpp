@@ -592,12 +592,12 @@ void Renderer::CreateFramebuffers()
 		frameState[ i ].depthImage.gpuImage = CreateGpuImage( info, GPU_IMAGE_READ, frameBufferMemory );
 		
 		frameState[ i ].depthImage.info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		vk_CreateImageView( frameState[ i ].depthImage.gpuImage, frameState[ i ].depthImage.info );
+		frameState[ i ].depthImage.gpuImage->VkImageView() = vk_CreateImageView( frameState[ i ].depthImage.gpuImage->GetVkImage(), frameState[ i ].depthImage.info );
 
 		frameState[ i ].stencilImage = frameState[ i ].depthImage;
 
 		frameState[ i ].stencilImage.info.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		vk_CreateImageView( frameState[ i ].stencilImage.gpuImage, frameState[ i ].stencilImage.info );
+		frameState[ i ].stencilImage.gpuImage->VkImageView() = vk_CreateImageView( frameState[ i ].stencilImage.gpuImage->GetVkImage(), frameState[ i ].stencilImage.info );
 	}
 
 	// Shadow map
@@ -840,7 +840,7 @@ void Renderer::CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t 
 	outImage.uploadId = -1;
 	outImage.info = info;
 	outImage.gpuImage = CreateGpuImage( outImage.info, flags, memory );
-	vk_CreateImageView( outImage.gpuImage, outImage.info );
+	outImage.gpuImage->VkImageView() = vk_CreateImageView( outImage.gpuImage->GetVkImage(), outImage.info );
 }
 
 

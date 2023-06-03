@@ -42,6 +42,7 @@ bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<con
 	return requiredExtensions.empty();
 }
 
+
 bool IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std::vector<const char*>& deviceExtensions )
 {
 	VkPhysicalDeviceProperties deviceProperties;
@@ -65,6 +66,7 @@ bool IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std
 
 	return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
+
 
 QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface )
 {
@@ -104,6 +106,7 @@ QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surf
 	return indices;
 }
 
+
 bool vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features )
 {
 	VkFormatProperties props;
@@ -117,6 +120,7 @@ bool vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkForma
 	}
 	return false;
 }
+
 
 uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 {
@@ -134,7 +138,8 @@ uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 	throw std::runtime_error( "Failed to find suitable memory type!" );
 }
 
-void vk_CreateImageView( GpuImage* image, const imageInfo_t& info )
+
+VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 {
 	VkImageAspectFlags aspectFlags = 0;
 	aspectFlags |= ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
@@ -143,7 +148,7 @@ void vk_CreateImageView( GpuImage* image, const imageInfo_t& info )
 
 	VkImageViewCreateInfo viewInfo{ };
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = image->GetVkImage();
+	viewInfo.image = image;
 	viewInfo.viewType = vk_GetTextureType( info.type );
 	viewInfo.format = vk_GetTextureFormat( info.fmt );
 	viewInfo.subresourceRange.aspectMask = aspectFlags;
@@ -156,8 +161,9 @@ void vk_CreateImageView( GpuImage* image, const imageInfo_t& info )
 	if ( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create texture image view!" );
 	}
-	image->VkImageView() = imageView;
+	return imageView;
 }
+
 
 VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 {
