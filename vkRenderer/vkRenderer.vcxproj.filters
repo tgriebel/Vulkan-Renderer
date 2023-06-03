@@ -95,6 +95,9 @@
     <ClCompile Include="src\render_binding\imageView.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\swapChain.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
