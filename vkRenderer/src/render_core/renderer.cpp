@@ -392,7 +392,7 @@ void Renderer::UploadAssets()
 }
 
 
-void Renderer::RenderScene( Scene* scene )
+void Renderer::RenderScene( const Scene* scene )
 {
 	frameTimer.Start();
 

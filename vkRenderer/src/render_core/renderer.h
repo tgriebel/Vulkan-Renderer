@@ -76,7 +76,7 @@ public:
 
 	void								Init();
 	void								Destroy();
-	void								RenderScene( Scene* scene );
+	void								RenderScene( const Scene* scene );
 
 	void								InitGPU();
 	void								ShutdownGPU();

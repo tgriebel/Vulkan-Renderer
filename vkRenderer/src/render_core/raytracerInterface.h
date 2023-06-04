@@ -7,7 +7,7 @@
 static RtView rtview;
 static RtScene rtScene;
 
-static void BuildRayTraceScene( Scene* scene )
+static void BuildRayTraceScene( const Scene* scene )
 {
 	rtScene.scene = scene;
 	rtScene.assets = &g_assets;
