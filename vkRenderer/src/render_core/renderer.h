@@ -176,9 +176,9 @@ private:
 	void								RecreateSwapChain();
 
 	// Image Functions
-	void								TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const imageInfo_t& info );
-	void								CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Image& texture );
-	void								GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const imageInfo_t& info );
+	void								TransitionImageLayout( UploadContext& uploadContext, Image& image, VkImageLayout oldLayout, VkImageLayout newLayout );
+	void								CopyBufferToImage( UploadContext& uploadContext, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
+	void								GenerateMipmaps( UploadContext& uploadContext, Image& image );
 
 	void								CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 

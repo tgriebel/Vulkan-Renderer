@@ -73,20 +73,20 @@ static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )
 {
 	switch ( fmt )
 	{
-		case IMAGE_FMT_UNKNOWN:	return VK_FORMAT_UNDEFINED;
-		case IMAGE_FMT_R_8:		return VK_FORMAT_R8_SRGB;
+		case IMAGE_FMT_UNKNOWN:		return VK_FORMAT_UNDEFINED;
+		case IMAGE_FMT_R_8:			return VK_FORMAT_R8_SRGB;
 		case IMAGE_FMT_R_16:		return VK_FORMAT_R16_SFLOAT;
 		case IMAGE_FMT_D_16:		return VK_FORMAT_D16_UNORM;
 		case IMAGE_FMT_D24S8:		return VK_FORMAT_D24_UNORM_S8_UINT;
 		case IMAGE_FMT_D_32:		return VK_FORMAT_D32_SFLOAT;
-		case IMAGE_FMT_D_32_S8:	return VK_FORMAT_D32_SFLOAT_S8_UINT;
+		case IMAGE_FMT_D_32_S8:		return VK_FORMAT_D32_SFLOAT_S8_UINT;
 		case IMAGE_FMT_RGB_8:		return VK_FORMAT_R8G8B8_SRGB;
-		case IMAGE_FMT_RGBA_8:	return VK_FORMAT_R8G8B8A8_SRGB;
-		case IMAGE_FMT_ABGR_8:	return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+		case IMAGE_FMT_RGBA_8:		return VK_FORMAT_R8G8B8A8_SRGB;
+		case IMAGE_FMT_ABGR_8:		return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
 		case IMAGE_FMT_BGR_8:		return VK_FORMAT_B8G8R8_SRGB;
-		case IMAGE_FMT_BGRA_8:	return VK_FORMAT_B8G8R8A8_SRGB;
-		case IMAGE_FMT_RGB_16:	return VK_FORMAT_R16G16B16_SFLOAT;
-		case IMAGE_FMT_RGBA_16:	return VK_FORMAT_R16G16B16A16_SFLOAT;
+		case IMAGE_FMT_BGRA_8:		return VK_FORMAT_B8G8R8A8_SRGB;
+		case IMAGE_FMT_RGB_16:		return VK_FORMAT_R16G16B16_SFLOAT;
+		case IMAGE_FMT_RGBA_16:		return VK_FORMAT_R16G16B16A16_SFLOAT;
 		default: assert( false );	break;
 	}
 	return VK_FORMAT_R8G8B8A8_SRGB;
@@ -121,11 +121,11 @@ static inline VkImageViewType vk_GetTextureType( imageType_t type )
 {
 	switch ( type ) {
 		default:
-		case IMAGE_TYPE_2D:			return VK_IMAGE_VIEW_TYPE_2D;
+		case IMAGE_TYPE_2D:				return VK_IMAGE_VIEW_TYPE_2D;
 		case IMAGE_TYPE_2D_ARRAY:		return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
-		case IMAGE_TYPE_3D:			return VK_IMAGE_VIEW_TYPE_3D;
+		case IMAGE_TYPE_3D:				return VK_IMAGE_VIEW_TYPE_3D;
 		case IMAGE_TYPE_CUBE:			return VK_IMAGE_VIEW_TYPE_CUBE;
-		case IMAGE_TYPE_CUBE_ARRAY:	return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
+		case IMAGE_TYPE_CUBE_ARRAY:		return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
 	}
 	assert(0);
 	return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
@@ -140,9 +140,9 @@ static inline VkSampleCountFlagBits vk_GetSampleCount( const imageSamples_t samp
 		case IMAGE_SMP_2:			return VK_SAMPLE_COUNT_2_BIT;
 		case IMAGE_SMP_4:			return VK_SAMPLE_COUNT_4_BIT;
 		case IMAGE_SMP_8:			return VK_SAMPLE_COUNT_8_BIT;
-		case IMAGE_SMP_16:		return VK_SAMPLE_COUNT_16_BIT;
-		case IMAGE_SMP_32:		return VK_SAMPLE_COUNT_32_BIT;
-		case IMAGE_SMP_64:		return VK_SAMPLE_COUNT_64_BIT;
+		case IMAGE_SMP_16:			return VK_SAMPLE_COUNT_16_BIT;
+		case IMAGE_SMP_32:			return VK_SAMPLE_COUNT_32_BIT;
+		case IMAGE_SMP_64:			return VK_SAMPLE_COUNT_64_BIT;
 		default: assert( false );	break;
 	}
 	return VK_SAMPLE_COUNT_1_BIT;

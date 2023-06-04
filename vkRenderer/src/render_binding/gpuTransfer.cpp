@@ -30,7 +30,7 @@
 
 extern AssetManager g_assets;
 
-void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Image& texture )
+void Renderer::CopyBufferToImage( UploadContext& uploadContext, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
 	const uint32_t layers = texture.info.layers;
 
@@ -51,8 +51,8 @@ void Renderer::CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buff
 	};
 
 	vkCmdCopyBufferToImage(
-		commandBuffer,
-		buffer,
+		uploadContext.commandBuffer,
+		buffer.GetVkObject(),
 		texture.gpuImage->GetVkImage(),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1,
@@ -77,14 +77,14 @@ void Renderer::UpdateTextures()
 		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
 		Image& texture = textureAsset->Get();
 
-		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
+		const uint64_t currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );
 
-		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
+		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-		CopyBufferToImage( commandBuffer, stagingBuffer.VkObject(), currentOffset, texture );
+		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
 	
-		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
+		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
 	}
 	EndUploadCommands( uploadContext );
 }
@@ -100,7 +100,6 @@ void Renderer::UploadTextures()
 	// 1. Upload Data
 	BeginUploadCommands( uploadContext );
 
-	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
@@ -114,12 +113,12 @@ void Renderer::UploadTextures()
 		texture.gpuImage = new GpuImage();
 		texture.gpuImage->Create( texture.info, flags, localMemory );
 
-		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, texture.info );
+		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-		const VkDeviceSize currentOffset = stagingBuffer.GetSize();
+		const uint64_t currentOffset = stagingBuffer.GetSize();
 		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );		
 
-		CopyBufferToImage( commandBuffer, stagingBuffer.VkObject(), currentOffset, texture );
+		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.uploadId = imageFreeSlot++;
@@ -133,7 +132,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
-		GenerateMipmaps( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, texture.info );
+		GenerateMipmaps( uploadContext, texture );
 	}
 	EndUploadCommands( uploadContext );
 

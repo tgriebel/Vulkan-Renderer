@@ -53,7 +53,7 @@ void Renderer::EndUploadCommands( UploadContext& uploadContext )
 }
 
 
-void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const imageInfo_t& info )
+void Renderer::TransitionImageLayout( UploadContext& uploadContext, Image& image, VkImageLayout oldLayout, VkImageLayout newLayout )
 {
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -61,12 +61,12 @@ void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage im
 	barrier.newLayout = newLayout;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = image;
+	barrier.image = image.gpuImage->GetVkImage();
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = info.mipLevels;
+	barrier.subresourceRange.levelCount = image.info.mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = info.layers;
+	barrier.subresourceRange.layerCount = image.info.layers;
 
 	VkPipelineStageFlags sourceStage;
 	VkPipelineStageFlags destinationStage;
@@ -90,7 +90,7 @@ void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage im
 	}
 
 	vkCmdPipelineBarrier(
-		commandBuffer,
+		uploadContext.commandBuffer,
 		sourceStage, destinationStage,
 		0,
 		0, nullptr,
@@ -100,10 +100,10 @@ void Renderer::TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage im
 }
 
 
-void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const imageInfo_t& info )
+void Renderer::GenerateMipmaps( UploadContext& uploadContext, Image& image )
 {
 	VkFormatProperties formatProperties;
-	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, imageFormat, &formatProperties );
+	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( image.info.fmt ), &formatProperties );
 
 	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
 	{
@@ -112,18 +112,18 @@ void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, V
 
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.image = image;
+	barrier.image = image.gpuImage->GetVkImage();
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = info.layers;
+	barrier.subresourceRange.layerCount = image.info.layers;
 	barrier.subresourceRange.levelCount = 1;
 
-	int32_t mipWidth = info.width;
-	int32_t mipHeight = info.height;
+	int32_t mipWidth = image.info.width;
+	int32_t mipHeight = image.info.height;
 
-	for ( uint32_t i = 1; i < info.mipLevels; i++ )
+	for ( uint32_t i = 1; i < image.info.mipLevels; i++ )
 	{
 		barrier.subresourceRange.baseMipLevel = i - 1;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -131,7 +131,7 @@ void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, V
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
-		vkCmdPipelineBarrier( commandBuffer,
+		vkCmdPipelineBarrier( uploadContext.commandBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
 			0, nullptr,
 			0, nullptr,
@@ -143,17 +143,17 @@ void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, V
 		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.srcSubresource.mipLevel = i - 1;
 		blit.srcSubresource.baseArrayLayer = 0;
-		blit.srcSubresource.layerCount = info.layers;
+		blit.srcSubresource.layerCount = image.info.layers;
 		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
 		blit.dstOffsets[ 1 ] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.dstSubresource.mipLevel = i;
 		blit.dstSubresource.baseArrayLayer = 0;
-		blit.dstSubresource.layerCount = info.layers;
+		blit.dstSubresource.layerCount = image.info.layers;
 
-		vkCmdBlitImage( commandBuffer,
-			image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		vkCmdBlitImage( uploadContext.commandBuffer,
+			image.gpuImage->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			image.gpuImage->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1, &blit,
 			VK_FILTER_LINEAR );
 
@@ -162,7 +162,7 @@ void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, V
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-		vkCmdPipelineBarrier( commandBuffer,
+		vkCmdPipelineBarrier( uploadContext.commandBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
 			0, nullptr,
 			0, nullptr,
@@ -172,13 +172,13 @@ void Renderer::GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, V
 		if ( mipHeight > 1 ) mipHeight /= 2;
 	}
 
-	barrier.subresourceRange.baseMipLevel = info.mipLevels - 1;
+	barrier.subresourceRange.baseMipLevel = image.info.mipLevels - 1;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-	vkCmdPipelineBarrier( commandBuffer,
+	vkCmdPipelineBarrier( uploadContext.commandBuffer,
 		VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
 		0, nullptr,
 		0, nullptr,
