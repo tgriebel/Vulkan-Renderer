@@ -110,9 +110,9 @@ void Renderer::InitApi()
 	{
 		// Memory Allocations
 		VkMemoryPropertyFlagBits type = VkMemoryPropertyFlagBits( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
-		AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
+		vk_AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
 		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
+		vk_AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
 	}
 
 	InitConfig();
@@ -123,7 +123,7 @@ void Renderer::InitApi()
 
 	{
 		// Create Frame Resources
-		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
+		vk_AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
 
 		CreateSyncObjects();
 		CreateFramebuffers();

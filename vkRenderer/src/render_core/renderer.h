@@ -225,7 +225,7 @@ private:
 		DestroyFramebuffers();
 		g_swapChain.Destroy();
 
-		AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
+		vk_AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
 		frameBufferMemory.Reset();
 
 		g_swapChain.Create( &g_window, width, height );
@@ -247,7 +247,7 @@ private:
 		}
 	}
 
-	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )
+	void vk_AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )
 	{
 		uint32_t typeIndex = vk_FindMemoryType( ~0x00, typeBits );
 

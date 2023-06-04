@@ -40,6 +40,7 @@ extern deviceContext_t context;
 
 struct imageInfo_t;
 class GpuImage;
+class AllocatorMemory;
 
 bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
@@ -48,3 +49,4 @@ bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFo
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
+void				vk_AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation );

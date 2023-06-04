@@ -179,3 +179,33 @@ VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 
 	return shaderModule;
 }
+
+
+void vk_AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )
+{
+	uint32_t typeIndex = vk_FindMemoryType( ~0x00, typeBits );
+
+	VkMemoryAllocateInfo allocInfo{ };
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = allocSize;
+	allocInfo.memoryTypeIndex = typeIndex;
+
+	VkDeviceMemory memory;
+	if ( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to allocate buffer memory!" );
+	}
+
+	VkPhysicalDeviceMemoryProperties memProperties;
+	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
+	VkMemoryType type = memProperties.memoryTypes[ typeIndex ];
+
+	void* memPtr = nullptr;
+	if ( ( type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) == 0 ) {
+		if ( vkMapMemory( context.device, memory, 0, VK_WHOLE_SIZE, 0, &memPtr ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to map memory to context.device memory!" );
+		}
+	}
+
+	outAllocation.Bind( memory, memPtr, allocSize, typeIndex );
+	outAllocation.memoryTypeIndex = typeIndex;
+}
