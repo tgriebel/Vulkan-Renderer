@@ -51,6 +51,7 @@ void Renderer::Cleanup()
 	// Buffers
 	vkFreeCommandBuffers( context.device, gfxContext.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), gfxContext.commandBuffers );
 	vkFreeCommandBuffers( context.device, computeContext.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), computeContext.commandBuffers );
+	vkFreeCommandBuffers( context.device, uploadContext.commandPool, 1, &uploadContext.commandBuffer );
 
 	ShutdownShaderResources();
 
@@ -72,6 +73,7 @@ void Renderer::Cleanup()
 
 	vkDestroyCommandPool( context.device, gfxContext.commandPool, nullptr );
 	vkDestroyCommandPool( context.device, computeContext.commandPool, nullptr );
+	vkDestroyCommandPool( context.device, uploadContext.commandPool, nullptr );
 	vkDestroyDevice( context.device, nullptr );
 
 	if ( enableValidationLayers )

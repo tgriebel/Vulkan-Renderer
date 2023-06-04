@@ -117,6 +117,7 @@ private:
 	VkDebugUtilsMessengerEXT			debugMessenger;
 	GfxContext							gfxContext;
 	ComputeContext						computeContext;
+	UploadContext						uploadContext;
 	ComputeState						particleState;
 	VkDescriptorPool					descriptorPool;
 	renderConfig_t						config;
@@ -201,8 +202,8 @@ private:
 	static drawPass_t					ViewRegionPassBegin( const renderViewRegion_t region );
 	static drawPass_t					ViewRegionPassEnd( const renderViewRegion_t region );
 	void								InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] );
-	void								RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
-	void								Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
+	void								RenderViewSurfaces( RenderView& view, GfxContext& gfxContext );
+	void								Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void								RenderViews();
 	void								Commit( const Scene* scene );
 	void								CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
@@ -216,8 +217,8 @@ private:
 	// Misc
 	void								DestroyFramebuffers();
 	void								CreateCodeTextures();
-	VkCommandBuffer						BeginSingleTimeCommands();
-	void								EndSingleTimeCommands( VkCommandBuffer commandBuffer );
+	void								BeginUploadCommands( UploadContext& uploadContext );
+	void								EndUploadCommands( UploadContext& uploadContext );
 	void								InitConfig();
 
 	// Update

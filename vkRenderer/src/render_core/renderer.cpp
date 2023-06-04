@@ -464,7 +464,7 @@ void Renderer::FlushGPU()
 }
 
 
-void Renderer::Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& bindSet, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
+void Renderer::Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& bindSet, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	pipelineState_t state = {};
 	state.progHdl = progHdl;
@@ -474,12 +474,14 @@ void Renderer::Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBin
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipelineHdl, &pipelineObject );
 
+	VkCommandBuffer cmdBuffer = computeContext.commandBuffers[ m_bufferId ];
+
 	if ( pipelineObject != nullptr )
 	{
-		vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
-		vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &descSet, 0, 0 );
+		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
+		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &descSet, 0, 0 );
 
-		vkCmdDispatch( commandBuffer, x, y, z );
+		vkCmdDispatch( cmdBuffer, x, y, z );
 	}
 }
 
@@ -517,7 +519,7 @@ void Renderer::SubmitFrame()
 
 		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		Dispatch( computeContext.commandBuffers[ m_bufferId ], progHdl, particleShaderBinds, particleState.parms[ m_bufferId ]->GetVkObject(), MaxParticles / 256 );
+		Dispatch( computeContext, progHdl, particleShaderBinds, particleState.parms[ m_bufferId ]->GetVkObject(), MaxParticles / 256 );
 
 		if ( vkEndCommandBuffer( computeContext.commandBuffers[ m_bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );
@@ -1109,7 +1111,7 @@ drawPass_t Renderer::ViewRegionPassEnd( const renderViewRegion_t region )
 }
 
 
-void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer )
+void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 {
 	const drawPass_t passBegin = ViewRegionPassBegin( view.region );
 	const drawPass_t passEnd = ViewRegionPassEnd( view.region );
@@ -1153,7 +1155,9 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	passInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
 	passInfo.pClearValues = clearValues.data();
 
-	vkCmdBeginRenderPass( commandBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+	VkCommandBuffer cmdBuffer = gfxContext.commandBuffers[ m_bufferId ];
+
+	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 	VkViewport viewport{ };
 	viewport.x = static_cast<float>( view.viewport.x );
@@ -1162,19 +1166,19 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 	viewport.height = static_cast<float>( view.viewport.height );
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport( commandBuffer, 0, 1, &viewport );
+	vkCmdSetViewport( cmdBuffer, 0, 1, &viewport );
 
 	VkRect2D rect{ };
 	rect.extent.width = view.viewport.width;
 	rect.extent.height = view.viewport.height;
-	vkCmdSetScissor( commandBuffer, 0, 1, &rect );
+	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();
 
-		MarkerBeginRegion( commandBuffer, view.passes[ passIx ]->name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( cmdBuffer, view.passes[ passIx ]->name, ColorToVector( Color::White ) );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];	
@@ -1189,32 +1193,32 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 				continue;
 			}
 
-			MarkerInsert( commandBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
+			MarkerInsert( cmdBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
 
 			if ( passIx == DRAWPASS_DEPTH ) {
 				// vkCmdSetDepthBias
-				vkCmdSetStencilReference( commandBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+				vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
 			}
 
 			const uint32_t descSetCount = 1;
 			VkDescriptorSet descSetArray[ descSetCount ] = { view.passes[ passIx ]->parms[ m_bufferId ]->GetVkObject() };
 
-			vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-			vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
+			vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+			vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
 			lastKey = surface.sortKey;
 
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.region ) };
-			vkCmdPushConstants( commandBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			vkCmdDrawIndexed( commandBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+			vkCmdDrawIndexed( cmdBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 		}
-		MarkerEndRegion( commandBuffer );
+		MarkerEndRegion( cmdBuffer );
 	}
 
 	if( view.region == renderViewRegion_t::POST )
 	{
 #ifdef USE_IMGUI
-		MarkerBeginRegion( commandBuffer, "Debug Menus", ColorToVector( Color::White ) );
+		MarkerBeginRegion( cmdBuffer, "Debug Menus", ColorToVector( Color::White ) );
 		ImGui_ImplVulkan_NewFrame();
 		ImGui::NewFrame();
 
@@ -1222,12 +1226,12 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 
 		// Render dear imgui into screen
 		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), commandBuffer );
-		MarkerEndRegion( commandBuffer );
+		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
+		MarkerEndRegion( cmdBuffer );
 #endif
 	}
 
-	vkCmdEndRenderPass( commandBuffer );
+	vkCmdEndRenderPass( cmdBuffer );
 }
 
 
@@ -1254,7 +1258,7 @@ void Renderer::RenderViews()
 	{
 		MarkerBeginRegion( gfxContext.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( shadowView, gfxContext.commandBuffers[ i ] );
+		RenderViewSurfaces( shadowView, gfxContext );
 
 		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
 	}
@@ -1263,7 +1267,7 @@ void Renderer::RenderViews()
 	{
 		MarkerBeginRegion( gfxContext.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( renderView, gfxContext.commandBuffers[ i ] );
+		RenderViewSurfaces( renderView, gfxContext );
 		
 		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
 	}
@@ -1272,7 +1276,7 @@ void Renderer::RenderViews()
 	{
 		MarkerBeginRegion( gfxContext.commandBuffers[ i ], view2D.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( view2D, gfxContext.commandBuffers[ i ] );
+		RenderViewSurfaces( view2D, gfxContext );
 		
 		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
 	}

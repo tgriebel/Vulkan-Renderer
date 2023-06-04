@@ -249,12 +249,15 @@ void Renderer::InitImGui( RenderView& view )
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
+	vkResetCommandPool( context.device, gfxContext.commandPool, 0 );
+
 	// Upload Fonts
 	{
-		vkResetCommandPool( context.device, gfxContext.commandPool, 0 );
-		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+		BeginUploadCommands( uploadContext );
+		VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
 		ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
-		EndSingleTimeCommands( commandBuffer );
+		EndUploadCommands( uploadContext );
+
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 	ImGui_ImplGlfw_NewFrame();
@@ -703,6 +706,11 @@ void Renderer::CreateCommandPools()
 	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &computeContext.commandPool ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create compute command pool!" );
 	}
+
+	poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
+	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &uploadContext.commandPool ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create upload command pool!" );
+	}
 }
 
 
@@ -901,5 +909,17 @@ void Renderer::CreateCommandBuffers()
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
 			vkResetCommandBuffer( computeContext.commandBuffers[i], 0 );
 		}
+	}
+
+	// Upload
+	{
+		allocInfo.commandPool = uploadContext.commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = 1;
+
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, &uploadContext.commandBuffer ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to allocate upload command buffers!" );
+		}
+		vkResetCommandBuffer( uploadContext.commandBuffer, 0 );
 	}
 }

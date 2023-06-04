@@ -27,40 +27,29 @@
 #include "renderer.h"
 #include <gfxcore/scene/entity.h>
 
-VkCommandBuffer Renderer::BeginSingleTimeCommands()
+void Renderer::BeginUploadCommands( UploadContext& uploadContext )
 {
-	VkCommandBufferAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = gfxContext.commandPool;
-	allocInfo.commandBufferCount = 1;
-
-	VkCommandBuffer commandBuffer;
-	vkAllocateCommandBuffers( context.device, &allocInfo, &commandBuffer );
+	vkResetCommandBuffer( uploadContext.commandBuffer, 0 );
 
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-	vkBeginCommandBuffer( commandBuffer, &beginInfo );
-
-	return commandBuffer;
+	vkBeginCommandBuffer( uploadContext.commandBuffer, &beginInfo );
 }
 
 
-void Renderer::EndSingleTimeCommands( VkCommandBuffer commandBuffer )
+void Renderer::EndUploadCommands( UploadContext& uploadContext )
 {
-	vkEndCommandBuffer( commandBuffer );
+	vkEndCommandBuffer( uploadContext.commandBuffer );
 
 	VkSubmitInfo submitInfo{ };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffer;
+	submitInfo.pCommandBuffers = &uploadContext.commandBuffer;
 
 	vkQueueSubmit( context.gfxContext, 1, &submitInfo, VK_NULL_HANDLE );
 	vkQueueWaitIdle( context.gfxContext );
-
-	vkFreeCommandBuffers( context.device, gfxContext.commandPool, 1, &commandBuffer );
 }
 
 

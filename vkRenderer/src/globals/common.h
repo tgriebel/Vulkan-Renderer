@@ -152,6 +152,7 @@ struct globalUboConstants_t
 	// uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
 };
 
+
 struct materialBufferObject_t
 {
 	int						textures[ Material::MaxMaterialTextures ];
@@ -185,6 +186,7 @@ struct particleBufferObject_t
 	vec2f	velocity;
 	vec4f	color;
 };
+
 
 struct SwapChainSupportDetails
 {
@@ -237,6 +239,7 @@ struct drawSurfInstance_t
 	uint32_t	id;
 };
 
+
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
 {
 	bool isEqual = true;
@@ -249,6 +252,7 @@ inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
 	return isEqual;
 }
 
+
 inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
 {
 	if ( surf0.sortKey.materialId == surf1.sortKey.materialId ) {
@@ -257,6 +261,7 @@ inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
 		return ( surf0.sortKey.materialId < surf1.sortKey.materialId );
 	}
 }
+
 
 template<> struct std::hash<drawSurf_t> {
 	size_t operator()( drawSurf_t const& surf ) const {
@@ -298,12 +303,15 @@ struct imguiControls_t
 };
 #endif
 
-enum pipelineQueue_t {
+
+enum pipelineQueue_t
+{
 	QUEUE_GRAPHICS,
 	QUEUE_PRESENT,
 	QUEUE_COMPUTE,
 	QUEUE_COUNT,
 };
+
 
 template<class T>
 class optional {
@@ -348,6 +356,7 @@ struct QueueFamilyIndices
 	}
 };
 
+
 class GfxContext
 {
 public:
@@ -360,6 +369,7 @@ public:
 	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
 };
 
+
 class ComputeContext
 {
 public:
@@ -367,4 +377,13 @@ public:
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
 	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
+};
+
+
+class UploadContext
+{
+public:
+	VkQueue						queue;
+	VkCommandPool				commandPool;
+	VkCommandBuffer				commandBuffer;
 };

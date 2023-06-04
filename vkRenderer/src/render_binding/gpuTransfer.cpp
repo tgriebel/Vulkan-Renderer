@@ -68,7 +68,10 @@ void Renderer::UpdateTextures()
 		return;
 	}
 	stagingBuffer.SetPos();
-	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+
+	BeginUploadCommands( uploadContext );
+
+	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
 		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
@@ -83,7 +86,7 @@ void Renderer::UpdateTextures()
 	
 		TransitionImageLayout( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, texture.info );
 	}
-	EndSingleTimeCommands( commandBuffer );
+	EndUploadCommands( uploadContext );
 }
 
 
@@ -95,7 +98,9 @@ void Renderer::UploadTextures()
 	}
 
 	// 1. Upload Data
-	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+	BeginUploadCommands( uploadContext );
+
+	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
@@ -130,7 +135,7 @@ void Renderer::UploadTextures()
 		Image& texture = textureAsset->Get();
 		GenerateMipmaps( commandBuffer, texture.gpuImage->GetVkImage(), VK_FORMAT_R8G8B8A8_SRGB, texture.info );
 	}
-	EndSingleTimeCommands( commandBuffer );
+	EndUploadCommands( uploadContext );
 
 	// 3. Add to resource type lists
 	{
@@ -238,9 +243,10 @@ void Renderer::UpdateGpuMaterials()
 
 void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
-	VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
+	BeginUploadCommands( uploadContext );
+	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
-	EndSingleTimeCommands( commandBuffer );
+	EndUploadCommands( uploadContext );
 
 	dstBuffer.Allocate( copyRegion.size );
 }
