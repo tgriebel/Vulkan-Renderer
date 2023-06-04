@@ -20,26 +20,56 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "renderer.h"
 
 #include <algorithm>
 #include <iterator>
 #include <numeric>
 #include <map>
-#include "renderer.h"
+#include <sstream>
+
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/entity.h>
-#include <sstream>
+#include <gfxcore/core/assetLib.h>
+#include <gfxcore/primitives/geom.h>
+#include <gfxcore/asset_types/texture.h>
+#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/scene/scene.h>
+#include <gfxcore/scene/entity.h>
+
+#include <raytracer/scene.h>
+#include <raytracer/raytrace.h>
+
 #include "debugMenu.h"
 #include "gpuImage.h"
-#include "../render_state/rhi.h"
-#include "../render_binding/bindings.h"
+#include "swapChain.h"
 #include "raytracerInterface.h"
 
+#include "../render_state/rhi.h"
+#include "../render_state/deviceContext.h"
+#include "../render_state/FrameState.h"
+#include "../render_binding/bindings.h"
+#include "../render_binding/pipeline.h"
+#include "../render_binding/shaderBinding.h"
+
+#include "../../GeoBuilder.h"
+#include "../../window.h"
+#include "../../input.h"
+#include "../io/io.h"
+
 #include <gfxcore/io/io.h>
+
+#if defined( USE_IMGUI )
+#include "../../external/imgui/backends/imgui_impl_vulkan.h"
+#endif
 
 extern Scene* g_scene;
 
 SwapChain g_swapChain;
+
+#if defined( USE_IMGUI )
+static ImGui_ImplVulkanH_Window imguiMainWindowData;
+#endif
 
 void Renderer::Commit( const Scene* scene )
 {

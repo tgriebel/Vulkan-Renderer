@@ -30,6 +30,14 @@
 #include "../render_binding/pipeline.h"
 #include "../render_binding/bindings.h"
 
+#include "drawpass.h"
+#include "swapChain.h"
+
+#if defined( USE_IMGUI )
+#include "../../external/imgui/backends/imgui_impl_glfw.h"
+#include "../../external/imgui/backends/imgui_impl_vulkan.h"
+#endif
+
 
 void Renderer::Init()
 {

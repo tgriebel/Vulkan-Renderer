@@ -23,50 +23,30 @@
 
 #pragma once
 
+#include <SysCore/timer.h>
 #include <gfxcore/scene/camera.h>
 
 #include "../globals/common.h"
-#include "../../window.h"
-#include "../../input.h"
 #include "../globals/render_util.h"
-#include "../render_state/deviceContext.h"
-#include "../render_binding/pipeline.h"
-#include "../render_binding/shaderBinding.h"
-#include "swapChain.h"
-#include "../render_state/FrameState.h"
-#include "../render_state/rhi.h"
 #include "../globals/renderConstants.h"
 #include "../globals/renderview.h"
-#include "../io/io.h"
-#include "../../GeoBuilder.h"
-#include <gfxcore/core/assetLib.h>
-#include <gfxcore/primitives/geom.h>
-#include <gfxcore/asset_types/texture.h>
-#include <gfxcore/asset_types/gpuProgram.h>
-#include <gfxcore/scene/scene.h>
-
-#include <raytracer/scene.h>
-#include <raytracer/raytrace.h>
-#include <SysCore/timer.h>
-#include "drawpass.h"
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
 #include "../../external/imgui/backends/imgui_impl_glfw.h"
-#include "../../external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
-#include <gfxcore/scene/entity.h>
+class Window;
+class SwapChain;
+class Scene;
 
-#if defined( USE_IMGUI )
-static ImGui_ImplVulkanH_Window imguiMainWindowData;
-extern imguiControls_t g_imguiControls;
-#endif
-
-typedef AssetLib<pipelineObject_t>	AssetLibPipelines;
-
+using AssetLibPipelines = AssetLib<pipelineObject_t>;
 using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
 using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
+
+#if defined( USE_IMGUI )
+extern imguiControls_t g_imguiControls;
+#endif
 
 extern Scene						scene;
 extern Window						g_window;

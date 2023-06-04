@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../globals/common.h"
+#include "../render_binding/pipeline.h"
 #include "../render_binding/shaderBinding.h"
 #include "../render_state/FrameState.h"
 
@@ -14,11 +15,11 @@ public:
 	uint32_t					clearStencil;
 
 	gfxStateBits_t				stateBits;
-	imageSamples_t			sampleRate;
+	imageSamples_t				sampleRate;
 	viewport_t					viewport;
 	renderPassTransitionFlags_t transitionState;
 
-	Array<Image*, 100>		codeImages[ MAX_FRAMES_STATES ];
+	Array<Image*, 100>			codeImages[ MAX_FRAMES_STATES ];
 	ShaderBindParms*			parms[ MAX_FRAMES_STATES ];
 	FrameBuffer*				fb[ MAX_FRAMES_STATES ];
 };

@@ -27,6 +27,13 @@
 #include "renderer.h"
 #include <gfxcore/scene/entity.h>
 
+#include "swapChain.h"
+
+#if defined( USE_IMGUI )
+#include "../../external/imgui/backends/imgui_impl_glfw.h"
+#include "../../external/imgui/backends/imgui_impl_vulkan.h"
+#endif
+
 void Renderer::Destroy()
 {
 	vkDeviceWaitIdle( context.device );
