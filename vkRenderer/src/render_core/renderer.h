@@ -134,19 +134,6 @@ public:
 
 	void		UploadAssets();
 
-	static imageSamples_t GetMaxUsableSampleCount()
-	{
-		VkSampleCountFlags counts = context.deviceProperties.limits.framebufferColorSampleCounts & context.deviceProperties.limits.framebufferDepthSampleCounts;
-		if ( counts & VK_SAMPLE_COUNT_64_BIT ) { return IMAGE_SMP_64; }
-		if ( counts & VK_SAMPLE_COUNT_32_BIT ) { return IMAGE_SMP_32; }
-		if ( counts & VK_SAMPLE_COUNT_16_BIT ) { return IMAGE_SMP_16; }
-		if ( counts & VK_SAMPLE_COUNT_8_BIT ) { return IMAGE_SMP_8; }
-		if ( counts & VK_SAMPLE_COUNT_4_BIT ) { return IMAGE_SMP_4; }
-		if ( counts & VK_SAMPLE_COUNT_2_BIT ) { return IMAGE_SMP_2; }
-
-		return IMAGE_SMP_1;
-	}
-
 private:
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
