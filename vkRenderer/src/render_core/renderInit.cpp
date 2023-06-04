@@ -234,7 +234,7 @@ void Renderer::InitImGui( RenderView& view )
 	vkInfo.PhysicalDevice = context.physicalDevice;
 	vkInfo.Device = context.device;
 	vkInfo.QueueFamily = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
-	vkInfo.Queue = context.graphicsQueue;
+	vkInfo.Queue = context.gfxContext;
 	vkInfo.PipelineCache = nullptr;
 	vkInfo.DescriptorPool = descriptorPool;
 	vkInfo.Allocator = nullptr;
@@ -251,7 +251,7 @@ void Renderer::InitImGui( RenderView& view )
 
 	// Upload Fonts
 	{
-		vkResetCommandPool( context.device, graphicsQueue.commandPool, 0 );
+		vkResetCommandPool( context.device, gfxContext.commandPool, 0 );
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
 		ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
 		EndSingleTimeCommands( commandBuffer );
@@ -373,9 +373,9 @@ void Renderer::CreateDevice()
 			throw std::runtime_error( "Failed to create logical context.device!" );
 		}
 
-		vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &context.graphicsQueue );
+		vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &context.gfxContext );
 		vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &context.presentQueue );
-		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeQueue );
+		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeContext );
 	}
 }
 
@@ -695,12 +695,12 @@ void Renderer::CreateCommandPools()
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &graphicsQueue.commandPool ) != VK_SUCCESS ) {
+	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &gfxContext.commandPool ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create graphics command pool!" );
 	}
 
 	poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_COMPUTE ];
-	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &computeQueue.commandPool ) != VK_SUCCESS ) {
+	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &computeContext.commandPool ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create compute command pool!" );
 	}
 }
@@ -856,15 +856,15 @@ void Renderer::CreateSyncObjects()
 
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 	{
-		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &graphicsQueue.imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
-			vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &graphicsQueue.renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||
-			vkCreateFence( context.device, &fenceInfo, nullptr, &graphicsQueue.inFlightFences[ i ] ) != VK_SUCCESS )
+		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &gfxContext.imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
+			vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &gfxContext.renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||
+			vkCreateFence( context.device, &fenceInfo, nullptr, &gfxContext.inFlightFences[ i ] ) != VK_SUCCESS )
 		{
 			throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 		}
 	}
 
-	if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, computeQueue.semaphores ) ) {
+	if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, computeContext.semaphores ) ) {
 		throw std::runtime_error( "Failed to create compute semaphore!" );
 	}
 }
@@ -876,30 +876,30 @@ void Renderer::CreateCommandBuffers()
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	// Graphics
 	{
-		allocInfo.commandPool = graphicsQueue.commandPool;
+		allocInfo.commandPool = gfxContext.commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, graphicsQueue.commandBuffers ) != VK_SUCCESS ) {
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, gfxContext.commandBuffers ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to allocate graphics command buffers!" );
 		}
 
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-			vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+			vkResetCommandBuffer( gfxContext.commandBuffers[ i ], 0 );
 		}
 	}
 
 	// Compute
 	{
-		allocInfo.commandPool = computeQueue.commandPool;
+		allocInfo.commandPool = computeContext.commandPool;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, computeQueue.commandBuffers ) != VK_SUCCESS ) {
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, computeContext.commandBuffers ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to allocate compute command buffers!" );
 		}
 		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-			vkResetCommandBuffer( computeQueue.commandBuffers[i], 0 );
+			vkResetCommandBuffer( computeContext.commandBuffers[i], 0 );
 		}
 	}
 }

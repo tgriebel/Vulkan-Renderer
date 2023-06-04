@@ -115,8 +115,8 @@ private:
 	std::set<hdl_t>						uploadMaterials;
 
 	VkDebugUtilsMessengerEXT			debugMessenger;
-	graphicsQueue_t						graphicsQueue;
-	computeQueue_t						computeQueue;
+	GfxContext							gfxContext;
+	ComputeContext						computeContext;
 	ComputeState						particleState;
 	VkDescriptorPool					descriptorPool;
 	renderConfig_t						config;

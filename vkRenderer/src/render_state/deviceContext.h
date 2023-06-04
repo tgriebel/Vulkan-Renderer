@@ -30,9 +30,9 @@ struct deviceContext_t
 	VkPhysicalDevice			physicalDevice;
 	VkInstance					instance;
 	VkPhysicalDeviceProperties	deviceProperties;
-	VkQueue						graphicsQueue;
+	VkQueue						gfxContext;
 	VkQueue						presentQueue;
-	VkQueue						computeQueue;
+	VkQueue						computeContext;
 	uint32_t					queueFamilyIndices[ QUEUE_COUNT ];
 };
 

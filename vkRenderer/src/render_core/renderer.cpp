@@ -452,14 +452,14 @@ void Renderer::UpdateDescriptorSets()
 
 void Renderer::WaitForEndFrame()
 {
-	vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
+	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ frameId ], VK_TRUE, UINT64_MAX );
 }
 
 
 void Renderer::FlushGPU()
 {
 	for ( int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i ) {
-		vkWaitForFences( context.device, 1, &graphicsQueue.inFlightFences[ i ], VK_TRUE, UINT64_MAX );
+		vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ i ], VK_TRUE, UINT64_MAX );
 	}
 }
 
@@ -488,38 +488,38 @@ void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
 
-	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, graphicsQueue.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
+	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.imageAvailableSemaphores[ frameId ], VK_NULL_HANDLE, &bufferId );
 	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
 
 	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-	if ( graphicsQueue.imagesInFlight[ bufferId ] != VK_NULL_HANDLE ) {
-		vkWaitForFences( context.device, 1, &graphicsQueue.imagesInFlight[ bufferId ], VK_TRUE, UINT64_MAX );
+	if ( gfxContext.imagesInFlight[ bufferId ] != VK_NULL_HANDLE ) {
+		vkWaitForFences( context.device, 1, &gfxContext.imagesInFlight[ bufferId ], VK_TRUE, UINT64_MAX );
 	}
 	// Mark the image as now being in use by this frame
-	graphicsQueue.imagesInFlight[ bufferId ] = graphicsQueue.inFlightFences[ frameId ];
+	gfxContext.imagesInFlight[ bufferId ] = gfxContext.inFlightFences[ frameId ];
 
 	UpdateBuffers( bufferId );
 
 	// Compute
 	{
-		vkResetCommandBuffer( computeQueue.commandBuffers[ bufferId ], 0 );
+		vkResetCommandBuffer( computeContext.commandBuffers[ bufferId ], 0 );
 
 		VkCommandBufferBeginInfo beginInfo{ };
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = 0; // Optional
 		beginInfo.pInheritanceInfo = nullptr; // Optional
 
-		if ( vkBeginCommandBuffer( computeQueue.commandBuffers[ bufferId ], &beginInfo ) != VK_SUCCESS ) {
+		if ( vkBeginCommandBuffer( computeContext.commandBuffers[ bufferId ], &beginInfo ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
 		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		Dispatch( computeQueue.commandBuffers[ bufferId ], progHdl, particleShaderBinds, particleState.parms[ bufferId ]->GetVkObject(), MaxParticles / 256 );
+		Dispatch( computeContext.commandBuffers[ bufferId ], progHdl, particleShaderBinds, particleState.parms[ bufferId ]->GetVkObject(), MaxParticles / 256 );
 
-		if ( vkEndCommandBuffer( computeQueue.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
+		if ( vkEndCommandBuffer( computeContext.commandBuffers[ bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );
 		}
 	}
@@ -531,9 +531,9 @@ void Renderer::SubmitFrame()
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &computeQueue.commandBuffers[ bufferId ];
+		submitInfo.pCommandBuffers = &computeContext.commandBuffers[ bufferId ];
 
-		if ( vkQueueSubmit( context.computeQueue, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit compute command buffers!" );
 		}
 	}
@@ -543,21 +543,21 @@ void Renderer::SubmitFrame()
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { graphicsQueue.imageAvailableSemaphores[ frameId ] };
+		VkSemaphore waitSemaphores[] = { gfxContext.imageAvailableSemaphores[ frameId ] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &graphicsQueue.commandBuffers[ bufferId ];
+		submitInfo.pCommandBuffers = &gfxContext.commandBuffers[ bufferId ];
 
-		VkSemaphore signalSemaphores[] = { graphicsQueue.renderFinishedSemaphores[ frameId ] };
+		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphores[ frameId ] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences( context.device, 1, &graphicsQueue.inFlightFences[ frameId ] );
+		vkResetFences( context.device, 1, &gfxContext.inFlightFences[ frameId ] );
 
-		if ( vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, graphicsQueue.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.inFlightFences[ frameId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffers!" );
 		}
 
@@ -1234,51 +1234,51 @@ void Renderer::RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuff
 void Renderer::RenderViews()
 {
 	const uint32_t i = bufferId;
-	vkResetCommandBuffer( graphicsQueue.commandBuffers[ i ], 0 );
+	vkResetCommandBuffer( gfxContext.commandBuffers[ i ], 0 );
 
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
 
-	if ( vkBeginCommandBuffer( graphicsQueue.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
+	if ( vkBeginCommandBuffer( gfxContext.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
 	}
 
 	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers( graphicsQueue.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( graphicsQueue.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
+	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	// Shadow View
 	{
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( shadowView, graphicsQueue.commandBuffers[ i ] );
+		RenderViewSurfaces( shadowView, gfxContext.commandBuffers[ i ] );
 
-		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
+		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
 	}
 
 	// Main View
 	{
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( renderView, graphicsQueue.commandBuffers[ i ] );
+		RenderViewSurfaces( renderView, gfxContext.commandBuffers[ i ] );
 		
-		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
+		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
 	}
 
 	// 2D View
 	{
-		MarkerBeginRegion( graphicsQueue.commandBuffers[ i ], view2D.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext.commandBuffers[ i ], view2D.name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( view2D, graphicsQueue.commandBuffers[ i ] );
+		RenderViewSurfaces( view2D, gfxContext.commandBuffers[ i ] );
 		
-		MarkerEndRegion( graphicsQueue.commandBuffers[ i ] );
+		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
 	}
 
 
-	if ( vkEndCommandBuffer( graphicsQueue.commandBuffers[ i ] ) != VK_SUCCESS )
+	if ( vkEndCommandBuffer( gfxContext.commandBuffers[ i ] ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to record command buffer!" );
 	}

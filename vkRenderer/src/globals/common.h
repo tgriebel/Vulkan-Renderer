@@ -348,9 +348,10 @@ struct QueueFamilyIndices
 	}
 };
 
-struct graphicsQueue_t
+class GfxContext
 {
-	VkQueue						graphicsQueue;
+public:
+	VkQueue						gfxContext;
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
 	VkSemaphore					imageAvailableSemaphores[ MAX_FRAMES_STATES ];
@@ -359,8 +360,9 @@ struct graphicsQueue_t
 	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
 };
 
-struct computeQueue_t
+class ComputeContext
 {
+public:
 	VkQueue						queue;
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];

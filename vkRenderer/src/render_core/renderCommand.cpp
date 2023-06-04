@@ -32,7 +32,7 @@ VkCommandBuffer Renderer::BeginSingleTimeCommands()
 	VkCommandBufferAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = graphicsQueue.commandPool;
+	allocInfo.commandPool = gfxContext.commandPool;
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
@@ -57,10 +57,10 @@ void Renderer::EndSingleTimeCommands( VkCommandBuffer commandBuffer )
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer;
 
-	vkQueueSubmit( context.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE );
-	vkQueueWaitIdle( context.graphicsQueue );
+	vkQueueSubmit( context.gfxContext, 1, &submitInfo, VK_NULL_HANDLE );
+	vkQueueWaitIdle( context.gfxContext );
 
-	vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, 1, &commandBuffer );
+	vkFreeCommandBuffers( context.device, gfxContext.commandPool, 1, &commandBuffer );
 }
 
 

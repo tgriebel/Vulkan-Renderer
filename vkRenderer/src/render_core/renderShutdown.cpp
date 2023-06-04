@@ -49,8 +49,8 @@ void Renderer::Cleanup()
 	ShutdownImGui();
 
 	// Buffers
-	vkFreeCommandBuffers( context.device, graphicsQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), graphicsQueue.commandBuffers );
-	vkFreeCommandBuffers( context.device, computeQueue.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), computeQueue.commandBuffers );
+	vkFreeCommandBuffers( context.device, gfxContext.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), gfxContext.commandBuffers );
+	vkFreeCommandBuffers( context.device, computeContext.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), computeContext.commandBuffers );
 
 	ShutdownShaderResources();
 
@@ -60,18 +60,18 @@ void Renderer::Cleanup()
 	// Sync
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
 	{
-		vkDestroySemaphore( context.device, graphicsQueue.renderFinishedSemaphores[ i ], nullptr );
-		vkDestroySemaphore( context.device, graphicsQueue.imageAvailableSemaphores[ i ], nullptr );
-		vkDestroyFence( context.device, graphicsQueue.inFlightFences[ i ], nullptr );
+		vkDestroySemaphore( context.device, gfxContext.renderFinishedSemaphores[ i ], nullptr );
+		vkDestroySemaphore( context.device, gfxContext.imageAvailableSemaphores[ i ], nullptr );
+		vkDestroyFence( context.device, gfxContext.inFlightFences[ i ], nullptr );
 
-		vkDestroySemaphore( context.device, computeQueue.semaphores[ i ], nullptr );
+		vkDestroySemaphore( context.device, computeContext.semaphores[ i ], nullptr );
 	}
 
 	// Memory
 	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
-	vkDestroyCommandPool( context.device, graphicsQueue.commandPool, nullptr );
-	vkDestroyCommandPool( context.device, computeQueue.commandPool, nullptr );
+	vkDestroyCommandPool( context.device, gfxContext.commandPool, nullptr );
+	vkDestroyCommandPool( context.device, computeContext.commandPool, nullptr );
 	vkDestroyDevice( context.device, nullptr );
 
 	if ( enableValidationLayers )
