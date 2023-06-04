@@ -285,6 +285,39 @@ void Renderer::ShutdownGPU()
 }
 
 
+void Renderer::RecreateSwapChain()
+{
+	int width = 0, height = 0;
+	g_window.GetWindowFrameBufferSize( width, height, true );
+
+	vkDeviceWaitIdle( context.device );
+
+	DestroyFramebuffers();
+	g_swapChain.Destroy();
+
+	vk_AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
+	frameBufferMemory.Reset();
+
+	g_swapChain.Create( &g_window, width, height );
+	CreateFramebuffers();
+
+	RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+
+	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+	{
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			if ( pass == nullptr ) {
+				continue;
+			}
+			pass->viewport.width = pass->fb[ 0 ]->GetWidth();
+			pass->viewport.height = pass->fb[ 0 ]->GetHeight();
+		}
+	}
+}
+
+
 void Renderer::Resize()
 {
 	RecreateSwapChain();
@@ -816,6 +849,17 @@ bool Renderer::CheckValidationLayerSupport()
 		}
 	}
 	return true;
+}
+
+
+static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+														VkDebugUtilsMessageTypeFlagsEXT messageType,
+														const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+														void* pUserData )
+{
+
+	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+	return VK_FALSE;
 }
 
 

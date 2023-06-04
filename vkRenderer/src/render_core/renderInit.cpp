@@ -30,6 +30,32 @@
 #include "../render_binding/pipeline.h"
 #include "../render_binding/bindings.h"
 
+
+void Renderer::Init()
+{
+	InitApi();
+
+	renderView.region = renderViewRegion_t::STANDARD_RASTER;
+	renderView.name = "Main View";
+
+	shadowView.region = renderViewRegion_t::SHADOW;
+	shadowView.name = "Shadow View";
+
+	view2D.region = renderViewRegion_t::POST;
+	view2D.name = "Post View";
+
+	InitRenderPasses( shadowView, shadowMap );
+	InitRenderPasses( renderView, mainColor );
+	InitRenderPasses( view2D, g_swapChain.framebuffers );
+
+	InitShaderResources();
+
+	CreatePipelineObjects();
+
+	InitImGui( view2D );
+}
+
+
 void Renderer::CreateInstance()
 {
 	if ( enableValidationLayers && !CheckValidationLayerSupport() )

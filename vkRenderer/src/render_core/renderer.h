@@ -88,51 +88,21 @@ struct ComputeState
 class Renderer
 {
 public:
-	void Init()
-	{
-		InitApi();
+	static void	GenerateGpuPrograms( AssetLibGpuProgram& lib );
 
-		renderView.region = renderViewRegion_t::STANDARD_RASTER;
-		renderView.name = "Main View";
-
-		shadowView.region = renderViewRegion_t::SHADOW;
-		shadowView.name = "Shadow View";
-		
-		view2D.region = renderViewRegion_t::POST;
-		view2D.name = "Post View";
-		
-		InitRenderPasses( shadowView, shadowMap );
-		InitRenderPasses( renderView, mainColor );
-		InitRenderPasses( view2D, g_swapChain.framebuffers );
-
-		InitShaderResources();
-
-		CreatePipelineObjects();
-
-		InitImGui( view2D );
-	}
-
-	void RenderScene( Scene* scene );
-
-	void Destroy()
-	{
-		vkDeviceWaitIdle( context.device );
-		Cleanup();
-	}
-
-	bool IsReady() {
+	inline bool IsReady() {
 		return ( frameNumber > 0 );
 	}
 
-	void		InitGPU();
-	void		ShutdownGPU();
-	void		Resize();
+	void								Init();
+	void								Destroy();
+	void								RenderScene( Scene* scene );
 
-	static void	GenerateGpuPrograms( AssetLibGpuProgram& lib );
-
-	void		CreatePipelineObjects();
-
-	void		UploadAssets();
+	void								InitGPU();
+	void								ShutdownGPU();
+	void								Resize();
+	void								CreatePipelineObjects();
+	void								UploadAssets();
 
 private:
 	static const uint32_t				ShadowMapWidth = 1024;
@@ -148,8 +118,8 @@ private:
 	RenderView							shadowView;
 	RenderView							view2D;
 
-	const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
+	const std::vector<const char*>		deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
 #ifdef NDEBUG
 	const bool enableValidationLayers = true;
@@ -157,52 +127,52 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 
-	Timer							frameTimer;
-	float							renderTime = 0.0f;
+	Timer								frameTimer;
+	float								renderTime = 0.0f;
 
-	std::set<hdl_t>					uploadTextures;
-	std::set<hdl_t>					updateTextures;
-	std::set<hdl_t>					uploadMaterials;
+	std::set<hdl_t>						uploadTextures;
+	std::set<hdl_t>						updateTextures;
+	std::set<hdl_t>						uploadMaterials;
 
-	VkDebugUtilsMessengerEXT		debugMessenger;
-	graphicsQueue_t					graphicsQueue;
-	computeQueue_t					computeQueue;
-	ComputeState					particleState;
-	VkDescriptorPool				descriptorPool;
-	renderConfig_t					config;
-	size_t							frameId = 0;
-	uint32_t						bufferId = 0;
-	uint32_t						frameNumber = 0;
-	GpuBuffer						stagingBuffer;
-	GpuBuffer						vb;	// move
-	GpuBuffer						ib;
-	ImageArray						gpuImages2D;
-	ImageArray						gpuImagesCube;
-	materialBufferObject_t			materialBuffer[ MaxMaterials ];
+	VkDebugUtilsMessengerEXT			debugMessenger;
+	graphicsQueue_t						graphicsQueue;
+	computeQueue_t						computeQueue;
+	ComputeState						particleState;
+	VkDescriptorPool					descriptorPool;
+	renderConfig_t						config;
+	size_t								frameId = 0;
+	uint32_t							bufferId = 0;
+	uint32_t							frameNumber = 0;
+	GpuBuffer							stagingBuffer;
+	GpuBuffer							vb;	// move
+	GpuBuffer							ib;
+	ImageArray							gpuImages2D;
+	ImageArray							gpuImagesCube;
+	materialBufferObject_t				materialBuffer[ MaxMaterials ];
 
-	FrameState						frameState[ MAX_FRAMES_STATES ];
-	FrameBuffer						shadowMap[ MAX_FRAMES_STATES ];
-	FrameBuffer						mainColor[ MAX_FRAMES_STATES ];
+	FrameState							frameState[ MAX_FRAMES_STATES ];
+	FrameBuffer							shadowMap[ MAX_FRAMES_STATES ];
+	FrameBuffer							mainColor[ MAX_FRAMES_STATES ];
 
-	uint32_t						imageFreeSlot = 0;
-	uint32_t						materialFreeSlot = 0;
-	uint32_t						vbBufElements = 0;
-	uint32_t						ibBufElements = 0;
+	uint32_t							imageFreeSlot = 0;
+	uint32_t							materialFreeSlot = 0;
+	uint32_t							vbBufElements = 0;
+	uint32_t							ibBufElements = 0;
 
-	AllocatorMemory					localMemory;
-	AllocatorMemory					frameBufferMemory;
-	AllocatorMemory					sharedMemory;
+	AllocatorMemory						localMemory;
+	AllocatorMemory						frameBufferMemory;
+	AllocatorMemory						sharedMemory;
 
-	ShaderBindParms					bindParmsList[ DescriptorPoolMaxSets ];
-	uint32_t						bindParmCount = 0;
+	ShaderBindParms						bindParmsList[ DescriptorPoolMaxSets ];
+	uint32_t							bindParmCount = 0;
 
-	VkSampler						vk_bilinearSampler;
-	VkSampler						vk_depthShadowSampler;
+	VkSampler							vk_bilinearSampler;
+	VkSampler							vk_depthShadowSampler;
 
-	renderPassMap_t					vk_renderPassCache;
+	renderPassMap_t						vk_renderPassCache;
 
-	ShaderBindSet					defaultBindSet;
-	ShaderBindSet					particleShaderBinds;
+	ShaderBindSet						defaultBindSet;
+	ShaderBindSet						particleShaderBinds;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	vk_fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
@@ -211,160 +181,88 @@ private:
 	PFN_vkCmdDebugMarkerEndEXT			vk_fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerInsertEXT		vk_fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
 
-	float							shadowNearPlane = 0.1f;
-	float							shadowFarPlane = 1000.0f;
-	bool							restart = false;
-
-	void RecreateSwapChain()
-	{
-		int width = 0, height = 0;
-		g_window.GetWindowFrameBufferSize( width, height, true );
-
-		vkDeviceWaitIdle( context.device );
-
-		DestroyFramebuffers();
-		g_swapChain.Destroy();
-
-		vk_AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
-		frameBufferMemory.Reset();
-
-		g_swapChain.Create( &g_window, width, height );
-		CreateFramebuffers();
-
-		RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
-
-		for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
-		{
-			for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
-			{
-				DrawPass* pass = views[ viewIx ]->passes[ passIx ];
-				if ( pass == nullptr ) {
-					continue;
-				}
-				pass->viewport.width = pass->fb[ 0 ]->GetWidth();
-				pass->viewport.height = pass->fb[ 0 ]->GetHeight();
-			}
-		}
-	}
-
-	void vk_AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )
-	{
-		uint32_t typeIndex = vk_FindMemoryType( ~0x00, typeBits );
-
-		VkMemoryAllocateInfo allocInfo{ };
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = allocSize;
-		allocInfo.memoryTypeIndex = typeIndex;
-
-		VkDeviceMemory memory;
-		if ( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to allocate buffer memory!" );
-		}
-
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
-		VkMemoryType type = memProperties.memoryTypes[ typeIndex ];
-
-		void* memPtr = nullptr;
-		if ( ( type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) == 0 ) {
-			if ( vkMapMemory( context.device, memory, 0, VK_WHOLE_SIZE, 0, &memPtr ) != VK_SUCCESS ) {
-				throw std::runtime_error( "Failed to map memory to context.device memory!" );
-			}
-		}
-
-		outAllocation.Bind( memory, memPtr, allocSize, typeIndex );
-		outAllocation.memoryTypeIndex = typeIndex;
-	}
+	float								shadowNearPlane = 0.1f;
+	float								shadowFarPlane = 1000.0f;
+	bool								restart = false;
 
 	// Init/Shutdown
-	void						InitApi();
-	void						InitShaderResources();
-	void						InitImGui( RenderView& view );
-	void						ShutdownImGui();
-	void						ShutdownShaderResources();
-	void						Cleanup();
+	void								InitApi();
+	void								InitShaderResources();
+	void								InitImGui( RenderView& view );
+	void								ShutdownImGui();
+	void								ShutdownShaderResources();
+	void								Cleanup();
+	void								RecreateSwapChain();
 
 	// Image Functions
-	void						TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const imageInfo_t& info );
-	void						CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Image& texture );
-	void						GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const imageInfo_t& info );
+	void								TransitionImageLayout( VkCommandBuffer& commandBuffer, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, const imageInfo_t& info );
+	void								CopyBufferToImage( VkCommandBuffer& commandBuffer, VkBuffer& buffer, const VkDeviceSize bufferOffset, Image& texture );
+	void								GenerateMipmaps( VkCommandBuffer& commandBuffer, VkImage image, VkFormat imageFormat, const imageInfo_t& info );
 
-	void						CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
+	void								CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	// API Creation Functions
-	void						CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
-	ShaderBindParms*			RegisterBindParm( const ShaderBindSet* set );
-	void						AllocRegisteredBindParms();
-	void						FreeRegisteredBindParms();
-	void						CreateDescriptorPool();
-	void						CreateInstance();
-	void						CreateDevice();
-	void						CreateSyncObjects();
-	void						CreateCommandBuffers();
-	void						CreateTextureSamplers();
-	void						CreateBuffers();
-	void						CreateFramebuffers();
-	void						CreateCommandPools();
+	void								CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
+	ShaderBindParms*					RegisterBindParm( const ShaderBindSet* set );
+	void								AllocRegisteredBindParms();
+	void								FreeRegisteredBindParms();
+	void								CreateDescriptorPool();
+	void								CreateInstance();
+	void								CreateDevice();
+	void								CreateSyncObjects();
+	void								CreateCommandBuffers();
+	void								CreateTextureSamplers();
+	void								CreateBuffers();
+	void								CreateFramebuffers();
+	void								CreateCommandPools();
 
 	// Draw Frame
-	static bool					SkipPass( const drawSurf_t& surf, const drawPass_t pass );
-	static drawPass_t			ViewRegionPassBegin( const renderViewRegion_t region );
-	static drawPass_t			ViewRegionPassEnd( const renderViewRegion_t region );
-	void						InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] );
-	void						RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
-	void						Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
-	void						RenderViews();
-	void						Commit( const Scene* scene );
-	void						CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
-	void						MergeSurfaces( RenderView& view );
-	DrawPass*					GetDrawPass( const drawPass_t pass );
-	void						DrawDebugMenu();
-	void						FlushGPU();
-	void						WaitForEndFrame();
-	void						SubmitFrame();
+	static bool							SkipPass( const drawSurf_t& surf, const drawPass_t pass );
+	static drawPass_t					ViewRegionPassBegin( const renderViewRegion_t region );
+	static drawPass_t					ViewRegionPassEnd( const renderViewRegion_t region );
+	void								InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] );
+	void								RenderViewSurfaces( RenderView& view, VkCommandBuffer commandBuffer );
+	void								Dispatch( VkCommandBuffer commandBuffer, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
+	void								RenderViews();
+	void								Commit( const Scene* scene );
+	void								CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
+	void								MergeSurfaces( RenderView& view );
+	DrawPass*							GetDrawPass( const drawPass_t pass );
+	void								DrawDebugMenu();
+	void								FlushGPU();
+	void								WaitForEndFrame();
+	void								SubmitFrame();
 
 	// Misc
-	void						DestroyFramebuffers();
-	void						CreateCodeTextures();
-	VkCommandBuffer				BeginSingleTimeCommands();
-	void						EndSingleTimeCommands( VkCommandBuffer commandBuffer );
-	void						InitConfig();
+	void								DestroyFramebuffers();
+	void								CreateCodeTextures();
+	VkCommandBuffer						BeginSingleTimeCommands();
+	void								EndSingleTimeCommands( VkCommandBuffer commandBuffer );
+	void								InitConfig();
 
 	// Update
-	void						UpdateViews( const Scene* scene );
-	void						UpdateTextures();
-	void						UploadTextures();
-	void						UpdateGpuMaterials();
-	void						UploadModelsToGPU();
-	void						UpdateBindSets( const uint32_t currentImage );
-	void						UpdateBuffers( const uint32_t currentImage );
-	void						UpdateFrameDescSet( const int currentImage );
-	void						UpdateDescriptorSets();
-	void						AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites );
+	void								UpdateViews( const Scene* scene );
+	void								UpdateTextures();
+	void								UploadTextures();
+	void								UpdateGpuMaterials();
+	void								UploadModelsToGPU();
+	void								UpdateBindSets( const uint32_t currentImage );
+	void								UpdateBuffers( const uint32_t currentImage );
+	void								UpdateFrameDescSet( const int currentImage );
+	void								UpdateDescriptorSets();
+	void								AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites );
 
 	// Debug
-	static VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::DebugCallback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		VkDebugUtilsMessageTypeFlagsEXT messageType,
-		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-		void* pUserData )
-	{
-
-		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
-		return VK_FALSE;
-	}
-
-	std::vector<const char*>	GetRequiredExtensions() const;	
-	bool						CheckValidationLayerSupport();
-	void						PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );
-	void						SetupMarkers();
-	void						MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );
-	void						MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
-	void						MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarkerName, const vec4f color );
-	void						MarkerEndRegion( VkCommandBuffer cmdBuffer );
-	void						MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, const vec4f color );
-	void						SetupDebugMessenger();
-	static VkResult				CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
-	static void					DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator );
+	std::vector<const char*>			GetRequiredExtensions() const;	
+	bool								CheckValidationLayerSupport();
+	void								PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );
+	void								SetupMarkers();
+	void								MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );
+	void								MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
+	void								MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarkerName, const vec4f color );
+	void								MarkerEndRegion( VkCommandBuffer cmdBuffer );
+	void								MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, const vec4f color );
+	void								SetupDebugMessenger();
+	static VkResult						CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
+	static void							DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator );
 };

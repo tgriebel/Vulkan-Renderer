@@ -27,6 +27,13 @@
 #include "renderer.h"
 #include <gfxcore/scene/entity.h>
 
+void Renderer::Destroy()
+{
+	vkDeviceWaitIdle( context.device );
+	Cleanup();
+}
+
+
 void Renderer::Cleanup()
 {
 	DestroyFramebuffers();
