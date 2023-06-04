@@ -981,7 +981,7 @@ void Renderer::MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT o
 }
 
 
-void Renderer::MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarkerName, const vec4f color )
+void Renderer::MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, const vec4f color )
 {
 	if ( debugMarkersEnabled )
 	{
@@ -992,21 +992,21 @@ void Renderer::MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarker
 		markerInfo.color[2] = color[2];
 		markerInfo.color[3] = color[3];
 		markerInfo.pMarkerName = pMarkerName;
-		vk_fnCmdDebugMarkerBegin( cmdbuffer, &markerInfo );	
+		vk_fnCmdDebugMarkerBegin( cxt.commandBuffers[ m_bufferId ], &markerInfo );	
 	}
 }
 
 
-void Renderer::MarkerEndRegion( VkCommandBuffer cmdBuffer )
+void Renderer::MarkerEndRegion( GfxContext& cxt )
 {
 	if ( debugMarkersEnabled )
 	{
-		vk_fnCmdDebugMarkerEnd( cmdBuffer );
+		vk_fnCmdDebugMarkerEnd( cxt.commandBuffers[ m_bufferId ] );
 	}
 }
 
 
-void Renderer::MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, const vec4f color )
+void Renderer::MarkerInsert( GfxContext& cxt, std::string markerName, const vec4f color )
 {
 	if ( debugMarkersEnabled )
 	{
@@ -1014,7 +1014,7 @@ void Renderer::MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, 
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
 		markerInfo.pMarkerName = markerName.c_str();
-		vk_fnCmdDebugMarkerInsert( cmdbuffer, &markerInfo );
+		vk_fnCmdDebugMarkerInsert( cxt.commandBuffers[ m_bufferId ], &markerInfo );
 	}
 }
 
@@ -1178,7 +1178,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();
 
-		MarkerBeginRegion( cmdBuffer, view.passes[ passIx ]->name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, view.passes[ passIx ]->name, ColorToVector( Color::White ) );
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];	
@@ -1193,7 +1193,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 				continue;
 			}
 
-			MarkerInsert( cmdBuffer, surface.dbgName, ColorToVector( Color::LGrey ) );
+			MarkerInsert( gfxContext, surface.dbgName, ColorToVector( Color::LGrey ) );
 
 			if ( passIx == DRAWPASS_DEPTH ) {
 				// vkCmdSetDepthBias
@@ -1212,13 +1212,13 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 			vkCmdDrawIndexed( cmdBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
 		}
-		MarkerEndRegion( cmdBuffer );
+		MarkerEndRegion( gfxContext );
 	}
 
 	if( view.region == renderViewRegion_t::POST )
 	{
 #ifdef USE_IMGUI
-		MarkerBeginRegion( cmdBuffer, "Debug Menus", ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, "Debug Menus", ColorToVector( Color::White ) );
 		ImGui_ImplVulkan_NewFrame();
 		ImGui::NewFrame();
 
@@ -1227,7 +1227,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		// Render dear imgui into screen
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
-		MarkerEndRegion( cmdBuffer );
+		MarkerEndRegion( gfxContext );
 #endif
 	}
 
@@ -1237,52 +1237,51 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 void Renderer::RenderViews()
 {
-	const uint32_t i = m_bufferId;
-	vkResetCommandBuffer( gfxContext.commandBuffers[ i ], 0 );
+	vkResetCommandBuffer( gfxContext.commandBuffers[ m_bufferId ], 0 );
 
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
 
-	if ( vkBeginCommandBuffer( gfxContext.commandBuffers[ i ], &beginInfo ) != VK_SUCCESS ) {
+	if ( vkBeginCommandBuffer( gfxContext.commandBuffers[ m_bufferId ], &beginInfo ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
 	}
 
 	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ i ], 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ i ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ m_bufferId ], 0, 1, vertexBuffers, offsets );
+	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ m_bufferId ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	// Shadow View
 	{
-		MarkerBeginRegion( gfxContext.commandBuffers[ i ], shadowView.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, shadowView.name, ColorToVector( Color::White ) );
 
 		RenderViewSurfaces( shadowView, gfxContext );
 
-		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
+		MarkerEndRegion( gfxContext );
 	}
 
 	// Main View
 	{
-		MarkerBeginRegion( gfxContext.commandBuffers[ i ], renderView.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, renderView.name, ColorToVector( Color::White ) );
 
 		RenderViewSurfaces( renderView, gfxContext );
 		
-		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
+		MarkerEndRegion( gfxContext );
 	}
 
 	// 2D View
 	{
-		MarkerBeginRegion( gfxContext.commandBuffers[ i ], view2D.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, view2D.name, ColorToVector( Color::White ) );
 
 		RenderViewSurfaces( view2D, gfxContext );
 		
-		MarkerEndRegion( gfxContext.commandBuffers[ i ] );
+		MarkerEndRegion( gfxContext );
 	}
 
 
-	if ( vkEndCommandBuffer( gfxContext.commandBuffers[ i ] ) != VK_SUCCESS )
+	if ( vkEndCommandBuffer( gfxContext.commandBuffers[ m_bufferId ] ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to record command buffer!" );
 	}

@@ -240,9 +240,9 @@ private:
 	void								SetupMarkers();
 	void								MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );
 	void								MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
-	void								MarkerBeginRegion( VkCommandBuffer cmdbuffer, const char* pMarkerName, const vec4f color );
-	void								MarkerEndRegion( VkCommandBuffer cmdBuffer );
-	void								MarkerInsert( VkCommandBuffer cmdbuffer, std::string markerName, const vec4f color );
+	void								MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, const vec4f color );
+	void								MarkerEndRegion( GfxContext& cxt );
+	void								MarkerInsert( GfxContext& cxt, std::string markerName, const vec4f color );
 	void								SetupDebugMessenger();
 	static VkResult						CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
 	static void							DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator );
