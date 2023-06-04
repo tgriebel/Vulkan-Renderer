@@ -758,32 +758,8 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 }
 
 
-void Renderer::PickPhysicalDevice()
+void Renderer::InitConfig()
 {
-	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices( context.instance, &deviceCount, nullptr );
-
-	if ( deviceCount == 0 ) {
-		throw std::runtime_error( "Failed to find GPUs with Vulkan support!" );
-	}
-
-	std::vector<VkPhysicalDevice> devices( deviceCount );
-	vkEnumeratePhysicalDevices( context.instance, &deviceCount, devices.data() );
-
-	for ( const auto& device : devices )
-	{
-		if ( vk_IsDeviceSuitable( device, g_window.vk_surface, deviceExtensions ) )
-		{
-			vkGetPhysicalDeviceProperties( device, &context.deviceProperties );
-			context.physicalDevice = device;
-			break;
-		}
-	}
-
-	if ( context.physicalDevice == VK_NULL_HANDLE ) {
-		throw std::runtime_error( "Failed to find a suitable GPU!" );
-	}
-
 	config.mainColorSubSamples = GetMaxUsableSampleCount();
 }
 

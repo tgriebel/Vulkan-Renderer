@@ -311,7 +311,7 @@ private:
 	void						FreeRegisteredBindParms();
 	void						CreateDescriptorPool();
 	void						CreateInstance();
-	void						CreateLogicalDevice();
+	void						CreateDevice();
 	void						CreateSyncObjects();
 	void						CreateCommandBuffers();
 	void						CreateTextureSamplers();
@@ -341,7 +341,7 @@ private:
 	void						CreateCodeTextures();
 	VkCommandBuffer				BeginSingleTimeCommands();
 	void						EndSingleTimeCommands( VkCommandBuffer commandBuffer );
-	void						PickPhysicalDevice();
+	void						InitConfig();
 
 	// Update
 	void						UpdateViews( const Scene* scene );
