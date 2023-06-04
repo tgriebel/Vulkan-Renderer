@@ -244,7 +244,7 @@ void Renderer::InitImGui( RenderView& view )
 
 void Renderer::CreateLogicalDevice()
 {
-	QueueFamilyIndices indices = FindQueueFamilies( context.physicalDevice, g_window.vk_surface );
+	QueueFamilyIndices indices = vk_FindQueueFamilies( context.physicalDevice, g_window.vk_surface );
 	context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
 	context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
 	context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
@@ -281,7 +281,7 @@ void Renderer::CreateLogicalDevice()
 		enabledExtensions.push_back( ext );
 	}
 	std::vector<const char*> captureExtensions = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
-	if( IsDeviceSuitable( context.physicalDevice, g_window.vk_surface, captureExtensions ) ) {
+	if( vk_IsDeviceSuitable( context.physicalDevice, g_window.vk_surface, captureExtensions ) ) {
 		for ( const char* ext : captureExtensions ) {
 			enabledExtensions.push_back( ext );
 		}

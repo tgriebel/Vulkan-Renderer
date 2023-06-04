@@ -26,7 +26,7 @@
 
 deviceContext_t context;
 
-bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
+bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
@@ -43,16 +43,16 @@ bool CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<con
 }
 
 
-bool IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std::vector<const char*>& deviceExtensions )
+bool vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std::vector<const char*>& deviceExtensions )
 {
 	VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures deviceFeatures;
 	vkGetPhysicalDeviceProperties( device, &deviceProperties );
 	vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
 
-	QueueFamilyIndices indices = FindQueueFamilies( device, surface );
+	QueueFamilyIndices indices = vk_FindQueueFamilies( device, surface );
 
-	bool extensionsSupported = CheckDeviceExtensionSupport( device, deviceExtensions );
+	bool extensionsSupported = vk_CheckDeviceExtensionSupport( device, deviceExtensions );
 
 	bool swapChainAdequate = false;
 	if ( extensionsSupported )
@@ -68,7 +68,7 @@ bool IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std
 }
 
 
-QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface )
+QueueFamilyIndices vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface )
 {
 	QueueFamilyIndices indices;
 
@@ -122,7 +122,7 @@ bool vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkForma
 }
 
 
-uint32_t FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
+uint32_t vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties )
 {
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );

@@ -41,10 +41,10 @@ extern deviceContext_t context;
 struct imageInfo_t;
 class GpuImage;
 
-bool				CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
-bool				IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
-QueueFamilyIndices	FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
+bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
+bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
+QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
-uint32_t			FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
+uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );

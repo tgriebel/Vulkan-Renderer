@@ -772,7 +772,7 @@ void Renderer::PickPhysicalDevice()
 
 	for ( const auto& device : devices )
 	{
-		if ( IsDeviceSuitable( device, g_window.vk_surface, deviceExtensions ) )
+		if ( vk_IsDeviceSuitable( device, g_window.vk_surface, deviceExtensions ) )
 		{
 			vkGetPhysicalDeviceProperties( device, &context.deviceProperties );
 			context.physicalDevice = device;

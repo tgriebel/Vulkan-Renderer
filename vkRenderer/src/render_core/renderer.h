@@ -262,7 +262,7 @@ private:
 
 	void AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation )
 	{
-		uint32_t typeIndex = FindMemoryType( ~0x00, typeBits );
+		uint32_t typeIndex = vk_FindMemoryType( ~0x00, typeBits );
 
 		VkMemoryAllocateInfo allocInfo{ };
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
