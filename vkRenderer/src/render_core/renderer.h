@@ -71,7 +71,7 @@ public:
 	static void	GenerateGpuPrograms( AssetLibGpuProgram& lib );
 
 	inline bool IsReady() {
-		return ( frameNumber > 0 );
+		return ( m_frameNumber > 0 );
 	}
 
 	void								Init();
@@ -120,9 +120,9 @@ private:
 	ComputeState						particleState;
 	VkDescriptorPool					descriptorPool;
 	renderConfig_t						config;
-	size_t								frameId = 0;
-	uint32_t							bufferId = 0;
-	uint32_t							frameNumber = 0;
+	size_t								m_frameId = 0;
+	uint32_t							m_bufferId = 0;
+	uint32_t							m_frameNumber = 0;
 	GpuBuffer							stagingBuffer;
 	GpuBuffer							vb;	// move
 	GpuBuffer							ib;
