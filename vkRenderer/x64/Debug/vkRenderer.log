@@ -1,10 +1,16 @@
 ﻿  descriptorWrites.cpp
   gpuTransfer.cpp
+  imageView.cpp
   pipeline.cpp
+  shaderBinding.cpp
+  gpuImage.cpp
   renderCommand.cpp
+  renderer.cpp
   renderInit.cpp
   renderShutdown.cpp
-  renderer.cpp
+  swapChain.cpp
+  deviceContext.cpp
+  frameState.cpp
   vulkinTestApp.cpp
   Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

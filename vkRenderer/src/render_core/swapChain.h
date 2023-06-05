@@ -88,11 +88,5 @@ public:
 	}
 
 	void Create( const Window* _window, const int displayWidth, const int displayHeight );
-
 	void Destroy();
-
-	void Recreate()
-	{
-	
-	}
 };

@@ -631,7 +631,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].shadowMapImage );
+		CreateImage( "shadowMap", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].shadowMapImage );
 	}
 
 	// Main images
@@ -648,13 +648,13 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].viewColorImage );
+		CreateImage( "viewColor", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].viewColorImage );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		CreateImage( info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].depthStencilImage );
+		CreateImage( "viewDepth", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].depthStencilImage );
 		
 		imageInfo_t depthInfo = frameState[ i ].depthStencilImage.info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
@@ -823,7 +823,7 @@ void Renderer::CreateBuffers()
 }
 
 
-void Renderer::CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
+void Renderer::CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
 {
 	outImage.bytes = nullptr;
 	outImage.sizeBytes = 0;
@@ -831,14 +831,14 @@ void Renderer::CreateImage( const imageInfo_t& info, const gpuImageStateFlags_t 
 	outImage.uploadId = -1;
 	outImage.info = info;
 	outImage.gpuImage = new GpuImage();
-	outImage.gpuImage->Create( outImage.info, flags, memory );
+	outImage.gpuImage->Create( name, outImage.info, flags, memory );
 }
 
 
 void Renderer::CreateCodeTextures() {
 	imageInfo_t info{};
-	info.width = ShadowMapWidth;
-	info.height = ShadowMapHeight;
+	info.width = 256;
+	info.height = 256;
 	info.mipLevels = 1;
 	info.layers = 1;
 	info.subsamples = IMAGE_SMP_1;
@@ -848,8 +848,8 @@ void Renderer::CreateCodeTextures() {
 	info.tiling = IMAGE_TILING_MORTON;
 
 	// Default Images
-	CreateImage( info, GPU_IMAGE_READ, localMemory, rc.whiteImage );
-	CreateImage( info, GPU_IMAGE_READ, localMemory, rc.blackImage );
+	CreateImage( "_white", info, GPU_IMAGE_READ, localMemory, rc.whiteImage );
+	CreateImage( "_black", info, GPU_IMAGE_READ, localMemory, rc.blackImage );
 }
 
 

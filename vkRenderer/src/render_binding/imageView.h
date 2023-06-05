@@ -25,15 +25,7 @@ public:
 	
 	~ImageView()
 	{
-		if( gpuImage != nullptr )
-		{
-#ifdef USE_VULKAN
-			// Views do not own the image, only the view
-			gpuImage->DetachVkImage();
-#endif
-			delete gpuImage;
-			gpuImage = nullptr;
-		}
+		Destroy();
 	}
 
 
@@ -51,7 +43,21 @@ public:
 		const VkImage img = image.gpuImage->GetVkImage();
 		const VkImageView view = vk_CreateImageView( image.gpuImage->GetVkImage(), info );
 
-		gpuImage = new GpuImage( img, view );
+		gpuImage = new GpuImage( image.gpuImage->GetDebugName(), img, view );
 #endif
+	}
+
+
+	void Destroy()
+	{
+		if ( gpuImage != nullptr )
+		{
+#ifdef USE_VULKAN
+			// Views do not own the image, only the view
+			gpuImage->DetachVkImage();
+#endif
+			delete gpuImage;
+			gpuImage = nullptr;
+		}
 	}
 };

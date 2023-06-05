@@ -25,6 +25,7 @@ protected:
 	Allocation			m_allocation;
 #endif
 	resourceLifetime_t	m_lifetime;
+	const char*			m_dbgName;
 
 public:
 
@@ -34,6 +35,7 @@ public:
 		vk_image[ 0 ]  = VK_NULL_HANDLE;
 		vk_view[ 0 ] = VK_NULL_HANDLE;
 #endif
+		m_dbgName = "";
 	}
 
 
@@ -43,10 +45,11 @@ public:
 	}
 
 #ifdef USE_VULKAN
-	GpuImage( const VkImage image, const VkImageView view )
+	GpuImage( const char* name, const VkImage image, const VkImageView view )
 	{
 		vk_image[ 0 ] = image;
 		vk_view[ 0 ] = view;
+		m_dbgName = name;
 	}
 
 
@@ -73,6 +76,11 @@ public:
 	}
 #endif
 
-	void Create( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory );
+	inline const char* GetDebugName() const
+	{
+		return m_dbgName;
+	}
+
+	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory );
 	virtual void Destroy();
 };

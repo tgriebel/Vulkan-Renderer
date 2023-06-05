@@ -142,7 +142,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 		info.tiling = IMAGE_TILING_LINEAR;
 		info.type = IMAGE_TYPE_2D;
 
-		m_swapChainImages[ i ].gpuImage = new GpuImage( vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
+		m_swapChainImages[ i ].gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
 
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.color0 = &m_swapChainImages[ i ];
@@ -166,6 +166,5 @@ void SwapChain::Destroy()
 		m_swapChainImages[ i ].gpuImage->DetachVkImage();
 		delete m_swapChainImages[ i ].gpuImage;
 	}
-
 	vkDestroySwapchainKHR( context.device, vk_swapChain, nullptr );
 }

@@ -93,15 +93,12 @@ void Renderer::DestroyFramebuffers()
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
 		// Images
-		frameState[ frameId ].viewColorImage.gpuImage->Destroy();
-		frameState[ frameId ].shadowMapImage.gpuImage->Destroy();
-		frameState[ frameId ].depthImageView.gpuImage->Destroy();
-		frameState[ frameId ].stencilImageView.gpuImage->Destroy();
+		frameState[ frameId ].depthImageView.Destroy();
+		frameState[ frameId ].stencilImageView.Destroy();
 
 		delete frameState[ frameId ].viewColorImage.gpuImage;
 		delete frameState[ frameId ].shadowMapImage.gpuImage;
-		delete frameState[ frameId ].depthImageView.gpuImage;
-		delete frameState[ frameId ].stencilImageView.gpuImage;
+		delete frameState[ frameId ].depthStencilImage.gpuImage;
 
 		// Buffers
 		shadowMap[ frameId ].Destroy();
@@ -149,9 +146,6 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// Images
-	rc.whiteImage.gpuImage->Destroy();
-	rc.blackImage.gpuImage->Destroy();
-
 	delete rc.whiteImage.gpuImage;
 	delete rc.blackImage.gpuImage;
 
@@ -159,7 +153,6 @@ void Renderer::ShutdownShaderResources()
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
 		const Image& texture = g_assets.textureLib.Find( i )->Get();
-		texture.gpuImage->Destroy();
 		delete texture.gpuImage;
 	}
 

@@ -4,7 +4,7 @@
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 
-void GpuImage::Create( const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
+void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
 {
 	VkImageCreateInfo imageInfo{ };
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -27,6 +27,7 @@ void GpuImage::Create( const imageInfo_t& info, const gpuImageStateFlags_t flags
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0;
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_DST ) != 0 ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0;
 
+	m_dbgName = name;
 	m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
@@ -70,11 +71,11 @@ void GpuImage::Destroy()
 	assert( context.device != VK_NULL_HANDLE );
 	if ( context.device != VK_NULL_HANDLE )
 	{
-		if( vk_view != VK_NULL_HANDLE ) {
+		if( vk_view[ 0 ] != VK_NULL_HANDLE ) {
 			vkDestroyImageView( context.device, vk_view[ 0 ], nullptr );
 			vk_view[ 0 ] = VK_NULL_HANDLE;
 		}
-		if ( vk_image != VK_NULL_HANDLE ) {
+		if ( vk_image[ 0 ] != VK_NULL_HANDLE ) {
 			vkDestroyImage( context.device, vk_image[ 0 ], nullptr );
 			vk_image[ 0 ] = VK_NULL_HANDLE;
 		}

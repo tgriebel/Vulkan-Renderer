@@ -111,7 +111,7 @@ void Renderer::UploadTextures()
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
 		texture.gpuImage = new GpuImage();
-		texture.gpuImage->Create( texture.info, flags, localMemory );
+		texture.gpuImage->Create( textureAsset->GetName().c_str(), texture.info, flags, localMemory );
 
 		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
