@@ -439,8 +439,8 @@ void Renderer::CreatePipelineObjects()
 void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] )
 {
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
-	const uint32_t width = g_swapChain.GetWidth();
-	const uint32_t height = g_swapChain.GetHeight();
+	const uint32_t width = view.viewport.width;
+	const uint32_t height = view.viewport.height;
 
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
@@ -457,8 +457,8 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 		pass->name = GetPassDebugName( drawPass_t( passIx ) );
 		pass->viewport.x = 0;
 		pass->viewport.y = 0;
-		pass->viewport.width = fb[ 0 ].width;
-		pass->viewport.height = fb[ 0 ].height;
+		pass->viewport.width = Min( width, fb[ 0 ].width );
+		pass->viewport.height = Min( height, fb[ 0 ].height );
 		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
 			pass->fb[ i ] = &fb[ i ];
 		}

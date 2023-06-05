@@ -93,7 +93,7 @@ private:
 	static const bool					ValidateErrors = true;
 
 	renderConstants_t					rc;
-	RenderView							views[ 3 ];
+	RenderView							views[ MaxViews ];
 	RenderView							renderView;
 	RenderView							shadowView;
 	RenderView							view2D;
