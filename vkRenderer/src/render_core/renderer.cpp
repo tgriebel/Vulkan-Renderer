@@ -918,72 +918,9 @@ void Renderer::PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfo
 }
 
 
-void Renderer::SetupMarkers()
+void Renderer::MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, const vec4f& color )
 {
-	uint32_t extensionCount;
-	vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, nullptr );
-
-	std::vector<VkExtensionProperties> availableExtensions( extensionCount );
-	vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, availableExtensions.data() );
-
-	bool found = false;
-	for ( const auto& extension : availableExtensions ) {
-		if ( strcmp( extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME ) == 0 ) {
-			found = true;
-			break;
-		}
-	}
-
-	if( found )
-	{
-		std::cout << "Enabling debug markers." << std::endl;
-
-		vk_fnDebugMarkerSetObjectTag = (PFN_vkDebugMarkerSetObjectTagEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectTagEXT" );
-		vk_fnDebugMarkerSetObjectName = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectNameEXT" );
-		vk_fnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerBeginEXT" );
-		vk_fnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerEndEXT" );
-		vk_fnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerInsertEXT" );
-
-		debugMarkersEnabled = ( vk_fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
-	} else {
-		std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled.";
-	}
-}
-
-
-void Renderer::MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name )
-{
-	if ( debugMarkersEnabled )
-	{
-		VkDebugMarkerObjectNameInfoEXT nameInfo = {};
-		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
-		nameInfo.objectType = objectType;
-		nameInfo.object = object;
-		nameInfo.pObjectName = name;
-		vk_fnDebugMarkerSetObjectName( context.device, &nameInfo );
-	}
-}
-
-
-void Renderer::MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag )
-{
-	if ( debugMarkersEnabled )
-	{
-		VkDebugMarkerObjectTagInfoEXT tagInfo = {};
-		tagInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT;
-		tagInfo.objectType = objectType;
-		tagInfo.object = object;
-		tagInfo.tagName = name;
-		tagInfo.tagSize = tagSize;
-		tagInfo.pTag = tag;
-		vk_fnDebugMarkerSetObjectTag( context.device, &tagInfo );
-	}
-}
-
-
-void Renderer::MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, const vec4f color )
-{
-	if ( debugMarkersEnabled )
+	if ( context.debugMarkersEnabled )
 	{
 		VkDebugMarkerMarkerInfoEXT markerInfo = {};
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
@@ -992,66 +929,29 @@ void Renderer::MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, cons
 		markerInfo.color[2] = color[2];
 		markerInfo.color[3] = color[3];
 		markerInfo.pMarkerName = pMarkerName;
-		vk_fnCmdDebugMarkerBegin( cxt.commandBuffers[ m_bufferId ], &markerInfo );	
+		context.fnCmdDebugMarkerBegin( cxt.commandBuffers[ m_bufferId ], &markerInfo );
 	}
 }
 
 
 void Renderer::MarkerEndRegion( GfxContext& cxt )
 {
-	if ( debugMarkersEnabled )
+	if ( context.debugMarkersEnabled )
 	{
-		vk_fnCmdDebugMarkerEnd( cxt.commandBuffers[ m_bufferId ] );
+		context.fnCmdDebugMarkerEnd( cxt.commandBuffers[ m_bufferId ] );
 	}
 }
 
 
-void Renderer::MarkerInsert( GfxContext& cxt, std::string markerName, const vec4f color )
+void Renderer::MarkerInsert( GfxContext& cxt, std::string markerName, const vec4f& color )
 {
-	if ( debugMarkersEnabled )
+	if ( context.debugMarkersEnabled )
 	{
 		VkDebugMarkerMarkerInfoEXT markerInfo = {};
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
 		markerInfo.pMarkerName = markerName.c_str();
-		vk_fnCmdDebugMarkerInsert( cxt.commandBuffers[ m_bufferId ], &markerInfo );
-	}
-}
-
-
-void Renderer::SetupDebugMessenger()
-{
-	if ( !enableValidationLayers ) {
-		return;
-	}
-
-	VkDebugUtilsMessengerCreateInfoEXT createInfo;
-	PopulateDebugMessengerCreateInfo( createInfo );
-
-	if ( CreateDebugUtilsMessengerEXT( context.instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS )
-	{
-		throw std::runtime_error( "Failed to set up debug messenger!" );
-	}
-}
-
-
-VkResult Renderer::CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger )
-{
-	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" );
-	if ( func != nullptr ) {
-		return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
-	}
-	else {
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-}
-
-
-void Renderer::DestroyDebugUtilsMessengerEXT( VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator )
-{
-	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" );
-	if ( func != nullptr ) {
-		func( instance, debugMessenger, pAllocator );
+		context.fnCmdDebugMarkerInsert( cxt.commandBuffers[ m_bufferId ], &markerInfo );
 	}
 }
 

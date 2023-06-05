@@ -78,7 +78,10 @@ void Renderer::Cleanup()
 
 	if ( enableValidationLayers )
 	{
-		DestroyDebugUtilsMessengerEXT( context.instance, debugMessenger, nullptr );
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( context.instance, "vkDestroyDebugUtilsMessengerEXT" );
+		if ( func != nullptr ) {
+			func( context.instance, debugMessenger, nullptr );
+		}
 	}
 
 	vkDestroySurfaceKHR( context.instance, g_window.vk_surface, nullptr );

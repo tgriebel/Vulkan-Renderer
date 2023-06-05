@@ -116,9 +116,22 @@ void Renderer::CreateInstance()
 	createInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
 	createInfo.ppEnabledExtensionNames = extensions.data();
 
-	if ( vkCreateInstance( &createInfo, nullptr, &context.instance ) != VK_SUCCESS )
-	{
+	if ( vkCreateInstance( &createInfo, nullptr, &context.instance ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create instance!" );
+	}
+
+	// Debug Messenger
+	{
+		if ( !enableValidationLayers ) {
+			return;
+		}
+
+		VkDebugUtilsMessengerCreateInfoEXT createInfo;
+		PopulateDebugMessengerCreateInfo( createInfo );
+
+		if ( vk_CreateDebugUtilsMessengerEXT( context.instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to set up debug messenger!" );
+		}
 	}
 }
 
@@ -128,10 +141,8 @@ void Renderer::InitApi()
 	{
 		// Device Set-up
 		CreateInstance();
-		SetupDebugMessenger();
 		g_window.CreateSurface();
 		CreateDevice();
-		SetupMarkers();
 		g_swapChain.Create( &g_window, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
 	}
 
@@ -379,6 +390,39 @@ void Renderer::CreateDevice()
 		vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &context.gfxContext );
 		vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &context.presentQueue );
 		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeContext );
+	}
+
+	// Debug Markers
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, nullptr );
+
+		std::vector<VkExtensionProperties> availableExtensions( extensionCount );
+		vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, availableExtensions.data() );
+
+		bool found = false;
+		for ( const auto& extension : availableExtensions ) {
+			if ( strcmp( extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME ) == 0 ) {
+				found = true;
+				break;
+			}
+		}
+
+		if ( found )
+		{
+			std::cout << "Enabling debug markers." << std::endl;
+
+			context.fnDebugMarkerSetObjectTag = (PFN_vkDebugMarkerSetObjectTagEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectTagEXT" );
+			context.fnDebugMarkerSetObjectName = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectNameEXT" );
+			context.fnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerBeginEXT" );
+			context.fnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerEndEXT" );
+			context.fnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerInsertEXT" );
+
+			context.debugMarkersEnabled = ( context.fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
+		}
+		else {
+			std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled." << std::endl;
+		}
 	}
 }
 

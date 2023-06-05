@@ -26,14 +26,21 @@
 
 struct deviceContext_t
 {
-	VkDevice					device;
-	VkPhysicalDevice			physicalDevice;
-	VkInstance					instance;
-	VkPhysicalDeviceProperties	deviceProperties;
-	VkQueue						gfxContext;
-	VkQueue						presentQueue;
-	VkQueue						computeContext;
-	uint32_t					queueFamilyIndices[ QUEUE_COUNT ];
+	VkDevice							device;
+	VkPhysicalDevice					physicalDevice;
+	VkInstance							instance;
+	VkPhysicalDeviceProperties			deviceProperties;
+	VkQueue								gfxContext;
+	VkQueue								presentQueue;
+	VkQueue								computeContext;
+	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
+
+	bool								debugMarkersEnabled = false;
+	PFN_vkDebugMarkerSetObjectTagEXT	fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
+	PFN_vkDebugMarkerSetObjectNameEXT	fnDebugMarkerSetObjectName = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerBeginEXT		fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerEndEXT			fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
 };
 
 extern deviceContext_t context;
@@ -50,3 +57,6 @@ uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags propert
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
 void				vk_AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFlagBits typeBits, AllocatorMemory& outAllocation );
+VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
+void				vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
+void				vk_MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );

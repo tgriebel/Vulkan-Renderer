@@ -62,6 +62,8 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 		throw std::runtime_error( "Buffer could not be allocated!" );
 	}
 
+	vk_MarkerSetObjectName( (uint64_t)vk_image[ 0 ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
+
 	vk_view[ 0 ] = vk_CreateImageView( vk_image[ 0 ], info );
 }
 

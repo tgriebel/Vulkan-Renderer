@@ -209,3 +209,45 @@ void vk_AllocateDeviceMemory( const uint32_t allocSize, const VkMemoryPropertyFl
 	outAllocation.Bind( memory, memPtr, allocSize, typeIndex );
 	outAllocation.memoryTypeIndex = typeIndex;
 }
+
+
+VkResult vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger )
+{
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" );
+	if ( func != nullptr ) {
+		return func( instance, pCreateInfo, pAllocator, pDebugMessenger );
+	}
+	else {
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+}
+
+
+void vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag )
+{
+	if ( context.debugMarkersEnabled )
+	{
+		VkDebugMarkerObjectTagInfoEXT tagInfo = {};
+		tagInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_TAG_INFO_EXT;
+		tagInfo.objectType = objectType;
+		tagInfo.object = object;
+		tagInfo.tagName = name;
+		tagInfo.tagSize = tagSize;
+		tagInfo.pTag = tag;
+		context.fnDebugMarkerSetObjectTag( context.device, &tagInfo );
+	}
+}
+
+
+void vk_MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name )
+{
+	if ( context.debugMarkersEnabled )
+	{
+		VkDebugMarkerObjectNameInfoEXT nameInfo = {};
+		nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_OBJECT_NAME_INFO_EXT;
+		nameInfo.objectType = objectType;
+		nameInfo.object = object;
+		nameInfo.pObjectName = name;
+		context.fnDebugMarkerSetObjectName( context.device, &nameInfo );
+	}
+}
