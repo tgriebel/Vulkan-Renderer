@@ -11,6 +11,7 @@ enum gpuImageStateFlags_t : uint8_t
 	GPU_IMAGE_READ			= ( 1 << 0 ),
 	GPU_IMAGE_TRANSFER_SRC	= ( 1 << 1 ),
 	GPU_IMAGE_TRANSFER_DST	= ( 1 << 2 ),
+	GPU_IMAGE_PERSISTENT	= ( 1 << 3 ),
 	GPU_IMAGE_ALL			= 0xFF,
 };
 DEFINE_ENUM_OPERATORS( gpuImageStateFlags_t, uint8_t )
@@ -19,18 +20,19 @@ class GpuImage
 {
 protected:
 #ifdef USE_VULKAN
-	VkImage			vk_image;
-	VkImageView		vk_view;
-	Allocation		allocation;
+	VkImage				vk_image[ MAX_FRAMES_IN_FLIGHT ];
+	VkImageView			vk_view[ MAX_FRAMES_IN_FLIGHT ];
+	Allocation			m_allocation;
 #endif
+	resourceLifetime_t	m_lifetime;
 
 public:
 
 	GpuImage()
 	{
 #ifdef USE_VULKAN
-		vk_image = VK_NULL_HANDLE;
-		vk_view = VK_NULL_HANDLE;
+		vk_image[ 0 ]  = VK_NULL_HANDLE;
+		vk_view[ 0 ] = VK_NULL_HANDLE;
 #endif
 	}
 
@@ -43,31 +45,31 @@ public:
 #ifdef USE_VULKAN
 	GpuImage( const VkImage image, const VkImageView view )
 	{
-		vk_image = image;
-		vk_view = view;
+		vk_image[ 0 ] = image;
+		vk_view[ 0 ] = view;
 	}
 
 
 	inline VkImage GetVkImage() const
 	{
-		return vk_image;
+		return vk_image[ 0 ];
 	}
 
 	inline VkImageView GetVkImageView() const
 	{
-		return vk_view;
+		return vk_view[ 0 ];
 	}
 
 
 	inline void DetachVkImage()
 	{
-		vk_image = VK_NULL_HANDLE;
+		vk_image[ 0 ] = VK_NULL_HANDLE;
 	}
 
 
 	inline void DetachVkImageView()
 	{
-		vk_view = VK_NULL_HANDLE;
+		vk_view[ 0 ] = VK_NULL_HANDLE;
 	}
 #endif
 

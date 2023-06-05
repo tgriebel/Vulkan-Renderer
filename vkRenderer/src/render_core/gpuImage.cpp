@@ -20,25 +20,14 @@ void GpuImage::Create( const imageInfo_t& info, const gpuImageStateFlags_t flags
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
-	if ( ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ) {
-		imageInfo.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-	}
+	imageInfo.usage = 0;
+	imageInfo.usage |= ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT : 0;
+	imageInfo.usage |= ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
+	imageInfo.usage |= ( flags & GPU_IMAGE_READ ) != 0 ? VK_IMAGE_USAGE_SAMPLED_BIT : 0;
+	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0;
+	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_DST ) != 0 ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0;
 
-	if ( ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ) {
-		imageInfo.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-	}
-
-	if ( ( flags & GPU_IMAGE_READ ) != 0 ) {
-		imageInfo.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
-	}
-
-	if ( ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
-		imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-	}
-
-	if ( ( flags & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
-		imageInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-	}
+	m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
 	if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
@@ -53,12 +42,12 @@ void GpuImage::Create( const imageInfo_t& info, const gpuImageStateFlags_t flags
 		imageInfo.flags = ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
-	if ( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image ) != VK_SUCCESS ) {
+	if ( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ 0 ] ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create image!" );
 	}
 
 	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements( context.device, vk_image, &memRequirements );
+	vkGetImageMemoryRequirements( context.device, vk_image[ 0 ], &memRequirements );
 
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -67,12 +56,12 @@ void GpuImage::Create( const imageInfo_t& info, const gpuImageStateFlags_t flags
 
 	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
-		vkBindImageMemory( context.device, vk_image, memory.GetMemoryResource(), alloc.GetOffset() );
+		vkBindImageMemory( context.device, vk_image[ 0 ], memory.GetMemoryResource(), alloc.GetOffset() );
 	} else {
 		throw std::runtime_error( "Buffer could not be allocated!" );
 	}
 
-	vk_view = vk_CreateImageView( vk_image, info );
+	vk_view[ 0 ] = vk_CreateImageView( vk_image[ 0 ], info );
 }
 
 
@@ -82,13 +71,13 @@ void GpuImage::Destroy()
 	if ( context.device != VK_NULL_HANDLE )
 	{
 		if( vk_view != VK_NULL_HANDLE ) {
-			vkDestroyImageView( context.device, vk_view, nullptr );
-			vk_view = VK_NULL_HANDLE;
+			vkDestroyImageView( context.device, vk_view[ 0 ], nullptr );
+			vk_view[ 0 ] = VK_NULL_HANDLE;
 		}
 		if ( vk_image != VK_NULL_HANDLE ) {
-			vkDestroyImage( context.device, vk_image, nullptr );
-			vk_image = VK_NULL_HANDLE;
+			vkDestroyImage( context.device, vk_image[ 0 ], nullptr );
+			vk_image[ 0 ] = VK_NULL_HANDLE;
 		}
-		allocation.Free();
+		m_allocation.Free();
 	}
 }
