@@ -58,13 +58,14 @@ public:
 
 struct frameBufferCreateInfo_t
 {
-	uint32_t	width;
-	uint32_t	height;
-	Image*	color0;
-	Image*	color1;
-	Image*	color2;
-	Image*	depth;
-	Image*	stencil;
+	uint32_t			width;
+	uint32_t			height;
+	resourceLifetime_t	lifetime;
+	Image*				color0;
+	Image*				color1;
+	Image*				color2;
+	Image*				depth;
+	Image*				stencil;
 
 	frameBufferCreateInfo_t() :
 		width( 0 ),
@@ -81,10 +82,11 @@ struct frameBufferCreateInfo_t
 class FrameBuffer
 {
 private:
-#ifdef USE_VULKAN
-	VkFramebuffer		buffers[ MAX_FRAMES_IN_FLIGHT ][ PassPermCount ];
-	VkRenderPass		renderPasses[ PassPermCount ];
-#endif
+	Image*				color0;
+	Image*				color1;
+	Image*				color2;
+	Image*				depth;
+	Image*				stencil;
 
 	uint32_t			width;
 	uint32_t			height;
@@ -92,14 +94,14 @@ private:
 	uint32_t			dsCount;
 	uint32_t			attachmentCount;
 
-public:
-	Image*				color0;
-	Image*				color1;
-	Image*				color2;
-	Image*				depth;
-	Image*				stencil;
-
 	resourceLifetime_t	lifetime;
+
+#ifdef USE_VULKAN
+	VkFramebuffer		buffers[ MAX_FRAMES_IN_FLIGHT ][ PassPermCount ];
+	VkRenderPass		renderPasses[ PassPermCount ];
+#endif
+
+public:
 
 	FrameBuffer()
 	{
@@ -138,6 +140,31 @@ public:
 	inline uint32_t GetLayers() const
 	{
 		return attachmentCount;
+	}
+
+	inline const Image* GetColor() const
+	{
+		return ( colorCount > 0 ) ? color0 : nullptr;
+	}
+
+	inline const Image* GetColor1() const
+	{
+		return ( colorCount > 1 ) ? color1 : nullptr;
+	}
+
+	inline const Image* GetColor2() const
+	{
+		return ( colorCount > 2 ) ? color2 : nullptr;
+	}
+
+	inline const Image* GetDepth() const
+	{
+		return ( dsCount > 1 ) ? depth : nullptr;
+	}
+
+	inline const Image* GetStencil() const
+	{
+		return ( dsCount > 1 ) ? stencil : nullptr;
 	}
 
 #ifdef USE_VULKAN
