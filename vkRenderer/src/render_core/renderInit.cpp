@@ -145,7 +145,10 @@ void Renderer::InitApi()
 		CreateInstance();
 		g_window.CreateSurface();
 		CreateDevice();
-		g_swapChain.Create( &g_window, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT );
+
+		int width, height;
+		g_window.GetWindowSize( width, height );
+		g_swapChain.Create( &g_window, width, height );
 	}
 
 	{
