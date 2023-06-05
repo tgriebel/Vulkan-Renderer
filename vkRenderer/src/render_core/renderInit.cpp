@@ -457,8 +457,8 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 		pass->name = GetPassDebugName( drawPass_t( passIx ) );
 		pass->viewport.x = 0;
 		pass->viewport.y = 0;
-		pass->viewport.width = Min( width, fb[ 0 ].width );
-		pass->viewport.height = Min( height, fb[ 0 ].height );
+		pass->viewport.width = Min( width, fb[ 0 ].GetWidth() );
+		pass->viewport.height = Min( height, fb[ 0 ].GetHeight() );
 		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
 			pass->fb[ i ] = &fb[ i ];
 		}

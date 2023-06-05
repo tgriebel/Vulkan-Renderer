@@ -182,7 +182,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 		if( ( canPresent == false ) && state.flags.presentAfter )
 		{
-			buffers[ i ] = VK_NULL_HANDLE;
+			buffers[ 0 ][ i ] = VK_NULL_HANDLE;
 			renderPasses[ i ] = VK_NULL_HANDLE;
 			continue;
 		}
@@ -267,7 +267,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		framebufferInfo.height = createInfo.height;
 		framebufferInfo.layers = 1;
 
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ i ] ) != VK_SUCCESS ) {
+		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ 0 ][ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create framebuffer!" );
 		}
 	}
@@ -290,7 +290,7 @@ void FrameBuffer::Destroy()
 		for ( uint32_t i = 0; i < PassPermCount; ++i )
 		{
 			if ( buffers != VK_NULL_HANDLE ) {
-				vkDestroyFramebuffer( context.device, buffers[ i ], nullptr );
+				vkDestroyFramebuffer( context.device, buffers[ 0 ][ i ], nullptr );
 			}
 			if ( renderPasses != VK_NULL_HANDLE ) {
 				vkDestroyRenderPass( context.device, renderPasses[ i ], nullptr );

@@ -1138,8 +1138,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
 	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
 
-	const uint32_t colorAttachmentsCount = pass->fb[ m_bufferId ]->colorCount;
-	const uint32_t attachmentsCount = pass->fb[ m_bufferId ]->attachmentCount;
+	const uint32_t colorAttachmentsCount = pass->fb[ m_bufferId ]->GetColorLayers();
+	const uint32_t attachmentsCount = pass->fb[ m_bufferId ]->GetLayers();
 
 	std::array<VkClearValue, 5> clearValues{ };
 	assert( attachmentsCount <= 5 );

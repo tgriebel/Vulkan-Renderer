@@ -272,6 +272,13 @@ template<> struct std::hash<drawSurf_t> {
 class FrameBuffer;
 
 
+enum resourceLifetime_t
+{
+	LIFETIME_TEMP,
+	LIFETIME_PERSISTENT,
+};
+
+
 enum normalDirection_t
 {
 	NORMAL_X_POS = 0,

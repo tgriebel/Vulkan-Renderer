@@ -80,23 +80,26 @@ struct frameBufferCreateInfo_t
 
 class FrameBuffer
 {
-public:
-	Image*		color0;
-	Image*		color1;
-	Image*		color2;
-	Image*		depth;
-	Image*		stencil;
-
+private:
 #ifdef USE_VULKAN
-	VkFramebuffer	buffers[ PassPermCount ];
-	VkRenderPass	renderPasses[ PassPermCount ];
+	VkFramebuffer		buffers[ MAX_FRAMES_IN_FLIGHT ][ PassPermCount ];
+	VkRenderPass		renderPasses[ PassPermCount ];
 #endif
 
-	uint32_t		width;
-	uint32_t		height;
-	uint32_t		attachmentCount;
-	uint32_t		colorCount;
-	uint32_t		dsCount;
+	uint32_t			width;
+	uint32_t			height;
+	uint32_t			colorCount;
+	uint32_t			dsCount;
+	uint32_t			attachmentCount;
+
+public:
+	Image*				color0;
+	Image*				color1;
+	Image*				color2;
+	Image*				depth;
+	Image*				stencil;
+
+	resourceLifetime_t	lifetime;
 
 	FrameBuffer()
 	{
@@ -112,20 +115,35 @@ public:
 		return ( buffers != VK_NULL_HANDLE );
 	}
 
-	inline uint32_t GetWidth()
+	inline uint32_t GetWidth() const
 	{
 		return width;
 	}
 
-	inline uint32_t GetHeight()
+	inline uint32_t GetHeight() const
 	{
 		return height;
+	}
+
+	inline uint32_t GetColorLayers() const
+	{
+		return colorCount;
+	}
+
+	inline uint32_t GetDepthLayers() const
+	{
+		return colorCount;
+	}
+
+	inline uint32_t GetLayers() const
+	{
+		return attachmentCount;
 	}
 
 #ifdef USE_VULKAN
 	VkFramebuffer GetVkBuffer( renderPassTransitionFlags_t transitionState = {} ) const
 	{
-		return buffers[ transitionState.bits ];
+		return buffers[ 0 ][ transitionState.bits ];
 	}
 
 	VkRenderPass GetVkRenderPass( renderPassTransitionFlags_t transitionState = {} )
