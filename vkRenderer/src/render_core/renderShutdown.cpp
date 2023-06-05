@@ -34,7 +34,7 @@
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
-void Renderer::Destroy()
+void Renderer::Shutdown()
 {
 	vkDeviceWaitIdle( context.device );
 	Cleanup();

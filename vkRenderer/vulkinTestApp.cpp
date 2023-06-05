@@ -98,7 +98,6 @@ void LoadNewScene( const std::string fileName )
 	sceneFile = fileName;
 
 	g_renderer.InitGPU();
-	g_renderer.UploadAssets();
 }
 
 
@@ -119,7 +118,6 @@ int main( int argc, char* argv[] )
 	try
 	{
 		g_renderer.Init();
-		g_renderer.UploadAssets();
 
 		while ( g_window.IsOpen() )
 		{
@@ -183,8 +181,6 @@ int main( int argc, char* argv[] )
 				InitScene( g_scene );
 		
 				g_renderer.InitGPU();
-				g_renderer.UploadAssets();
-				g_renderer.CreatePipelineObjects();
 
 				g_imguiControls.openSceneFileDialog = false;
 			}
@@ -202,7 +198,7 @@ int main( int argc, char* argv[] )
 #endif
 			g_scene->AdvanceFrame();
 		}
-		g_renderer.Destroy();
+		g_renderer.Shutdown();
 	}
 	catch (const std::exception& e)
 	{

@@ -300,6 +300,8 @@ void Renderer::InitGPU()
 
 	InitShaderResources();
 	RecreateSwapChain();
+	UploadAssets();
+	CreatePipelineObjects();
 }
 
 

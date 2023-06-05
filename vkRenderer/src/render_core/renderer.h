@@ -75,14 +75,13 @@ public:
 	}
 
 	void								Init();
-	void								Destroy();
+	void								Shutdown();
 	void								RenderScene( const Scene* scene );
 
 	void								InitGPU();
 	void								ShutdownGPU();
 	void								Resize();
 	void								CreatePipelineObjects();
-	void								UploadAssets();
 
 private:
 	static const uint32_t				ShadowMapWidth = 1024;
@@ -215,6 +214,7 @@ private:
 	void								InitConfig();
 
 	// Update
+	void								UploadAssets();
 	void								UpdateViews( const Scene* scene );
 	void								UpdateTextures();
 	void								UploadTextures();

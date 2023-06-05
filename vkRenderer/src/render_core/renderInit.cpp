@@ -61,6 +61,8 @@ void Renderer::Init()
 	CreatePipelineObjects();
 
 	InitImGui( view2D );
+
+	UploadAssets();
 }
 
 
