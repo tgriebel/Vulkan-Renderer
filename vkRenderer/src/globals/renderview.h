@@ -41,12 +41,7 @@ class RenderView
 public:
 	RenderView()
 	{
-		viewport.x = 0;
-		viewport.y = 0;
-		viewport.width = DEFAULT_DISPLAY_WIDTH;
-		viewport.height = DEFAULT_DISPLAY_HEIGHT;
-		viewport.near = 1.0f;
-		viewport.far = 0.0f;
+		m_viewport = viewport_t( 0, 0, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, 1.0f, 0.0f );
 
 		committedModelCnt = 0;
 		mergedModelCnt = 0;
@@ -74,12 +69,16 @@ public:
 		}
 	}
 
+	void					Resize();
+	void					SetViewport( const viewport_t& viewport );
+	const viewport_t&		GetViewport() const;
+
 	const char*				name;
 	renderViewRegion_t		region;
 	mat4x4f					viewMatrix;
 	mat4x4f					projMatrix;
 	mat4x4f					viewprojMatrix;
-	viewport_t				viewport;
+	viewport_t				m_viewport;
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
 	DrawPass*				passes[ DRAWPASS_COUNT ];

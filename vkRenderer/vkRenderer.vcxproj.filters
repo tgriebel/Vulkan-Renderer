@@ -98,6 +98,9 @@
     <ClCompile Include="src\render_core\swapChain.cpp">
       <Filter>render core</Filter>
     </ClCompile>
+    <ClCompile Include="src\globals\renderView.cpp">
+      <Filter>globals</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />

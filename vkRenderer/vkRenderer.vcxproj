@@ -223,6 +223,7 @@
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\globals\renderView.cpp" />
     <ClCompile Include="src\globals\render_util.cpp" />
     <ClCompile Include="src\io\io.cpp" />
     <ClCompile Include="src\render_binding\binding.cpp" />
