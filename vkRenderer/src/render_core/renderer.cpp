@@ -594,10 +594,8 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// Main view
 	{
-		renderView.SetViewport( viewport_t( 0, 0, width, height, 0.0f, 1.0f ) );
-		renderView.viewMatrix = scene->camera.GetViewMatrix();
-		renderView.projMatrix = scene->camera.GetPerspectiveMatrix();
-		renderView.viewprojMatrix = renderView.projMatrix * renderView.viewMatrix;
+		renderView.SetViewRect( 0, 0, width, height );
+		renderView.SetCamera( scene->camera );
 
 		renderView.numLights = static_cast<uint32_t>( scene->lights.size() );
 		for ( uint32_t i = 0; i < renderView.numLights; ++i ) {
@@ -607,35 +605,20 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// Shadow views
 	{
-		vec3f shadowLightDir;
-		shadowLightDir[ 0 ] = -renderView.lights[ 0 ].lightDir[ 0 ];
-		shadowLightDir[ 1 ] = -renderView.lights[ 0 ].lightDir[ 1 ];
-		shadowLightDir[ 2 ] = -renderView.lights[ 0 ].lightDir[ 2 ];
-
 		// Temp shadow map set-up
-		shadowView.SetViewport( viewport_t( 0, 0, ShadowMapWidth, ShadowMapHeight, 0.0f, 1.0f ) );
-		shadowView.viewMatrix = MatrixFromVector( shadowLightDir );
-		shadowView.viewMatrix = shadowView.viewMatrix;
-		const vec4f shadowLightPos = shadowView.viewMatrix * renderView.lights[ 0 ].lightPos;
-		shadowView.viewMatrix[ 3 ][ 0 ] = -shadowLightPos[ 0 ];
-		shadowView.viewMatrix[ 3 ][ 1 ] = -shadowLightPos[ 1 ];
-		shadowView.viewMatrix[ 3 ][ 2 ] = -shadowLightPos[ 2 ];
-
 		Camera shadowCam;
-		shadowCam = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+		shadowCam = Camera( renderView.lights[ 0 ].lightPos, MatrixFromVector( renderView.lights[ 0 ].lightDir.Reverse() ) );
 		shadowCam.SetClip( shadowNearPlane, shadowFarPlane );
 		shadowCam.SetFov( Radians( 90.0f ) );
 		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
-		shadowView.projMatrix = shadowCam.GetPerspectiveMatrix( false );
-		shadowView.viewprojMatrix = shadowView.projMatrix * shadowView.viewMatrix;
+		
+		shadowView.SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
+		shadowView.SetCamera( shadowCam, false );
 	}
 
 	// Post view
 	{
-		view2D.SetViewport( viewport_t( 0, 0, width, height, 0.0f, 1.0f ) );
-		view2D.viewMatrix = mat4x4f( 1.0f );
-		view2D.projMatrix = mat4x4f( 1.0f );
-		shadowView.viewprojMatrix = mat4x4f( 1.0f );
+		view2D.SetViewRect( 0, 0, width, height );
 	}
 }
 
@@ -703,8 +686,10 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		float intPart = 0;
 		const float fracPart = modf( time, &intPart );
 
-		const float viewWidth = static_cast<float>( renderView.m_viewport.width );
-		const float viewHeight = static_cast<float>( renderView.m_viewport.height );
+		const viewport_t& viewport = renderView.GetViewport();
+
+		const float viewWidth = static_cast<float>( viewport.width );
+		const float viewHeight = static_cast<float>( viewport.height );
 
 		globals.time = vec4f( time, intPart, fracPart, 1.0f );
 		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
@@ -718,14 +703,14 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 
 	static viewBufferObject_t viewBuffer[MaxViews];
 	{
-		viewBuffer[ int(renderView.region) ].view = renderView.viewMatrix;
-		viewBuffer[ int( renderView.region ) ].proj = renderView.projMatrix;
+		viewBuffer[ int(renderView.region) ].view = renderView.GetViewMatrix();
+		viewBuffer[ int( renderView.region ) ].proj = renderView.GetProjMatrix();
 
-		viewBuffer[ int( shadowView.region ) ].view = shadowView.viewMatrix;
-		viewBuffer[ int( shadowView.region ) ].proj = shadowView.projMatrix;
+		viewBuffer[ int( shadowView.region ) ].view = shadowView.GetViewMatrix();
+		viewBuffer[ int( shadowView.region ) ].proj = shadowView.GetProjMatrix();
 
-		viewBuffer[ int( view2D.region ) ].view = view2D.viewMatrix;
-		viewBuffer[ int( view2D.region ) ].proj = view2D.projMatrix;
+		viewBuffer[ int( view2D.region ) ].view = view2D.GetViewMatrix();
+		viewBuffer[ int( view2D.region ) ].proj = view2D.GetProjMatrix();
 
 		for( uint32_t i = 3; i < MaxViews; ++i )
 		{
@@ -1039,18 +1024,20 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-	VkViewport viewport{ };
-	viewport.x = static_cast<float>( view.m_viewport.x );
-	viewport.y = static_cast<float>( view.m_viewport.y );
-	viewport.width = static_cast<float>( view.m_viewport.width );
-	viewport.height = static_cast<float>( view.m_viewport.height );
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport( cmdBuffer, 0, 1, &viewport );
+	const viewport_t& viewport = view.GetViewport();
+
+	VkViewport vk_viewport{ };
+	vk_viewport.x = static_cast<float>( viewport.x );
+	vk_viewport.y = static_cast<float>( viewport.y );
+	vk_viewport.width = static_cast<float>( viewport.width );
+	vk_viewport.height = static_cast<float>( viewport.height );
+	vk_viewport.minDepth = 0.0f;
+	vk_viewport.maxDepth = 1.0f;
+	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
 
 	VkRect2D rect{ };
-	rect.extent.width = view.m_viewport.width;
-	rect.extent.height = view.m_viewport.height;
+	rect.extent.width = viewport.width;
+	rect.extent.height = viewport.height;
 	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )

@@ -38,10 +38,16 @@ enum class renderViewRegion_t : uint32_t
 
 class RenderView
 {
+private:
+	viewport_t		m_viewport;
+	mat4x4f			m_viewMatrix;
+	mat4x4f			m_projMatrix;
+	mat4x4f			m_viewprojMatrix;
+
 public:
 	RenderView()
 	{
-		m_viewport = viewport_t( 0, 0, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, 1.0f, 0.0f );
+		m_viewport = viewport_t( 0, 0, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, 0.0f, 1.0f );
 
 		committedModelCnt = 0;
 		mergedModelCnt = 0;
@@ -49,6 +55,10 @@ public:
 		for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
 			passes[ i ] = nullptr;
 		}
+
+		m_viewMatrix = mat4x4f( 1.0f );
+		m_projMatrix = mat4x4f( 1.0f );
+		m_viewprojMatrix = mat4x4f( 1.0f );
 
 		region = renderViewRegion_t::UNKNOWN;
 
@@ -70,15 +80,15 @@ public:
 	}
 
 	void					Resize();
-	void					SetViewport( const viewport_t& viewport );
+	void					SetCamera( const Camera& camera, const bool reverseZ = true );
+	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
 	const viewport_t&		GetViewport() const;
+	const mat4x4f&			GetViewMatrix() const;
+	const mat4x4f&			GetProjMatrix() const;
+	const mat4x4f&			GetViewprojMatrix() const;
 
 	const char*				name;
 	renderViewRegion_t		region;
-	mat4x4f					viewMatrix;
-	mat4x4f					projMatrix;
-	mat4x4f					viewprojMatrix;
-	viewport_t				m_viewport;
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
 	DrawPass*				passes[ DRAWPASS_COUNT ];

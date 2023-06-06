@@ -488,8 +488,10 @@ void Renderer::CreatePipelineObjects()
 void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] )
 {
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
-	const uint32_t width = view.m_viewport.width;
-	const uint32_t height = view.m_viewport.height;
+	
+	const viewport_t& viewport = view.GetViewport();
+	const uint32_t width = viewport.width;
+	const uint32_t height = viewport.height;
 
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
