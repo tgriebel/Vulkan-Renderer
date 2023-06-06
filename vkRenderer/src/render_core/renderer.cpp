@@ -263,7 +263,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 			}
 		}
 
-		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			surf.pipelineObject[ passIx ] = INVALID_HDL;
 			if ( material.GetShader( passIx ).IsValid() == false ) {
@@ -275,9 +275,10 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 				continue;
 			}
 
-			drawPass_t drawPass = drawPass_t( passIx );
-			const DrawPass* pass = GetDrawPass( drawPass );
-			assert( pass != nullptr );
+			const DrawPass* pass = view.passes[ passIx ];
+			if( pass == nullptr ){
+				continue;
+			}
 
 			surf.pipelineObject[ passIx ] = FindPipelineObject( pass, *prog );
 			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
@@ -416,18 +417,6 @@ void Renderer::RenderScene( const Scene* scene )
 
 	localMemory.Pack();
 	sharedMemory.Pack();
-}
-
-
-DrawPass* Renderer::GetDrawPass( const drawPass_t pass )
-{
-	if ( pass == DRAWPASS_SHADOW ) {
-		return shadowView.passes[ pass ];
-	} else if ( pass == DRAWPASS_POST_2D ) {
-		return view2D.passes[ pass ];
-	} else {
-		return renderView.passes[ pass ];
-	}
 }
 
 

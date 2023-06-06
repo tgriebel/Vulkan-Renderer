@@ -200,7 +200,6 @@ private:
 	void								Commit( const Scene* scene );
 	void								CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
 	void								MergeSurfaces( RenderView& view );
-	DrawPass*							GetDrawPass( const drawPass_t pass );
 	void								DrawDebugMenu();
 	void								FlushGPU();
 	void								WaitForEndFrame();

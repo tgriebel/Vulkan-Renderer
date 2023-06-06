@@ -448,23 +448,35 @@ void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
 void Renderer::CreatePipelineObjects()
 {
 	ClearPipelineCache();
+
+	std::vector<const DrawPass*> passes;
+	passes.reserve( 3 * DRAWPASS_COUNT );
+
+	RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+	{
+		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			const DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			if( pass != nullptr ) {
+				passes.push_back( pass );
+			}
+		}
+	}
+
 	for ( uint32_t i = 0; i < g_assets.materialLib.Count(); ++i )
 	{
 		const Material& m = g_assets.materialLib.Find( i )->Get();
 
-		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
+		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
+		for ( int passIx = 0; passIx < passCount; ++passIx )
+		{
 			const hdl_t progHdl = m.GetShader( passIx );
 			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( progHdl );
 			if ( prog == nullptr ) {
 				continue;
 			}
-
-			const drawPass_t drawPass = drawPass_t( passIx );
-
-			const DrawPass* pass = GetDrawPass( drawPass );
-			assert( pass != nullptr );
-
-			CreateGraphicsPipeline( pass, *prog );
+			CreateGraphicsPipeline( passes[ passIx ], *prog );
 		}
 	}
 	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
