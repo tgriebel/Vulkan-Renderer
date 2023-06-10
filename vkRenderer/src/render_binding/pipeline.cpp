@@ -198,7 +198,7 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 	vertShaderStageInfo.module = prog.vk_shaders[ 0 ];
 	vertShaderStageInfo.pName = "main";
 
-	prog.shaders[ 0].type == shaderType_t::VERTEX;
+	assert( prog.shaders[ 0].type == shaderType_t::VERTEX );
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{ };
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -206,7 +206,7 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 	fragShaderStageInfo.module = prog.vk_shaders[ 1 ];
 	fragShaderStageInfo.pName = "main";
 
-	prog.shaders[ 1 ].type == shaderType_t::PIXEL;
+	assert( prog.shaders[ 1 ].type == shaderType_t::PIXEL );
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 

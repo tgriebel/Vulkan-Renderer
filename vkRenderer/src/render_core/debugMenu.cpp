@@ -123,6 +123,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									rgbTuplef_t rgb = mat.##VALUE();						\
 									if( EditRgb( rgb ) ) {									\
 										mat.##VALUE( rgb );									\
+										matAsset->QueueUpload();							\
 									}														\
 									ImGui::PopID();											\
 								}
@@ -134,6 +135,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									float value = mat.##VALUE();							\
 									if( EditFloat( value ) ) {								\
 										mat.##VALUE( value );								\
+										matAsset->QueueUpload();							\
 									}														\
 									ImGui::PopID();											\
 								}

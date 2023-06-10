@@ -471,7 +471,7 @@ void Renderer::CreatePipelineObjects()
 		const Material& m = g_assets.materialLib.Find( i )->Get();
 
 		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
-		for ( int passIx = 0; passIx < passCount; ++passIx )
+		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
 		{
 			const hdl_t progHdl = m.GetShader( passIx );
 			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( progHdl );

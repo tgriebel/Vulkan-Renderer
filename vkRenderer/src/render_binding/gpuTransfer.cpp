@@ -205,7 +205,7 @@ void Renderer::UpdateGpuMaterials()
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialFreeSlot++;
 		}
-		m.dirty = false;
+		matAsset->CompleteUpload();
 
 		assert( m.uploadId < MaxMaterials );
 		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
