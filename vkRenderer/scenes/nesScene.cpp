@@ -58,7 +58,8 @@ extern Window g_window;
 
 void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 {
-	Image& texture = g_assets.textureLib.Find( texHandle )->Get();
+	Asset<Image>* imageAsset = g_assets.textureLib.Find( texHandle );
+	Image& texture = imageAsset->Get();
 
 	const uint32_t width = fr.frameBuffer->GetWidth();
 	const uint32_t height = fr.frameBuffer->GetHeight();
@@ -75,8 +76,8 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 			texture.bytes[ pixelIx * 4 + 2 ] = pixel.rgba.blue;
 			texture.bytes[ pixelIx * 4 + 3 ] = pixel.rgba.alpha;
 		}
-		texture.dirty = true;
 	}
+	imageAsset->QueueUpload();
 }
 
 void NesScene::Init()

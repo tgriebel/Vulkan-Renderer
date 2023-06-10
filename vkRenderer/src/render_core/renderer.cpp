@@ -253,12 +253,14 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() ) {
-				Image& texture = g_assets.textureLib.Find( texHandle )->Get();
-				if( texture.gpuImage->GetId() < 0 ) {
+				Asset<Image>* imageAsset = g_assets.textureLib.Find( texHandle );
+				Image& image = imageAsset->Get();
+				if( image.gpuImage->GetId() < 0 ) {
 					uploadTextures.insert( texHandle );
 				}
-				if ( texture.dirty ) {
+				if ( imageAsset->IsUploaded() == false ) {
 					updateTextures.insert( texHandle );
+					imageAsset->CompleteUpload();
 				}
 			}
 		}

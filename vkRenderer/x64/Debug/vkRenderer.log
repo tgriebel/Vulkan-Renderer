@@ -1,6 +1,7 @@
-﻿  renderInit.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderInit.cpp(472,32): warning C4018: '<': signed/unsigned mismatch
-  renderShutdown.cpp
+﻿  scene.cpp
+  chessScene.cpp
+  deviceContext.cpp
   vulkinTestApp.cpp
   Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
