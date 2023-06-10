@@ -74,19 +74,23 @@ void Renderer::UpdateTextures()
 	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
-		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
-		Image& texture = textureAsset->Get();
+		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );
+		Image& image = imageAsset->Get();
 
 		const uint64_t currentOffset = stagingBuffer.GetSize();
-		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );
+		stagingBuffer.CopyData( image.bytes, image.sizeBytes );
 
-		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
+		CopyBufferToImage( uploadContext, image, stagingBuffer, currentOffset );
 	
-		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+	
+		imageAsset->CompleteUpload();
 	}
 	EndUploadCommands( uploadContext );
+
+	updateTextures.clear();
 }
 
 

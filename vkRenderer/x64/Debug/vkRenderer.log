@@ -1,7 +1,4 @@
-﻿  scene.cpp
-  chessScene.cpp
-  deviceContext.cpp
-  vulkinTestApp.cpp
+﻿  gpuTransfer.cpp
+  renderer.cpp
   Generating Code...
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

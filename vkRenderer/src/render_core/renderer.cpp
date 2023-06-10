@@ -260,7 +260,6 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 				}
 				if ( imageAsset->IsUploaded() == false ) {
 					updateTextures.insert( texHandle );
-					imageAsset->CompleteUpload();
 				}
 			}
 		}
