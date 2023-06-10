@@ -78,7 +78,7 @@ void Renderer::Commit( const Scene* scene )
 	renderView.committedModelCnt = 0;
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( renderView, *scene->entities[i], 0 );
+		CommitModel( renderView, *scene->entities[i] );
 	}
 	MergeSurfaces( renderView );
 
@@ -88,14 +88,14 @@ void Renderer::Commit( const Scene* scene )
 		if ( ( scene->entities[i] )->HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
 			continue;
 		}
-		CommitModel( shadowView, *scene->entities[i], 0 );
+		CommitModel( shadowView, *scene->entities[i] );
 	}
 	MergeSurfaces( shadowView );
 
 	view2D.committedModelCnt = 0;
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
-		CommitModel( view2D, *scene->entities[ i ], 0 );
+		CommitModel( view2D, *scene->entities[ i ] );
 	}
 	MergeSurfaces( view2D );
 
@@ -169,7 +169,7 @@ void Renderer::MergeSurfaces( RenderView& view )
 }
 
 
-void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset )
+void Renderer::CommitModel( RenderView& view, const Entity& ent )
 {
 	if ( ent.HasFlag( ENT_FLAG_NO_DRAW ) ) {
 		return;
@@ -240,7 +240,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 		surf.firstIndex = upload.firstIndex;
 		surf.indicesCnt = upload.indexCount;
 		surf.sortKey.materialId = material.uploadId;
-		surf.objectId = objectOffset;
+		surf.objectId = 0;
 		surf.flags = renderFlags;
 		surf.stencilBit = ent.outline ? 0x01 : 0;
 		surf.hash = Hash( surf );

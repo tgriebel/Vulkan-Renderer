@@ -204,7 +204,7 @@ private:
 	void								Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void								RenderViews();
 	void								Commit( const Scene* scene );
-	void								CommitModel( RenderView& view, const Entity& ent, const uint32_t objectOffset );
+	void								CommitModel( RenderView& view, const Entity& ent );
 	void								MergeSurfaces( RenderView& view );
 	void								DrawDebugMenu();
 	void								FlushGPU();
