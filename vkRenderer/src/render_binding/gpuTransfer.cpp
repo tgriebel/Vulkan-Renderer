@@ -256,10 +256,12 @@ void Renderer::UploadModelsToGPU()
 
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
-		Model& model = g_assets.modelLib.Find( m )->Get();
-		if ( model.uploaded ) {
+		Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
+		Model& model = modelAsset->Get();
+		if ( modelAsset->IsUploaded() ) {
 			continue;
 		}
+		modelAsset->QueueUpload();
 
 		model.upload.resize( model.surfCount );
 		for ( uint32_t s = 0; s < model.surfCount; ++s )
@@ -326,6 +328,6 @@ void Renderer::UploadModelsToGPU()
 				assert( ibBufElements < MaxIndices );
 			}
 		}
-		model.uploaded = true;
+		modelAsset->CompleteUpload();
 	}
 }
