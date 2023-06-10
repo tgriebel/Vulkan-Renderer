@@ -26,6 +26,7 @@ protected:
 #endif
 	resourceLifetime_t	m_lifetime;
 	const char*			m_dbgName;
+	int					m_id;
 
 public:
 
@@ -36,12 +37,23 @@ public:
 		vk_view[ 0 ] = VK_NULL_HANDLE;
 #endif
 		m_dbgName = "";
+		m_id = -1;
 	}
 
 
 	virtual GpuImage::~GpuImage()
 	{
 		Destroy();
+	}
+
+	int GetId() const
+	{
+		return m_id;
+	}
+
+	void SetId( const int id )
+	{
+		m_id = id;
 	}
 
 #ifdef USE_VULKAN

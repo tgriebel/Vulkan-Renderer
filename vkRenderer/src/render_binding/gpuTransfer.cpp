@@ -121,7 +121,8 @@ void Renderer::UploadTextures()
 		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
-		texture.uploadId = imageFreeSlot++;
+		texture.gpuImage->SetId( imageFreeSlot );
+		++imageFreeSlot;
 	}
 
 	// 2. Generate MIPS
@@ -165,16 +166,17 @@ void Renderer::UploadTextures()
 				continue;
 			}
 			Image& texture = textureAsset->Get();
+			const int uploadId = texture.gpuImage->GetId();
 
 			switch ( texture.info.type )
 			{
 				case IMAGE_TYPE_2D:
-					gpuImages2D[ texture.uploadId ] = &texture;
-					gpuImagesCube[ texture.uploadId ] = firstCube;
+					gpuImages2D[ uploadId ] = &texture;
+					gpuImagesCube[ uploadId ] = firstCube;
 					break;
 				case IMAGE_TYPE_CUBE:
-					gpuImages2D[ texture.uploadId ] = &g_assets.textureLib.GetDefault()->Get();
-					gpuImagesCube[ texture.uploadId ] = &texture;
+					gpuImages2D[ uploadId ] = &g_assets.textureLib.GetDefault()->Get();
+					gpuImagesCube[ uploadId ] = &texture;
 					break;
 			}
 		}
@@ -217,7 +219,7 @@ void Renderer::UpdateGpuMaterials()
 			{
 				const hdl_t handle = m.GetTexture( t );
 				if ( handle.IsValid() ) {
-					const int uploadId = g_assets.textureLib.Find( m.GetTexture( t ) )->Get().uploadId;
+					const int uploadId = g_assets.textureLib.Find( m.GetTexture( t ) )->Get().gpuImage->GetId();
 					assert( uploadId >= 0 );
 					ubo.textures[ t ] = uploadId;
 				}

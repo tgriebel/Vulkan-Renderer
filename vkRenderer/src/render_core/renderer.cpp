@@ -254,7 +254,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent, const uint32_t 
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() ) {
 				Image& texture = g_assets.textureLib.Find( texHandle )->Get();
-				if( texture.uploadId < 0 ) {
+				if( texture.gpuImage->GetId() < 0 ) {
 					uploadTextures.insert( texHandle );
 				}
 				if ( texture.dirty ) {
@@ -373,7 +373,7 @@ void Renderer::UploadAssets()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
-		if ( texture.uploadId != -1 ) {
+		if ( ( texture.gpuImage != nullptr ) && ( texture.gpuImage->GetId() != -1 ) ) {
 			continue;
 		}
 		uploadTextures.insert( textureAsset->Handle() );

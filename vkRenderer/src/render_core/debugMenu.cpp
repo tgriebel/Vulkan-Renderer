@@ -1,5 +1,6 @@
 
 #include "../globals/common.h"
+#include "gpuImage.h"
 #include <gfxcore/scene/assetManager.h>
 #include <gfxcore/scene/scene.h>
 #include <sstream>
@@ -315,7 +316,7 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 			ImGui::TableNextRow();
 
 			ImGui::TableNextColumn();	ImGui::Text( "Upload Id" );
-			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.uploadId );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.gpuImage->GetId() );
 			ImGui::TableNextRow();
 
 			ImGui::TableNextColumn();	ImGui::Text( "Size(bytes)" );
