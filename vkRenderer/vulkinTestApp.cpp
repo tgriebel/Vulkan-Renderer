@@ -81,7 +81,6 @@ void CheckReloadAssets()
 		system( "glsl_compile.bat" );
 		g_assets.gpuPrograms.UnloadAll();
 		g_assets.gpuPrograms.LoadAll();
-		Renderer::GenerateGpuPrograms( g_assets.gpuPrograms );
 		g_renderer.CreatePipelineObjects();
 
 		g_imguiControls.rebuildShaders = false;

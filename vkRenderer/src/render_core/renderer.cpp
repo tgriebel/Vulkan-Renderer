@@ -303,7 +303,6 @@ void Renderer::InitGPU()
 	InitShaderResources();
 	RecreateSwapChain();
 	UploadAssets();
-	CreatePipelineObjects();
 }
 
 
@@ -380,6 +379,7 @@ void Renderer::UploadAssets()
 		uploadTextures.insert( textureAsset->Handle() );
 	}
 
+	CreatePipelineObjects();
 	UploadTextures();
 	UploadModelsToGPU();
 	UpdateGpuMaterials();

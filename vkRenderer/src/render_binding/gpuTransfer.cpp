@@ -267,7 +267,6 @@ void Renderer::UploadModelsToGPU()
 		if ( modelAsset->IsUploaded() ) {
 			continue;
 		}
-		modelAsset->QueueUpload();
 
 		model.upload.resize( model.surfCount );
 		for ( uint32_t s = 0; s < model.surfCount; ++s )

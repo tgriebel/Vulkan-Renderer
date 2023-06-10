@@ -198,11 +198,15 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 	vertShaderStageInfo.module = prog.vk_shaders[ 0 ];
 	vertShaderStageInfo.pName = "main";
 
+	prog.shaders[ 0].type == shaderType_t::VERTEX;
+
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{ };
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	fragShaderStageInfo.module = prog.vk_shaders[ 1 ];
 	fragShaderStageInfo.pName = "main";
+
+	prog.shaders[ 1 ].type == shaderType_t::PIXEL;
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 

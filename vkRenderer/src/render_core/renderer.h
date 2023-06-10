@@ -70,8 +70,6 @@ struct ComputeState
 class Renderer
 {
 public:
-	static void	GenerateGpuPrograms( AssetLibGpuProgram& lib );
-
 	inline bool IsReady() {
 		return ( m_frameNumber > 0 );
 	}

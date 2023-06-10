@@ -59,8 +59,6 @@ void Renderer::Init()
 
 	InitShaderResources();
 
-	CreatePipelineObjects();
-
 	InitImGui( view2D );
 
 	UploadAssets();
@@ -229,8 +227,6 @@ void Renderer::InitShaderResources()
 	}
 
 	AllocRegisteredBindParms();
-
-	GenerateGpuPrograms( g_assets.gpuPrograms );
 
 	CreateCodeTextures();
 	CreateBuffers();
@@ -433,21 +429,26 @@ void Renderer::CreateDevice()
 }
 
 
-void Renderer::GenerateGpuPrograms( AssetLibGpuProgram& lib )
-{
-	const uint32_t programCount = lib.Count();
-	for ( uint32_t i = 0; i < programCount; ++i )
-	{
-		GpuProgram& prog = lib.Find( i )->Get();
-		for ( uint32_t i = 0; i < prog.shaderCount; ++i ) {
-			prog.vk_shaders[ i ] = vk_CreateShaderModule( prog.shaders[ i ].blob );
-		}
-	}
-}
-
-
 void Renderer::CreatePipelineObjects()
 {
+	const uint32_t programCount = g_assets.gpuPrograms.Count();
+	for ( uint32_t progIx = 0; progIx < programCount; ++progIx )
+	{
+		Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( progIx );
+		if ( progAsset->IsUploaded() ) {
+			continue;
+		}
+
+		GpuProgram& prog = progAsset->Get();
+		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+		{
+			if ( prog.vk_shaders[ shaderIx ] != VK_NULL_HANDLE ) {
+				vkDestroyShaderModule( context.device, prog.vk_shaders[ shaderIx ], nullptr );
+			}
+			prog.vk_shaders[ shaderIx ] = vk_CreateShaderModule( prog.shaders[ shaderIx ].blob );	
+		}
+	}
+
 	ClearPipelineCache();
 
 	std::vector<const DrawPass*> passes;
@@ -477,13 +478,19 @@ void Renderer::CreatePipelineObjects()
 			if ( prog == nullptr ) {
 				continue;
 			}
-			CreateGraphicsPipeline( passes[ passIx ], *prog );
+			if( prog->IsUploaded() == false ) {
+				CreateGraphicsPipeline( passes[ passIx ], *prog );
+			}
 		}
 	}
+
 	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
 	{
 		Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( i );
 		if ( prog == nullptr ) {
+			continue;
+		}
+		if ( prog->IsUploaded() == false ) {
 			continue;
 		}
 		if( prog->Get().shaderCount != 1 ) {
@@ -492,8 +499,14 @@ void Renderer::CreatePipelineObjects()
 		if ( prog->Get().shaders[0].type != shaderType_t::COMPUTE ) {
 			continue;
 		}
-
+		
 		CreateComputePipeline( *prog );
+	}
+
+	for ( uint32_t progIx = 0; progIx < programCount; ++progIx )
+	{
+		Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( progIx );
+		progAsset->CompleteUpload();
 	}
 }
 

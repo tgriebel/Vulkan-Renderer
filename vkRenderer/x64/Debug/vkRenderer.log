@@ -1,5 +1,2 @@
-﻿  renderInit.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderInit.cpp(473,32): warning C4018: '<': signed/unsigned mismatch
-  vulkinTestApp.cpp
-  Generating Code...
+﻿  gpuTransfer.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
