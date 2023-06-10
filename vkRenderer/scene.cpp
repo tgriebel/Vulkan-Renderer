@@ -344,7 +344,21 @@ void DrawAssetDebugMenu()
 				Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( s );
 				GpuProgram& shader = shaderAsset->Get();
 				const char* shaderName = shaderAsset->GetName().c_str();
-				ImGui::Text( shaderName );
+				if ( ImGui::TreeNode( shaderName ) )
+				{
+					for( uint32_t i = 0; i < shader.shaderCount; ++i )
+					{
+						ImGui::Text( shader.shaders[ i ].name.c_str() );
+						switch( shader.shaders[ i ].type )
+						{
+							case VERTEX: ImGui::Text( "Vertex" ); break;
+							case PIXEL: ImGui::Text( "Pixel" ); break;
+							case COMPUTE: ImGui::Text( "Compute" ); break;
+						}
+						ImGui::Text( "Size: %u", shader.shaders[ i ].blob.size() );
+					}
+					ImGui::TreePop();
+				}
 			}
 			ImGui::TreePop();
 		}
