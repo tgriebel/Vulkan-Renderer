@@ -64,6 +64,12 @@ void CreateCodeAssets();
 void UpdateScene( Scene* scene );
 void InitScene( Scene* scene );
 void ShutdownScene( Scene* scene );
+void DrawSceneDebugMenu();
+void DrawAssetDebugMenu();
+void DrawManipDebugMenu();
+void DrawEntityDebugMenu();
+void DrawOutlinerDebugMenu();
+void DeviceDebugMenu();
 
 void RenderThread()
 {
@@ -118,6 +124,12 @@ int main( int argc, char* argv[] )
 	try
 	{
 		g_renderer.Init();
+		g_renderer.AttachDebugMenu( &DrawSceneDebugMenu );
+		g_renderer.AttachDebugMenu( &DrawAssetDebugMenu );
+		g_renderer.AttachDebugMenu( &DrawManipDebugMenu );
+		g_renderer.AttachDebugMenu( &DrawEntityDebugMenu );
+		g_renderer.AttachDebugMenu( &DrawOutlinerDebugMenu );
+		g_renderer.AttachDebugMenu( &DeviceDebugMenu );
 
 		while ( g_window.IsOpen() )
 		{

@@ -38,6 +38,7 @@
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
+#include "debugMenu.h"
 
 void Renderer::Init()
 {

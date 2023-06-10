@@ -9,4 +9,5 @@ void DebugMenuModelTreeNode( Asset<Model>* modelAsset );
 void DebugMenuTextureTreeNode( Asset<Image>* texAsset );
 void DebugMenuLightEdit( Scene* scene );
 void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties );
+void DeviceDebugMenu();
 #endif

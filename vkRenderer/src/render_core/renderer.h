@@ -48,6 +48,8 @@ using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 extern imguiControls_t g_imguiControls;
 #endif
 
+typedef void ( *debugMenuFuncPtr )( );
+
 extern Scene						scene;
 extern Window						g_window;
 extern SwapChain					g_swapChain;
@@ -82,6 +84,8 @@ public:
 	void								ShutdownGPU();
 	void								Resize();
 	void								CreatePipelineObjects();
+
+	void								AttachDebugMenu( const debugMenuFuncPtr funcPtr );
 
 private:
 	static const uint32_t				ShadowMapWidth = 1024;
@@ -153,6 +157,10 @@ private:
 
 	ShaderBindSet						defaultBindSet;
 	ShaderBindSet						particleShaderBinds;
+
+	static const uint32_t				DEBUG_MENU_MAX = 12;
+	uint32_t							debugMenuCount = 0;
+	debugMenuFuncPtr					debugMenus[ DEBUG_MENU_MAX ];
 
 	float								shadowNearPlane = 0.1f;
 	float								shadowFarPlane = 1000.0f;

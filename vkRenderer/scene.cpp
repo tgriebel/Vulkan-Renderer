@@ -6,7 +6,14 @@
 #include <gfxcore/scene/scene.h>
 #include "src/globals/render_util.h"
 
+#if defined( USE_IMGUI )
+#include "external/imgui/imgui.h"
+#endif
+
+#include "src/render_core/debugMenu.h"
+
 extern AssetManager g_assets;
+extern Scene* g_scene;
 
 extern imguiControls_t			g_imguiControls;
 extern Window					g_window;
@@ -258,4 +265,343 @@ void UpdateScene( Scene* scene )
 	}
 
 	scene->Update();
+}
+
+
+void DrawSceneDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginTabItem( "Debug" ) )
+	{
+		g_imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
+		g_imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
+		ImGui::SameLine();
+		g_imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+		ImGui::SameLine();
+		g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
+
+		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
+		ImGui::SliderFloat( "Roughness", &g_imguiControls.roughness, 0.1f, 1.0f );
+		ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
+		ImGui::InputFloat( "Tone Map R", &g_imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Tone Map B", &g_imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Tone Map A", &g_imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+		ImGui::EndTabItem();
+	}
+#endif
+}
+
+
+void DrawAssetDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginTabItem( "Assets" ) )
+	{
+		const uint32_t matCount = g_assets.materialLib.Count();
+		if ( ImGui::TreeNode( "Materials", "Materials (%i)", matCount ) )
+		{
+			for ( uint32_t m = 0; m < matCount; ++m )
+			{
+				Asset<Material>* matAsset = g_assets.materialLib.Find( m );
+				Material& mat = matAsset->Get();
+				const char* matName = g_assets.materialLib.FindName( m );
+
+				if ( ImGui::TreeNode( matAsset->GetName().c_str() ) )
+				{
+					DebugMenuMaterialEdit( matAsset );
+					ImGui::Separator();
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+		const uint32_t modelCount = g_assets.modelLib.Count();
+		if ( ImGui::TreeNode( "Models", "Models (%i)", modelCount ) )
+		{
+			for ( uint32_t m = 0; m < modelCount; ++m )
+			{
+				Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
+				DebugMenuModelTreeNode( modelAsset );
+			}
+			ImGui::TreePop();
+		}
+		const uint32_t texCount = g_assets.textureLib.Count();
+		if ( ImGui::TreeNode( "Textures", "Textures (%i)", texCount ) )
+		{
+			for ( uint32_t t = 0; t < texCount; ++t )
+			{
+				Asset<Image>* texAsset = g_assets.textureLib.Find( t );
+				DebugMenuTextureTreeNode( texAsset );
+			}
+			ImGui::TreePop();
+		}
+		const uint32_t shaderCount = g_assets.gpuPrograms.Count();
+		if ( ImGui::TreeNode( "Shaders", "Shaders (%i)", shaderCount ) )
+		{
+			for ( uint32_t s = 0; s < shaderCount; ++s )
+			{
+				Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( s );
+				GpuProgram& shader = shaderAsset->Get();
+				const char* shaderName = shaderAsset->GetName().c_str();
+				ImGui::Text( shaderName );
+			}
+			ImGui::TreePop();
+		}
+		ImGui::EndTabItem();
+	}
+#endif
+}
+
+
+void DrawManipDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginTabItem( "Manip" ) )
+	{
+		static uint32_t currentIdx = 0;
+		Entity* ent = g_scene->FindEntity( currentIdx );
+		const char* previewValue = ent->name.c_str();
+		if ( ImGui::BeginCombo( "Entity", previewValue ) )
+		{
+			const uint32_t modelCount = g_assets.modelLib.Count();
+			for ( uint32_t e = 0; e < g_scene->EntityCount(); ++e )
+			{
+				Entity* comboEnt = g_scene->FindEntity( e );
+
+				const bool selected = ( currentIdx == e );
+				if ( ImGui::Selectable( comboEnt->name.c_str(), selected ) ) {
+					currentIdx = e;
+				}
+
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		if ( ent != nullptr )
+		{
+			const vec3f o = ent->GetOrigin();
+			const vec3f s = ent->GetScale();
+			const mat4x4f r = ent->GetRotation();
+			float origin[ 3 ] = { o[ 0 ], o[ 1 ], o[ 2 ] };
+			ImGui::PushItemWidth( 100 );
+			ImGui::Text( "Origin" );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##OriginX", &origin[ 0 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##OriginY", &origin[ 1 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##OriginZ", &origin[ 2 ], 0.1f, 1.0f );
+
+			float scale[ 3 ] = { s[ 0 ], s[ 1 ], s[ 2 ] };
+			ImGui::Text( "Scale" );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##ScaleX", &scale[ 0 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##ScaleY", &scale[ 1 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##ScaleZ", &scale[ 2 ], 0.1f, 1.0f );
+
+			float rotation[ 3 ] = { 0.0f, 0.0f, 0.0f };
+			MatrixToEulerZYX( r, rotation[ 0 ], rotation[ 1 ], rotation[ 2 ] );
+
+			ImGui::Text( "Rotation" );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##RotationX", &rotation[ 0 ], 1.0f, 10.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##RotationY", &rotation[ 1 ], 1.0f, 10.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##RotationZ", &rotation[ 2 ], 1.0f, 10.0f );
+			ImGui::PopItemWidth();
+
+			ent->SetOrigin( origin );
+			ent->SetScale( scale );
+			ent->SetRotation( rotation );
+
+			if ( ImGui::Button( "Add Bounds" ) )
+			{
+				AABB bounds = ent->GetBounds();
+				const vec3f X = bounds.GetMax()[ 0 ] - bounds.GetMin()[ 0 ];
+				const vec3f Y = bounds.GetMax()[ 1 ] - bounds.GetMin()[ 1 ];
+				const vec3f Z = bounds.GetMax()[ 2 ] - bounds.GetMin()[ 2 ];
+
+				//mat4x4f m = CreateMatrix4x4( )
+
+				Entity* boundEnt = new Entity( *ent );
+				boundEnt->name = ent->name + "_bounds";
+				boundEnt->SetFlag( ENT_FLAG_WIREFRAME );
+				boundEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+
+				g_scene->entities.push_back( boundEnt );
+				g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "cube" ), *boundEnt );
+			}
+
+			ImGui::SameLine();
+			if ( ImGui::Button( "Export Model" ) )
+			{
+				Asset<Model>* asset = g_assets.modelLib.Find( ent->modelHdl );
+				WriteModel( asset, BakePath + asset->GetName() + BakedModelExtension );
+			}
+			ImGui::SameLine();
+			bool hidden = ent->HasFlag( ENT_FLAG_NO_DRAW );
+			if ( ImGui::Checkbox( "Hide", &hidden ) )
+			{
+				if ( hidden ) {
+					ent->SetFlag( ENT_FLAG_NO_DRAW );
+				}
+				else {
+					ent->ClearFlag( ENT_FLAG_NO_DRAW );
+				}
+			}
+			ImGui::SameLine();
+			bool wireframe = ent->HasFlag( ENT_FLAG_WIREFRAME );
+			if ( ImGui::Checkbox( "Wireframe", &wireframe ) )
+			{
+				if ( wireframe ) {
+					ent->SetFlag( ENT_FLAG_WIREFRAME );
+				}
+				else {
+					ent->ClearFlag( ENT_FLAG_WIREFRAME );
+				}
+			}
+		}
+		ImGui::EndTabItem();
+	}
+#endif
+}
+
+
+void DrawEntityDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginTabItem( "Create Entity" ) )
+	{
+		static char name[ 128 ] = {};
+		static uint32_t currentIdx = 0;
+		const char* previewValue = g_assets.modelLib.FindName( currentIdx );
+		if ( ImGui::BeginCombo( "Model", previewValue ) )
+		{
+			const uint32_t modelCount = g_assets.modelLib.Count();
+			for ( uint32_t m = 0; m < modelCount; ++m )
+			{
+				Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
+
+				const bool selected = ( currentIdx == m );
+				if ( ImGui::Selectable( modelAsset->GetName().c_str(), selected ) ) {
+					currentIdx = m;
+				}
+
+				if ( selected ) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::InputText( "Name", name, 128 );
+
+		if ( ImGui::Button( "Create" ) )
+		{
+			Entity* ent = new Entity();
+			ent->name = name;
+			ent->SetFlag( ENT_FLAG_DEBUG );
+			g_scene->entities.push_back( ent );
+			g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( g_assets.modelLib.FindName( currentIdx ) ), *ent );
+		}
+
+		ImGui::EndTabItem();
+	}
+#endif
+}
+
+
+void DrawOutlinerDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginTabItem( "Outliner" ) )
+	{
+		static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+
+		DebugMenuLightEdit( g_scene );
+
+		if ( ImGui::BeginTable( "3ways", 3, flags ) )
+		{
+			// The first column will use the default _WidthStretch when ScrollX is Off and _WidthFixed when ScrollX is On
+			ImGui::TableSetupColumn( "Name", ImGuiTableColumnFlags_WidthFixed, 50.0f );
+			ImGui::TableSetupColumn( "Size", ImGuiTableColumnFlags_WidthFixed, 200.0f );
+			ImGui::TableSetupColumn( "Type", ImGuiTableColumnFlags_WidthFixed, 200.0f );
+			ImGui::TableHeadersRow();
+
+			//const uint32_t entCount = scene.entities.size();
+			//for ( uint32_t i = 0; i < entCount; ++i )
+			//{
+			//	Entity* ent = scene.entities[ i ];
+
+			//	std::stringstream numberStream;
+			//	numberStream << i;
+			//	ImGui::Text( numberStream.str().c_str() );
+			//	ImGui::NextColumn();
+
+			//	ImGui::Text( ent->dbgName.c_str() );
+			//	ImGui::NextColumn();
+			//}
+
+			struct EntityTreeNode
+			{
+				const char* Name;
+				const char* Type;
+				int			Size;
+				int			ChildIdx;
+				int			ChildCount;
+				static void DisplayNode( const EntityTreeNode* node, const EntityTreeNode* all_nodes )
+				{
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					const bool is_folder = ( node->ChildCount > 0 );
+					if ( is_folder )
+					{
+						bool open = ImGui::TreeNodeEx( node->Name, ImGuiTreeNodeFlags_SpanFullWidth );
+						ImGui::TableNextColumn();
+						ImGui::TextDisabled( "--" );
+						ImGui::TableNextColumn();
+						ImGui::TextUnformatted( node->Type );
+						if ( open )
+						{
+							for ( int child_n = 0; child_n < node->ChildCount; child_n++ )
+								DisplayNode( &all_nodes[ node->ChildIdx + child_n ], all_nodes );
+							ImGui::TreePop();
+						}
+					}
+					else
+					{
+						ImGui::TreeNodeEx( node->Name, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth );
+						ImGui::TableNextColumn();
+						ImGui::Text( "%d", node->Size );
+						ImGui::TableNextColumn();
+						ImGui::TextUnformatted( node->Type );
+					}
+				}
+			};
+			static const EntityTreeNode nodes[] =
+			{
+				{ "Root",                         "Folder",       -1,       1, 3    }, // 0
+				{ "Music",                        "Folder",       -1,       4, 2    }, // 1
+				{ "Textures",                     "Folder",       -1,       6, 3    }, // 2
+				{ "desktop.ini",                  "System file",  1024,    -1,-1    }, // 3
+				{ "File1_a.wav",                  "Audio file",   123000,  -1,-1    }, // 4
+				{ "File1_b.wav",                  "Audio file",   456000,  -1,-1    }, // 5
+				{ "Image001.png",                 "Image file",   203128,  -1,-1    }, // 6
+				{ "Copy of Image001.png",         "Image file",   203256,  -1,-1    }, // 7
+				{ "Copy of Image001 (Final2).png","Image file",   203512,  -1,-1    }, // 8
+			};
+
+			EntityTreeNode::DisplayNode( &nodes[ 0 ], nodes );
+
+			ImGui::EndTable();
+		}
+		ImGui::EndTabItem();
+	}
+#endif
 }
