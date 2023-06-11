@@ -332,10 +332,11 @@ void Renderer::RecreateSwapChain()
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
 
-	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], view2D[ 0 ] }; // FIXME: TEMP!!
-
-	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx ) {
-		views[ viewIx ]->Resize();
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
+	{
+		if( views[ viewIx ].IsCommitted() ) {
+			views[ viewIx ].Resize();
+		}
 	}
 }
 
@@ -615,13 +616,15 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 {
 	const uint32_t i = currentImage;
 
-	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], view2D[ 0 ] }; // FIXME: TEMP!!
-
-	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
+		if( views[ viewIx ].IsCommitted() == false ) {
+			continue;
+		}
+
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
-			DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			DrawPass* pass = views[ viewIx ].passes[ passIx ];
 			if( pass == nullptr ) {
 				continue;
 			}
@@ -645,7 +648,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 
 			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
 			pass->parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-			pass->parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ views[ viewIx ]->GetViewId() ] );
+			pass->parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ views[ viewIx ].GetViewId() ] );
 			pass->parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
 			pass->parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
 			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );

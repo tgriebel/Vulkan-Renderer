@@ -97,6 +97,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, std::vector
 	{
 		const ShaderBinding* binding = set->GetBinding( i );
 		const ShaderAttachment* attachment = parms.GetAttachment( binding );
+		assert( attachment != nullptr );
 
 		VkWriteDescriptorSet writeInfo = {};
 		writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

@@ -43,7 +43,8 @@ private:
 	mat4x4f			m_viewMatrix;
 	mat4x4f			m_projMatrix;
 	mat4x4f			m_viewprojMatrix;
-	int				m_viewId;			
+	int				m_viewId;
+	bool			m_committed;
 
 public:
 	RenderView()
@@ -62,6 +63,7 @@ public:
 		m_viewprojMatrix = mat4x4f( 1.0f );
 
 		m_viewId = -1;
+		m_committed = false;
 
 		region = renderViewRegion_t::UNKNOWN;
 
@@ -91,6 +93,8 @@ public:
 	const mat4x4f&			GetViewprojMatrix() const;
 	const int				GetViewId() const;
 	const void				SetViewId( const int id );
+	const void				Commit();
+	const bool				IsCommitted() const;
 
 	const char*				name;
 	renderViewRegion_t		region;

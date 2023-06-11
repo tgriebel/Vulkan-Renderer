@@ -59,6 +59,18 @@ const void RenderView::SetViewId( const int id )
 }
 
 
+const void RenderView::Commit()
+{
+	m_committed = true;;
+}
+
+
+const bool RenderView::IsCommitted() const
+{
+	return m_committed;
+}
+
+
 void RenderView::SetCamera( const Camera& camera, const bool reverseZ )
 {
 	m_viewMatrix = camera.GetViewMatrix();

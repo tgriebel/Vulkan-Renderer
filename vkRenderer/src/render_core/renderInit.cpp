@@ -53,6 +53,7 @@ void Renderer::Init()
 		shadowView[ i ]->name = "Shadow View";
 		InitView( *shadowView[ i ], shadowMap );
 	}
+
 	for ( uint32_t i = 0; i < Max3DViews; ++i )
 	{
 		renderView[ i ] = &views[ viewCount ];
@@ -60,13 +61,18 @@ void Renderer::Init()
 		renderView[ i ]->name = "Main View";
 		InitView( *renderView[ i ], mainColor );
 	}
-	for ( uint32_t i = 0; i < Max3DViews; ++i )
+
+	for ( uint32_t i = 0; i < Max2DViews; ++i )
 	{
 		view2D[ i ] = &views[ viewCount ];
 		view2D[ i ]->region = renderViewRegion_t::POST;
 		view2D[ i ]->name = "Post View";
 		InitView( *view2D[ i ], g_swapChain.framebuffers );
 	}
+
+	shadowView[ 0 ]->Commit();
+	renderView[ 0 ]->Commit();
+	view2D[ 0 ]->Commit();
 
 	InitShaderResources();
 
@@ -218,12 +224,11 @@ void Renderer::InitShaderResources()
 	}
 
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
-	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], view2D[ 0 ] }; // FIXME: TEMP!!
-	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
-			DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			DrawPass* pass = views[ viewIx ].passes[ passIx ];
 			if ( pass == nullptr ) {
 				continue;
 			}
@@ -463,14 +468,17 @@ void Renderer::CreatePipelineObjects()
 	ClearPipelineCache();
 
 	std::vector<const DrawPass*> passes;
-	passes.reserve( 3 * DRAWPASS_COUNT );
+	passes.reserve( MaxViews * DRAWPASS_COUNT );
 
-	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], view2D[ 0 ] }; // FIXME: TEMP!!
-	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
+		if( views[ viewIx ].IsCommitted() == false ) {
+			continue;
+		}
+
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
-			const DrawPass* pass = views[ viewIx ]->passes[ passIx ];
+			const DrawPass* pass = views[ viewIx ].passes[ passIx ];
 			if( pass != nullptr ) {
 				passes.push_back( pass );
 			}
