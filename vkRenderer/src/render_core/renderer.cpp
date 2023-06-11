@@ -186,7 +186,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			if( material.GetShader( DRAWPASS_SHADOW ) == INVALID_HDL ) {
 				continue;
 			}
-			if ( ent.HasFlag( ENT_FLAG_NO_SHADOWS ) == false ) {
+			if ( ent.HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
 				continue;
 			}
 			if ( ( renderFlags & SKIP_OPAQUE ) != 0 ) {
