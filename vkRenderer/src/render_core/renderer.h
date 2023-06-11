@@ -97,7 +97,7 @@ private:
 	RenderView							views[ MaxViews ];
 	RenderView*							renderView[ Max3DViews ];
 	RenderView*							shadowView[ MaxShadowViews ];
-	RenderView							view2D;
+	RenderView*							view2D[ Max2DViews ];
 	uint32_t							viewCount;
 
 	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };

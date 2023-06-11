@@ -88,11 +88,11 @@ void Renderer::Commit( const Scene* scene )
 	}
 	MergeSurfaces( *shadowView[ 0 ] );
 
-	view2D.committedModelCnt = 0;
+	view2D[ 0 ]->committedModelCnt = 0;
 	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( view2D, *scene->entities[ i ] );
+		CommitModel( *view2D[ 0 ], *scene->entities[ i ] );
 	}
-	MergeSurfaces( view2D );
+	MergeSurfaces( *view2D[ 0 ] );
 
 	UpdateViews( scene );
 }
@@ -332,7 +332,7 @@ void Renderer::RecreateSwapChain()
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
 
-	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], &view2D }; // FIXME: TEMP!!
+	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], view2D[ 0 ] }; // FIXME: TEMP!!
 
 	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx ) {
 		views[ viewIx ]->Resize();
@@ -606,7 +606,7 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// Post view
 	{
-		view2D.SetViewRect( 0, 0, width, height );
+		view2D[ 0 ]->SetViewRect( 0, 0, width, height );
 	}
 }
 
@@ -615,7 +615,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 {
 	const uint32_t i = currentImage;
 
-	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], &view2D }; // FIXME: TEMP!!
+	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], view2D[ 0 ] }; // FIXME: TEMP!!
 
 	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
 	{
@@ -697,8 +697,8 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		viewBuffer[ shadowView[ 0 ]->GetViewId() ].view = shadowView[ 0 ]->GetViewMatrix();
 		viewBuffer[ shadowView[ 0 ]->GetViewId() ].proj = shadowView[ 0 ]->GetProjMatrix();
 
-		viewBuffer[ view2D.GetViewId() ].view = view2D.GetViewMatrix();
-		viewBuffer[ view2D.GetViewId() ].proj = view2D.GetProjMatrix();
+		viewBuffer[ view2D[ 0 ]->GetViewId() ].view = view2D[ 0 ]->GetViewMatrix();
+		viewBuffer[ view2D[ 0 ]->GetViewId() ].proj = view2D[ 0 ]->GetProjMatrix();
 	}
 
 	static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
@@ -724,13 +724,13 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	}
 
 	static uniformBufferObject_t postUboBuffer[ MaxSurfaces ];
-	assert( view2D.committedModelCnt < MaxSurfaces );
-	for ( uint32_t i = 0; i < view2D.committedModelCnt; ++i )
+	assert( view2D[ 0 ]->committedModelCnt < MaxSurfaces );
+	for ( uint32_t i = 0; i < view2D[ 0 ]->committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
-		ubo.model = view2D.sortedInstances[ i ].modelMatrix;
-		const drawSurf_t& surf = view2D.merged[ view2D.sortedInstances[ i ].surfId ];
-		const uint32_t objectId = ( view2D.sortedInstances[ i ].id + surf.objectId );
+		ubo.model = view2D[ 0 ]->sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = view2D[ 0 ]->merged[ view2D[ 0 ]->sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( view2D[ 0 ]->sortedInstances[ 0 ].id + surf.objectId );
 		postUboBuffer[ objectId ] = ubo;
 	}
 
@@ -756,8 +756,8 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	frameState[ currentImage ].surfParmPartitions[ renderView[ 0 ]->GetViewId() ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	frameState[ currentImage ].surfParmPartitions[ shadowView[ 0 ]->GetViewId() ].SetPos();
 	frameState[ currentImage ].surfParmPartitions[ shadowView[ 0 ]->GetViewId() ].CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParmPartitions[ view2D.GetViewId() ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ view2D.GetViewId() ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ view2D[ 0 ]->GetViewId() ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ view2D[ 0 ]->GetViewId() ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
 	frameState[ currentImage ].materialBuffers.SetPos();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
@@ -1122,9 +1122,9 @@ void Renderer::RenderViews()
 
 	// 2D View
 	{
-		MarkerBeginRegion( gfxContext, view2D.name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, view2D[ 0 ]->name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( view2D, gfxContext );
+		RenderViewSurfaces( *view2D[ 0 ], gfxContext );
 		
 		MarkerEndRegion( gfxContext );
 	}
