@@ -658,9 +658,11 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 
 void Renderer::UpdateBuffers( const uint32_t currentImage )
 {
-	static globalUboConstants_t globalsBuffer;
+	FrameState& state = frameState[ currentImage ];
+
+	state.globalConstants.SetPos();
 	{
-		globalUboConstants_t globals;
+		globalUboConstants_t globals = {};
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
@@ -680,16 +682,22 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.numLights = renderViews[ 0 ]->numLights;
-		globalsBuffer = globals;
+	
+		state.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
-	static viewBufferObject_t viewBuffer[MaxViews];
+	state.viewParms.SetPos();
+
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		const RenderView& view = views[ viewIx ];
 		const uint32_t viewId = view.GetViewId();
-		viewBuffer[ viewId ].view = view.GetViewMatrix();
-		viewBuffer[ viewId ].proj = view.GetProjMatrix();
+
+		viewBufferObject_t viewBuffer = {};
+		viewBuffer.view = view.GetViewMatrix();
+		viewBuffer.proj = view.GetProjMatrix();
+
+		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 
 		static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
 		assert( view.committedModelCnt < MaxSurfaces );
@@ -702,33 +710,25 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 			uboBuffer[ objectId ] = ubo;
 		}
 
-		frameState[ currentImage ].surfParmPartitions[ viewId ].SetPos();
-		frameState[ currentImage ].surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+		state.surfParmPartitions[ viewId ].SetPos();
+		state.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	}
 
-	static lightBufferObject_t lightBuffer[ MaxLights ];
+	state.lightParms.SetPos();
 	for ( int i = 0; i < MaxLights; ++i )
 	{
 		// TODO: this should be all committed lights for all views eventually
-		lightBufferObject_t light;
-		light.intensity = renderViews[ 0 ]->lights[ i ].intensity;
-		light.lightDir = renderViews[ 0 ]->lights[ i ].lightDir;
-		light.lightPos = renderViews[ 0 ]->lights[ i ].lightPos;
-		light.shadowViewId = uint32_t( shadowViews[ 0 ]->GetViewId() );
-		lightBuffer[i] = light;
+		lightBufferObject_t lightBuffer = {};
+		lightBuffer.intensity = renderViews[ 0 ]->lights[ i ].intensity;
+		lightBuffer.lightDir = renderViews[ 0 ]->lights[ i ].lightDir;
+		lightBuffer.lightPos = renderViews[ 0 ]->lights[ i ].lightPos;
+		lightBuffer.shadowViewId = uint32_t( shadowViews[ 0 ]->GetViewId() );
+		
+		state.lightParms.CopyData( &lightBuffer, sizeof( lightBufferObject_t ) );
 	}
-
-	frameState[ currentImage ].globalConstants.SetPos();
-	frameState[ currentImage ].globalConstants.CopyData( &globalsBuffer, sizeof( globalUboConstants_t ) );
-
-	frameState[ currentImage ].viewParms.SetPos();
-	frameState[ currentImage ].viewParms.CopyData( &viewBuffer, sizeof( viewBufferObject_t ) * MaxViews );
 
 	frameState[ currentImage ].materialBuffers.SetPos();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
-
-	frameState[ currentImage ].lightParms.SetPos();
-	frameState[ currentImage ].lightParms.CopyData( lightBuffer, sizeof( lightBufferObject_t ) * MaxLights );
 
 	frameState[ currentImage ].particleBuffer.SetPos( frameState[ currentImage ].particleBuffer.GetMaxSize() );
 	//frameState[ currentImage ].particleBuffer.CopyData();
