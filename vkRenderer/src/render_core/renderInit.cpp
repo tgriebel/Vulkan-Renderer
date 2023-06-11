@@ -241,6 +241,8 @@ void Renderer::InitShaderResources()
 		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 	}
 
+	materialBuffer.Reset();
+
 	AllocRegisteredBindParms();
 
 	CreateCodeTextures();
