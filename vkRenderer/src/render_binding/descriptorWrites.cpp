@@ -181,16 +181,18 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
 	AppendDescriptorWrites( *particleState.parms[ currentImage ], descriptorWrites );
 
-	for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
-		if ( shadowViews[ 0 ]->passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *shadowViews[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
+		RenderView& view = views[ viewIx ];
+		if ( view.IsCommitted() == false ) {
+			continue;
 		}
-		if ( renderViews[ 0 ]->passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *renderViews[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
-		}
-		if ( view2Ds[ 0 ]->passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *view2Ds[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
+		for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
+		{
+			DrawPass* pass = view.passes[ i ];
+			if ( pass != nullptr ) {
+				AppendDescriptorWrites( *pass->parms[ currentImage ], descriptorWrites );
+			}
 		}
 	}
 
