@@ -83,18 +83,13 @@ void Renderer::Commit( const Scene* scene )
 	MergeSurfaces( renderView );
 
 	shadowView.committedModelCnt = 0;
-	for ( uint32_t i = 0; i < entCount; ++i )
-	{
-		if ( ( scene->entities[i] )->HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
-			continue;
-		}
+	for ( uint32_t i = 0; i < entCount; ++i ) {
 		CommitModel( shadowView, *scene->entities[i] );
 	}
 	MergeSurfaces( shadowView );
 
 	view2D.committedModelCnt = 0;
-	for ( uint32_t i = 0; i < entCount; ++i )
-	{
+	for ( uint32_t i = 0; i < entCount; ++i ) {
 		CommitModel( view2D, *scene->entities[ i ] );
 	}
 	MergeSurfaces( view2D );
@@ -197,6 +192,9 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		if( view.region == renderViewRegion_t::SHADOW )
 		{
 			if( material.GetShader( DRAWPASS_SHADOW ) == INVALID_HDL ) {
+				continue;
+			}
+			if ( ent.HasFlag( ENT_FLAG_NO_SHADOWS ) == false ) {
 				continue;
 			}
 			if ( ( renderFlags & SKIP_OPAQUE ) != 0 ) {
