@@ -88,6 +88,7 @@ public:
 		}
 	}
 
+	void					Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId );
 	void					Resize();
 	void					SetCamera( const Camera& camera, const bool reverseZ = true );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );

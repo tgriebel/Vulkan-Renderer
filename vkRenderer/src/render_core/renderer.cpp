@@ -698,7 +698,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		viewBufferObject_t viewBuffer = {};
 		viewBuffer.view = view.GetViewMatrix();
 		viewBuffer.proj = view.GetProjMatrix();
-		viewBuffer.dimensions = vec4f( frameSize[ 0 ], frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
+		viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 
 		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 

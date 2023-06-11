@@ -1,5 +1,160 @@
 #include "renderview.h"
 
+static drawPass_t ViewRegionPassBegin( const renderViewRegion_t region )
+{
+	switch ( region )
+	{
+		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
+		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
+		case renderViewRegion_t::POST:				return DRAWPASS_POST_BEGIN;
+	}
+	return DRAWPASS_COUNT;
+}
+
+
+static drawPass_t ViewRegionPassEnd( const renderViewRegion_t region )
+{
+	switch ( region )
+	{
+		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
+		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
+		case renderViewRegion_t::POST:				return DRAWPASS_POST_END;
+	}
+	return DRAWPASS_COUNT;
+}
+
+
+void RenderView::Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId )
+{
+	const uint32_t frameStateCount = MAX_FRAMES_STATES;
+
+	const viewport_t& viewport = GetViewport();
+	const uint32_t width = viewport.width;
+	const uint32_t height = viewport.height;
+
+	m_frameBufferSize = vec2i( fb[ 0 ].GetWidth(), fb[ 0 ].GetHeight() );
+
+	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	{
+		passes[ passIx ] = nullptr;
+
+		if ( passIx < ViewRegionPassBegin( region ) ) {
+			continue;
+		}
+		if ( passIx > ViewRegionPassEnd( region ) ) {
+			continue;
+		}
+		DrawPass* pass = new DrawPass();
+
+		pass->name = GetPassDebugName( drawPass_t( passIx ) );
+		pass->viewport.x = 0;
+		pass->viewport.y = 0;
+		pass->viewport.width = Min( width, fb[ 0 ].GetWidth() );
+		pass->viewport.height = Min( height, fb[ 0 ].GetHeight() );
+		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
+			pass->fb[ i ] = &fb[ i ];
+		}
+
+		pass->transitionState.bits = 0;
+		pass->stateBits = GFX_STATE_NONE;
+
+		if ( passIx == DRAWPASS_SHADOW )
+		{
+			pass->transitionState.flags.clear = true;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = true;
+			pass->transitionState.flags.presentAfter = false;
+
+			pass->stateBits |= GFX_STATE_DEPTH_TEST;
+			pass->stateBits |= GFX_STATE_DEPTH_WRITE;
+			pass->stateBits |= GFX_STATE_DEPTH_OP_0;
+
+			pass->clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
+			pass->clearDepth = 1.0f;
+			pass->clearStencil = 0;
+
+			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
+		}
+		else if ( passIx == DRAWPASS_POST_2D )
+		{
+			pass->transitionState.flags.clear = true;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = false;
+			pass->transitionState.flags.presentAfter = true;
+
+			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+			pass->clearDepth = 0.0f;
+			pass->clearStencil = 0;
+
+			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
+			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
+		}
+		else
+		{
+			pass->transitionState.flags.clear = false;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = true;
+			pass->transitionState.flags.presentAfter = false;
+
+			gfxStateBits_t stateBits = GFX_STATE_NONE;
+			if ( passIx == DRAWPASS_DEPTH )
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_DEPTH_WRITE;
+				stateBits |= GFX_STATE_COLOR_MASK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_STENCIL_ENABLE;
+
+				pass->transitionState.flags.clear = true;
+			}
+			else if ( passIx == DRAWPASS_TRANS )
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+				stateBits |= GFX_STATE_BLEND_ENABLE;
+			}
+			else if ( passIx == DRAWPASS_DEBUG_WIREFRAME )
+			{
+				stateBits |= GFX_STATE_WIREFRAME_ENABLE;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+
+				pass->transitionState.flags.readAfter = true;
+			}
+			else if ( passIx == DRAWPASS_DEBUG_SOLID )
+			{
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_BLEND_ENABLE;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+			}
+			else
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_DEPTH_WRITE;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+			}
+			pass->stateBits = stateBits;
+
+			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+			pass->clearDepth = 0.0f;
+			pass->clearStencil = 0;
+
+			if( fb[ 0 ].GetColorLayers() > 0 ) {
+				pass->sampleRate = fb[ 0 ].GetColor()->info.subsamples;
+			} else {
+				pass->sampleRate = fb[ 0 ].GetDepth()->info.subsamples;
+			}
+		}
+
+		passes[ passIx ] = pass;
+	}
+
+	m_viewId = viewId;
+}
+
+
 void RenderView::Resize()
 {
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )

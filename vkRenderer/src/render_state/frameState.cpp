@@ -191,8 +191,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		attachmentCount = 0;
 		VkImageView attachments[ 5 ] = {};
 
-		uint32_t colorCount = 0;
-		uint32_t dsCount = 0;
+		colorCount = 0;
+		dsCount = 0;
 
 		vk_RenderPassBits_t passBits = {};
 
