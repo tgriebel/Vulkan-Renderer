@@ -1,29 +1,5 @@
 #include "renderview.h"
 
-static drawPass_t ViewRegionPassBegin( const renderViewRegion_t region )
-{
-	switch ( region )
-	{
-		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
-		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
-		case renderViewRegion_t::POST:				return DRAWPASS_POST_BEGIN;
-	}
-	return DRAWPASS_COUNT;
-}
-
-
-static drawPass_t ViewRegionPassEnd( const renderViewRegion_t region )
-{
-	switch ( region )
-	{
-		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
-		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
-		case renderViewRegion_t::POST:				return DRAWPASS_POST_END;
-	}
-	return DRAWPASS_COUNT;
-}
-
-
 void RenderView::Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId )
 {
 	const uint32_t frameStateCount = MAX_FRAMES_STATES;
@@ -38,10 +14,10 @@ void RenderView::Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId )
 	{
 		passes[ passIx ] = nullptr;
 
-		if ( passIx < ViewRegionPassBegin( region ) ) {
+		if ( passIx < ViewRegionPassBegin() ) {
 			continue;
 		}
-		if ( passIx > ViewRegionPassEnd( region ) ) {
+		if ( passIx > ViewRegionPassEnd() ) {
 			continue;
 		}
 		DrawPass* pass = new DrawPass();
@@ -175,6 +151,30 @@ void RenderView::SetViewRect( const int32_t x, const int32_t y, const uint32_t w
 	m_viewport.y = y;
 	m_viewport.width = width;
 	m_viewport.height = height;
+}
+
+
+drawPass_t RenderView::ViewRegionPassBegin()
+{
+	switch ( region )
+	{
+		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
+		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
+		case renderViewRegion_t::POST:				return DRAWPASS_POST_BEGIN;
+	}
+	return DRAWPASS_COUNT;
+}
+
+
+drawPass_t RenderView::ViewRegionPassEnd()
+{
+	switch ( region )
+	{
+		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
+		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
+		case renderViewRegion_t::POST:				return DRAWPASS_POST_END;
+	}
+	return DRAWPASS_COUNT;
 }
 
 

@@ -902,34 +902,10 @@ bool Renderer::SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 }
 
 
-drawPass_t Renderer::ViewRegionPassBegin( const renderViewRegion_t region )
-{
-	switch( region )
-	{
-		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
-		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
-		case renderViewRegion_t::POST:				return DRAWPASS_POST_BEGIN;
-	}
-	return DRAWPASS_COUNT;
-}
-
-
-drawPass_t Renderer::ViewRegionPassEnd( const renderViewRegion_t region )
-{
-	switch ( region )
-	{
-		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
-		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
-		case renderViewRegion_t::POST:				return DRAWPASS_POST_END;
-	}
-	return DRAWPASS_COUNT;
-}
-
-
 void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 {
-	const drawPass_t passBegin = ViewRegionPassBegin( view.region );
-	const drawPass_t passEnd = ViewRegionPassEnd( view.region );
+	const drawPass_t passBegin = view.ViewRegionPassBegin();
+	const drawPass_t passEnd = view.ViewRegionPassEnd();
 
 	// For now the pass state is the same for the entire view region
 	const DrawPass* pass = view.passes[ passBegin ];

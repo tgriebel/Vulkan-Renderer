@@ -200,8 +200,6 @@ private:
 
 	// Draw Frame
 	static bool							SkipPass( const drawSurf_t& surf, const drawPass_t pass );
-	static drawPass_t					ViewRegionPassBegin( const renderViewRegion_t region );
-	static drawPass_t					ViewRegionPassEnd( const renderViewRegion_t region );
 	void								RenderViewSurfaces( RenderView& view, GfxContext& gfxContext );
 	void								Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void								RenderViews();

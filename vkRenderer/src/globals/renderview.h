@@ -43,11 +43,11 @@ private:
 	mat4x4f			m_viewMatrix;
 	mat4x4f			m_projMatrix;
 	mat4x4f			m_viewprojMatrix;
+	vec2i			m_frameBufferSize;
 	int				m_viewId;
 	bool			m_committed;
 
 public:
-	vec2i			m_frameBufferSize; // FIXME: make private
 
 	RenderView()
 	{
@@ -87,6 +87,9 @@ public:
 			passes[ i ] = nullptr;
 		}
 	}
+
+	drawPass_t				ViewRegionPassBegin();
+	drawPass_t				ViewRegionPassEnd();
 
 	void					Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId );
 	void					Resize();
