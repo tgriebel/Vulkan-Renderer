@@ -74,6 +74,9 @@ void main()
 {
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
+
+    const view_t view = viewUbo.views[ viewlId ];
+
 	const bool isTextured = materialUbo.materials[ materialId ].textured != 0;
     const int albedoTexId = isTextured ? materialUbo.materials[ materialId ].textureId0 : -1;
     const int normalTexId = isTextured ? materialUbo.materials[ materialId ].textureId1 : -1;
@@ -84,7 +87,7 @@ void main()
     const float specularPower = materialUbo.materials[ materialId ].Ns;
 
     const mat4 modelMat = ubo.model[ objectId ];
-    const mat4 viewMat = viewUbo.views[ viewlId ].view;
+    const mat4 viewMat = view.viewMat;
     const mat3 invViewMat = mat3( transpose( viewMat ) );
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
@@ -156,9 +159,11 @@ void main()
 
     const uint shadowViewId = lightUbo.lights[ 0 ].shadowViewId;
 
+    const view_t shadowView = viewUbo.views[ shadowViewId ];
+
     float visibility = 1.0f;
     const uint shadowMapTexId = 0;
-    vec4 lsPosition = viewUbo.views[ shadowViewId ].proj * viewUbo.views[ shadowViewId ].view * vec4( worldPosition.xyz, 1.0f );
+    vec4 lsPosition = shadowView.projMat * shadowView.viewMat * vec4( worldPosition.xyz, 1.0f );
     lsPosition.xyz /= lsPosition.w;
     vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
     float bias = 0.001f;

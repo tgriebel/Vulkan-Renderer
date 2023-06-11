@@ -35,19 +35,19 @@ void main()
     const uint materialId = pushConstants.materialId;
 	const uint viewlId = pushConstants.viewId;
 
+	const view_t view = viewUbo.views[ viewlId ];
+
 	const uint textureId0 = materialUbo.materials[ materialId ].textureId0;
     const uint textureId1 = materialUbo.materials[ materialId ].textureId1;
     const uint textureId2 = materialUbo.materials[ materialId ].textureId2;
 
-	const mat4 viewMat = viewUbo.views[ viewlId ].view;
+	const mat4 viewMat = view.viewMat;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
 	const vec3 up = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 1 ][ 0 ], viewMat[ 2 ][ 0 ] ) );	
 	const vec3 right = normalize( vec3( viewMat[ 0 ][ 1 ], viewMat[ 1 ][ 1 ], viewMat[ 2 ][ 1 ] ) );
 	const vec3 viewVector = normalize( forward + fragTexCoord.x * up + fragTexCoord.y * right );
 
-	//ubo[ objectId ].view;
-
-	const ivec2 pixelLocation = ivec2( globals.dimensions.xy * fragTexCoord.xy );
+	const ivec2 pixelLocation = ivec2( view.dimensions.xy * fragTexCoord.xy );
 
 	float stencilCoverage = 0;
 	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;

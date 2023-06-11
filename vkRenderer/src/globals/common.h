@@ -148,7 +148,6 @@ struct globalUboConstants_t
 {
 	vec4f		time;
 	vec4f		generic;
-	vec4f		dimensions;
 	vec4f		shadowParms;
 	vec4f		tonemap;
 	uint32_t	numSamples;

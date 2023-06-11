@@ -35,10 +35,12 @@ void main()
 	objectId = pushConstants.objectId;
 	const uint viewlId = pushConstants.viewId;
 
+	const view_t view = viewUbo.views[ viewlId ];
+
 	const float maxHeight = 1.0f;
 	vec3 position = inPosition;
 	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
-    gl_Position = viewUbo.views[ viewlId ].proj * viewUbo.views[ viewlId ].view * worldPosition;
+    gl_Position = view.projMat * view.viewMat * worldPosition;
 	gl_Position.z = 0.0f;
     fragColor = inColor;
     fragTexCoord = inTexCoord;

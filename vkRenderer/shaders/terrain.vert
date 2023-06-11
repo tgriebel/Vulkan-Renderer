@@ -61,6 +61,8 @@ void main()
 	const uint materialId = pushConstants.materialId;
 	const uint viewlId = pushConstants.viewId;
 
+	const view_t view = viewUbo.views[ viewlId ];
+
 	const uint heightMapId = materialUbo.materials[ materialId ].textureId0;
 	const float heightMapValue = texture( texSampler[ heightMapId ], inTexCoord.xy ).r;
 
@@ -68,7 +70,7 @@ void main()
 	vec3 position = inPosition;
 	position.z += maxHeight * heightMapValue;
 	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
-    gl_Position = viewUbo.views[ viewlId ].proj * viewUbo.views[ viewlId ].view * worldPosition;
+    gl_Position = view.projMat * view.viewMat * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 	mat3 worldTangent = ( mat3( ubo.model[ objectId ] ) * GetTerrainTangent( inTexCoord.xy ) );

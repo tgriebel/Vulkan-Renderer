@@ -65,8 +65,8 @@ struct material_t
 
 struct view_t
 {
-	mat4	view;
-	mat4	proj;
+	mat4	viewMat;
+	mat4	projMat;
 	vec4	dimensions;
 };
 
@@ -82,7 +82,6 @@ struct view_t
 											{																		\
 												vec4        time;													\
 												vec4        generic;												\
-												vec4        dimensions;												\
 												vec4        shadowParms;											\
 												vec4        toneMap;												\
 												uint		numSamples;												\
