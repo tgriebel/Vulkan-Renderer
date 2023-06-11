@@ -138,9 +138,10 @@ struct uniformBufferObject_t
 
 struct viewBufferObject_t
 {
-	mat4x4f	view;
-	mat4x4f	proj;
-	vec4f	dimensions;
+	mat4x4f		view;
+	mat4x4f		proj;
+	vec4f		dimensions;
+	uint32_t	numLights;
 };
 
 
@@ -151,8 +152,7 @@ struct globalUboConstants_t
 	vec4f		shadowParms;
 	vec4f		tonemap;
 	uint32_t	numSamples;
-	uint32_t	numLights;
-	// uint32_t	pad[ 3 ]; // minUniformBufferOffsetAlignment
+	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };
 
 

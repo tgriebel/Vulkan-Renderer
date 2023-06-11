@@ -705,8 +705,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
-		globals.numLights = renderViews[ 0 ]->numLights;
-	
+
 		state.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
@@ -723,6 +722,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		viewBuffer.view = view.GetViewMatrix();
 		viewBuffer.proj = view.GetProjMatrix();
 		viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
+		viewBuffer.numLights = view.numLights;
 
 		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 

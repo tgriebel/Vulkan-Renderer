@@ -68,6 +68,10 @@ struct view_t
 	mat4	viewMat;
 	mat4	projMat;
 	vec4	dimensions;
+	uint	numLights;
+	uint	pad0;
+	uint	pad1;
+	uint	pad2;
 };
 
 
@@ -85,7 +89,6 @@ struct view_t
 												vec4        shadowParms;											\
 												vec4        toneMap;												\
 												uint		numSamples;												\
-												uint		numLights;												\
 											} globals;
 
 #define VIEW_LAYOUT( S, N )					layout( set = S, binding = N ) buffer ViewUniformBuffer					\
