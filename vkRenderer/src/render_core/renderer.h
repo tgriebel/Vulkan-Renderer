@@ -134,6 +134,7 @@ private:
 	ImageArray							gpuImages2D;
 	ImageArray							gpuImagesCube;
 	materialBufferObject_t				materialBuffer[ MaxMaterials ];
+	lightBufferObject_t					lightsBuffer[ MaxLights ];
 
 	FrameState							frameState[ MAX_FRAMES_STATES ];
 	FrameBuffer							shadowMap[ MAX_FRAMES_STATES ];
@@ -141,6 +142,8 @@ private:
 
 	uint32_t							imageFreeSlot = 0;
 	uint32_t							materialFreeSlot = 0;
+	uint32_t							lightCount = 0;
+	uint32_t							shadowCount = 0;
 	uint32_t							vbBufElements = 0;
 	uint32_t							ibBufElements = 0;
 
@@ -165,7 +168,6 @@ private:
 
 	float								shadowNearPlane = 0.1f;
 	float								shadowFarPlane = 1000.0f;
-	bool								restart = false;
 
 	// Init/Shutdown
 	void								InitApi();

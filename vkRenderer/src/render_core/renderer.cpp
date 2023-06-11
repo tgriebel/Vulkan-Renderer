@@ -576,6 +576,24 @@ void Renderer::UpdateViews( const Scene* scene )
 	activeViews[ 1 ] = renderViews[ 0 ];
 	activeViews[ 2 ] = view2Ds[ 0 ];
 
+	shadowCount = 0;
+	lightCount = static_cast<uint32_t>( scene->lights.size() );
+	assert( lightCount <= MaxLights );
+
+	for( uint32_t i = 0; i < lightCount; ++i )
+	{
+		const light_t& light = scene->lights[ i ];
+		if( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
+			continue;
+		}
+		lightsBuffer[ shadowCount ].intensity = light.intensity;
+		lightsBuffer[ shadowCount ].lightDir = light.lightDir;
+		lightsBuffer[ shadowCount ].lightPos = light.lightPos;
+		lightsBuffer[ shadowCount ].shadowViewId = shadowCount;
+		++shadowCount;
+		assert( shadowCount < MaxShadowMaps );
+	}
+
 	// Main view
 	{
 		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
@@ -583,15 +601,17 @@ void Renderer::UpdateViews( const Scene* scene )
 
 		renderViews[ 0 ]->numLights = static_cast<uint32_t>( scene->lights.size() );
 		for ( uint32_t i = 0; i < renderViews[ 0 ]->numLights; ++i ) {
-			renderViews[ 0 ]->lights[ i ] = scene->lights[ i ];
+			renderViews[ 0 ]->lights[ i ] = i;
 		}
 	}
 
 	// Shadow views
 	{
+		const light_t& light = scene->lights[ 0 ];
+
 		// Temp shadow map set-up
 		Camera shadowCam;
-		shadowCam = Camera( renderViews[ 0 ]->lights[ 0 ].lightPos, MatrixFromVector( renderViews[ 0 ]->lights[ 0 ].lightDir.Reverse() ) );
+		shadowCam = Camera( light.lightPos, MatrixFromVector( light.lightDir.Reverse() ) );
 		shadowCam.SetClip( shadowNearPlane, shadowFarPlane );
 		shadowCam.SetFov( Radians( 90.0f ) );
 		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
@@ -716,24 +736,14 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		state.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	}
 
+	state.materialBuffers.SetPos();
+	state.materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
+
 	state.lightParms.SetPos();
-	for ( int i = 0; i < MaxLights; ++i )
-	{
-		// TODO: this should be all committed lights for all views eventually
-		lightBufferObject_t lightBuffer = {};
-		lightBuffer.intensity = renderViews[ 0 ]->lights[ i ].intensity;
-		lightBuffer.lightDir = renderViews[ 0 ]->lights[ i ].lightDir;
-		lightBuffer.lightPos = renderViews[ 0 ]->lights[ i ].lightPos;
-		lightBuffer.shadowViewId = uint32_t( shadowViews[ 0 ]->GetViewId() );
-		
-		state.lightParms.CopyData( &lightBuffer, sizeof( lightBufferObject_t ) );
-	}
+	state.lightParms.CopyData( lightsBuffer, sizeof( lightBufferObject_t ) * MaxLights );
 
-	frameState[ currentImage ].materialBuffers.SetPos();
-	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
-
-	frameState[ currentImage ].particleBuffer.SetPos( frameState[ currentImage ].particleBuffer.GetMaxSize() );
-	//frameState[ currentImage ].particleBuffer.CopyData();
+	state.particleBuffer.SetPos( frameState[ currentImage ].particleBuffer.GetMaxSize() );
+	//state.particleBuffer.CopyData();
 }
 
 

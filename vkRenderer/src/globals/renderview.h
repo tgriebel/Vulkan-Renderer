@@ -112,7 +112,7 @@ public:
 	const void				Commit();
 	const bool				IsCommitted() const;
 
-	light_t					lights[ MaxLights ];
+	uint32_t				lights[ MaxLights ];
 	uint32_t				numLights;
 	DrawPass*				passes[ DRAWPASS_COUNT ];
 
