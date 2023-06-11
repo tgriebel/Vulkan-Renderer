@@ -72,7 +72,6 @@ const uint32_t	MaxLights						= 128;
 const uint32_t	MaxParticles					= 1024;
 const uint32_t	MaxViews						= 6;
 const uint32_t	MaxModels						= 1000;
-const uint32_t	ShadowObjectOffset				= MaxModels;
 const uint32_t	MaxVertices						= 0x000FFFFF;
 const uint32_t	MaxIndices						= 0x000FFFFF;
 const uint32_t	MaxSurfaces						= MaxModels;

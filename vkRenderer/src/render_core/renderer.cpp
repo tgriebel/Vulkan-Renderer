@@ -685,7 +685,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
 		globals.dimensions = vec4f( viewWidth, viewHeight, 1.0f / viewWidth, 1.0f / viewHeight );
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
-		globals.shadowParms = vec4f( ShadowObjectOffset, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
+		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.numLights = renderView.numLights;
 		globalsBuffer = globals;

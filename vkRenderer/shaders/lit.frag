@@ -158,7 +158,6 @@ void main()
 
     float visibility = 1.0f;
     const uint shadowMapTexId = 0;
-    const uint shadowId = int( globals.shadowParms.x );
     vec4 lsPosition = viewUbo.views[ shadowViewId ].proj * viewUbo.views[ shadowViewId ].view * vec4( worldPosition.xyz, 1.0f );
     lsPosition.xyz /= lsPosition.w;
     vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
