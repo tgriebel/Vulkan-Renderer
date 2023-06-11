@@ -332,11 +332,8 @@ void Renderer::RecreateSwapChain()
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
 
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		if( views[ viewIx ].IsCommitted() ) {
-			views[ viewIx ].Resize();
-		}
+	for ( uint32_t viewIx = 0; viewIx < viewCount; ++viewIx ) {
+		views[ viewIx ].Resize();
 	}
 }
 
@@ -580,6 +577,12 @@ void Renderer::UpdateViews( const Scene* scene )
 	int width;
 	int height;
 	g_window.GetWindowSize( width, height );
+
+	// FIXME: TEMP HACK
+	activeViewCount = 3;
+	activeViews[ 0 ] = shadowView[ 0 ];
+	activeViews[ 1 ] = renderView[ 0 ];
+	activeViews[ 2 ] = view2D[ 0 ];
 
 	// Main view
 	{
@@ -1101,33 +1104,14 @@ void Renderer::RenderViews()
 	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ m_bufferId ], 0, 1, vertexBuffers, offsets );
 	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ m_bufferId ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
-	// Shadow View
+	for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 	{
-		MarkerBeginRegion( gfxContext, shadowView[ 0 ]->name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, activeViews[ viewIx ]->name, ColorToVector( Color::White ) );
 
-		RenderViewSurfaces( *shadowView[ 0 ], gfxContext );
+		RenderViewSurfaces( *activeViews[ viewIx ], gfxContext );
 
 		MarkerEndRegion( gfxContext );
 	}
-
-	// Main View
-	{
-		MarkerBeginRegion( gfxContext, renderView[ 0 ]->name, ColorToVector( Color::White ) );
-
-		RenderViewSurfaces( *renderView[ 0 ], gfxContext );
-		
-		MarkerEndRegion( gfxContext );
-	}
-
-	// 2D View
-	{
-		MarkerBeginRegion( gfxContext, view2D[ 0 ]->name, ColorToVector( Color::White ) );
-
-		RenderViewSurfaces( *view2D[ 0 ], gfxContext );
-		
-		MarkerEndRegion( gfxContext );
-	}
-
 
 	if ( vkEndCommandBuffer( gfxContext.commandBuffers[ m_bufferId ] ) != VK_SUCCESS )
 	{
