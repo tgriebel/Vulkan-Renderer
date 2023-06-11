@@ -70,6 +70,9 @@ struct ComputeState
 class Renderer
 {
 public:
+	using lightBufferArray_t = Array<lightBufferObject_t, MaxLights>;
+	using materialBufferArray_t = Array<materialBufferObject_t, MaxMaterials>;
+
 	inline bool IsReady() {
 		return ( m_frameNumber > 0 );
 	}
@@ -133,15 +136,14 @@ private:
 	GpuBuffer							ib;
 	ImageArray							gpuImages2D;
 	ImageArray							gpuImagesCube;
-	materialBufferObject_t				materialBuffer[ MaxMaterials ];
-	lightBufferObject_t					lightsBuffer[ MaxLights ];
+	materialBufferArray_t				materialBuffer;
+	lightBufferArray_t					lightsBuffer;
 
 	FrameState							frameState[ MAX_FRAMES_STATES ];
 	FrameBuffer							shadowMap[ MaxShadowMaps ][ MAX_FRAMES_STATES ];
 	FrameBuffer							mainColor[ MAX_FRAMES_STATES ];
 
 	uint32_t							imageFreeSlot = 0;
-	uint32_t							materialFreeSlot = 0;
 	uint32_t							lightCount = 0;
 	uint32_t							shadowCount = 0;
 	uint32_t							vbBufElements = 0;

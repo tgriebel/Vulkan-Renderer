@@ -203,18 +203,17 @@ void Renderer::UpdateGpuMaterials()
 		Asset<Material>* matAsset = g_assets.materialLib.Find( *it );
 		Material& m = matAsset->Get();
 		if( m.uploadId < 0 ) {
-			m.uploadId = materialFreeSlot++;
+			m.uploadId = materialBuffer.Count();
 		}
 		matAsset->CompleteUpload();
 
 		assert( m.uploadId < MaxMaterials );
-		materialBufferObject_t& ubo = materialBuffer[ m.uploadId ];
+		materialBufferObject_t materialObject = {};
 
 		if( m.usage == MATERIAL_USAGE_CODE )
 		{
-			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
-			{
-				ubo.textures[ t ] = (int)m.GetTexture( t ).Get();
+			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
+				materialObject.textures[ t ] = (int)m.GetTexture( t ).Get();
 			}
 		}
 		else
@@ -222,26 +221,28 @@ void Renderer::UpdateGpuMaterials()
 			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
 			{
 				const hdl_t handle = m.GetTexture( t );
-				if ( handle.IsValid() ) {
+				if ( handle.IsValid() )
+				{
 					const int uploadId = g_assets.textureLib.Find( m.GetTexture( t ) )->Get().gpuImage->GetId();
 					assert( uploadId >= 0 );
-					ubo.textures[ t ] = uploadId;
-				}
-				else {
-					ubo.textures[ t ] = -1;
+					materialObject.textures[ t ] = uploadId;
+				} else {
+					materialObject.textures[ t ] = -1;
 				}
 			}
 		}
-		ubo.Kd = vec3f( m.Kd().r, m.Kd().g, m.Kd().b );
-		ubo.Ks = vec3f( m.Ks().r, m.Ks().g, m.Ks().b );
-		ubo.Ka = vec3f( m.Ka().r, m.Ka().g, m.Ka().b );
-		ubo.Ke = vec3f( m.Ke().r, m.Ke().g, m.Ke().b );
-		ubo.Tf = vec3f( m.Tf().r, m.Tf().g, m.Tf().b );
-		ubo.Tr = m.Tr();
-		ubo.Ni = m.Ni();
-		ubo.Ns = m.Ns();
-		ubo.illum = m.Illum();
-		ubo.textured = m.IsTextured();
+		materialObject.Kd = vec3f( m.Kd().r, m.Kd().g, m.Kd().b );
+		materialObject.Ks = vec3f( m.Ks().r, m.Ks().g, m.Ks().b );
+		materialObject.Ka = vec3f( m.Ka().r, m.Ka().g, m.Ka().b );
+		materialObject.Ke = vec3f( m.Ke().r, m.Ke().g, m.Ke().b );
+		materialObject.Tf = vec3f( m.Tf().r, m.Tf().g, m.Tf().b );
+		materialObject.Tr = m.Tr();
+		materialObject.Ni = m.Ni();
+		materialObject.Ns = m.Ns();
+		materialObject.illum = m.Illum();
+		materialObject.textured = m.IsTextured();
+
+		materialBuffer.Append( materialObject );
 	}
 	uploadMaterials.clear();
 }

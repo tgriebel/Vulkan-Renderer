@@ -302,7 +302,6 @@ void Renderer::ShutdownGPU()
 	ShutdownShaderResources();
 
 	imageFreeSlot = 0;
-	materialFreeSlot = 0;
 	vbBufElements = 0;
 	ibBufElements = 0;
 }
@@ -571,8 +570,10 @@ void Renderer::UpdateViews( const Scene* scene )
 	g_window.GetWindowSize( width, height );
 
 	shadowCount = 0;
-	lightCount = static_cast<uint32_t>( scene->lights.size() );
+	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
 	assert( lightCount <= MaxLights );
+
+	lightsBuffer.Reset();
 
 	for( uint32_t i = 0; i < lightCount; ++i )
 	{
@@ -580,15 +581,17 @@ void Renderer::UpdateViews( const Scene* scene )
 		if ( ( light.flags & LIGHT_FLAGS_HIDDEN ) != 0 ) {
 			continue;
 		}
-		lightsBuffer[ shadowCount ].intensity = light.intensity;
-		lightsBuffer[ shadowCount ].lightDir = light.lightDir;
-		lightsBuffer[ shadowCount ].lightPos = light.lightPos;
+
+		lightBufferObject_t lightObject = {};
+		lightObject.intensity = light.intensity;
+		lightObject.lightDir = light.lightDir;
+		lightObject.lightPos = light.lightPos;
 
 		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
-			lightsBuffer[ shadowCount ].shadowViewId = 0xFF;
+			lightObject.shadowViewId = 0xFF;
 		} else
 		{
-			lightsBuffer[ shadowCount ].shadowViewId = shadowCount;
+			lightObject.shadowViewId = shadowCount;
 
 			Camera shadowCam;
 			shadowCam = Camera( light.lightPos, MatrixFromVector( light.lightDir.Reverse() ) );
@@ -599,6 +602,8 @@ void Renderer::UpdateViews( const Scene* scene )
 			shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
 			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
 		}	
+		lightsBuffer.Append( lightObject );
+
 		++shadowCount;
 		assert( shadowCount < MaxShadowMaps );
 	}
@@ -741,10 +746,10 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	}
 
 	state.materialBuffers.SetPos();
-	state.materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
+	state.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
 
 	state.lightParms.SetPos();
-	state.lightParms.CopyData( lightsBuffer, sizeof( lightBufferObject_t ) * MaxLights );
+	state.lightParms.CopyData( lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
 	state.particleBuffer.SetPos( frameState[ currentImage ].particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
