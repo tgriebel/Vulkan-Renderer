@@ -67,6 +67,7 @@ struct view_t
 {
 	mat4	view;
 	mat4	proj;
+	vec4	dimensions;
 };
 
 

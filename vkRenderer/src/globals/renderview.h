@@ -47,6 +47,8 @@ private:
 	bool			m_committed;
 
 public:
+	vec2i			m_frameBufferSize; // FIXME: make private
+
 	RenderView()
 	{
 		m_viewport = viewport_t( 0, 0, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, 0.0f, 1.0f );
@@ -61,6 +63,8 @@ public:
 		m_viewMatrix = mat4x4f( 1.0f );
 		m_projMatrix = mat4x4f( 1.0f );
 		m_viewprojMatrix = mat4x4f( 1.0f );
+
+		m_frameBufferSize = vec2i( 0, 0 );
 
 		m_viewId = -1;
 		m_committed = false;
@@ -88,6 +92,7 @@ public:
 	void					SetCamera( const Camera& camera, const bool reverseZ = true );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
 	const viewport_t&		GetViewport() const;
+	vec2i					GetFrameSize() const;
 	const mat4x4f&			GetViewMatrix() const;
 	const mat4x4f&			GetProjMatrix() const;
 	const mat4x4f&			GetViewprojMatrix() const;

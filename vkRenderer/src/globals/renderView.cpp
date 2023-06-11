@@ -23,6 +23,12 @@ void RenderView::SetViewRect( const int32_t x, const int32_t y, const uint32_t w
 }
 
 
+vec2i RenderView::GetFrameSize() const
+{
+	return m_frameBufferSize;
+}
+
+
 const viewport_t& RenderView::GetViewport() const
 {
 	return m_viewport;

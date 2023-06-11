@@ -538,6 +538,8 @@ void Renderer::InitView( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] )
 	const uint32_t width = viewport.width;
 	const uint32_t height = viewport.height;
 
+	view.m_frameBufferSize = vec2i( fb[ 0 ].GetWidth(), fb[ 0 ].GetHeight() );
+
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
 		view.passes[ passIx ] = nullptr;

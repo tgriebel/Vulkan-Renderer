@@ -138,8 +138,9 @@ struct uniformBufferObject_t
 
 struct viewBufferObject_t
 {
-	mat4x4f view;
-	mat4x4f proj;
+	mat4x4f	view;
+	mat4x4f	proj;
+	vec4f	dimensions;
 };
 
 
