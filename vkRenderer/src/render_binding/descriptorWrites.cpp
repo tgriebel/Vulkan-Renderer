@@ -185,8 +185,8 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		if ( shadowView[ 0 ]->passes[ i ] != nullptr ) {
 			AppendDescriptorWrites( *shadowView[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
 		}
-		if ( renderView.passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *renderView.passes[ i ]->parms[ currentImage ], descriptorWrites );
+		if ( renderView[ 0 ]->passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *renderView[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
 		}
 		if ( view2D.passes[ i ] != nullptr ) {
 			AppendDescriptorWrites( *view2D.passes[ i ]->parms[ currentImage ], descriptorWrites );

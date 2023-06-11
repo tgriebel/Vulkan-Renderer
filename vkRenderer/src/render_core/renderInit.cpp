@@ -44,9 +44,6 @@ void Renderer::Init()
 {
 	InitApi();
 
-	renderView.region = renderViewRegion_t::STANDARD_RASTER;
-	renderView.name = "Main View";
-
 	view2D.region = renderViewRegion_t::POST;
 	view2D.name = "Post View";
 
@@ -59,7 +56,13 @@ void Renderer::Init()
 		shadowView[ i ]->name = "Shadow View";
 		InitView( *shadowView[ i ], shadowMap );
 	}
-	InitView( renderView, mainColor );
+	for ( uint32_t i = 0; i < Max3DViews; ++i )
+	{
+		renderView[ i ] = &views[ viewCount ];
+		renderView[ i ]->region = renderViewRegion_t::STANDARD_RASTER;
+		renderView[ i ]->name = "Main View";
+		InitView( *renderView[ i ], mainColor );
+	}
 	InitView( view2D, g_swapChain.framebuffers );
 
 	InitShaderResources();
@@ -212,7 +215,7 @@ void Renderer::InitShaderResources()
 	}
 
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
-	RenderView* views[ 3 ] = { shadowView[ 0 ], &renderView, &view2D }; // FIXME: TEMP!!
+	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], &view2D }; // FIXME: TEMP!!
 	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
 	{
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
@@ -459,7 +462,7 @@ void Renderer::CreatePipelineObjects()
 	std::vector<const DrawPass*> passes;
 	passes.reserve( 3 * DRAWPASS_COUNT );
 
-	RenderView* views[ 3 ] = { shadowView[ 0 ], &renderView, &view2D }; // FIXME: TEMP!!
+	RenderView* views[ 3 ] = { shadowView[ 0 ], renderView[ 0 ], &view2D }; // FIXME: TEMP!!
 	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
 	{
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
