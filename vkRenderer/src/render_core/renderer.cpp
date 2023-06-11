@@ -731,7 +731,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 
 	static uniformBufferObject_t postUboBuffer[ MaxSurfaces ];
 	assert( view2D.committedModelCnt < MaxSurfaces );
-	for ( uint32_t i = 0; i < shadowView.committedModelCnt; ++i )
+	for ( uint32_t i = 0; i < view2D.committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
 		ubo.model = view2D.sortedInstances[ i ].modelMatrix;
