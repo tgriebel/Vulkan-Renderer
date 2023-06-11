@@ -73,27 +73,19 @@ static ImGui_ImplVulkanH_Window imguiMainWindowData;
 
 void Renderer::Commit( const Scene* scene )
 {
-	// TODO: the scene needs to filter into views
-
-	renderViews[ 0 ]->committedModelCnt = 0;
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
-	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( *renderViews[ 0 ], *scene->entities[i] );
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
+	{
+		RenderView& view = views[ viewIx ];
+		if( view.IsCommitted() == false ) {
+			continue;
+		}
+		view.committedModelCnt = 0;
+		for ( uint32_t entIx = 0; entIx < entCount; ++entIx ) {
+			CommitModel( view, *scene->entities[ entIx ] );
+		}
+		MergeSurfaces( view );
 	}
-	MergeSurfaces( *renderViews[ 0 ] );
-
-	shadowViews[ 0 ]->committedModelCnt = 0;
-	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( *shadowViews[ 0 ], *scene->entities[i] );
-	}
-	MergeSurfaces( *shadowViews[ 0 ] );
-
-	view2Ds[ 0 ]->committedModelCnt = 0;
-	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( *view2Ds[ 0 ], *scene->entities[ i ] );
-	}
-	MergeSurfaces( *view2Ds[ 0 ] );
-
 	UpdateViews( scene );
 }
 
