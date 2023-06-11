@@ -618,10 +618,6 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
-		if( views[ viewIx ].IsCommitted() == false ) {
-			continue;
-		}
-
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			DrawPass* pass = views[ viewIx ].passes[ passIx ];
