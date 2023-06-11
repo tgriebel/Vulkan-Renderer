@@ -47,15 +47,20 @@ void Renderer::Init()
 	renderView.region = renderViewRegion_t::STANDARD_RASTER;
 	renderView.name = "Main View";
 
-	shadowView.region = renderViewRegion_t::SHADOW;
-	shadowView.name = "Shadow View";
-
 	view2D.region = renderViewRegion_t::POST;
 	view2D.name = "Post View";
 
-	InitRenderPasses( shadowView, shadowMap );
-	InitRenderPasses( renderView, mainColor );
-	InitRenderPasses( view2D, g_swapChain.framebuffers );
+	viewCount = 0;
+
+	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
+	{
+		shadowView[ i ] = &views[ viewCount ];
+		shadowView[ i ]->region = renderViewRegion_t::SHADOW;
+		shadowView[ i ]->name = "Shadow View";
+		InitView( *shadowView[ i ], shadowMap );
+	}
+	InitView( renderView, mainColor );
+	InitView( view2D, g_swapChain.framebuffers );
 
 	InitShaderResources();
 
@@ -207,7 +212,7 @@ void Renderer::InitShaderResources()
 	}
 
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
-	RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+	RenderView* views[ 3 ] = { shadowView[ 0 ], &renderView, &view2D }; // FIXME: TEMP!!
 	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
 	{
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
@@ -454,7 +459,7 @@ void Renderer::CreatePipelineObjects()
 	std::vector<const DrawPass*> passes;
 	passes.reserve( 3 * DRAWPASS_COUNT );
 
-	RenderView* views[ 3 ] = { &shadowView, &renderView, &view2D }; // FIXME: TEMP!!
+	RenderView* views[ 3 ] = { shadowView[ 0 ], &renderView, &view2D }; // FIXME: TEMP!!
 	for ( uint32_t viewIx = 0; viewIx < 3; ++viewIx )
 	{
 		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
@@ -511,7 +516,7 @@ void Renderer::CreatePipelineObjects()
 }
 
 
-void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] )
+void Renderer::InitView( RenderView& view, FrameBuffer fb[ MAX_FRAMES_STATES ] )
 {
 	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
 	
@@ -631,6 +636,9 @@ void Renderer::InitRenderPasses( RenderView& view, FrameBuffer fb[ MAX_FRAMES_ST
 
 		view.passes[ passIx ] = pass;
 	}
+
+	view.SetViewId( viewCount ); // TODO: this is a side effect of the Init view class being part of the renderer class
+	++viewCount;
 }
 
 
@@ -888,7 +896,7 @@ void Renderer::CreateBuffers()
 		frameState[ i ].lightParms.Create( "Light", MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 		frameState[ i ].particleBuffer.Create( "Particle", MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 
-		for ( size_t v = 0; v < g_swapChain.GetBufferCount(); ++v ) {
+		for ( size_t v = 0; v < MaxViews; ++v ) {
 			frameState[ i ].surfParmPartitions[ v ] = frameState[ i ].surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 	}

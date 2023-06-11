@@ -47,6 +47,18 @@ const mat4x4f& RenderView::GetViewprojMatrix() const
 }
 
 
+const int RenderView::GetViewId() const
+{
+	return m_viewId;
+}
+
+
+const void RenderView::SetViewId( const int id )
+{
+	m_viewId = id;
+}
+
+
 void RenderView::SetCamera( const Camera& camera, const bool reverseZ )
 {
 	m_viewMatrix = camera.GetViewMatrix();

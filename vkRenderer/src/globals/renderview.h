@@ -43,6 +43,7 @@ private:
 	mat4x4f			m_viewMatrix;
 	mat4x4f			m_projMatrix;
 	mat4x4f			m_viewprojMatrix;
+	int				m_viewId;			
 
 public:
 	RenderView()
@@ -59,6 +60,8 @@ public:
 		m_viewMatrix = mat4x4f( 1.0f );
 		m_projMatrix = mat4x4f( 1.0f );
 		m_viewprojMatrix = mat4x4f( 1.0f );
+
+		m_viewId = -1;
 
 		region = renderViewRegion_t::UNKNOWN;
 
@@ -86,6 +89,8 @@ public:
 	const mat4x4f&			GetViewMatrix() const;
 	const mat4x4f&			GetProjMatrix() const;
 	const mat4x4f&			GetViewprojMatrix() const;
+	const int				GetViewId() const;
+	const void				SetViewId( const int id );
 
 	const char*				name;
 	renderViewRegion_t		region;
