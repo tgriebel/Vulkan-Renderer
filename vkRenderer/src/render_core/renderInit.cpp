@@ -48,35 +48,35 @@ void Renderer::Init()
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{
-		shadowView[ i ] = &views[ viewCount ];
-		shadowView[ i ]->region = renderViewRegion_t::SHADOW;
-		shadowView[ i ]->name = "Shadow View";
-		InitView( *shadowView[ i ], shadowMap );
+		shadowViews[ i ] = &views[ viewCount ];
+		shadowViews[ i ]->region = renderViewRegion_t::SHADOW;
+		shadowViews[ i ]->name = "Shadow View";
+		InitView( *shadowViews[ i ], shadowMap );
 	}
 
 	for ( uint32_t i = 0; i < Max3DViews; ++i )
 	{
-		renderView[ i ] = &views[ viewCount ];
-		renderView[ i ]->region = renderViewRegion_t::STANDARD_RASTER;
-		renderView[ i ]->name = "Main View";
-		InitView( *renderView[ i ], mainColor );
+		renderViews[ i ] = &views[ viewCount ];
+		renderViews[ i ]->region = renderViewRegion_t::STANDARD_RASTER;
+		renderViews[ i ]->name = "Main View";
+		InitView( *renderViews[ i ], mainColor );
 	}
 
 	for ( uint32_t i = 0; i < Max2DViews; ++i )
 	{
-		view2D[ i ] = &views[ viewCount ];
-		view2D[ i ]->region = renderViewRegion_t::POST;
-		view2D[ i ]->name = "Post View";
-		InitView( *view2D[ i ], g_swapChain.framebuffers );
+		view2Ds[ i ] = &views[ viewCount ];
+		view2Ds[ i ]->region = renderViewRegion_t::POST;
+		view2Ds[ i ]->name = "Post View";
+		InitView( *view2Ds[ i ], g_swapChain.framebuffers );
 	}
 
-	shadowView[ 0 ]->Commit();
-	renderView[ 0 ]->Commit();
-	view2D[ 0 ]->Commit();
+	shadowViews[ 0 ]->Commit();
+	renderViews[ 0 ]->Commit();
+	view2Ds[ 0 ]->Commit();
 
 	InitShaderResources();
 
-	InitImGui( *view2D[ 0 ] );
+	InitImGui( *view2Ds[ 0 ] );
 
 	UploadAssets();
 }

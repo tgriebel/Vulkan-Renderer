@@ -183,14 +183,14 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 
 	for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
 	{
-		if ( shadowView[ 0 ]->passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *shadowView[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
+		if ( shadowViews[ 0 ]->passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *shadowViews[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
 		}
-		if ( renderView[ 0 ]->passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *renderView[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
+		if ( renderViews[ 0 ]->passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *renderViews[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
 		}
-		if ( view2D[ 0 ]->passes[ i ] != nullptr ) {
-			AppendDescriptorWrites( *view2D[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
+		if ( view2Ds[ 0 ]->passes[ i ] != nullptr ) {
+			AppendDescriptorWrites( *view2Ds[ 0 ]->passes[ i ]->parms[ currentImage ], descriptorWrites );
 		}
 	}
 

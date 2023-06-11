@@ -96,9 +96,9 @@ private:
 	renderConstants_t					rc;
 	RenderView							views[ MaxViews ];
 	RenderView*							activeViews[ MaxViews ];
-	RenderView*							renderView[ Max3DViews ];
-	RenderView*							shadowView[ MaxShadowViews ];
-	RenderView*							view2D[ Max2DViews ];
+	RenderView*							renderViews[ Max3DViews ];
+	RenderView*							shadowViews[ MaxShadowViews ];
+	RenderView*							view2Ds[ Max2DViews ];
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 

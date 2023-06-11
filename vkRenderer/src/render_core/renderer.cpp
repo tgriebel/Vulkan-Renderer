@@ -75,24 +75,24 @@ void Renderer::Commit( const Scene* scene )
 {
 	// TODO: the scene needs to filter into views
 
-	renderView[ 0 ]->committedModelCnt = 0;
+	renderViews[ 0 ]->committedModelCnt = 0;
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( *renderView[ 0 ], *scene->entities[i] );
+		CommitModel( *renderViews[ 0 ], *scene->entities[i] );
 	}
-	MergeSurfaces( *renderView[ 0 ] );
+	MergeSurfaces( *renderViews[ 0 ] );
 
-	shadowView[ 0 ]->committedModelCnt = 0;
+	shadowViews[ 0 ]->committedModelCnt = 0;
 	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( *shadowView[ 0 ], *scene->entities[i] );
+		CommitModel( *shadowViews[ 0 ], *scene->entities[i] );
 	}
-	MergeSurfaces( *shadowView[ 0 ] );
+	MergeSurfaces( *shadowViews[ 0 ] );
 
-	view2D[ 0 ]->committedModelCnt = 0;
+	view2Ds[ 0 ]->committedModelCnt = 0;
 	for ( uint32_t i = 0; i < entCount; ++i ) {
-		CommitModel( *view2D[ 0 ], *scene->entities[ i ] );
+		CommitModel( *view2Ds[ 0 ], *scene->entities[ i ] );
 	}
-	MergeSurfaces( *view2D[ 0 ] );
+	MergeSurfaces( *view2Ds[ 0 ] );
 
 	UpdateViews( scene );
 }
@@ -580,18 +580,18 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// FIXME: TEMP HACK
 	activeViewCount = 3;
-	activeViews[ 0 ] = shadowView[ 0 ];
-	activeViews[ 1 ] = renderView[ 0 ];
-	activeViews[ 2 ] = view2D[ 0 ];
+	activeViews[ 0 ] = shadowViews[ 0 ];
+	activeViews[ 1 ] = renderViews[ 0 ];
+	activeViews[ 2 ] = view2Ds[ 0 ];
 
 	// Main view
 	{
-		renderView[ 0 ]->SetViewRect( 0, 0, width, height );
-		renderView[ 0 ]->SetCamera( scene->camera );
+		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
+		renderViews[ 0 ]->SetCamera( scene->camera );
 
-		renderView[ 0 ]->numLights = static_cast<uint32_t>( scene->lights.size() );
-		for ( uint32_t i = 0; i < renderView[ 0 ]->numLights; ++i ) {
-			renderView[ 0 ]->lights[ i ] = scene->lights[ i ];
+		renderViews[ 0 ]->numLights = static_cast<uint32_t>( scene->lights.size() );
+		for ( uint32_t i = 0; i < renderViews[ 0 ]->numLights; ++i ) {
+			renderViews[ 0 ]->lights[ i ] = scene->lights[ i ];
 		}
 	}
 
@@ -599,18 +599,18 @@ void Renderer::UpdateViews( const Scene* scene )
 	{
 		// Temp shadow map set-up
 		Camera shadowCam;
-		shadowCam = Camera( renderView[ 0 ]->lights[ 0 ].lightPos, MatrixFromVector( renderView[ 0 ]->lights[ 0 ].lightDir.Reverse() ) );
+		shadowCam = Camera( renderViews[ 0 ]->lights[ 0 ].lightPos, MatrixFromVector( renderViews[ 0 ]->lights[ 0 ].lightDir.Reverse() ) );
 		shadowCam.SetClip( shadowNearPlane, shadowFarPlane );
 		shadowCam.SetFov( Radians( 90.0f ) );
 		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
 		
-		shadowView[ 0 ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
-		shadowView[ 0 ]->SetCamera( shadowCam, false );
+		shadowViews[ 0 ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
+		shadowViews[ 0 ]->SetCamera( shadowCam, false );
 	}
 
 	// Post view
 	{
-		view2D[ 0 ]->SetViewRect( 0, 0, width, height );
+		view2Ds[ 0 ]->SetViewRect( 0, 0, width, height );
 	}
 }
 
@@ -676,7 +676,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		float intPart = 0;
 		const float fracPart = modf( time, &intPart );
 
-		const viewport_t& viewport = renderView[ 0 ]->GetViewport();
+		const viewport_t& viewport = renderViews[ 0 ]->GetViewport();
 
 		const float viewWidth = static_cast<float>( viewport.width );
 		const float viewHeight = static_cast<float>( viewport.height );
@@ -687,52 +687,52 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
-		globals.numLights = renderView[ 0 ]->numLights;
+		globals.numLights = renderViews[ 0 ]->numLights;
 		globalsBuffer = globals;
 	}
 
 	static viewBufferObject_t viewBuffer[MaxViews];
 	{
-		viewBuffer[ renderView[ 0 ]->GetViewId() ].view = renderView[ 0 ]->GetViewMatrix();
-		viewBuffer[ renderView[ 0 ]->GetViewId() ].proj = renderView[ 0 ]->GetProjMatrix();
+		viewBuffer[ renderViews[ 0 ]->GetViewId() ].view = renderViews[ 0 ]->GetViewMatrix();
+		viewBuffer[ renderViews[ 0 ]->GetViewId() ].proj = renderViews[ 0 ]->GetProjMatrix();
 
-		viewBuffer[ shadowView[ 0 ]->GetViewId() ].view = shadowView[ 0 ]->GetViewMatrix();
-		viewBuffer[ shadowView[ 0 ]->GetViewId() ].proj = shadowView[ 0 ]->GetProjMatrix();
+		viewBuffer[ shadowViews[ 0 ]->GetViewId() ].view = shadowViews[ 0 ]->GetViewMatrix();
+		viewBuffer[ shadowViews[ 0 ]->GetViewId() ].proj = shadowViews[ 0 ]->GetProjMatrix();
 
-		viewBuffer[ view2D[ 0 ]->GetViewId() ].view = view2D[ 0 ]->GetViewMatrix();
-		viewBuffer[ view2D[ 0 ]->GetViewId() ].proj = view2D[ 0 ]->GetProjMatrix();
+		viewBuffer[ view2Ds[ 0 ]->GetViewId() ].view = view2Ds[ 0 ]->GetViewMatrix();
+		viewBuffer[ view2Ds[ 0 ]->GetViewId() ].proj = view2Ds[ 0 ]->GetProjMatrix();
 	}
 
 	static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
-	assert( renderView[ 0 ]->committedModelCnt < MaxSurfaces );
-	for ( uint32_t i = 0; i < renderView[ 0 ]->committedModelCnt; ++i )
+	assert( renderViews[ 0 ]->committedModelCnt < MaxSurfaces );
+	for ( uint32_t i = 0; i < renderViews[ 0 ]->committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
-		ubo.model = renderView[ 0 ]->sortedInstances[ i ].modelMatrix;
-		const drawSurf_t& surf = renderView[ 0 ]->merged[ renderView[ 0 ]->sortedInstances[ i ].surfId ];
-		const uint32_t objectId = ( renderView[ 0 ]->sortedInstances[ i ].id + surf.objectId );
+		ubo.model = renderViews[ 0 ]->sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = renderViews[ 0 ]->merged[ renderViews[ 0 ]->sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( renderViews[ 0 ]->sortedInstances[ i ].id + surf.objectId );
 		uboBuffer[ objectId ] = ubo;
 	}
 
 	static uniformBufferObject_t shadowUboBuffer[ MaxSurfaces ];
-	assert( shadowView[ 0 ]->committedModelCnt < MaxSurfaces );
-	for ( uint32_t i = 0; i < shadowView[ 0 ]->committedModelCnt; ++i )
+	assert( shadowViews[ 0 ]->committedModelCnt < MaxSurfaces );
+	for ( uint32_t i = 0; i < shadowViews[ 0 ]->committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
-		ubo.model = shadowView[ 0 ]->sortedInstances[ i ].modelMatrix;
-		const drawSurf_t& surf = shadowView[ 0 ]->merged[ shadowView[ 0 ]->sortedInstances[ i ].surfId ];
-		const uint32_t objectId = ( shadowView[ 0 ]->sortedInstances[ i ].id + surf.objectId );
+		ubo.model = shadowViews[ 0 ]->sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = shadowViews[ 0 ]->merged[ shadowViews[ 0 ]->sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( shadowViews[ 0 ]->sortedInstances[ i ].id + surf.objectId );
 		shadowUboBuffer[ objectId ] = ubo;
 	}
 
 	static uniformBufferObject_t postUboBuffer[ MaxSurfaces ];
-	assert( view2D[ 0 ]->committedModelCnt < MaxSurfaces );
-	for ( uint32_t i = 0; i < view2D[ 0 ]->committedModelCnt; ++i )
+	assert( view2Ds[ 0 ]->committedModelCnt < MaxSurfaces );
+	for ( uint32_t i = 0; i < view2Ds[ 0 ]->committedModelCnt; ++i )
 	{
 		uniformBufferObject_t ubo;
-		ubo.model = view2D[ 0 ]->sortedInstances[ i ].modelMatrix;
-		const drawSurf_t& surf = view2D[ 0 ]->merged[ view2D[ 0 ]->sortedInstances[ i ].surfId ];
-		const uint32_t objectId = ( view2D[ 0 ]->sortedInstances[ 0 ].id + surf.objectId );
+		ubo.model = view2Ds[ 0 ]->sortedInstances[ i ].modelMatrix;
+		const drawSurf_t& surf = view2Ds[ 0 ]->merged[ view2Ds[ 0 ]->sortedInstances[ i ].surfId ];
+		const uint32_t objectId = ( view2Ds[ 0 ]->sortedInstances[ 0 ].id + surf.objectId );
 		postUboBuffer[ objectId ] = ubo;
 	}
 
@@ -741,10 +741,10 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	{
 		// TODO: this should be all committed lights for all views eventually
 		lightBufferObject_t light;
-		light.intensity = renderView[ 0 ]->lights[ i ].intensity;
-		light.lightDir = renderView[ 0 ]->lights[ i ].lightDir;
-		light.lightPos = renderView[ 0 ]->lights[ i ].lightPos;
-		light.shadowViewId = uint32_t( shadowView[ 0 ]->GetViewId() );
+		light.intensity = renderViews[ 0 ]->lights[ i ].intensity;
+		light.lightDir = renderViews[ 0 ]->lights[ i ].lightDir;
+		light.lightPos = renderViews[ 0 ]->lights[ i ].lightPos;
+		light.shadowViewId = uint32_t( shadowViews[ 0 ]->GetViewId() );
 		lightBuffer[i] = light;
 	}
 
@@ -754,12 +754,12 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	frameState[ currentImage ].viewParms.SetPos();
 	frameState[ currentImage ].viewParms.CopyData( &viewBuffer, sizeof( viewBufferObject_t ) * MaxViews );
 
-	frameState[ currentImage ].surfParmPartitions[ renderView[ 0 ]->GetViewId() ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ renderView[ 0 ]->GetViewId() ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParmPartitions[ shadowView[ 0 ]->GetViewId() ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ shadowView[ 0 ]->GetViewId() ].CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
-	frameState[ currentImage ].surfParmPartitions[ view2D[ 0 ]->GetViewId() ].SetPos();
-	frameState[ currentImage ].surfParmPartitions[ view2D[ 0 ]->GetViewId() ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ renderViews[ 0 ]->GetViewId() ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ renderViews[ 0 ]->GetViewId() ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ shadowViews[ 0 ]->GetViewId() ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ shadowViews[ 0 ]->GetViewId() ].CopyData( shadowUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+	frameState[ currentImage ].surfParmPartitions[ view2Ds[ 0 ]->GetViewId() ].SetPos();
+	frameState[ currentImage ].surfParmPartitions[ view2Ds[ 0 ]->GetViewId() ].CopyData( postUboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 
 	frameState[ currentImage ].materialBuffers.SetPos();
 	frameState[ currentImage ].materialBuffers.CopyData( materialBuffer, sizeof( materialBufferObject_t ) * materialFreeSlot );
