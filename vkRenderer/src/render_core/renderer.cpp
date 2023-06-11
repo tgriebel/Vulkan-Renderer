@@ -583,13 +583,18 @@ void Renderer::UpdateViews( const Scene* scene )
 	for( uint32_t i = 0; i < lightCount; ++i )
 	{
 		const light_t& light = scene->lights[ i ];
-		if( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
+		if ( ( light.flags & LIGHT_FLAGS_HIDDEN ) != 0 ) {
 			continue;
 		}
 		lightsBuffer[ shadowCount ].intensity = light.intensity;
 		lightsBuffer[ shadowCount ].lightDir = light.lightDir;
 		lightsBuffer[ shadowCount ].lightPos = light.lightPos;
-		lightsBuffer[ shadowCount ].shadowViewId = shadowCount;
+
+		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
+			lightsBuffer[ shadowCount ].shadowViewId = 0xFF;
+		} else {
+			lightsBuffer[ shadowCount ].shadowViewId = shadowCount;
+		}	
 		++shadowCount;
 		assert( shadowCount < MaxShadowMaps );
 	}

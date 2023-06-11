@@ -124,8 +124,11 @@ void main()
     F0 = mix( F0, albedoColor.rgb, metallic );
 	
     vec3 Lo = vec3( 0.0f, 0.0f, 0.0f );
-    for( int i = 0; i < globals.numLights; ++i ) {
-	    const vec3 l = normalize( lightUbo.lights[ i ].lightPos.xyz - worldPosition.xyz );
+    for( int i = 0; i < globals.numLights; ++i )
+    {
+        const light_t light = lightUbo.lights[ i ];
+
+	    const vec3 l = normalize( light.lightPos.xyz - worldPosition.xyz );
         const vec3 h = normalize( v + l );
 
         const float NoL = max( dot( n, l ), 0.0f );
@@ -140,7 +143,7 @@ void main()
         vec3 kD = vec3( 1.0f ) - kS;
         kD *= 1.0f - metallic;
 
-        const float spotAngle = dot( l, lightUbo.lights[ i ].lightDir.xyz );
+        const float spotAngle = dot( l, light.lightDir.xyz );
         const float spotFov = 0.5f;
 
         vec3 numerator      = D * G * F;
@@ -150,39 +153,44 @@ void main()
         const float distance    = length( l );
         const float attenuation = 1.0f / ( distance * distance );
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
-        const vec3 radiance     = attenuation * spotFalloff * lightUbo.lights[ i ].intensity.rgb;
+        const vec3 radiance     = attenuation * spotFalloff * light.intensity.rgb;
 
         vec3 diffuse = ( ( kD * albedoColor.rgb ) / PI + Fr ) * radiance * NoL;
         Lo += diffuse;
+
+        const uint shadowViewId = light.shadowViewId;
+        if ( shadowViewId != 0xFF )
+        {
+            const view_t shadowView = viewUbo.views[ shadowViewId ];
+
+            float visibility = 1.0f;
+            const uint shadowMapTexId = 0;
+            vec4 lsPosition = shadowView.projMat * shadowView.viewMat * vec4( worldPosition.xyz, 1.0f );
+            lsPosition.xyz /= lsPosition.w;
+            vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
+            float bias = 0.001f;
+            float depth = ( lsPosition.z );
+
+            if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f )
+            {
+                const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
+                const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], shadowPixelLocation, 0 ).r;
+                if ( shadowValue < ( depth - bias ) ) {
+                    visibility = globals.shadowParms.w;
+                }
+            }
+            else {
+                visibility = globals.shadowParms.w;
+            }
+            Lo.rgb *= visibility;
+        }
     }
     outColor.rgb = Lo.rgb + ambient;
     outColor.a = 1.0f;
 
-    const uint shadowViewId = lightUbo.lights[ 0 ].shadowViewId;
-
-    const view_t shadowView = viewUbo.views[ shadowViewId ];
-
-    float visibility = 1.0f;
-    const uint shadowMapTexId = 0;
-    vec4 lsPosition = shadowView.projMat * shadowView.viewMat * vec4( worldPosition.xyz, 1.0f );
-    lsPosition.xyz /= lsPosition.w;
-    vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
-    float bias = 0.001f;
-    float depth = ( lsPosition.z );
-
-    if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f ) {
-        const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
-        const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], shadowPixelLocation, 0 ).r;
-        if ( shadowValue < ( depth - bias ) ) {
-            visibility = globals.shadowParms.w;
-        }
-    } else {
-        visibility = globals.shadowParms.w;
-    }
-    //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
-    outColor.rgb *= visibility;
+    //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
 	outColor.a = material.Tr;
-//    outColor.rgb = envColor.rgb;
-//    outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
-//    outColor.rg = fragTexCoord.rb;
+//  outColor.rgb = envColor.rgb;
+//  outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
+//  outColor.rg = fragTexCoord.rb;
 }
