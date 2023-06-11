@@ -1,12 +1,15 @@
 #include "renderview.h"
 
-void RenderView::Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId )
+void RenderView::Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer fb[ MAX_FRAMES_STATES ] )
 {
 	const uint32_t frameStateCount = MAX_FRAMES_STATES;
 
 	const viewport_t& viewport = GetViewport();
 	const uint32_t width = viewport.width;
 	const uint32_t height = viewport.height;
+
+	m_name = name;
+	m_region = region;
 
 	m_frameBufferSize = vec2i( fb[ 0 ].GetWidth(), fb[ 0 ].GetHeight() );
 
@@ -156,7 +159,7 @@ void RenderView::SetViewRect( const int32_t x, const int32_t y, const uint32_t w
 
 drawPass_t RenderView::ViewRegionPassBegin()
 {
-	switch ( region )
+	switch ( m_region )
 	{
 		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
 		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
@@ -168,7 +171,7 @@ drawPass_t RenderView::ViewRegionPassBegin()
 
 drawPass_t RenderView::ViewRegionPassEnd()
 {
-	switch ( region )
+	switch ( m_region )
 	{
 		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
 		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
@@ -217,6 +220,18 @@ const int RenderView::GetViewId() const
 const void RenderView::SetViewId( const int id )
 {
 	m_viewId = id;
+}
+
+
+const char* RenderView::GetName() const
+{
+	return m_name;
+}
+
+
+const renderViewRegion_t RenderView::GetRegion() const
+{
+	return m_region;
 }
 
 

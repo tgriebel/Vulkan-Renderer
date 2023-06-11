@@ -181,7 +181,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_DEBUG ) ? DEBUG_SOLID | SKIP_OPAQUE : NONE ) );
 
 		// TODO: Make InRegion() function
-		if( view.region == renderViewRegion_t::SHADOW )
+		if( view.GetRegion() == renderViewRegion_t::SHADOW )
 		{
 			if( material.GetShader( DRAWPASS_SHADOW ) == INVALID_HDL ) {
 				continue;
@@ -193,13 +193,13 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 		}
-		else if ( view.region == renderViewRegion_t::POST )
+		else if ( view.GetRegion() == renderViewRegion_t::POST )
 		{
 			if ( material.GetShader( DRAWPASS_POST_2D ) == INVALID_HDL ) {
 				continue;
 			}
 		}
-		else if ( view.region == renderViewRegion_t::STANDARD_RASTER )
+		else if ( view.GetRegion() == renderViewRegion_t::STANDARD_RASTER )
 		{
 			const drawPass_t mainPasses[] = {	DRAWPASS_DEPTH,
 												DRAWPASS_TERRAIN,
@@ -1008,7 +1008,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		MarkerEndRegion( gfxContext );
 	}
 
-	if( view.region == renderViewRegion_t::POST )
+	if( view.GetRegion() == renderViewRegion_t::POST )
 	{
 #ifdef USE_IMGUI
 		MarkerBeginRegion( gfxContext, "Debug Menus", ColorToVector( Color::White ) );
@@ -1048,7 +1048,7 @@ void Renderer::RenderViews()
 
 	for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 	{
-		MarkerBeginRegion( gfxContext, activeViews[ viewIx ]->name, ColorToVector( Color::White ) );
+		MarkerBeginRegion( gfxContext, activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
 
 		RenderViewSurfaces( *activeViews[ viewIx ], gfxContext );
 

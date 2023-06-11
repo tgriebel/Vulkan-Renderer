@@ -49,27 +49,21 @@ void Renderer::Init()
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{
 		shadowViews[ i ] = &views[ viewCount ];
-		shadowViews[ i ]->region = renderViewRegion_t::SHADOW;
-		shadowViews[ i ]->name = "Shadow View";
-		shadowViews[ i ]->Init( shadowMap, viewCount );
+		shadowViews[ i ]->Init( "Shadow View", renderViewRegion_t::SHADOW, viewCount, shadowMap );
 		++viewCount;
 	}
 
 	for ( uint32_t i = 0; i < Max3DViews; ++i )
 	{
 		renderViews[ i ] = &views[ viewCount ];
-		renderViews[ i ]->region = renderViewRegion_t::STANDARD_RASTER;
-		renderViews[ i ]->name = "Main View";
-		renderViews[ i ]->Init( mainColor, viewCount );
+		renderViews[ i ]->Init( "Main View", renderViewRegion_t::STANDARD_RASTER, viewCount, mainColor );
 		++viewCount;
 	}
 
 	for ( uint32_t i = 0; i < Max2DViews; ++i )
 	{
 		view2Ds[ i ] = &views[ viewCount ];
-		view2Ds[ i ]->region = renderViewRegion_t::POST;
-		view2Ds[ i ]->name = "Post View";
-		view2Ds[ i ]->Init( g_swapChain.framebuffers, viewCount );
+		view2Ds[ i ]->Init( "Post View", renderViewRegion_t::POST, viewCount, g_swapChain.framebuffers );
 		++viewCount;
 	}
 

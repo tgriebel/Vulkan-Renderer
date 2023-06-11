@@ -39,13 +39,15 @@ enum class renderViewRegion_t : uint32_t
 class RenderView
 {
 private:
-	viewport_t		m_viewport;
-	mat4x4f			m_viewMatrix;
-	mat4x4f			m_projMatrix;
-	mat4x4f			m_viewprojMatrix;
-	vec2i			m_frameBufferSize;
-	int				m_viewId;
-	bool			m_committed;
+	viewport_t			m_viewport;
+	mat4x4f				m_viewMatrix;
+	mat4x4f				m_projMatrix;
+	mat4x4f				m_viewprojMatrix;
+	vec2i				m_frameBufferSize;
+	const char*			m_name;
+	renderViewRegion_t	m_region;
+	int					m_viewId;
+	bool				m_committed;
 
 public:
 
@@ -69,7 +71,7 @@ public:
 		m_viewId = -1;
 		m_committed = false;
 
-		region = renderViewRegion_t::UNKNOWN;
+		m_region = renderViewRegion_t::UNKNOWN;
 
 		memset( surfaces, 0, MaxSurfaces );
 		memset( sortedSurfaces, 0, MaxSurfaces );
@@ -91,8 +93,9 @@ public:
 	drawPass_t				ViewRegionPassBegin();
 	drawPass_t				ViewRegionPassEnd();
 
-	void					Init( FrameBuffer fb[ MAX_FRAMES_STATES ], const int viewId );
+	void					Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer fb[ MAX_FRAMES_STATES ] );
 	void					Resize();
+
 	void					SetCamera( const Camera& camera, const bool reverseZ = true );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
 	const viewport_t&		GetViewport() const;
@@ -102,11 +105,13 @@ public:
 	const mat4x4f&			GetViewprojMatrix() const;
 	const int				GetViewId() const;
 	const void				SetViewId( const int id );
+
+	const char*				GetName() const;
+	const renderViewRegion_t GetRegion() const;
+
 	const void				Commit();
 	const bool				IsCommitted() const;
 
-	const char*				name;
-	renderViewRegion_t		region;
 	light_t					lights[ MaxLights ];
 	uint32_t				numLights;
 	DrawPass*				passes[ DRAWPASS_COUNT ];
