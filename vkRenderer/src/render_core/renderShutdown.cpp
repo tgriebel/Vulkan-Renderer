@@ -183,5 +183,4 @@ void Renderer::ShutdownShaderResources()
 	particleShaderBinds.Destroy();
 
 	FreeRegisteredBindParms();
-	bindParmCount = 0;
 }

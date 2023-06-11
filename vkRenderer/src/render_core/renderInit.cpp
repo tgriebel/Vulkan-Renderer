@@ -717,11 +717,9 @@ ShaderBindParms* Renderer::RegisterBindParm( const ShaderBindSet* set )
 {
 	ShaderBindParms parms = ShaderBindParms( set );
 
-	assert( bindParmCount < DescriptorPoolMaxSets );
-	bindParmsList[ bindParmCount ] = parms;
-	++bindParmCount;
+	bindParmsList.Append( parms );
 
-	return &bindParmsList[ bindParmCount - 1 ];
+	return &bindParmsList[ bindParmsList.Count() - 1 ];
 }
 
 
@@ -729,6 +727,8 @@ void Renderer::AllocRegisteredBindParms()
 {
 	std::vector<VkDescriptorSetLayout> layouts;
 	std::vector<VkDescriptorSet> descSets;
+
+	const uint32_t bindParmCount = bindParmsList.Count();
 
 	layouts.reserve( bindParmCount );
 	descSets.reserve( bindParmCount );
@@ -763,9 +763,9 @@ void Renderer::AllocRegisteredBindParms()
 void Renderer::FreeRegisteredBindParms()
 {
 	std::vector<VkDescriptorSet> descSets;
-	descSets.reserve( bindParmCount );
+	descSets.reserve( bindParmsList.Count() );
 
-	for ( uint32_t i = 0; i < bindParmCount; ++i )
+	for ( uint32_t i = 0; i < bindParmsList.Count(); ++i )
 	{
 		ShaderBindParms& parms = bindParmsList[ i ];
 		descSets.push_back( parms.GetVkObject() );

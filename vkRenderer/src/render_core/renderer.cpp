@@ -595,7 +595,7 @@ void Renderer::UpdateViews( const Scene* scene )
 
 			Camera shadowCam;
 			shadowCam = Camera( light.lightPos, MatrixFromVector( light.lightDir.Reverse() ) );
-			shadowCam.SetClip( shadowNearPlane, shadowFarPlane );
+			shadowCam.SetClip( 0.1f, 1000.0f );
 			shadowCam.SetFov( Radians( 90.0f ) );
 			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
 
@@ -1082,8 +1082,7 @@ void Renderer::RenderViews()
 
 void Renderer::AttachDebugMenu( const debugMenuFuncPtr funcPtr )
 {
-	debugMenus[ debugMenuCount ] = funcPtr;
-	++debugMenuCount;
+	debugMenus.Append( funcPtr );
 }
 
 
@@ -1131,7 +1130,7 @@ void Renderer::DrawDebugMenu()
 
 	if ( ImGui::BeginTabBar( "Tabs" ) )
 	{
-		for( uint32_t i = 0; i < debugMenuCount; ++i ) {
+		for( uint32_t i = 0; i < debugMenus.Count(); ++i ) {
 			(*debugMenus[ i ])();
 		}
 		ImGui::EndTabBar();

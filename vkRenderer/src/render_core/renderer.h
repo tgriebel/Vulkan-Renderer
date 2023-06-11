@@ -72,6 +72,8 @@ class Renderer
 public:
 	using lightBufferArray_t = Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t = Array<materialBufferObject_t, MaxMaterials>;
+	using bindParmArray_t = Array<ShaderBindParms, DescriptorPoolMaxSets>;
+	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
 	inline bool IsReady() {
 		return ( m_frameNumber > 0 );
@@ -144,7 +146,6 @@ private:
 	FrameBuffer							mainColor[ MAX_FRAMES_STATES ];
 
 	uint32_t							imageFreeSlot = 0;
-	uint32_t							lightCount = 0;
 	uint32_t							shadowCount = 0;
 	uint32_t							vbBufElements = 0;
 	uint32_t							ibBufElements = 0;
@@ -153,23 +154,15 @@ private:
 	AllocatorMemory						frameBufferMemory;
 	AllocatorMemory						sharedMemory;
 
-	ShaderBindParms						bindParmsList[ DescriptorPoolMaxSets ];
-	uint32_t							bindParmCount = 0;
+	bindParmArray_t						bindParmsList;
 
 	VkSampler							vk_bilinearSampler;
 	VkSampler							vk_depthShadowSampler;
 
-	renderPassMap_t						vk_renderPassCache;
-
 	ShaderBindSet						defaultBindSet;
 	ShaderBindSet						particleShaderBinds;
 
-	static const uint32_t				DEBUG_MENU_MAX = 12;
-	uint32_t							debugMenuCount = 0;
-	debugMenuFuncPtr					debugMenus[ DEBUG_MENU_MAX ];
-
-	float								shadowNearPlane = 0.1f;
-	float								shadowFarPlane = 1000.0f;
+	debugMenuArray_t					debugMenus;
 
 	// Init/Shutdown
 	void								InitApi();
