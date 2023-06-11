@@ -253,9 +253,11 @@ void ChessScene::Update()
 		}
 	}
 
-	Material& glowMat = g_assets.materialLib.Find( "GlowSquare" )->Get();
+	Asset<Material>* glowMatAsset = g_assets.materialLib.Find( "GlowSquare" );
+	Material& glowMat = glowMatAsset->Get();
 	glowMat.Kd( rgbTuplef_t( 0.1f, 0.1f, 1.0f ) );
 	glowMat.Tr( 0.5f * cos( 3.0f * time ) + 0.5f );
+	glowMatAsset->QueueUpload();
 
 	const uint32_t lightCount = static_cast<uint32_t>( lights.size() );
 	for ( uint32_t i = 0; i < lightCount; ++i )

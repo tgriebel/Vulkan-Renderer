@@ -204,11 +204,12 @@ void Renderer::UpdateGpuMaterials()
 		Material& m = matAsset->Get();
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialBuffer.Count();
+			materialBuffer.Append( materialBufferObject_t() );
 		}
 		matAsset->CompleteUpload();
 
 		assert( m.uploadId < MaxMaterials );
-		materialBufferObject_t materialObject = {};
+		materialBufferObject_t& materialObject = materialBuffer[ m.uploadId ];
 
 		if( m.usage == MATERIAL_USAGE_CODE )
 		{
@@ -241,8 +242,6 @@ void Renderer::UpdateGpuMaterials()
 		materialObject.Ns = m.Ns();
 		materialObject.illum = m.Illum();
 		materialObject.textured = m.IsTextured();
-
-		materialBuffer.Append( materialObject );
 	}
 	uploadMaterials.clear();
 }

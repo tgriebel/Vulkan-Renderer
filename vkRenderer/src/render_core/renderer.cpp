@@ -236,7 +236,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		surf.hash = Hash( surf );
 		surf.dbgName = materialAsset->GetName().c_str();
 
-		if( materialAsset->IsUploaded() ) {
+		if( materialAsset->IsUploaded() == false ) {
 			uploadMaterials.insert( materialHdl );
 		}
 
