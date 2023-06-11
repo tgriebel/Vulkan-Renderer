@@ -174,7 +174,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 		{
 			ImGui::Text( "%i:", s );
 			ImGui::SameLine();
-			hdl_t shaderHdl = mat.GetShader( s );
+			hdl_t shaderHdl = mat.GetShader( drawPass_t( s ) );
 			if ( shaderHdl.IsValid() == false )
 			{
 				ImGui::Text( "<none>" );

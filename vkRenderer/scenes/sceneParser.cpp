@@ -251,7 +251,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 		if ( s[ mapIx ][0] == '\0' ) {
 			continue;
 		}
-		material->AddShader( enumMap[ mapIx ].value, AssetLibGpuProgram::Handle( s[ mapIx ] ) );
+		material->AddShader( drawPass_t( enumMap[ mapIx ].value ), AssetLibGpuProgram::Handle( s[ mapIx ] ) );
 	}
 	return 0;
 }

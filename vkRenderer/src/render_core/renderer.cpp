@@ -257,11 +257,11 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			surf.pipelineObject[ passIx ] = INVALID_HDL;
-			if ( material.GetShader( passIx ).IsValid() == false ) {
+			if ( material.GetShader( drawPass_t( passIx ) ).IsValid() == false ) {
 				continue;
 			}
 
-			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( material.GetShader( passIx ) );
+			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( material.GetShader( drawPass_t( passIx ) ) );
 			if ( prog == nullptr ) {
 				continue;
 			}
@@ -570,12 +570,6 @@ void Renderer::UpdateViews( const Scene* scene )
 	int height;
 	g_window.GetWindowSize( width, height );
 
-	// FIXME: TEMP HACK
-	activeViewCount = 3;
-	activeViews[ 0 ] = shadowViews[ 0 ];
-	activeViews[ 1 ] = renderViews[ 0 ];
-	activeViews[ 2 ] = view2Ds[ 0 ];
-
 	shadowCount = 0;
 	lightCount = static_cast<uint32_t>( scene->lights.size() );
 	assert( lightCount <= MaxLights );
@@ -592,8 +586,18 @@ void Renderer::UpdateViews( const Scene* scene )
 
 		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
 			lightsBuffer[ shadowCount ].shadowViewId = 0xFF;
-		} else {
+		} else
+		{
 			lightsBuffer[ shadowCount ].shadowViewId = shadowCount;
+
+			Camera shadowCam;
+			shadowCam = Camera( light.lightPos, MatrixFromVector( light.lightDir.Reverse() ) );
+			shadowCam.SetClip( shadowNearPlane, shadowFarPlane );
+			shadowCam.SetFov( Radians( 90.0f ) );
+			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+
+			shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
+			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
 		}	
 		++shadowCount;
 		assert( shadowCount < MaxShadowMaps );
@@ -604,31 +608,26 @@ void Renderer::UpdateViews( const Scene* scene )
 		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
 		renderViews[ 0 ]->SetCamera( scene->camera );
 
-		renderViews[ 0 ]->numLights = static_cast<uint32_t>( scene->lights.size() );
-		for ( uint32_t i = 0; i < renderViews[ 0 ]->numLights; ++i ) {
+		renderViews[ 0 ]->numLights = lightCount;
+		for ( uint32_t i = 0; i < lightCount; ++i ) {
 			renderViews[ 0 ]->lights[ i ] = i;
 		}
-	}
-
-	// Shadow views
-	{
-		const light_t& light = scene->lights[ 0 ];
-
-		// Temp shadow map set-up
-		Camera shadowCam;
-		shadowCam = Camera( light.lightPos, MatrixFromVector( light.lightDir.Reverse() ) );
-		shadowCam.SetClip( shadowNearPlane, shadowFarPlane );
-		shadowCam.SetFov( Radians( 90.0f ) );
-		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
-		
-		shadowViews[ 0 ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
-		shadowViews[ 0 ]->SetCamera( shadowCam, false );
 	}
 
 	// Post view
 	{
 		view2Ds[ 0 ]->SetViewRect( 0, 0, width, height );
 	}
+
+	// FIXME: TEMP HACK
+	activeViewCount = 0;
+	for( uint32_t i = 0; i < shadowCount; ++i )
+	{
+		activeViews[ i ] = shadowViews[ i ];
+		++activeViewCount;
+	}
+	activeViews[ activeViewCount++ ] = renderViews[ 0 ];
+	activeViews[ activeViewCount++ ] = view2Ds[ 0 ];
 }
 
 

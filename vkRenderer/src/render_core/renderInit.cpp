@@ -49,7 +49,7 @@ void Renderer::Init()
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{
 		shadowViews[ i ] = &views[ viewCount ];
-		shadowViews[ i ]->Init( "Shadow View", renderViewRegion_t::SHADOW, viewCount, shadowMap );
+		shadowViews[ i ]->Init( "Shadow View", renderViewRegion_t::SHADOW, viewCount, shadowMap[ i ] );
 		++viewCount;
 	}
 
@@ -67,7 +67,9 @@ void Renderer::Init()
 		++viewCount;
 	}
 
-	shadowViews[ 0 ]->Commit();
+	for ( uint32_t i = 0; i < MaxShadowViews; ++i ) {
+		shadowViews[ i ]->Commit();
+	}
 	renderViews[ 0 ]->Commit();
 	view2Ds[ 0 ]->Commit();
 
@@ -489,7 +491,7 @@ void Renderer::CreatePipelineObjects()
 		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
 		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
 		{
-			const hdl_t progHdl = m.GetShader( passIx );
+			const hdl_t progHdl = m.GetShader( passes[ passIx ]->passId );
 			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( progHdl );
 			if ( prog == nullptr ) {
 				continue;
@@ -636,15 +638,18 @@ void Renderer::CreateFramebuffers()
 	}
 
 	// Shadow map
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
+	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
-		frameBufferCreateInfo_t fbInfo = {};
-		//fbInfo.color0 = &rc.whiteImage;
-		fbInfo.depth = &frameState[ i ].shadowMapImage;
-		fbInfo.width = frameState[ i ].shadowMapImage.info.width;
-		fbInfo.height = frameState[ i ].shadowMapImage.info.height;
+		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
+		{
+			frameBufferCreateInfo_t fbInfo = {};
+			//fbInfo.color0 = &rc.whiteImage;
+			fbInfo.depth = &frameState[ frameIx ].shadowMapImage;
+			fbInfo.width = frameState[ frameIx ].shadowMapImage.info.width;
+			fbInfo.height = frameState[ frameIx ].shadowMapImage.info.height;
 
-		shadowMap[ i ].Create( fbInfo );
+			shadowMap[ shadowIx ][ frameIx ].Create( fbInfo );
+		}
 	}
 
 	// Main Scene 3D Render

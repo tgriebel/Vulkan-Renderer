@@ -36,6 +36,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 
 		pass->transitionState.bits = 0;
 		pass->stateBits = GFX_STATE_NONE;
+		pass->passId = drawPass_t( passIx );
 
 		if ( passIx == DRAWPASS_SHADOW )
 		{

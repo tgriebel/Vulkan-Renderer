@@ -137,7 +137,7 @@ private:
 	lightBufferObject_t					lightsBuffer[ MaxLights ];
 
 	FrameState							frameState[ MAX_FRAMES_STATES ];
-	FrameBuffer							shadowMap[ MAX_FRAMES_STATES ];
+	FrameBuffer							shadowMap[ MaxShadowMaps ][ MAX_FRAMES_STATES ];
 	FrameBuffer							mainColor[ MAX_FRAMES_STATES ];
 
 	uint32_t							imageFreeSlot = 0;
