@@ -33,6 +33,8 @@ PS_LAYOUT_STANDARD( sampler2D )
 void main()
 {
     const uint materialId = pushConstants.materialId;
+
+    const material_t material = materialUbo.materials[ materialId ];
     
     uint textureId = 0;
 
@@ -42,11 +44,11 @@ void main()
     const float majorAxis = max( max( xm, ym ), zm );
 
     if( majorAxis == xm ) {
-        textureId = ( sign( fragNormal.x ) > 0.0f ) ? materialUbo.materials[ materialId ].textureId0 : materialUbo.materials[ materialId ].textureId1;
+        textureId = ( sign( fragNormal.x ) > 0.0f ) ? material.textureId0 : material.textureId1;
     } else if( majorAxis == ym ) {
-        textureId = ( sign( fragNormal.y ) > 0.0f ) ? materialUbo.materials[ materialId ].textureId5 : materialUbo.materials[ materialId ].textureId4;
+        textureId = ( sign( fragNormal.y ) > 0.0f ) ? material.textureId5 : material.textureId4;
     } else if( majorAxis == zm ) {
-        textureId = ( sign( fragNormal.z ) > 0.0f ) ? materialUbo.materials[ materialId ].textureId2 : materialUbo.materials[ materialId ].textureId3;
+        textureId = ( sign( fragNormal.z ) > 0.0f ) ? material.textureId2 : material.textureId3;
     }
 	outColor = SrgbToLinear( texture( texSampler[textureId], fragTexCoord.xy ) );
 }

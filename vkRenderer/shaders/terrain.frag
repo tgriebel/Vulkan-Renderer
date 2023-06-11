@@ -36,10 +36,11 @@ void main()
     const uint viewlId = pushConstants.viewId;
 
     const view_t view = viewUbo.views[ viewlId ];
+    const material_t material = materialUbo.materials[ materialId ];
 
-    const uint blendId = materialUbo.materials[ materialId ].textureId0;
-    const uint textureId0 = materialUbo.materials[ materialId ].textureId1;
-    const uint textureId1 = materialUbo.materials[ materialId ].textureId2;
+    const uint blendId = material.textureId0;
+    const uint textureId0 = material.textureId1;
+    const uint textureId1 = material.textureId2;
 
     const float maxHeight = globals.generic.x;
     const vec4 blendValue = maxHeight * texture( texSampler[ blendId ], fragTexCoord.xy );

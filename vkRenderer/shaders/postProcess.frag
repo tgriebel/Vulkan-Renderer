@@ -36,10 +36,11 @@ void main()
 	const uint viewlId = pushConstants.viewId;
 
 	const view_t view = viewUbo.views[ viewlId ];
+	const material_t material = materialUbo.materials[ materialId ];
 
-	const uint textureId0 = materialUbo.materials[ materialId ].textureId0;
-    const uint textureId1 = materialUbo.materials[ materialId ].textureId1;
-    const uint textureId2 = materialUbo.materials[ materialId ].textureId2;
+	const uint textureId0 = material.textureId0;
+    const uint textureId1 = material.textureId1;
+    const uint textureId2 = material.textureId2;
 
 	const mat4 viewMat = view.viewMat;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );

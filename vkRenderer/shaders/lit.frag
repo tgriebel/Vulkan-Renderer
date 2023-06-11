@@ -76,15 +76,16 @@ void main()
     const uint viewlId = pushConstants.viewId;
 
     const view_t view = viewUbo.views[ viewlId ];
+    const material_t material = materialUbo.materials[ materialId ];
 
-	const bool isTextured = materialUbo.materials[ materialId ].textured != 0;
-    const int albedoTexId = isTextured ? materialUbo.materials[ materialId ].textureId0 : -1;
-    const int normalTexId = isTextured ? materialUbo.materials[ materialId ].textureId1 : -1;
-    const int roughnessTexId = isTextured ? materialUbo.materials[ materialId ].textureId2 : -1;
+	const bool isTextured = material.textured != 0;
+    const int albedoTexId = isTextured ? material.textureId0 : -1;
+    const int normalTexId = isTextured ? material.textureId1 : -1;
+    const int roughnessTexId = isTextured ? material.textureId2 : -1;
 	
-	const vec3 diffuseColor = materialUbo.materials[ materialId ].Kd.rgb;
-    const vec3 specularColor = materialUbo.materials[ materialId ].Ks.rgb;
-    const float specularPower = materialUbo.materials[ materialId ].Ns;
+	const vec3 diffuseColor = material.Kd.rgb;
+    const vec3 specularColor = material.Ks.rgb;
+    const float specularPower = material.Ns;
 
     const mat4 modelMat = ubo.model[ objectId ];
     const mat4 viewMat = view.viewMat;
@@ -117,7 +118,7 @@ void main()
     const float ao = 1.0f;
 
 	const vec3 albedoColor = albedoTex.rgb;
-    const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * materialUbo.materials[ materialId ].Ka.rgb;
+    const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * material.Ka.rgb;
 	
     vec3 F0 = vec3( 0.04f ); 
     F0 = mix( F0, albedoColor.rgb, metallic );
@@ -180,7 +181,7 @@ void main()
     }
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
     outColor.rgb *= visibility;
-	outColor.a = materialUbo.materials[ materialId ].Tr;
+	outColor.a = material.Tr;
 //    outColor.rgb = envColor.rgb;
 //    outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
 //    outColor.rg = fragTexCoord.rb;

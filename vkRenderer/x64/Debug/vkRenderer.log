@@ -1,1 +1,13 @@
-﻿  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
+﻿  scene.cpp
+  chessScene.cpp
+  nesScene.cpp
+  sceneParser.cpp
+  renderView.cpp
+  render_util.cpp
+  io.cpp
+  binding.cpp
+  descriptorWrites.cpp
+  gpuResources.cpp
+  gpuTransfer.cpp
+  imageView.cpp
+  pipeline.cpp
