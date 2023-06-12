@@ -345,8 +345,7 @@ void Renderer::UploadAssets()
 		if ( materialAsset->IsLoaded() == false ) {
 			continue;
 		}
-		Material& material = materialAsset->Get();
-		if ( material.uploadId != -1 ) {
+		if ( materialAsset->IsUploaded() ) {
 			continue;
 		}
 		uploadMaterials.insert( materialAsset->Handle() );
@@ -359,8 +358,7 @@ void Renderer::UploadAssets()
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
-		Image& texture = textureAsset->Get();
-		if ( ( texture.gpuImage != nullptr ) && ( texture.gpuImage->GetId() != -1 ) ) {
+		if ( textureAsset->IsUploaded() ) {
 			continue;
 		}
 		uploadTextures.insert( textureAsset->Handle() );
