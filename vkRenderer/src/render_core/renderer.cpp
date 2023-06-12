@@ -341,7 +341,7 @@ void Renderer::UploadAssets()
 	const uint32_t materialCount = g_assets.materialLib.Count();
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
-		Asset<Material>* materialAsset = g_assets.materialLib.Find( i );
+		AssetInterface* materialAsset = g_assets.materialLib.Find( i );
 		if ( materialAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -354,7 +354,7 @@ void Renderer::UploadAssets()
 	const uint32_t textureCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		Asset<Image>* textureAsset = g_assets.textureLib.Find( i );
+		AssetInterface* textureAsset = g_assets.textureLib.Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
