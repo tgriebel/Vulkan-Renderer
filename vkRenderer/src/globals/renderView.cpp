@@ -104,6 +104,13 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 				stateBits |= GFX_STATE_MSAA_ENABLE;
 				stateBits |= GFX_STATE_BLEND_ENABLE;
 			}
+			else if ( passIx == DRAWPASS_EMISSIVE )
+			{
+				stateBits |= GFX_STATE_DEPTH_TEST;
+				stateBits |= GFX_STATE_CULL_MODE_BACK;
+				stateBits |= GFX_STATE_MSAA_ENABLE;
+				stateBits |= GFX_STATE_BLEND_ENABLE;
+			}
 			else if ( passIx == DRAWPASS_DEBUG_WIREFRAME )
 			{
 				stateBits |= GFX_STATE_WIREFRAME_ENABLE;

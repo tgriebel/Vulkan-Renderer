@@ -206,6 +206,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 												DRAWPASS_OPAQUE,
 												DRAWPASS_SKYBOX,
 												DRAWPASS_TRANS,
+												DRAWPASS_EMISSIVE,
 												DRAWPASS_DEBUG_SOLID,
 												DRAWPASS_DEBUG_WIREFRAME
 											};

@@ -83,7 +83,7 @@
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitCRT",
+          "DRAWPASS_EMISSIVE": "LitCRT",
           "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
 	  "textures": {
@@ -95,7 +95,7 @@
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_EMISSIVE": "LitCRT",
           "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
 	  "textures": {
@@ -107,7 +107,7 @@
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_EMISSIVE": "LitCRT",
           "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
 	  "textures": {
@@ -119,7 +119,7 @@
       "shaders": {
 		  "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_EMISSIVE": "LitCRT",
           "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
 	  "textures": {

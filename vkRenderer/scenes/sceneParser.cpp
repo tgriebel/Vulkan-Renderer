@@ -213,7 +213,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 
 	Material* material = reinterpret_cast<Material*>( object );
 
-	const uint32_t objectCount = 9;
+	const uint32_t objectCount = 10;
 	char s[ objectCount ][TOKEN_LEN] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
@@ -222,6 +222,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 		MAKE_ENUM_STRING( DRAWPASS_DEPTH ),
 		MAKE_ENUM_STRING( DRAWPASS_OPAQUE ),
 		MAKE_ENUM_STRING( DRAWPASS_TRANS ),
+		MAKE_ENUM_STRING( DRAWPASS_EMISSIVE ),
 		MAKE_ENUM_STRING( DRAWPASS_TERRAIN ),
 		MAKE_ENUM_STRING( DRAWPASS_DEBUG_WIREFRAME ),
 		MAKE_ENUM_STRING( DRAWPASS_SKYBOX ),
@@ -240,6 +241,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 		{ enumMap[ 6 ].name, &s[ 6 ], &ParseStringObject },
 		{ enumMap[ 7 ].name, &s[ 7 ], &ParseStringObject },
 		{ enumMap[ 8 ].name, &s[ 8 ], &ParseStringObject },
+		{ enumMap[ 9 ].name, &s[ 9 ], &ParseStringObject },
 
 	};
 	static_assert( COUNTARRAY( objectMap ) == DRAWPASS_COUNT, "Size mismatch" );
