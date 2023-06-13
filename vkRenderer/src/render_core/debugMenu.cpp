@@ -344,8 +344,8 @@ void DebugMenuLightEdit( Scene* scene )
 
 		if ( ImGui::TreeNode( label.c_str() + 2 ) )
 		{
-			const vec4f o = scene->lights[ i ].lightPos;
-			const vec4f d = scene->lights[ i ].lightDir;
+			const vec4f o = scene->lights[ i ].pos;
+			const vec4f d = scene->lights[ i ].dir;
 			float origin[ 3 ] = { o[ 0 ], o[ 1 ], o[ 2 ] };
 			float dir[ 3 ] = { d[ 0 ], d[ 1 ], d[ 2 ] };
 
@@ -364,13 +364,16 @@ void DebugMenuLightEdit( Scene* scene )
 			ImGui::SameLine();
 			ImGui::InputFloat( "##lightDirZ", &dir[ 2 ], 0.1f, 1.0f );
 
+			ImGui::InputFloat( "##lightIntesity", &scene->lights[ i ].intensity, 0.1f, 1.0f );
+
 			ImGui::PopItemWidth();
 
 			rgbTuplef_t rgb = scene->lights[ i ].color.AsRGBf();
+			
 			EditRgb( rgb );
 
-			scene->lights[ i ].lightPos = origin;
-			scene->lights[ i ].lightDir = dir;
+			scene->lights[ i ].pos = origin;
+			scene->lights[ i ].dir = dir;
 			scene->lights[ i ].color = rgb;
 
 			ImGui::TreePop();

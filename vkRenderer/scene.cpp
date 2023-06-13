@@ -131,19 +131,22 @@ void InitScene( Scene* scene )
 
 	{
 		scene->lights.resize( 3 );
-		scene->lights[ 0 ].lightPos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
-		scene->lights[ 0 ].intensity = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		scene->lights[ 0 ].lightDir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
+		scene->lights[ 0 ].pos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
+		scene->lights[ 0 ].intensity = 1.0f;
+		scene->lights[ 0 ].dir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
+		scene->lights[ 0 ].color = Color::White;
 		scene->lights[ 0 ].flags = LIGHT_FLAGS_SHADOW;
 
-		scene->lights[ 1 ].lightPos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
-		scene->lights[ 1 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
-		scene->lights[ 1 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		scene->lights[ 1 ].pos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
+		scene->lights[ 1 ].intensity = 1.0f;
+		scene->lights[ 1 ].dir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		scene->lights[ 1 ].color = Color::Red;
 		scene->lights[ 1 ].flags = LIGHT_FLAGS_NONE;
 
-		scene->lights[ 2 ].lightPos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
-		scene->lights[ 2 ].intensity = vec4f( 0.5f, 0.5f, 0.5f, 1.0f );
-		scene->lights[ 2 ].lightDir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		scene->lights[ 2 ].pos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
+		scene->lights[ 2 ].intensity = 1.0f;
+		scene->lights[ 2 ].dir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		scene->lights[ 2 ].color = Color::Blue;
 		scene->lights[ 2 ].flags = LIGHT_FLAGS_NONE;
 	}
 }

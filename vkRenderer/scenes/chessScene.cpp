@@ -166,7 +166,7 @@ void ChessScene::Update()
 	const float time = TotalTimeSeconds();
 	const float periodsPerSecond = 2.0f;
 
-	lights[ 0 ].lightPos = vec4f( 5.0f * cos( periodsPerSecond * time ), 5.0f * sin( periodsPerSecond * time ), 8.0f, 0.0f );
+	lights[ 0 ].pos = vec4f( 5.0f * cos( periodsPerSecond * time ), 5.0f * sin( periodsPerSecond * time ), 8.0f, 0.0f );
 
 	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( ( mouse.centered == false ) && mouse.leftDown )
@@ -266,7 +266,7 @@ void ChessScene::Update()
 		if ( debugLight == nullptr ) {
 			continue;
 		}
-		vec3f origin = vec3f( lights[ i ].lightPos[ 0 ], lights[ i ].lightPos[ 1 ], lights[ i ].lightPos[ 2 ] );
+		vec3f origin = vec3f( lights[ i ].pos[ 0 ], lights[ i ].pos[ 1 ], lights[ i ].pos[ 2 ] );
 		debugLight->SetOrigin( origin );
 		debugLight->SetScale( vec3f( 0.25f, 0.25f, 0.25f ) );
 	}

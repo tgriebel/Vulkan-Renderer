@@ -584,9 +584,9 @@ void Renderer::UpdateViews( const Scene* scene )
 		}
 
 		lightBufferObject_t lightObject = {};
-		lightObject.intensity = light.intensity;
-		lightObject.lightDir = light.lightDir;
-		lightObject.lightPos = light.lightPos;
+		lightObject.intensity = light.intensity * ColorToVector( light.color );
+		lightObject.lightDir = light.dir;
+		lightObject.lightPos = light.pos;
 
 		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
 			lightObject.shadowViewId = 0xFF;
@@ -595,7 +595,7 @@ void Renderer::UpdateViews( const Scene* scene )
 			lightObject.shadowViewId = shadowCount;
 
 			Camera shadowCam;
-			shadowCam = Camera( light.lightPos, MatrixFromVector( light.lightDir.Reverse() ) );
+			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
 			shadowCam.SetClip( 0.1f, 1000.0f );
 			shadowCam.SetFov( Radians( 90.0f ) );
 			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
