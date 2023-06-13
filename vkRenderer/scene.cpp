@@ -139,15 +139,15 @@ void InitScene( Scene* scene )
 
 		scene->lights[ 1 ].pos = vec4f( 0.0f, 10.0f, 5.0f, 0.0f );
 		scene->lights[ 1 ].intensity = 1.0f;
-		scene->lights[ 1 ].dir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		scene->lights[ 1 ].dir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 		scene->lights[ 1 ].color = Color::Red;
-		scene->lights[ 1 ].flags = LIGHT_FLAGS_NONE;
+		scene->lights[ 1 ].flags = LIGHT_FLAGS_SHADOW;
 
 		scene->lights[ 2 ].pos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
 		scene->lights[ 2 ].intensity = 1.0f;
-		scene->lights[ 2 ].dir = vec4f( 0.0f, 0.0f, 1.0f, 0.0f );
+		scene->lights[ 2 ].dir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 		scene->lights[ 2 ].color = Color::Blue;
-		scene->lights[ 2 ].flags = LIGHT_FLAGS_NONE;
+		scene->lights[ 2 ].flags = LIGHT_FLAGS_SHADOW;
 	}
 }
 
