@@ -378,6 +378,9 @@ void Renderer::RenderScene( const Scene* scene )
 
 	UploadModelsToGPU(); // TODO: Can this be moved after commit?
 
+	// TODO: Expose this from the renderer's API, then call Render() after commit. Needs model upload to be moved first.
+	// This will allow the scene to commit at finer level eventually.
+	// The scene will control when things are updated in the renderer too.
 	Commit( scene );
 
 	UploadTextures();
