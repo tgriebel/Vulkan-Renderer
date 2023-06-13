@@ -70,6 +70,36 @@ float Fd_Lambert() {
     return 1.0 / PI;
 }
 
+float Shadow( in light_t light, in vec3 pos )
+{
+    const uint shadowViewId = light.shadowViewId;
+    if ( shadowViewId != 0xFF )
+    {
+        const view_t shadowView = viewUbo.views[ shadowViewId ];
+
+        const uint shadowMapTexId = shadowViewId;
+        vec4 lsPosition = shadowView.projMat * shadowView.viewMat * vec4( pos.xyz, 1.0f );
+        lsPosition.xyz /= lsPosition.w;
+
+        const vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
+        const float bias = 0.001f;
+        const float depth = ( lsPosition.z );
+
+        if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f )
+        {
+            const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
+            const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], shadowPixelLocation, 0 ).r;
+            if ( shadowValue < ( depth - bias ) ) {
+                return 1.0f - min( 1.0f, globals.shadowParms.w );
+            }
+        }
+        else {
+            return 1.0f - min( 1.0f, globals.shadowParms.w );
+        }
+    }
+    return 1.0f;
+}
+
 void main()
 {
     const uint materialId = pushConstants.materialId;
@@ -155,35 +185,11 @@ void main()
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
         const vec3 radiance     = attenuation * spotFalloff * light.intensity.rgb;
 
+        const float shadowing = Shadow( light, worldPosition.xyz );
+        
         vec3 diffuse = ( ( kD * albedoColor.rgb ) / PI + Fr ) * radiance * NoL;
-        Lo += diffuse;
 
-        const uint shadowViewId = light.shadowViewId;
-        if ( shadowViewId != 0xFF )
-        {
-            const view_t shadowView = viewUbo.views[ shadowViewId ];
-
-            float visibility = 1.0f;
-            const uint shadowMapTexId = 0;
-            vec4 lsPosition = shadowView.projMat * shadowView.viewMat * vec4( worldPosition.xyz, 1.0f );
-            lsPosition.xyz /= lsPosition.w;
-            vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
-            float bias = 0.001f;
-            float depth = ( lsPosition.z );
-
-            if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f )
-            {
-                const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
-                const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], shadowPixelLocation, 0 ).r;
-                if ( shadowValue < ( depth - bias ) ) {
-                    visibility = globals.shadowParms.w;
-                }
-            }
-            else {
-                visibility = globals.shadowParms.w;
-            }
-            Lo.rgb *= visibility;
-        }
+        Lo += shadowing * diffuse;
     }
     outColor.rgb = Lo.rgb + ambient;
     outColor.a = 1.0f;
