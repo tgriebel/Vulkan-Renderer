@@ -4,14 +4,23 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 {
 	const uint32_t frameStateCount = MAX_FRAMES_STATES;
 
-	const viewport_t& viewport = GetViewport();
-	const uint32_t width = viewport.width;
-	const uint32_t height = viewport.height;
+	const uint32_t width = fb[ 0 ].GetWidth();
+	const uint32_t height = fb[ 0 ].GetHeight();
+
+	m_viewport.width = width;
+	m_viewport.height = height;
+
+	imageSamples_t samples = IMAGE_SMP_1;
+	if ( fb[ 0 ].GetColorLayers() > 0 ) {
+		samples = fb[ 0 ].GetColor()->info.subsamples;
+	} else {
+		samples = fb[ 0 ].GetDepth()->info.subsamples;
+	}
 
 	m_name = name;
 	m_region = region;
 
-	m_frameBufferSize = vec2i( fb[ 0 ].GetWidth(), fb[ 0 ].GetHeight() );
+	m_frameBufferSize = vec2i( width, height );
 
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
@@ -28,8 +37,8 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		pass->name = GetPassDebugName( drawPass_t( passIx ) );
 		pass->viewport.x = 0;
 		pass->viewport.y = 0;
-		pass->viewport.width = Min( width, fb[ 0 ].GetWidth() );
-		pass->viewport.height = Min( height, fb[ 0 ].GetHeight() );
+		pass->viewport.width = width;
+		pass->viewport.height = height;
 		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
 			pass->fb[ i ] = &fb[ i ];
 		}
@@ -120,12 +129,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 			pass->clearDepth = 0.0f;
 			pass->clearStencil = 0;
-
-			if( fb[ 0 ].GetColorLayers() > 0 ) {
-				pass->sampleRate = fb[ 0 ].GetColor()->info.subsamples;
-			} else {
-				pass->sampleRate = fb[ 0 ].GetDepth()->info.subsamples;
-			}
+			pass->sampleRate = samples;
 		}
 
 		passes[ passIx ] = pass;

@@ -592,20 +592,23 @@ void Renderer::CreateFramebuffers()
 	g_window.GetWindowFrameBufferSize( width, height );
 
 	// Shadow images
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
+	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
-		imageInfo_t info{};
-		info.width = ShadowMapWidth;
-		info.height = ShadowMapHeight;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_D_32;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; ++i )
+		{
+			imageInfo_t info{};
+			info.width = ShadowMapWidth;
+			info.height = ShadowMapHeight;
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_D_32;
+			info.type = IMAGE_TYPE_2D;
+			info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+			info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "shadowMap", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].shadowMapImage );
+			CreateImage( "shadowMap", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].shadowMapImage[ shadowIx ] );
+		}
 	}
 
 	// Main images
@@ -646,9 +649,9 @@ void Renderer::CreateFramebuffers()
 		{
 			frameBufferCreateInfo_t fbInfo = {};
 			//fbInfo.color0 = &rc.whiteImage;
-			fbInfo.depth = &frameState[ frameIx ].shadowMapImage;
-			fbInfo.width = frameState[ frameIx ].shadowMapImage.info.width;
-			fbInfo.height = frameState[ frameIx ].shadowMapImage.info.height;
+			fbInfo.depth = &frameState[ frameIx ].shadowMapImage[ shadowIx ];
+			fbInfo.width = frameState[ frameIx ].shadowMapImage[ shadowIx ].info.width;
+			fbInfo.height = frameState[ frameIx ].shadowMapImage[ shadowIx ].info.height;
 
 			shadowMap[ shadowIx ][ frameIx ].Create( fbInfo );
 		}

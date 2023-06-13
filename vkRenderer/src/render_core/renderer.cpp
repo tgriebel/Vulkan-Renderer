@@ -647,21 +647,24 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 				continue;
 			}
 
-			pass->codeImages[ currentImage ].Resize( 2 );
+			pass->codeImages[ currentImage ].Resize( 3 );
 			if ( passIx == DRAWPASS_SHADOW )
 			{				
 				pass->codeImages[ currentImage ][ 0 ] = gpuImages2D[ 0 ];
 				pass->codeImages[ currentImage ][ 1 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ currentImage ][ 2 ] = gpuImages2D[ 0 ];
 			}
 			else if ( passIx == DRAWPASS_POST_2D )
 			{
 				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].viewColorImage;
 				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImageView;
+				pass->codeImages[ currentImage ][ 2 ] = &frameState[ currentImage ].stencilImageView;
 			}
 			else
 			{
-				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].shadowMapImage;
-				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].shadowMapImage;
+				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].shadowMapImage[ 0 ];
+				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].shadowMapImage[ 1 ];
+				pass->codeImages[ currentImage ][ 2 ] = &frameState[ currentImage ].shadowMapImage[ 2 ];
 			}
 
 			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
@@ -929,16 +932,10 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		throw std::runtime_error( "Missing pass state!" );
 	}
 
-	renderPassTransitionFlags_t transitionState = {};
-	transitionState.flags.readAfter = pass->transitionState.flags.readAfter;
-	transitionState.flags.presentAfter = pass->transitionState.flags.presentAfter;
-	transitionState.flags.store = true;
-	transitionState.flags.clear = true;
-
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->fb[ m_bufferId ]->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->fb[ m_bufferId ]->GetVkBuffer( transitionState );
+	passInfo.renderPass = pass->fb[ m_bufferId ]->GetVkRenderPass( pass->transitionState );
+	passInfo.framebuffer = pass->fb[ m_bufferId ]->GetVkBuffer( pass->transitionState );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
@@ -948,19 +945,25 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 	const uint32_t colorAttachmentsCount = pass->fb[ m_bufferId ]->GetColorLayers();
 	const uint32_t attachmentsCount = pass->fb[ m_bufferId ]->GetLayers();
 
-	std::array<VkClearValue, 5> clearValues{ };
-	assert( attachmentsCount <= 5 );
+	passInfo.clearValueCount = 0;
+	passInfo.pClearValues = nullptr;
 
-	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
-		clearValues[ i ].color = clearColor;
+	if( pass->transitionState.flags.clear )
+	{
+		std::array<VkClearValue, 5> clearValues{ };
+		assert( attachmentsCount <= 5 );
+
+		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+			clearValues[ i ].color = clearColor;
+		}
+
+		for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
+			clearValues[ i ].depthStencil = clearDepth;
+		}
+
+		passInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
+		passInfo.pClearValues = clearValues.data();
 	}
-
-	for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
-		clearValues[ i ].depthStencil = clearDepth;
-	}
-
-	passInfo.clearValueCount = static_cast<uint32_t>( clearValues.size() );
-	passInfo.pClearValues = clearValues.data();
 
 	VkCommandBuffer cmdBuffer = gfxContext.commandBuffers[ m_bufferId ];
 

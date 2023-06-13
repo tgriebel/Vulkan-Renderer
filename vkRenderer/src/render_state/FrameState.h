@@ -34,7 +34,7 @@ class FrameState
 {
 public:
 	Image			viewColorImage;
-	Image			shadowMapImage;
+	Image			shadowMapImage[ MaxShadowViews ];
 	Image			depthStencilImage;
 	ImageView		depthImageView;
 	ImageView		stencilImageView;
@@ -159,12 +159,12 @@ public:
 
 	inline const Image* GetDepth() const
 	{
-		return ( dsCount > 1 ) ? depth : nullptr;
+		return ( dsCount >= 1 ) ? depth : nullptr;
 	}
 
 	inline const Image* GetStencil() const
 	{
-		return ( dsCount > 1 ) ? stencil : nullptr;
+		return ( dsCount >= 1 ) ? stencil : nullptr;
 	}
 
 #ifdef USE_VULKAN

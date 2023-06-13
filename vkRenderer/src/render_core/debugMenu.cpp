@@ -344,18 +344,34 @@ void DebugMenuLightEdit( Scene* scene )
 
 		if ( ImGui::TreeNode( label.c_str() + 2 ) )
 		{
-			ImGui::PushID( "##editLight_x" );
-			EditFloat( scene->lights[ i ].lightPos[0] );
-			ImGui::PopID();
-			ImGui::PushID( "##editLight_y" );
-			EditFloat( scene->lights[ i ].lightPos[1] );
-			ImGui::PopID();
-			ImGui::PushID( "##editLight_z" );
-			EditFloat( scene->lights[ i ].lightPos[2] );
-			ImGui::PopID();
+			const vec4f o = scene->lights[ i ].lightPos;
+			const vec4f d = scene->lights[ i ].lightDir;
+			float origin[ 3 ] = { o[ 0 ], o[ 1 ], o[ 2 ] };
+			float dir[ 3 ] = { d[ 0 ], d[ 1 ], d[ 2 ] };
+
+			ImGui::PushItemWidth( 100 );
+
+			ImGui::SameLine();
+			ImGui::InputFloat( "##lightOriginX", &origin[ 0 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##lightOriginY", &origin[ 1 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##lightOriginZ", &origin[ 2 ], 0.1f, 1.0f );
+
+			ImGui::InputFloat( "##lightDirX", &dir[ 0 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##lightDirY", &dir[ 1 ], 0.1f, 1.0f );
+			ImGui::SameLine();
+			ImGui::InputFloat( "##lightDirZ", &dir[ 2 ], 0.1f, 1.0f );
+
+			ImGui::PopItemWidth();
 
 			rgbTuplef_t rgb = scene->lights[ i ].color.AsRGBf();
 			EditRgb( rgb );
+
+			scene->lights[ i ].lightPos = origin;
+			scene->lights[ i ].lightDir = dir;
+			scene->lights[ i ].color = rgb;
 
 			ImGui::TreePop();
 		}
