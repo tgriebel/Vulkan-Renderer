@@ -174,16 +174,21 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		perms[ i ].bits = i;
 	}
 
+	const uint32_t frameCount = 1;
 	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
 
-	for( uint32_t i = 0; i < PassPermCount; ++i )
-	{
-		const renderPassTransitionFlags_t& state = perms[ i ];
+	for ( uint32_t permIx = 0; permIx < PassPermCount; ++permIx ) {
+		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx ) {
+			buffers[ frameIx ][ permIx ] = VK_NULL_HANDLE;
+		}
+		renderPasses[ permIx ] = VK_NULL_HANDLE;
+	}
 
-		if( ( canPresent == false ) && state.flags.presentAfter )
-		{
-			buffers[ 0 ][ i ] = VK_NULL_HANDLE;
-			renderPasses[ i ] = VK_NULL_HANDLE;
+	for( uint32_t permIx = 0; permIx < PassPermCount; ++permIx )
+	{
+		const renderPassTransitionFlags_t& state = perms[ permIx ];
+
+		if( ( canPresent == false ) && state.flags.presentAfter ) {
 			continue;
 		}
 
@@ -253,30 +258,33 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 		attachmentCount = colorCount + dsCount;
 
-		renderPasses[ i ] = vk_CreateRenderPass( passBits );
-		if ( renderPasses[ i ] == VK_NULL_HANDLE ) {
+		renderPasses[ permIx ] = vk_CreateRenderPass( passBits );
+		if ( renderPasses[ permIx ] == VK_NULL_HANDLE ) {
 			throw std::runtime_error( "Failed to create framebuffer! Render pass invalid" );
 		}
 
-		VkFramebufferCreateInfo framebufferInfo{ };
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPasses[ i ];
-		framebufferInfo.attachmentCount = attachmentCount;
-		framebufferInfo.pAttachments = attachments;
-		framebufferInfo.width = createInfo.width;
-		framebufferInfo.height = createInfo.height;
-		framebufferInfo.layers = 1;
+		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx )
+		{
+			VkFramebufferCreateInfo framebufferInfo{ };
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = renderPasses[ permIx ];
+			framebufferInfo.attachmentCount = attachmentCount;
+			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.width = createInfo.width;
+			framebufferInfo.height = createInfo.height;
+			framebufferInfo.layers = 1;
 
-		if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ 0 ][ i ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create framebuffer!" );
+			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ frameIx ][ permIx ] ) != VK_SUCCESS ) {
+				throw std::runtime_error( "Failed to create framebuffer!" );
+			}
 		}
 	}
 
-	color0 = createInfo.color0;
-	color1 = createInfo.color1;
-	color2 = createInfo.color2;
-	depth = createInfo.depth;
-	stencil = createInfo.stencil;
+	color0[ 0 ] = createInfo.color0;
+	color1[ 0 ] = createInfo.color1;
+	color2[ 0 ] = createInfo.color2;
+	depth[ 0 ] = createInfo.depth;
+	stencil[ 0 ] = createInfo.stencil;
 	width = createInfo.width;
 	height = createInfo.height;
 }

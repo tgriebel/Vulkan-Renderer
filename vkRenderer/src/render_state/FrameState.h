@@ -82,11 +82,11 @@ struct frameBufferCreateInfo_t
 class FrameBuffer
 {
 private:
-	Image*				color0;
-	Image*				color1;
-	Image*				color2;
-	Image*				depth;
-	Image*				stencil;
+	Image*				color0[ MAX_FRAMES_STATES ];
+	Image*				color1[ MAX_FRAMES_STATES ];
+	Image*				color2[ MAX_FRAMES_STATES ];
+	Image*				depth[ MAX_FRAMES_STATES ];
+	Image*				stencil[ MAX_FRAMES_STATES ];
 
 	uint32_t			width;
 	uint32_t			height;
@@ -97,7 +97,7 @@ private:
 	resourceLifetime_t	lifetime;
 
 #ifdef USE_VULKAN
-	VkFramebuffer		buffers[ MAX_FRAMES_IN_FLIGHT ][ PassPermCount ];
+	VkFramebuffer		buffers[ MAX_FRAMES_STATES ][ PassPermCount ];
 	VkRenderPass		renderPasses[ PassPermCount ];
 #endif
 
@@ -142,35 +142,35 @@ public:
 		return attachmentCount;
 	}
 
-	inline const Image* GetColor() const
+	inline const Image* GetColor( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 0 ) ? color0 : nullptr;
+		return ( colorCount > 0 ) ? color0[ bufferId ] : nullptr;
 	}
 
-	inline const Image* GetColor1() const
+	inline const Image* GetColor1( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 1 ) ? color1 : nullptr;
+		return ( colorCount > 1 ) ? color1[ bufferId ] : nullptr;
 	}
 
-	inline const Image* GetColor2() const
+	inline const Image* GetColor2( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 2 ) ? color2 : nullptr;
+		return ( colorCount > 2 ) ? color2[ bufferId ] : nullptr;
 	}
 
-	inline const Image* GetDepth() const
+	inline const Image* GetDepth( const uint32_t bufferId = 0 ) const
 	{
-		return ( dsCount >= 1 ) ? depth : nullptr;
+		return ( dsCount >= 1 ) ? depth[ bufferId ] : nullptr;
 	}
 
-	inline const Image* GetStencil() const
+	inline const Image* GetStencil( const uint32_t bufferId = 0 ) const
 	{
-		return ( dsCount >= 1 ) ? stencil : nullptr;
+		return ( dsCount >= 1 ) ? stencil[ bufferId ] : nullptr;
 	}
 
 #ifdef USE_VULKAN
-	VkFramebuffer GetVkBuffer( renderPassTransitionFlags_t transitionState = {} ) const
+	VkFramebuffer GetVkBuffer( renderPassTransitionFlags_t transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
-		return buffers[ 0 ][ transitionState.bits ];
+		return buffers[ bufferId ][ transitionState.bits ];
 	}
 
 	VkRenderPass GetVkRenderPass( renderPassTransitionFlags_t transitionState = {} )
