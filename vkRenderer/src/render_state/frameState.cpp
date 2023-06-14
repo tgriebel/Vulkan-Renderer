@@ -175,7 +175,16 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	}
 
 	const uint32_t frameCount = 1;
-	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
+	const bool canPresent = ( createInfo.color0[ 0 ] != nullptr ) && ( createInfo.color0[ 0 ]->info.fmt == g_swapChain.GetBackBufferFormat() );
+
+	for ( uint32_t frameIx = 1; frameIx < createInfo.bufferCount; ++frameIx )
+	{
+		assert( createInfo.color0[ frameIx - 1 ]->info == createInfo.color0[ frameIx ]->info );
+		assert( createInfo.color1[ frameIx - 1 ]->info == createInfo.color1[ frameIx ]->info );
+		assert( createInfo.color2[ frameIx - 1 ]->info == createInfo.color2[ frameIx ]->info );
+		assert( createInfo.depth[ frameIx - 1 ]->info == createInfo.depth[ frameIx ]->info );
+		assert( createInfo.stencil[ frameIx - 1 ]->info == createInfo.stencil[ frameIx ]->info );
+	}
 
 	for ( uint32_t permIx = 0; permIx < PassPermCount; ++permIx ) {
 		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx ) {
@@ -201,58 +210,58 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 		vk_RenderPassBits_t passBits = {};
 
-		if( createInfo.color0 != nullptr )
+		if( createInfo.color0[ 0 ] != nullptr )
 		{
-			passBits.semantic.colorAttach0.samples = createInfo.color0->info.subsamples;
-			passBits.semantic.colorAttach0.fmt = createInfo.color0->info.fmt;
+			passBits.semantic.colorAttach0.samples = createInfo.color0[ 0 ]->info.subsamples;
+			passBits.semantic.colorAttach0.fmt = createInfo.color0[ 0 ]->info.fmt;
 			passBits.semantic.colorTrans0 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
 
-			attachments[ colorCount ] = createInfo.color0->gpuImage->GetVkImageView();
+			attachments[ colorCount ] = createInfo.color0[ 0 ]->gpuImage->GetVkImageView();
 			++colorCount;
 		}
 
-		if ( createInfo.color1 != nullptr )
+		if ( createInfo.color1[ 0 ] != nullptr )
 		{
-			passBits.semantic.colorAttach1.samples = createInfo.color1->info.subsamples;
-			passBits.semantic.colorAttach1.fmt = createInfo.color1->info.fmt;
+			passBits.semantic.colorAttach1.samples = createInfo.color1[ 0 ]->info.subsamples;
+			passBits.semantic.colorAttach1.fmt = createInfo.color1[ 0 ]->info.fmt;
 			passBits.semantic.colorTrans1 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
 
-			attachments[ colorCount ] = createInfo.color1->gpuImage->GetVkImageView();
+			attachments[ colorCount ] = createInfo.color1[ 0 ]->gpuImage->GetVkImageView();
 			++colorCount;
 		}
 
-		if ( createInfo.color2 != nullptr )
+		if ( createInfo.color2[ 0 ] != nullptr )
 		{
-			passBits.semantic.colorAttach2.samples = createInfo.color2->info.subsamples;
-			passBits.semantic.colorAttach2.fmt = createInfo.color2->info.fmt;
+			passBits.semantic.colorAttach2.samples = createInfo.color2[ 0 ]->info.subsamples;
+			passBits.semantic.colorAttach2.fmt = createInfo.color2[ 0 ]->info.fmt;
 			passBits.semantic.colorTrans2 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
 
-			attachments[ colorCount ] = createInfo.color2->gpuImage->GetVkImageView();
+			attachments[ colorCount ] = createInfo.color2[ 0 ]->gpuImage->GetVkImageView();
 			++colorCount;
 		}
 
-		if ( createInfo.depth != nullptr )
+		if ( createInfo.depth[ 0 ] != nullptr )
 		{
-			passBits.semantic.depthAttach.samples = createInfo.depth->info.subsamples;
-			passBits.semantic.depthAttach.fmt = createInfo.depth->info.fmt;
+			passBits.semantic.depthAttach.samples = createInfo.depth[ 0 ]->info.subsamples;
+			passBits.semantic.depthAttach.fmt = createInfo.depth[ 0 ]->info.fmt;
 			passBits.semantic.depthTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
 
-			attachments[ colorCount ] = createInfo.depth->gpuImage->GetVkImageView();
+			attachments[ colorCount ] = createInfo.depth[ 0 ]->gpuImage->GetVkImageView();
 			++dsCount;
 		}
 
-		if ( createInfo.stencil != nullptr )
+		if ( createInfo.stencil[ 0 ] != nullptr )
 		{
-			passBits.semantic.stencilAttach.samples = createInfo.stencil->info.subsamples;
-			passBits.semantic.stencilAttach.fmt = createInfo.stencil->info.fmt;
+			passBits.semantic.stencilAttach.samples = createInfo.stencil[ 0 ]->info.subsamples;
+			passBits.semantic.stencilAttach.fmt = createInfo.stencil[ 0 ]->info.fmt;
 			passBits.semantic.stencilTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
 
-			attachments[ colorCount + dsCount ] = createInfo.stencil->gpuImage->GetVkImageView();
+			attachments[ colorCount + dsCount ] = createInfo.stencil[ 0 ]->gpuImage->GetVkImageView();
 			++dsCount;
 		}
 
@@ -280,11 +289,11 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		}
 	}
 
-	color0[ 0 ] = createInfo.color0;
-	color1[ 0 ] = createInfo.color1;
-	color2[ 0 ] = createInfo.color2;
-	depth[ 0 ] = createInfo.depth;
-	stencil[ 0 ] = createInfo.stencil;
+	color0[ 0 ] = createInfo.color0[ 0 ];
+	color1[ 0 ] = createInfo.color1[ 0 ];
+	color2[ 0 ] = createInfo.color2[ 0 ];
+	depth[ 0 ] = createInfo.depth[ 0 ];
+	stencil[ 0 ] = createInfo.stencil[ 0 ];
 	width = createInfo.width;
 	height = createInfo.height;
 }

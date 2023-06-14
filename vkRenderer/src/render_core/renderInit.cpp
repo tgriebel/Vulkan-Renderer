@@ -648,10 +648,10 @@ void Renderer::CreateFramebuffers()
 		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
 		{
 			frameBufferCreateInfo_t fbInfo = {};
-			//fbInfo.color0 = &rc.whiteImage;
-			fbInfo.depth = &frameState[ frameIx ].shadowMapImage[ shadowIx ];
+			fbInfo.depth[ 0 ] = &frameState[ frameIx ].shadowMapImage[ shadowIx ];
 			fbInfo.width = frameState[ frameIx ].shadowMapImage[ shadowIx ].info.width;
 			fbInfo.height = frameState[ frameIx ].shadowMapImage[ shadowIx ].info.height;
+			fbInfo.bufferCount = 1;
 
 			shadowMap[ shadowIx ][ frameIx ].Create( fbInfo );
 		}
@@ -661,11 +661,12 @@ void Renderer::CreateFramebuffers()
 	for ( size_t i = 0; i < g_swapChain.GetBufferCount(); i++ )
 	{
 		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.color0 = &frameState[ i ].viewColorImage;
-		fbInfo.depth = &frameState[ i ].depthImageView;
-		fbInfo.stencil = &frameState[ i ].stencilImageView;
+		fbInfo.color0[ 0 ] = &frameState[ i ].viewColorImage;
+		fbInfo.depth[ 0 ] = &frameState[ i ].depthImageView;
+		fbInfo.stencil[ 0 ] = &frameState[ i ].stencilImageView;
 		fbInfo.width = frameState[ i ].viewColorImage.info.width;
 		fbInfo.height = frameState[ i ].viewColorImage.info.height;
+		fbInfo.bufferCount = 1;
 
 		mainColor[ i ].Create( fbInfo );
 	}

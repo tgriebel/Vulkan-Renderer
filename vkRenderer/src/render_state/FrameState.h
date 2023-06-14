@@ -60,22 +60,26 @@ struct frameBufferCreateInfo_t
 {
 	uint32_t			width;
 	uint32_t			height;
+	uint32_t			bufferCount;
 	resourceLifetime_t	lifetime;
-	Image*				color0;
-	Image*				color1;
-	Image*				color2;
-	Image*				depth;
-	Image*				stencil;
+	Image*				color0[ MAX_FRAMES_STATES ];
+	Image*				color1[ MAX_FRAMES_STATES ];
+	Image*				color2[ MAX_FRAMES_STATES ];
+	Image*				depth[ MAX_FRAMES_STATES ];
+	Image*				stencil[ MAX_FRAMES_STATES ];
 
 	frameBufferCreateInfo_t() :
 		width( 0 ),
 		height( 0 ),
-		color0( nullptr ),
-		color1( nullptr ),
-		color2( nullptr ),
-		depth( nullptr ),
-		stencil( nullptr )
-	{}
+		bufferCount( 0 ),
+		lifetime( LIFETIME_TEMP )
+	{
+		memset( color0, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( color1, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( color2, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( depth, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( stencil, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+	}
 };
 
 

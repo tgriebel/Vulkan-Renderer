@@ -145,9 +145,10 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 		m_swapChainImages[ i ].gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
 
 		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.color0 = &m_swapChainImages[ i ];
+		fbInfo.color0[ 0 ] = &m_swapChainImages[ i ];
 		fbInfo.width = info.width;
 		fbInfo.height = info.height;
+		fbInfo.bufferCount = 1;
 
 		framebuffers[ i ].Create( fbInfo );
 	}
