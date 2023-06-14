@@ -33,8 +33,6 @@
 class FrameState
 {
 public:
-	Image			viewColorImage;
-	Image			depthStencilImage;
 	ImageView		depthImageView;
 	ImageView		stencilImageView;
 

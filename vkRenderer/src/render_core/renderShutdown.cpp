@@ -97,10 +97,10 @@ void Renderer::DestroyFramebuffers()
 	{
 		frameState[ frameId ].depthImageView.Destroy();
 		frameState[ frameId ].stencilImageView.Destroy();
-
-		delete frameState[ frameId ].viewColorImage.gpuImage;	
-		delete frameState[ frameId ].depthStencilImage.gpuImage;
 	}
+
+	delete viewColorImage.gpuImage;
+	delete depthStencilImage.gpuImage;
 
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{

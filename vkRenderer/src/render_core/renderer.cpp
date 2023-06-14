@@ -660,7 +660,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 			}
 			else if ( passIx == DRAWPASS_POST_2D )
 			{
-				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].viewColorImage;
+				pass->codeImages[ currentImage ][ 0 ] = &viewColorImage;
 				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImageView;
 				pass->codeImages[ currentImage ][ 2 ] = &frameState[ currentImage ].stencilImageView;
 			}

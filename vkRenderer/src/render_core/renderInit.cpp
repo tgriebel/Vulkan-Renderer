@@ -609,7 +609,6 @@ void Renderer::CreateFramebuffers()
 	}
 
 	// Main images
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ )
 	{
 		imageInfo_t info{};
 		info.width = width;
@@ -622,21 +621,24 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "viewColor", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].viewColorImage );
+		CreateImage( "viewColor", info, GPU_IMAGE_READ, frameBufferMemory, viewColorImage );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		CreateImage( "viewDepth", info, GPU_IMAGE_READ, frameBufferMemory, frameState[ i ].depthStencilImage );
-		
-		imageInfo_t depthInfo = frameState[ i ].depthStencilImage.info;
-		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		frameState[ i ].depthImageView.Init( frameState[ i ].depthStencilImage, depthInfo );
+		CreateImage( "viewDepth", info, GPU_IMAGE_READ, frameBufferMemory, depthStencilImage );
+	}
 
-		imageInfo_t stencilInfo = frameState[ i ].depthStencilImage.info;
+	for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
+	{
+		imageInfo_t depthInfo = depthStencilImage.info;
+		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+		frameState[ i ].depthImageView.Init( depthStencilImage, depthInfo );
+
+		imageInfo_t stencilInfo = depthStencilImage.info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		frameState[ i ].stencilImageView.Init( frameState[ i ].depthStencilImage, stencilInfo );
+		frameState[ i ].stencilImageView.Init( depthStencilImage, stencilInfo );
 	}
 
 	// Shadow map
@@ -656,13 +658,13 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo = {};
 		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
 		{
-			fbInfo.color0[ frameIx ] = &frameState[ frameIx ].viewColorImage;
+			fbInfo.color0[ frameIx ] = &viewColorImage;
 			fbInfo.depth[ frameIx ] = &frameState[ frameIx ].depthImageView;
 			fbInfo.stencil[ frameIx ] = &frameState[ frameIx ].stencilImageView;
 		}
-		fbInfo.width = frameState[ 0 ].viewColorImage.info.width;
-		fbInfo.height = frameState[ 0 ].viewColorImage.info.height;
-		fbInfo.lifetime = LIFETIME_PERSISTENT;
+		fbInfo.width = viewColorImage.info.width;
+		fbInfo.height = viewColorImage.info.height;
+		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );
 	}

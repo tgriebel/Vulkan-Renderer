@@ -142,6 +142,8 @@ private:
 	lightBufferArray_t					lightsBuffer;
 
 	Image								shadowMapImage[ MaxShadowViews ];
+	Image								viewColorImage;
+	Image								depthStencilImage;
 
 	FrameState							frameState[ MAX_FRAMES_STATES ];
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
