@@ -141,6 +141,8 @@ private:
 	materialBufferArray_t				materialBuffer;
 	lightBufferArray_t					lightsBuffer;
 
+	Image								shadowMapImage[ MaxShadowViews ];
+
 	FrameState							frameState[ MAX_FRAMES_STATES ];
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;

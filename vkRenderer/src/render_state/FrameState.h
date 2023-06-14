@@ -34,7 +34,6 @@ class FrameState
 {
 public:
 	Image			viewColorImage;
-	Image			shadowMapImage[ MaxShadowViews ];
 	Image			depthStencilImage;
 	ImageView		depthImageView;
 	ImageView		stencilImageView;
@@ -103,6 +102,12 @@ private:
 	VkRenderPass		renderPasses[ PassPermCount ];
 #endif
 
+	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
+	{
+		const uint32_t bufferCount = ( lifetime == LIFETIME_PERSISTENT ) ? MAX_FRAMES_STATES : 1;
+		return Min( bufferId, bufferCount - 1 );
+	}
+
 public:
 
 	FrameBuffer()
@@ -146,33 +151,33 @@ public:
 
 	inline const Image* GetColor( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 0 ) ? color0[ bufferId ] : nullptr;
+		return ( colorCount > 0 ) ? color0[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetColor1( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 1 ) ? color1[ bufferId ] : nullptr;
+		return ( colorCount > 1 ) ? color1[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetColor2( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 2 ) ? color2[ bufferId ] : nullptr;
+		return ( colorCount > 2 ) ? color2[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetDepth( const uint32_t bufferId = 0 ) const
 	{
-		return ( dsCount >= 1 ) ? depth[ bufferId ] : nullptr;
+		return ( dsCount >= 1 ) ? depth[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetStencil( const uint32_t bufferId = 0 ) const
 	{
-		return ( dsCount >= 1 ) ? stencil[ bufferId ] : nullptr;
+		return ( dsCount >= 1 ) ? stencil[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 #ifdef USE_VULKAN
 	VkFramebuffer GetVkBuffer( renderPassTransitionFlags_t transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
-		return buffers[ bufferId ][ transitionState.bits ];
+		return buffers[ GetBufferId( bufferId ) ][ transitionState.bits ];
 	}
 
 	VkRenderPass GetVkRenderPass( renderPassTransitionFlags_t transitionState = {} )

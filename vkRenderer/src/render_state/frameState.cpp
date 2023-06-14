@@ -328,6 +328,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	}
 	width = createInfo.width;
 	height = createInfo.height;
+	lifetime = createInfo.lifetime;
 }
 
 

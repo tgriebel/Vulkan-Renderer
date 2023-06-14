@@ -666,9 +666,9 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 			}
 			else
 			{
-				pass->codeImages[ currentImage ][ 0 ] = &frameState[ currentImage ].shadowMapImage[ 0 ];
-				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].shadowMapImage[ 1 ];
-				pass->codeImages[ currentImage ][ 2 ] = &frameState[ currentImage ].shadowMapImage[ 2 ];
+				pass->codeImages[ currentImage ][ 0 ] = &shadowMapImage[ 0 ];
+				pass->codeImages[ currentImage ][ 1 ] = &shadowMapImage[ 1 ];
+				pass->codeImages[ currentImage ][ 2 ] = &shadowMapImage[ 2 ];
 			}
 
 			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
