@@ -256,6 +256,7 @@
     <None Include="shaders\clear.comp" />
     <None Include="shaders\crt.frag" />
     <None Include="shaders\depth.frag" />
+    <None Include="shaders\downsample.frag" />
     <None Include="shaders\emissive.frag" />
     <None Include="shaders\lit.frag" />
     <None Include="shaders\pixelSimple.frag" />

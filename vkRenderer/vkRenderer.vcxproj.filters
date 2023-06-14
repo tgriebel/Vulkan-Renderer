@@ -262,6 +262,9 @@
     <None Include="shaders\clear.comp">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\downsample.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
