@@ -60,7 +60,6 @@ struct frameBufferCreateInfo_t
 {
 	uint32_t			width;
 	uint32_t			height;
-	uint32_t			bufferCount;
 	resourceLifetime_t	lifetime;
 	Image*				color0[ MAX_FRAMES_STATES ];
 	Image*				color1[ MAX_FRAMES_STATES ];
@@ -71,7 +70,6 @@ struct frameBufferCreateInfo_t
 	frameBufferCreateInfo_t() :
 		width( 0 ),
 		height( 0 ),
-		bufferCount( 0 ),
 		lifetime( LIFETIME_TEMP )
 	{
 		memset( color0, 0, sizeof( Image* ) * MAX_FRAMES_STATES );

@@ -1,20 +1,20 @@
 #include "renderview.h"
 
-void RenderView::Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer fb[ MAX_FRAMES_STATES ] )
+void RenderView::Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb )
 {
 	const uint32_t frameStateCount = MAX_FRAMES_STATES;
 
-	const uint32_t width = fb[ 0 ].GetWidth();
-	const uint32_t height = fb[ 0 ].GetHeight();
+	const uint32_t width = fb.GetWidth();
+	const uint32_t height = fb.GetHeight();
 
 	m_viewport.width = width;
 	m_viewport.height = height;
 
 	imageSamples_t samples = IMAGE_SMP_1;
-	if ( fb[ 0 ].GetColorLayers() > 0 ) {
-		samples = fb[ 0 ].GetColor()->info.subsamples;
+	if ( fb.GetColorLayers() > 0 ) {
+		samples = fb.GetColor()->info.subsamples;
 	} else {
-		samples = fb[ 0 ].GetDepth()->info.subsamples;
+		samples = fb.GetDepth()->info.subsamples;
 	}
 
 	m_name = name;
@@ -39,9 +39,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		pass->viewport.y = 0;
 		pass->viewport.width = width;
 		pass->viewport.height = height;
-		for ( uint32_t i = 0; i < frameStateCount; ++i ) {
-			pass->fb[ i ] = &fb[ i ];
-		}
+		pass->fb = &fb;
 
 		pass->transitionState.bits = 0;
 		pass->stateBits = GFX_STATE_NONE;
@@ -154,8 +152,8 @@ void RenderView::Resize()
 		if ( pass == nullptr ) {
 			continue;
 		}
-		pass->viewport.width = pass->fb[ 0 ]->GetWidth();
-		pass->viewport.height = pass->fb[ 0 ]->GetHeight();
+		pass->viewport.width = pass->fb->GetWidth();
+		pass->viewport.height = pass->fb->GetHeight();
 	}
 }
 

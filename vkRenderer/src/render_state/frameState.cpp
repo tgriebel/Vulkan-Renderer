@@ -174,34 +174,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		perms[ i ].bits = i;
 	}
 
-	const uint32_t frameCount = 1;
+	const uint32_t imageLayers = 5;
+	const uint32_t frameCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MAX_FRAMES_STATES : 1;
 	const bool canPresent = ( createInfo.color0[ 0 ] != nullptr ) && ( createInfo.color0[ 0 ]->info.fmt == g_swapChain.GetBackBufferFormat() );
-
-	// Validation
-	for ( uint32_t frameIx = 1; frameIx < createInfo.bufferCount; ++frameIx )
-	{
-		bool differentImages = true;
-		differentImages = differentImages && ( createInfo.color0[ frameIx - 1 ] != createInfo.color0[ frameIx ] );
-		differentImages = differentImages && ( createInfo.color1[ frameIx - 1 ] != createInfo.color1[ frameIx ] );
-		differentImages = differentImages && ( createInfo.color2[ frameIx - 1 ] != createInfo.color2[ frameIx ] );
-		differentImages = differentImages && ( createInfo.depth[ frameIx - 1 ] != createInfo.depth[ frameIx ] );
-		differentImages = differentImages && ( createInfo.stencil[ frameIx - 1 ] != createInfo.stencil[ frameIx ] );
-
-		if ( differentImages == false ) {
-			throw std::runtime_error( "Framebuffer buffer layers refer to same images." );
-		}
-
-		bool infoMatches = true;
-		infoMatches = infoMatches && ( createInfo.color0[ frameIx - 1 ]->info == createInfo.color0[ frameIx ]->info );
-		infoMatches = infoMatches && ( createInfo.color1[ frameIx - 1 ]->info == createInfo.color1[ frameIx ]->info );
-		infoMatches = infoMatches && ( createInfo.color2[ frameIx - 1 ]->info == createInfo.color2[ frameIx ]->info );
-		infoMatches = infoMatches && ( createInfo.depth[ frameIx - 1 ]->info == createInfo.depth[ frameIx ]->info );
-		infoMatches = infoMatches && ( createInfo.stencil[ frameIx - 1 ]->info == createInfo.stencil[ frameIx ]->info );
-
-		if ( infoMatches == false ) {
-			throw std::runtime_error( "Framebuffer images have different properties." );
-		}
-	}
 
 	colorCount += ( createInfo.color0[ 0 ] != nullptr ) ? 1 : 0;
 	colorCount += ( createInfo.color1[ 0 ] != nullptr ) ? 1 : 0;
@@ -211,6 +186,41 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 	attachmentCount = colorCount + dsCount;
 
+	// Validation
+	{
+		Image* images[ imageLayers ][ MAX_FRAMES_STATES ];
+		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx )
+		{
+			images[ 0 ][ frameIx ] = createInfo.color0[ frameIx ];
+			images[ 1 ][ frameIx ] = createInfo.color1[ frameIx ];
+			images[ 2 ][ frameIx ] = createInfo.color2[ frameIx ];
+			images[ 3 ][ frameIx ] = createInfo.depth[ frameIx ];
+			images[ 4 ][ frameIx ] = createInfo.stencil[ frameIx ];
+		}
+
+		for ( uint32_t imageIx = 0; imageIx < imageLayers; ++imageIx )
+		{
+			if ( images[ imageIx ][ 0 ] == nullptr ) {
+				for ( uint32_t frameIx = 1; frameIx < frameCount; ++frameIx ) {
+					if( images[ imageIx ][ frameIx ] != nullptr ) {
+						throw std::runtime_error( "Framebuffer image missing." );
+					}
+				}
+				continue;
+			}
+		
+			for ( uint32_t frameIx = 1; frameIx < frameCount; ++frameIx ) {
+				if( images[ imageIx ][ frameIx - 1 ] == images[ imageIx ][ frameIx ] ) {
+					throw std::runtime_error( "Framebuffer images are the same across multiple buffers." );
+				}
+				if ( images[ imageIx ][ frameIx - 1 ]->info != images[ imageIx ][ frameIx ]->info ) {
+					throw std::runtime_error( "Framebuffer images have different properties." );
+				}
+			}
+		}
+	}
+
+	// Defaults
 	for ( uint32_t permIx = 0; permIx < PassPermCount; ++permIx ) {
 		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx ) {
 			buffers[ frameIx ][ permIx ] = VK_NULL_HANDLE;
@@ -218,6 +228,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		renderPasses[ permIx ] = VK_NULL_HANDLE;
 	}
 
+	// Initialization
 	for( uint32_t permIx = 0; permIx < PassPermCount; ++permIx )
 	{
 		const renderPassTransitionFlags_t& state = perms[ permIx ];
@@ -227,19 +238,13 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		}
 
 		// Can specify clear options, etc. Assigned to cached render pass that matches
-		VkImageView attachments[ 5 ] = {};
-
 		vk_RenderPassBits_t passBits = {};
-
-		uint32_t currentAttachment = 0;
 		if( createInfo.color0[ 0 ] != nullptr )
 		{
 			passBits.semantic.colorAttach0.samples = createInfo.color0[ 0 ]->info.subsamples;
 			passBits.semantic.colorAttach0.fmt = createInfo.color0[ 0 ]->info.fmt;
 			passBits.semantic.colorTrans0 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR0;
-
-			attachments[ currentAttachment++ ] = createInfo.color0[ 0 ]->gpuImage->GetVkImageView();
 		}
 
 		if ( createInfo.color1[ 0 ] != nullptr )
@@ -248,8 +253,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			passBits.semantic.colorAttach1.fmt = createInfo.color1[ 0 ]->info.fmt;
 			passBits.semantic.colorTrans1 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR1;
-
-			attachments[ currentAttachment++ ] = createInfo.color1[ 0 ]->gpuImage->GetVkImageView();
 		}
 
 		if ( createInfo.color2[ 0 ] != nullptr )
@@ -258,8 +261,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			passBits.semantic.colorAttach2.fmt = createInfo.color2[ 0 ]->info.fmt;
 			passBits.semantic.colorTrans2 = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_COLOR2;
-
-			attachments[ currentAttachment++ ] = createInfo.color2[ 0 ]->gpuImage->GetVkImageView();
 		}
 
 		if ( createInfo.depth[ 0 ] != nullptr )
@@ -268,8 +269,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			passBits.semantic.depthAttach.fmt = createInfo.depth[ 0 ]->info.fmt;
 			passBits.semantic.depthTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_DEPTH;
-
-			attachments[ currentAttachment++ ] = createInfo.depth[ 0 ]->gpuImage->GetVkImageView();
 		}
 
 		if ( createInfo.stencil[ 0 ] != nullptr )
@@ -278,10 +277,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			passBits.semantic.stencilAttach.fmt = createInfo.stencil[ 0 ]->info.fmt;
 			passBits.semantic.stencilTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
-
-			attachments[ currentAttachment++ ] = createInfo.stencil[ 0 ]->gpuImage->GetVkImageView();
-		}
-		assert( currentAttachment == attachmentCount );
+		}	
 
 		renderPasses[ permIx ] = vk_CreateRenderPass( passBits );
 		if ( renderPasses[ permIx ] == VK_NULL_HANDLE ) {
@@ -290,6 +286,26 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx )
 		{
+			VkImageView attachments[ imageLayers ] = {};
+			
+			uint32_t currentAttachment = 0;
+			if ( createInfo.color0[ frameIx ] != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.color0[ frameIx ]->gpuImage->GetVkImageView();
+			}
+			if ( createInfo.color1[ frameIx ] != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.color1[ frameIx ]->gpuImage->GetVkImageView();
+			}
+			if ( createInfo.color2[ frameIx ] != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.color2[ frameIx ]->gpuImage->GetVkImageView();
+			}
+			if ( createInfo.depth[ frameIx ] != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.depth[ frameIx ]->gpuImage->GetVkImageView();
+			}
+			if ( createInfo.stencil[ frameIx ] != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.stencil[ frameIx ]->gpuImage->GetVkImageView();
+			}
+			assert( currentAttachment == attachmentCount );
+
 			VkFramebufferCreateInfo framebufferInfo{ };
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferInfo.renderPass = renderPasses[ permIx ];
@@ -302,14 +318,14 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ frameIx ][ permIx ] ) != VK_SUCCESS ) {
 				throw std::runtime_error( "Failed to create framebuffer!" );
 			}
+
+			color0[ frameIx ] = createInfo.color0[ frameIx ];
+			color1[ frameIx ] = createInfo.color1[ frameIx ];
+			color2[ frameIx ] = createInfo.color2[ frameIx ];
+			depth[ frameIx ] = createInfo.depth[ frameIx ];
+			stencil[ frameIx ] = createInfo.stencil[ frameIx ];
 		}
 	}
-
-	color0[ 0 ] = createInfo.color0[ 0 ];
-	color1[ 0 ] = createInfo.color1[ 0 ];
-	color2[ 0 ] = createInfo.color2[ 0 ];
-	depth[ 0 ] = createInfo.depth[ 0 ];
-	stencil[ 0 ] = createInfo.stencil[ 0 ];
 	width = createInfo.width;
 	height = createInfo.height;
 }

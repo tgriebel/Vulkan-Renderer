@@ -143,23 +143,23 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 		info.type = IMAGE_TYPE_2D;
 
 		m_swapChainImages[ i ].gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
-
-		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.color0[ 0 ] = &m_swapChainImages[ i ];
-		fbInfo.width = info.width;
-		fbInfo.height = info.height;
-		fbInfo.bufferCount = 1;
-
-		framebuffers[ i ].Create( fbInfo );
 	}
+
+	frameBufferCreateInfo_t fbInfo = {};
+	for ( uint32_t i = 0; i < m_imageCount; ++i ) {
+		fbInfo.color0[ i ] = &m_swapChainImages[ i ];
+	}
+	fbInfo.width = m_swapChainImages[ 0 ].info.width;
+	fbInfo.height = m_swapChainImages[ 0 ].info.height;
+	fbInfo.lifetime = LIFETIME_PERSISTENT;
+
+	framebuffers.Create( fbInfo );
 }
 
 
 void SwapChain::Destroy()
 {
-	for ( size_t i = 0; i < m_imageCount; i++ ) {
-		framebuffers[ i ].Destroy();
-	}
+	framebuffers.Destroy();
 
 	for ( size_t i = 0; i < m_imageCount; i++ )
 	{

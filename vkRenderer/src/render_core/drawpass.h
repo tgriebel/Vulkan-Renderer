@@ -22,7 +22,7 @@ public:
 
 	Array<Image*, 100>			codeImages[ MAX_FRAMES_STATES ];
 	ShaderBindParms*			parms[ MAX_FRAMES_STATES ];
-	FrameBuffer*				fb[ MAX_FRAMES_STATES ];
+	FrameBuffer*				fb;
 };
 
 

@@ -142,8 +142,8 @@ private:
 	lightBufferArray_t					lightsBuffer;
 
 	FrameState							frameState[ MAX_FRAMES_STATES ];
-	FrameBuffer							shadowMap[ MaxShadowMaps ][ MAX_FRAMES_STATES ];
-	FrameBuffer							mainColor[ MAX_FRAMES_STATES ];
+	FrameBuffer							shadowMap[ MaxShadowMaps ];
+	FrameBuffer							mainColor;
 
 	uint32_t							imageFreeSlot = 0;
 	uint32_t							shadowCount = 0;

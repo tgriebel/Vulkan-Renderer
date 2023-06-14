@@ -93,7 +93,7 @@ public:
 	drawPass_t				ViewRegionPassBegin();
 	drawPass_t				ViewRegionPassEnd();
 
-	void					Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer fb[ MAX_FRAMES_STATES ] );
+	void					Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb );
 	void					Resize();
 
 	void					SetCamera( const Camera& camera, const bool reverseZ = true );

@@ -407,7 +407,7 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
-	pipelineInfo.renderPass = pass->fb[ 0 ]->GetVkRenderPass();
+	pipelineInfo.renderPass = pass->fb->GetVkRenderPass();
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional

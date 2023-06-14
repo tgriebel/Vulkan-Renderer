@@ -938,16 +938,16 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->fb[ m_bufferId ]->GetVkRenderPass( pass->transitionState );
-	passInfo.framebuffer = pass->fb[ m_bufferId ]->GetVkBuffer( pass->transitionState );
+	passInfo.renderPass = pass->fb->GetVkRenderPass( pass->transitionState );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, m_bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
 	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
 	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
 
-	const uint32_t colorAttachmentsCount = pass->fb[ m_bufferId ]->GetColorLayers();
-	const uint32_t attachmentsCount = pass->fb[ m_bufferId ]->GetLayers();
+	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
+	const uint32_t attachmentsCount = pass->fb->GetLayers();
 
 	passInfo.clearValueCount = 0;
 	passInfo.pClearValues = nullptr;

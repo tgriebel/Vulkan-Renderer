@@ -46,7 +46,7 @@ private:
 	VkSwapchainKHR				vk_swapChain;
 #endif
 public:
-	FrameBuffer					framebuffers[ MaxSwapChainBuffers ];
+	FrameBuffer					framebuffers;
 
 public:
 
@@ -70,9 +70,9 @@ public:
 	}
 	
 
-	inline const FrameBuffer* GetFrameBuffer( const uint32_t i ) const
+	inline const FrameBuffer* GetFrameBuffer() const
 	{
-		return &framebuffers[ i ];
+		return &framebuffers;
 	}
 
 

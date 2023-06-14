@@ -274,7 +274,7 @@ void Renderer::InitImGui( RenderView& view )
 
 	assert( view.passes[ DRAWPASS_POST_2D ] != nullptr );
 	const renderPassTransitionFlags_t transitionState = view.passes[ DRAWPASS_POST_2D ]->transitionState;
-	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_POST_2D ]->fb[ 0 ]->GetVkRenderPass( transitionState ) );
+	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_POST_2D ]->fb->GetVkRenderPass( transitionState ) );
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
@@ -644,31 +644,32 @@ void Renderer::CreateFramebuffers()
 
 	// Shadow map
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
-	{
-		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
-		{
-			frameBufferCreateInfo_t fbInfo = {};
-			fbInfo.depth[ 0 ] = &frameState[ frameIx ].shadowMapImage[ shadowIx ];
-			fbInfo.width = frameState[ frameIx ].shadowMapImage[ shadowIx ].info.width;
-			fbInfo.height = frameState[ frameIx ].shadowMapImage[ shadowIx ].info.height;
-			fbInfo.bufferCount = 1;
-
-			shadowMap[ shadowIx ][ frameIx ].Create( fbInfo );
+	{	
+		frameBufferCreateInfo_t fbInfo = {};
+		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx ) {
+			fbInfo.depth[ frameIx ] = &frameState[ frameIx ].shadowMapImage[ shadowIx ];
 		}
+		fbInfo.width = frameState[ 0 ].shadowMapImage[ shadowIx ].info.width;
+		fbInfo.height = frameState[ 0 ].shadowMapImage[ shadowIx ].info.height;
+		fbInfo.lifetime = LIFETIME_PERSISTENT;
+
+		shadowMap[ shadowIx ].Create( fbInfo );
 	}
 
 	// Main Scene 3D Render
-	for ( size_t i = 0; i < g_swapChain.GetBufferCount(); i++ )
 	{
 		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.color0[ 0 ] = &frameState[ i ].viewColorImage;
-		fbInfo.depth[ 0 ] = &frameState[ i ].depthImageView;
-		fbInfo.stencil[ 0 ] = &frameState[ i ].stencilImageView;
-		fbInfo.width = frameState[ i ].viewColorImage.info.width;
-		fbInfo.height = frameState[ i ].viewColorImage.info.height;
-		fbInfo.bufferCount = 1;
+		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
+		{
+			fbInfo.color0[ frameIx ] = &frameState[ frameIx ].viewColorImage;
+			fbInfo.depth[ frameIx ] = &frameState[ frameIx ].depthImageView;
+			fbInfo.stencil[ frameIx ] = &frameState[ frameIx ].stencilImageView;
+		}
+		fbInfo.width = frameState[ 0 ].viewColorImage.info.width;
+		fbInfo.height = frameState[ 0 ].viewColorImage.info.height;
+		fbInfo.lifetime = LIFETIME_PERSISTENT;
 
-		mainColor[ i ].Create( fbInfo );
+		mainColor.Create( fbInfo );
 	}
 }
 

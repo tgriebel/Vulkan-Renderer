@@ -95,7 +95,6 @@ void Renderer::DestroyFramebuffers()
 {
 	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
 	{
-		// Images
 		frameState[ frameId ].depthImageView.Destroy();
 		frameState[ frameId ].stencilImageView.Destroy();
 
@@ -104,13 +103,12 @@ void Renderer::DestroyFramebuffers()
 			delete frameState[ frameId ].shadowMapImage[ shadowIx ].gpuImage;
 		}
 		delete frameState[ frameId ].depthStencilImage.gpuImage;
-
-		// Buffers
-		for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
-			shadowMap[ shadowIx ][ frameId ].Destroy();
-		}
-		mainColor[ frameId ].Destroy();
 	}
+
+	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
+		shadowMap[ shadowIx ].Destroy();
+	}
+	mainColor.Destroy();
 
 	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
 	frameBufferMemory.Unbind();
