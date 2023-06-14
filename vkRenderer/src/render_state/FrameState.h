@@ -81,6 +81,8 @@ struct frameBufferCreateInfo_t
 class FrameBuffer
 {
 private:
+	static const uint32_t MaxAttachmentCount = 5;
+
 	Image*				color0[ MAX_FRAMES_STATES ];
 	Image*				color1[ MAX_FRAMES_STATES ];
 	Image*				color2[ MAX_FRAMES_STATES ];
@@ -92,6 +94,7 @@ private:
 	uint32_t			colorCount;
 	uint32_t			dsCount;
 	uint32_t			attachmentCount;
+	uint32_t			bufferCount;
 
 	resourceLifetime_t	lifetime;
 
@@ -108,13 +111,19 @@ private:
 
 public:
 
-	FrameBuffer()
+	FrameBuffer() :
+		attachmentCount( 0 ),
+		bufferCount( 0 ),
+		colorCount( 0 ),
+		dsCount( 0 ),
+		width( 0 ),
+		height( 0 )
 	{
-		attachmentCount = 0;
-		colorCount = 0;
-		dsCount = 0;
-		width = 0;
-		height = 0;
+		memset( color0, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( color1, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( color2, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( depth, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( stencil, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
 	}
 
 	inline bool IsValid() const

@@ -169,13 +169,16 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
+	if ( bufferCount > 0 ) {
+		throw std::runtime_error( "Framebuffer already initialized." );
+	}
+
 	renderPassTransitionFlags_t perms[ PassPermCount ];
 	for ( uint32_t i = 0; i < PassPermCount; ++i ) {
 		perms[ i ].bits = i;
 	}
 
-	const uint32_t imageLayers = 5;
-	const uint32_t frameCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MAX_FRAMES_STATES : 1;
+	bufferCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MAX_FRAMES_STATES : 1;
 	const bool canPresent = ( createInfo.color0[ 0 ] != nullptr ) && ( createInfo.color0[ 0 ]->info.fmt == g_swapChain.GetBackBufferFormat() );
 
 	colorCount += ( createInfo.color0[ 0 ] != nullptr ) ? 1 : 0;
@@ -188,8 +191,13 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 	// Validation
 	{
-		Image* images[ imageLayers ][ MAX_FRAMES_STATES ];
-		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx )
+		if ( ( createInfo.color0[ 0 ] == nullptr ) &&
+			( ( createInfo.color1[ 0 ] != nullptr ) || ( createInfo.color2[ 0 ] != nullptr ) ) ) {
+			throw std::runtime_error( "Color attachment 0 has to be used if 1 and 2 are." );
+		}
+
+		Image* images[ MaxAttachmentCount ][ MAX_FRAMES_STATES ];
+		for ( uint32_t frameIx = 0; frameIx < bufferCount; ++frameIx )
 		{
 			images[ 0 ][ frameIx ] = createInfo.color0[ frameIx ];
 			images[ 1 ][ frameIx ] = createInfo.color1[ frameIx ];
@@ -198,10 +206,10 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			images[ 4 ][ frameIx ] = createInfo.stencil[ frameIx ];
 		}
 
-		for ( uint32_t imageIx = 0; imageIx < imageLayers; ++imageIx )
+		for ( uint32_t imageIx = 0; imageIx < MaxAttachmentCount; ++imageIx )
 		{
 			if ( images[ imageIx ][ 0 ] == nullptr ) {
-				for ( uint32_t frameIx = 1; frameIx < frameCount; ++frameIx ) {
+				for ( uint32_t frameIx = 1; frameIx < bufferCount; ++frameIx ) {
 					if( images[ imageIx ][ frameIx ] != nullptr ) {
 						throw std::runtime_error( "Framebuffer image missing." );
 					}
@@ -209,7 +217,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 				continue;
 			}
 		
-			for ( uint32_t frameIx = 1; frameIx < frameCount; ++frameIx ) {
+			for ( uint32_t frameIx = 1; frameIx < bufferCount; ++frameIx ) {
 				if( images[ imageIx ][ frameIx - 1 ] == images[ imageIx ][ frameIx ] ) {
 					throw std::runtime_error( "Framebuffer images are the same across multiple buffers." );
 				}
@@ -222,7 +230,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 	// Defaults
 	for ( uint32_t permIx = 0; permIx < PassPermCount; ++permIx ) {
-		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx ) {
+		for ( uint32_t frameIx = 0; frameIx < bufferCount; ++frameIx ) {
 			buffers[ frameIx ][ permIx ] = VK_NULL_HANDLE;
 		}
 		renderPasses[ permIx ] = VK_NULL_HANDLE;
@@ -284,9 +292,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			throw std::runtime_error( "Failed to create framebuffer! Render pass invalid" );
 		}
 
-		for ( uint32_t frameIx = 0; frameIx < frameCount; ++frameIx )
+		for ( uint32_t frameIx = 0; frameIx < bufferCount; ++frameIx )
 		{
-			VkImageView attachments[ imageLayers ] = {};
+			VkImageView attachments[ MaxAttachmentCount ] = {};
 			
 			uint32_t currentAttachment = 0;
 			if ( createInfo.color0[ frameIx ] != nullptr ) {
@@ -339,12 +347,23 @@ void FrameBuffer::Destroy()
 	{
 		for ( uint32_t i = 0; i < PassPermCount; ++i )
 		{
-			if ( buffers != VK_NULL_HANDLE ) {
-				vkDestroyFramebuffer( context.device, buffers[ 0 ][ i ], nullptr );
+			for ( uint32_t frameIx = 0; frameIx < bufferCount; ++frameIx )
+			{
+				if ( buffers != VK_NULL_HANDLE )
+				{
+					vkDestroyFramebuffer( context.device, buffers[ frameIx ][ i ], nullptr );
+					buffers[ frameIx ][ i ] = VK_NULL_HANDLE;
+				}		
 			}
-			if ( renderPasses != VK_NULL_HANDLE ) {
+			if ( renderPasses != VK_NULL_HANDLE )
+			{
 				vkDestroyRenderPass( context.device, renderPasses[ i ], nullptr );
+				renderPasses[ i ] = VK_NULL_HANDLE;
 			}
 		}
 	}
+	colorCount = 0;
+	dsCount = 0;
+	attachmentCount = 0;
+	bufferCount = 0;
 }
