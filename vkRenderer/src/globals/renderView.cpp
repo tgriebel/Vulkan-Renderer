@@ -19,8 +19,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 
 	m_name = name;
 	m_region = region;
-
-	m_frameBufferSize = vec2i( width, height );
+	m_framebuffer = &fb;
 
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
@@ -193,7 +192,7 @@ drawPass_t RenderView::ViewRegionPassEnd()
 
 vec2i RenderView::GetFrameSize() const
 {
-	return m_frameBufferSize;
+	return vec2i( static_cast<int32_t>( m_framebuffer->GetWidth() ), static_cast<int32_t>( m_framebuffer->GetHeight() ) );
 }
 
 

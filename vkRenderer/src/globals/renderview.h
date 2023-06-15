@@ -39,11 +39,11 @@ enum class renderViewRegion_t : uint32_t
 class RenderView
 {
 private:
+	const FrameBuffer*	m_framebuffer;
 	viewport_t			m_viewport;
 	mat4x4f				m_viewMatrix;
 	mat4x4f				m_projMatrix;
 	mat4x4f				m_viewprojMatrix;
-	vec2i				m_frameBufferSize;
 	const char*			m_name;
 	renderViewRegion_t	m_region;
 	int					m_viewId;
@@ -66,11 +66,10 @@ public:
 		m_projMatrix = mat4x4f( 1.0f );
 		m_viewprojMatrix = mat4x4f( 1.0f );
 
-		m_frameBufferSize = vec2i( 0, 0 );
-
 		m_viewId = -1;
 		m_committed = false;
 
+		m_framebuffer = nullptr;
 		m_region = renderViewRegion_t::UNKNOWN;
 
 		memset( surfaces, 0, MaxSurfaces );

@@ -324,8 +324,10 @@ void Renderer::RecreateSwapChain()
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
 
-	for ( uint32_t viewIx = 0; viewIx < viewCount; ++viewIx ) {
+	for ( uint32_t viewIx = 0; viewIx < viewCount; ++viewIx )
+	{
 		views[ viewIx ].Resize();
+		views[ viewIx ].SetViewRect( 0, 0, width, height );
 	}
 }
 
@@ -704,11 +706,6 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		float intPart = 0;
 		const float fracPart = modf( time, &intPart );
 
-		const viewport_t& viewport = renderViews[ 0 ]->GetViewport();
-
-		const float viewWidth = static_cast<float>( viewport.width );
-		const float viewHeight = static_cast<float>( viewport.height );
-
 		globals.time = vec4f( time, intPart, fracPart, 1.0f );
 		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
@@ -994,7 +991,13 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();
 
-		MarkerBeginRegion( gfxContext, view.passes[ passIx ]->name, ColorToVector( Color::White ) );
+		const DrawPass* pass = view.passes[ passIx ];
+		if( pass == nullptr ) {
+			continue;
+		}
+
+		MarkerBeginRegion( gfxContext, pass->name, ColorToVector( Color::White ) );
+
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];	
@@ -1017,7 +1020,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 			}
 
 			const uint32_t descSetCount = 1;
-			VkDescriptorSet descSetArray[ descSetCount ] = { view.passes[ passIx ]->parms[ m_bufferId ]->GetVkObject() };
+			VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms[ m_bufferId ]->GetVkObject() };
 
 			vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 			vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
