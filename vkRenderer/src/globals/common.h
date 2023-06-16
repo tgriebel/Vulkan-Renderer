@@ -96,6 +96,7 @@ const std::string ModelPath = ".\\models\\";
 const std::string TexturePath = ".\\textures\\";
 const std::string BakePath = ".\\baked\\";
 const std::string BakedModelExtension = ".mdl";
+const std::string BakedTextureExtension = ".img";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 

@@ -46,6 +46,7 @@
 #include "scenes/chessScene.h"
 #include <gfxcore/asset_types/gpuProgram.h>
 #include <SysCore/systemUtils.h>
+#include <gfxcore/io/serializeClasses.h>
 
 AssetManager						g_assets;
 Scene*								g_scene;
@@ -88,21 +89,21 @@ void CheckReloadAssets()
 }
 
 
-void LoadNewScene( const std::string fileName )
+void BakeAssets()
 {
-	g_assets.Clear();
-	ShutdownScene( g_scene );
-	delete g_scene;
-	g_scene = nullptr;
-	g_renderer.ShutdownGPU();
+	Serializer* s = new Serializer( MB( 128 ), serializeMode_t::STORE );
 
-	CreateCodeAssets();
-	LoadScene( fileName, &g_scene, &g_assets );
-	InitScene( g_scene );
+	const uint32_t imageCount = g_assets.textureLib.Count();
+	for ( uint32_t i = 0; i < imageCount; ++i ) {
+		Asset<Image>* image = g_assets.textureLib.Find( i );
+		image->Get().InitCpuImage();
+		
+		s->Clear( false );
+		image->Get().cpuImage.Serialize( s );	
+		s->WriteFile( BakePath + TexturePath + image->Handle().String() + BakedTextureExtension );
+	}
 
-	sceneFile = fileName;
-
-	g_renderer.InitGPU();
+	delete s;
 }
 
 
@@ -119,6 +120,11 @@ int main( int argc, char* argv[] )
 
 	g_window.Init();
 	InitScene( g_scene );
+
+	const bool bake = true;
+	if( bake ) {
+		BakeAssets();
+	}
 
 	try
 	{

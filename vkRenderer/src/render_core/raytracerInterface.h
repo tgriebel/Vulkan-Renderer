@@ -39,19 +39,7 @@ static void BuildRayTraceScene( const Scene* scene )
 	{
 		Asset<Image>* texAsset = g_assets.textureLib.Find( i );
 		Image& texture = texAsset->Get();
-
-		texture.cpuImage.Init( texture.info.width, texture.info.height );
-
-		for ( uint32_t py = 0; py < texture.info.height; ++py ) {
-			for ( uint32_t px = 0; px < texture.info.width; ++px ) {
-				RGBA rgba;
-				rgba.r = texture.bytes[ ( py * texture.info.width + px ) * 4 + 0 ];
-				rgba.g = texture.bytes[ ( py * texture.info.width + px ) * 4 + 1 ];
-				rgba.b = texture.bytes[ ( py * texture.info.width + px ) * 4 + 2 ];
-				rgba.a = texture.bytes[ ( py * texture.info.width + px ) * 4 + 3 ];
-				texture.cpuImage.SetPixel( px, py, rgba );
-			}
-		}
+		texture.InitCpuImage();
 	}
 }
 
