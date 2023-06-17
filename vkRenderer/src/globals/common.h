@@ -94,9 +94,11 @@ const int MAX_FRAMES_STATES = ( MAX_FRAMES_IN_FLIGHT + 1 );
 
 const std::string ModelPath = ".\\models\\";
 const std::string TexturePath = ".\\textures\\";
+const std::string MaterialPath = ".\\materials\\";
 const std::string BakePath = ".\\baked\\";
-const std::string BakedModelExtension = ".mdl";
-const std::string BakedTextureExtension = ".img";
+const std::string BakedModelExtension = ".mdl.bin";
+const std::string BakedTextureExtension = ".img.bin";
+const std::string BakedMaterialExtension = ".mtl.bin";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 

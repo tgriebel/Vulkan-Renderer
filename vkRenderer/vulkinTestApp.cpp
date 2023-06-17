@@ -88,20 +88,63 @@ void CheckReloadAssets()
 	}
 }
 
+struct bakedAssetInfo_t
+{
+	std::string		name;
+	std::string		hash;
+	std::string		type;
+	uint32_t		sizeBytes;
+};
+
+std::vector<bakedAssetInfo_t> assetInfo;
+Serializer* s;
+
+template<class T>
+void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const std::string& ext )
+{
+	const uint32_t count = lib.Count();
+	for ( uint32_t i = 0; i < count; ++i )
+	{
+		Asset<T>* asset = lib.Find( i );
+
+		s->Clear( false );
+		asset->Get().Serialize( s );
+		s->WriteFile( path + asset->Handle().String() + ext );
+
+		bakedAssetInfo_t info;
+		info.name = asset->GetName();
+		info.hash = asset->Handle().String();
+		info.type = lib.AssetTypeName();
+		info.sizeBytes = s->CurrentSize();
+		assetInfo.push_back( info );
+	}
+}
+
 
 void BakeAssets()
-{
-	Serializer* s = new Serializer( MB( 128 ), serializeMode_t::STORE );
+{	
+	s = new Serializer( MB( 128 ), serializeMode_t::STORE );
+	assetInfo.reserve( 1000 );
 
 	const uint32_t imageCount = g_assets.textureLib.Count();
-	for ( uint32_t i = 0; i < imageCount; ++i ) {
+	for ( uint32_t i = 0; i < imageCount; ++i )
+	{
 		Asset<Image>* image = g_assets.textureLib.Find( i );
 		image->Get().InitCpuImage();
-		
-		s->Clear( false );
-		image->Get().cpuImage.Serialize( s );	
-		s->WriteFile( BakePath + TexturePath + image->Handle().String() + BakedTextureExtension );
 	}
+
+	BakeLibraryAssets( g_assets.textureLib, BakePath + TexturePath, BakedTextureExtension );
+	BakeLibraryAssets( g_assets.materialLib, BakePath + MaterialPath, BakedMaterialExtension );
+	BakeLibraryAssets( g_assets.modelLib, BakePath + ModelPath, BakedModelExtension );
+
+	std::ofstream assetFile( BakePath + "asset_info.csv", std::ios::out | std::ios::trunc );
+	assetFile << "Name,Type,Hash,Size\n";
+	for( auto it = assetInfo.begin(); it != assetInfo.end(); ++it )
+	{
+		const bakedAssetInfo_t& asset = *it;
+		assetFile << asset.name << "," << asset.type << "," << asset.hash << "," << asset.sizeBytes << "\n";
+	}
+	assetFile.close();
 
 	delete s;
 }
@@ -121,7 +164,7 @@ int main( int argc, char* argv[] )
 	g_window.Init();
 	InitScene( g_scene );
 
-	const bool bake = true;
+	const bool bake = false;
 	if( bake ) {
 		BakeAssets();
 	}
