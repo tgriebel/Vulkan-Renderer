@@ -147,6 +147,7 @@ void BakeAssets()
 	assetFile.close();
 
 	delete s;
+	exit(0);
 }
 
 
