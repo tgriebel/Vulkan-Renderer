@@ -107,8 +107,10 @@ static void CopyGeoBuilderResult( const GeoBuilder& gb, Surface& surf, AABB& bou
 }
 
 
-bool SkyBoxLoader::Load( Model& model )
+bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 {
+	Model& model = modelAsset.Get();
+
 	const float gridSize = 1.0f;
 	const uint32_t width = 1;
 	const uint32_t height = 1;
@@ -189,8 +191,10 @@ bool SkyBoxLoader::Load( Model& model )
 }
 
 
-bool TerrainLoader::Load( Model& model )
+bool TerrainLoader::Load( Asset<Model>& modelAsset )
 {
+	Model& model = modelAsset.Get();
+
 	GeoBuilder::planeInfo_t info;
 	info.gridSize = vec2f( cellSize );
 	info.widthInQuads = width;
@@ -215,8 +219,10 @@ bool TerrainLoader::Load( Model& model )
 }
 
 
-bool WaterLoader::Load( Model& model )
+bool WaterLoader::Load( Asset<Model>& modelAsset )
 {
+	Model& model = modelAsset.Get();
+
 	const float gridSize = 10.f;
 	const uint32_t width = 1;
 	const uint32_t height = 1;
@@ -278,7 +284,7 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 }
 
 
-bool QuadLoader::Load( Model& model )
+bool QuadLoader::Load( Asset<Model>& model )
 {
 	//CreateQuadSurface2D();
 	return false;

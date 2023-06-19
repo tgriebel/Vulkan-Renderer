@@ -55,7 +55,7 @@ private:
 class SkyBoxLoader : public LoadHandler<Model>
 {
 private:
-	bool Load( Model& model );
+	bool Load( Asset<Model>& model );
 public:
 };
 
@@ -68,7 +68,7 @@ private:
 	float cellSize;
 	float uvScale;
 	hdl_t handle;
-	bool Load( Model& model );
+	bool Load( Asset<Model>& model );
 public:
 	TerrainLoader( const int _width, const int _height, const float _cellSize, const float _uvScale, const hdl_t _handle )
 	{
@@ -84,7 +84,7 @@ public:
 class WaterLoader : public LoadHandler<Model>
 {
 private:
-	bool Load( Model& model );
+	bool Load( Asset<Model>& model );
 public:
 };
 
@@ -92,7 +92,7 @@ public:
 class QuadLoader : public LoadHandler<Model>
 {
 private:
-	bool Load( Model& model );
+	bool Load( Asset<Model>& model );
 public:
 };
 
