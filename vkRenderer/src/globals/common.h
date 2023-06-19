@@ -400,3 +400,7 @@ public:
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffer;
 };
+
+
+class Timer;
+void TimerPrint( const Timer* timer );
