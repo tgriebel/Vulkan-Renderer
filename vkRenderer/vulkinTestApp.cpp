@@ -94,8 +94,6 @@ void TimerPrint( const Timer* timer )
 	std::cout << "Timer(" << timer->GetLabel() << "): " << timer->GetCurrentElapsed() << "ms" << std::endl;
 }
 
-#define SCOPED_TIMER( label ) ScopedLogTimer scopedTimer_##label( #label, &TimerPrint );
-
 #include <chrono>
 #include <ctime>
 
@@ -178,13 +176,10 @@ void BakeAssets()
 int main( int argc, char* argv[] )
 {
 	CreateCodeAssets();
-	{
-		SCOPED_TIMER( Load );
-		if( argc == 2 ) {
-			LoadScene( argv[1], &g_scene, &g_assets );
-		} else {
-			LoadScene( sceneFile, &g_scene, &g_assets );
-		}
+	if( argc == 2 ) {
+		LoadScene( argv[1], &g_scene, &g_assets );
+	} else {
+		LoadScene( sceneFile, &g_scene, &g_assets );
 	}
 
 	std::thread renderThread( RenderThread );
