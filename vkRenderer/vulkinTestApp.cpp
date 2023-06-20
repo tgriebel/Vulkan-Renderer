@@ -88,12 +88,6 @@ void CheckReloadAssets()
 	}
 }
 
-void TimerPrint( const Timer* timer )
-{
-	assert( timer != nullptr );
-	std::cout << "Timer(" << timer->GetLabel() << "): " << timer->GetCurrentElapsed() << "ms" << std::endl;
-}
-
 #include <chrono>
 #include <ctime>
 
@@ -121,10 +115,6 @@ void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const std::st
 		info.type = lib.AssetTypeName();
 		info.date = std::string( dateCStr );
 		info.sizeBytes = s->CurrentSize();
-
-		if( info.type == "Image" ) {
-			std::cout << "Baking " << info.name << " with hash " << info.hash << std::endl;
-		}
 
 		s->Clear( false );
 		s->NextString( info.name );
