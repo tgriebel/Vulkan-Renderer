@@ -101,6 +101,9 @@
     <ClCompile Include="src\globals\renderView.cpp">
       <Filter>globals</Filter>
     </ClCompile>
+    <ClCompile Include="external\MikkTSpace\mikktspace.c">
+      <Filter>external\mikkTSpace</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -212,6 +215,9 @@
     <ClInclude Include="src\render_binding\imageView.h">
       <Filter>render binding</Filter>
     </ClInclude>
+    <ClInclude Include="external\MikkTSpace\mikktspace.h">
+      <Filter>external\mikkTSpace</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
@@ -299,6 +305,9 @@
     </Filter>
     <Filter Include="external\tinyfiledialogs">
       <UniqueIdentifier>{ef848272-6ac6-4f38-b6f0-14d00456cc67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\mikkTSpace">
+      <UniqueIdentifier>{f0416a04-d0e7-4d2e-8767-9190e0f772ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
