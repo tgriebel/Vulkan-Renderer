@@ -59,6 +59,7 @@
 #include <gfxcore/asset_types/gpuProgram.h>
 #include <syscore/common.h>
 #include <sysCore/array.h>
+#include <syscore/timer.h>
 
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1000;
 const uint32_t	DescriptorPoolMaxSamplers		= 3;
