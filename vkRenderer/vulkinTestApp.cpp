@@ -88,12 +88,6 @@ void CheckReloadAssets()
 	}
 }
 
-void TimerPrint( const Timer* timer )
-{
-	assert( timer != nullptr );
-	std::cout << "Timer(" << timer->GetLabel() << "): " << timer->GetCurrentElapsed() << "ms" << std::endl;
-}
-
 #include <chrono>
 #include <ctime>
 

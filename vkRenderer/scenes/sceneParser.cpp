@@ -664,12 +664,12 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
 {
 	{
-		SCOPED_TIMER( ParseScene );
+		SCOPED_TIMER_PRINT( ParseScene );
 		ParseJson( fileName, scene, assets, true );
 	}
 
 	{
-		SCOPED_TIMER( LoadAssets );
+		SCOPED_TIMER_PRINT( LoadAssets );
 		g_assets.RunLoadLoop();
 	}
 }

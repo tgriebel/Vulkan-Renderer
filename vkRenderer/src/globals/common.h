@@ -400,8 +400,3 @@ public:
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffer;
 };
-
-
-class Timer;
-void TimerPrint( const Timer* timer );
-#define SCOPED_TIMER( label ) ScopedLogTimer scopedTimer_##label( #label, &TimerPrint );
