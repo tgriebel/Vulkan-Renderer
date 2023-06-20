@@ -1,19 +1,39 @@
-﻿  scene.cpp
+﻿  stdafx.cpp
+  imgui_impl_glfw.cpp
+  imgui_impl_vulkan.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  scene.cpp
   chessScene.cpp
   nesScene.cpp
   sceneParser.cpp
   renderView.cpp
   render_util.cpp
   io.cpp
+  binding.cpp
   descriptorWrites.cpp
+  gpuResources.cpp
   gpuTransfer.cpp
+  imageView.cpp
   pipeline.cpp
+  Generating Code...
+  Compiling...
+  shaderBinding.cpp
   debugMenu.cpp
+  gpuImage.cpp
   renderCommand.cpp
+  renderer.cpp
   renderInit.cpp
   renderShutdown.cpp
-  renderer.cpp
+  swapChain.cpp
+  deviceContext.cpp
+  frameState.cpp
+  window.cpp
   vulkinTestApp.cpp
   Generating Code...
+  tinyfiledialogs.c
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
