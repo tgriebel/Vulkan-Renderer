@@ -51,7 +51,7 @@ static void TraceScene( const bool rasterize = false )
 	rtview.targetSize[ 0 ] = 320;
 	rtview.targetSize[ 1 ] = 180;
 	//g_window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
-	ImageBuffer<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], Color::Black, "testRayTrace" );
+	ImageBuffer<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], 1, Color::Black, "testRayTrace" );
 	{
 		rtview.camera = rtScene.scene->camera;
 		rtview.viewTransform = rtview.camera.GetViewMatrix();
