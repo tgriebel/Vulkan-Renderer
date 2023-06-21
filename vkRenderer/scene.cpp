@@ -41,19 +41,14 @@ void CreateCodeAssets()
 			texture.info.channels = 4;
 			texture.info.fmt = IMAGE_FMT_RGBA_8;
 			texture.info.tiling = IMAGE_TILING_MORTON;
-			texture.sizeBytes = texture.info.channels * texture.info.width * texture.info.height;
-
-			texture.bytes = new uint8_t[ texture.sizeBytes ];
-
-			const uint32_t pixelCount = texture.info.width * texture.info.height;
-			for ( uint32_t i = 0; i < pixelCount; ++i )
-			{
-				texture.bytes[ i * 4 + 0 ] = rgba.r;
-				texture.bytes[ i * 4 + 1 ] = rgba.g;
-				texture.bytes[ i * 4 + 2 ] = rgba.b;
-				texture.bytes[ i * 4 + 3 ] = rgba.a;
-			}
 			
+			texture.cpuImage.Init( texture.info.width, texture.info.height );
+
+			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
+				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
+					texture.cpuImage.SetPixel( x, y, rgba );
+				}
+			}			
 		}
 	}
 
@@ -234,14 +229,14 @@ void UpdateScene( Scene* scene )
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( "CODE_COLOR_0" );
 		Image& texture = imageAsset->Get();
 
-		const uint32_t pixelCount = texture.info.width * texture.info.height;
-		for ( uint32_t i = 0; i < pixelCount; ++i )
-		{
-			texture.bytes[ i * 4 + 0 ] = rgba.r;
-			texture.bytes[ i * 4 + 1 ] = rgba.g;
-			texture.bytes[ i * 4 + 2 ] = rgba.b;
-			texture.bytes[ i * 4 + 3 ] = rgba.a;
+		texture.cpuImage.Init( texture.info.width, texture.info.height );
+
+		for ( uint32_t y = 0; y < texture.info.height; ++y ) {
+			for ( uint32_t x = 0; x < texture.info.width; ++x ) {
+				texture.cpuImage.SetPixel( x, y, rgba );
+			}
 		}
+
 		imageAsset->QueueUpload();
 	}
 	

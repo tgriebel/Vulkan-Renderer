@@ -78,7 +78,7 @@ void Renderer::UpdateTextures()
 		Image& image = imageAsset->Get();
 
 		const uint64_t currentOffset = stagingBuffer.GetSize();
-		stagingBuffer.CopyData( image.bytes, image.sizeBytes );
+		stagingBuffer.CopyData( image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
 
 		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
@@ -120,7 +120,7 @@ void Renderer::UploadTextures()
 		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
 		const uint64_t currentOffset = stagingBuffer.GetSize();
-		stagingBuffer.CopyData( texture.bytes, texture.sizeBytes );		
+		stagingBuffer.CopyData( texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
 
 		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
 		

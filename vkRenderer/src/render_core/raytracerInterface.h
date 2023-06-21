@@ -33,14 +33,6 @@ static void BuildRayTraceScene( const Scene* scene )
 	{
 		rtScene.lights.push_back( scene->lights[ i ] );
 	}
-
-	const uint32_t texCount = g_assets.textureLib.Count();
-	for ( uint32_t i = 0; i < texCount; ++i )
-	{
-		Asset<Image>* texAsset = g_assets.textureLib.Find( i );
-		Image& texture = texAsset->Get();
-		texture.InitCpuImage();
-	}
 }
 
 

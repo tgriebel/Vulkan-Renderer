@@ -133,13 +133,6 @@ void BakeAssets()
 	s = new Serializer( MB( 128 ), serializeMode_t::STORE );
 	assetInfo.reserve( 1000 );
 
-	const uint32_t imageCount = g_assets.textureLib.Count();
-	for ( uint32_t i = 0; i < imageCount; ++i )
-	{
-		Asset<Image>* image = g_assets.textureLib.Find( i );
-		image->Get().InitCpuImage();
-	}
-
 	MakeDirectory( BakePath );
 	MakeDirectory( BakePath + TexturePath );
 	MakeDirectory( BakePath + MaterialPath );

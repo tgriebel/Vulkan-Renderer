@@ -64,6 +64,9 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 	const uint32_t width = fr.frameBuffer->GetWidth();
 	const uint32_t height = fr.frameBuffer->GetHeight();
 
+	texture.cpuImage.Destroy();
+	texture.cpuImage.Init( width, height );
+
 	for ( uint32_t y = 0; y < height; ++y )
 	{
 		for ( uint32_t x = 0; x < width; ++x )
@@ -71,10 +74,9 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 			const uint32_t pixelIx = y * width + x;
 			Tomtendo::Pixel pixel = fr.frameBuffer->Get( pixelIx );
 
-			texture.bytes[ pixelIx * 4 + 0 ] = pixel.rgba.red;
-			texture.bytes[ pixelIx * 4 + 1 ] = pixel.rgba.green;
-			texture.bytes[ pixelIx * 4 + 2 ] = pixel.rgba.blue;
-			texture.bytes[ pixelIx * 4 + 3 ] = pixel.rgba.alpha;
+			Pixel px;
+			px.r8g8b8a8 = pixel.rawABGR;
+			texture.cpuImage.SetPixel( x, y, px.rgba );
 		}
 	}
 	imageAsset->QueueUpload();

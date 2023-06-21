@@ -322,7 +322,7 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 			ImGui::TableNextRow();
 
 			ImGui::TableNextColumn();	ImGui::Text( "Size(bytes)" );
-			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.sizeBytes );
+			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.cpuImage.GetByteCount() );
 			ImGui::TableNextRow();
 
 			ImGui::EndTable();

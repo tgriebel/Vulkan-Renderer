@@ -804,8 +804,6 @@ void Renderer::CreateBuffers()
 
 void Renderer::CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
 {
-	outImage.bytes = nullptr;
-	outImage.sizeBytes = 0;
 	outImage.info = info;
 	outImage.gpuImage = new GpuImage();
 	outImage.gpuImage->Create( name, outImage.info, flags, memory );
