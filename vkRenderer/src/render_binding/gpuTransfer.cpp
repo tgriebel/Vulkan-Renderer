@@ -224,7 +224,12 @@ void Renderer::UpdateGpuMaterials()
 				const hdl_t handle = m.GetTexture( t );
 				if ( handle.IsValid() )
 				{
-					const int uploadId = g_assets.textureLib.Find( m.GetTexture( t ) )->Get().gpuImage->GetId();
+					const hdl_t imageId = m.GetTexture( t );
+					const Asset<Image>* imageAsset = g_assets.textureLib.Find( imageId );
+					const Image& image = imageAsset->Get();
+					assert( image.gpuImage != nullptr );
+
+					const int uploadId = image.gpuImage->GetId();
 					assert( uploadId >= 0 );
 					materialObject.textures[ t ] = uploadId;
 				} else {
