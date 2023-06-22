@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "..\..\Raytrace
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wintendoCore", "..\..\nesEmu\wintendo\wintendoCore\wintendo.vcxproj", "{F89DD5F8-F02F-43B5-A687-6E61449D54B0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetConverter", "AssetConverter\AssetConverter.vcxproj", "{11A9154E-560C-4CEB-AE50-0A0B661612BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -97,6 +99,18 @@ Global
 		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x64.Build.0 = Debug|x64
 		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x86.ActiveCfg = Debug|Win32
 		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x86.Build.0 = Debug|Win32
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x64.ActiveCfg = Debug|x64
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x64.Build.0 = Debug|x64
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x86.ActiveCfg = Debug|Win32
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x86.Build.0 = Debug|Win32
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Release|x64.ActiveCfg = Release|x64
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Release|x64.Build.0 = Release|x64
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Release|x86.ActiveCfg = Release|Win32
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Release|x86.Build.0 = Release|Win32
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Test (Debug)|x64.ActiveCfg = Debug|x64
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Test (Debug)|x64.Build.0 = Debug|x64
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Test (Debug)|x86.ActiveCfg = Debug|Win32
+		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Test (Debug)|x86.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
