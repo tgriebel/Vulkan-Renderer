@@ -47,6 +47,7 @@
 #include <gfxcore/asset_types/gpuProgram.h>
 #include <SysCore/systemUtils.h>
 #include <gfxcore/io/serializeClasses.h>
+#include <gfxcore/scene/assetBaker.h>
 
 AssetManager						g_assets;
 Scene*								g_scene;
@@ -88,70 +89,16 @@ void CheckReloadAssets()
 	}
 }
 
-#include <chrono>
-#include <ctime>
-
-std::vector<bakedAssetInfo_t> assetInfo;
-Serializer* s;
-
-template<class T>
-void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const std::string& ext )
-{
-	assert( s->GetMode() == serializeMode_t::STORE );
-
-	auto time = std::chrono::system_clock::now();
-	std::time_t date = std::chrono::system_clock::to_time_t( time );
-	char dateCStr[ 128 ];
-	ctime_s( dateCStr, 128, &date );
-
-	const uint32_t count = lib.Count();
-	for ( uint32_t i = 0; i < count; ++i )
-	{
-		Asset<T>* asset = lib.Find( i );
-
-		bakedAssetInfo_t info = {};
-		info.name = asset->GetName();
-		info.hash = asset->Handle().String();
-		info.type = lib.AssetTypeName();
-		info.date = std::string( dateCStr );
-		info.sizeBytes = s->CurrentSize();
-
-		s->Clear( false );
-		s->NextString( info.name );
-		s->NextString( info.type );
-		s->NextString( info.date );
-		asset->Get().Serialize( s );
-		s->WriteFile( path + asset->Handle().String() + ext );
-
-		assetInfo.push_back( info );
-	}
-}
-
-
 void BakeAssets()
 {	
-	s = new Serializer( MB( 128 ), serializeMode_t::STORE );
-	assetInfo.reserve( 1000 );
+	AssetBaker baker;
+	baker.AddBakeDirectory( BakePath );
+	baker.AddAssetLib( &g_assets.modelLib, ModelPath, BakedModelExtension );
+	baker.AddAssetLib( &g_assets.materialLib, MaterialPath, BakedMaterialExtension );
+	baker.AddAssetLib( &g_assets.textureLib, TexturePath, BakedTextureExtension );
 
-	MakeDirectory( BakePath );
-	MakeDirectory( BakePath + TexturePath );
-	MakeDirectory( BakePath + MaterialPath );
-	MakeDirectory( BakePath + ModelPath );
+	baker.Bake();
 
-	BakeLibraryAssets( g_assets.textureLib, BakePath + TexturePath, BakedTextureExtension );
-	BakeLibraryAssets( g_assets.materialLib, BakePath + MaterialPath, BakedMaterialExtension );
-	BakeLibraryAssets( g_assets.modelLib, BakePath + ModelPath, BakedModelExtension );
-
-	std::ofstream assetFile( BakePath + "asset_info.csv", std::ios::out | std::ios::trunc );
-	assetFile << "Name,Type,Hash,Data,Size\n";
-	for( auto it = assetInfo.begin(); it != assetInfo.end(); ++it )
-	{
-		const bakedAssetInfo_t& asset = *it;
-		assetFile << asset.name << "," << asset.type << "," << asset.hash << "," << asset.sizeBytes << "," << asset.date; // date has an end-line char
-	}
-	assetFile.close();
-
-	delete s;
 	exit(0);
 }
 
