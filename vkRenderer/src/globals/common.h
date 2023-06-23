@@ -209,11 +209,10 @@ union sortKey_t
 	uint32_t	key;
 };
 
-struct surfaceUpload_t;
 
 struct drawSurf_t
 {
-	surfaceUpload_t*	upload;
+	uint32_t			uploadId;
 	uint32_t			objectId;
 	sortKey_t			sortKey;
 	renderFlags_t		flags;

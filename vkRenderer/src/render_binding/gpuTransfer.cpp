@@ -272,12 +272,14 @@ void Renderer::UploadModelsToGPU()
 		if ( modelAsset->IsUploaded() ) {
 			continue;
 		}
+		if( model.uploadId == -1 ) {
+			continue;
+		}
 
-		model.upload.resize( model.surfCount );
 		for ( uint32_t s = 0; s < model.surfCount; ++s )
 		{
-			Surface& surf = model.surfs[ s ];
-			surfaceUpload_t& upload = model.upload[ s ];
+			Surface& surf = model.surfs[ s ];	
+			surfaceUpload_t& upload = surfUploads[ model.uploadId + s ];
 
 			upload.vertexOffset = vbBufElements;
 			upload.firstIndex = ibBufElements;

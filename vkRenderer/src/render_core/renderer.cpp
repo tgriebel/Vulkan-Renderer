@@ -168,13 +168,21 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 	assert( DRAWPASS_COUNT <= Material::MaxMaterialShaders );
 
-	Model& source = g_assets.modelLib.Find( ent.modelHdl )->Get();
-	for ( uint32_t i = 0; i < source.surfCount; ++i ) {
+	Asset<Model>* modelAsset = g_assets.modelLib.Find( ent.modelHdl );
+	Model& model = modelAsset->Get();
+
+	for ( uint32_t i = 0; i < model.surfCount; ++i )
+	{
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
-		surfaceUpload_t& surfUpload = source.upload[ i ];
 
-		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl;
+		if( model.uploadId == -1 )
+		{
+			model.uploadId = surfUploads.Count();
+			surfUploads.Grow( model.surfCount );
+		}
+
+		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : model.surfs[ i ].materialHdl;
 		const Asset<Material>* materialAsset = g_assets.materialLib.Find( materialHdl );
 		const Material& material = materialAsset->Get();
 
@@ -230,7 +238,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
-		surf.upload = &surfUpload;
+		surf.uploadId = ( model.uploadId + i );
 		surf.sortKey.materialId = material.uploadId;
 		surf.objectId = 0;
 		surf.flags = renderFlags;
@@ -991,7 +999,8 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
-			drawSurf_t& surface = view.merged[ surfIx ];	
+			drawSurf_t& surface = view.merged[ surfIx ];
+			surfaceUpload_t& upload = surfUploads[ surface.uploadId ];
 
 			if ( SkipPass( surface, drawPass_t( passIx ) ) ) {
 				continue;
@@ -1020,7 +1029,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.GetViewId() ) };
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			vkCmdDrawIndexed( cmdBuffer, surface.upload->indexCount, view.instanceCounts[ surfIx ], surface.upload->firstIndex, surface.upload->vertexOffset, 0 );
+			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, view.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
 		}
 		MarkerEndRegion( gfxContext );
 	}

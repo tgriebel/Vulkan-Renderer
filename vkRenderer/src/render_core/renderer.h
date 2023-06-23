@@ -74,6 +74,7 @@ public:
 	using materialBufferArray_t = Array<materialBufferObject_t, MaxMaterials>;
 	using bindParmArray_t = Array<ShaderBindParms, DescriptorPoolMaxSets>;
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
+	using surfUploadArray_t = Array<surfaceUpload_t, MaxSurfaces * MaxViews>;
 
 	inline bool IsReady() {
 		return ( m_frameNumber > 0 );
@@ -141,6 +142,7 @@ private:
 	ImageArray							gpuImagesCube;
 	materialBufferArray_t				materialBuffer;
 	lightBufferArray_t					lightsBuffer;
+	surfUploadArray_t					surfUploads;
 
 	Image								shadowMapImage[ MaxShadowViews ];
 	Image								viewColorImage;
