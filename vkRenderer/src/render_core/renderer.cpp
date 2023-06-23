@@ -87,6 +87,10 @@ void Renderer::Commit( const Scene* scene )
 		MergeSurfaces( view );
 	}
 	UpdateViews( scene );
+
+	if ( g_imguiControls.rebuildRaytraceScene ) {
+		BuildRayTraceScene( scene );
+	}
 }
 
 
@@ -168,7 +172,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 	for ( uint32_t i = 0; i < source.surfCount; ++i ) {
 		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
 		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
-		surfaceUpload_t& upload = source.upload[ i ];
+		surfaceUpload_t& surfUpload = source.upload[ i ];
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : source.surfs[ i ].materialHdl;
 		const Asset<Material>* materialAsset = g_assets.materialLib.Find( materialHdl );
@@ -226,10 +230,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
-		surf.vertexCount = upload.vertexCount;
-		surf.vertexOffset = upload.vertexOffset;
-		surf.firstIndex = upload.firstIndex;
-		surf.indicesCnt = upload.indexCount;
+		surf.upload = &surfUpload;
 		surf.sortKey.materialId = material.uploadId;
 		surf.objectId = 0;
 		surf.flags = renderFlags;
@@ -375,17 +376,11 @@ void Renderer::UploadAssets()
 }
 
 
-void Renderer::RenderScene( const Scene* scene )
+void Renderer::Render()
 {
 	frameTimer.Start();
 
-	UploadModelsToGPU(); // TODO: Can this be moved after commit?
-
-	// TODO: Expose this from the renderer's API, then call Render() after commit. Needs model upload to be moved first.
-	// This will allow the scene to commit at finer level eventually.
-	// The scene will control when things are updated in the renderer too.
-	Commit( scene );
-
+	UploadModelsToGPU();
 	UploadTextures();
 	UpdateTextures();
 	UpdateGpuMaterials();
@@ -394,10 +389,6 @@ void Renderer::RenderScene( const Scene* scene )
 
 	frameTimer.Stop();
 	renderTime = static_cast<float>( frameTimer.GetElapsed() );
-
-	if( g_imguiControls.rebuildRaytraceScene ) {
-		BuildRayTraceScene( scene );
-	}
 
 	if ( g_imguiControls.raytraceScene ) {
 		TraceScene( false );
@@ -1029,7 +1020,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.GetViewId() ) };
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			vkCmdDrawIndexed( cmdBuffer, surface.indicesCnt, view.instanceCounts[ surfIx ], surface.firstIndex, surface.vertexOffset, 0 );
+			vkCmdDrawIndexed( cmdBuffer, surface.upload->indexCount, view.instanceCounts[ surfIx ], surface.upload->firstIndex, surface.upload->vertexOffset, 0 );
 		}
 		MarkerEndRegion( gfxContext );
 	}

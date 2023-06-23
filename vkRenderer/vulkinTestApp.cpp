@@ -205,7 +205,8 @@ int main( int argc, char* argv[] )
 
 			UpdateScene( g_scene );
 			g_window.input.NewFrame();
-			g_renderer.RenderScene( g_scene );
+			g_renderer.Commit( g_scene );
+			g_renderer.Render();
 #if defined( USE_IMGUI )
 			ImGui_ImplGlfw_NewFrame();
 #endif

@@ -81,7 +81,8 @@ public:
 
 	void								Init();
 	void								Shutdown();
-	void								RenderScene( const Scene* scene );
+	void								Commit( const Scene* scene );
+	void								Render();
 
 	void								InitGPU();
 	void								ShutdownGPU();
@@ -204,7 +205,6 @@ private:
 	void								RenderViewSurfaces( RenderView& view, GfxContext& gfxContext );
 	void								Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void								RenderViews();
-	void								Commit( const Scene* scene );
 	void								CommitModel( RenderView& view, const Entity& ent );
 	void								MergeSurfaces( RenderView& view );
 	void								DrawDebugMenu();
