@@ -41,6 +41,8 @@
 
 static const int TOKEN_LEN = 128;
 
+static uint8_t trashBuffer[ 4096 ];
+
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
 		strncmp( json + tok->start, s, tok->end - tok->start ) == 0 ) {
@@ -545,6 +547,7 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 			if ( jsoneq( st.file->data(), &st.tokens[ st.tx ], objectMap[ mapIx ].name ) != 0 ) {
 				continue;
 			}
+
 			if ( st.tokens[ st.tx + 1 ].type == JSMN_ARRAY )
 			{
 				st.tx += 1;
@@ -644,9 +647,14 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	st.tx = 0;
 	st.scene = *scene;
 
-	const uint32_t objectCount = 5;
+	assert( COUNTARRAY( trashBuffer ) >= file.size() );
+
+	const uint32_t objectCount = 8;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
+		{ "sceneClass", &trashBuffer, &ParseStringObject },
+		{ "type", &trashBuffer, &ParseStringObject },
+		{ "reflink", &trashBuffer, &ParseStringObject },
 		{ "shaders", &st.assets->gpuPrograms, &ParseShaderObject },
 		{ "images", &st.assets->textureLib, &ParseImageObject },
 		{ "materials", &st.assets->materialLib, &ParseMaterialObject },
