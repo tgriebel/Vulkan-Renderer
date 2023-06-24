@@ -109,8 +109,7 @@ void Renderer::DestroyFramebuffers()
 	}
 	mainColor.Destroy();
 
-	vkFreeMemory( context.device, frameBufferMemory.GetMemoryResource(), nullptr );
-	frameBufferMemory.Unbind();
+	frameBufferMemory.Destroy();
 }
 
 
@@ -129,12 +128,8 @@ void Renderer::ShutdownShaderResources()
 	vb.Destroy();
 
 	// Memory
-	vkFreeMemory( context.device, localMemory.GetMemoryResource(), nullptr );
-	vkFreeMemory( context.device, sharedMemory.GetMemoryResource(), nullptr );
-	localMemory.Unbind();
-	sharedMemory.Unbind();
-	localMemory.Reset();
-	sharedMemory.Reset();
+	localMemory.Destroy();
+	sharedMemory.Destroy();
 
 	// Staging
 	stagingBuffer.Destroy();

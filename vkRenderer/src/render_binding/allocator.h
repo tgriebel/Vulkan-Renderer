@@ -281,8 +281,19 @@ private:
 	friend alloc_t;
 };
 
+enum memoryRegion_t
+{
+	LOCAL,
+	SHARED,
+};
+
 class AllocatorMemory : public Allocator<VkDeviceMemory>
 {
 public:
-	uint32_t memoryTypeIndex;
+	uint32_t vk_memoryTypeIndex;
+
+	memoryRegion_t memoryRegion;
+
+	void Create( const uint32_t sizeBytes, const memoryRegion_t region );
+	void Destroy();
 };

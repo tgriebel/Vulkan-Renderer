@@ -287,10 +287,8 @@ void Renderer::InitGPU()
 {
 	{
 		// Memory Allocations
-		VkMemoryPropertyFlagBits type = VkMemoryPropertyFlagBits( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
-		vk_AllocateDeviceMemory( MaxSharedMemory, type, sharedMemory );
-		type = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-		vk_AllocateDeviceMemory( MaxLocalMemory, type, localMemory );
+		sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
+		localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
 	}
 
 	InitShaderResources();
@@ -320,8 +318,7 @@ void Renderer::RecreateSwapChain()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
-	vk_AllocateDeviceMemory( MaxFrameBufferMemory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frameBufferMemory );
-	frameBufferMemory.Reset();
+	frameBufferMemory.Create( MaxSharedMemory, memoryRegion_t::LOCAL );
 
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();

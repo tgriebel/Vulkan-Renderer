@@ -53,7 +53,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = memory.memoryTypeIndex;
+	allocInfo.memoryTypeIndex = memory.vk_memoryTypeIndex;
 
 	alloc_t<Allocator<VkDeviceMemory>> alloc;
 	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {

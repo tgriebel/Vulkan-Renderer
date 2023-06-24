@@ -104,6 +104,9 @@
     <ClCompile Include="external\MikkTSpace\mikktspace.c">
       <Filter>external\mikkTSpace</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\allocator.cpp">
+      <Filter>render binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -205,9 +208,6 @@
     </ClInclude>
     <ClInclude Include="src\render_binding\shaderBinding.h">
       <Filter>render binding</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render_core\raytracerInterface.h">
-      <Filter>render core</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\drawpass.h">
       <Filter>render core</Filter>

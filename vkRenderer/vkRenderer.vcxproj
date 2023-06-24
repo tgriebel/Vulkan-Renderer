@@ -197,7 +197,6 @@
     <ClInclude Include="src\render_core\debugMenu.h" />
     <ClInclude Include="src\render_core\drawpass.h" />
     <ClInclude Include="src\render_core\gpuImage.h" />
-    <ClInclude Include="src\render_core\raytracerInterface.h" />
     <ClInclude Include="src\render_core\renderer.h" />
     <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="src\render_state\deviceContext.h" />
@@ -228,6 +227,7 @@
     <ClCompile Include="src\globals\renderView.cpp" />
     <ClCompile Include="src\globals\render_util.cpp" />
     <ClCompile Include="src\io\io.cpp" />
+    <ClCompile Include="src\render_binding\allocator.cpp" />
     <ClCompile Include="src\render_binding\binding.cpp" />
     <ClCompile Include="src\render_binding\descriptorWrites.cpp" />
     <ClCompile Include="src\render_binding\gpuResources.cpp" />

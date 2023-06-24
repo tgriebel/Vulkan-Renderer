@@ -124,7 +124,7 @@ void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = bufferMemory.memoryTypeIndex;
+	allocInfo.memoryTypeIndex = bufferMemory.vk_memoryTypeIndex;
 
 	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_alloc ) ) {
 		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetMemoryResource(), m_alloc.GetOffset() );
