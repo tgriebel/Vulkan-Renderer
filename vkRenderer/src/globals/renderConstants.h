@@ -23,6 +23,7 @@
 
 #pragma once
 #include "../globals/common.h"
+#include <GfxCore/asset_types/texture.h>
 
 struct renderConstants_t
 {

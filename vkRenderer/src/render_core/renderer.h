@@ -24,10 +24,8 @@
 #pragma once
 
 #include <SysCore/timer.h>
-#include <gfxcore/scene/camera.h>
 
 #include "../globals/common.h"
-#include "../globals/render_util.h"
 #include "../globals/renderConstants.h"
 #include "../globals/renderview.h"
 

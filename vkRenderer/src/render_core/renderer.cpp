@@ -47,6 +47,7 @@
 #include "../render_binding/bindings.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/shaderBinding.h"
+#include "../globals/render_util.h"
 
 #include "../../GeoBuilder.h"
 #include "../../window.h"

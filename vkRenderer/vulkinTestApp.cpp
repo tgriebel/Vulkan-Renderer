@@ -28,25 +28,14 @@
 #include <chrono>
 #include <mutex>
 #include "src/globals/common.h"
-#include <gfxcore/scene/camera.h>
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/assetManager.h>
-#include <gfxcore/core/assetLib.h>
-#include "src/globals/render_util.h"
-#include "src/render_state/deviceContext.h"
-#include "src/render_binding/pipeline.h"
-#include "src/render_core/swapChain.h"
 #include "window.h"
-#include "src/render_state/FrameState.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
-#include "src/render_binding/allocator.h"
-#include "src/render_binding/gpuResources.h"
+#include "src/render_core/renderer.h"
 #include "scenes/sceneParser.h"
-#include "scenes/chessScene.h"
-#include <gfxcore/asset_types/gpuProgram.h>
 #include <SysCore/systemUtils.h>
-#include <gfxcore/io/serializeClasses.h>
 #include <gfxcore/scene/assetBaker.h>
 #include "raytracerInterface.h"
 
@@ -54,8 +43,6 @@ AssetManager						g_assets;
 Scene*								g_scene;
 Renderer							g_renderer;
 Window								g_window;
-
-static SpinLock						acquireNextFrame;
 
 static std::string sceneFile = "chess.json";
 

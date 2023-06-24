@@ -20,15 +20,16 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "render_util.h"
 
 #include "common.h"
-#include "../render_state/deviceContext.h"
 #include "io.h"
 #include "../../GeoBuilder.h"
 #include <gfxcore/scene/assetManager.h>
 #include <gfxcore/core/assetLib.h>
 #include <gfxcore/asset_types/gpuProgram.h>
-#include "render_util.h"
+#include <gfxcore/asset_types/texture.h>
+#include <gfxcore/asset_types/model.h>
 
 extern AssetManager g_assets;
 
