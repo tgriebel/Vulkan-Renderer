@@ -21,19 +21,18 @@
 * SOFTWARE.
 */
 
-template< class AllocatorType >
-struct alloc_t;
-
-template< class ResourceType >
-class Allocator;
-
-class AllocatorMemory;
-using Allocation = alloc_t<AllocatorMemory>;
-
 #pragma once
 #include "../globals/common.h"
 
-template< class ResourceType > class Allocator;
+class AllocatorMemory;
+
+enum memoryRegion_t
+{
+	UNKNOWN,
+	LOCAL,
+	SHARED,
+};
+
 
 struct allocRecord_t
 {
@@ -43,257 +42,94 @@ struct allocRecord_t
 	bool		isValid;
 };
 
-template< class AllocatorType >
-struct alloc_t
+
+class Allocation
 {
-public:
-	alloc_t()
-	{
-		allocator = nullptr;
-	}
-
-	uint64_t GetOffset() const
-	{
-		if ( IsValid() )
-		{
-			const allocRecord_t* record = allocator->GetRecord( handle );
-			if ( record != nullptr ) {
-				return record->offset;
-			}
-		}
-		return 0;
-	}
-
-	uint64_t GetSize() const
-	{
-		if ( IsValid() )
-		{
-			const allocRecord_t* record = allocator->GetRecord( handle );
-			if ( record != nullptr ) {
-				return record->size;
-			}
-		}
-		return 0;
-	}
-
-	uint64_t GetAlignment() const
-	{
-		if ( IsValid() )
-		{
-			const allocRecord_t* record = allocator->GetRecord( handle );
-			if ( record != nullptr ) {
-				return record->alignment;
-			}
-		}
-		return 0;
-	}
-
-	void* GetPtr() const
-	{
-		if ( IsValid() )
-		{
-			const allocRecord_t* record = allocator->GetRecord( handle );
-			if ( record != nullptr ) {
-				return allocator->GetMemoryMapPtr( *record );
-			}
-		}
-		return nullptr;
-	}
-
-	void Free()
-	{
-		if ( IsValid() ) {
-			allocator->Free( handle );
-		}
-	}
-
 private:
-	bool IsValid() const
+	inline bool IsValid() const
 	{
 		return ( allocator != nullptr ) && ( handle.Get() >= 0 );
 	}
 
-	hdl_t			handle;
-	AllocatorType* allocator;
+	hdl_t				handle;
+	AllocatorMemory*	allocator;
 
-	friend AllocatorType;
+	friend class AllocatorMemory;
+
+public:
+	Allocation()
+	{
+		allocator = nullptr;
+	}
+
+	uint64_t	GetOffset() const;
+	uint64_t	GetSize() const;
+	uint64_t	GetAlignment() const;
+	void*		GetPtr() const;
+	void		Free();
 };
 
-template< class ResourceType >
-class Allocator
+
+class AllocatorMemory
 {
 private:
-	using allocator_t = Allocator< ResourceType >;
-	using alloc_t = alloc_t< allocator_t >;
-public:
+	uint32_t						m_type;
+	uint64_t						m_size;
+	uint64_t						m_offset;
+	void* ptr;
+	std::vector< allocRecord_t >	m_allocations;
+	std::vector< hdl_t >			m_handles;
 
-	Allocator()
+	memoryRegion_t					m_memoryRegion;
+
+#ifdef USE_VULKAN
+	uint32_t						vk_memoryTypeIndex;
+	VkDeviceMemory					vk_deviceMemory;
+#endif
+
+	friend class Allocation;
+
+public:
+	AllocatorMemory()
 	{
 		Unbind();
 	}
 
-	Allocator( ResourceType& _memory, const uint64_t _size, const uint32_t _type )
+	AllocatorMemory( VkDeviceMemory& _memory, const uint64_t _size, const uint32_t _type )
 	{
-		offset = 0;
-		resource = _memory;
-		size = _size;
-		type = _type;
+		m_offset = 0;
+		vk_deviceMemory = _memory;
+		m_size = _size;
+		m_type = _type;
 		ptr = nullptr;
+
+		vk_memoryTypeIndex = 0;
+		m_memoryRegion = memoryRegion_t::UNKNOWN;
 	}
 
-	void Bind( ResourceType& _memory, void* memMap, const uint64_t _size, const uint32_t _type )
-	{
-		offset = 0;
-		resource = _memory;
-		size = _size;
-		type = _type;
-		ptr = memMap;
-	}
+	void					Create( const uint32_t sizeBytes, const memoryRegion_t region );
+	void					Destroy();
 
-	void Unbind()
-	{
-		offset = 0;
-		size = 0;
-		type = 0;
-		ptr = nullptr;
-	}
+	void					Bind( VkDeviceMemory& _memory, void* memMap, const uint64_t _size, const uint32_t _type );
+	void					Unbind();
+	bool					IsMemoryCompatible( const uint32_t memoryType ) const;
+	void*					GetMemoryMapPtr( const allocRecord_t& record ) const;
+	uint64_t				GetSize() const;
+	uint64_t				GetAlignedOffset( const uint64_t alignment ) const;
+	bool					CanAllocate( uint64_t alignment, uint64_t allocSize ) const;
+	bool					Allocate( uint64_t alignment, uint64_t allocSize, Allocation& handle );
+	void					Reset();
+	void					Free( hdl_t& handle );
+	memoryRegion_t			GetMemoryRegion() const;
 
-	ResourceType& GetMemoryResource()
-	{
-		return resource;
-	}
-
-	bool IsMemoryCompatible( const uint32_t memoryType ) const
-	{
-		return ( type == memoryType );
-	}
-
-	void* GetMemoryMapPtr( const allocRecord_t& record ) const
-	{
-		if ( ptr == nullptr ) {
-			return nullptr;
-		}
-		if ( ( record.offset + record.size ) > size ) { // starts from 0 offset
-			return nullptr;
-		}
-		uint8_t* bytes = reinterpret_cast<uint8_t*>( ptr );
-		return reinterpret_cast< void * >( bytes + record.offset );
-	}
-
-	uint64_t GetSize() const
-	{
-		return offset;
-	}
-
-	uint64_t GetAlignedOffset( const uint64_t alignment ) const
-	{
-		const uint64_t boundary = ( offset % alignment );
-		const uint64_t nextOffset = ( boundary == 0 ) ? boundary : ( alignment - boundary );
-
-		return ( offset + nextOffset );
-	}
-
-	bool CanAllocate( uint64_t alignment, uint64_t allocSize ) const
-	{
-		const uint64_t nextOffset = GetAlignedOffset( alignment );
-		return ( ( nextOffset + allocSize ) < size );
-	}
-
-	bool Allocate( uint64_t alignment, uint64_t allocSize, alloc_t& handle )
-	{
-		if ( !CanAllocate( alignment, allocSize ) ) {
-			return false;
-		}
-
-		const uint64_t nextOffset = GetAlignedOffset( alignment );
-
-		const int index = static_cast<int>( allocations.size() );
-
-		allocRecord_t alloc;
-		alloc.offset = nextOffset;
-		alloc.size = allocSize;
-		alloc.alignment = alignment;
-		alloc.isValid = true;
-		allocations.push_back( alloc );
-
-		handle.handle = hdl_t( index );
-		handle.allocator = this;
-		handles.push_back( index );
-
-		offset = nextOffset + allocSize;
-
-		return true;
-	}
-
-	void Reset()
-	{
-		for ( int i = 0; i < static_cast<int>( handles.size() ); ++i ) {
-			handles[ i ] = INVALID_HDL;
-		}
-		offset = 0;
-		allocations.resize( 0 );
-		handles.resize( 0 );
-	}
-
-	void Free( hdl_t& handle )
-	{
-		if ( IsValidIndex( handle.Get() ) ) {
-			allocations[ handle.Get() ].isValid = false;
-		}
-		handle.Reset();
-	}
-
-	void Pack()
-	{
-
-	}
-
-	void ReassignHandles() {
-		for( int i = 0; i < static_cast< int >( handles.size() ); ++i ) {
-			handles[ i ].Reassign( i );
-		}
-	}
+#ifdef USE_VULKAN
+	VkDeviceMemory&			GetVkObject();
+	uint32_t				GetVkMemoryType() const;
+#endif
 
 	[[nodiscard]]
-	bool IsValidIndex( const uint64_t index ) const {
-		return ( index >= 0 ) && ( index < allocations.size() );
-	}
+	bool					IsValidIndex( const uint64_t index ) const;
 
 	[[nodiscard]]
-	const allocRecord_t* GetRecord( const hdl_t& handle ) const
-	{
-		const uint64_t index = handle.Get();
-		if ( IsValidIndex( index ) ) {
-			return &allocations[ index ];
-		}
-		return nullptr;
-	}
-
-private:
-	uint32_t						type;
-	uint64_t						size;
-	uint64_t						offset;
-	ResourceType					resource;
-	void*							ptr;
-	std::vector< allocRecord_t >	allocations;
-	std::vector< hdl_t >			handles;
-
-	friend alloc_t;
-};
-
-enum memoryRegion_t
-{
-	LOCAL,
-	SHARED,
-};
-
-class AllocatorMemory : public Allocator<VkDeviceMemory>
-{
-public:
-	uint32_t vk_memoryTypeIndex;
-
-	memoryRegion_t memoryRegion;
-
-	void Create( const uint32_t sizeBytes, const memoryRegion_t region );
-	void Destroy();
+	const allocRecord_t*	GetRecord( const hdl_t& handle ) const;
 };

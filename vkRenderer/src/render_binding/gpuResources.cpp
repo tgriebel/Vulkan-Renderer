@@ -124,10 +124,10 @@ void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_
 	VkMemoryAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = bufferMemory.vk_memoryTypeIndex;
+	allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
 
 	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_alloc ) ) {
-		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetMemoryResource(), m_alloc.GetOffset() );
+		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetVkObject(), m_alloc.GetOffset() );
 	}
 	else {
 		throw std::runtime_error( "Buffer could not allocate!" );

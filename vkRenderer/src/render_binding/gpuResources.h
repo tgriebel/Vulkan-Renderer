@@ -60,7 +60,7 @@ public:
 	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount );
 
 protected:
-	alloc_t<Allocator<VkDeviceMemory>> m_alloc;
+	Allocation	m_alloc;
 	VkBuffer	m_buffer;
 	uint64_t	m_baseOffset;
 	uint64_t	m_offset;

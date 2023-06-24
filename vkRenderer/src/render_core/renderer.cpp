@@ -387,9 +387,6 @@ void Renderer::Render()
 
 	frameTimer.Stop();
 	renderTime = static_cast<float>( frameTimer.GetElapsed() );
-
-	localMemory.Pack();
-	sharedMemory.Pack();
 }
 
 
