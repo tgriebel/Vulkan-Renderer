@@ -38,7 +38,6 @@ class Window;
 class SwapChain;
 class Scene;
 
-using AssetLibPipelines = AssetLib<pipelineObject_t>;
 using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
 using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 
