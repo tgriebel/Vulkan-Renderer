@@ -1,8 +1,10 @@
 #pragma once
 
-#include "renderer.h"
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/entity.h>
+
+#include <raytracer/scene.h>
+#include <raytracer/raytrace.h>
 
 static RtView rtview;
 static RtScene rtScene;

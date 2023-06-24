@@ -48,6 +48,7 @@
 #include <SysCore/systemUtils.h>
 #include <gfxcore/io/serializeClasses.h>
 #include <gfxcore/scene/assetBaker.h>
+#include "raytracerInterface.h"
 
 AssetManager						g_assets;
 Scene*								g_scene;
@@ -204,6 +205,19 @@ int main( int argc, char* argv[] )
 			}
 
 			UpdateScene( g_scene );
+
+			if ( g_imguiControls.rebuildRaytraceScene ) {
+				BuildRayTraceScene( g_scene );
+			}
+
+			if ( g_imguiControls.raytraceScene ) {
+				TraceScene( false );
+			}
+
+			if ( g_imguiControls.rasterizeScene ) {
+				TraceScene( true );
+			}
+
 			g_window.input.NewFrame();
 			g_renderer.Commit( g_scene );
 			g_renderer.Render();

@@ -37,13 +37,9 @@
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/entity.h>
 
-#include <raytracer/scene.h>
-#include <raytracer/raytrace.h>
-
 #include "debugMenu.h"
 #include "gpuImage.h"
 #include "swapChain.h"
-#include "raytracerInterface.h"
 
 #include "../render_state/rhi.h"
 #include "../render_state/deviceContext.h"
@@ -87,10 +83,6 @@ void Renderer::Commit( const Scene* scene )
 		MergeSurfaces( view );
 	}
 	UpdateViews( scene );
-
-	if ( g_imguiControls.rebuildRaytraceScene ) {
-		BuildRayTraceScene( scene );
-	}
 }
 
 
@@ -397,14 +389,6 @@ void Renderer::Render()
 
 	frameTimer.Stop();
 	renderTime = static_cast<float>( frameTimer.GetElapsed() );
-
-	if ( g_imguiControls.raytraceScene ) {
-		TraceScene( false );
-	}
-
-	if ( g_imguiControls.rasterizeScene ) {
-		TraceScene( true );
-	}
 
 	localMemory.Pack();
 	sharedMemory.Pack();
