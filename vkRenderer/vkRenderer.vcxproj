@@ -178,7 +178,6 @@
     <ClInclude Include="external\imgui\imstb_rectpack.h" />
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
-    <ClInclude Include="external\MikkTSpace\mikktspace.h" />
     <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="scenes\nesScene.h" />
@@ -218,7 +217,6 @@
     <ClCompile Include="external\imgui\imgui_draw.cpp" />
     <ClCompile Include="external\imgui\imgui_tables.cpp" />
     <ClCompile Include="external\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="external\MikkTSpace\mikktspace.c" />
     <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="scenes\chessScene.cpp" />

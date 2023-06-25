@@ -366,7 +366,8 @@ void Renderer::UploadAssets()
 		uploadTextures.insert( textureAsset->Handle() );
 	}
 
-	CreatePipelineObjects();
+	ClearPipelineCache();
+	BuildPipelines();
 	UploadTextures();
 	UploadModelsToGPU();
 	UpdateGpuMaterials();
@@ -382,6 +383,7 @@ void Renderer::Render()
 	UploadTextures();
 	UpdateTextures();
 	UpdateGpuMaterials();
+	BuildPipelines();
 
 	SubmitFrame();
 

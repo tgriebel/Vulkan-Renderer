@@ -85,7 +85,6 @@ public:
 	void								InitGPU();
 	void								ShutdownGPU();
 	void								Resize();
-	void								CreatePipelineObjects();
 
 	void								AttachDebugMenu( const debugMenuFuncPtr funcPtr );
 
@@ -115,23 +114,31 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 
+	// Timers
 	Timer								frameTimer;
 	float								renderTime = 0.0f;
 
+	// Upload management
 	std::set<hdl_t>						uploadTextures;
 	std::set<hdl_t>						updateTextures;
 	std::set<hdl_t>						uploadMaterials;
 
-	VkDebugUtilsMessengerEXT			debugMessenger;
+	uint32_t							imageFreeSlot = 0;
+	uint32_t							vbBufElements = 0;
+	uint32_t							ibBufElements = 0;
+	
+	// Render context
 	GfxContext							gfxContext;
 	ComputeContext						computeContext;
 	UploadContext						uploadContext;
 	ComputeState						particleState;
-	VkDescriptorPool					descriptorPool;
-	renderConfig_t						config;
+
+	// Frame Sync
 	size_t								m_frameId = 0;
 	uint32_t							m_bufferId = 0;
 	uint32_t							m_frameNumber = 0;
+
+	// Shader resources
 	GpuBuffer							stagingBuffer;
 	GpuBuffer							vb;	// move
 	GpuBuffer							ib;
@@ -149,28 +156,31 @@ private:
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
 
-	uint32_t							imageFreeSlot = 0;
-	uint32_t							shadowCount = 0;
-	uint32_t							vbBufElements = 0;
-	uint32_t							ibBufElements = 0;
+	VkSampler							vk_bilinearSampler;
+	VkSampler							vk_depthShadowSampler;
 
+	uint32_t							shadowCount = 0;
+
+	// Memory
 	AllocatorMemory						localMemory;
 	AllocatorMemory						frameBufferMemory;
 	AllocatorMemory						sharedMemory;
 
+	// Shader binding
 	bindParmArray_t						bindParmsList;
-
-	VkSampler							vk_bilinearSampler;
-	VkSampler							vk_depthShadowSampler;
-
 	ShaderBindSet						defaultBindSet;
 	ShaderBindSet						particleShaderBinds;
+	VkDescriptorPool					descriptorPool;
 
+	// Misc
+	VkDebugUtilsMessengerEXT			debugMessenger;
 	debugMenuArray_t					debugMenus;
+	renderConfig_t						config;
 
 	// Init/Shutdown
 	void								InitApi();
 	void								InitShaderResources();
+	void								InitConfig();
 	void								InitImGui( RenderView& view );
 	void								ShutdownImGui();
 	void								ShutdownShaderResources();
@@ -182,9 +192,7 @@ private:
 	void								CopyBufferToImage( UploadContext& uploadContext, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 	void								GenerateMipmaps( UploadContext& uploadContext, Image& image );
 
-	void								CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
-
-	// API Creation Functions
+	// API Resource Functions
 	void								CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
 	ShaderBindParms*					RegisterBindParm( const ShaderBindSet* set );
 	void								AllocRegisteredBindParms();
@@ -195,8 +203,10 @@ private:
 	void								CreateSyncObjects();
 	void								CreateCommandBuffers();
 	void								CreateTextureSamplers();
+	void								CreateCodeTextures();
 	void								CreateBuffers();
 	void								CreateFramebuffers();
+	void								DestroyFramebuffers();
 	void								CreateCommandPools();
 
 	// Draw Frame
@@ -211,14 +221,11 @@ private:
 	void								WaitForEndFrame();
 	void								SubmitFrame();
 
-	// Misc
-	void								DestroyFramebuffers();
-	void								CreateCodeTextures();
+	// Update/Upload
 	void								BeginUploadCommands( UploadContext& uploadContext );
 	void								EndUploadCommands( UploadContext& uploadContext );
-	void								InitConfig();
+	void								CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
-	// Update
 	void								UploadAssets();
 	void								UpdateViews( const Scene* scene );
 	void								UpdateTextures();
@@ -228,6 +235,7 @@ private:
 	void								UpdateBindSets( const uint32_t currentImage );
 	void								UpdateBuffers( const uint32_t currentImage );
 	void								UpdateFrameDescSet( const int currentImage );
+	void								BuildPipelines();
 	void								UpdateDescriptorSets();
 	void								AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites );
 

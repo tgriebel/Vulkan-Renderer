@@ -444,28 +444,54 @@ void Renderer::CreateDevice()
 }
 
 
-void Renderer::CreatePipelineObjects()
+void Renderer::BuildPipelines()
 {
 	const uint32_t programCount = g_assets.gpuPrograms.Count();
+
+	std::vector< Asset<GpuProgram>* > invalidAssets;
+	invalidAssets.reserve( programCount );
+
+	// 1. Collect stale shaders	
 	for ( uint32_t progIx = 0; progIx < programCount; ++progIx )
 	{
 		Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( progIx );
-		if ( progAsset->IsUploaded() ) {
+		if ( progAsset == nullptr ) {
 			continue;
 		}
 
+		if ( progAsset->IsUploaded() ) {
+			continue;
+		}
+		invalidAssets.push_back( progAsset );
+	}
+
+	if( invalidAssets.size() == 0 ) {
+		return;
+	}
+
+	// 2. Destroy shaders
+	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
+	{
+		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
-		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
-		{
+		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx ) {
 			if ( prog.vk_shaders[ shaderIx ] != VK_NULL_HANDLE ) {
 				vkDestroyShaderModule( context.device, prog.vk_shaders[ shaderIx ], nullptr );
 			}
-			prog.vk_shaders[ shaderIx ] = vk_CreateShaderModule( prog.shaders[ shaderIx ].blob );	
 		}
 	}
 
-	ClearPipelineCache();
+	// 3. Create shaders
+	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
+	{
+		Asset<GpuProgram>* progAsset = *it;
+		GpuProgram& prog = progAsset->Get();
+		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx ) {
+			prog.vk_shaders[ shaderIx ] = vk_CreateShaderModule( prog.shaders[ shaderIx ].blob );
+		}
+	}
 
+	// 4. Collect all passes in active views
 	std::vector<const DrawPass*> passes;
 	passes.reserve( MaxViews * DRAWPASS_COUNT );
 
@@ -484,47 +510,44 @@ void Renderer::CreatePipelineObjects()
 		}
 	}
 
-	for ( uint32_t i = 0; i < g_assets.materialLib.Count(); ++i )
+	// 5. Destroy pipelines. Own pass so cache isn't destroyed per iteration
+	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
-		const Material& m = g_assets.materialLib.Find( i )->Get();
+		Asset<GpuProgram>* progAsset = *it;
+		progAsset->CompleteUpload();
+
+		GpuProgram& prog = progAsset->Get();
+		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
+		{
+			assert( prog.shaderCount == 1 );
+			DestroyComputePipeline( *progAsset );
+			continue;
+		}
 
 		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
-		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
-		{
-			const hdl_t progHdl = m.GetShader( passes[ passIx ]->passId );
-			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( progHdl );
-			if ( prog == nullptr ) {
-				continue;
-			}
-			if( prog->IsUploaded() == false ) {
-				CreateGraphicsPipeline( passes[ passIx ], *prog );
-			}
+		for ( uint32_t passIx = 0; passIx < passCount; ++passIx ) {
+			DestroyGraphicsPipeline( passes[ passIx ], *progAsset );
 		}
 	}
 
-	for ( uint32_t i = 0; i < g_assets.gpuPrograms.Count(); ++i )
+	// 6. Create pipelines
+	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
-		Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( i );
-		if ( prog == nullptr ) {
-			continue;
-		}
-		if ( prog->IsUploaded() == false ) {
-			continue;
-		}
-		if( prog->Get().shaderCount != 1 ) {
-			continue;
-		}
-		if ( prog->Get().shaders[0].type != shaderType_t::COMPUTE ) {
-			continue;
-		}
-		
-		CreateComputePipeline( *prog );
-	}
-
-	for ( uint32_t progIx = 0; progIx < programCount; ++progIx )
-	{
-		Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( progIx );
+		Asset<GpuProgram>* progAsset = *it;
 		progAsset->CompleteUpload();
+
+		GpuProgram& prog = progAsset->Get();
+		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
+		{
+			assert( prog.shaderCount == 1 );
+			CreateComputePipeline( *progAsset );
+			continue;
+		}
+
+		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
+		for ( uint32_t passIx = 0; passIx < passCount; ++passIx ) {
+			CreateGraphicsPipeline( passes[ passIx ], *progAsset );
+		}	
 	}
 }
 

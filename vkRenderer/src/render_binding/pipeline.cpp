@@ -172,6 +172,26 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 }
 
 
+void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
+{
+	pipelineState_t state = {};
+	state.stateBits = pass->stateBits;
+	state.samplingRate = pass->sampleRate;
+	state.progHdl = progAsset.Handle();
+
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
+
+	auto it = g_pipelineLib.find( pipelineHdl.Get() );
+	if ( it == g_pipelineLib.end() ) {
+		return;
+	}
+	vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
+	vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
+
+	g_pipelineLib.erase( it );
+}
+
+
 void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
@@ -419,6 +439,25 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }
+
+
+void DestroyComputePipeline( const Asset<GpuProgram>& progAsset )
+{
+	pipelineState_t state = {};
+	state.progHdl = progAsset.Handle();
+
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
+
+	auto it = g_pipelineLib.find( pipelineHdl.Get() );
+	if ( it == g_pipelineLib.end() ) {
+		return;
+	}
+	vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
+	vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
+
+	g_pipelineLib.erase( it );
+}
+
 
 void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 {
