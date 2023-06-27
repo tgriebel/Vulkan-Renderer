@@ -385,6 +385,8 @@ void Renderer::Render()
 	UpdateGpuMaterials();
 	BuildPipelines();
 
+	//UpdateDescriptorSets(); // need to allow dynamic views
+
 	SubmitFrame();
 
 	frameTimer.Stop();
@@ -407,6 +409,18 @@ void Renderer::UpdateDescriptorSets()
 void Renderer::WaitForEndFrame()
 {
 	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ m_frameId ], VK_TRUE, UINT64_MAX );
+
+	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.imageAvailableSemaphores[ m_frameId ], VK_NULL_HANDLE, &m_bufferId );
+	if ( result != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to acquire swap chain image!" );
+	}
+
+	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+	if ( gfxContext.imagesInFlight[ m_bufferId ] != VK_NULL_HANDLE ) {
+		vkWaitForFences( context.device, 1, &gfxContext.imagesInFlight[ m_bufferId ], VK_TRUE, UINT64_MAX );
+	}
+	// Mark the image as now being in use by this frame
+	gfxContext.imagesInFlight[ m_bufferId ] = gfxContext.inFlightFences[ m_frameId ];
 }
 
 
@@ -444,19 +458,8 @@ void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
 
-	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.imageAvailableSemaphores[ m_frameId ], VK_NULL_HANDLE, &m_bufferId );
-	if ( result != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to acquire swap chain image!" );
-	}
-
-	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-	if ( gfxContext.imagesInFlight[ m_bufferId ] != VK_NULL_HANDLE ) {
-		vkWaitForFences( context.device, 1, &gfxContext.imagesInFlight[ m_bufferId ], VK_TRUE, UINT64_MAX );
-	}
-	// Mark the image as now being in use by this frame
-	gfxContext.imagesInFlight[ m_bufferId ] = gfxContext.inFlightFences[ m_frameId ];
-
 	UpdateBuffers( m_bufferId );
+	//UpdateFrameDescSet( m_bufferId );
 
 	// Compute
 	{
@@ -529,8 +532,7 @@ void Renderer::SubmitFrame()
 		presentInfo.pImageIndices = &m_bufferId;
 		presentInfo.pResults = nullptr; // Optional
 
-		result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
-
+		VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
 		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
 		{
 			g_window.RequestImageResize();
@@ -592,6 +594,7 @@ void Renderer::UpdateViews( const Scene* scene )
 		assert( shadowCount < MaxShadowMaps );
 	}
 
+
 	// Main view
 	{
 		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
@@ -626,6 +629,9 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
+		if( views[ viewIx ].IsCommitted() == false ) {
+			continue;
+		}
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			DrawPass* pass = views[ viewIx ].passes[ passIx ];
@@ -642,7 +648,7 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 			}
 			else if ( passIx == DRAWPASS_POST_2D )
 			{
-				pass->codeImages[ currentImage ][ 0 ] = &viewColorImage;
+				pass->codeImages[ currentImage ][ 0 ] = &mainColorImage;
 				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImageView;
 				pass->codeImages[ currentImage ][ 2 ] = &frameState[ currentImage ].stencilImageView;
 			}
@@ -700,17 +706,26 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		const RenderView& view = views[ viewIx ];
-		const uint32_t viewId = view.GetViewId();
-
-		const vec2i& frameSize = view.GetFrameSize();
 
 		viewBufferObject_t viewBuffer = {};
-		viewBuffer.view = view.GetViewMatrix();
-		viewBuffer.proj = view.GetProjMatrix();
-		viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
-		viewBuffer.numLights = view.numLights;
-
+		if( view.IsCommitted() )
+		{
+			const vec2i& frameSize = view.GetFrameSize();
+			viewBuffer.view = view.GetViewMatrix();
+			viewBuffer.proj = view.GetProjMatrix();
+			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
+			viewBuffer.numLights = view.numLights;
+		}
 		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+	}
+
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
+	{
+		const RenderView& view = views[ viewIx ];
+		if ( view.IsCommitted() == false ) {
+			continue;
+		}
+		const uint32_t viewId = view.GetViewId();
 
 		static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
 		assert( view.committedModelCnt < MaxSurfaces );

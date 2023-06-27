@@ -192,6 +192,9 @@ drawPass_t RenderView::ViewRegionPassEnd()
 
 vec2i RenderView::GetFrameSize() const
 {
+	if( m_framebuffer == nullptr ) {
+		return vec2i( 0, 0 );
+	}
 	return vec2i( static_cast<int32_t>( m_framebuffer->GetWidth() ), static_cast<int32_t>( m_framebuffer->GetHeight() ) );
 }
 

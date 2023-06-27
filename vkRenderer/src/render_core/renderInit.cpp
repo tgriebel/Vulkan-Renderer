@@ -60,12 +60,13 @@ void Renderer::Init()
 		++viewCount;
 	}
 
-	for ( uint32_t i = 0; i < Max2DViews; ++i )
 	{
-		view2Ds[ i ] = &views[ viewCount ];
-		view2Ds[ i ]->Init( "Post View", renderViewRegion_t::POST, viewCount, g_swapChain.framebuffers );
+		view2Ds[ 0 ] = &views[ viewCount ];
+		view2Ds[ 0 ]->Init( "Present", renderViewRegion_t::POST, viewCount, g_swapChain.framebuffers );
 		++viewCount;
 	}
+
+	assert( viewCount <= ( MaxViews - 1 ) ); // Last view is reserved for temp views
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i ) {
 		shadowViews[ i ]->Commit();
@@ -230,13 +231,16 @@ void Renderer::InitShaderResources()
 				continue;
 			}
 			for ( uint32_t i = 0; i < frameStateCount; ++i ) {
-				pass->parms[ i ] = RegisterBindParm( &defaultBindSet );
+				pass->parms[ i ] = RegisterBindParm( &defaultBindSet );			
 			}
+			pass->updateDescriptorSets = true;
 		}
 	}
 
-	for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i ) {
+	for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
+	{
 		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
+		particleState.updateDescriptorSets = true;
 	}
 
 	materialBuffer.Reset();
@@ -606,6 +610,33 @@ void Renderer::CreateTextureSamplers()
 }
 
 
+void Renderer::CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region )
+{
+	// Image resource
+	{
+		CreateImage( "tempColor", info, GPU_IMAGE_READ, frameBufferMemory, tempColorImage );
+	}
+
+	// Frame buffer
+	{
+		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.color0[ 0 ] = &tempColorImage;
+		fbInfo.width = tempColorImage.info.width;
+		fbInfo.height = tempColorImage.info.height;
+		fbInfo.lifetime = LIFETIME_TEMP;
+
+		tempColor.Create( fbInfo );
+	}
+
+	// Frame buffer
+	{
+		view2Ds[ 1 ] = &views[ MaxViews - 1 ];
+		view2Ds[ 1 ]->Init( "Temp Canvas", region, MaxViews - 1, tempColor );
+		view2Ds[ 1 ]->Commit();
+	}
+}
+
+
 void Renderer::CreateFramebuffers()
 {
 	int width = 0;
@@ -642,7 +673,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "viewColor", info, GPU_IMAGE_READ, frameBufferMemory, viewColorImage );
+		CreateImage( "mainColor", info, GPU_IMAGE_READ, frameBufferMemory, mainColorImage );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
@@ -679,12 +710,12 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo = {};
 		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
 		{
-			fbInfo.color0[ frameIx ] = &viewColorImage;
+			fbInfo.color0[ frameIx ] = &mainColorImage;
 			fbInfo.depth[ frameIx ] = &frameState[ frameIx ].depthImageView;
 			fbInfo.stencil[ frameIx ] = &frameState[ frameIx ].stencilImageView;
 		}
-		fbInfo.width = viewColorImage.info.width;
-		fbInfo.height = viewColorImage.info.height;
+		fbInfo.width = mainColorImage.info.width;
+		fbInfo.height = mainColorImage.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );

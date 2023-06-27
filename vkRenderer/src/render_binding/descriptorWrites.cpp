@@ -179,7 +179,12 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 {
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
-	AppendDescriptorWrites( *particleState.parms[ currentImage ], descriptorWrites );
+
+	//if( particleState.updateDescriptorSets )
+	{
+		AppendDescriptorWrites( *particleState.parms[ currentImage ], descriptorWrites );
+	//	particleState.updateDescriptorSets = false;
+	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -192,9 +197,13 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 			DrawPass* pass = view.passes[ i ];
 			if ( pass != nullptr ) {
 				AppendDescriptorWrites( *pass->parms[ currentImage ], descriptorWrites );
+			//	pass->updateDescriptorSets = false;
 			}
 		}
 	}
 
-	vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
+	//if( descriptorWrites.size() > 0 ) 
+	{
+		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
+	}
 }

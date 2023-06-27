@@ -61,6 +61,7 @@ struct ComputeState
 	int32_t				x;
 	int32_t				y;
 	int32_t				z;
+	bool				updateDescriptorSets;
 	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
 };
 
@@ -149,12 +150,14 @@ private:
 	surfUploadArray_t					surfUploads;
 
 	Image								shadowMapImage[ MaxShadowViews ];
-	Image								viewColorImage;
+	Image								mainColorImage;
+	Image								tempColorImage;
 	Image								depthStencilImage;
 
 	FrameState							frameState[ MAX_FRAMES_STATES ];
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
+	FrameBuffer							tempColor;
 
 	VkSampler							vk_bilinearSampler;
 	VkSampler							vk_depthShadowSampler;
@@ -208,6 +211,7 @@ private:
 	void								CreateFramebuffers();
 	void								DestroyFramebuffers();
 	void								CreateCommandPools();
+	void								CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region );
 
 	// Draw Frame
 	static bool							SkipPass( const drawSurf_t& surf, const drawPass_t pass );
