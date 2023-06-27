@@ -26,21 +26,21 @@
 
 extern deviceContext_t context;
 
-void GpuBuffer::SetPos( const uint64_t pos )
+void GpuBuffer::SetPos( const uint32_t bufferId, const uint64_t pos )
 {
-	m_buffer.offset = Clamp( pos, m_buffer.baseOffset, GetMaxSize() );
+	m_buffer[ 0 ].offset = Clamp( pos, m_buffer[ 0 ].baseOffset, GetMaxSize() );
 }
 
 
-uint64_t GpuBuffer::GetSize() const
+uint64_t GpuBuffer::GetSize( const uint32_t bufferId ) const
 {
-	return ( m_buffer.offset - m_buffer.baseOffset );
+	return ( m_buffer[ 0 ].offset - m_buffer[ 0 ].baseOffset );
 }
 
 
-uint64_t GpuBuffer::GetBaseOffset() const
+uint64_t GpuBuffer::GetBaseOffset( const uint32_t bufferId ) const
 {
-	return m_buffer.baseOffset;
+	return m_buffer[ 0 ].baseOffset;
 }
 
 
@@ -62,29 +62,42 @@ uint64_t GpuBuffer::GetMaxSize() const
 }
 
 
-void GpuBuffer::Allocate( const uint64_t size )
+void GpuBuffer::Allocate( const uint32_t bufferId, const uint64_t size )
 {
-	SetPos( m_buffer.offset + size );
+	SetPos( bufferId, m_buffer[ 0 ].offset + size );
 }
 
 
-VkBuffer GpuBuffer::GetVkObject() const
+VkBuffer GpuBuffer::GetVkObject( const uint32_t bufferId ) const
 {
-	return m_buffer.buffer;
+	return m_buffer[ 0 ].buffer;
 }
 
 
-VkBuffer& GpuBuffer::VkObject()
+VkBuffer& GpuBuffer::VkObject( const uint32_t bufferId )
 {
-	return m_buffer.buffer;
+	return m_buffer[ 0 ].buffer;
 }
 
 
-void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
+void GpuBuffer::Create( const bufferCreateInfo_t info )
+{
+	Create( info.name, info.lifetime, info.elements, info.elementSizeBytes, info.type, *info.bufferMemory );
+}
+
+
+void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
 {
 	VkBufferUsageFlags usage = 0;
 	VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
 	VkDeviceSize alignment = elementSizeBytes;
+
+	m_lifetime = lifetime;
+	if( m_lifetime == LIFETIME_PERSISTENT ) {
+		m_bufferCount = MAX_FRAMES_IN_FLIGHT;
+	} else {
+		m_bufferCount = 1;
+	}
 
 	if( type == bufferType_t::STORAGE ) {
 		alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
@@ -114,30 +127,34 @@ void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_
 	bufferInfo.usage = usage;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &VkObject() ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create buffer!" );
+	{
+		const uint32_t bufferId = 0;
+
+		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &VkObject( bufferId ) ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create buffer!" );
+		}
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements( context.device, GetVkObject( bufferId ), &memRequirements );
+
+		VkMemoryAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
+
+		if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer[ bufferId ].alloc ) ) {
+			vkBindBufferMemory( context.device, GetVkObject( bufferId ), bufferMemory.GetVkObject(), m_buffer[ bufferId ].alloc.GetOffset() );
+		}
+		else {
+			throw std::runtime_error( "Buffer could not allocate!" );
+		}
+
+		m_name = name;
+
+		m_end = m_buffer[ bufferId ].alloc.GetSize();
+		m_buffer[ bufferId ].baseOffset = 0;
+		SetPos( bufferId, 0 );
 	}
-
-	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements( context.device, GetVkObject(), &memRequirements );
-
-	VkMemoryAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
-
-	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer.alloc ) ) {
-		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetVkObject(), m_buffer.alloc.GetOffset() );
-	}
-	else {
-		throw std::runtime_error( "Buffer could not allocate!" );
-	}
-
-	m_name = name;
-
-	m_end = m_buffer.alloc.GetSize();
-	m_buffer.baseOffset = 0;
-	SetPos( m_buffer.baseOffset );
 }
 
 
@@ -146,11 +163,10 @@ void GpuBuffer::Destroy()
 	if ( context.device == VK_NULL_HANDLE ) {
 		throw std::runtime_error( "GPU Buffer: Destroy: No device context!" );
 	}
-	VkBuffer vkBuffer = GetVkObject();
-	if ( vkBuffer != VK_NULL_HANDLE ) {
-		vkDestroyBuffer( context.device, vkBuffer, nullptr );
+	if ( m_buffer[ 0 ].buffer != VK_NULL_HANDLE ) {
+		vkDestroyBuffer( context.device, m_buffer[ 0 ].buffer, nullptr );
 	}
-	SetPos();
+	SetPos( 0, 0 );
 }
 
 
@@ -162,20 +178,26 @@ uint64_t GpuBuffer::GetAlignedSize( const uint64_t size, const uint64_t alignmen
 
 bool GpuBuffer::VisibleToCpu() const
 {
-	const void* mappedData = m_buffer.alloc.GetPtr();
+	const void* mappedData = m_buffer[ 0 ].alloc.GetPtr();
 	return ( mappedData != nullptr );
 }
 
 
-void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
+void GpuBuffer::CopyData( const uint32_t bufferId, void* data, const size_t sizeInBytes )
 {
-	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
-	void* mappedData = m_buffer.alloc.GetPtr();
+	assert( ( GetSize( 0 ) + sizeInBytes ) <= GetMaxSize() );
+	void* mappedData = m_buffer[ 0 ].alloc.GetPtr();
 	if ( mappedData != nullptr )
 	{
-		memcpy( (uint8_t*)mappedData + m_buffer.offset, data, sizeInBytes );
-		m_buffer.offset += GetAlignedSize( sizeInBytes, m_buffer.alloc.GetAlignment() );
+		memcpy( (uint8_t*)mappedData + m_buffer[ 0 ].offset, data, sizeInBytes );
+		m_buffer[ 0 ].offset += GetAlignedSize( sizeInBytes, m_buffer[ 0 ].alloc.GetAlignment() );
 	}
+}
+
+
+const char* GpuBuffer::GetName() const
+{
+	return m_name;
 }
 
 
@@ -185,10 +207,10 @@ GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t e
 
 	const uint64_t maxSize = GetMaxSize();
 
-	view.m_buffer = m_buffer;
-	view.m_buffer.baseOffset = baseElementIx * m_elementPadding;
-	view.m_buffer.baseOffset = Clamp( view.m_buffer.baseOffset, m_buffer.baseOffset, maxSize );
-	view.m_end = Min( view.m_buffer.baseOffset + elementCount * m_elementPadding, maxSize );
+	view.m_buffer[ 0 ] = m_buffer[ 0 ];
+	view.m_buffer[ 0 ].baseOffset = baseElementIx * m_elementPadding;
+	view.m_buffer[ 0 ].baseOffset = Clamp( view.m_buffer[ 0 ].baseOffset, m_buffer[ 0 ].baseOffset, maxSize );
+	view.m_end = Min( view.m_buffer[ 0 ].baseOffset + elementCount * m_elementPadding, maxSize );
 	view.m_elementSize = m_elementSize;
 	view.m_elementPadding = m_elementPadding;
 

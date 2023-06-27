@@ -241,7 +241,7 @@ private:
 	void								UpdateFrameDescSet( const int currentImage );
 	void								BuildPipelines();
 	void								UpdateDescriptorSets();
-	void								AppendDescriptorWrites( const ShaderBindParms& parms, std::vector<VkWriteDescriptorSet>& descSetWrites );
+	void								AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t currentBuffer, std::vector<VkWriteDescriptorSet>& descSetWrites );
 
 	// Debug
 	std::vector<const char*>			GetRequiredExtensions() const;	

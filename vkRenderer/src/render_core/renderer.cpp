@@ -682,7 +682,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 {
 	FrameState& state = frameState[ currentImage ];
 
-	state.globalConstants.SetPos();
+	state.globalConstants.SetPos( currentImage, 0 );
 	{
 		globalUboConstants_t globals = {};
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -698,10 +698,10 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 
-		state.globalConstants.CopyData( &globals, sizeof( globals ) );
+		state.globalConstants.CopyData( currentImage, &globals, sizeof( globals ) );
 	}
 
-	state.viewParms.SetPos();
+	state.viewParms.SetPos( currentImage, 0 );
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -716,7 +716,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
 		}
-		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+		state.viewParms.CopyData( currentImage, &viewBuffer, sizeof( viewBuffer ) );
 	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
@@ -738,17 +738,17 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 			uboBuffer[ objectId ] = ubo;
 		}
 
-		state.surfParmPartitions[ viewId ].SetPos();
-		state.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+		state.surfParmPartitions[ viewId ].SetPos( currentImage, 0 );
+		state.surfParmPartitions[ viewId ].CopyData( currentImage, uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	}
 
-	state.materialBuffers.SetPos();
-	state.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
+	state.materialBuffers.SetPos( currentImage, 0 );
+	state.materialBuffers.CopyData( currentImage, materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
 
-	state.lightParms.SetPos();
-	state.lightParms.CopyData( lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
+	state.lightParms.SetPos( currentImage, 0 );
+	state.lightParms.CopyData( currentImage, lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
-	state.particleBuffer.SetPos( frameState[ currentImage ].particleBuffer.GetMaxSize() );
+	state.particleBuffer.SetPos( currentImage, frameState[ currentImage ].particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
 }
 
@@ -1063,10 +1063,10 @@ void Renderer::RenderViews()
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
 	}
 
-	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
+	VkBuffer vertexBuffers[] = { vb.GetVkObject( m_bufferId ) };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ m_bufferId ], 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ m_bufferId ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ m_bufferId ], ib.GetVkObject( m_bufferId ), 0, VK_INDEX_TYPE_UINT32 );
 
 	for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 	{

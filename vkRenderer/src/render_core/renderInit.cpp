@@ -835,22 +835,22 @@ void Renderer::CreateBuffers()
 {
 	for ( size_t i = 0; i < g_swapChain.GetBufferCount(); ++i )
 	{
-		frameState[ i ].globalConstants.Create( "Globals", 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, sharedMemory );
-		frameState[ i ].viewParms.Create( "View", MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState[ i ].surfParms.Create( "Surf", MaxViews * MaxSurfaces, sizeof( uniformBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState[ i ].materialBuffers.Create( "Material", MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState[ i ].lightParms.Create( "Light", MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState[ i ].particleBuffer.Create( "Particle", MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].globalConstants.Create( "Globals", LIFETIME_PERSISTENT, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, sharedMemory );
+		frameState[ i ].viewParms.Create( "View", LIFETIME_PERSISTENT, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].surfParms.Create( "Surf", LIFETIME_PERSISTENT, MaxViews * MaxSurfaces, sizeof( uniformBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].materialBuffers.Create( "Material", LIFETIME_PERSISTENT, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].lightParms.Create( "Light", LIFETIME_PERSISTENT, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState[ i ].particleBuffer.Create( "Particle", LIFETIME_PERSISTENT, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
 
 		for ( size_t v = 0; v < MaxViews; ++v ) {
 			frameState[ i ].surfParmPartitions[ v ] = frameState[ i ].surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 	}
 
-	vb.Create( "VB", MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, localMemory );
-	ib.Create( "IB", MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, localMemory );
+	vb.Create( "VB", LIFETIME_PERSISTENT, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, localMemory );
+	ib.Create( "IB", LIFETIME_PERSISTENT, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, localMemory );
 
-	stagingBuffer.Create( "Staging", 1, 256 * MB_1, bufferType_t::STAGING, sharedMemory );
+	stagingBuffer.Create( "Staging", LIFETIME_TEMP, 1, 256 * MB_1, bufferType_t::STAGING, sharedMemory );
 }
 
 

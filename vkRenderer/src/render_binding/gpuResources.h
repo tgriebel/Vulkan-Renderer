@@ -34,6 +34,18 @@ enum class bufferType_t
 	STAGING
 };
 
+
+struct bufferCreateInfo_t
+{
+	const char*			name;
+	resourceLifetime_t	lifetime;
+	uint32_t			elements;
+	uint32_t			elementSizeBytes;
+	bufferType_t		type;
+	AllocatorMemory*	bufferMemory;
+};
+
+
 class GpuBufferView;
 
 class GpuBuffer
@@ -41,22 +53,23 @@ class GpuBuffer
 public:
 	static uint64_t	GetAlignedSize( const uint64_t size, const uint64_t alignment );
 
-	virtual void	SetPos( const uint64_t pos = 0 );
+	virtual void	SetPos( const uint32_t bufferId, const uint64_t pos );
 	virtual uint64_t GetMaxSize() const;
 
-	uint64_t		GetSize() const;	
-	uint64_t		GetBaseOffset() const;
+	uint64_t		GetSize( const uint32_t bufferId ) const;
+	uint64_t		GetBaseOffset( const uint32_t bufferId ) const;
 	uint64_t		GetElementSize() const;
 	uint64_t		GetElementSizeAligned() const;
-	VkBuffer&		VkObject();
-	VkBuffer		GetVkObject() const;
-	void			Create( const char* name, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
+	VkBuffer&		VkObject( const uint32_t bufferId );
+	VkBuffer		GetVkObject( const uint32_t bufferId ) const;
+	void			Create( const bufferCreateInfo_t info );
+	void			Create( const char* name, const resourceLifetime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
-	void			Allocate( const uint64_t size );
-	void			CopyData( void* data, const size_t sizeInBytes );
-	const char*		GetName() const;
+	void			Allocate( const uint32_t bufferId, const uint64_t size );
+	void			CopyData( const uint32_t bufferId, void* data, const size_t sizeInBytes );
 
+	const char*		GetName() const;
 	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount );
 
 protected:
@@ -68,7 +81,7 @@ protected:
 		uint64_t			offset;
 	};
 
-	buffer_t			m_buffer;
+	buffer_t			m_buffer[ MAX_FRAMES_IN_FLIGHT ];
 	uint32_t			m_bufferCount;
 	uint64_t			m_end;
 	uint64_t			m_elementSize;
