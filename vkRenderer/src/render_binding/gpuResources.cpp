@@ -28,19 +28,19 @@ extern deviceContext_t context;
 
 void GpuBuffer::SetPos( const uint64_t pos )
 {
-	m_offset = Clamp( pos, m_baseOffset, GetMaxSize() );
+	m_buffer.offset = Clamp( pos, m_buffer.baseOffset, GetMaxSize() );
 }
 
 
 uint64_t GpuBuffer::GetSize() const
 {
-	return ( m_offset - m_baseOffset );
+	return ( m_buffer.offset - m_buffer.baseOffset );
 }
 
 
 uint64_t GpuBuffer::GetBaseOffset() const
 {
-	return m_baseOffset;
+	return m_buffer.baseOffset;
 }
 
 
@@ -64,19 +64,19 @@ uint64_t GpuBuffer::GetMaxSize() const
 
 void GpuBuffer::Allocate( const uint64_t size )
 {
-	SetPos( m_offset + size );
+	SetPos( m_buffer.offset + size );
 }
 
 
 VkBuffer GpuBuffer::GetVkObject() const
 {
-	return m_buffer;
+	return m_buffer.buffer;
 }
 
 
 VkBuffer& GpuBuffer::VkObject()
 {
-	return m_buffer;
+	return m_buffer.buffer;
 }
 
 
@@ -126,8 +126,8 @@ void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
 
-	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_alloc ) ) {
-		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetVkObject(), m_alloc.GetOffset() );
+	if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer.alloc ) ) {
+		vkBindBufferMemory( context.device, GetVkObject(), bufferMemory.GetVkObject(), m_buffer.alloc.GetOffset() );
 	}
 	else {
 		throw std::runtime_error( "Buffer could not allocate!" );
@@ -135,9 +135,9 @@ void GpuBuffer::Create( const char* name, const uint32_t elements, const uint32_
 
 	m_name = name;
 
-	m_end = m_alloc.GetSize();
-	m_baseOffset = 0;
-	SetPos( m_baseOffset );
+	m_end = m_buffer.alloc.GetSize();
+	m_buffer.baseOffset = 0;
+	SetPos( m_buffer.baseOffset );
 }
 
 
@@ -162,7 +162,7 @@ uint64_t GpuBuffer::GetAlignedSize( const uint64_t size, const uint64_t alignmen
 
 bool GpuBuffer::VisibleToCpu() const
 {
-	const void* mappedData = m_alloc.GetPtr();
+	const void* mappedData = m_buffer.alloc.GetPtr();
 	return ( mappedData != nullptr );
 }
 
@@ -170,11 +170,11 @@ bool GpuBuffer::VisibleToCpu() const
 void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 {
 	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
-	void* mappedData = m_alloc.GetPtr();
+	void* mappedData = m_buffer.alloc.GetPtr();
 	if ( mappedData != nullptr )
 	{
-		memcpy( (uint8_t*)mappedData + m_offset, data, sizeInBytes );
-		m_offset += GetAlignedSize( sizeInBytes, m_alloc.GetAlignment() );
+		memcpy( (uint8_t*)mappedData + m_buffer.offset, data, sizeInBytes );
+		m_buffer.offset += GetAlignedSize( sizeInBytes, m_buffer.alloc.GetAlignment() );
 	}
 }
 
@@ -185,12 +185,10 @@ GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t e
 
 	const uint64_t maxSize = GetMaxSize();
 
-	view.m_baseOffset = baseElementIx * m_elementPadding;
-	view.m_baseOffset = Clamp( view.m_baseOffset, m_baseOffset, maxSize );
-	view.m_alloc = m_alloc;
 	view.m_buffer = m_buffer;
-	view.m_offset = view.m_baseOffset;
-	view.m_end = Min( view.m_baseOffset + elementCount * m_elementPadding, maxSize );
+	view.m_buffer.baseOffset = baseElementIx * m_elementPadding;
+	view.m_buffer.baseOffset = Clamp( view.m_buffer.baseOffset, m_buffer.baseOffset, maxSize );
+	view.m_end = Min( view.m_buffer.baseOffset + elementCount * m_elementPadding, maxSize );
 	view.m_elementSize = m_elementSize;
 	view.m_elementPadding = m_elementPadding;
 

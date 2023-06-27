@@ -60,14 +60,22 @@ public:
 	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount );
 
 protected:
-	Allocation	m_alloc;
-	VkBuffer	m_buffer;
-	uint64_t	m_baseOffset;
-	uint64_t	m_offset;
-	uint64_t	m_end;
-	uint64_t	m_elementSize;
-	uint64_t	m_elementPadding;
-	const char*	m_name;
+	struct buffer_t
+	{
+		Allocation			alloc;
+		VkBuffer			buffer;
+		uint64_t			baseOffset;
+		uint64_t			offset;
+	};
+
+	buffer_t			m_buffer;
+	uint32_t			m_bufferCount;
+	uint64_t			m_end;
+	uint64_t			m_elementSize;
+	uint64_t			m_elementPadding;
+	bufferType_t		m_type;
+	resourceLifetime_t	m_lifetime;
+	const char*			m_name;
 
 	friend class GpuBufferView;
 };
