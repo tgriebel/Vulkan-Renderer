@@ -50,6 +50,8 @@ class GpuBufferView;
 
 class GpuBuffer
 {
+private:
+	uint32_t		ClampId( const uint32_t bufferId ) const;
 public:
 	static uint64_t	GetAlignedSize( const uint64_t size, const uint64_t alignment );
 
@@ -81,7 +83,7 @@ protected:
 		uint64_t			offset;
 	};
 
-	buffer_t			m_buffer[ MAX_FRAMES_IN_FLIGHT ];
+	buffer_t			m_buffer[ MAX_FRAMES_STATES ];
 	uint32_t			m_bufferCount;
 	uint64_t			m_end;
 	uint64_t			m_elementSize;

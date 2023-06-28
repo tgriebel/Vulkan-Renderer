@@ -154,7 +154,7 @@ private:
 	Image								tempColorImage;
 	Image								depthStencilImage;
 
-	FrameState							frameState[ MAX_FRAMES_STATES ];
+	FrameState							frameState;
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
 	FrameBuffer							tempColor;

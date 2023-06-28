@@ -93,11 +93,8 @@ void Renderer::Cleanup()
 
 void Renderer::DestroyFramebuffers()
 {
-	for ( size_t frameId = 0; frameId < MAX_FRAMES_STATES; ++frameId )
-	{
-		frameState[ frameId ].depthImageView.Destroy();
-		frameState[ frameId ].stencilImageView.Destroy();
-	}
+	frameState.depthImageView.Destroy();
+	frameState.stencilImageView.Destroy();
 
 	delete tempColorImage.gpuImage;
 	delete mainColorImage.gpuImage;
@@ -136,13 +133,13 @@ void Renderer::ShutdownShaderResources()
 	stagingBuffer.Destroy();
 
 	// Buffers
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-		frameState[ i ].globalConstants.Destroy();
-		frameState[ i ].viewParms.Destroy();
-		frameState[ i ].surfParms.Destroy();
-		frameState[ i ].materialBuffers.Destroy();
-		frameState[ i ].lightParms.Destroy();
-		frameState[ i ].particleBuffer.Destroy();
+	{
+		frameState.globalConstants.Destroy();
+		frameState.viewParms.Destroy();
+		frameState.surfParms.Destroy();
+		frameState.materialBuffers.Destroy();
+		frameState.lightParms.Destroy();
+		frameState.particleBuffer.Destroy();
 	}
 
 	// Images

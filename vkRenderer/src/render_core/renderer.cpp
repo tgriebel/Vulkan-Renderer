@@ -649,8 +649,8 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 			else if ( passIx == DRAWPASS_POST_2D )
 			{
 				pass->codeImages[ currentImage ][ 0 ] = &mainColorImage;
-				pass->codeImages[ currentImage ][ 1 ] = &frameState[ currentImage ].depthImageView;
-				pass->codeImages[ currentImage ][ 2 ] = &frameState[ currentImage ].stencilImageView;
+				pass->codeImages[ currentImage ][ 1 ] = &frameState.depthImageView;
+				pass->codeImages[ currentImage ][ 2 ] = &frameState.stencilImageView;
 			}
 			else
 			{
@@ -659,28 +659,28 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 				pass->codeImages[ currentImage ][ 2 ] = &shadowMapImage[ 2 ];
 			}
 
-			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-			pass->parms[ i ]->Bind( bind_viewBuffer, &frameState[ i ].viewParms );
-			pass->parms[ i ]->Bind( bind_modelBuffer, &frameState[ i ].surfParmPartitions[ views[ viewIx ].GetViewId() ] );
+			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
+			pass->parms[ i ]->Bind( bind_viewBuffer, &frameState.viewParms );
+			pass->parms[ i ]->Bind( bind_modelBuffer, &frameState.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
 			pass->parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
 			pass->parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState[ i ].materialBuffers );
-			pass->parms[ i ]->Bind( bind_lightBuffer, &frameState[ i ].lightParms );
+			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState.materialBuffers );
+			pass->parms[ i ]->Bind( bind_lightBuffer, &frameState.lightParms );
 			pass->parms[ i ]->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
-			pass->parms[ i ]->Bind( bind_imageStencil, ( passIx == DRAWPASS_POST_2D ) ? &frameState[ currentImage ].stencilImageView : pass->codeImages[ i ][ 0 ] );
+			pass->parms[ i ]->Bind( bind_imageStencil, ( passIx == DRAWPASS_POST_2D ) ? &frameState.stencilImageView : pass->codeImages[ i ][ 0 ] );
 		}
 	}
 
 	{
-		particleState.parms[ i ]->Bind( bind_globalsBuffer, &frameState[ i ].globalConstants );
-		particleState.parms[ i ]->Bind( bind_particleWriteBuffer, &frameState[ i ].particleBuffer );
+		particleState.parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
+		particleState.parms[ i ]->Bind( bind_particleWriteBuffer, &frameState.particleBuffer );
 	}
 }
 
 
 void Renderer::UpdateBuffers( const uint32_t currentImage )
 {
-	FrameState& state = frameState[ currentImage ];
+	FrameState& state = frameState;
 
 	state.globalConstants.SetPos( currentImage, 0 );
 	{
@@ -748,7 +748,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 	state.lightParms.SetPos( currentImage, 0 );
 	state.lightParms.CopyData( currentImage, lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
-	state.particleBuffer.SetPos( currentImage, frameState[ currentImage ].particleBuffer.GetMaxSize() );
+	state.particleBuffer.SetPos( currentImage, frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
 }
 
