@@ -611,15 +611,15 @@ void Renderer::UpdateViews( const Scene* scene )
 		view2Ds[ 0 ]->SetViewRect( 0, 0, width, height );
 	}
 
-	// FIXME: TEMP HACK
 	activeViewCount = 0;
-	for( uint32_t i = 0; i < shadowCount; ++i )
+	for( uint32_t i = 0; i < viewCount; ++i )
 	{
-		activeViews[ i ] = shadowViews[ i ];
-		++activeViewCount;
+		if( views[ i ].IsCommitted() )
+		{
+			activeViews[ activeViewCount ] = &views[ i ];
+			++activeViewCount;
+		}	
 	}
-	activeViews[ activeViewCount++ ] = renderViews[ 0 ];
-	activeViews[ activeViewCount++ ] = view2Ds[ 0 ];
 }
 
 
