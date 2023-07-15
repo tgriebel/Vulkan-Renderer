@@ -41,7 +41,7 @@
 
 static const int TOKEN_LEN = 128;
 
-static uint8_t trashBuffer[ 4096 ];
+static uint8_t trashBuffer[ 8192 ];
 
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
 	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
