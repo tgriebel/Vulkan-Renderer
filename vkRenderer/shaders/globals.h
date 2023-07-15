@@ -26,6 +26,8 @@
 #define MaxViews		6
 #define MaxSurfaces		1000
 
+#define PI				3.14159265359f
+
 struct light_t
 {
 	vec4	lightPos;
