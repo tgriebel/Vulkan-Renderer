@@ -212,6 +212,9 @@
     <ClInclude Include="src\render_binding\imageView.h">
       <Filter>render binding</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\light.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
