@@ -32,6 +32,16 @@ class GeoBuilder
 {
 public:
 
+	enum normalDirection_t
+	{
+		NORMAL_X_POS = 0,
+		NORMAL_X_NEG = 1,
+		NORMAL_Y_POS = 2,
+		NORMAL_Y_NEG = 3,
+		NORMAL_Z_POS = 4,
+		NORMAL_Z_NEG = 5,
+	};
+
 	struct vertex_t
 	{
 		vec3f	pos;

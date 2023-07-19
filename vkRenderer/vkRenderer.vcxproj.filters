@@ -104,6 +104,9 @@
     <ClCompile Include="src\render_binding\allocator.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_state\cmdContext.cpp">
+      <Filter>render state</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="shaders\light.h">
       <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_state\cmdContext.h">
+      <Filter>render state</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

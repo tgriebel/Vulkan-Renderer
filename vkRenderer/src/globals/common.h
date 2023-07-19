@@ -273,24 +273,10 @@ template<> struct std::hash<drawSurf_t> {
 	}
 };
 
-class FrameBuffer;
-
-
 enum resourceLifetime_t
 {
 	LIFETIME_TEMP,
 	LIFETIME_PERSISTENT,
-};
-
-
-enum normalDirection_t
-{
-	NORMAL_X_POS = 0,
-	NORMAL_X_NEG = 1,
-	NORMAL_Y_POS = 2,
-	NORMAL_Y_NEG = 3,
-	NORMAL_Z_POS = 4,
-	NORMAL_Z_NEG = 5,
 };
 
 
@@ -313,88 +299,3 @@ struct imguiControls_t
 	vec3f		selectedModelOrigin;
 };
 #endif
-
-
-enum pipelineQueue_t
-{
-	QUEUE_GRAPHICS,
-	QUEUE_PRESENT,
-	QUEUE_COMPUTE,
-	QUEUE_COUNT,
-};
-
-
-template<class T>
-class optional {
-
-	std::pair<T, bool> option;
-
-public:
-
-	optional()
-	{
-		option.second = false;
-	}
-
-	bool has_value()
-	{
-		return option.second;
-	}
-
-	void set_value( const T& value_ )
-	{
-		option.first = value_;
-		option.second = true;
-	}
-
-	T value()
-	{
-		return option.first;
-	}
-};
-
-
-struct QueueFamilyIndices
-{
-	optional<uint32_t> graphicsFamily;
-	optional<uint32_t> presentFamily;
-	optional<uint32_t> computeFamily;
-
-	bool IsComplete() {
-		return	graphicsFamily.has_value() && 
-				presentFamily.has_value() &&
-				computeFamily.has_value();
-	}
-};
-
-
-class GfxContext
-{
-public:
-	VkQueue						gfxContext;
-	VkCommandPool				commandPool;
-	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
-	VkSemaphore					imageAvailableSemaphores[ MAX_FRAMES_STATES ];
-	VkSemaphore					renderFinishedSemaphores[ MAX_FRAMES_STATES ];
-	VkFence						inFlightFences[ MAX_FRAMES_STATES ];
-	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
-};
-
-
-class ComputeContext
-{
-public:
-	VkQueue						queue;
-	VkCommandPool				commandPool;
-	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
-	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
-};
-
-
-class UploadContext
-{
-public:
-	VkQueue						queue;
-	VkCommandPool				commandPool;
-	VkCommandBuffer				commandBuffer;
-};

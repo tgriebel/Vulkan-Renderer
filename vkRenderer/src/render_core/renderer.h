@@ -29,6 +29,8 @@
 #include "../globals/renderConstants.h"
 #include "../globals/renderview.h"
 
+#include "../render_state/cmdContext.h"
+
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
 #include "../../external/imgui/backends/imgui_impl_glfw.h"

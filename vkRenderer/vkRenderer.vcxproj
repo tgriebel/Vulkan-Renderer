@@ -199,6 +199,7 @@
     <ClInclude Include="src\render_core\gpuImage.h" />
     <ClInclude Include="src\render_core\renderer.h" />
     <ClInclude Include="src\render_core\swapChain.h" />
+    <ClInclude Include="src\render_state\cmdContext.h" />
     <ClInclude Include="src\render_state\deviceContext.h" />
     <ClInclude Include="src\render_state\FrameState.h" />
     <ClInclude Include="src\render_state\rhi.h" />
@@ -241,6 +242,7 @@
     <ClCompile Include="src\render_core\renderInit.cpp" />
     <ClCompile Include="src\render_core\renderShutdown.cpp" />
     <ClCompile Include="src\render_core\swapChain.cpp" />
+    <ClCompile Include="src\render_state\cmdContext.cpp" />
     <ClCompile Include="src\render_state\deviceContext.cpp" />
     <ClCompile Include="src\render_state\frameState.cpp" />
     <ClCompile Include="window.cpp" />

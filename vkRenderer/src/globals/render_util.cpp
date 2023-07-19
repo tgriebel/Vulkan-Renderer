@@ -125,7 +125,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 0 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
 	info[ 0 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
 	info[ 0 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 0 ].normalDirection = NORMAL_Z_NEG;
+	info[ 0 ].normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
 	info[ 1 ].gridSize = vec2f( gridSize );
 	info[ 1 ].widthInQuads = width;
@@ -135,7 +135,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 1 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
 	info[ 1 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, -gridSize );
 	info[ 1 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 1 ].normalDirection = NORMAL_Z_POS;
+	info[ 1 ].normalDirection = GeoBuilder::NORMAL_Z_POS;
 
 	info[ 2 ].gridSize = vec2f( gridSize );
 	info[ 2 ].widthInQuads = width;
@@ -145,7 +145,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 2 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 2 ].origin = vec3f( -0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
 	info[ 2 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 2 ].normalDirection = NORMAL_X_POS;
+	info[ 2 ].normalDirection = GeoBuilder::NORMAL_X_POS;
 
 	info[ 3 ].gridSize = vec2f( gridSize );
 	info[ 3 ].widthInQuads = width;
@@ -155,7 +155,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 3 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 3 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
 	info[ 3 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 3 ].normalDirection = NORMAL_X_NEG;
+	info[ 3 ].normalDirection = GeoBuilder::NORMAL_X_NEG;
 
 	info[ 4 ].gridSize = vec2f( gridSize );
 	info[ 4 ].widthInQuads = width;
@@ -165,7 +165,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 4 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 4 ].origin = vec3f( 0.5f * gridSize * width, -0.5f * gridSize * height, 0.0f );
 	info[ 4 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 4 ].normalDirection = NORMAL_Y_NEG;
+	info[ 4 ].normalDirection = GeoBuilder::NORMAL_Y_NEG;
 
 	info[ 5 ].gridSize = vec2f( gridSize );
 	info[ 5 ].widthInQuads = width;
@@ -175,7 +175,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 5 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info[ 5 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
 	info[ 5 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 5 ].normalDirection = NORMAL_Y_POS;
+	info[ 5 ].normalDirection = GeoBuilder::NORMAL_Y_POS;
 
 	GeoBuilder gb;
 	for ( int i = 0; i < 6; ++i ) {
@@ -205,7 +205,7 @@ bool TerrainLoader::Load( Asset<Model>& modelAsset )
 	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, 0.0f );
 	info.color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info.normalDirection = NORMAL_Z_NEG;
+	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
@@ -238,7 +238,7 @@ bool WaterLoader::Load( Asset<Model>& modelAsset )
 	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
 	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, -0.15f );
 	info.color = vec4f( 0.0f, 0.0f, 1.0f, 0.2f );
-	info.normalDirection = NORMAL_Z_NEG;
+	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
@@ -263,7 +263,7 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	info.uv[ 0 ] = vec2f( 1.0f, 0.0f );
 	info.uv[ 1 ] = vec2f( -1.0f, 1.0f );
 	info.origin = vec3f( origin[ 0 ], origin[ 1 ], 0.0f );
-	info.normalDirection = NORMAL_Z_NEG;
+	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
