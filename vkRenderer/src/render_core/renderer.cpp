@@ -487,17 +487,7 @@ void Renderer::SubmitFrame()
 
 	RenderViews();
 
-	// Compute queue submit
-	{
-		VkSubmitInfo submitInfo{ };
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &computeContext.commandBuffers[ m_bufferId ];
-
-		if ( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to submit compute command buffers!" );
-		}
-	}
+	computeContext.Submit( m_bufferId );
 
 	// Graphics queue submit
 	{

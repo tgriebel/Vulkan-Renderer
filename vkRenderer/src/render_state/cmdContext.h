@@ -98,7 +98,7 @@ public:
 	VkCommandBuffer				commandBuffers[ MAX_FRAMES_STATES ];
 	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
 
-	void Submit();
+	void Submit( const uint32_t bufferId );
 };
 
 
