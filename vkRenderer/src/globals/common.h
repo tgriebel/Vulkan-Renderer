@@ -133,68 +133,6 @@ enum renderFlags_t
 
 struct pipelineObject_t;
 
-
-struct uniformBufferObject_t
-{
-	mat4x4f model;
-};
-
-
-struct viewBufferObject_t
-{
-	mat4x4f		view;
-	mat4x4f		proj;
-	vec4f		dimensions;
-	uint32_t	numLights;
-};
-
-
-struct globalUboConstants_t
-{
-	vec4f		time;
-	vec4f		generic;
-	vec4f		shadowParms;
-	vec4f		tonemap;
-	uint32_t	numSamples;
-	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
-};
-
-
-struct materialBufferObject_t
-{
-	int						textures[ Material::MaxMaterialTextures ];
-	vec3f					Ka;
-	float					Tr;
-	vec3f					Ke;
-	float					Ns;
-	vec3f					Kd;
-	float					Ni;
-	vec3f					Ks;
-	float					illum;
-	vec3f					Tf;
-	uint32_t				textured;
-	uint32_t				pad[ 4 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
-};
-
-
-struct lightBufferObject_t
-{
-	vec4f		lightPos;
-	vec4f		intensity;
-	vec4f		lightDir;
-	uint32_t	shadowViewId;
-	uint32_t	pad[3];
-};
-
-
-struct particleBufferObject_t
-{
-	vec2f	position;
-	vec2f	velocity;
-	vec4f	color;
-};
-
-
 struct SwapChainSupportDetails
 {
 	VkSurfaceCapabilitiesKHR		capabilities;

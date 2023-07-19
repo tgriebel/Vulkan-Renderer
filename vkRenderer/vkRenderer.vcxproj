@@ -190,6 +190,7 @@
     <ClInclude Include="src\io\io.h" />
     <ClInclude Include="src\render_binding\allocator.h" />
     <ClInclude Include="src\render_binding\bindings.h" />
+    <ClInclude Include="src\render_binding\bufferObjects.h" />
     <ClInclude Include="src\render_binding\gpuResources.h" />
     <ClInclude Include="src\render_binding\imageView.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />

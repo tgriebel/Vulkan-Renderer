@@ -27,6 +27,7 @@
 #include "../render_core/renderer.h"
 #include "../render_state/rhi.h"
 #include "../render_state/cmdContext.h"
+#include "../render_binding/bufferObjects.h"
 #include <gfxcore/scene/assetManager.h>
 
 extern AssetManager g_assets;

@@ -221,6 +221,9 @@
     <ClInclude Include="src\render_state\cmdContext.h">
       <Filter>render state</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_binding\bufferObjects.h">
+      <Filter>render binding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

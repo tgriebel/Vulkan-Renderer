@@ -30,6 +30,7 @@
 #include "../globals/renderview.h"
 
 #include "../render_state/cmdContext.h"
+#include "../render_binding/bufferObjects.h"
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
