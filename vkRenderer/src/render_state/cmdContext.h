@@ -25,6 +25,8 @@
 
 #include "../globals/common.h"
 
+class ShaderBindParms;
+
 enum pipelineQueue_t
 {
 	QUEUE_GRAPHICS,
@@ -87,6 +89,9 @@ public:
 	VkSemaphore					renderFinishedSemaphores[ MAX_FRAMES_STATES ];
 	VkFence						inFlightFences[ MAX_FRAMES_STATES ];
 	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
+
+	//void Submit( ); // TODO
+	//void Dispatch( ); // TODO: Compute jobs can still be dispatched from gfx
 };
 
 
@@ -99,6 +104,7 @@ public:
 	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
 
 	void Submit( const uint32_t bufferId );
+	void Dispatch( const hdl_t progHdl, const uint32_t bufferId, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 };
 
 

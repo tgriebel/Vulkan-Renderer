@@ -219,7 +219,6 @@ private:
 	// Draw Frame
 	static bool							SkipPass( const drawSurf_t& surf, const drawPass_t pass );
 	void								RenderViewSurfaces( RenderView& view, GfxContext& gfxContext );
-	void								Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& shader, VkDescriptorSet descSet, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 	void								RenderViews();
 	void								CommitModel( RenderView& view, const Entity& ent );
 	void								MergeSurfaces( RenderView& view );

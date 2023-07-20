@@ -434,28 +434,6 @@ void Renderer::FlushGPU()
 }
 
 
-void Renderer::Dispatch( ComputeContext& computeContext, hdl_t progHdl, ShaderBindSet& bindSet, VkDescriptorSet descSet, const uint32_t x, const uint32_t y, const uint32_t z )
-{
-	pipelineState_t state = {};
-	state.progHdl = progHdl;
-
-	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
-
-	pipelineObject_t* pipelineObject = nullptr;
-	GetPipelineObject( pipelineHdl, &pipelineObject );
-
-	VkCommandBuffer cmdBuffer = computeContext.commandBuffers[ m_bufferId ];
-
-	if ( pipelineObject != nullptr )
-	{
-		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
-		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, &descSet, 0, 0 );
-
-		vkCmdDispatch( cmdBuffer, x, y, z );
-	}
-}
-
-
 void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
@@ -478,7 +456,7 @@ void Renderer::SubmitFrame()
 
 		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		Dispatch( computeContext, progHdl, particleShaderBinds, particleState.parms[ m_bufferId ]->GetVkObject(), MaxParticles / 256 );
+		computeContext.Dispatch( progHdl, m_bufferId, *particleState.parms[ m_bufferId ], MaxParticles / 256 );
 
 		if ( vkEndCommandBuffer( computeContext.commandBuffers[ m_bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );

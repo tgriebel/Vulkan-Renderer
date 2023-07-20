@@ -22,6 +22,7 @@
 */
 #include "cmdContext.h"
 #include "deviceContext.h"
+#include "../render_binding/pipeline.h"
 
 void ComputeContext::Submit( const uint32_t bufferId )
 {
@@ -32,5 +33,29 @@ void ComputeContext::Submit( const uint32_t bufferId )
 
 	if ( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to submit compute command buffers!" );
+	}
+}
+
+
+void ComputeContext::Dispatch( const hdl_t progHdl, const uint32_t bufferId, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
+{
+	pipelineState_t state = {};
+	state.progHdl = progHdl;
+
+	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
+
+	pipelineObject_t* pipelineObject = nullptr;
+	GetPipelineObject( pipelineHdl, &pipelineObject );
+
+	VkCommandBuffer cmdBuffer = commandBuffers[ bufferId ];
+
+	if ( pipelineObject != nullptr )
+	{
+		VkDescriptorSet set[1] = { bindParms.GetVkObject() };
+
+		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
+		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
+
+		vkCmdDispatch( cmdBuffer, x, y, z );
 	}
 }
