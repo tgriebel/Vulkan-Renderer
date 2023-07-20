@@ -138,7 +138,7 @@ private:
 	ComputeState						particleState;
 
 	// Frame Sync
-	size_t								m_frameId = 0;
+	uint32_t							m_frameId = 0;
 	uint32_t							m_frameNumber = 0;
 
 	// Shader resources
