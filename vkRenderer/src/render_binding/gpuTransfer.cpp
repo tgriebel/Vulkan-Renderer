@@ -54,7 +54,7 @@ void Renderer::CopyBufferToImage( UploadContext& uploadContext, Image& texture, 
 
 	vkCmdCopyBufferToImage(
 		uploadContext.commandBuffer,
-		buffer.GetVkObject( m_bufferId ),
+		buffer.GetVkObject( context.bufferId ),
 		texture.gpuImage->GetVkImage(),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1,
@@ -69,7 +69,7 @@ void Renderer::UpdateTextures()
 	if( textureCount == 0 ) {
 		return;
 	}
-	stagingBuffer.SetPos( m_bufferId, 0 );
+	stagingBuffer.SetPos( context.bufferId, 0 );
 
 	BeginUploadCommands( uploadContext );
 
@@ -79,8 +79,8 @@ void Renderer::UpdateTextures()
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );
 		Image& image = imageAsset->Get();
 
-		const uint64_t currentOffset = stagingBuffer.GetSize( m_bufferId );
-		stagingBuffer.CopyData( m_bufferId, image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
+		const uint64_t currentOffset = stagingBuffer.GetSize( context.bufferId );
+		stagingBuffer.CopyData( context.bufferId, image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
 
 		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
@@ -121,8 +121,8 @@ void Renderer::UploadTextures()
 
 		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-		const uint64_t currentOffset = stagingBuffer.GetSize( m_bufferId );
-		stagingBuffer.CopyData( m_bufferId, texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
+		const uint64_t currentOffset = stagingBuffer.GetSize( context.bufferId );
+		stagingBuffer.CopyData( context.bufferId, texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
 
 		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
 		
@@ -257,10 +257,10 @@ void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBuff
 {
 	BeginUploadCommands( uploadContext );
 	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
-	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject( m_bufferId ), dstBuffer.GetVkObject( m_bufferId ), 1, &copyRegion );
+	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject( context.bufferId ), dstBuffer.GetVkObject( context.bufferId ), 1, &copyRegion );
 	EndUploadCommands( uploadContext );
 
-	dstBuffer.Allocate( m_bufferId, copyRegion.size );
+	dstBuffer.Allocate( context.bufferId, copyRegion.size );
 }
 
 void Renderer::UploadModelsToGPU()
@@ -307,13 +307,13 @@ void Renderer::UploadModelsToGPU()
 
 				// Copy stream to staging buffer
 				VkDeviceSize vbCopySize = sizeof( vertexStream[0] ) * vertexCount;
-				stagingBuffer.SetPos( m_bufferId, 0 );
-				stagingBuffer.CopyData( m_bufferId, vertexStream.data(), static_cast<size_t>( vbCopySize ) );
+				stagingBuffer.SetPos( context.bufferId, 0 );
+				stagingBuffer.CopyData( context.bufferId, vertexStream.data(), static_cast<size_t>( vbCopySize ) );
 
 				VkBufferCopy vbCopyRegion{ };
 				vbCopyRegion.size = vbCopySize;
 				vbCopyRegion.srcOffset = 0;
-				vbCopyRegion.dstOffset = vb.GetSize( m_bufferId );
+				vbCopyRegion.dstOffset = vb.GetSize( context.bufferId );
 				CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
 
 				upload.vertexCount = vertexCount;
@@ -326,13 +326,13 @@ void Renderer::UploadModelsToGPU()
 			{
 				// IB Copy
 				VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
-				stagingBuffer.SetPos( m_bufferId, 0 );
-				stagingBuffer.CopyData( m_bufferId, surf.indices.data(), static_cast<size_t>( ibCopySize ) );
+				stagingBuffer.SetPos( context.bufferId, 0 );
+				stagingBuffer.CopyData( context.bufferId, surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
 				VkBufferCopy ibCopyRegion{ };
 				ibCopyRegion.size = ibCopySize;
 				ibCopyRegion.srcOffset = 0;
-				ibCopyRegion.dstOffset = ib.GetSize( m_bufferId );
+				ibCopyRegion.dstOffset = ib.GetSize( context.bufferId );
 				CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
 
 				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );

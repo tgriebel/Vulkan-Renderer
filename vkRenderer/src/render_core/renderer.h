@@ -139,7 +139,6 @@ private:
 
 	// Frame Sync
 	size_t								m_frameId = 0;
-	uint32_t							m_bufferId = 0;
 	uint32_t							m_frameNumber = 0;
 
 	// Shader resources

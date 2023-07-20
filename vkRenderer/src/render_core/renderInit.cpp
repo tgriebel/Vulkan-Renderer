@@ -445,6 +445,8 @@ void Renderer::CreateDevice()
 			std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled." << std::endl;
 		}
 	}
+
+	context.bufferId = 0;
 }
 
 

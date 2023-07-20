@@ -35,6 +35,7 @@ struct deviceContext_t
 	VkQueue								presentQueue;
 	VkQueue								computeContext;
 	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
+	uint32_t							bufferId;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
