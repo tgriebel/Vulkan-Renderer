@@ -55,21 +55,21 @@ private:
 public:
 	static uint64_t	GetAlignedSize( const uint64_t size, const uint64_t alignment );
 
-	virtual void	SetPos( const uint32_t bufferId, const uint64_t pos );
+	virtual void	SetPos( const uint64_t pos );
 	virtual uint64_t GetMaxSize() const;
 
-	uint64_t		GetSize( const uint32_t bufferId ) const;
-	uint64_t		GetBaseOffset( const uint32_t bufferId ) const;
+	uint64_t		GetSize() const;
+	uint64_t		GetBaseOffset() const;
 	uint64_t		GetElementSize() const;
 	uint64_t		GetElementSizeAligned() const;
-	VkBuffer&		VkObject( const uint32_t bufferId );
-	VkBuffer		GetVkObject( const uint32_t bufferId ) const;
+	VkBuffer&		VkObject();
+	VkBuffer		GetVkObject() const;
 	void			Create( const bufferCreateInfo_t info );
 	void			Create( const char* name, const resourceLifetime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
-	void			Allocate( const uint32_t bufferId, const uint64_t size );
-	void			CopyData( const uint32_t bufferId, void* data, const size_t sizeInBytes );
+	void			Allocate( const uint64_t size );
+	void			CopyData( void* data, const size_t sizeInBytes );
 
 	const char*		GetName() const;
 	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount );

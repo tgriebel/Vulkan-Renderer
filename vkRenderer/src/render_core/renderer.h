@@ -237,9 +237,9 @@ private:
 	void								UploadTextures();
 	void								UpdateGpuMaterials();
 	void								UploadModelsToGPU();
-	void								UpdateBindSets( const uint32_t currentImage );
-	void								UpdateBuffers( const uint32_t currentImage );
-	void								UpdateFrameDescSet( const int currentImage );
+	void								UpdateBindSets();
+	void								UpdateBuffers();
+	void								UpdateFrameDescSet();
 	void								BuildPipelines();
 	void								UpdateDescriptorSets();
 	void								AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t currentBuffer, std::vector<VkWriteDescriptorSet>& descSetWrites );

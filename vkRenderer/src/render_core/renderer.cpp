@@ -401,10 +401,12 @@ void Renderer::UpdateDescriptorSets()
 	const uint32_t frameBufferCount = static_cast<uint32_t>( g_swapChain.GetBufferCount() );
 	for ( uint32_t i = 0; i < frameBufferCount; i++ )
 	{
-		UpdateBuffers( i );
-		UpdateBindSets( i );
-		UpdateFrameDescSet(i );
+		context.bufferId = i; // FIXME: HACK
+		UpdateBuffers();
+		UpdateBindSets();
+		UpdateFrameDescSet();
 	}
+	context.bufferId = 0;
 }
 
 
@@ -438,7 +440,7 @@ void Renderer::SubmitFrame()
 {
 	WaitForEndFrame();
 
-	UpdateBuffers( context.bufferId );
+	UpdateBuffers();
 	//UpdateFrameDescSet( context.bufferId );
 
 	// Compute
@@ -593,9 +595,9 @@ void Renderer::UpdateViews( const Scene* scene )
 }
 
 
-void Renderer::UpdateBindSets( const uint32_t currentImage )
+void Renderer::UpdateBindSets()
 {
-	const uint32_t i = currentImage;
+	const uint32_t i = context.bufferId;
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -609,24 +611,24 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 				continue;
 			}
 
-			pass->codeImages[ currentImage ].Resize( 3 );
+			pass->codeImages[ i ].Resize( 3 );
 			if ( passIx == DRAWPASS_SHADOW )
 			{				
-				pass->codeImages[ currentImage ][ 0 ] = gpuImages2D[ 0 ];
-				pass->codeImages[ currentImage ][ 1 ] = gpuImages2D[ 0 ];
-				pass->codeImages[ currentImage ][ 2 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ i ][ 0 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ i ][ 1 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ i ][ 2 ] = gpuImages2D[ 0 ];
 			}
 			else if ( passIx == DRAWPASS_POST_2D )
 			{
-				pass->codeImages[ currentImage ][ 0 ] = &mainColorImage;
-				pass->codeImages[ currentImage ][ 1 ] = &frameState.depthImageView;
-				pass->codeImages[ currentImage ][ 2 ] = &frameState.stencilImageView;
+				pass->codeImages[ i ][ 0 ] = &mainColorImage;
+				pass->codeImages[ i ][ 1 ] = &frameState.depthImageView;
+				pass->codeImages[ i ][ 2 ] = &frameState.stencilImageView;
 			}
 			else
 			{
-				pass->codeImages[ currentImage ][ 0 ] = &shadowMapImage[ 0 ];
-				pass->codeImages[ currentImage ][ 1 ] = &shadowMapImage[ 1 ];
-				pass->codeImages[ currentImage ][ 2 ] = &shadowMapImage[ 2 ];
+				pass->codeImages[ i ][ 0 ] = &shadowMapImage[ 0 ];
+				pass->codeImages[ i ][ 1 ] = &shadowMapImage[ 1 ];
+				pass->codeImages[ i ][ 2 ] = &shadowMapImage[ 2 ];
 			}
 
 			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
@@ -648,11 +650,11 @@ void Renderer::UpdateBindSets( const uint32_t currentImage )
 }
 
 
-void Renderer::UpdateBuffers( const uint32_t currentImage )
+void Renderer::UpdateBuffers()
 {
 	FrameState& state = frameState;
 
-	state.globalConstants.SetPos( currentImage, 0 );
+	state.globalConstants.SetPos( 0 );
 	{
 		globalUboConstants_t globals = {};
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -668,10 +670,10 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 
-		state.globalConstants.CopyData( currentImage, &globals, sizeof( globals ) );
+		state.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
-	state.viewParms.SetPos( currentImage, 0 );
+	state.viewParms.SetPos( 0 );
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -686,7 +688,7 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
 		}
-		state.viewParms.CopyData( currentImage, &viewBuffer, sizeof( viewBuffer ) );
+		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
@@ -708,17 +710,17 @@ void Renderer::UpdateBuffers( const uint32_t currentImage )
 			uboBuffer[ objectId ] = ubo;
 		}
 
-		state.surfParmPartitions[ viewId ].SetPos( currentImage, 0 );
-		state.surfParmPartitions[ viewId ].CopyData( currentImage, uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+		state.surfParmPartitions[ viewId ].SetPos( 0 );
+		state.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	}
 
-	state.materialBuffers.SetPos( currentImage, 0 );
-	state.materialBuffers.CopyData( currentImage, materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
+	state.materialBuffers.SetPos( 0 );
+	state.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
 
-	state.lightParms.SetPos( currentImage, 0 );
-	state.lightParms.CopyData( currentImage, lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
+	state.lightParms.SetPos( 0 );
+	state.lightParms.CopyData( lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
-	state.particleBuffer.SetPos( currentImage, frameState.particleBuffer.GetMaxSize() );
+	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
 }
 
@@ -1033,10 +1035,10 @@ void Renderer::RenderViews()
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
 	}
 
-	VkBuffer vertexBuffers[] = { vb.GetVkObject( context.bufferId ) };
+	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ context.bufferId ], 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ context.bufferId ], ib.GetVkObject( context.bufferId ), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ context.bufferId ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 	{

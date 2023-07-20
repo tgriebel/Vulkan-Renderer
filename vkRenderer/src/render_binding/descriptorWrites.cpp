@@ -111,9 +111,9 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, const uint3
 			const GpuBuffer* buffer = attachment->GetBuffer();
 
 			VkDescriptorBufferInfo& info = writeBuilder.NextBufferInfo();
-			info.buffer = buffer->GetVkObject( currentBuffer );
-			info.offset = buffer->GetBaseOffset( currentBuffer );
-			info.range = buffer->GetSize( currentBuffer );
+			info.buffer = buffer->GetVkObject();
+			info.offset = buffer->GetBaseOffset();
+			info.range = buffer->GetSize();
 
 			assert( info.buffer != nullptr );
 
@@ -175,14 +175,14 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, const uint3
 }
 
 
-void Renderer::UpdateFrameDescSet( const int currentImage )
+void Renderer::UpdateFrameDescSet()
 {
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
 
 	//if( particleState.updateDescriptorSets )
 	{
-		AppendDescriptorWrites( *particleState.parms[ currentImage ], currentImage, descriptorWrites );
+		AppendDescriptorWrites( *particleState.parms[ context.bufferId ], context.bufferId, descriptorWrites );
 	//	particleState.updateDescriptorSets = false;
 	}
 
@@ -196,7 +196,7 @@ void Renderer::UpdateFrameDescSet( const int currentImage )
 		{
 			DrawPass* pass = view.passes[ i ];
 			if ( pass != nullptr ) {
-				AppendDescriptorWrites( *pass->parms[ currentImage ], currentImage, descriptorWrites );
+				AppendDescriptorWrites( *pass->parms[ context.bufferId ], context.bufferId, descriptorWrites );
 			//	pass->updateDescriptorSets = false;
 			}
 		}

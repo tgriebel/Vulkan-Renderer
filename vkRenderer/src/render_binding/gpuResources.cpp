@@ -41,23 +41,23 @@ uint32_t GpuBuffer::ClampId( const uint32_t bufferId ) const
 }
 
 
-void GpuBuffer::SetPos( const uint32_t bufferId, const uint64_t pos )
+void GpuBuffer::SetPos( const uint64_t pos )
 {
-	const uint32_t id = ClampId( bufferId );
+	const uint32_t id = ClampId( context.bufferId );
 	m_buffer[ id ].offset = Clamp( pos, m_buffer[ id ].baseOffset, GetMaxSize() );
 }
 
 
-uint64_t GpuBuffer::GetSize( const uint32_t bufferId ) const
+uint64_t GpuBuffer::GetSize() const
 {
-	const uint32_t id = ClampId( bufferId );
+	const uint32_t id = ClampId( context.bufferId );
 	return ( m_buffer[ id ].offset - m_buffer[ id ].baseOffset );
 }
 
 
-uint64_t GpuBuffer::GetBaseOffset( const uint32_t bufferId ) const
+uint64_t GpuBuffer::GetBaseOffset() const
 {
-	const uint32_t id = ClampId( bufferId );
+	const uint32_t id = ClampId( context.bufferId );
 	return m_buffer[ id ].baseOffset;
 }
 
@@ -80,23 +80,23 @@ uint64_t GpuBuffer::GetMaxSize() const
 }
 
 
-void GpuBuffer::Allocate( const uint32_t bufferId, const uint64_t size )
+void GpuBuffer::Allocate( const uint64_t size )
 {
-	const uint32_t id = ClampId( bufferId );
-	SetPos( id, m_buffer[ id ].offset + size );
+	const uint32_t id = ClampId( context.bufferId );
+	SetPos( m_buffer[ id ].offset + size );
 }
 
 
-VkBuffer GpuBuffer::GetVkObject( const uint32_t bufferId ) const
+VkBuffer GpuBuffer::GetVkObject() const
 {
-	const uint32_t id = ClampId( bufferId );
+	const uint32_t id = ClampId( context.bufferId );
 	return m_buffer[ id ].buffer;
 }
 
 
-VkBuffer& GpuBuffer::VkObject( const uint32_t bufferId )
+VkBuffer& GpuBuffer::VkObject()
 {
-	const uint32_t id = ClampId( bufferId );
+	const uint32_t id = ClampId( context.bufferId );
 	return m_buffer[ id ].buffer;
 }
 
@@ -173,7 +173,7 @@ void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, con
 
 		m_end = m_buffer[ bufferId ].alloc.GetSize();
 		m_buffer[ bufferId ].baseOffset = 0;
-		SetPos( bufferId, 0 );
+		m_buffer[ bufferId ].offset = 0;
 	}
 }
 
@@ -188,7 +188,7 @@ void GpuBuffer::Destroy()
 		if ( m_buffer[ bufferId ].buffer != VK_NULL_HANDLE ) {
 			vkDestroyBuffer( context.device, m_buffer[ bufferId ].buffer, nullptr );
 		}
-		SetPos( bufferId, 0 );
+		m_buffer[ bufferId ].offset = 0;
 	}
 }
 
@@ -206,11 +206,11 @@ bool GpuBuffer::VisibleToCpu() const
 }
 
 
-void GpuBuffer::CopyData( const uint32_t bufferId, void* data, const size_t sizeInBytes )
+void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 {
-	const uint32_t id = ClampId( bufferId );
+	const uint32_t id = ClampId( context.bufferId );
 
-	assert( ( GetSize( id ) + sizeInBytes ) <= GetMaxSize() );
+	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
 	void* mappedData = m_buffer[ id ].alloc.GetPtr();
 	if ( mappedData != nullptr )
 	{
