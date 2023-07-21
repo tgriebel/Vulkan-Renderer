@@ -49,9 +49,9 @@ void Renderer::Cleanup()
 	ShutdownImGui();
 
 	// Buffers
-	vkFreeCommandBuffers( context.device, gfxContext.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), gfxContext.commandBuffers );
-	vkFreeCommandBuffers( context.device, computeContext.commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), computeContext.commandBuffers );
-	vkFreeCommandBuffers( context.device, uploadContext.commandPool, 1, &uploadContext.commandBuffer );
+	gfxContext.Destroy();
+	computeContext.Destroy();
+	uploadContext.Destroy();
 
 	ShutdownShaderResources();
 

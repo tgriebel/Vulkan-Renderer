@@ -24,6 +24,61 @@
 #include "deviceContext.h"
 #include "../render_binding/pipeline.h"
 
+
+VkCommandBuffer& CommandContext::CommandBuffer()
+{
+	return commandBuffers[ context.bufferId ];
+}
+
+
+void GfxContext::Create()
+{
+	VkCommandBufferAllocateInfo allocInfo{ };
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+
+	if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to allocate graphics command buffers!" );
+	}
+
+	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+		vkResetCommandBuffer( commandBuffers[ i ], 0 );
+	}
+}
+
+
+void GfxContext::Destroy()
+{
+	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
+}
+
+
+void ComputeContext::Create()
+{
+	VkCommandBufferAllocateInfo allocInfo{ };
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+
+	if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to allocate compute command buffers!" );
+	}
+
+	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+		vkResetCommandBuffer( commandBuffers[ i ], 0 );
+	}
+}
+
+
+void ComputeContext::Destroy()
+{
+	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
+}
+
+
 void ComputeContext::Submit( const uint32_t bufferId )
 {
 	VkSubmitInfo submitInfo{ };
@@ -58,4 +113,28 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const uint32_t bufferId, con
 
 		vkCmdDispatch( cmdBuffer, x, y, z );
 	}
+}
+
+
+void UploadContext::Create()
+{
+	VkCommandBufferAllocateInfo allocInfo{ };
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+
+	if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to allocate upload command buffers!" );
+	}
+
+	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+		vkResetCommandBuffer( commandBuffers[ i ], 0 );
+	}
+}
+
+
+void UploadContext::Destroy()
+{
+	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
 }

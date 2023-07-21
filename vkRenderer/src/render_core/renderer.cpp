@@ -445,14 +445,14 @@ void Renderer::SubmitFrame()
 
 	// Compute
 	{
-		vkResetCommandBuffer( computeContext.commandBuffers[ context.bufferId ], 0 );
+		vkResetCommandBuffer( computeContext.CommandBuffer(), 0 );
 
 		VkCommandBufferBeginInfo beginInfo{ };
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = 0; // Optional
 		beginInfo.pInheritanceInfo = nullptr; // Optional
 
-		if ( vkBeginCommandBuffer( computeContext.commandBuffers[ context.bufferId ], &beginInfo ) != VK_SUCCESS ) {
+		if ( vkBeginCommandBuffer( computeContext.CommandBuffer(), &beginInfo ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to begin recording command buffer!" );
 		}
 
@@ -460,7 +460,7 @@ void Renderer::SubmitFrame()
 
 		computeContext.Dispatch( progHdl, context.bufferId, *particleState.parms[ context.bufferId ], MaxParticles / 256 );
 
-		if ( vkEndCommandBuffer( computeContext.commandBuffers[ context.bufferId ] ) != VK_SUCCESS ) {
+		if ( vkEndCommandBuffer( computeContext.CommandBuffer() ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );
 		}
 	}
@@ -480,7 +480,7 @@ void Renderer::SubmitFrame()
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &gfxContext.commandBuffers[ context.bufferId ];
+		submitInfo.pCommandBuffers = &gfxContext.CommandBuffer();
 
 		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphores[ m_frameId ] };
 		submitInfo.signalSemaphoreCount = 1;
@@ -831,7 +831,7 @@ void Renderer::MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, cons
 		markerInfo.color[2] = color[2];
 		markerInfo.color[3] = color[3];
 		markerInfo.pMarkerName = pMarkerName;
-		context.fnCmdDebugMarkerBegin( cxt.commandBuffers[ context.bufferId ], &markerInfo );
+		context.fnCmdDebugMarkerBegin( cxt.CommandBuffer(), &markerInfo );
 	}
 }
 
@@ -840,7 +840,7 @@ void Renderer::MarkerEndRegion( GfxContext& cxt )
 {
 	if ( context.debugMarkersEnabled )
 	{
-		context.fnCmdDebugMarkerEnd( cxt.commandBuffers[ context.bufferId ] );
+		context.fnCmdDebugMarkerEnd( cxt.CommandBuffer() );
 	}
 }
 
@@ -853,7 +853,7 @@ void Renderer::MarkerInsert( GfxContext& cxt, std::string markerName, const vec4
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
 		markerInfo.pMarkerName = markerName.c_str();
-		context.fnCmdDebugMarkerInsert( cxt.commandBuffers[ context.bufferId ], &markerInfo );
+		context.fnCmdDebugMarkerInsert( cxt.CommandBuffer(), &markerInfo );
 	}
 }
 
@@ -933,7 +933,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		passInfo.pClearValues = clearValues.data();
 	}
 
-	VkCommandBuffer cmdBuffer = gfxContext.commandBuffers[ context.bufferId ];
+	VkCommandBuffer cmdBuffer = gfxContext.CommandBuffer();
 
 	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
@@ -1024,21 +1024,21 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 void Renderer::RenderViews()
 {
-	vkResetCommandBuffer( gfxContext.commandBuffers[ context.bufferId ], 0 );
+	vkResetCommandBuffer( gfxContext.CommandBuffer(), 0 );
 
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
 
-	if ( vkBeginCommandBuffer( gfxContext.commandBuffers[ context.bufferId ], &beginInfo ) != VK_SUCCESS ) {
+	if ( vkBeginCommandBuffer( gfxContext.CommandBuffer(), &beginInfo ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
 	}
 
 	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers( gfxContext.commandBuffers[ context.bufferId ], 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( gfxContext.commandBuffers[ context.bufferId ], ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindVertexBuffers( gfxContext.CommandBuffer(), 0, 1, vertexBuffers, offsets );
+	vkCmdBindIndexBuffer( gfxContext.CommandBuffer(), ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 	{
@@ -1049,7 +1049,7 @@ void Renderer::RenderViews()
 		MarkerEndRegion( gfxContext );
 	}
 
-	if ( vkEndCommandBuffer( gfxContext.commandBuffers[ context.bufferId ] ) != VK_SUCCESS )
+	if ( vkEndCommandBuffer( gfxContext.CommandBuffer() ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to record command buffer!" );
 	}

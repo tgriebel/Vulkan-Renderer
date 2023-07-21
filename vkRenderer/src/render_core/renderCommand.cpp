@@ -29,24 +29,24 @@
 
 void Renderer::BeginUploadCommands( UploadContext& uploadContext )
 {
-	vkResetCommandBuffer( uploadContext.commandBuffer, 0 );
+	vkResetCommandBuffer( uploadContext.CommandBuffer(), 0 );
 
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-	vkBeginCommandBuffer( uploadContext.commandBuffer, &beginInfo );
+	vkBeginCommandBuffer( uploadContext.CommandBuffer(), &beginInfo );
 }
 
 
 void Renderer::EndUploadCommands( UploadContext& uploadContext )
 {
-	vkEndCommandBuffer( uploadContext.commandBuffer );
+	vkEndCommandBuffer( uploadContext.CommandBuffer() );
 
 	VkSubmitInfo submitInfo{ };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &uploadContext.commandBuffer;
+	submitInfo.pCommandBuffers = &uploadContext.CommandBuffer();
 
 	vkQueueSubmit( context.gfxContext, 1, &submitInfo, VK_NULL_HANDLE );
 	vkQueueWaitIdle( context.gfxContext );
@@ -90,7 +90,7 @@ void Renderer::TransitionImageLayout( UploadContext& uploadContext, Image& image
 	}
 
 	vkCmdPipelineBarrier(
-		uploadContext.commandBuffer,
+		uploadContext.CommandBuffer(),
 		sourceStage, destinationStage,
 		0,
 		0, nullptr,
@@ -131,7 +131,7 @@ void Renderer::GenerateMipmaps( UploadContext& uploadContext, Image& image )
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
-		vkCmdPipelineBarrier( uploadContext.commandBuffer,
+		vkCmdPipelineBarrier( uploadContext.CommandBuffer(),
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
 			0, nullptr,
 			0, nullptr,
@@ -151,7 +151,7 @@ void Renderer::GenerateMipmaps( UploadContext& uploadContext, Image& image )
 		blit.dstSubresource.baseArrayLayer = 0;
 		blit.dstSubresource.layerCount = image.info.layers;
 
-		vkCmdBlitImage( uploadContext.commandBuffer,
+		vkCmdBlitImage( uploadContext.CommandBuffer(),
 			image.gpuImage->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			image.gpuImage->GetVkImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1, &blit,
@@ -162,7 +162,7 @@ void Renderer::GenerateMipmaps( UploadContext& uploadContext, Image& image )
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-		vkCmdPipelineBarrier( uploadContext.commandBuffer,
+		vkCmdPipelineBarrier( uploadContext.CommandBuffer(),
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
 			0, nullptr,
 			0, nullptr,
@@ -178,7 +178,7 @@ void Renderer::GenerateMipmaps( UploadContext& uploadContext, Image& image )
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-	vkCmdPipelineBarrier( uploadContext.commandBuffer,
+	vkCmdPipelineBarrier( uploadContext.CommandBuffer(),
 		VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
 		0, nullptr,
 		0, nullptr,

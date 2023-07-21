@@ -285,7 +285,7 @@ void Renderer::InitImGui( RenderView& view )
 	// Upload Fonts
 	{
 		BeginUploadCommands( uploadContext );
-		VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
+		VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 		ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
 		EndUploadCommands( uploadContext );
 
@@ -902,46 +902,7 @@ void Renderer::CreateSyncObjects()
 
 void Renderer::CreateCommandBuffers()
 {
-	VkCommandBufferAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	// Graphics
-	{
-		allocInfo.commandPool = gfxContext.commandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
-
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, gfxContext.commandBuffers ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to allocate graphics command buffers!" );
-		}
-
-		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-			vkResetCommandBuffer( gfxContext.commandBuffers[ i ], 0 );
-		}
-	}
-
-	// Compute
-	{
-		allocInfo.commandPool = computeContext.commandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
-
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, computeContext.commandBuffers ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to allocate compute command buffers!" );
-		}
-		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-			vkResetCommandBuffer( computeContext.commandBuffers[i], 0 );
-		}
-	}
-
-	// Upload
-	{
-		allocInfo.commandPool = uploadContext.commandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandBufferCount = 1;
-
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, &uploadContext.commandBuffer ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to allocate upload command buffers!" );
-		}
-		vkResetCommandBuffer( uploadContext.commandBuffer, 0 );
-	}
+	gfxContext.Create();
+	computeContext.Create();
+	uploadContext.Create();
 }

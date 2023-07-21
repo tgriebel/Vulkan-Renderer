@@ -53,7 +53,7 @@ void Renderer::CopyBufferToImage( UploadContext& uploadContext, Image& texture, 
 	};
 
 	vkCmdCopyBufferToImage(
-		uploadContext.commandBuffer,
+		uploadContext.CommandBuffer(),
 		buffer.GetVkObject(),
 		texture.gpuImage->GetVkImage(),
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -73,7 +73,7 @@ void Renderer::UpdateTextures()
 
 	BeginUploadCommands( uploadContext );
 
-	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
+	VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );
@@ -256,7 +256,7 @@ void Renderer::UpdateGpuMaterials()
 void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
 	BeginUploadCommands( uploadContext );
-	VkCommandBuffer commandBuffer = uploadContext.commandBuffer;
+	VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
 	EndUploadCommands( uploadContext );
 
