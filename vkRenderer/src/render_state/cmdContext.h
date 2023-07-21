@@ -116,7 +116,7 @@ public:
 	void Create();
 	void Destroy();
 	void Submit( const uint32_t bufferId );
-	void Dispatch( const hdl_t progHdl, const uint32_t bufferId, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
+	void Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 };
 
 

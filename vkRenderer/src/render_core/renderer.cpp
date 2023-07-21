@@ -458,7 +458,7 @@ void Renderer::SubmitFrame()
 
 		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		computeContext.Dispatch( progHdl, context.bufferId, *particleState.parms[ context.bufferId ], MaxParticles / 256 );
+		computeContext.Dispatch( progHdl, *particleState.parms[ context.bufferId ], MaxParticles / 256 );
 
 		if ( vkEndCommandBuffer( computeContext.CommandBuffer() ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to record command buffer!" );

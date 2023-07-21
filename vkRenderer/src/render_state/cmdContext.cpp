@@ -92,7 +92,7 @@ void ComputeContext::Submit( const uint32_t bufferId )
 }
 
 
-void ComputeContext::Dispatch( const hdl_t progHdl, const uint32_t bufferId, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
+void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	pipelineState_t state = {};
 	state.progHdl = progHdl;
@@ -102,7 +102,7 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const uint32_t bufferId, con
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipelineHdl, &pipelineObject );
 
-	VkCommandBuffer cmdBuffer = commandBuffers[ bufferId ];
+	VkCommandBuffer cmdBuffer = commandBuffers[ context.bufferId ];
 
 	if ( pipelineObject != nullptr )
 	{
