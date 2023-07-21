@@ -86,7 +86,7 @@ public:
 
 static DescriptorWritesBuilder writeBuilder;
 
-void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t currentBuffer, std::vector<VkWriteDescriptorSet>& descSetWrites )
+static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t currentBuffer, std::vector<VkWriteDescriptorSet>& descSetWrites )
 {
 	const ShaderBindSet* set = parms.GetSet();
 
@@ -123,7 +123,7 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, const uint3
 			const Image* image = attachment->GetImage();
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
-			info.sampler = vk_bilinearSampler;
+			info.sampler = context.bilinearSampler;
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
 			assert( info.imageView != nullptr );
 
@@ -158,12 +158,12 @@ void Renderer::AppendDescriptorWrites( const ShaderBindParms& parms, const uint3
 
 				if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
 				{
-					info.sampler = vk_depthShadowSampler;
+					info.sampler = context.depthShadowSampler;
 					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 				}
 				else
 				{
-					info.sampler = vk_bilinearSampler;
+					info.sampler = context.bilinearSampler;
 					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				}
 			}

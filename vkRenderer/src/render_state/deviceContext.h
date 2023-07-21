@@ -34,6 +34,8 @@ struct deviceContext_t
 	VkQueue								gfxContext;
 	VkQueue								presentQueue;
 	VkQueue								computeContext;
+	VkSampler							bilinearSampler;
+	VkSampler							depthShadowSampler;
 	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
 	uint32_t							bufferId;
 

@@ -161,9 +161,6 @@ private:
 	FrameBuffer							mainColor;
 	FrameBuffer							tempColor;
 
-	VkSampler							vk_bilinearSampler;
-	VkSampler							vk_depthShadowSampler;
-
 	uint32_t							shadowCount = 0;
 
 	// Memory
@@ -207,7 +204,6 @@ private:
 	void								CreateDevice();
 	void								CreateSyncObjects();
 	void								CreateCommandBuffers();
-	void								CreateTextureSamplers();
 	void								CreateCodeTextures();
 	void								CreateBuffers();
 	void								CreateFramebuffers();
@@ -242,7 +238,6 @@ private:
 	void								UpdateFrameDescSet();
 	void								BuildPipelines();
 	void								UpdateDescriptorSets();
-	void								AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t currentBuffer, std::vector<VkWriteDescriptorSet>& descSetWrites );
 
 	// Debug
 	std::vector<const char*>			GetRequiredExtensions() const;	

@@ -55,8 +55,8 @@ void Renderer::Cleanup()
 
 	ShutdownShaderResources();
 
-	vkDestroySampler( context.device, vk_bilinearSampler, nullptr );
-	vkDestroySampler( context.device, vk_depthShadowSampler, nullptr );
+	vkDestroySampler( context.device, context.bilinearSampler, nullptr );
+	vkDestroySampler( context.device, context.depthShadowSampler, nullptr );
 
 	// Sync
 	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
