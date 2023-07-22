@@ -83,24 +83,34 @@ struct QueueFamilyIndices
 class CommandContext
 {
 protected:
-	VkCommandBuffer commandBuffers[ MAX_FRAMES_STATES ];
+	pipelineQueue_t		queueType;
+private:
+	VkCommandPool		commandPool;
+	VkCommandBuffer		commandBuffers[ MAX_FRAMES_STATES ];
 public:
-	VkCommandBuffer& CommandBuffer();
+	VkCommandBuffer&	CommandBuffer();
+	void				Begin();
+	void				End();
+	void				Reset();
+	void				Create();
+	void				Destroy();
+//	virtual void		Submit() = 0;
 };
+
 
 class GfxContext : public CommandContext
 {
 public:
-	VkQueue						gfxContext;
-	VkCommandPool				commandPool;
-	
 	VkSemaphore					imageAvailableSemaphores[ MAX_FRAMES_STATES ];
 	VkSemaphore					renderFinishedSemaphores[ MAX_FRAMES_STATES ];
 	VkFence						inFlightFences[ MAX_FRAMES_STATES ];
 	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
 
-	void Create();
-	void Destroy();
+	GfxContext()
+	{
+		queueType = QUEUE_GRAPHICS;
+	}
+
 	//void Submit( ); // TODO
 	//void Dispatch( ); // TODO: Compute jobs can still be dispatched from gfx
 };
@@ -109,12 +119,13 @@ public:
 class ComputeContext : public CommandContext
 {
 public:
-	VkQueue						queue;
-	VkCommandPool				commandPool;
 	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
 
-	void Create();
-	void Destroy();
+	ComputeContext()
+	{
+		queueType = QUEUE_COMPUTE;
+	}
+
 	void Submit();
 	void Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 };
@@ -123,9 +134,9 @@ public:
 class UploadContext : public CommandContext
 {
 public:
-	VkQueue						queue;
-	VkCommandPool				commandPool;
-
-	void Create();
-	void Destroy();
+	UploadContext()
+	{
+		queueType = QUEUE_GRAPHICS;
+	}
+	void Submit();
 };

@@ -42,13 +42,7 @@ void Renderer::BeginUploadCommands( UploadContext& uploadContext )
 void Renderer::EndUploadCommands( UploadContext& uploadContext )
 {
 	vkEndCommandBuffer( uploadContext.CommandBuffer() );
-
-	VkSubmitInfo submitInfo{ };
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &uploadContext.CommandBuffer();
-
-	vkQueueSubmit( context.gfxContext, 1, &submitInfo, VK_NULL_HANDLE );
+	uploadContext.Submit();
 	vkQueueWaitIdle( context.gfxContext );
 }
 

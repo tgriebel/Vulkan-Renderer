@@ -282,7 +282,7 @@ void Renderer::InitImGui( RenderView& view )
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
-	vkResetCommandPool( context.device, gfxContext.commandPool, 0 );
+	gfxContext.Reset();
 
 	// Upload Fonts
 	{
