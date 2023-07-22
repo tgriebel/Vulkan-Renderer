@@ -20,8 +20,8 @@ class GpuImage
 {
 protected:
 #ifdef USE_VULKAN
-	VkImage				vk_image[ MAX_FRAMES_IN_FLIGHT ];
-	VkImageView			vk_view[ MAX_FRAMES_IN_FLIGHT ];
+	VkImage				vk_image[ MaxFrameStates ];
+	VkImageView			vk_view[ MaxFrameStates ];
 	Allocation			m_allocation;
 #endif
 	resourceLifetime_t	m_lifetime;

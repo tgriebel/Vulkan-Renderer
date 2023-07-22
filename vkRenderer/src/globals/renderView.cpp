@@ -2,7 +2,7 @@
 
 void RenderView::Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb )
 {
-	const uint32_t frameStateCount = MAX_FRAMES_STATES;
+	const uint32_t frameStateCount = MaxFrameStates;
 
 	const uint32_t width = fb.GetWidth();
 	const uint32_t height = fb.GetHeight();

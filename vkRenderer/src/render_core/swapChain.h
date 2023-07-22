@@ -35,7 +35,7 @@ QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surf
 
 class SwapChain
 {
-	static const uint32_t MaxSwapChainBuffers = MAX_FRAMES_STATES;
+	static const uint32_t MaxSwapChainBuffers = MaxFrameStates;
 
 private:
 	const Window*				m_window;

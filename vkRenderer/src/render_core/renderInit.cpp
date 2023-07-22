@@ -238,7 +238,7 @@ void Renderer::InitShaderResources()
 		}
 	}
 
-	for ( uint32_t i = 0; i < MAX_FRAMES_STATES; ++i )
+	for ( uint32_t i = 0; i < MaxFrameStates; ++i )
 	{
 		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 		particleState.updateDescriptorSets = true;
@@ -706,7 +706,7 @@ void Renderer::CreateFramebuffers()
 	// Main Scene 3D Render
 	{
 		frameBufferCreateInfo_t fbInfo = {};
-		for ( uint32_t frameIx = 0; frameIx < MAX_FRAMES_STATES; ++frameIx )
+		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
 			fbInfo.color0[ frameIx ] = &mainColorImage;
 			fbInfo.depth[ frameIx ] = &frameState.depthImageView;
@@ -864,7 +864,7 @@ void Renderer::CreateSyncObjects()
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
+	for ( size_t i = 0; i < MaxFrameStates; i++ )
 	{
 		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &gfxContext.imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
 			vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &gfxContext.renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||

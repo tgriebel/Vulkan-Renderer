@@ -379,6 +379,8 @@ void Renderer::UploadAssets()
 
 void Renderer::Render()
 {
+	WaitForEndFrame();
+
 	frameTimer.Start();
 
 	UploadModelsToGPU();
@@ -430,16 +432,12 @@ void Renderer::WaitForEndFrame()
 
 void Renderer::FlushGPU()
 {
-	for ( int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i ) {
-		vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ i ], VK_TRUE, UINT64_MAX );
-	}
+	vkDeviceWaitIdle( context.device );
 }
 
 
 void Renderer::SubmitFrame()
 {
-	WaitForEndFrame();
-
 	UpdateBuffers();
 	//UpdateFrameDescSet( context.bufferId );
 
@@ -516,7 +514,7 @@ void Renderer::SubmitFrame()
 		}
 	}
 
-	m_frameId = ( m_frameId + 1 ) % MAX_FRAMES_IN_FLIGHT;
+	m_frameId = ( m_frameId + 1 ) % MaxFrameStates;
 	++m_frameNumber;
 }
 

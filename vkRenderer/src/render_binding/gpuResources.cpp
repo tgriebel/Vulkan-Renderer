@@ -115,7 +115,7 @@ void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, con
 
 	m_lifetime = lifetime;
 	if( m_lifetime == LIFETIME_PERSISTENT ) {
-		m_bufferCount = MAX_FRAMES_STATES;
+		m_bufferCount = MaxFrameStates;
 	} else {
 		m_bufferCount = 1;
 	}

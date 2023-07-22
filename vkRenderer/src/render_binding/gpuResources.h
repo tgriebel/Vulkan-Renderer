@@ -83,7 +83,7 @@ protected:
 		uint64_t			offset;
 	};
 
-	buffer_t			m_buffer[ MAX_FRAMES_STATES ];
+	buffer_t			m_buffer[ MaxFrameStates ];
 	uint32_t			m_bufferCount;
 	uint64_t			m_end;
 	uint64_t			m_elementSize;

@@ -178,7 +178,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		perms[ i ].bits = i;
 	}
 
-	bufferCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MAX_FRAMES_STATES : 1;
+	bufferCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
 	const bool canPresent = ( createInfo.color0[ 0 ] != nullptr ) && ( createInfo.color0[ 0 ]->info.fmt == g_swapChain.GetBackBufferFormat() );
 
 	colorCount += ( createInfo.color0[ 0 ] != nullptr ) ? 1 : 0;
@@ -196,7 +196,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			throw std::runtime_error( "Color attachment 0 has to be used if 1 and 2 are." );
 		}
 
-		Image* images[ MaxAttachmentCount ][ MAX_FRAMES_STATES ];
+		Image* images[ MaxAttachmentCount ][ MaxFrameStates ];
 		for ( uint32_t frameIx = 0; frameIx < bufferCount; ++frameIx )
 		{
 			images[ 0 ][ frameIx ] = createInfo.color0[ frameIx ];

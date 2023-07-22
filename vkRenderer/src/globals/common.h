@@ -86,12 +86,10 @@ const uint32_t	MaxCodeImages					= 3;
 const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
 const uint64_t	MaxFrameBufferMemory			= GB( 2 );
+const uint64_t	MaxFrameStates					= 3;
 
 const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
 const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;
-
-const int MAX_FRAMES_IN_FLIGHT = 2;
-const int MAX_FRAMES_STATES = ( MAX_FRAMES_IN_FLIGHT + 1 );
 
 const std::string ModelPath = ".\\models\\";
 const std::string TexturePath = ".\\textures\\";

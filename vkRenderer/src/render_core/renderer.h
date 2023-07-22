@@ -65,7 +65,7 @@ struct ComputeState
 	int32_t				y;
 	int32_t				z;
 	bool				updateDescriptorSets;
-	ShaderBindParms*	parms[ MAX_FRAMES_STATES ];
+	ShaderBindParms*	parms[ MaxFrameStates ];
 };
 
 class Renderer

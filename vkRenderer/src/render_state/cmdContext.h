@@ -80,13 +80,26 @@ struct QueueFamilyIndices
 };
 
 
+class Fence
+{
+public:
+	VkFence	fence[ MaxFrameStates ];
+
+	VkFence& VkObject();
+
+	void Create();
+	void Destroy();
+	void Reset();
+};
+
+
 class CommandContext
 {
 protected:
 	pipelineQueue_t		queueType;
 private:
 	VkCommandPool		commandPool;
-	VkCommandBuffer		commandBuffers[ MAX_FRAMES_STATES ];
+	VkCommandBuffer		commandBuffers[ MaxFrameStates ];
 public:
 	VkCommandBuffer&	CommandBuffer();
 	void				Begin();
@@ -101,10 +114,12 @@ public:
 class GfxContext : public CommandContext
 {
 public:
-	VkSemaphore					imageAvailableSemaphores[ MAX_FRAMES_STATES ];
-	VkSemaphore					renderFinishedSemaphores[ MAX_FRAMES_STATES ];
-	VkFence						inFlightFences[ MAX_FRAMES_STATES ];
-	VkFence						imagesInFlight[ MAX_FRAMES_STATES ];
+	VkSemaphore					imageAvailableSemaphores[ MaxFrameStates ];
+	VkSemaphore					renderFinishedSemaphores[ MaxFrameStates ];
+	//Fence						inFlightFrames;
+	//Fence						imagesInFlight;
+	VkFence						inFlightFences[ MaxFrameStates ];
+	VkFence						imagesInFlight[ MaxFrameStates ];
 
 	GfxContext()
 	{
@@ -119,7 +134,7 @@ public:
 class ComputeContext : public CommandContext
 {
 public:
-	VkSemaphore					semaphores[ MAX_FRAMES_STATES ];
+	VkSemaphore					semaphores[ MaxFrameStates ];
 
 	ComputeContext()
 	{

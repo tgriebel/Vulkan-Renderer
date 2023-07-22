@@ -58,22 +58,22 @@ struct frameBufferCreateInfo_t
 	uint32_t			width;
 	uint32_t			height;
 	resourceLifetime_t	lifetime;
-	Image*				color0[ MAX_FRAMES_STATES ];
-	Image*				color1[ MAX_FRAMES_STATES ];
-	Image*				color2[ MAX_FRAMES_STATES ];
-	Image*				depth[ MAX_FRAMES_STATES ];
-	Image*				stencil[ MAX_FRAMES_STATES ];
+	Image*				color0[ MaxFrameStates ];
+	Image*				color1[ MaxFrameStates ];
+	Image*				color2[ MaxFrameStates ];
+	Image*				depth[ MaxFrameStates ];
+	Image*				stencil[ MaxFrameStates ];
 
 	frameBufferCreateInfo_t() :
 		width( 0 ),
 		height( 0 ),
 		lifetime( LIFETIME_TEMP )
 	{
-		memset( color0, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( color1, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( color2, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( depth, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( stencil, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( color0, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( color1, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( color2, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( depth, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( stencil, 0, sizeof( Image* ) * MaxFrameStates );
 	}
 };
 
@@ -83,11 +83,11 @@ class FrameBuffer
 private:
 	static const uint32_t MaxAttachmentCount = 5;
 
-	Image*				color0[ MAX_FRAMES_STATES ];
-	Image*				color1[ MAX_FRAMES_STATES ];
-	Image*				color2[ MAX_FRAMES_STATES ];
-	Image*				depth[ MAX_FRAMES_STATES ];
-	Image*				stencil[ MAX_FRAMES_STATES ];
+	Image*				color0[ MaxFrameStates ];
+	Image*				color1[ MaxFrameStates ];
+	Image*				color2[ MaxFrameStates ];
+	Image*				depth[ MaxFrameStates ];
+	Image*				stencil[ MaxFrameStates ];
 
 	uint32_t			width;
 	uint32_t			height;
@@ -99,13 +99,13 @@ private:
 	resourceLifetime_t	lifetime;
 
 #ifdef USE_VULKAN
-	VkFramebuffer		buffers[ MAX_FRAMES_STATES ][ PassPermCount ];
+	VkFramebuffer		buffers[ MaxFrameStates ][ PassPermCount ];
 	VkRenderPass		renderPasses[ PassPermCount ];
 #endif
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
 	{
-		const uint32_t bufferCount = ( lifetime == LIFETIME_PERSISTENT ) ? MAX_FRAMES_STATES : 1;
+		const uint32_t bufferCount = ( lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
 		return Min( bufferId, bufferCount - 1 );
 	}
 
@@ -119,11 +119,11 @@ public:
 		width( 0 ),
 		height( 0 )
 	{
-		memset( color0, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( color1, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( color2, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( depth, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
-		memset( stencil, 0, sizeof( Image* ) * MAX_FRAMES_STATES );
+		memset( color0, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( color1, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( color2, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( depth, 0, sizeof( Image* ) * MaxFrameStates );
+		memset( stencil, 0, sizeof( Image* ) * MaxFrameStates );
 	}
 
 	inline bool IsValid() const

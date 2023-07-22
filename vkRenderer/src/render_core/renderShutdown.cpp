@@ -59,7 +59,7 @@ void Renderer::Cleanup()
 	vkDestroySampler( context.device, context.depthShadowSampler, nullptr );
 
 	// Sync
-	for ( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ )
+	for ( size_t i = 0; i < MaxFrameStates; i++ )
 	{
 		vkDestroySemaphore( context.device, gfxContext.renderFinishedSemaphores[ i ], nullptr );
 		vkDestroySemaphore( context.device, gfxContext.imageAvailableSemaphores[ i ], nullptr );
