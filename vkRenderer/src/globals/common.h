@@ -87,9 +87,8 @@ const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
 const uint64_t	MaxFrameBufferMemory			= GB( 2 );
 const uint64_t	MaxFrameStates					= 3;
-
-const uint32_t DEFAULT_DISPLAY_WIDTH			= 1280;
-const uint32_t DEFAULT_DISPLAY_HEIGHT			= 720;
+const uint32_t	DefaultDisplayWidth				= 1280;
+const uint32_t	DefaultDisplayHeight			= 720;
 
 const std::string ModelPath = ".\\models\\";
 const std::string TexturePath = ".\\textures\\";

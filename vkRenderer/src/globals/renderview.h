@@ -53,7 +53,7 @@ public:
 
 	RenderView()
 	{
-		m_viewport = viewport_t( 0, 0, DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT, 0.0f, 1.0f );
+		m_viewport = viewport_t( 0, 0, DefaultDisplayWidth, DefaultDisplayHeight, 0.0f, 1.0f );
 
 		committedModelCnt = 0;
 		mergedModelCnt = 0;
