@@ -467,7 +467,7 @@ void Renderer::SubmitFrame()
 
 	RenderViews();
 
-	computeContext.Submit( context.bufferId );
+	computeContext.Submit();
 
 	// Graphics queue submit
 	{

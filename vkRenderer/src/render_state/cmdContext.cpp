@@ -110,12 +110,12 @@ void ComputeContext::Destroy()
 }
 
 
-void ComputeContext::Submit( const uint32_t bufferId )
+void ComputeContext::Submit()
 {
 	VkSubmitInfo submitInfo{ };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers[ bufferId ];
+	submitInfo.pCommandBuffers = &commandBuffers[ context.bufferId ];
 
 	if ( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to submit compute command buffers!" );
