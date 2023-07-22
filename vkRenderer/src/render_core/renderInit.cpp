@@ -190,7 +190,10 @@ void Renderer::InitApi()
 
 		CreateSyncObjects();
 		CreateFramebuffers();
-		CreateCommandBuffers();
+
+		gfxContext.Create();
+		computeContext.Create();
+		uploadContext.Create();
 	}
 }
 
@@ -897,12 +900,4 @@ void Renderer::CreateSyncObjects()
 	if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, computeContext.semaphores ) ) {
 		throw std::runtime_error( "Failed to create compute semaphore!" );
 	}
-}
-
-
-void Renderer::CreateCommandBuffers()
-{
-	gfxContext.Create();
-	computeContext.Create();
-	uploadContext.Create();
 }

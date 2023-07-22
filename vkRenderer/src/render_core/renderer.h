@@ -203,7 +203,6 @@ private:
 	void								CreateInstance();
 	void								CreateDevice();
 	void								CreateSyncObjects();
-	void								CreateCommandBuffers();
 	void								CreateCodeTextures();
 	void								CreateBuffers();
 	void								CreateFramebuffers();
