@@ -71,9 +71,6 @@ void Renderer::Cleanup()
 	// Memory
 	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
 
-	vkDestroyCommandPool( context.device, gfxContext.commandPool, nullptr );
-	vkDestroyCommandPool( context.device, computeContext.commandPool, nullptr );
-	vkDestroyCommandPool( context.device, uploadContext.commandPool, nullptr );
 	vkDestroyDevice( context.device, nullptr );
 
 	if ( enableValidationLayers )

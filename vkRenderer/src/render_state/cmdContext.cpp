@@ -33,18 +33,32 @@ VkCommandBuffer& CommandContext::CommandBuffer()
 
 void GfxContext::Create()
 {
-	VkCommandBufferAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandPool;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
-
-	if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to allocate graphics command buffers!" );
+	// Pool creation
+	{
+		VkCommandPoolCreateInfo poolInfo{ };
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create graphics command pool!" );
+		}
 	}
 
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-		vkResetCommandBuffer( commandBuffers[ i ], 0 );
+	// Buffer creation
+	{
+		VkCommandBufferAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to allocate graphics command buffers!" );
+		}
+
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+			vkResetCommandBuffer( commandBuffers[ i ], 0 );
+		}
 	}
 }
 
@@ -52,23 +66,39 @@ void GfxContext::Create()
 void GfxContext::Destroy()
 {
 	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
+	vkDestroyCommandPool( context.device, commandPool, nullptr );
 }
 
 
 void ComputeContext::Create()
 {
-	VkCommandBufferAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandPool;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
-
-	if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to allocate compute command buffers!" );
+	// Pool creation
+	{
+		VkCommandPoolCreateInfo poolInfo{ };
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_COMPUTE ];
+		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create compute command pool!" );
+		}
 	}
 
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-		vkResetCommandBuffer( commandBuffers[ i ], 0 );
+	// Buffer creation
+	{
+		VkCommandBufferAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to allocate compute command buffers!" );
+		}
+
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+			vkResetCommandBuffer( commandBuffers[ i ], 0 );
+		}
 	}
 }
 
@@ -76,6 +106,7 @@ void ComputeContext::Create()
 void ComputeContext::Destroy()
 {
 	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
+	vkDestroyCommandPool( context.device, commandPool, nullptr );
 }
 
 
@@ -118,18 +149,33 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 void UploadContext::Create()
 {
-	VkCommandBufferAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = commandPool;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
-
-	if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to allocate upload command buffers!" );
+	// Pool creation
+	{
+		VkCommandPoolCreateInfo poolInfo{ };
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
+		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to create upload command pool!" );
+		}
 	}
 
-	for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
-		vkResetCommandBuffer( commandBuffers[ i ], 0 );
+	// Buffer creation
+	{
+		VkCommandBufferAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = static_cast<uint32_t>( MAX_FRAMES_STATES );
+
+		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
+			throw std::runtime_error( "Failed to allocate upload command buffers!" );
+		}
+
+		for ( size_t i = 0; i < MAX_FRAMES_STATES; i++ ) {
+			vkResetCommandBuffer( commandBuffers[ i ], 0 );
+		}
 	}
 }
 
@@ -137,4 +183,5 @@ void UploadContext::Create()
 void UploadContext::Destroy()
 {
 	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MAX_FRAMES_STATES ), commandBuffers );
+	vkDestroyCommandPool( context.device, commandPool, nullptr );
 }

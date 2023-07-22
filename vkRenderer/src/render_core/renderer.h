@@ -207,7 +207,6 @@ private:
 	void								CreateBuffers();
 	void								CreateFramebuffers();
 	void								DestroyFramebuffers();
-	void								CreateCommandPools();
 	void								CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region );
 
 	// Draw Frame

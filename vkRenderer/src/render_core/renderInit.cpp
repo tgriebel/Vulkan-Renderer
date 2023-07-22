@@ -170,7 +170,6 @@ void Renderer::InitApi()
 	{
 		// Pool Creation
 		CreateDescriptorPool();
-		CreateCommandPools();
 	}
 
 	{
@@ -718,28 +717,6 @@ void Renderer::CreateFramebuffers()
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );
-	}
-}
-
-
-void Renderer::CreateCommandPools()
-{
-	VkCommandPoolCreateInfo poolInfo{ };
-	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
-	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &gfxContext.commandPool ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create graphics command pool!" );
-	}
-
-	poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_COMPUTE ];
-	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &computeContext.commandPool ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create compute command pool!" );
-	}
-
-	poolInfo.queueFamilyIndex = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
-	if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &uploadContext.commandPool ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create upload command pool!" );
 	}
 }
 
