@@ -130,14 +130,6 @@ enum renderFlags_t
 
 struct pipelineObject_t;
 
-struct SwapChainSupportDetails
-{
-	VkSurfaceCapabilitiesKHR		capabilities;
-	std::vector<VkSurfaceFormatKHR>	formats;
-	std::vector<VkPresentModeKHR>	presentModes;
-};
-
-
 union sortKey_t
 {
 	uint32_t	materialId : 32;

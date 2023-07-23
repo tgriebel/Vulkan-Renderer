@@ -25,6 +25,14 @@
 #include "../globals/common.h"
 #include "cmdContext.h"
 
+struct swapChainInfo_t
+{
+	VkSurfaceCapabilitiesKHR		capabilities;
+	std::vector<VkSurfaceFormatKHR>	formats;
+	std::vector<VkPresentModeKHR>	presentModes;
+};
+
+
 struct deviceContext_t
 {
 	VkDevice							device;

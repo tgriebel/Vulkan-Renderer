@@ -57,7 +57,7 @@ bool vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const 
 	bool swapChainAdequate = false;
 	if ( extensionsSupported )
 	{
-		SwapChainSupportDetails swapChainSupport = SwapChain::QuerySwapChainSupport( device, surface );
+		swapChainInfo_t swapChainSupport = SwapChain::QuerySwapChainSupport( device, surface );
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
 

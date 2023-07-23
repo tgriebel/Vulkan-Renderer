@@ -46,18 +46,18 @@ static VkExtent2D vk_ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilit
 }
 
 
-SwapChainSupportDetails  SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface )
+swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface )
 {
-	SwapChainSupportDetails details;
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR( device, surface, &details.capabilities );
+	swapChainInfo_t info;
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR( device, surface, &info.capabilities );
 
 	uint32_t formatCount;
 	vkGetPhysicalDeviceSurfaceFormatsKHR( device, surface, &formatCount, nullptr );
 
 	if ( formatCount != 0 )
 	{
-		details.formats.resize( formatCount );
-		vkGetPhysicalDeviceSurfaceFormatsKHR( device, surface, &formatCount, details.formats.data() );
+		info.formats.resize( formatCount );
+		vkGetPhysicalDeviceSurfaceFormatsKHR( device, surface, &formatCount, info.formats.data() );
 	}
 
 	uint32_t presentModeCount;
@@ -65,18 +65,18 @@ SwapChainSupportDetails  SwapChain::QuerySwapChainSupport( VkPhysicalDevice devi
 
 	if ( presentModeCount != 0 )
 	{
-		details.presentModes.resize( presentModeCount );
-		vkGetPhysicalDeviceSurfacePresentModesKHR( device, surface, &presentModeCount, details.presentModes.data() );
+		info.presentModes.resize( presentModeCount );
+		vkGetPhysicalDeviceSurfacePresentModesKHR( device, surface, &presentModeCount, info.presentModes.data() );
 	}
 
-	return details;
+	return info;
 }
 
 
 void SwapChain::Create( const Window* _window, const int displayWidth, const int displayHeight )
 {
 	m_window = _window;
-	SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport( context.physicalDevice, m_window->vk_surface );
+	swapChainInfo_t swapChainSupport = QuerySwapChainSupport( context.physicalDevice, m_window->vk_surface );
 
 	VkSurfaceFormatKHR surfaceFormat = vk_ChooseSwapSurfaceFormat( swapChainSupport.formats );
 	VkPresentModeKHR presentMode = vk_ChooseSwapPresentMode( swapChainSupport.presentModes );

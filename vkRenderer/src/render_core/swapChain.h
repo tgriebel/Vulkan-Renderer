@@ -50,7 +50,7 @@ public:
 
 public:
 
-	static SwapChainSupportDetails  SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface );
+	static swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface );
 
 	inline imageFmt_t GetBackBufferFormat() const
 	{
