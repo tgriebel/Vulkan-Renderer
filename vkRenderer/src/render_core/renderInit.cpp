@@ -271,8 +271,8 @@ void Renderer::InitImGui( RenderView& view )
 	vkInfo.PipelineCache = nullptr;
 	vkInfo.DescriptorPool = descriptorPool;
 	vkInfo.Allocator = nullptr;
-	vkInfo.MinImageCount = 2;
-	vkInfo.ImageCount = 2;
+	vkInfo.MinImageCount = MaxFrameStates;
+	vkInfo.ImageCount = MaxFrameStates;
 	vkInfo.CheckVkResultFn = nullptr;
 
 	assert( view.passes[ DRAWPASS_POST_2D ] != nullptr );
