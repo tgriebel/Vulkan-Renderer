@@ -294,6 +294,8 @@ void Renderer::InitImGui( RenderView& view )
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 	ImGui_ImplGlfw_NewFrame();
+	ImGui_ImplVulkan_NewFrame();
+	ImGui::NewFrame();
 #endif
 	g_imguiControls.raytraceScene = false;
 	g_imguiControls.rasterizeScene = false;

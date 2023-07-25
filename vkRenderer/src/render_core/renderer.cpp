@@ -516,6 +516,11 @@ void Renderer::SubmitFrame()
 
 	m_frameId = ( m_frameId + 1 ) % MaxFrameStates;
 	++m_frameNumber;
+
+#ifdef USE_IMGUI
+	ImGui_ImplVulkan_NewFrame();
+	ImGui::NewFrame();
+#endif
 }
 
 
@@ -1004,8 +1009,6 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 	{
 #ifdef USE_IMGUI
 		MarkerBeginRegion( gfxContext, "Debug Menus", ColorToVector( Color::White ) );
-		ImGui_ImplVulkan_NewFrame();
-		ImGui::NewFrame();
 
 		DrawDebugMenu();
 
