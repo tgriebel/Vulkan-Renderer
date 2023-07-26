@@ -24,6 +24,7 @@
 */
 
 #include "../globals/common.h"
+#include "../render_core/GpuSync.h"
 
 class ShaderBindParms;
 
@@ -116,8 +117,6 @@ class GfxContext : public CommandContext
 public:
 	VkSemaphore					imageAvailableSemaphores[ MaxFrameStates ];
 	VkSemaphore					renderFinishedSemaphores[ MaxFrameStates ];
-	//Fence						inFlightFrames;
-	//Fence						imagesInFlight;
 	VkFence						inFlightFences[ MaxFrameStates ];
 	VkFence						imagesInFlight[ MaxFrameStates ];
 

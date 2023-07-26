@@ -24,40 +24,6 @@
 #include "deviceContext.h"
 #include "../render_binding/pipeline.h"
 
-void Fence::Create()
-{
-	VkFenceCreateInfo fenceInfo{ };
-	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
-		if( vkCreateFence( context.device, &fenceInfo, nullptr, &fence[ i ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
-		}
-	}
-}
-
-
-void Fence::Destroy()
-{
-	for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
-		vkDestroyFence( context.device, fence[ i ], nullptr );
-	}
-}
-
-
-void Fence::Reset()
-{
-//	vkResetFences( context.device, 1, &fence[ m_frameId ] );
-}
-
-
-VkFence& Fence::VkObject()
-{
-	return fence[ context.bufferId ];
-}
-
-
 VkCommandBuffer& CommandContext::CommandBuffer()
 {
 	return commandBuffers[ context.bufferId ];
