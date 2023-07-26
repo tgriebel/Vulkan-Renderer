@@ -198,6 +198,7 @@
     <ClInclude Include="src\render_core\debugMenu.h" />
     <ClInclude Include="src\render_core\drawpass.h" />
     <ClInclude Include="src\render_core\gpuImage.h" />
+    <ClInclude Include="src\render_core\GpuSync.h" />
     <ClInclude Include="src\render_core\renderer.h" />
     <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="src\render_state\cmdContext.h" />
@@ -238,6 +239,7 @@
     <ClCompile Include="src\render_binding\shaderBinding.cpp" />
     <ClCompile Include="src\render_core\debugMenu.cpp" />
     <ClCompile Include="src\render_core\gpuImage.cpp" />
+    <ClCompile Include="src\render_core\GpuSync.cpp" />
     <ClCompile Include="src\render_core\renderCommand.cpp" />
     <ClCompile Include="src\render_core\renderer.cpp" />
     <ClCompile Include="src\render_core\renderInit.cpp" />

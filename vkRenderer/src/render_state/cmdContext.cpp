@@ -173,6 +173,7 @@ void UploadContext::Submit()
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &CommandBuffer();
+	//submitInfo.pSignalSemaphores
 
 	vkQueueSubmit( context.gfxContext, 1, &submitInfo, VK_NULL_HANDLE );
 }

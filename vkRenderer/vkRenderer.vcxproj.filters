@@ -107,6 +107,9 @@
     <ClCompile Include="src\render_state\cmdContext.cpp">
       <Filter>render state</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\GpuSync.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -223,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="src\render_binding\bufferObjects.h">
       <Filter>render binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\GpuSync.h">
+      <Filter>render core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
