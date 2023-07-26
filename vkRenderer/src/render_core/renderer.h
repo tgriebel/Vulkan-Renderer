@@ -121,6 +121,7 @@ private:
 	// Timers
 	Timer								frameTimer;
 	float								renderTime = 0.0f;
+	uint32_t							m_frameNumber = 0;
 
 	// Upload management
 	std::set<hdl_t>						uploadTextures;
@@ -136,10 +137,6 @@ private:
 	ComputeContext						computeContext;
 	UploadContext						uploadContext;
 	ComputeState						particleState;
-
-	// Frame Sync
-	uint32_t							m_frameId = 0;
-	uint32_t							m_frameNumber = 0;
 
 	// Shader resources
 	GpuBuffer							stagingBuffer;

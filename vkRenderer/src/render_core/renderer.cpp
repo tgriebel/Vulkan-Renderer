@@ -414,9 +414,9 @@ void Renderer::UpdateDescriptorSets()
 
 void Renderer::WaitForEndFrame()
 {
-	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ m_frameId ], VK_TRUE, UINT64_MAX );
+	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ context.frameId ], VK_TRUE, UINT64_MAX );
 
-	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.imageAvailableSemaphores[ m_frameId ], VK_NULL_HANDLE, &context.bufferId );
+	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.imageAvailableSemaphores[ context.frameId ], VK_NULL_HANDLE, &context.bufferId );
 	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
@@ -426,7 +426,7 @@ void Renderer::WaitForEndFrame()
 		vkWaitForFences( context.device, 1, &gfxContext.imagesInFlight[ context.bufferId ], VK_TRUE, UINT64_MAX );
 	}
 	// Mark the image as now being in use by this frame
-	gfxContext.imagesInFlight[ context.bufferId ] = gfxContext.inFlightFences[ m_frameId ];
+	gfxContext.imagesInFlight[ context.bufferId ] = gfxContext.inFlightFences[ context.frameId ];
 }
 
 
@@ -472,7 +472,7 @@ void Renderer::SubmitFrame()
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { gfxContext.imageAvailableSemaphores[ m_frameId ] };
+		VkSemaphore waitSemaphores[] = { gfxContext.imageAvailableSemaphores[ context.frameId ] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
@@ -480,13 +480,13 @@ void Renderer::SubmitFrame()
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &gfxContext.CommandBuffer();
 
-		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphores[ m_frameId ] };
+		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphores[ context.frameId ] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences( context.device, 1, &gfxContext.inFlightFences[ m_frameId ] );
+		vkResetFences( context.device, 1, &gfxContext.inFlightFences[ context.frameId ] );
 
-		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.inFlightFences[ m_frameId ] ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.inFlightFences[ context.frameId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffers!" );
 		}
 
@@ -514,7 +514,6 @@ void Renderer::SubmitFrame()
 		}
 	}
 
-	m_frameId = ( m_frameId + 1 ) % MaxFrameStates;
 	++m_frameNumber;
 
 #ifdef USE_IMGUI
