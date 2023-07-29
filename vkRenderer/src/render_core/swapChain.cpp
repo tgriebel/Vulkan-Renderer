@@ -89,7 +89,7 @@ bool SwapChain::Present( GfxContext& gfxContext )
 	VkSwapchainKHR swapChains[] = { GetVkObject() };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &context.bufferId;
+	presentInfo.pImageIndices = &context.swapChainIndex;
 	presentInfo.pResults = nullptr; // Optional
 
 	VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );

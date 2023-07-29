@@ -126,11 +126,9 @@ public:
 	GpuSemaphore				presentSemaphore;
 	GpuSemaphore				renderFinishedSemaphore;
 	GpuFence					frameFence[ MaxFrameStates ];
-	uint32_t					waitBufferId;
 
 	GfxContext()
 	{
-		waitBufferId = 0;
 		queueType = QUEUE_GRAPHICS;
 	}
 

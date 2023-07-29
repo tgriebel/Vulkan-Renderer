@@ -416,15 +416,13 @@ void Renderer::UpdateDescriptorSets()
 
 void Renderer::WaitForEndFrame()
 {
-	gfxContext.frameFence[ gfxContext.waitBufferId ].Wait();
+	context.bufferId = ( context.bufferId + 1 ) % MaxFrameStates;
+	gfxContext.frameFence[ context.bufferId ].Wait();
 
-	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId );
+	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.swapChainIndex );
 	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
-
-	gfxContext.frameFence[ context.bufferId ].Reset();
-	gfxContext.waitBufferId = context.bufferId;
 
 #ifdef USE_IMGUI
 	ImGui_ImplVulkan_NewFrame();
@@ -867,7 +865,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = pass->fb->GetVkRenderPass( pass->transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, context.bufferId );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 

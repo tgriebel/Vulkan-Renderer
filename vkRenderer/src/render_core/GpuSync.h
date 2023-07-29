@@ -30,7 +30,6 @@ public:
 	void			Create();
 	void			Destroy();
 	void			Wait();
-	void			Reset();
 #ifdef USE_VULKAN
 	VkFence&		VkObject();
 	VkFence			GetVkObject() const;
