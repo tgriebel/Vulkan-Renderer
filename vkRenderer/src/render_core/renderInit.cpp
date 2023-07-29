@@ -282,8 +282,6 @@ void Renderer::InitImGui( RenderView& view )
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
-	gfxContext.Reset();
-
 	// Upload Fonts
 	{
 		BeginUploadCommands( uploadContext );
@@ -859,16 +857,10 @@ void Renderer::CreateSyncObjects()
 {
 	gfxContext.presentSemaphore.Create();
 	gfxContext.renderFinishedSemaphore.Create();
+	gfxContext.frameFence.Create();
 	computeContext.semaphore.Create();
 
-	VkFenceCreateInfo fenceInfo{ };
-	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	for ( size_t i = 0; i < MaxFrameStates; i++ )
-	{
-		if ( vkCreateFence( context.device, &fenceInfo, nullptr, &gfxContext.inFlightFences[ i ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
-		}
-	}
+#ifdef USE_VULKAN
+	gfxContext.renderFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+#endif
 }

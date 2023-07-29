@@ -416,14 +416,14 @@ void Renderer::UpdateDescriptorSets()
 
 void Renderer::WaitForEndFrame()
 {
-	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ gfxContext.waitBufferId ], VK_TRUE, UINT64_MAX );
+	gfxContext.frameFence.Wait( gfxContext.waitBufferId );
 
 	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId );
 	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
 
-	vkResetFences( context.device, 1, &gfxContext.inFlightFences[ context.bufferId ] );
+	gfxContext.frameFence.Reset();
 	gfxContext.waitBufferId = context.bufferId;
 
 #ifdef USE_IMGUI
@@ -444,24 +444,13 @@ void Renderer::SubmitFrame()
 {
 	// Compute
 	{
-		vkResetCommandBuffer( computeContext.CommandBuffer(), 0 );
-
-		VkCommandBufferBeginInfo beginInfo{ };
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = 0; // Optional
-		beginInfo.pInheritanceInfo = nullptr; // Optional
-
-		if ( vkBeginCommandBuffer( computeContext.CommandBuffer(), &beginInfo ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to begin recording command buffer!" );
-		}
+		computeContext.Begin();
 
 		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
 		computeContext.Dispatch( progHdl, *particleState.parms[ context.bufferId ], MaxParticles / 256 );
 
-		if ( vkEndCommandBuffer( computeContext.CommandBuffer() ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to record command buffer!" );
-		}
+		computeContext.End();
 	}
 
 	RenderViews();
@@ -485,9 +474,13 @@ void Renderer::SubmitFrame()
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.inFlightFences[ context.bufferId ] ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.frameFence.GetVkObject() ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffers!" );
 		}
+
+		//gfxContext.Wait( &gfxContext.presentSemaphore );
+		//gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
+		//gfxContext.Submit( &gfxContext.frameFinished );
 	}
 
 	if ( g_swapChain.Present( gfxContext ) == false ) {

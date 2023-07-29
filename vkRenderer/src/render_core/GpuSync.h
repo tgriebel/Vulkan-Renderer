@@ -4,16 +4,18 @@
 
 class GpuSemaphore
 {
-private:
 #ifdef USE_VULKAN
-	VkSemaphore	semaphores[ MaxFrameStates ];
+private:
+	VkSemaphore				semaphores[ MaxFrameStates ];
+public:
+	VkPipelineStageFlagBits	waitStage;
 #endif
 public:
-	void			Create();
-	void			Destroy();
+	void					Create();
+	void					Destroy();
 #ifdef USE_VULKAN
-	VkSemaphore&	VkObject();
-	VkSemaphore		GetVkObject() const;
+	VkSemaphore&			VkObject();
+	VkSemaphore				GetVkObject() const;
 #endif
 };
 
@@ -27,7 +29,7 @@ private:
 public:
 	void			Create();
 	void			Destroy();
-	void			Wait();
+	void			Wait( const uint32_t waitIndex );
 	void			Reset();
 #ifdef USE_VULKAN
 	VkFence&		VkObject();

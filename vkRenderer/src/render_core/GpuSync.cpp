@@ -65,28 +65,28 @@ void GpuFence::Destroy()
 }
 
 
-void GpuFence::Wait()
+void GpuFence::Wait( const uint32_t waitIndex )
 {
 	if ( fences[ context.frameId ] != VK_NULL_HANDLE ) {
-		vkWaitForFences( context.device, 1, &fences[ context.frameId ], VK_TRUE, UINT64_MAX );
+		vkWaitForFences( context.device, 1, &fences[ waitIndex ], VK_TRUE, UINT64_MAX );
 	}
 }
 
 
 void GpuFence::Reset()
 {
-	vkResetFences( context.device, 1, &fences[ context.frameId ] );
+	vkResetFences( context.device, 1, &fences[ context.bufferId ] );
 }
 
 #ifdef USE_VULKAN
 VkFence& GpuFence::VkObject()
 {
-	return fences[ context.frameId ];
+	return fences[ context.bufferId ];
 }
 
 
 VkFence GpuFence::GetVkObject() const
 {
-	return fences[ context.frameId ];
+	return fences[ context.bufferId ];
 }
 #endif

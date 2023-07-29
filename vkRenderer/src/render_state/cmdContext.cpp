@@ -24,6 +24,9 @@
 #include "deviceContext.h"
 #include "../render_binding/pipeline.h"
 
+/////////////////////////////////////////////
+// Base Command Context
+/////////////////////////////////////////////
 VkCommandBuffer& CommandContext::CommandBuffer()
 {
 	return commandBuffers[ context.bufferId ];
@@ -32,6 +35,8 @@ VkCommandBuffer& CommandContext::CommandBuffer()
 
 void CommandContext::Begin()
 {
+	vkResetCommandBuffer( CommandBuffer(), 0 );
+
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
@@ -40,6 +45,8 @@ void CommandContext::Begin()
 	if ( vkBeginCommandBuffer( CommandBuffer(), &beginInfo ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to begin recording command buffer!" );
 	}
+
+	isOpen = true;
 }
 
 
@@ -48,12 +55,8 @@ void CommandContext::End()
 	if ( vkEndCommandBuffer( CommandBuffer() ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to record command buffer!" );
 	}
-}
 
-
-void CommandContext::Reset()
-{
-	vkResetCommandBuffer( CommandBuffer(), 0 );
+	isOpen = false;
 }
 
 
@@ -96,6 +99,69 @@ void CommandContext::Destroy()
 }
 
 
+void CommandContext::Wait( GpuSemaphore* semaphore )
+{
+	waitSemaphores.push_back( semaphore );
+}
+
+
+void CommandContext::Signal( GpuSemaphore* semaphore )
+{
+	signalSemaphores.push_back( semaphore );
+}
+
+
+void CommandContext::Submit( const GpuFence* fence )
+{
+	VkSubmitInfo submitInfo{ };
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	std::vector<VkPipelineStageFlags> vk_waitStages;
+	std::vector<VkSemaphore> vk_waitSemaphores;	
+	vk_waitStages.reserve( waitSemaphores.size() );
+	vk_waitSemaphores.reserve( waitSemaphores.size() );
+
+	for( GpuSemaphore* semaphore : waitSemaphores )
+	{
+		vk_waitStages.push_back( semaphore->waitStage );
+		vk_waitSemaphores.push_back( semaphore->GetVkObject() );
+	}
+
+	std::vector<VkSemaphore> vk_signalSemaphores;
+	vk_signalSemaphores.reserve( signalSemaphores.size() );
+
+	for ( GpuSemaphore* semaphore : signalSemaphores ) {
+		vk_signalSemaphores.push_back( semaphore->GetVkObject() );
+	}
+
+	if ( vk_waitSemaphores.size() > 0 )
+	{
+		submitInfo.waitSemaphoreCount = static_cast<uint32_t>( vk_waitSemaphores.size() );
+		submitInfo.pWaitSemaphores = vk_waitSemaphores.data();
+		submitInfo.pWaitDstStageMask = vk_waitStages.data();
+	}
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &CommandBuffer();
+
+	if( vk_signalSemaphores.size() > 0 )
+	{
+		submitInfo.signalSemaphoreCount = static_cast<uint32_t>( vk_signalSemaphores.size() );
+		submitInfo.pSignalSemaphores = vk_signalSemaphores.data();
+	}
+
+	VkFence vk_fence = ( fence != nullptr ) ? fence->GetVkObject() : VK_NULL_HANDLE;
+
+	VkQueue vk_queue = ( queueType == QUEUE_COMPUTE ) ? context.computeContext : context.gfxContext;
+
+	if ( vkQueueSubmit( vk_queue, 1, &submitInfo, vk_fence ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to submit draw command buffers!" );
+	}
+}
+
+
+/////////////////////////////////////////////
+// Compute Context
+/////////////////////////////////////////////
 void ComputeContext::Submit()
 {
 	VkSubmitInfo submitInfo{ };
@@ -111,6 +177,8 @@ void ComputeContext::Submit()
 
 void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
 {
+	assert( isOpen );
+
 	pipelineState_t state = {};
 	state.progHdl = progHdl;
 
@@ -133,6 +201,9 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 }
 
 
+/////////////////////////////////////////////
+// Upload Context
+/////////////////////////////////////////////
 void UploadContext::Submit()
 {
 	VkSubmitInfo submitInfo{ };

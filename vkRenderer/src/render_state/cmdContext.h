@@ -30,6 +30,7 @@ class ShaderBindParms;
 
 enum pipelineQueue_t
 {
+	QUEUE_UNKNOWN,
 	QUEUE_GRAPHICS,
 	QUEUE_PRESENT,
 	QUEUE_COMPUTE,
@@ -81,34 +82,41 @@ struct QueueFamilyIndices
 };
 
 
-class Fence
-{
-public:
-	VkFence	fence[ MaxFrameStates ];
-
-	VkFence& VkObject();
-
-	void Create();
-	void Destroy();
-	void Reset();
-};
-
-
 class CommandContext
 {
 protected:
-	pipelineQueue_t		queueType;
+	pipelineQueue_t				queueType;
+	bool						isOpen;
 private:
-	VkCommandPool		commandPool;
-	VkCommandBuffer		commandBuffers[ MaxFrameStates ];
+	std::vector<GpuSemaphore*>	waitSemaphores;
+	std::vector<GpuSemaphore*>	signalSemaphores;
+#ifdef USE_VULKAN
+	VkCommandPool				commandPool;
+	VkCommandBuffer				commandBuffers[ MaxFrameStates ];
+#endif
 public:
-	VkCommandBuffer&	CommandBuffer();
-	void				Begin();
-	void				End();
-	void				Reset();
-	void				Create();
-	void				Destroy();
-//	virtual void		Submit() = 0;
+	CommandContext()
+	{
+#ifdef USE_VULKAN
+		commandPool = VK_NULL_HANDLE;
+		for( uint32_t i = 0; i < MaxFrameStates; ++i ) {
+			commandBuffers[ i ] = VK_NULL_HANDLE;
+		}
+
+		queueType = QUEUE_UNKNOWN;
+		isOpen = false;
+#endif
+	}
+#ifdef USE_VULKAN
+	VkCommandBuffer&			CommandBuffer();
+#endif
+	void						Begin();
+	void						End();
+	void						Create();
+	void						Destroy();
+	void						Wait( GpuSemaphore* semaphore );
+	void						Signal( GpuSemaphore* semaphore );
+	void						Submit( const GpuFence* fence );
 };
 
 
@@ -117,7 +125,7 @@ class GfxContext : public CommandContext
 public:
 	GpuSemaphore				presentSemaphore;
 	GpuSemaphore				renderFinishedSemaphore;
-	VkFence						inFlightFences[ MaxFrameStates ];
+	GpuFence					frameFence;
 	uint32_t					waitBufferId;
 
 	GfxContext()

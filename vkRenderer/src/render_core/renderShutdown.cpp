@@ -61,11 +61,8 @@ void Renderer::Cleanup()
 	// Sync
 	gfxContext.presentSemaphore.Destroy();
 	gfxContext.renderFinishedSemaphore.Destroy();
+	gfxContext.frameFence.Destroy();
 	computeContext.semaphore.Destroy();
-
-	for ( size_t i = 0; i < MaxFrameStates; i++ ) {
-		vkDestroyFence( context.device, gfxContext.inFlightFences[ i ], nullptr );
-	}
 
 	// Memory
 	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
