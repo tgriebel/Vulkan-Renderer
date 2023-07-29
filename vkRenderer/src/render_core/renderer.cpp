@@ -320,7 +320,7 @@ void Renderer::RecreateSwapChain()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
-	frameBufferMemory.Create( MaxSharedMemory, memoryRegion_t::LOCAL );
+	frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
 
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
