@@ -24,12 +24,12 @@ class GpuFence
 {
 private:
 #ifdef USE_VULKAN
-	VkFence	fences[ MaxFrameStates ];
+	VkFence	fence;
 #endif
 public:
 	void			Create();
 	void			Destroy();
-	void			Wait( const uint32_t waitIndex );
+	void			Wait();
 	void			Reset();
 #ifdef USE_VULKAN
 	VkFence&		VkObject();

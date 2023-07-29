@@ -416,14 +416,14 @@ void Renderer::UpdateDescriptorSets()
 
 void Renderer::WaitForEndFrame()
 {
-	gfxContext.frameFence.Wait( gfxContext.waitBufferId );
+	gfxContext.frameFence[ gfxContext.waitBufferId ].Wait();
 
 	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId );
 	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
 
-	gfxContext.frameFence.Reset();
+	gfxContext.frameFence[ context.bufferId ].Reset();
 	gfxContext.waitBufferId = context.bufferId;
 
 #ifdef USE_IMGUI
@@ -474,7 +474,7 @@ void Renderer::SubmitFrame()
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.frameFence.GetVkObject() ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.frameFence[ context.bufferId ].GetVkObject() ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffers!" );
 		}
 

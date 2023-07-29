@@ -45,11 +45,9 @@ void GpuFence::Create()
 	VkFenceCreateInfo fenceInfo{ };
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
-		if ( vkCreateFence( context.device, &fenceInfo, nullptr, &fences[ i ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create fence!" );
-		}
+	
+	if ( vkCreateFence( context.device, &fenceInfo, nullptr, &fence ) != VK_SUCCESS ) {
+		throw std::runtime_error( "Failed to create fence!" );
 	}
 #endif
 }
@@ -58,35 +56,33 @@ void GpuFence::Create()
 void GpuFence::Destroy()
 {
 #ifdef USE_VULKAN
-	for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
-		vkDestroyFence( context.device, fences[ i ], nullptr );
-	}
+	vkDestroyFence( context.device, fence, nullptr );
 #endif
 }
 
 
-void GpuFence::Wait( const uint32_t waitIndex )
+void GpuFence::Wait()
 {
-	if ( fences[ context.frameId ] != VK_NULL_HANDLE ) {
-		vkWaitForFences( context.device, 1, &fences[ waitIndex ], VK_TRUE, UINT64_MAX );
+	if ( fence != VK_NULL_HANDLE ) {
+		vkWaitForFences( context.device, 1, &fence, VK_TRUE, UINT64_MAX );
 	}
 }
 
 
 void GpuFence::Reset()
 {
-	vkResetFences( context.device, 1, &fences[ context.bufferId ] );
+	vkResetFences( context.device, 1, &fence );
 }
 
 #ifdef USE_VULKAN
 VkFence& GpuFence::VkObject()
 {
-	return fences[ context.bufferId ];
+	return fence;
 }
 
 
 VkFence GpuFence::GetVkObject() const
 {
-	return fences[ context.bufferId ];
+	return fence;
 }
 #endif

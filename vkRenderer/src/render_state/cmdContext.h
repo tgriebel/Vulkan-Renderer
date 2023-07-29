@@ -125,7 +125,7 @@ class GfxContext : public CommandContext
 public:
 	GpuSemaphore				presentSemaphore;
 	GpuSemaphore				renderFinishedSemaphore;
-	GpuFence					frameFence;
+	GpuFence					frameFence[ MaxFrameStates ];
 	uint32_t					waitBufferId;
 
 	GfxContext()

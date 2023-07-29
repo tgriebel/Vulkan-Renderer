@@ -857,8 +857,11 @@ void Renderer::CreateSyncObjects()
 {
 	gfxContext.presentSemaphore.Create();
 	gfxContext.renderFinishedSemaphore.Create();
-	gfxContext.frameFence.Create();
 	computeContext.semaphore.Create();
+
+	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
+		gfxContext.frameFence[ i ].Create();
+	}
 
 #ifdef USE_VULKAN
 	gfxContext.renderFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
