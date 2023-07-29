@@ -73,6 +73,34 @@ swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const
 }
 
 
+bool SwapChain::Present( GfxContext& gfxContext )
+{
+	VkSubmitInfo submitInfo{ };
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = { gfxContext.renderFinishedSemaphore.GetVkObject() };
+
+	VkPresentInfoKHR presentInfo{ };
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = waitSemaphores;
+
+	VkSwapchainKHR swapChains[] = { GetVkObject() };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &context.bufferId;
+	presentInfo.pResults = nullptr; // Optional
+
+	VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
+	if( ( result == VK_ERROR_OUT_OF_DATE_KHR ) || ( result == VK_SUBOPTIMAL_KHR ) ) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+
 void SwapChain::Create( const Window* _window, const int displayWidth, const int displayHeight )
 {
 	m_window = _window;

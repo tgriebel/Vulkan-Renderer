@@ -36,7 +36,7 @@
 
 void Renderer::Shutdown()
 {
-	vkDeviceWaitIdle( context.device );
+	FlushGPU();
 	Cleanup();
 }
 
@@ -59,13 +59,12 @@ void Renderer::Cleanup()
 	vkDestroySampler( context.device, context.depthShadowSampler, nullptr );
 
 	// Sync
-	for ( size_t i = 0; i < MaxFrameStates; i++ )
-	{
-		vkDestroySemaphore( context.device, gfxContext.renderFinishedSemaphores[ i ], nullptr );
-		vkDestroySemaphore( context.device, gfxContext.imageAvailableSemaphores[ i ], nullptr );
-		vkDestroyFence( context.device, gfxContext.inFlightFences[ i ], nullptr );
+	gfxContext.presentSemaphore.Destroy();
+	gfxContext.renderFinishedSemaphore.Destroy();
+	computeContext.semaphore.Destroy();
 
-		vkDestroySemaphore( context.device, computeContext.semaphores[ i ], nullptr );
+	for ( size_t i = 0; i < MaxFrameStates; i++ ) {
+		vkDestroyFence( context.device, gfxContext.inFlightFences[ i ], nullptr );
 	}
 
 	// Memory

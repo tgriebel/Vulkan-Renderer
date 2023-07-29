@@ -87,6 +87,8 @@ public:
 		return m_swapChainImages[ 0 ].info.height;
 	}
 
+	bool Present( GfxContext& context );
+
 	void Create( const Window* _window, const int displayWidth, const int displayHeight );
 	void Destroy();
 };

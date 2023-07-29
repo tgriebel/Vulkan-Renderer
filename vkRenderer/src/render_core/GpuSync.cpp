@@ -28,13 +28,13 @@ void GpuSemaphore::Destroy()
 #ifdef USE_VULKAN
 VkSemaphore& GpuSemaphore::VkObject()
 {
-	return semaphores[ context.bufferId ];
+	return semaphores[ context.frameId ];
 }
 
 
 VkSemaphore GpuSemaphore::GetVkObject() const
 {
-	return semaphores[ context.bufferId ];
+	return semaphores[ context.frameId ];
 }
 #endif
 
@@ -67,26 +67,26 @@ void GpuFence::Destroy()
 
 void GpuFence::Wait()
 {
-	if ( fences[ context.bufferId ] != VK_NULL_HANDLE ) {
-		vkWaitForFences( context.device, 1, &fences[ context.bufferId ], VK_TRUE, UINT64_MAX );
+	if ( fences[ context.frameId ] != VK_NULL_HANDLE ) {
+		vkWaitForFences( context.device, 1, &fences[ context.frameId ], VK_TRUE, UINT64_MAX );
 	}
 }
 
 
 void GpuFence::Reset()
 {
-	vkResetFences( context.device, 1, &fences[ context.bufferId ] );
+	vkResetFences( context.device, 1, &fences[ context.frameId ] );
 }
 
 #ifdef USE_VULKAN
 VkFence& GpuFence::VkObject()
 {
-	return fences[ context.bufferId ];
+	return fences[ context.frameId ];
 }
 
 
 VkFence GpuFence::GetVkObject() const
 {
-	return fences[ context.bufferId ];
+	return fences[ context.frameId ];
 }
 #endif

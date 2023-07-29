@@ -3,6 +3,11 @@
 
 #include "external/tinyfiledialogs/tinyfiledialogs.h"
 
+#if defined( USE_IMGUI )
+#include "../../external/imgui/imgui.h"
+#include "../../external/imgui/backends/imgui_impl_glfw.h"
+#endif
+
 #define KEY_MAP( k ) { GLFW_KEY_##k, KEY_##k }
 
 struct KeyPair
@@ -149,15 +154,35 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	mouse.centered = true;
 }
 
+
+void Window::BeginFrame()
+{
+	input.NewFrame();
+
+#if defined( USE_IMGUI )
+	ImGui::NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+#endif
+}
+
+
+void Window::EndFrame()
+{
+
+}
+
+
 bool Window::IsOpen() const
 {
 	return ( glfwWindowShouldClose( window ) == false );
 }
 
+
 bool Window::IsFocused() const
 {
 	return focused;
 }
+
 
 std::string Window::OpenFileDialog( const std::string& title, const std::vector<const char*>& filters, const std::string& filterDesc )
 {

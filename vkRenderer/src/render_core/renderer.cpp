@@ -315,7 +315,7 @@ void Renderer::RecreateSwapChain()
 	int width = 0, height = 0;
 	g_window.GetWindowFrameBufferSize( width, height, true );
 
-	vkDeviceWaitIdle( context.device );
+	FlushGPU();
 
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
@@ -389,6 +389,8 @@ void Renderer::Render()
 	UpdateGpuMaterials();
 	BuildPipelines();
 
+	UpdateBuffers();
+	//UpdateFrameDescSet( context.bufferId );
 	//UpdateDescriptorSets(); // need to allow dynamic views
 
 	SubmitFrame();
@@ -414,19 +416,21 @@ void Renderer::UpdateDescriptorSets()
 
 void Renderer::WaitForEndFrame()
 {
-	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ context.frameId ], VK_TRUE, UINT64_MAX );
+	vkWaitForFences( context.device, 1, &gfxContext.inFlightFences[ gfxContext.waitBufferId ], VK_TRUE, UINT64_MAX );
 
-	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.imageAvailableSemaphores[ context.frameId ], VK_NULL_HANDLE, &context.bufferId );
+	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId );
 	if ( result != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to acquire swap chain image!" );
 	}
 
-	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-	if ( gfxContext.imagesInFlight[ context.bufferId ] != VK_NULL_HANDLE ) {
-		vkWaitForFences( context.device, 1, &gfxContext.imagesInFlight[ context.bufferId ], VK_TRUE, UINT64_MAX );
-	}
-	// Mark the image as now being in use by this frame
-	gfxContext.imagesInFlight[ context.bufferId ] = gfxContext.inFlightFences[ context.frameId ];
+	vkResetFences( context.device, 1, &gfxContext.inFlightFences[ context.bufferId ] );
+	gfxContext.waitBufferId = context.bufferId;
+
+#ifdef USE_IMGUI
+	ImGui_ImplVulkan_NewFrame();
+#endif
+
+	++m_frameNumber;
 }
 
 
@@ -438,9 +442,6 @@ void Renderer::FlushGPU()
 
 void Renderer::SubmitFrame()
 {
-	UpdateBuffers();
-	//UpdateFrameDescSet( context.bufferId );
-
 	// Compute
 	{
 		vkResetCommandBuffer( computeContext.CommandBuffer(), 0 );
@@ -472,7 +473,7 @@ void Renderer::SubmitFrame()
 		VkSubmitInfo submitInfo{ };
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { gfxContext.imageAvailableSemaphores[ context.frameId ] };
+		VkSemaphore waitSemaphores[] = { gfxContext.presentSemaphore.GetVkObject() };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
@@ -480,46 +481,18 @@ void Renderer::SubmitFrame()
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &gfxContext.CommandBuffer();
 
-		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphores[ context.frameId ] };
+		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphore.GetVkObject() };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences( context.device, 1, &gfxContext.inFlightFences[ context.frameId ] );
-
-		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.inFlightFences[ context.frameId ] ) != VK_SUCCESS ) {
+		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.inFlightFences[ context.bufferId ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to submit draw command buffers!" );
-		}
-
-		VkPresentInfoKHR presentInfo{ };
-		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-		presentInfo.waitSemaphoreCount = 1;
-		presentInfo.pWaitSemaphores = signalSemaphores;
-
-		VkSwapchainKHR swapChains[] = { g_swapChain.GetVkObject() };
-		presentInfo.swapchainCount = 1;
-		presentInfo.pSwapchains = swapChains;
-		presentInfo.pImageIndices = &context.bufferId;
-		presentInfo.pResults = nullptr; // Optional
-
-		VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
-		if ( result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR )
-		{
-			g_window.RequestImageResize();
-			return;
-		}
-		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR )
-		{
-			throw std::runtime_error( "Failed to acquire swap chain image!" );
 		}
 	}
 
-	++m_frameNumber;
-
-#ifdef USE_IMGUI
-	ImGui_ImplVulkan_NewFrame();
-	ImGui::NewFrame();
-#endif
+	if ( g_swapChain.Present( gfxContext ) == false ) {
+		g_window.RequestImageResize();
+	}
 }
 
 

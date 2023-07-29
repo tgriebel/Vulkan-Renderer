@@ -294,8 +294,6 @@ void Renderer::InitImGui( RenderView& view )
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 	ImGui_ImplGlfw_NewFrame();
-	ImGui_ImplVulkan_NewFrame();
-	ImGui::NewFrame();
 #endif
 	g_imguiControls.raytraceScene = false;
 	g_imguiControls.rasterizeScene = false;
@@ -859,8 +857,9 @@ void Renderer::CreateCodeTextures() {
 
 void Renderer::CreateSyncObjects()
 {
-	VkSemaphoreCreateInfo semaphoreInfo{ };
-	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	gfxContext.presentSemaphore.Create();
+	gfxContext.renderFinishedSemaphore.Create();
+	computeContext.semaphore.Create();
 
 	VkFenceCreateInfo fenceInfo{ };
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -868,15 +867,8 @@ void Renderer::CreateSyncObjects()
 
 	for ( size_t i = 0; i < MaxFrameStates; i++ )
 	{
-		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &gfxContext.imageAvailableSemaphores[ i ] ) != VK_SUCCESS ||
-			vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &gfxContext.renderFinishedSemaphores[ i ] ) != VK_SUCCESS ||
-			vkCreateFence( context.device, &fenceInfo, nullptr, &gfxContext.inFlightFences[ i ] ) != VK_SUCCESS )
-		{
+		if ( vkCreateFence( context.device, &fenceInfo, nullptr, &gfxContext.inFlightFences[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create synchronization objects for a frame!" );
 		}
-	}
-
-	if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, computeContext.semaphores ) ) {
-		throw std::runtime_error( "Failed to create compute semaphore!" );
 	}
 }

@@ -115,13 +115,14 @@ public:
 class GfxContext : public CommandContext
 {
 public:
-	VkSemaphore					imageAvailableSemaphores[ MaxFrameStates ];
-	VkSemaphore					renderFinishedSemaphores[ MaxFrameStates ];
+	GpuSemaphore				presentSemaphore;
+	GpuSemaphore				renderFinishedSemaphore;
 	VkFence						inFlightFences[ MaxFrameStates ];
-	VkFence						imagesInFlight[ MaxFrameStates ];
+	uint32_t					waitBufferId;
 
 	GfxContext()
 	{
+		waitBufferId = 0;
 		queueType = QUEUE_GRAPHICS;
 	}
 
@@ -133,7 +134,7 @@ public:
 class ComputeContext : public CommandContext
 {
 public:
-	VkSemaphore					semaphores[ MaxFrameStates ];
+	GpuSemaphore semaphore;
 
 	ComputeContext()
 	{

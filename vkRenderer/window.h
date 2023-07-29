@@ -20,6 +20,8 @@ public:
 	VkSurfaceKHR			vk_surface;
 	Input					input;
 	void					Init();
+	void					BeginFrame();
+	void					EndFrame();
 	bool					IsOpen() const;
 	bool					IsFocused() const;
 	std::string				OpenFileDialog( const std::string& title, const std::vector<const char*>& filters, const std::string& filterDesc );

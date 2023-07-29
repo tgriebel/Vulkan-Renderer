@@ -33,7 +33,6 @@
 #include "window.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
-#include "src/render_core/renderer.h"
 #include "scenes/sceneParser.h"
 #include <SysCore/systemUtils.h>
 #include <gfxcore/scene/assetBaker.h>
@@ -203,14 +202,14 @@ int main( int argc, char* argv[] )
 			if ( g_imguiControls.rasterizeScene ) {
 				TraceScene( true );
 			}
+			
+			g_window.BeginFrame();
 
-			g_window.input.NewFrame();
 			g_renderer.Commit( g_scene );
 			g_renderer.Render();
-#if defined( USE_IMGUI )
-			ImGui_ImplGlfw_NewFrame();
-#endif
+
 			g_scene->AdvanceFrame();
+			g_window.EndFrame();
 		}
 		g_renderer.Shutdown();
 	}

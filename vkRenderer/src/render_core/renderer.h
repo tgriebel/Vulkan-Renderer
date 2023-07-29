@@ -50,13 +50,13 @@ extern imguiControls_t g_imguiControls;
 
 typedef void ( *debugMenuFuncPtr )( );
 
-extern Scene						scene;
 extern Window						g_window;
 extern SwapChain					g_swapChain;
 
 struct renderConfig_t
 {
-	imageSamples_t mainColorSubSamples;
+	imageSamples_t	mainColorSubSamples;
+	bool			present;
 };
 
 struct ComputeState
