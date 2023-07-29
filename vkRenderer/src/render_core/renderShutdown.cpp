@@ -60,7 +60,7 @@ void Renderer::Cleanup()
 
 	// Sync
 	gfxContext.presentSemaphore.Destroy();
-	gfxContext.renderFinishedSemaphore.Destroy();	
+	gfxContext.renderFinishedSemaphore.Destroy();
 	computeContext.semaphore.Destroy();
 
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {

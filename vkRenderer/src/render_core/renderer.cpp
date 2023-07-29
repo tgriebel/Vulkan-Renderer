@@ -442,7 +442,6 @@ void Renderer::FlushGPU()
 
 void Renderer::SubmitFrame()
 {
-	// Compute
 	{
 		computeContext.Begin();
 
@@ -453,34 +452,31 @@ void Renderer::SubmitFrame()
 		computeContext.End();
 	}
 
-	RenderViews();
+	{
+		gfxContext.Begin();
+
+		VkBuffer vertexBuffers[] = { vb.GetVkObject() };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers( gfxContext.CommandBuffer(), 0, 1, vertexBuffers, offsets );
+		vkCmdBindIndexBuffer( gfxContext.CommandBuffer(), ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+
+		for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
+		{
+			MarkerBeginRegion( gfxContext, activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
+
+			RenderViewSurfaces( *activeViews[ viewIx ], gfxContext );
+
+			MarkerEndRegion( gfxContext );
+		}
+		gfxContext.End();
+	}
 
 	computeContext.Submit();
 
-	// Graphics queue submit
 	{
-		VkSubmitInfo submitInfo{ };
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-		VkSemaphore waitSemaphores[] = { gfxContext.presentSemaphore.GetVkObject() };
-		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		submitInfo.waitSemaphoreCount = 1;
-		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &gfxContext.CommandBuffer();
-
-		VkSemaphore signalSemaphores[] = { gfxContext.renderFinishedSemaphore.GetVkObject() };
-		submitInfo.signalSemaphoreCount = 1;
-		submitInfo.pSignalSemaphores = signalSemaphores;
-
-		if ( vkQueueSubmit( context.gfxContext, 1, &submitInfo, gfxContext.frameFence[ context.bufferId ].GetVkObject() ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to submit draw command buffers!" );
-		}
-
-		//gfxContext.Wait( &gfxContext.presentSemaphore );
-		//gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
-		//gfxContext.Submit( &gfxContext.frameFinished );
+		gfxContext.Wait( &gfxContext.presentSemaphore );
+		gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
+		gfxContext.Submit( &gfxContext.frameFence[ context.bufferId ] );
 	}
 
 	if ( g_swapChain.Present( gfxContext ) == false ) {
@@ -985,40 +981,6 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 	}
 
 	vkCmdEndRenderPass( cmdBuffer );
-}
-
-
-void Renderer::RenderViews()
-{
-	vkResetCommandBuffer( gfxContext.CommandBuffer(), 0 );
-
-	VkCommandBufferBeginInfo beginInfo{ };
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = 0; // Optional
-	beginInfo.pInheritanceInfo = nullptr; // Optional
-
-	if ( vkBeginCommandBuffer( gfxContext.CommandBuffer(), &beginInfo ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to begin recording command buffer!" );
-	}
-
-	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers( gfxContext.CommandBuffer(), 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( gfxContext.CommandBuffer(), ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
-
-	for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
-	{
-		MarkerBeginRegion( gfxContext, activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
-
-		RenderViewSurfaces( *activeViews[ viewIx ], gfxContext );
-
-		MarkerEndRegion( gfxContext );
-	}
-
-	if ( vkEndCommandBuffer( gfxContext.CommandBuffer() ) != VK_SUCCESS )
-	{
-		throw std::runtime_error( "Failed to record command buffer!" );
-	}
 }
 
 

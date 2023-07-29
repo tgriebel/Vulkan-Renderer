@@ -37,6 +37,9 @@ void CommandContext::Begin()
 {
 	vkResetCommandBuffer( CommandBuffer(), 0 );
 
+	waitSemaphores.clear();
+	signalSemaphores.clear();
+
 	VkCommandBufferBeginInfo beginInfo{ };
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags = 0; // Optional
@@ -123,6 +126,7 @@ void CommandContext::Submit( const GpuFence* fence )
 
 	for( GpuSemaphore* semaphore : waitSemaphores )
 	{
+		assert( semaphore->waitStage != VK_PIPELINE_STAGE_NONE_KHR );
 		vk_waitStages.push_back( semaphore->waitStage );
 		vk_waitSemaphores.push_back( semaphore->GetVkObject() );
 	}

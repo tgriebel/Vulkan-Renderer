@@ -864,6 +864,6 @@ void Renderer::CreateSyncObjects()
 	}
 
 #ifdef USE_VULKAN
-	gfxContext.renderFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	gfxContext.presentSemaphore.waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 #endif
 }
