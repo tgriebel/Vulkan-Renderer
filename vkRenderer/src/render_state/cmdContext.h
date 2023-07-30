@@ -114,6 +114,9 @@ public:
 	void						End();
 	void						Create();
 	void						Destroy();
+	void						MarkerBeginRegion( const char* pMarkerName, const vec4f& color );
+	void						MarkerEndRegion();
+	void						MarkerInsert( std::string markerName, const vec4f& color );
 	void						Wait( GpuSemaphore* semaphore );
 	void						Signal( GpuSemaphore* semaphore );
 	void						Submit( const GpuFence* fence );

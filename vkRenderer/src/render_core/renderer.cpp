@@ -460,11 +460,11 @@ void Renderer::SubmitFrame()
 
 		for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 		{
-			MarkerBeginRegion( gfxContext, activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
+			gfxContext.MarkerBeginRegion( activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
 
 			RenderViewSurfaces( *activeViews[ viewIx ], gfxContext );
 
-			MarkerEndRegion( gfxContext );
+			gfxContext.MarkerEndRegion();
 		}
 		gfxContext.End();
 	}
@@ -782,44 +782,6 @@ void Renderer::PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfo
 }
 
 
-void Renderer::MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, const vec4f& color )
-{
-	if ( context.debugMarkersEnabled )
-	{
-		VkDebugMarkerMarkerInfoEXT markerInfo = {};
-		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-		markerInfo.color[0] = color[0];
-		markerInfo.color[1] = color[1];
-		markerInfo.color[2] = color[2];
-		markerInfo.color[3] = color[3];
-		markerInfo.pMarkerName = pMarkerName;
-		context.fnCmdDebugMarkerBegin( cxt.CommandBuffer(), &markerInfo );
-	}
-}
-
-
-void Renderer::MarkerEndRegion( GfxContext& cxt )
-{
-	if ( context.debugMarkersEnabled )
-	{
-		context.fnCmdDebugMarkerEnd( cxt.CommandBuffer() );
-	}
-}
-
-
-void Renderer::MarkerInsert( GfxContext& cxt, std::string markerName, const vec4f& color )
-{
-	if ( context.debugMarkersEnabled )
-	{
-		VkDebugMarkerMarkerInfoEXT markerInfo = {};
-		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
-		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
-		markerInfo.pMarkerName = markerName.c_str();
-		context.fnCmdDebugMarkerInsert( cxt.CommandBuffer(), &markerInfo );
-	}
-}
-
-
 bool Renderer::SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 {
 	if ( surf.pipelineObject[ pass ] == INVALID_HDL ) {
@@ -925,7 +887,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 			continue;
 		}
 
-		MarkerBeginRegion( gfxContext, pass->name, ColorToVector( Color::White ) );
+		gfxContext.MarkerBeginRegion( pass->name, ColorToVector( Color::White ) );
 
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
@@ -942,7 +904,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 				continue;
 			}
 
-			MarkerInsert( gfxContext, surface.dbgName, ColorToVector( Color::LGrey ) );
+			gfxContext.MarkerInsert( surface.dbgName, ColorToVector( Color::LGrey ) );
 
 			if ( passIx == DRAWPASS_DEPTH ) {
 				// vkCmdSetDepthBias
@@ -961,20 +923,20 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, view.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
 		}
-		MarkerEndRegion( gfxContext );
+		gfxContext.MarkerEndRegion();
 	}
 
 	if( view.GetRegion() == renderViewRegion_t::POST )
 	{
 #ifdef USE_IMGUI
-		MarkerBeginRegion( gfxContext, "Debug Menus", ColorToVector( Color::White ) );
+		gfxContext.MarkerBeginRegion( "Debug Menus", ColorToVector( Color::White ) );
 
 		DrawDebugMenu();
 
 		// Render dear imgui into screen
 		ImGui::Render();
 		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
-		MarkerEndRegion( gfxContext );
+		gfxContext.MarkerEndRegion();
 #endif
 	}
 

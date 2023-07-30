@@ -114,6 +114,44 @@ void CommandContext::Signal( GpuSemaphore* semaphore )
 }
 
 
+void CommandContext::MarkerBeginRegion( const char* pMarkerName, const vec4f& color )
+{
+	if ( context.debugMarkersEnabled )
+	{
+		VkDebugMarkerMarkerInfoEXT markerInfo = {};
+		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+		markerInfo.color[ 0 ] = color[ 0 ];
+		markerInfo.color[ 1 ] = color[ 1 ];
+		markerInfo.color[ 2 ] = color[ 2 ];
+		markerInfo.color[ 3 ] = color[ 3 ];
+		markerInfo.pMarkerName = pMarkerName;
+		context.fnCmdDebugMarkerBegin( CommandBuffer(), &markerInfo );
+	}
+}
+
+
+void CommandContext::MarkerEndRegion()
+{
+	if ( context.debugMarkersEnabled )
+	{
+		context.fnCmdDebugMarkerEnd( CommandBuffer() );
+	}
+}
+
+
+void CommandContext::MarkerInsert( std::string markerName, const vec4f& color )
+{
+	if ( context.debugMarkersEnabled )
+	{
+		VkDebugMarkerMarkerInfoEXT markerInfo = {};
+		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
+		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
+		markerInfo.pMarkerName = markerName.c_str();
+		context.fnCmdDebugMarkerInsert( CommandBuffer(), &markerInfo );
+	}
+}
+
+
 void CommandContext::Submit( const GpuFence* fence )
 {
 	VkSubmitInfo submitInfo{ };

@@ -237,7 +237,4 @@ private:
 	std::vector<const char*>			GetRequiredExtensions() const;	
 	bool								CheckValidationLayerSupport();
 	void								PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );
-	void								MarkerBeginRegion( GfxContext& cxt, const char* pMarkerName, const vec4f& color );
-	void								MarkerEndRegion( GfxContext& cxt );
-	void								MarkerInsert( GfxContext& cxt, std::string markerName, const vec4f& color );
 };
