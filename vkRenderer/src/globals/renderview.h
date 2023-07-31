@@ -115,6 +115,9 @@ public:
 	uint32_t				numLights;
 	DrawPass*				passes[ DRAWPASS_COUNT ];
 
+	GpuBuffer*				ib;	// FIXME: don't use a pointer
+	GpuBuffer*				vb;
+
 	uint32_t				committedModelCnt;
 	uint32_t				mergedModelCnt;
 	drawSurf_t				surfaces[ MaxSurfaces ];
@@ -122,5 +125,6 @@ public:
 	drawSurfInstance_t		instances[ MaxSurfaces ];
 	drawSurfInstance_t		sortedInstances[ MaxSurfaces ];
 	drawSurf_t				merged[ MaxSurfaces ];
+	surfaceUpload_t			uploads[ MaxSurfaces ];
 	uint32_t				instanceCounts[ MaxSurfaces ];
 };

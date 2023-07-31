@@ -207,7 +207,6 @@ private:
 	void								CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region );
 
 	// Draw Frame
-	static bool							SkipPass( const drawSurf_t& surf, const drawPass_t pass );
 	void								RenderViewSurfaces( RenderView& view, GfxContext& gfxContext );
 	void								CommitModel( RenderView& view, const Entity& ent );
 	void								MergeSurfaces( RenderView& view );
