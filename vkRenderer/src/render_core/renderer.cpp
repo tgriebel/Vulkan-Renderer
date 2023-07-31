@@ -84,9 +84,6 @@ void Renderer::Commit( const Scene* scene )
 			CommitModel( view, *scene->entities[ entIx ] );
 		}
 		MergeSurfaces( view );
-
-		view.vb = &vb;
-		view.ib = &ib;
 	}
 	UpdateViews( scene );
 }
@@ -150,10 +147,8 @@ void Renderer::MergeSurfaces( RenderView& view )
 			}
 		}
 		uint32_t totalCount = 0;
-		for ( uint32_t i = 0; i < view.mergedModelCnt; ++i )
-		{
+		for ( uint32_t i = 0; i < view.mergedModelCnt; ++i ) {
 			view.merged[ i ].objectId += totalCount;
-			view.uploads[ i ] = surfUploads[ view.merged[ i ].uploadId ];
 			totalCount += view.instanceCounts[ i ];
 		}
 	}
@@ -782,6 +777,37 @@ void Renderer::PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfo
 }
 
 
+bool Renderer::SkipPass( const drawSurf_t& surf, const drawPass_t pass )
+{
+	if ( surf.pipelineObject[ pass ] == INVALID_HDL ) {
+		return true;
+	}
+
+	if ( ( surf.flags & SKIP_OPAQUE ) != 0 )
+	{
+		if( ( pass == DRAWPASS_SHADOW ) ||
+			( pass == DRAWPASS_DEPTH ) ||
+			( pass == DRAWPASS_TERRAIN ) ||
+			( pass == DRAWPASS_OPAQUE ) ||
+			( pass == DRAWPASS_SKYBOX ) ||
+			( pass == DRAWPASS_DEBUG_SOLID )
+		) {
+			return true;
+		}
+	}
+
+	if ( ( pass == DRAWPASS_DEBUG_SOLID ) && ( ( surf.flags & DEBUG_SOLID ) == 0 ) ) {
+		return true;
+	}
+
+	if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surf.flags & WIREFRAME ) == 0 ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+
 void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 {
 	const drawPass_t passBegin = view.ViewRegionPassBegin();
@@ -866,7 +892,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
 		{
 			drawSurf_t& surface = view.merged[ surfIx ];
-			surfaceUpload_t& upload = view.uploads[ surfIx ];
+			surfaceUpload_t& upload = surfUploads[ surface.uploadId ];
 
 			if ( SkipPass( surface, drawPass_t( passIx ) ) ) {
 				continue;
