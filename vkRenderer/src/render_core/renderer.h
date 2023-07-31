@@ -71,16 +71,6 @@ struct ComputeState
 class Renderer
 {
 public:
-	using lightBufferArray_t = Array<lightBufferObject_t, MaxLights>;
-	using materialBufferArray_t = Array<materialBufferObject_t, MaxMaterials>;
-	using bindParmArray_t = Array<ShaderBindParms, DescriptorPoolMaxSets>;
-	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
-	using surfUploadArray_t = Array<surfaceUpload_t, MaxSurfaces * MaxViews>;
-
-	inline bool IsReady() {
-		return ( m_frameNumber > 0 );
-	}
-
 	void								Init();
 	void								Shutdown();
 	void								Commit( const Scene* scene );
@@ -93,6 +83,12 @@ public:
 	void								AttachDebugMenu( const debugMenuFuncPtr funcPtr );
 
 private:
+	using lightBufferArray_t	= Array<lightBufferObject_t, MaxLights>;
+	using materialBufferArray_t	= Array<materialBufferObject_t, MaxMaterials>;
+	using bindParmArray_t		= Array<ShaderBindParms, DescriptorPoolMaxSets>;
+	using debugMenuArray_t		= Array<debugMenuFuncPtr, 12>;
+	using surfUploadArray_t		= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
+
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
 

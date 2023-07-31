@@ -110,6 +110,9 @@
     <ClCompile Include="src\render_core\GpuSync.cpp">
       <Filter>render core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\RenderTask.cpp">
+      <Filter>render core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -228,6 +231,9 @@
       <Filter>render binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\GpuSync.h">
+      <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\RenderTask.h">
       <Filter>render core</Filter>
     </ClInclude>
   </ItemGroup>
