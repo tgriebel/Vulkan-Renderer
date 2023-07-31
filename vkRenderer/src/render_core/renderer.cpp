@@ -453,11 +453,6 @@ void Renderer::SubmitFrame()
 	{
 		gfxContext.Begin();
 
-		VkBuffer vertexBuffers[] = { vb.GetVkObject() };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers( gfxContext.CommandBuffer(), 0, 1, vertexBuffers, offsets );
-		vkCmdBindIndexBuffer( gfxContext.CommandBuffer(), ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
-
 		for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
 		{
 			gfxContext.MarkerBeginRegion( activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
@@ -858,6 +853,11 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 	}
 
 	VkCommandBuffer cmdBuffer = gfxContext.CommandBuffer();
+
+	VkBuffer vertexBuffers[] = { vb.GetVkObject() };
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers( gfxContext.CommandBuffer(), 0, 1, vertexBuffers, offsets );
+	vkCmdBindIndexBuffer( gfxContext.CommandBuffer(), ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
