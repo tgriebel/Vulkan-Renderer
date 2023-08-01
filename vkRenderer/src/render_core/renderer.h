@@ -133,6 +133,7 @@ private:
 	ComputeContext						computeContext;
 	UploadContext						uploadContext;
 	ComputeState						particleState;
+	GpuSemaphore						uploadFinishedSemaphore;
 
 	// Shader resources
 	GpuBuffer							stagingBuffer;

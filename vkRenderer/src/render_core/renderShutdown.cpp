@@ -63,6 +63,8 @@ void Renderer::Cleanup()
 	gfxContext.renderFinishedSemaphore.Destroy();
 	computeContext.semaphore.Destroy();
 
+	uploadFinishedSemaphore.Destroy();
+
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
 		gfxContext.frameFence[ i ].Destroy();
 	}

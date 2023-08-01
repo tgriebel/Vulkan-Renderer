@@ -859,6 +859,8 @@ void Renderer::CreateSyncObjects()
 	gfxContext.renderFinishedSemaphore.Create();
 	computeContext.semaphore.Create();
 
+	uploadFinishedSemaphore.Create();
+
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
 		gfxContext.frameFence[ i ].Create();
 	}
