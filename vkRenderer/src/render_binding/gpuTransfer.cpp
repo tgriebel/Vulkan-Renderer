@@ -69,9 +69,6 @@ void Renderer::UpdateTextures()
 	if( textureCount == 0 ) {
 		return;
 	}
-	stagingBuffer.SetPos( 0 );
-
-	BeginUploadCommands( uploadContext );
 
 	VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
@@ -79,18 +76,17 @@ void Renderer::UpdateTextures()
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );
 		Image& image = imageAsset->Get();
 
-		const uint64_t currentOffset = stagingBuffer.GetSize();
-		stagingBuffer.CopyData( image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
+		const uint64_t currentOffset = textureStagingBuffer.GetSize();
+		textureStagingBuffer.CopyData( image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
 
 		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-		CopyBufferToImage( uploadContext, image, stagingBuffer, currentOffset );
+		CopyBufferToImage( uploadContext, image, textureStagingBuffer, currentOffset );
 	
 		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
 	
 		imageAsset->CompleteUpload();
 	}
-	EndUploadCommands( uploadContext );
 
 	updateTextures.clear();
 }
@@ -104,7 +100,7 @@ void Renderer::UploadTextures()
 	}
 
 	// 1. Upload Data
-	BeginUploadCommands( uploadContext );
+	//BeginUploadCommands( uploadContext );
 
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
@@ -121,10 +117,10 @@ void Renderer::UploadTextures()
 
 		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
 
-		const uint64_t currentOffset = stagingBuffer.GetSize();
-		stagingBuffer.CopyData( texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
+		const uint64_t currentOffset = textureStagingBuffer.GetSize();
+		textureStagingBuffer.CopyData( texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
 
-		CopyBufferToImage( uploadContext, texture, stagingBuffer, currentOffset );
+		CopyBufferToImage( uploadContext, texture, textureStagingBuffer, currentOffset );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.gpuImage->SetId( imageFreeSlot );
@@ -141,7 +137,7 @@ void Renderer::UploadTextures()
 		Image& texture = textureAsset->Get();
 		GenerateMipmaps( uploadContext, texture );
 	}
-	EndUploadCommands( uploadContext );
+	//EndUploadCommands( uploadContext );
 
 	// 3. Add to resource type lists
 	{
@@ -255,10 +251,8 @@ void Renderer::UpdateGpuMaterials()
 
 void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
-	BeginUploadCommands( uploadContext );
 	VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
-	EndUploadCommands( uploadContext );
 
 	dstBuffer.Allocate( copyRegion.size );
 }
@@ -306,15 +300,16 @@ void Renderer::UploadModelsToGPU()
 				}
 
 				// Copy stream to staging buffer
-				VkDeviceSize vbCopySize = sizeof( vertexStream[0] ) * vertexCount;
-				stagingBuffer.SetPos( 0 );
-				stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
+				VkDeviceSize vbCopySize = sizeof( vertexStream[ 0 ] ) * vertexCount;
 
 				VkBufferCopy vbCopyRegion{ };
 				vbCopyRegion.size = vbCopySize;
-				vbCopyRegion.srcOffset = 0;
+				vbCopyRegion.srcOffset = geoStagingBuffer.GetSize();
 				vbCopyRegion.dstOffset = vb.GetSize();
-				CopyGpuBuffer( stagingBuffer, vb, vbCopyRegion );
+			
+				geoStagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
+
+				CopyGpuBuffer( geoStagingBuffer, vb, vbCopyRegion );
 
 				upload.vertexCount = vertexCount;
 				vbBufElements += vertexCount;
@@ -326,14 +321,14 @@ void Renderer::UploadModelsToGPU()
 			{
 				// IB Copy
 				VkDeviceSize ibCopySize = sizeof( surf.indices[ 0 ] ) * surf.indices.size();
-				stagingBuffer.SetPos( 0 );
-				stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
 				VkBufferCopy ibCopyRegion{ };
 				ibCopyRegion.size = ibCopySize;
-				ibCopyRegion.srcOffset = 0;
+				ibCopyRegion.srcOffset = geoStagingBuffer.GetSize();
 				ibCopyRegion.dstOffset = ib.GetSize();
-				CopyGpuBuffer( stagingBuffer, ib, ibCopyRegion );
+				CopyGpuBuffer( geoStagingBuffer, ib, ibCopyRegion );
+
+				geoStagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
 				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
 				upload.indexCount = indexCount;

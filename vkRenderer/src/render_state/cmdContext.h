@@ -119,7 +119,7 @@ public:
 	void						MarkerInsert( std::string markerName, const vec4f& color );
 	void						Wait( GpuSemaphore* semaphore );
 	void						Signal( GpuSemaphore* semaphore );
-	void						Submit( const GpuFence* fence );
+	void						Submit( const GpuFence* fence = nullptr );
 };
 
 
@@ -162,5 +162,4 @@ public:
 	{
 		queueType = QUEUE_GRAPHICS;
 	}
-	void Submit();
 };

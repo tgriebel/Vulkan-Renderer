@@ -136,7 +136,8 @@ private:
 	GpuSemaphore						uploadFinishedSemaphore;
 
 	// Shader resources
-	GpuBuffer							stagingBuffer;
+	GpuBuffer							geoStagingBuffer;
+	GpuBuffer							textureStagingBuffer;
 	GpuBuffer							vb;	// move
 	GpuBuffer							ib;
 	ImageArray							gpuImages2D;

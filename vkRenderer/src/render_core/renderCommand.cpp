@@ -43,7 +43,7 @@ void Renderer::EndUploadCommands( UploadContext& uploadContext )
 {
 	vkEndCommandBuffer( uploadContext.CommandBuffer() );
 	uploadContext.Submit();
-	vkQueueWaitIdle( context.gfxContext ); // FIXME: use a semaphore
+	vkQueueWaitIdle( context.gfxContext );
 }
 
 

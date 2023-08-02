@@ -128,7 +128,8 @@ void Renderer::ShutdownShaderResources()
 	sharedMemory.Destroy();
 
 	// Staging
-	stagingBuffer.Destroy();
+	geoStagingBuffer.Destroy();
+	textureStagingBuffer.Destroy();
 
 	// Buffers
 	{

@@ -823,7 +823,8 @@ void Renderer::CreateBuffers()
 	vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, localMemory );
 	ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, localMemory );
 
-	stagingBuffer.Create( "Staging", LIFETIME_TEMP, 1, 256 * MB_1, bufferType_t::STAGING, sharedMemory );
+	geoStagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, sharedMemory );
+	textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, sharedMemory );
 }
 
 
@@ -866,6 +867,7 @@ void Renderer::CreateSyncObjects()
 	}
 
 #ifdef USE_VULKAN
+	uploadFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 	gfxContext.presentSemaphore.waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 #endif
 }

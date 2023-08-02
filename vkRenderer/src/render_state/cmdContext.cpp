@@ -241,18 +241,3 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 		vkCmdDispatch( cmdBuffer, x, y, z );
 	}
 }
-
-
-/////////////////////////////////////////////
-// Upload Context
-/////////////////////////////////////////////
-void UploadContext::Submit()
-{
-	VkSubmitInfo submitInfo{ };
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &CommandBuffer();
-	//submitInfo.pSignalSemaphores
-
-	vkQueueSubmit( context.gfxContext, 1, &submitInfo, VK_NULL_HANDLE );
-}

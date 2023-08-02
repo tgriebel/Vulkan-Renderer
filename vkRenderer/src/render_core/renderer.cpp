@@ -375,8 +375,18 @@ void Renderer::UploadAssets()
 
 	ClearPipelineCache();
 	BuildPipelines();
-	UploadTextures();
+
+	geoStagingBuffer.SetPos( 0 );
+	textureStagingBuffer.SetPos( 0 );
+	uploadContext.Begin();
+
 	UploadModelsToGPU();
+
+	UploadTextures();
+	uploadContext.End();
+	uploadContext.Submit();
+	vkQueueWaitIdle( context.gfxContext );
+
 	UpdateGpuMaterials();
 	UpdateDescriptorSets();
 }
@@ -388,12 +398,22 @@ void Renderer::Render()
 
 	frameTimer.Start();
 
-	UploadModelsToGPU();
-	UploadTextures();
-	UpdateTextures();
-	UpdateGpuMaterials();
 	BuildPipelines();
 
+	geoStagingBuffer.SetPos( 0 );
+	textureStagingBuffer.SetPos( 0 );
+	uploadContext.Begin();
+
+	UploadModelsToGPU();
+
+	UploadTextures();
+	UpdateTextures();
+
+	uploadContext.End();
+	uploadContext.Signal( &uploadFinishedSemaphore );
+	uploadContext.Submit();
+
+	UpdateGpuMaterials();
 	UpdateBuffers();
 	//UpdateFrameDescSet( context.bufferId );
 	//UpdateDescriptorSets(); // need to allow dynamic views
@@ -422,7 +442,11 @@ void Renderer::UpdateDescriptorSets()
 void Renderer::WaitForEndFrame()
 {
 	context.bufferId = ( context.bufferId + 1 ) % MaxFrameStates;
-	gfxContext.frameFence[ context.bufferId ].Wait();
+
+	{
+		SCOPED_TIMER_PRINT( WaitForFrame );
+		gfxContext.frameFence[ context.bufferId ].Wait();
+	}
 
 	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.swapChainIndex );
 	if ( result != VK_SUCCESS ) {
@@ -473,6 +497,7 @@ void Renderer::SubmitFrame()
 
 	{
 		gfxContext.Wait( &gfxContext.presentSemaphore );
+		gfxContext.Wait( &uploadFinishedSemaphore );
 		gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
 		gfxContext.Submit( &gfxContext.frameFence[ context.bufferId ] );
 	}
