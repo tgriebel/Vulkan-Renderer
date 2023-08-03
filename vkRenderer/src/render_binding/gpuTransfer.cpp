@@ -63,7 +63,7 @@ void Renderer::CopyBufferToImage( UploadContext& uploadContext, Image& texture, 
 }
 
 
-void Renderer::UpdateTextures()
+void Renderer::UpdateTextureData()
 {
 	const uint32_t textureCount = static_cast<uint32_t>( updateTextures.size() );
 	if( textureCount == 0 ) {

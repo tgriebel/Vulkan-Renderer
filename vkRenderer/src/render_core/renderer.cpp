@@ -407,7 +407,7 @@ void Renderer::Render()
 	UploadModelsToGPU();
 
 	UploadTextures();
-	UpdateTextures();
+	UpdateTextureData();
 
 	uploadContext.End();
 	uploadContext.Signal( &uploadFinishedSemaphore );

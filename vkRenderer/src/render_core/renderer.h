@@ -220,7 +220,7 @@ private:
 
 	void								UploadAssets();
 	void								UpdateViews( const Scene* scene );
-	void								UpdateTextures();
+	void								UpdateTextureData();
 	void								UploadTextures();
 	void								UpdateGpuMaterials();
 	void								UploadModelsToGPU();
