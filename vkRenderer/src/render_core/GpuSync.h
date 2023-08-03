@@ -11,7 +11,7 @@ public:
 	VkPipelineStageFlagBits	waitStage;
 #endif
 public:
-	void					Create();
+	void					Create( const char* name );
 	void					Destroy();
 #ifdef USE_VULKAN
 	VkSemaphore&			VkObject();
@@ -27,7 +27,7 @@ private:
 	VkFence	fence;
 #endif
 public:
-	void			Create();
+	void			Create( const char* name );
 	void			Destroy();
 	void			Wait();
 #ifdef USE_VULKAN

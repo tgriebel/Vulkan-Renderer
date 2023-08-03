@@ -327,6 +327,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 				throw std::runtime_error( "Failed to create framebuffer!" );
 			}
 
+			vk_MarkerSetObjectName( (uint64_t)buffers[ frameIx ][ permIx ], VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, createInfo.name );
+
 			color0[ frameIx ] = createInfo.color0[ frameIx ];
 			color1[ frameIx ] = createInfo.color1[ frameIx ];
 			color2[ frameIx ] = createInfo.color2[ frameIx ];

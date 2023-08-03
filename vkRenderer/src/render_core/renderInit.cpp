@@ -190,9 +190,9 @@ void Renderer::InitApi()
 		CreateSyncObjects();
 		CreateFramebuffers();
 
-		gfxContext.Create();
-		computeContext.Create();
-		uploadContext.Create();
+		gfxContext.Create( "GFX Context" );
+		computeContext.Create( "Compute Context" );
+		uploadContext.Create( "Upload Context" );
 	}
 }
 
@@ -438,7 +438,12 @@ void Renderer::CreateDevice()
 			context.fnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerEndEXT" );
 			context.fnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerInsertEXT" );
 
-			context.debugMarkersEnabled = ( context.fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
+			context.debugMarkersEnabled = true;
+			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnDebugMarkerSetObjectTag != VK_NULL_HANDLE );
+			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
+			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnCmdDebugMarkerBegin != VK_NULL_HANDLE );
+			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnCmdDebugMarkerEnd != VK_NULL_HANDLE );
+			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnCmdDebugMarkerInsert != VK_NULL_HANDLE );
 		}
 		else {
 			std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled." << std::endl;
@@ -617,6 +622,7 @@ void Renderer::CreateTempCanvas( const imageInfo_t& info, const renderViewRegion
 	// Frame buffer
 	{
 		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.name = "TempColorFB";
 		fbInfo.color0[ 0 ] = &tempColorImage;
 		fbInfo.width = tempColorImage.info.width;
 		fbInfo.height = tempColorImage.info.height;
@@ -693,6 +699,7 @@ void Renderer::CreateFramebuffers()
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{	
 		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.name = "ShadowMapFB";
 		fbInfo.depth[ 0 ] = &shadowMapImage[ shadowIx ];
 		fbInfo.width = shadowMapImage[ shadowIx ].info.width;
 		fbInfo.height = shadowMapImage[ shadowIx ].info.height;
@@ -704,6 +711,7 @@ void Renderer::CreateFramebuffers()
 	// Main Scene 3D Render
 	{
 		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.name = "MainColorFB";
 		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
 			fbInfo.color0[ frameIx ] = &mainColorImage;
@@ -856,14 +864,14 @@ void Renderer::CreateCodeTextures() {
 
 void Renderer::CreateSyncObjects()
 {
-	gfxContext.presentSemaphore.Create();
-	gfxContext.renderFinishedSemaphore.Create();
-	computeContext.semaphore.Create();
+	gfxContext.presentSemaphore.Create( "PresentSemaphore" );
+	gfxContext.renderFinishedSemaphore.Create( "RenderSemaphore" );
+	computeContext.semaphore.Create( "ComputeSemaphore" );
 
-	uploadFinishedSemaphore.Create();
+	uploadFinishedSemaphore.Create( "UploadSemaphore" );
 
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
-		gfxContext.frameFence[ i ].Create();
+		gfxContext.frameFence[ i ].Create( "FrameFence" );
 	}
 
 #ifdef USE_VULKAN

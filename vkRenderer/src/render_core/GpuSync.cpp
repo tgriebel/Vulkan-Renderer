@@ -1,7 +1,7 @@
 #include "GpuSync.h"
 #include "../render_state/deviceContext.h"
 
-void GpuSemaphore::Create()
+void GpuSemaphore::Create( const char* name )
 {
 #ifdef USE_VULKAN
 	VkSemaphoreCreateInfo semaphoreInfo{ };
@@ -11,6 +11,7 @@ void GpuSemaphore::Create()
 		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &semaphores[ i ] ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create semaphore!" );
 		}
+		vk_MarkerSetObjectName( (uint64_t)semaphores[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT, name );
 	}
 #endif
 }
@@ -39,7 +40,7 @@ VkSemaphore GpuSemaphore::GetVkObject() const
 #endif
 
 
-void GpuFence::Create()
+void GpuFence::Create( const char* name )
 {
 #ifdef USE_VULKAN
 	VkFenceCreateInfo fenceInfo{ };
@@ -49,6 +50,7 @@ void GpuFence::Create()
 	if ( vkCreateFence( context.device, &fenceInfo, nullptr, &fence ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create fence!" );
 	}
+	vk_MarkerSetObjectName( (uint64_t)fence, VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT, name );
 #endif
 }
 

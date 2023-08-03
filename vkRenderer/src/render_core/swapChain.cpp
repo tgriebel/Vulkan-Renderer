@@ -174,6 +174,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	}
 
 	frameBufferCreateInfo_t fbInfo = {};
+	fbInfo.name = "SwapChainFB";
 	for ( uint32_t i = 0; i < m_imageCount; ++i ) {
 		fbInfo.color0[ i ] = &m_swapChainImages[ i ];
 	}

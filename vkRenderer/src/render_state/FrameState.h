@@ -58,6 +58,7 @@ struct frameBufferCreateInfo_t
 	uint32_t			width;
 	uint32_t			height;
 	resourceLifetime_t	lifetime;
+	const char*			name;
 	Image*				color0[ MaxFrameStates ];
 	Image*				color1[ MaxFrameStates ];
 	Image*				color2[ MaxFrameStates ];
@@ -69,6 +70,8 @@ struct frameBufferCreateInfo_t
 		height( 0 ),
 		lifetime( LIFETIME_TEMP )
 	{
+		name = "";
+
 		memset( color0, 0, sizeof( Image* ) * MaxFrameStates );
 		memset( color1, 0, sizeof( Image* ) * MaxFrameStates );
 		memset( color2, 0, sizeof( Image* ) * MaxFrameStates );

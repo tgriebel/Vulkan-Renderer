@@ -444,7 +444,7 @@ void Renderer::WaitForEndFrame()
 	context.bufferId = ( context.bufferId + 1 ) % MaxFrameStates;
 
 	{
-		SCOPED_TIMER_PRINT( WaitForFrame );
+		//SCOPED_TIMER_PRINT( WaitForFrame );
 		gfxContext.frameFence[ context.bufferId ].Wait();
 	}
 

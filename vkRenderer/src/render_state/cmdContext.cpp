@@ -63,7 +63,7 @@ void CommandContext::End()
 }
 
 
-void CommandContext::Create()
+void CommandContext::Create( const char* name )
 {
 	// Pool creation
 	{
@@ -74,6 +74,7 @@ void CommandContext::Create()
 		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create graphics command pool!" );
 		}
+		vk_MarkerSetObjectName( (uint64_t)commandPool, VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT, name );
 	}
 
 	// Buffer creation
@@ -88,8 +89,10 @@ void CommandContext::Create()
 			throw std::runtime_error( "Failed to allocate graphics command buffers!" );
 		}
 
-		for ( size_t i = 0; i < MaxFrameStates; i++ ) {
+		for ( size_t i = 0; i < MaxFrameStates; i++ )
+		{
 			vkResetCommandBuffer( commandBuffers[ i ], 0 );
+			vk_MarkerSetObjectName( (uint64_t)commandBuffers[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT, name );
 		}
 	}
 }
@@ -132,7 +135,7 @@ void CommandContext::MarkerBeginRegion( const char* pMarkerName, const vec4f& co
 
 void CommandContext::MarkerEndRegion()
 {
-	if ( context.debugMarkersEnabled )
+	if ( context.debugMarkersEnabled && ( context.fnCmdDebugMarkerEnd != nullptr ) )
 	{
 		context.fnCmdDebugMarkerEnd( CommandBuffer() );
 	}

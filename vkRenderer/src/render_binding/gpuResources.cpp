@@ -164,10 +164,11 @@ void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, con
 
 		if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer[ bufferId ].alloc ) ) {
 			vkBindBufferMemory( context.device, m_buffer[ bufferId ].buffer, bufferMemory.GetVkObject(), m_buffer[ bufferId ].alloc.GetOffset() );
-		}
-		else {
+		} else {
 			throw std::runtime_error( "Buffer could not allocate!" );
 		}
+
+		vk_MarkerSetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT, name );
 
 		m_name = name;
 

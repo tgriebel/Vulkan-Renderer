@@ -112,7 +112,7 @@ public:
 #endif
 	void						Begin();
 	void						End();
-	void						Create();
+	void						Create( const char* name );
 	void						Destroy();
 	void						MarkerBeginRegion( const char* pMarkerName, const vec4f& color );
 	void						MarkerEndRegion();
