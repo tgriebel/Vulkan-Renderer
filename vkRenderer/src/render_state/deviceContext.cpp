@@ -46,9 +46,7 @@ bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<
 bool vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std::vector<const char*>& deviceExtensions )
 {
 	VkPhysicalDeviceProperties deviceProperties;
-	VkPhysicalDeviceFeatures deviceFeatures;
 	vkGetPhysicalDeviceProperties( device, &deviceProperties );
-	vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
 
 	QueueFamilyIndices indices = vk_FindQueueFamilies( device, surface );
 

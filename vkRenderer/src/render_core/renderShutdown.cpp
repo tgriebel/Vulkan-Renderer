@@ -57,6 +57,7 @@ void Renderer::Cleanup()
 
 	vkDestroySampler( context.device, context.bilinearSampler, nullptr );
 	vkDestroySampler( context.device, context.depthShadowSampler, nullptr );
+	vkDestroyQueryPool( context.device, queryPool, nullptr );
 
 	// Sync
 	gfxContext.presentSemaphore.Destroy();

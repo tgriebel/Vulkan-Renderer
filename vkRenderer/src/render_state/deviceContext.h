@@ -39,6 +39,8 @@ struct deviceContext_t
 	VkPhysicalDevice					physicalDevice;
 	VkInstance							instance;
 	VkPhysicalDeviceProperties			deviceProperties;
+	VkPhysicalDeviceFeatures			deviceFeatures;
+	VkPhysicalDeviceFeatures			supportedFeatures;
 	VkQueue								gfxContext;
 	VkQueue								presentQueue;
 	VkQueue								computeContext;
@@ -57,6 +59,16 @@ struct deviceContext_t
 };
 
 extern deviceContext_t context;
+
+#define VK_CHECK_RESULT( f )																			\
+{																										\
+	VkResult res = (f);																					\
+	if (res != VK_SUCCESS)																				\
+	{																									\
+		throw std::runtime_error( #f );																	\
+		assert(res == VK_SUCCESS);																		\
+	}																									\
+}
 
 struct imageInfo_t;
 class GpuImage;

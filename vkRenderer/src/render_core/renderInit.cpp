@@ -329,6 +329,7 @@ void Renderer::CreateDevice()
 			if ( vk_IsDeviceSuitable( device, g_window.vk_surface, deviceExtensions ) )
 			{
 				vkGetPhysicalDeviceProperties( device, &context.deviceProperties );
+				vkGetPhysicalDeviceFeatures( device, &context.deviceFeatures );
 				context.physicalDevice = device;
 				break;
 			}
@@ -369,8 +370,8 @@ void Renderer::CreateDevice()
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 		deviceFeatures.fillModeNonSolid = VK_TRUE;
 		deviceFeatures.sampleRateShading = VK_TRUE;
+		deviceFeatures.pipelineStatisticsQuery = VK_TRUE;
 		createInfo.pEnabledFeatures = &deviceFeatures;
-
 
 		std::vector<const char*> enabledExtensions;
 		for( auto ext : deviceExtensions )
@@ -498,6 +499,26 @@ void Renderer::CreateDevice()
 		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &context.depthShadowSampler ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create depth sampler!" );
 		}
+	}
+
+	// Query Pool
+	if( context.deviceFeatures.pipelineStatisticsQuery )
+	{
+		VkQueryPoolCreateInfo queryPoolInfo = {};
+		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+		// This query pool will store pipeline statistics
+		queryPoolInfo.queryType = VK_QUERY_TYPE_PIPELINE_STATISTICS;
+		// Pipeline counters to be returned for this pool
+		queryPoolInfo.pipelineStatistics =
+			VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT |
+			VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT |
+			VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT |
+			VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT |
+			VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT |
+			VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT;
+		queryPoolInfo.queryCount = 6;
+
+		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &queryPool ) );
 	}
 
 	context.bufferId = 0;
