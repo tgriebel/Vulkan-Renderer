@@ -32,11 +32,6 @@
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
 
-#if defined( USE_IMGUI )
-#include "../../external/imgui/imgui.h"
-#include "../../external/imgui/backends/imgui_impl_glfw.h"
-#endif
-
 class Window;
 class SwapChain;
 class Scene;
