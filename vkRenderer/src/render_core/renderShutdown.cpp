@@ -55,12 +55,6 @@ void Renderer::Cleanup()
 
 	ShutdownShaderResources();
 
-	vkDestroySampler( context.device, context.bilinearSampler, nullptr );
-	vkDestroySampler( context.device, context.depthShadowSampler, nullptr );
-	vkDestroyQueryPool( context.device, context.statQueryPool, nullptr );
-	vkDestroyQueryPool( context.device, context.timestampQueryPool, nullptr );
-	vkDestroyQueryPool( context.device, context.occlusionQueryPool, nullptr );
-
 	// Sync
 	gfxContext.presentSemaphore.Destroy();
 	gfxContext.renderFinishedSemaphore.Destroy();
@@ -72,22 +66,8 @@ void Renderer::Cleanup()
 		gfxContext.frameFence[ i ].Destroy();
 	}
 
-	// Memory
-	vkDestroyDescriptorPool( context.device, descriptorPool, nullptr );
-
-	vkDestroyDevice( context.device, nullptr );
-
-	if ( enableValidationLayers )
-	{
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( context.instance, "vkDestroyDebugUtilsMessengerEXT" );
-		if ( func != nullptr ) {
-			func( context.instance, context.debugMessenger, nullptr );
-		}
-	}
-
-	vkDestroySurfaceKHR( context.instance, g_window.vk_surface, nullptr );
-	vkDestroyInstance( context.instance, nullptr );
-
+	context.Destroy( g_window );
+	
 	g_window.~Window();
 }
 

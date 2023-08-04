@@ -154,7 +154,6 @@ private:
 	bindParmArray_t						bindParmsList;
 	ShaderBindSet						defaultBindSet;
 	ShaderBindSet						particleShaderBinds;
-	VkDescriptorPool					descriptorPool;
 
 	// Misc
 	debugMenuArray_t					debugMenus;
@@ -181,8 +180,6 @@ private:
 	void								AllocRegisteredBindParms();
 	void								FreeRegisteredBindParms();
 	void								CreateDescriptorPool();
-	void								CreateInstance();
-	void								CreateDevice();
 	void								CreateSyncObjects();
 	void								CreateCodeTextures();
 	void								CreateBuffers();

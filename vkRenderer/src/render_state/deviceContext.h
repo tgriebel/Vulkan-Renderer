@@ -48,6 +48,7 @@ public:
 	VkPhysicalDeviceProperties			deviceProperties;
 	VkPhysicalDeviceFeatures			deviceFeatures;
 	VkDebugUtilsMessengerEXT			debugMessenger;
+	VkDescriptorPool					descriptorPool;
 	VkQueryPool							statQueryPool;
 	VkQueryPool							timestampQueryPool;
 	VkQueryPool							occlusionQueryPool;
@@ -68,7 +69,7 @@ public:
 	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
 
 	void	Create( Window& window );
-	void	Destroy();
+	void	Destroy( Window& window );
 };
 
 extern DeviceContext context;

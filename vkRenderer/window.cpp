@@ -201,10 +201,12 @@ std::string Window::OpenFileDialog( const std::string& title, const std::vector<
 	return ( fileName == nullptr ) ? "" : fileName;
 }
 
+
 void Window::PumpMessages()
 {
 	glfwPollEvents();
 }
+
 
 void Window::Init()
 {
@@ -222,6 +224,7 @@ void Window::Init()
 	glfwSetCursorPosCallback( window, MouseMoveCallback );
 }
 
+
 vec2f Window::GetNdc( const float x, const float y )
 {
 	const vec2f screenPoint = vec2f( x, y );
@@ -231,15 +234,18 @@ vec2f Window::GetNdc( const float x, const float y )
 	return ndc;
 }
 
+
 void Window::GetWindowPosition( int& x, int& y )
 {
 	glfwGetWindowPos( window, &x, &y );
 }
 
+
 void Window::GetWindowSize( int& width, int& height )
 {
 	glfwGetWindowSize( window, &width, &height );
 }
+
 
 void Window::GetWindowFrameBufferSize( int& width, int& height, const bool wait )
 {
@@ -254,6 +260,7 @@ void Window::GetWindowFrameBufferSize( int& width, int& height, const bool wait 
 	}
 }
 
+
 float Window::GetWindowFrameBufferAspect( const bool wait )
 {
 	int width, height;
@@ -261,9 +268,17 @@ float Window::GetWindowFrameBufferAspect( const bool wait )
 	return width / static_cast<float>( height );
 }
 
-void Window::CreateSurface()
+#ifdef USE_VULKAN
+void Window::CreateGlfwSurface()
 {
 	if ( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) != VK_SUCCESS ) {
 		throw std::runtime_error( "Failed to create window surface!" );
 	}
 }
+
+
+void Window::DestroyGlfwSurface()
+{
+	vkDestroySurfaceKHR( context.instance, vk_surface, nullptr );
+}
+#endif

@@ -333,8 +333,8 @@ void DeviceContext::Create( Window& window )
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 		if ( enableValidationLayers )
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>( context.validationLayers.size() );
-			createInfo.ppEnabledLayerNames = context.validationLayers.data();
+			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
+			createInfo.ppEnabledLayerNames = validationLayers.data();
 
 			vk_PopulateDebugMessengerCreateInfo( debugCreateInfo );
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
@@ -349,7 +349,7 @@ void DeviceContext::Create( Window& window )
 		createInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
-		if ( vkCreateInstance( &createInfo, nullptr, &context.instance ) != VK_SUCCESS ) {
+		if ( vkCreateInstance( &createInfo, nullptr, &instance ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create instance!" );
 		}
 	}
@@ -363,50 +363,50 @@ void DeviceContext::Create( Window& window )
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		vk_PopulateDebugMessengerCreateInfo( createInfo );
 
-		if ( vk_CreateDebugUtilsMessengerEXT( context.instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS ) {
+		if ( vk_CreateDebugUtilsMessengerEXT( instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to set up debug messenger!" );
 		}
 	}
 
 	// Window Surface
 	{
-		window.CreateSurface();
+		window.CreateGlfwSurface();
 	}
 
 	// Pick physical device
 	{
 		uint32_t deviceCount = 0;
-		vkEnumeratePhysicalDevices( context.instance, &deviceCount, nullptr );
+		vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr );
 
 		if ( deviceCount == 0 ) {
 			throw std::runtime_error( "Failed to find GPUs with Vulkan support!" );
 		}
 
 		std::vector<VkPhysicalDevice> devices( deviceCount );
-		vkEnumeratePhysicalDevices( context.instance, &deviceCount, devices.data() );
+		vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
 
 		for ( const auto& device : devices )
 		{
 			if ( vk_IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
 			{
-				vkGetPhysicalDeviceProperties( device, &context.deviceProperties );
-				vkGetPhysicalDeviceFeatures( device, &context.deviceFeatures );
-				context.physicalDevice = device;
+				vkGetPhysicalDeviceProperties( device, &deviceProperties );
+				vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
+				physicalDevice = device;
 				break;
 			}
 		}
 
-		if ( context.physicalDevice == VK_NULL_HANDLE ) {
+		if ( physicalDevice == VK_NULL_HANDLE ) {
 			throw std::runtime_error( "Failed to find a suitable GPU!" );
 		}
 	}
 
 	// Create logical device
 	{
-		QueueFamilyIndices indices = vk_FindQueueFamilies( context.physicalDevice, window.vk_surface );
-		context.queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
-		context.queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
-		context.queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
+		QueueFamilyIndices indices = vk_FindQueueFamilies( physicalDevice, window.vk_surface );
+		queueFamilyIndices[ QUEUE_GRAPHICS ] = indices.graphicsFamily.value();
+		queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
+		queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value(), indices.computeFamily.value() };
@@ -440,7 +440,7 @@ void DeviceContext::Create( Window& window )
 			enabledExtensions.push_back( ext );
 		}
 		std::vector<const char*> captureExtensions = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
-		if ( vk_IsDeviceSuitable( context.physicalDevice, window.vk_surface, captureExtensions ) ) {
+		if ( vk_IsDeviceSuitable( physicalDevice, window.vk_surface, captureExtensions ) ) {
 			for ( const char* ext : captureExtensions ) {
 				enabledExtensions.push_back( ext );
 			}
@@ -465,22 +465,22 @@ void DeviceContext::Create( Window& window )
 		descIndexing.pNext = NULL;
 		createInfo.pNext = &descIndexing;
 
-		if ( vkCreateDevice( context.physicalDevice, &createInfo, nullptr, &context.device ) != VK_SUCCESS ) {
+		if ( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create logical context.device!" );
 		}
 
-		vkGetDeviceQueue( context.device, indices.graphicsFamily.value(), 0, &context.gfxContext );
-		vkGetDeviceQueue( context.device, indices.presentFamily.value(), 0, &context.presentQueue );
-		vkGetDeviceQueue( context.device, indices.computeFamily.value(), 0, &context.computeContext );
+		vkGetDeviceQueue( device, indices.graphicsFamily.value(), 0, &gfxContext );
+		vkGetDeviceQueue( device, indices.presentFamily.value(), 0, &presentQueue );
+		vkGetDeviceQueue( device, indices.computeFamily.value(), 0, &computeContext );
 	}
 
 	// Debug Markers
 	{
 		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, nullptr );
+		vkEnumerateDeviceExtensionProperties( physicalDevice, nullptr, &extensionCount, nullptr );
 
 		std::vector<VkExtensionProperties> availableExtensions( extensionCount );
-		vkEnumerateDeviceExtensionProperties( context.physicalDevice, nullptr, &extensionCount, availableExtensions.data() );
+		vkEnumerateDeviceExtensionProperties( physicalDevice, nullptr, &extensionCount, availableExtensions.data() );
 
 		bool found = false;
 		for ( const auto& extension : availableExtensions ) {
@@ -494,18 +494,18 @@ void DeviceContext::Create( Window& window )
 		{
 			std::cout << "Enabling debug markers." << std::endl;
 
-			context.fnDebugMarkerSetObjectTag = (PFN_vkDebugMarkerSetObjectTagEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectTagEXT" );
-			context.fnDebugMarkerSetObjectName = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr( context.device, "vkDebugMarkerSetObjectNameEXT" );
-			context.fnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerBeginEXT" );
-			context.fnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerEndEXT" );
-			context.fnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr( context.device, "vkCmdDebugMarkerInsertEXT" );
+			fnDebugMarkerSetObjectTag = (PFN_vkDebugMarkerSetObjectTagEXT)vkGetDeviceProcAddr( device, "vkDebugMarkerSetObjectTagEXT" );
+			fnDebugMarkerSetObjectName = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr( device, "vkDebugMarkerSetObjectNameEXT" );
+			fnCmdDebugMarkerBegin = (PFN_vkCmdDebugMarkerBeginEXT)vkGetDeviceProcAddr( device, "vkCmdDebugMarkerBeginEXT" );
+			fnCmdDebugMarkerEnd = (PFN_vkCmdDebugMarkerEndEXT)vkGetDeviceProcAddr( device, "vkCmdDebugMarkerEndEXT" );
+			fnCmdDebugMarkerInsert = (PFN_vkCmdDebugMarkerInsertEXT)vkGetDeviceProcAddr( device, "vkCmdDebugMarkerInsertEXT" );
 
-			context.debugMarkersEnabled = true;
-			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnDebugMarkerSetObjectTag != VK_NULL_HANDLE );
-			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
-			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnCmdDebugMarkerBegin != VK_NULL_HANDLE );
-			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnCmdDebugMarkerEnd != VK_NULL_HANDLE );
-			context.debugMarkersEnabled = context.debugMarkersEnabled && ( context.fnCmdDebugMarkerInsert != VK_NULL_HANDLE );
+			debugMarkersEnabled = true;
+			debugMarkersEnabled = debugMarkersEnabled && ( fnDebugMarkerSetObjectTag != VK_NULL_HANDLE );
+			debugMarkersEnabled = debugMarkersEnabled && ( fnDebugMarkerSetObjectName != VK_NULL_HANDLE );
+			debugMarkersEnabled = debugMarkersEnabled && ( fnCmdDebugMarkerBegin != VK_NULL_HANDLE );
+			debugMarkersEnabled = debugMarkersEnabled && ( fnCmdDebugMarkerEnd != VK_NULL_HANDLE );
+			debugMarkersEnabled = debugMarkersEnabled && ( fnCmdDebugMarkerInsert != VK_NULL_HANDLE );
 		}
 		else {
 			std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled." << std::endl;
@@ -532,7 +532,7 @@ void DeviceContext::Create( Window& window )
 		samplerInfo.maxLod = 16.0f;
 		samplerInfo.mipLodBias = 0.0f;
 
-		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &context.bilinearSampler ) != VK_SUCCESS ) {
+		if ( vkCreateSampler( device, &samplerInfo, nullptr, &bilinearSampler ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create texture sampler!" );
 		}
 	}
@@ -557,13 +557,13 @@ void DeviceContext::Create( Window& window )
 		samplerInfo.maxLod = 16.0f;
 		samplerInfo.mipLodBias = 0.0f;
 
-		if ( vkCreateSampler( context.device, &samplerInfo, nullptr, &context.depthShadowSampler ) != VK_SUCCESS ) {
+		if ( vkCreateSampler( device, &samplerInfo, nullptr, &depthShadowSampler ) != VK_SUCCESS ) {
 			throw std::runtime_error( "Failed to create depth sampler!" );
 		}
 	}
 
 	// Query Pool (Statistics)
-	if ( context.deviceFeatures.pipelineStatisticsQuery )
+	if ( deviceFeatures.pipelineStatisticsQuery )
 	{
 		VkQueryPoolCreateInfo queryPoolInfo = {};
 		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
@@ -579,18 +579,18 @@ void DeviceContext::Create( Window& window )
 			VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT;
 		queryPoolInfo.queryCount = 6;
 
-		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &context.statQueryPool ) );
+		VK_CHECK_RESULT( vkCreateQueryPool( device, &queryPoolInfo, NULL, &statQueryPool ) );
 	}
 
 	// Query Pool (Timestamp)
-	if ( context.deviceProperties.limits.timestampComputeAndGraphics )
+	if ( deviceProperties.limits.timestampComputeAndGraphics )
 	{
 		VkQueryPoolCreateInfo queryPoolInfo = {};
 		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
 		queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
 		queryPoolInfo.queryCount = MaxTimeStampQueries;
 
-		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &context.timestampQueryPool ) );
+		VK_CHECK_RESULT( vkCreateQueryPool( device, &queryPoolInfo, NULL, &timestampQueryPool ) );
 	}
 
 	// Query Pool (Occlusion)
@@ -600,8 +600,34 @@ void DeviceContext::Create( Window& window )
 		queryPoolInfo.queryType = VK_QUERY_TYPE_OCCLUSION;
 		queryPoolInfo.queryCount = MaxOcclusionQueries;
 
-		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &context.occlusionQueryPool ) );
+		VK_CHECK_RESULT( vkCreateQueryPool( device, &queryPoolInfo, NULL, &occlusionQueryPool ) );
 	}
 
-	context.bufferId = 0;
+	bufferId = 0;
+}
+
+
+void DeviceContext::Destroy( Window& window )
+{
+	vkDestroySampler( device, bilinearSampler, nullptr );
+	vkDestroySampler( device, depthShadowSampler, nullptr );
+	vkDestroyQueryPool( device, statQueryPool, nullptr );
+	vkDestroyQueryPool( device, timestampQueryPool, nullptr );
+	vkDestroyQueryPool( device, occlusionQueryPool, nullptr );
+
+	vkDestroyDescriptorPool( device, descriptorPool, nullptr );
+
+	vkDestroyDevice( device, nullptr );
+
+	if ( enableValidationLayers )
+	{
+		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" );
+		if ( func != nullptr ) {
+			func( instance, debugMessenger, nullptr );
+		}
+	}
+
+	window.DestroyGlfwSurface();
+	
+	vkDestroyInstance( instance, nullptr );
 }

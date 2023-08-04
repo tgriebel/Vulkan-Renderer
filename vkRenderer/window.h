@@ -26,7 +26,6 @@ public:
 	bool					IsFocused() const;
 	std::string				OpenFileDialog( const std::string& title, const std::vector<const char*>& filters, const std::string& filterDesc );
 	void					PumpMessages();
-	void					CreateSurface();
 	vec2f					GetNdc( const float x, const float y );
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );
@@ -35,6 +34,11 @@ public:
 	bool					IsResizeRequested() const { return needsImageResize; }
 	void					CompleteImageResize() { needsImageResize = false; }
 	void					RequestImageResize() { needsImageResize = true; }
+
+#ifdef USE_VULKAN
+	void					CreateGlfwSurface();
+	void					DestroyGlfwSurface();
+#endif
 
 private:
 	bool					needsImageResize;

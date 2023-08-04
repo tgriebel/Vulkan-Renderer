@@ -82,12 +82,6 @@ void Renderer::Init()
 }
 
 
-void Renderer::CreateInstance()
-{
-
-}
-
-
 void Renderer::InitApi()
 {
 	{
@@ -201,7 +195,7 @@ void Renderer::InitImGui( RenderView& view )
 	vkInfo.QueueFamily = context.queueFamilyIndices[ QUEUE_GRAPHICS ];
 	vkInfo.Queue = context.gfxContext;
 	vkInfo.PipelineCache = nullptr;
-	vkInfo.DescriptorPool = descriptorPool;
+	vkInfo.DescriptorPool = context.descriptorPool;
 	vkInfo.Allocator = nullptr;
 	vkInfo.MinImageCount = MaxFrameStates;
 	vkInfo.ImageCount = MaxFrameStates;
@@ -239,12 +233,6 @@ void Renderer::InitImGui( RenderView& view )
 	g_imguiControls.dbgImageId = -1;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
-}
-
-
-void Renderer::CreateDevice()
-{
-
 }
 
 
@@ -488,7 +476,7 @@ void Renderer::CreateDescriptorPool()
 	poolInfo.maxSets = DescriptorPoolMaxSets;
 	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
-	if ( vkCreateDescriptorPool( context.device, &poolInfo, nullptr, &descriptorPool ) != VK_SUCCESS )
+	if ( vkCreateDescriptorPool( context.device, &poolInfo, nullptr, &context.descriptorPool ) != VK_SUCCESS )
 	{
 		throw std::runtime_error( "Failed to create descriptor pool!" );
 	}
@@ -526,7 +514,7 @@ void Renderer::AllocRegisteredBindParms()
 
 	VkDescriptorSetAllocateInfo allocInfo{ };
 	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-	allocInfo.descriptorPool = descriptorPool;
+	allocInfo.descriptorPool = context.descriptorPool;
 	allocInfo.descriptorSetCount = static_cast<uint32_t>( layouts.size() );
 	allocInfo.pSetLayouts = layouts.data();
 
@@ -553,7 +541,7 @@ void Renderer::FreeRegisteredBindParms()
 		descSets.push_back( parms.GetVkObject() );
 	}
 
-	vkFreeDescriptorSets( context.device, descriptorPool, static_cast<uint32_t>( descSets.size() ), descSets.data() );
+	vkFreeDescriptorSets( context.device, context.descriptorPool, static_cast<uint32_t>( descSets.size() ), descSets.data() );
 }
 
 
