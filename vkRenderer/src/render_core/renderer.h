@@ -170,7 +170,6 @@ private:
 	VkDescriptorPool					descriptorPool;
 
 	// Misc
-	VkQueryPool							queryPool;
 	VkDebugUtilsMessengerEXT			debugMessenger;
 	debugMenuArray_t					debugMenus;
 	renderConfig_t						config;

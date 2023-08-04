@@ -501,7 +501,7 @@ void Renderer::CreateDevice()
 		}
 	}
 
-	// Query Pool
+	// Query Pool (Statistics)
 	if( context.deviceFeatures.pipelineStatisticsQuery )
 	{
 		VkQueryPoolCreateInfo queryPoolInfo = {};
@@ -518,7 +518,28 @@ void Renderer::CreateDevice()
 			VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT;
 		queryPoolInfo.queryCount = 6;
 
-		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &queryPool ) );
+		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &context.statQueryPool ) );
+	}
+
+	// Query Pool (Timestamp)
+	if ( context.deviceProperties.limits.timestampComputeAndGraphics )
+	{
+		VkQueryPoolCreateInfo queryPoolInfo = {};
+		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+		queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
+		queryPoolInfo.queryCount = MaxTimeStampQueries;
+
+		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &context.timestampQueryPool ) );
+	}
+
+	// Query Pool (Occlusion)
+	{
+		VkQueryPoolCreateInfo queryPoolInfo = {};
+		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
+		queryPoolInfo.queryType = VK_QUERY_TYPE_OCCLUSION;
+		queryPoolInfo.queryCount = MaxOcclusionQueries;
+
+		VK_CHECK_RESULT( vkCreateQueryPool( context.device, &queryPoolInfo, NULL, &context.occlusionQueryPool ) );
 	}
 
 	context.bufferId = 0;

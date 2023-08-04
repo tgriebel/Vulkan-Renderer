@@ -40,6 +40,9 @@ struct deviceContext_t
 	VkInstance							instance;
 	VkPhysicalDeviceProperties			deviceProperties;
 	VkPhysicalDeviceFeatures			deviceFeatures;
+	VkQueryPool							statQueryPool;
+	VkQueryPool							timestampQueryPool;
+	VkQueryPool							occlusionQueryPool;
 	VkQueue								gfxContext;
 	VkQueue								presentQueue;
 	VkQueue								computeContext;

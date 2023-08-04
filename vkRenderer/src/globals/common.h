@@ -87,6 +87,8 @@ const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
 const uint64_t	MaxFrameBufferMemory			= GB( 2 );
 const uint64_t	MaxFrameStates					= 3;
+const uint64_t	MaxTimeStampQueries				= 12;
+const uint64_t	MaxOcclusionQueries				= 12;
 const uint32_t	DefaultDisplayWidth				= 1280;
 const uint32_t	DefaultDisplayHeight			= 720;
 
