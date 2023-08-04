@@ -94,11 +94,6 @@ void Renderer::InitApi()
 	}
 
 	{
-		// Pool Creation
-		CreateDescriptorPool();
-	}
-
-	{
 		// Memory Allocations
 		sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
 		localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
@@ -455,30 +450,6 @@ void Renderer::CreateFramebuffers()
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );
-	}
-}
-
-
-void Renderer::CreateDescriptorPool()
-{
-	std::array<VkDescriptorPoolSize, 3> poolSizes{ };
-	poolSizes[ 0 ].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[ 0 ].descriptorCount = DescriptorPoolMaxUniformBuffers;
-	poolSizes[ 1 ].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[ 1 ].descriptorCount = DescriptorPoolMaxComboImages;
-	poolSizes[ 2 ].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-	poolSizes[ 2 ].descriptorCount = DescriptorPoolMaxImages;
-
-	VkDescriptorPoolCreateInfo poolInfo{ };
-	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	poolInfo.poolSizeCount = static_cast<uint32_t>( poolSizes.size() );
-	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = DescriptorPoolMaxSets;
-	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-	if ( vkCreateDescriptorPool( context.device, &poolInfo, nullptr, &context.descriptorPool ) != VK_SUCCESS )
-	{
-		throw std::runtime_error( "Failed to create descriptor pool!" );
 	}
 }
 

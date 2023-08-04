@@ -287,7 +287,7 @@ std::vector<const char*> vk_GetRequiredExtensions()
 
 	std::vector<const char*> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
 
-	if ( enableValidationLayers ) {
+	if ( EnableValidationLayers ) {
 		extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
 	}
 
@@ -299,7 +299,7 @@ void DeviceContext::Create( Window& window )
 {
 	// Create Instance
 	{
-		if ( enableValidationLayers && !vk_CheckValidationLayerSupport() )
+		if ( EnableValidationLayers && !vk_CheckValidationLayerSupport() )
 		{
 			throw std::runtime_error( "validation layers requested, but not available!" );
 		}
@@ -331,7 +331,7 @@ void DeviceContext::Create( Window& window )
 		uint32_t glfwExtensionCount = 0;
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-		if ( enableValidationLayers )
+		if ( EnableValidationLayers )
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
 			createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -356,7 +356,7 @@ void DeviceContext::Create( Window& window )
 
 	// Debug Messenger
 	{
-		if ( !enableValidationLayers ) {
+		if ( !EnableValidationLayers ) {
 			return;
 		}
 
@@ -448,7 +448,7 @@ void DeviceContext::Create( Window& window )
 
 		createInfo.enabledExtensionCount = static_cast<uint32_t>( enabledExtensions.size() );
 		createInfo.ppEnabledExtensionNames = enabledExtensions.data();
-		if ( enableValidationLayers )
+		if ( EnableValidationLayers )
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
 			createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -562,6 +562,29 @@ void DeviceContext::Create( Window& window )
 		}
 	}
 
+	// Descriptor Pool
+	{
+		std::array<VkDescriptorPoolSize, 3> poolSizes{ };
+		poolSizes[ 0 ].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSizes[ 0 ].descriptorCount = DescriptorPoolMaxUniformBuffers;
+		poolSizes[ 1 ].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[ 1 ].descriptorCount = DescriptorPoolMaxComboImages;
+		poolSizes[ 2 ].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		poolSizes[ 2 ].descriptorCount = DescriptorPoolMaxImages;
+
+		VkDescriptorPoolCreateInfo poolInfo{ };
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = static_cast<uint32_t>( poolSizes.size() );
+		poolInfo.pPoolSizes = poolSizes.data();
+		poolInfo.maxSets = DescriptorPoolMaxSets;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+
+		if ( vkCreateDescriptorPool( device, &poolInfo, nullptr, &descriptorPool ) != VK_SUCCESS )
+		{
+			throw std::runtime_error( "Failed to create descriptor pool!" );
+		}
+	}
+
 	// Query Pool (Statistics)
 	if ( deviceFeatures.pipelineStatisticsQuery )
 	{
@@ -619,7 +642,7 @@ void DeviceContext::Destroy( Window& window )
 
 	vkDestroyDevice( device, nullptr );
 
-	if ( enableValidationLayers )
+	if ( EnableValidationLayers )
 	{
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" );
 		if ( func != nullptr ) {

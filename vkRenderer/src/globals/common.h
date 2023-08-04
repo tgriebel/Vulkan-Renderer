@@ -62,9 +62,9 @@
 #include <syscore/timer.h>
 
 #ifdef NDEBUG
-const bool enableValidationLayers = true;
+const bool EnableValidationLayers = true;
 #else
-const bool enableValidationLayers = true;
+const bool EnableValidationLayers = true;
 #endif
 
 const bool		ValidateVerbose					= false;
