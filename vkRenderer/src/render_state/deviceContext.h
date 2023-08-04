@@ -25,6 +25,8 @@
 #include "../globals/common.h"
 #include "cmdContext.h"
 
+class Window;
+
 struct swapChainInfo_t
 {
 	VkSurfaceCapabilitiesKHR		capabilities;
@@ -33,13 +35,19 @@ struct swapChainInfo_t
 };
 
 
-struct deviceContext_t
+class DeviceContext
 {
+public:
+	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
+	const std::vector<const char*>		deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+public:
 	VkDevice							device;
 	VkPhysicalDevice					physicalDevice;
 	VkInstance							instance;
 	VkPhysicalDeviceProperties			deviceProperties;
 	VkPhysicalDeviceFeatures			deviceFeatures;
+	VkDebugUtilsMessengerEXT			debugMessenger;
 	VkQueryPool							statQueryPool;
 	VkQueryPool							timestampQueryPool;
 	VkQueryPool							occlusionQueryPool;
@@ -58,9 +66,12 @@ struct deviceContext_t
 	PFN_vkCmdDebugMarkerBeginEXT		fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerEndEXT			fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
+
+	void	Create( Window& window );
+	void	Destroy();
 };
 
-extern deviceContext_t context;
+extern DeviceContext context;
 
 #define VK_CHECK_RESULT( f )																			\
 {																										\

@@ -61,6 +61,16 @@
 #include <sysCore/array.h>
 #include <syscore/timer.h>
 
+#ifdef NDEBUG
+const bool enableValidationLayers = true;
+#else
+const bool enableValidationLayers = true;
+#endif
+
+const bool		ValidateVerbose					= false;
+const bool		ValidateWarnings				= false;
+const bool		ValidateErrors					= true;
+
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1000;
 const uint32_t	DescriptorPoolMaxSamplers		= 3;
 const uint32_t	DescriptorPoolMaxImages			= 1000;

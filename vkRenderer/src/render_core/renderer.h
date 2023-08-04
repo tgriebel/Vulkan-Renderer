@@ -92,10 +92,6 @@ private:
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
 
-	static const bool					ValidateVerbose = false;
-	static const bool					ValidateWarnings = false;
-	static const bool					ValidateErrors = true;
-
 	renderConstants_t					rc;
 	RenderView							views[ MaxViews ];
 	RenderView*							activeViews[ MaxViews ];
@@ -104,15 +100,6 @@ private:
 	RenderView*							view2Ds[ Max2DViews ];
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
-
-	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector<const char*>		deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-
-#ifdef NDEBUG
-	const bool enableValidationLayers = true;
-#else
-	const bool enableValidationLayers = true;
-#endif
 
 	// Timers
 	Timer								frameTimer;
@@ -170,7 +157,6 @@ private:
 	VkDescriptorPool					descriptorPool;
 
 	// Misc
-	VkDebugUtilsMessengerEXT			debugMessenger;
 	debugMenuArray_t					debugMenus;
 	renderConfig_t						config;
 
@@ -229,9 +215,4 @@ private:
 	void								UpdateFrameDescSet();
 	void								BuildPipelines();
 	void								UpdateDescriptorSets();
-
-	// Debug
-	std::vector<const char*>			GetRequiredExtensions() const;	
-	bool								CheckValidationLayerSupport();
-	void								PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& createInfo );
 };

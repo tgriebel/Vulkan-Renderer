@@ -24,7 +24,7 @@
 #include "gpuResources.h"
 #include "../render_state/deviceContext.h"
 
-extern deviceContext_t context;
+extern DeviceContext context;
 
 
 uint32_t GpuBuffer::ClampId( const uint32_t bufferId ) const

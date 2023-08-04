@@ -81,7 +81,7 @@ void Renderer::Cleanup()
 	{
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( context.instance, "vkDestroyDebugUtilsMessengerEXT" );
 		if ( func != nullptr ) {
-			func( context.instance, debugMessenger, nullptr );
+			func( context.instance, context.debugMessenger, nullptr );
 		}
 	}
 
