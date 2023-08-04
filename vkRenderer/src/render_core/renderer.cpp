@@ -953,7 +953,7 @@ void DeviceDebugMenu()
 {
 	if ( ImGui::BeginTabItem( "Device" ) )
 	{
-		DebugMenuDeviceProperties( context.deviceProperties );
+		DebugMenuDeviceProperties( context.deviceProperties, context.deviceFeatures );
 		ImGui::EndTabItem();
 	}
 }

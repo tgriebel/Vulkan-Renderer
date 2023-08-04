@@ -8,6 +8,6 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset );
 void DebugMenuModelTreeNode( Asset<Model>* modelAsset );
 void DebugMenuTextureTreeNode( Asset<Image>* texAsset );
 void DebugMenuLightEdit( Scene* scene );
-void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties );
+void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures deviceFeatures );
 void DeviceDebugMenu();
 #endif

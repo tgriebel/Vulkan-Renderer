@@ -382,10 +382,6 @@ void DebugMenuLightEdit( Scene* scene )
 }
 
 
-void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties )
-{
-	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
-
 #define LimitUint( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
 									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
 
@@ -406,6 +402,14 @@ void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties )
 
 #define LimitHex( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
 									ImGui::TableNextColumn();	ImGui::Text( "%X", deviceProperties.limits.##FIELD );
+
+#define FeatureBool( FIELD )		ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceFeatures.##FIELD );
+
+
+void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures deviceFeatures )
+{
+	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
 
 	if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
 	{
@@ -557,6 +561,70 @@ void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties )
 
 		ImGui::TreePop();
 	}
+	if ( ImGui::TreeNode( "Features" ) )
+	{
+		if ( ImGui::BeginTable( "Info", 2, tableFlags ) )
+		{
+			FeatureBool( robustBufferAccess )
+			FeatureBool( fullDrawIndexUint32 )
+			FeatureBool( imageCubeArray )
+			FeatureBool( independentBlend )
+			FeatureBool( geometryShader )
+			FeatureBool( tessellationShader )
+			FeatureBool( sampleRateShading )
+			FeatureBool( dualSrcBlend )
+			FeatureBool( logicOp )
+			FeatureBool( multiDrawIndirect )
+			FeatureBool( drawIndirectFirstInstance )
+			FeatureBool( depthClamp )
+			FeatureBool( depthBiasClamp )
+			FeatureBool( fillModeNonSolid )
+			FeatureBool( depthBounds )
+			FeatureBool( wideLines )
+			FeatureBool( largePoints )
+			FeatureBool( alphaToOne )
+			FeatureBool( multiViewport )
+			FeatureBool( samplerAnisotropy )
+			FeatureBool( textureCompressionETC2 )
+			FeatureBool( textureCompressionASTC_LDR )
+			FeatureBool( textureCompressionBC )
+			FeatureBool( occlusionQueryPrecise )
+			FeatureBool( pipelineStatisticsQuery )
+			FeatureBool( vertexPipelineStoresAndAtomics )
+			FeatureBool( fragmentStoresAndAtomics )
+			FeatureBool( shaderTessellationAndGeometryPointSize )
+			FeatureBool( shaderImageGatherExtended )
+			FeatureBool( shaderStorageImageExtendedFormats )
+			FeatureBool( shaderStorageImageMultisample )
+			FeatureBool( shaderStorageImageReadWithoutFormat )
+			FeatureBool( shaderStorageImageWriteWithoutFormat )
+			FeatureBool( shaderUniformBufferArrayDynamicIndexing )
+			FeatureBool( shaderSampledImageArrayDynamicIndexing )
+			FeatureBool( shaderStorageBufferArrayDynamicIndexing )
+			FeatureBool( shaderStorageImageArrayDynamicIndexing )
+			FeatureBool( shaderClipDistance )
+			FeatureBool( shaderCullDistance )
+			FeatureBool( shaderFloat64 )
+			FeatureBool( shaderInt64 )
+			FeatureBool( shaderInt16 )
+			FeatureBool( shaderResourceResidency )
+			FeatureBool( shaderResourceMinLod )
+			FeatureBool( sparseBinding )
+			FeatureBool( sparseResidencyBuffer )
+			FeatureBool( sparseResidencyImage2D )
+			FeatureBool( sparseResidencyImage3D )
+			FeatureBool( sparseResidency2Samples )
+			FeatureBool( sparseResidency4Samples )
+			FeatureBool( sparseResidency8Samples )
+			FeatureBool( sparseResidency16Samples )
+			FeatureBool( sparseResidencyAliased )
+			FeatureBool( variableMultisampleRate )
+			FeatureBool( inheritedQueries )
+			ImGui::EndTable();
+		}
+		ImGui::TreePop();
+	}
+}
 
 #undef LimitUint
 #undef LimitDeviceSize
@@ -564,5 +632,6 @@ void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties )
 #undef LimitFloat
 #undef LimitInt
 #undef LimitHex
-}
+#undef FeatureBool
+
 #endif

@@ -40,7 +40,6 @@ struct deviceContext_t
 	VkInstance							instance;
 	VkPhysicalDeviceProperties			deviceProperties;
 	VkPhysicalDeviceFeatures			deviceFeatures;
-	VkPhysicalDeviceFeatures			supportedFeatures;
 	VkQueue								gfxContext;
 	VkQueue								presentQueue;
 	VkQueue								computeContext;
