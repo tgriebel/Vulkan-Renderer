@@ -144,8 +144,9 @@ struct pipelineObject_t;
 
 union sortKey_t
 {
-	uint32_t	materialId : 32;
-	uint32_t	key;
+	uint64_t	materialId : 32;
+	uint64_t	stencilBit : 8;
+	uint64_t	key;
 };
 
 

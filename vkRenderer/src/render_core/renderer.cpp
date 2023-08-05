@@ -816,6 +816,7 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();
+		lastKey.stencilBit = 0;
 
 		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
 		{
@@ -850,17 +851,20 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 
 			gfxContext.MarkerInsert( surface.dbgName, ColorToVector( Color::LGrey ) );
 
-			if ( passIx == DRAWPASS_DEPTH ) {
-				// vkCmdSetDepthBias
-				vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+			if( lastKey.key != surface.sortKey.key )
+			{
+				if ( passIx == DRAWPASS_DEPTH ) {
+					// vkCmdSetDepthBias
+					vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+				}
+
+				const uint32_t descSetCount = 1;
+				VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms[ context.bufferId ]->GetVkObject() };
+
+				vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+				vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
+				lastKey = surface.sortKey;
 			}
-
-			const uint32_t descSetCount = 1;
-			VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms[ context.bufferId ]->GetVkObject() };
-
-			vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-			vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
-			lastKey = surface.sortKey;
 
 			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.GetViewId() ) };
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
