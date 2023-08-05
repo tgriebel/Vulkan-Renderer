@@ -66,7 +66,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->transitionState.flags.clear = true;
 			pass->transitionState.flags.store = true;
 			pass->transitionState.flags.readAfter = false;
-			pass->transitionState.flags.presentAfter = true;
+			pass->transitionState.flags.presentAfter = false;
 
 			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 			pass->clearDepth = 0.0f;
