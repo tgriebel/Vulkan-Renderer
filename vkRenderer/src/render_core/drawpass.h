@@ -39,9 +39,10 @@ static const char* GetPassDebugName( const drawPass_t pass )
 		case DRAWPASS_SKYBOX:			return "Skybox Pass";
 		case DRAWPASS_TRANS:			return "Trans Pass";
 		case DRAWPASS_EMISSIVE:			return "Emissive Pass";
-		case DRAWPASS_DEBUG_SOLID:		return "Debug Solid Pass";
+		case DRAWPASS_DEBUG_3D:			return "Debug 3D Pass";
 		case DRAWPASS_DEBUG_WIREFRAME:	return "Wireframe Pass";
 		case DRAWPASS_POST_2D:			return "2D Pass";
+		case DRAWPASS_DEBUG_2D:			return "Debug Pass";
 	};
 	return "";
 }

@@ -38,6 +38,8 @@
 #include <gfxcore/scene/assetBaker.h>
 #include "raytracerInterface.h"
 
+static const bool bake = false;
+
 AssetManager						g_assets;
 Scene*								g_scene;
 Renderer							g_renderer;
@@ -103,7 +105,6 @@ int main( int argc, char* argv[] )
 	g_window.Init();
 	InitScene( g_scene );
 
-	const bool bake = false;
 	if( bake ) {
 		BakeAssets();
 	}

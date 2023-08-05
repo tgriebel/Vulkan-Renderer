@@ -226,13 +226,13 @@ static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 			( pass == DRAWPASS_TERRAIN ) ||
 			( pass == DRAWPASS_OPAQUE ) ||
 			( pass == DRAWPASS_SKYBOX ) ||
-			( pass == DRAWPASS_DEBUG_SOLID )
+			( pass == DRAWPASS_DEBUG_3D )
 			) {
 			return true;
 		}
 	}
 
-	if ( ( pass == DRAWPASS_DEBUG_SOLID ) && ( ( surf.flags & DEBUG_SOLID ) == 0 ) ) {
+	if ( ( pass == DRAWPASS_DEBUG_3D ) && ( ( surf.flags & DEBUG_SOLID ) == 0 ) ) {
 		return true;
 	}
 

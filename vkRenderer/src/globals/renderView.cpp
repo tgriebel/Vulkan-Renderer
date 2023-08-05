@@ -75,6 +75,20 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
 			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
 		}
+		else if ( passIx == DRAWPASS_DEBUG_2D )
+		{
+			pass->transitionState.flags.clear = false;
+			pass->transitionState.flags.store = true;
+			pass->transitionState.flags.readAfter = false;
+			pass->transitionState.flags.presentAfter = true;
+
+			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+			pass->clearDepth = 0.0f;
+			pass->clearStencil = 0;
+
+			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
+			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
+		}
 		else
 		{
 			pass->transitionState.flags.clear = false;
@@ -115,7 +129,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 
 				pass->transitionState.flags.readAfter = true;
 			}
-			else if ( passIx == DRAWPASS_DEBUG_SOLID )
+			else if ( passIx == DRAWPASS_DEBUG_3D )
 			{
 				stateBits |= GFX_STATE_CULL_MODE_BACK;
 				stateBits |= GFX_STATE_BLEND_ENABLE;

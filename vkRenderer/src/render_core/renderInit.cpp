@@ -62,7 +62,7 @@ void Renderer::Init()
 
 	{
 		view2Ds[ 0 ] = &views[ viewCount ];
-		view2Ds[ 0 ]->Init( "Present", renderViewRegion_t::POST, viewCount, g_swapChain.framebuffers );
+		view2Ds[ 0 ]->Init( "Post", renderViewRegion_t::POST, viewCount, g_swapChain.framebuffers );
 		++viewCount;
 	}
 
@@ -196,9 +196,9 @@ void Renderer::InitImGui( RenderView& view )
 	vkInfo.ImageCount = MaxFrameStates;
 	vkInfo.CheckVkResultFn = nullptr;
 
-	assert( view.passes[ DRAWPASS_POST_2D ] != nullptr );
-	const renderPassTransitionFlags_t transitionState = view.passes[ DRAWPASS_POST_2D ]->transitionState;
-	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_POST_2D ]->fb->GetVkRenderPass( transitionState ) );
+	assert( view.passes[ DRAWPASS_DEBUG_2D ] != nullptr );
+	const renderPassTransitionFlags_t transitionState = view.passes[ DRAWPASS_DEBUG_2D ]->transitionState;
+	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_DEBUG_2D ]->fb->GetVkRenderPass( transitionState ) );
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
@@ -360,9 +360,9 @@ void Renderer::CreateTempCanvas( const imageInfo_t& info, const renderViewRegion
 
 	// Frame buffer
 	{
-		view2Ds[ 1 ] = &views[ MaxViews - 1 ];
-		view2Ds[ 1 ]->Init( "Temp Canvas", region, MaxViews - 1, tempColor );
-		view2Ds[ 1 ]->Commit();
+		//view2Ds[ 1 ] = &views[ MaxViews - 1 ];
+		//view2Ds[ 1 ]->Init( "Temp Canvas", region, MaxViews - 1, tempColor );
+		//view2Ds[ 1 ]->Commit();
 	}
 }
 

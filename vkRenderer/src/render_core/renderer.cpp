@@ -219,7 +219,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 												DRAWPASS_SKYBOX,
 												DRAWPASS_TRANS,
 												DRAWPASS_EMISSIVE,
-												DRAWPASS_DEBUG_SOLID,
+												DRAWPASS_DEBUG_3D,
 												DRAWPASS_DEBUG_WIREFRAME
 											};
 			const uint32_t passCount = COUNTARRAY( mainPasses );
@@ -605,7 +605,7 @@ void Renderer::UpdateBindSets()
 				pass->codeImages[ i ][ 1 ] = gpuImages2D[ 0 ];
 				pass->codeImages[ i ][ 2 ] = gpuImages2D[ 0 ];
 			}
-			else if ( passIx == DRAWPASS_POST_2D )
+			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
 			{
 				pass->codeImages[ i ][ 0 ] = &mainColorImage;
 				pass->codeImages[ i ][ 1 ] = &frameState.depthImageView;
@@ -626,7 +626,7 @@ void Renderer::UpdateBindSets()
 			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState.materialBuffers );
 			pass->parms[ i ]->Bind( bind_lightBuffer, &frameState.lightParms );
 			pass->parms[ i ]->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
-			pass->parms[ i ]->Bind( bind_imageStencil, ( passIx == DRAWPASS_POST_2D ) ? &frameState.stencilImageView : pass->codeImages[ i ][ 0 ] );
+			pass->parms[ i ]->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &frameState.stencilImageView : pass->codeImages[ i ][ 0 ] );
 		}
 	}
 
@@ -812,6 +812,21 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 			continue;
 		}
 
+		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
+		{
+#ifdef USE_IMGUI
+			gfxContext.MarkerBeginRegion( "Debug Menus", ColorToVector( Color::White ) );
+
+			DrawDebugMenu();
+
+			// Render dear imgui into screen
+			ImGui::Render();
+			ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
+			gfxContext.MarkerEndRegion();
+#endif
+			continue;
+		}
+
 		gfxContext.MarkerBeginRegion( pass->name, ColorToVector( Color::White ) );
 
 		for ( size_t surfIx = 0; surfIx < view.mergedModelCnt; surfIx++ )
@@ -849,20 +864,6 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, view.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
 		}
 		gfxContext.MarkerEndRegion();
-	}
-
-	if( view.GetRegion() == renderViewRegion_t::POST )
-	{
-#ifdef USE_IMGUI
-		gfxContext.MarkerBeginRegion( "Debug Menus", ColorToVector( Color::White ) );
-
-		DrawDebugMenu();
-
-		// Render dear imgui into screen
-		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
-		gfxContext.MarkerEndRegion();
-#endif
 	}
 
 	vkCmdEndRenderPass( cmdBuffer );
