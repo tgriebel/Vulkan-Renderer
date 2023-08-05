@@ -360,9 +360,9 @@ void Renderer::CreateTempCanvas( const imageInfo_t& info, const renderViewRegion
 
 	// Frame buffer
 	{
-		//view2Ds[ 1 ] = &views[ MaxViews - 1 ];
-		//view2Ds[ 1 ]->Init( "Temp Canvas", region, MaxViews - 1, tempColor );
-		//view2Ds[ 1 ]->Commit();
+		view2Ds[ 1 ] = &views[ MaxViews - 1 ];
+		view2Ds[ 1 ]->Init( "Temp Canvas", region, MaxViews - 1, tempColor );
+		view2Ds[ 1 ]->Commit();
 	}
 }
 
