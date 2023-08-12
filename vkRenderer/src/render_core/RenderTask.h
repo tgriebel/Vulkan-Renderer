@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <GfxCore/asset_types/material.h>
+#include "../render_core/GpuSync.h"
 
 class CommandContext;
 class RenderView;
@@ -15,12 +17,25 @@ public:
 class RenderTask : public GpuTask
 {
 private:
-	RenderView* view;
+	RenderView*		renderView;
+	drawPass_t		beginPass;
+	drawPass_t		endPass;
+	GpuSemaphore	finishedSemaphore;
 
+	void Init( RenderView* view, drawPass_t begin, drawPass_t end );
+	void Shuntdown();
 	void RenderViewSurfaces( CommandContext& context );
 
 public:
-	RenderTask( RenderView* view ) : view( view ) {}
+	RenderTask( RenderView* view, drawPass_t begin, drawPass_t end )
+	{
+		Init( view, begin, end );
+	}
+
+	~RenderTask()
+	{
+		Shuntdown();
+	}
 
 	void Execute( CommandContext& context ) override;
 };

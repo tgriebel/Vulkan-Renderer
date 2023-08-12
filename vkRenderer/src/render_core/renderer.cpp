@@ -534,7 +534,8 @@ void Renderer::UpdateViews( const Scene* scene )
 
 		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
 			lightObject.shadowViewId = 0xFF;
-		} else
+		}
+		else
 		{
 			lightObject.shadowViewId = shadowCount;
 
@@ -866,7 +867,9 @@ void Renderer::RenderViewSurfaces( RenderView& view, GfxContext& gfxContext )
 				lastKey = surface.sortKey;
 			}
 
-			pushConstants_t pushConstants = { surface.objectId, surface.sortKey.materialId, uint32_t( view.GetViewId() ) };
+			assert( surface.sortKey.materialId < ( 1 << KeyMaterialBits ) );
+
+			pushConstants_t pushConstants = { surface.objectId, uint32_t( surface.sortKey.materialId ), uint32_t( view.GetViewId() ) };
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, view.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );

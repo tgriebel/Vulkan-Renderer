@@ -31,6 +31,7 @@
 
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
+#include "../render_core/RenderTask.h"
 
 class Window;
 class SwapChain;
@@ -66,6 +67,8 @@ struct ComputeState
 class Renderer
 {
 public:
+	friend class RenderTask;
+
 	void								Init();
 	void								Shutdown();
 	void								Commit( const Scene* scene );
@@ -95,6 +98,8 @@ private:
 	RenderView*							view2Ds[ Max2DViews ];
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
+
+	RenderSchedule						schedule;
 
 	// Timers
 	Timer								frameTimer;

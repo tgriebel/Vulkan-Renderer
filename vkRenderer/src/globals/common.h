@@ -142,10 +142,13 @@ enum renderFlags_t
 
 struct pipelineObject_t;
 
+const static uint32_t KeyMaterialBits = 32;
+const static uint32_t KeyStencilBits = 8;
+
 union sortKey_t
 {
-	uint64_t	materialId : 32;
-	uint64_t	stencilBit : 8;
+	uint64_t	materialId : KeyMaterialBits;
+	uint64_t	stencilBit : KeyStencilBits;
 	uint64_t	key;
 };
 
