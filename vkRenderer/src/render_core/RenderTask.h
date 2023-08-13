@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <queue>
 #include <GfxCore/asset_types/material.h>
 #include "../render_core/GpuSync.h"
 
@@ -27,6 +27,11 @@ private:
 	void RenderViewSurfaces( CommandContext& context );
 
 public:
+	RenderTask()
+	{
+		Init( nullptr, DRAWPASS_COUNT, DRAWPASS_COUNT );
+	}
+
 	RenderTask( RenderView* view, drawPass_t begin, drawPass_t end )
 	{
 		Init( view, begin, end );
@@ -51,9 +56,17 @@ public:
 class RenderSchedule
 {
 private:
-	std::vector<GpuTask*> tasks;
+	std::vector< GpuTask* >	tasks;
+	uint32_t				currentTask;
 	
 public:
 
-	void AddTask( GpuTask* task );
+	RenderSchedule() : currentTask( 0 )
+	{}
+
+	uint32_t	PendingTasks() const;
+	void		Reset();
+	void		Clear();
+	void		Queue( GpuTask* task );
+	void		IssueNext( CommandContext& context );
 };

@@ -68,6 +68,7 @@ void RenderThread()
 
 void CheckReloadAssets()
 {
+#if defined( USE_IMGUI )
 	if ( g_imguiControls.rebuildShaders ) {
 		system( "glsl_compile.bat" );
 		g_assets.gpuPrograms.UnloadAll();
@@ -75,6 +76,7 @@ void CheckReloadAssets()
 
 		g_imguiControls.rebuildShaders = false;
 	}
+#endif
 }
 
 void BakeAssets()
@@ -131,6 +133,7 @@ int main( int argc, char* argv[] )
 				g_window.CompleteImageResize();
 			}
 
+#if defined( USE_IMGUI )
 			if ( g_imguiControls.openModelImportFileDialog )
 			{
 				std::vector<const char*> filters;
@@ -189,9 +192,11 @@ int main( int argc, char* argv[] )
 			{
 				g_imguiControls.reloadScene = true;
 			}
+#endif
 
 			UpdateScene( g_scene );
 
+#if defined( USE_IMGUI )
 			if ( g_imguiControls.rebuildRaytraceScene ) {
 				BuildRayTraceScene( g_scene );
 			}
@@ -203,6 +208,7 @@ int main( int argc, char* argv[] )
 			if ( g_imguiControls.rasterizeScene ) {
 				TraceScene( true );
 			}
+#endif
 			
 			g_window.BeginFrame();
 

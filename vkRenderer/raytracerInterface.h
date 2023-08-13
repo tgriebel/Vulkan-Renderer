@@ -40,7 +40,9 @@ static void BuildRayTraceScene( const Scene* scene )
 
 static void TraceScene( const bool rasterize = false )
 {
+#if defined( USE_IMGUI )
 	g_imguiControls.raytraceScene = false;
+#endif
 
 	rtview.targetSize[ 0 ] = 320;
 	rtview.targetSize[ 1 ] = 180;

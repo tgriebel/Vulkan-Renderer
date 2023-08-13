@@ -29,6 +29,7 @@
 #include "../render_state/rhi.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/bindings.h"
+#include "../render_core/RenderTask.h"
 
 #include "drawpass.h"
 #include "swapChain.h"
@@ -79,6 +80,12 @@ void Renderer::Init()
 	InitImGui( *view2Ds[ 0 ] );
 
 	UploadAssets();
+
+	for ( uint32_t i = 0; i < MaxShadowViews; ++i ) {
+		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
+	}
+	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 }
 
 
@@ -213,7 +220,7 @@ void Renderer::InitImGui( RenderView& view )
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
 	}
 	ImGui_ImplGlfw_NewFrame();
-#endif
+
 	g_imguiControls.raytraceScene = false;
 	g_imguiControls.rasterizeScene = false;
 	g_imguiControls.rebuildRaytraceScene = false;
@@ -228,6 +235,8 @@ void Renderer::InitImGui( RenderView& view )
 	g_imguiControls.dbgImageId = -1;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
+
+#endif
 }
 
 

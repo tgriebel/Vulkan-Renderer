@@ -482,14 +482,11 @@ void Renderer::SubmitFrame()
 	{
 		gfxContext.Begin();
 
-		for ( uint32_t viewIx = 0; viewIx < activeViewCount; ++viewIx )
-		{
-			gfxContext.MarkerBeginRegion( activeViews[ viewIx ]->GetName(), ColorToVector( Color::White ) );
-
-			RenderViewSurfaces( *activeViews[ viewIx ], gfxContext );
-
-			gfxContext.MarkerEndRegion();
+		schedule.Reset();
+		while( schedule.PendingTasks() > 0 ) {
+			schedule.IssueNext( gfxContext );
 		}
+
 		gfxContext.End();
 	}
 
@@ -653,9 +650,15 @@ void Renderer::UpdateBuffers()
 		const float fracPart = modf( time, &intPart );
 
 		globals.time = vec4f( time, intPart, fracPart, 1.0f );
+#if defined( USE_IMGUI )
 		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
+#else
+		globals.generic = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
+		globals.tonemap = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
+#endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 
 		state.globalConstants.CopyData( &globals, sizeof( globals ) );
@@ -889,16 +892,19 @@ void Renderer::AttachDebugMenu( const debugMenuFuncPtr funcPtr )
 
 void DeviceDebugMenu()
 {
+#if defined( USE_IMGUI )
 	if ( ImGui::BeginTabItem( "Device" ) )
 	{
 		DebugMenuDeviceProperties( context.deviceProperties, context.deviceFeatures );
 		ImGui::EndTabItem();
 	}
+#endif
 }
 
 
 void Renderer::DrawDebugMenu()
 {
+#if defined( USE_IMGUI )
 	if ( ImGui::BeginMainMenuBar() )
 	{
 		if ( ImGui::BeginMenu( "File" ) )
@@ -964,4 +970,5 @@ void Renderer::DrawDebugMenu()
 	//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
 
 	ImGui::End();
+#endif
 }

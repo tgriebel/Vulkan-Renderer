@@ -15,7 +15,9 @@
 extern AssetManager g_assets;
 extern Scene* g_scene;
 
+#if defined( USE_IMGUI )
 extern imguiControls_t			g_imguiControls;
+#endif
 extern Window					g_window;
 
 void CreateCodeAssets()
@@ -241,6 +243,7 @@ void UpdateScene( Scene* scene )
 	}
 	
 
+#if defined( USE_IMGUI )
 	if ( g_imguiControls.dbgImageId >= 0 )
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
@@ -255,7 +258,9 @@ void UpdateScene( Scene* scene )
 			}
 		}
 	}
-	else {
+	else
+#endif
+	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
 		if ( ent != nullptr ) {
 			ent->SetFlag( ENT_FLAG_NO_DRAW );
