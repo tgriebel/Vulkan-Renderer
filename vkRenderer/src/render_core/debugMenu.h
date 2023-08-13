@@ -2,6 +2,16 @@
 
 class Scene;
 
+struct renderDebugData_t
+{
+	uint32_t	frameNumber;
+	float		frameTimeMs;
+	float		mouseX;
+	float		mouseY;
+};
+
+extern renderDebugData_t g_renderDebugData;
+
 #if defined( USE_IMGUI )
 void DebugMenuMaterial( const Material& mat );
 void DebugMenuMaterialEdit( Asset<Material>* matAsset );

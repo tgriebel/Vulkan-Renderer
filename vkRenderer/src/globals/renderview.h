@@ -39,6 +39,8 @@ enum class renderViewRegion_t : uint32_t
 class RenderView
 {
 private:
+	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
+
 	const FrameBuffer*	m_framebuffer;
 	viewport_t			m_viewport;
 	mat4x4f				m_viewMatrix;
@@ -127,4 +129,5 @@ public:
 	drawSurf_t				merged[ MaxSurfaces ];
 	surfaceUpload_t			uploads[ MaxSurfaces ];
 	uint32_t				instanceCounts[ MaxSurfaces ];
+	debugMenuArray_t		debugMenus;
 };

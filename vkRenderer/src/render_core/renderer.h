@@ -44,8 +44,6 @@ using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 extern imguiControls_t g_imguiControls;
 #endif
 
-typedef void ( *debugMenuFuncPtr )( );
-
 extern Window						g_window;
 extern SwapChain					g_swapChain;
 
@@ -84,12 +82,12 @@ private:
 	using lightBufferArray_t	= Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t	= Array<materialBufferObject_t, MaxMaterials>;
 	using bindParmArray_t		= Array<ShaderBindParms, DescriptorPoolMaxSets>;
-	using debugMenuArray_t		= Array<debugMenuFuncPtr, 12>;
 	using surfUploadArray_t		= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
 
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
 
+	renderConfig_t						config;
 	renderConstants_t					rc;
 	RenderView							views[ MaxViews ];
 	RenderView*							activeViews[ MaxViews ];
@@ -103,7 +101,6 @@ private:
 
 	// Timers
 	Timer								frameTimer;
-	float								renderTime = 0.0f;
 	uint32_t							m_frameNumber = 0;
 
 	// Upload management
@@ -154,10 +151,6 @@ private:
 	bindParmArray_t						bindParmsList;
 	ShaderBindSet						defaultBindSet;
 	ShaderBindSet						particleShaderBinds;
-
-	// Misc
-	debugMenuArray_t					debugMenus;
-	renderConfig_t						config;
 
 	// Init/Shutdown
 	void								InitApi();

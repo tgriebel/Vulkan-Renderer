@@ -12,9 +12,13 @@ extern AssetManager g_assets;
 #include "../../external/imgui/backends/imgui_impl_glfw.h"
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
 
+#include "debugMenu.h"
+
 extern imguiControls_t g_imguiControls;
 
 static const int defaultWidth = 100;
+
+renderDebugData_t g_renderDebugData;
 
 struct ImguiStyle
 {

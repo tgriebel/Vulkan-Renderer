@@ -421,7 +421,9 @@ void Renderer::Render()
 	SubmitFrame();
 
 	frameTimer.Stop();
-	renderTime = static_cast<float>( frameTimer.GetElapsed() );
+
+	g_renderDebugData.frameTimeMs = static_cast<float>( frameTimer.GetElapsed() );
+	g_renderDebugData.frameNumber = m_frameNumber;
 }
 
 
@@ -739,7 +741,7 @@ void Renderer::InitConfig()
 
 void Renderer::AttachDebugMenu( const debugMenuFuncPtr funcPtr )
 {
-	debugMenus.Append( funcPtr );
+	view2Ds[ 0 ]->debugMenus.Append( funcPtr );
 }
 
 
@@ -751,77 +753,5 @@ void DeviceDebugMenu()
 		DebugMenuDeviceProperties( context.deviceProperties, context.deviceFeatures );
 		ImGui::EndTabItem();
 	}
-#endif
-}
-
-
-void Renderer::DrawDebugMenu()
-{
-#if defined( USE_IMGUI )
-	if ( ImGui::BeginMainMenuBar() )
-	{
-		if ( ImGui::BeginMenu( "File" ) )
-		{
-			if ( ImGui::MenuItem( "Open Scene", "CTRL+O" ) ) {
-				g_imguiControls.openSceneFileDialog = true;
-			}
-			if ( ImGui::MenuItem( "Reload", "CTRL+R" ) ) {
-				g_imguiControls.reloadScene = true;
-			}
-			if ( ImGui::MenuItem( "Import Obj", "CTRL+I" ) ) {
-				g_imguiControls.openModelImportFileDialog = true;
-			}
-			ImGui::EndMenu();
-		}
-		if ( ImGui::BeginMenu( "Edit" ) )
-		{
-			if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {}
-			if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {}  // Disabled item
-			ImGui::Separator();
-			if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {}
-			if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {}
-			if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {}
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
-
-	ImGui::Begin( "Control Panel" );
-
-	if ( ImGui::BeginTabBar( "Tabs" ) )
-	{
-		for( uint32_t i = 0; i < debugMenus.Count(); ++i ) {
-			(*debugMenus[ i ])();
-		}
-		ImGui::EndTabBar();
-	}
-
-	ImGui::Separator();
-
-	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
-	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
-
-	char entityName[ 256 ];
-	if ( g_imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, g_assets.modelLib.FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
-	}
-	else {
-		memset( &entityName[ 0 ], 0, 256 );
-	}
-
-	ImGui::Text( "Mouse: (%f, %f)", (float)g_window.input.GetMouse().x, (float)g_window.input.GetMouse().y );
-	ImGui::Text( "Mouse Dt: (%f, %f)", (float)g_window.input.GetMouse().dx, (float)g_window.input.GetMouse().dy );
-	const vec4f cameraOrigin = g_scene->camera.GetOrigin();
-	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
-
-	const vec2f ndc = g_window.GetNdc( g_window.input.GetMouse().x, g_window.input.GetMouse().y );
-
-	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
-	ImGui::Text( "Frame Number: %d", m_frameNumber );
-	ImGui::SameLine();
-	ImGui::Text( "FPS: %f", 1000.0f / renderTime );
-	//ImGui::Text( "Model %i: %s", 0, models[ 0 ].name.c_str() );
-
-	ImGui::End();
 #endif
 }
