@@ -1,11 +1,24 @@
 #include "GpuSync.h"
 #include "../render_state/deviceContext.h"
 
-void GpuSemaphore::Create( const char* name )
+void GpuSemaphore::Create( const char* name, const bool isBinary )
 {
 #ifdef USE_VULKAN
+
+	VkSemaphoreTypeCreateInfo timelineCreateInfo{};
 	VkSemaphoreCreateInfo semaphoreInfo{ };
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	if( isBinary == false )
+	{	
+		timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+		timelineCreateInfo.pNext = NULL;
+		timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+		timelineCreateInfo.initialValue = 0;
+
+		semaphoreInfo.flags = VK_SEMAPHORE_TYPE_TIMELINE;
+		semaphoreInfo.pNext = &timelineCreateInfo;
+	}
 
 	for( uint32_t i = 0; i < MaxFrameStates; ++i ) {
 		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &semaphores[ i ] ) != VK_SUCCESS ) {

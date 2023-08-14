@@ -11,7 +11,7 @@ public:
 	VkPipelineStageFlagBits	waitStage;
 #endif
 public:
-	void					Create( const char* name );
+	void					Create( const char* name, const bool isBinary = true );
 	void					Destroy();
 #ifdef USE_VULKAN
 	VkSemaphore&			VkObject();
