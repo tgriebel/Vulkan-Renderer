@@ -285,7 +285,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			passBits.semantic.stencilAttach.fmt = createInfo.stencil[ 0 ]->info.fmt;
 			passBits.semantic.stencilTrans = state;
 			passBits.semantic.attachmentMask |= RENDER_PASS_MASK_STENCIL;
-		}	
+		}
 
 		renderPasses[ permIx ] = vk_CreateRenderPass( passBits );
 		if ( renderPasses[ permIx ] == VK_NULL_HANDLE ) {

@@ -113,6 +113,12 @@
     <ClCompile Include="src\render_core\RenderTask.cpp">
       <Filter>render core</Filter>
     </ClCompile>
+    <ClCompile Include="src\globals\postEffect.cpp">
+      <Filter>globals</Filter>
+    </ClCompile>
+    <ClCompile Include="src\globals\drawGroup.cpp">
+      <Filter>globals</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -235,6 +241,12 @@
     </ClInclude>
     <ClInclude Include="src\render_core\RenderTask.h">
       <Filter>render core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globals\postEffect.h">
+      <Filter>globals</Filter>
+    </ClInclude>
+    <ClInclude Include="src\globals\drawGroup.h">
+      <Filter>globals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <gfxcore/scene/scene.h>
 #include "common.h"
+#include "drawGroup.h"
 #include "../render_core/drawpass.h"
 
 enum class renderViewRegion_t : uint32_t
@@ -57,9 +58,6 @@ public:
 	{
 		m_viewport = viewport_t( 0, 0, DefaultDisplayWidth, DefaultDisplayHeight, 0.0f, 1.0f );
 
-		committedModelCnt = 0;
-		mergedModelCnt = 0;
-
 		for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
 			passes[ i ] = nullptr;
 		}
@@ -73,13 +71,6 @@ public:
 
 		m_framebuffer = nullptr;
 		m_region = renderViewRegion_t::UNKNOWN;
-
-		memset( surfaces, 0, MaxSurfaces );
-		memset( sortedSurfaces, 0, MaxSurfaces );
-		memset( merged, 0, MaxSurfaces );
-		memset( sortedInstances, 0, MaxSurfaces );
-		memset( instances, 0, MaxSurfaces );
-		memset( instanceCounts, 0, MaxSurfaces );
 	}
 
 	~RenderView()
@@ -116,18 +107,6 @@ public:
 	uint32_t				lights[ MaxLights ];
 	uint32_t				numLights;
 	DrawPass*				passes[ DRAWPASS_COUNT ];
-
-	GpuBuffer*				ib;	// FIXME: don't use a pointer
-	GpuBuffer*				vb;
-
-	uint32_t				committedModelCnt;
-	uint32_t				mergedModelCnt;
-	drawSurf_t				surfaces[ MaxSurfaces ];
-	drawSurf_t				sortedSurfaces[ MaxSurfaces ];
-	drawSurfInstance_t		instances[ MaxSurfaces ];
-	drawSurfInstance_t		sortedInstances[ MaxSurfaces ];
-	drawSurf_t				merged[ MaxSurfaces ];
-	surfaceUpload_t			uploads[ MaxSurfaces ];
-	uint32_t				instanceCounts[ MaxSurfaces ];
+	DrawGroup				drawGroup;
 	debugMenuArray_t		debugMenus;
 };

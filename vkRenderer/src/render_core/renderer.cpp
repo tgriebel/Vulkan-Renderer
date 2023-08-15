@@ -79,14 +79,14 @@ void Renderer::Commit( const Scene* scene )
 		if( view.IsCommitted() == false ) {
 			continue;
 		}
-		view.committedModelCnt = 0;
+		view.drawGroup.committedModelCnt = 0;
 		for ( uint32_t entIx = 0; entIx < entCount; ++entIx ) {
 			CommitModel( view, *scene->entities[ entIx ] );
 		}
 		MergeSurfaces( view );
 
-		view.vb = &vb;
-		view.ib = &ib;
+		view.drawGroup.vb = &vb;
+		view.drawGroup.ib = &ib;
 	}
 	UpdateViews( scene );
 }
@@ -104,57 +104,57 @@ void Renderer::MergeSurfaces( RenderView& view )
 			Comparator( RenderView* view ) : view( view ) {}
 			bool operator()( const uint32_t ix0, const uint32_t ix1 )
 			{
-				const auto lhs = view->surfaces[ ix0 ].sortKey.key;
-				const auto rhs = view->surfaces[ ix1 ].sortKey.key;
+				const auto lhs = view->drawGroup.surfaces[ ix0 ].sortKey.key;
+				const auto rhs = view->drawGroup.surfaces[ ix1 ].sortKey.key;
 				return ( lhs < rhs );
 			}
 		};
 
-		std::vector<uint32_t> sortIndices( view.committedModelCnt );
+		std::vector<uint32_t> sortIndices( view.drawGroup.committedModelCnt );
 		std::iota( sortIndices.begin(), sortIndices.end(), 0 );
 
 		std::sort( sortIndices.begin(), sortIndices.end(), Comparator( &view ) );
 
-		for( uint32_t srcIndex = 0; srcIndex < view.committedModelCnt; ++srcIndex )
+		for( uint32_t srcIndex = 0; srcIndex < view.drawGroup.committedModelCnt; ++srcIndex )
 		{
 			const uint32_t dstIndex = sortIndices[ srcIndex ];
-			view.sortedSurfaces[ dstIndex ] = view.surfaces[ srcIndex ];
-			view.sortedInstances[ dstIndex ] = view.instances[ srcIndex ];
+			view.drawGroup.sortedSurfaces[ dstIndex ] = view.drawGroup.surfaces[ srcIndex ];
+			view.drawGroup.sortedInstances[ dstIndex ] = view.drawGroup.instances[ srcIndex ];
 		}
 	}
 
 	// Merge Surfaces
 	{
-		view.mergedModelCnt = 0;
+		view.drawGroup.mergedModelCnt = 0;
 		std::unordered_map< uint32_t, uint32_t > uniqueSurfs;
-		uniqueSurfs.reserve( view.committedModelCnt );
-		for ( uint32_t i = 0; i < view.committedModelCnt; ++i ) {
-			drawSurfInstance_t& instance = view.sortedInstances[ i ];
-			auto it = uniqueSurfs.find( view.sortedSurfaces[ i ].hash );
+		uniqueSurfs.reserve( view.drawGroup.committedModelCnt );
+		for ( uint32_t i = 0; i < view.drawGroup.committedModelCnt; ++i ) {
+			drawSurfInstance_t& instance = view.drawGroup.sortedInstances[ i ];
+			auto it = uniqueSurfs.find( view.drawGroup.sortedSurfaces[ i ].hash );
 			if ( it == uniqueSurfs.end() ) {
-				const uint32_t surfId = view.mergedModelCnt;
-				uniqueSurfs[ view.sortedSurfaces[ i ].hash ] = surfId;
+				const uint32_t surfId = view.drawGroup.mergedModelCnt;
+				uniqueSurfs[ view.drawGroup.sortedSurfaces[ i ].hash ] = surfId;
 
-				view.instanceCounts[ surfId ] = 1;
-				view.merged[ surfId ] = view.sortedSurfaces[ i ];
+				view.drawGroup.instanceCounts[ surfId ] = 1;
+				view.drawGroup.merged[ surfId ] = view.drawGroup.sortedSurfaces[ i ];
 
 				instance.id = 0;
 				instance.surfId = surfId;
 
-				++view.mergedModelCnt;
+				++view.drawGroup.mergedModelCnt;
 			}
 			else {
-				instance.id = view.instanceCounts[ it->second ];
+				instance.id = view.drawGroup.instanceCounts[ it->second ];
 				instance.surfId = it->second;
-				view.instanceCounts[ it->second ]++;
+				view.drawGroup.instanceCounts[ it->second ]++;
 			}
 		}
 		uint32_t totalCount = 0;
-		for ( uint32_t i = 0; i < view.mergedModelCnt; ++i )
+		for ( uint32_t i = 0; i < view.drawGroup.mergedModelCnt; ++i )
 		{
-			view.merged[ i ].objectId += totalCount;
-			view.uploads[ i ] = surfUploads[ view.merged[ i ].uploadId ];
-			totalCount += view.instanceCounts[ i ];
+			view.drawGroup.merged[ i ].objectId += totalCount;
+			view.drawGroup.uploads[ i ] = surfUploads[ view.drawGroup.merged[ i ].uploadId ];
+			totalCount += view.drawGroup.instanceCounts[ i ];
 		}
 	}
 }
@@ -173,8 +173,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 	for ( uint32_t i = 0; i < model.surfCount; ++i )
 	{
-		drawSurfInstance_t& instance = view.instances[ view.committedModelCnt ];
-		drawSurf_t& surf = view.surfaces[ view.committedModelCnt ];
+		drawSurfInstance_t& instance = view.drawGroup.instances[ view.drawGroup.committedModelCnt ];
+		drawSurf_t& surf = view.drawGroup.surfaces[ view.drawGroup.committedModelCnt ];
 
 		if( model.uploadId == -1 )
 		{
@@ -285,7 +285,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
 		}
 
-		++view.committedModelCnt;
+		++view.drawGroup.committedModelCnt;
 	}
 }
 
@@ -693,13 +693,13 @@ void Renderer::UpdateBuffers()
 		const uint32_t viewId = view.GetViewId();
 
 		static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
-		assert( view.committedModelCnt < MaxSurfaces );
-		for ( uint32_t surfIx = 0; surfIx < view.committedModelCnt; ++surfIx )
+		assert( view.drawGroup.committedModelCnt < MaxSurfaces );
+		for ( uint32_t surfIx = 0; surfIx < view.drawGroup.committedModelCnt; ++surfIx )
 		{
 			uniformBufferObject_t ubo;
-			ubo.model = view.sortedInstances[ surfIx ].modelMatrix;
-			const drawSurf_t& surf = view.merged[ view.sortedInstances[ surfIx ].surfId ];
-			const uint32_t objectId = ( view.sortedInstances[ surfIx ].id + surf.objectId );
+			ubo.model = view.drawGroup.sortedInstances[ surfIx ].modelMatrix;
+			const drawSurf_t& surf = view.drawGroup.merged[ view.drawGroup.sortedInstances[ surfIx ].surfId ];
+			const uint32_t objectId = ( view.drawGroup.sortedInstances[ surfIx ].id + surf.objectId );
 			uboBuffer[ objectId ] = ubo;
 		}
 

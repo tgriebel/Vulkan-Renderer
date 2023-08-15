@@ -184,6 +184,8 @@
     <ClInclude Include="scenes\sceneParser.h" />
     <ClInclude Include="shaders\light.h" />
     <ClInclude Include="src\globals\common.h" />
+    <ClInclude Include="src\globals\drawGroup.h" />
+    <ClInclude Include="src\globals\postEffect.h" />
     <ClInclude Include="src\globals\renderConstants.h" />
     <ClInclude Include="src\globals\renderview.h" />
     <ClInclude Include="src\globals\render_util.h" />
@@ -227,6 +229,8 @@
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\globals\drawGroup.cpp" />
+    <ClCompile Include="src\globals\postEffect.cpp" />
     <ClCompile Include="src\globals\renderView.cpp" />
     <ClCompile Include="src\globals\render_util.cpp" />
     <ClCompile Include="src\io\io.cpp" />

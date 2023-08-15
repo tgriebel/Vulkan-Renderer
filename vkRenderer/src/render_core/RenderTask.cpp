@@ -101,10 +101,10 @@ void RenderTask::RenderViewSurfaces( CommandContext& cmdContext )
 
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
-	VkBuffer vertexBuffers[] = { renderView->vb->GetVkObject() };
+	VkBuffer vertexBuffers[] = { renderView->drawGroup.vb->GetVkObject() };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers( cmdContext.CommandBuffer(), 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( cmdContext.CommandBuffer(), renderView->ib->GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindIndexBuffer( cmdContext.CommandBuffer(), renderView->drawGroup.ib->GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
@@ -191,10 +191,10 @@ void RenderTask::RenderViewSurfaces( CommandContext& cmdContext )
 			continue;
 		}
 
-		for ( size_t surfIx = 0; surfIx < renderView->mergedModelCnt; surfIx++ )
+		for ( size_t surfIx = 0; surfIx < renderView->drawGroup.mergedModelCnt; surfIx++ )
 		{
-			drawSurf_t& surface = renderView->merged[ surfIx ];
-			surfaceUpload_t& upload = renderView->uploads[ surfIx ];
+			drawSurf_t& surface = renderView->drawGroup.merged[ surfIx ];
+			surfaceUpload_t& upload = renderView->drawGroup.uploads[ surfIx ];
 
 			if ( SkipPass( surface, drawPass_t( passIx ) ) ) {
 				continue;
@@ -228,7 +228,7 @@ void RenderTask::RenderViewSurfaces( CommandContext& cmdContext )
 			pushConstants_t pushConstants = { surface.objectId, uint32_t( surface.sortKey.materialId ), uint32_t( renderView->GetViewId() ) };
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, renderView->instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
+			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, renderView->drawGroup.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
 		}
 
 		vkCmdEndRenderPass( cmdBuffer );
