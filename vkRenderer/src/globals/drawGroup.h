@@ -27,6 +27,9 @@ public:
 		memset( instanceCounts,		0, MaxSurfaces );
 	}
 
+	void	Sort();
+	void	Merge();
+
 	GpuBuffer*				ib;	// FIXME: don't use a pointer
 	GpuBuffer*				vb;
 

@@ -28,6 +28,7 @@
 #include "../globals/common.h"
 #include "../globals/renderConstants.h"
 #include "../globals/renderview.h"
+#include "../globals/postEffect.h"
 
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
@@ -94,6 +95,7 @@ private:
 	RenderView*							renderViews[ Max3DViews ];
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
+	PostEffect							downScale;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
@@ -180,10 +182,8 @@ private:
 	void								CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region );
 
 	// Draw Frame
-	void								RenderViewSurfaces( RenderView& view, GfxContext& gfxContext );
 	void								CommitModel( RenderView& view, const Entity& ent );
 	void								MergeSurfaces( RenderView& view );
-	void								DrawDebugMenu();
 	void								FlushGPU();
 	void								WaitForEndFrame();
 	void								SubmitFrame();
