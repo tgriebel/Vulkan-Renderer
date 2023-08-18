@@ -170,9 +170,7 @@ public:
 	ShaderBindSet()
 	{}
 
-	ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount );
-
-	void Create();
+	void Create( const ShaderBinding bindings[], const uint32_t bindCount );
 	void Destroy();
 
 #ifdef USE_VULKAN

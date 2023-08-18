@@ -77,41 +77,39 @@ uint32_t ShaderBinding::GetHash() const
 }
 
 
-ShaderBindSet::ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount )
+void ShaderBindSet::Create( const ShaderBinding bindings[], const uint32_t bindCount )
 {
-	m_bindMap.reserve( bindCount );
-
-	std::vector<uint32_t> hashes;
-	hashes.resize( bindCount );
-
-	for ( uint32_t i = 0; i < bindCount; ++i )
-	{
-		ShaderBinding& binding = m_bindMap[ bindings[ i ].GetHash() ];
-		binding = bindings[i];
-		binding.SetSlot( i );
-		hashes[ i ] = binding.GetHash();
-	}
-
-	m_hash = Hash( reinterpret_cast<const uint8_t*>( hashes.data() ), bindCount * sizeof( hashes[ 0 ] ) );
-	m_valid = false;
-}
-
-
-void ShaderBindSet::Create()
-{
-	const uint32_t bindingCount = Count();
-	if ( bindingCount == 0 )
+	if ( bindCount == 0 )
 	{
 		assert( 0 );
 		return;
 	}
-	assert( m_valid == false );
 
+	// Build bind set
+	{
+		m_bindMap.reserve( bindCount );
+
+		std::vector<uint32_t> hashes;
+		hashes.resize( bindCount );
+
+		for ( uint32_t i = 0; i < bindCount; ++i )
+		{
+			ShaderBinding& binding = m_bindMap[ bindings[ i ].GetHash() ];
+			binding = bindings[ i ];
+			binding.SetSlot( i );
+			hashes[ i ] = binding.GetHash();
+		}
+
+		m_hash = Hash( reinterpret_cast<const uint8_t*>( hashes.data() ), bindCount * sizeof( hashes[ 0 ] ) );
+		m_valid = false;
+	}
+
+	// Create API object
 #ifdef USE_VULKAN
 	std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-	layoutBindings.resize( bindingCount );
+	layoutBindings.resize( bindCount );
 
-	for ( uint32_t i = 0; i < bindingCount; ++i )
+	for ( uint32_t i = 0; i < bindCount; ++i )
 	{
 		const ShaderBinding* binding = GetBinding( i );
 

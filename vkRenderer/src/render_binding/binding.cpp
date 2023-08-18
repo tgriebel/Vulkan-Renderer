@@ -9,7 +9,7 @@ BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
 
 // Post Effect Resources
-BINDING( sourceImage, IMAGE_2D, 1, BIND_STATE_ALL );
+BINDING( sourceImage, IMAGE_2D, 1, BIND_STATE_PS );
 
 // Raster Resources
 BINDING( viewBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );

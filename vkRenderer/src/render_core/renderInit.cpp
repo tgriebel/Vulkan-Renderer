@@ -130,13 +130,9 @@ void Renderer::InitApi()
 void Renderer::InitShaderResources()
 {
 	{
-		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
-		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
-		downSampleBinds = ShaderBindSet( g_downsampleBindings, g_downsampleBindCount );
-
-		defaultBindSet.Create();
-		particleShaderBinds.Create();
-		//downSampleBinds.Create();
+		defaultBindSet.Create( g_defaultBindings, g_defaultBindCount );
+		particleShaderBinds.Create( g_particleCsBindings, g_particleCsBindCount );;
+		downSampleBinds.Create( g_downsampleBindings, g_downsampleBindCount );
 
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
 		for ( uint32_t i = 0; i < programCount; ++i )
