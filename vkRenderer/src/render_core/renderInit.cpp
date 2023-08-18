@@ -75,6 +75,8 @@ void Renderer::Init()
 	renderViews[ 0 ]->Commit();
 	view2Ds[ 0 ]->Commit();
 
+	downScale.Init( "DownScale", tempColor, true, false );
+
 	InitShaderResources();
 
 	InitImGui( *view2Ds[ 0 ] );
@@ -130,9 +132,11 @@ void Renderer::InitShaderResources()
 	{
 		particleShaderBinds = ShaderBindSet( g_particleCsBindings, g_particleCsBindCount );
 		defaultBindSet = ShaderBindSet( g_defaultBindings, g_defaultBindCount );
+		downSampleBinds = ShaderBindSet( g_downsampleBindings, g_downsampleBindCount );
 
 		defaultBindSet.Create();
 		particleShaderBinds.Create();
+		//downSampleBinds.Create();
 
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
 		for ( uint32_t i = 0; i < programCount; ++i )

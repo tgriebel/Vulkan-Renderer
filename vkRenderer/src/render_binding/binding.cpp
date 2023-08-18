@@ -8,6 +8,9 @@ BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 // Compute Resources
 BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
 
+// Post Effect Resources
+BINDING( sourceImage, IMAGE_2D, 1, BIND_STATE_ALL );
+
 // Raster Resources
 BINDING( viewBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
 BINDING( modelBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
@@ -36,4 +39,9 @@ const ShaderBinding g_particleCsBindings[ g_particleCsBindCount ] =
 											{
 												bind_globalsBuffer,
 												bind_particleWriteBuffer 
+											};
+
+const ShaderBinding g_downsampleBindings[ g_downsampleBindCount ] =
+											{
+												bind_sourceImage,
 											};

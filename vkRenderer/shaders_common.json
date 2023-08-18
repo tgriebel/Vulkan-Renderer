@@ -79,5 +79,10 @@
       "name": "ClearParticles",
       "cs": "clearCS.spv",
     },
+	{
+      "name": "DownSample",
+      "vs": "fullscreenVS.spv",
+      "ps": "downsamplePS.spv"
+    },
   ]
 }

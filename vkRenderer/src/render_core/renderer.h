@@ -153,6 +153,7 @@ private:
 	bindParmArray_t						bindParmsList;
 	ShaderBindSet						defaultBindSet;
 	ShaderBindSet						particleShaderBinds;
+	ShaderBindSet						downSampleBinds;
 
 	// Init/Shutdown
 	void								InitApi();

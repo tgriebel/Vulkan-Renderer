@@ -431,6 +431,8 @@ void Renderer::SubmitFrame()
 	{
 		gfxContext.Begin();
 
+		//downScale.Execute();
+
 		schedule.Reset();
 		while( schedule.PendingTasks() > 0 ) {
 			schedule.IssueNext( gfxContext );

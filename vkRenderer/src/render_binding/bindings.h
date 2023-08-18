@@ -22,3 +22,6 @@ extern const ShaderBinding g_defaultBindings[ g_defaultBindCount ];
 
 const uint32_t g_particleCsBindCount = 2;
 extern const ShaderBinding g_particleCsBindings[ g_particleCsBindCount ];
+
+const uint32_t g_downsampleBindCount = 1;
+extern const ShaderBinding g_downsampleBindings[ g_downsampleBindCount ];

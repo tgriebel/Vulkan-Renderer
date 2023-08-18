@@ -270,6 +270,7 @@
     <None Include="shaders\depth.frag" />
     <None Include="shaders\downsample.frag" />
     <None Include="shaders\emissive.frag" />
+    <None Include="shaders\fullscreen.vert" />
     <None Include="shaders\lit.frag" />
     <None Include="shaders\pixelSimple.frag" />
     <None Include="shaders\postProcess.frag" />

@@ -21,41 +21,26 @@
 * SOFTWARE.
 */
 
-float D_GGX( const float NoH, const float roughness )
-{
-    float a = roughness * roughness;
-    float a2 = a * a;
-    float NoH2 = NoH * NoH;
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_EXT_nonuniform_qualifier : require
+#extension GL_GOOGLE_include_directive : require
 
-    float num = a2;
-    float denom = ( NoH2 * ( a2 - 1.0 ) + 1.0 );
-    denom = PI * denom * denom;
+#include "globals.h"
 
-    return num / denom;
-}
+VS_LAYOUT_BASIC_IO
 
-float G_SchlickGGX( const float cosAngle, const float roughness )
-{
-    const float r = ( roughness + 1.0 );
-    const float k = ( r * r ) / 8.0f;
+vec2 positions[ 3 ] = vec2[] (
+	vec2( 0.0, 0.0 ),
+	vec2( 2.0, 0.0 ),
+	vec2( 0.0, 2.0 )
+);
 
-    const float num = cosAngle;
-    const float denom = cosAngle * ( 1.0f - k ) + k;
-
-    return ( num / denom );
-}
-
-float G_Smith( const float NoV, const float NoL, const float roughness )
-{
-    const float ggx2 = G_SchlickGGX( NoV, roughness );
-    const float ggx1 = G_SchlickGGX( NoL, roughness );
-    return ( ggx1 * ggx2 );
-}
-
-vec3 F_Schlick( float cosTheta, vec3 f0 ) {
-    return f0 + ( 1.0 - f0 ) * pow( 1.0 - cosTheta, 5.0 );
-}
-
-float Fd_Lambert() {
-    return 1.0 / PI;
+void main() {
+	worldPosition = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+	gl_Position = worldPosition;
+	fragColor = inColor;
+	fragTexCoord = inTexCoord;
+	fragNormal = inNormal;
+	clipPosition = gl_Position;
 }

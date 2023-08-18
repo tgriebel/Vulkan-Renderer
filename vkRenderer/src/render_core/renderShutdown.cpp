@@ -46,6 +46,8 @@ void Renderer::Cleanup()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
+	downScale.Shutdown();
+
 	ShutdownImGui();
 
 	// Buffers
@@ -155,6 +157,7 @@ void Renderer::ShutdownShaderResources()
 	// Shader binding resources
 	defaultBindSet.Destroy();
 	particleShaderBinds.Destroy();
+	downSampleBinds.Destroy();
 
 	FreeRegisteredBindParms();
 	bindParmsList.Reset();

@@ -170,8 +170,6 @@ public:
 	ShaderBindSet()
 	{}
 
-
-
 	ShaderBindSet( const ShaderBinding bindings[], const uint32_t bindCount );
 
 	void Create();
