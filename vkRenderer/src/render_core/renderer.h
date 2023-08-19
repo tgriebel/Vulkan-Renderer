@@ -40,6 +40,7 @@ class Scene;
 
 using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
 using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
+using bindSetMap_t = std::unordered_map<uint64_t, ShaderBindSet>;
 
 #if defined( USE_IMGUI )
 extern imguiControls_t g_imguiControls;
@@ -151,9 +152,7 @@ private:
 
 	// Shader binding
 	bindParmArray_t						bindParmsList;
-	ShaderBindSet						defaultBindSet;
-	ShaderBindSet						particleShaderBinds;
-	ShaderBindSet						downSampleBinds;
+	bindSetMap_t						bindSets;
 
 	// Init/Shutdown
 	void								InitApi();

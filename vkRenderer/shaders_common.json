@@ -3,7 +3,8 @@
     {
       "name": "Basic",
       "vs": "simpleVS.spv",
-      "ps": "simplePS.spv"
+      "ps": "simplePS.spv",
+	  "bindset": "defaultBindSet",
     },
     {
       "name": "Shadow",
@@ -78,11 +79,8 @@
 	{
       "name": "ClearParticles",
       "cs": "clearCS.spv",
+	  "bindset": "particleShaderBinds",
     },
-	{
-      "name": "DownSample",
-      "vs": "fullscreenVS.spv",
-      "ps": "downsamplePS.spv"
-    },
+
   ]
 }

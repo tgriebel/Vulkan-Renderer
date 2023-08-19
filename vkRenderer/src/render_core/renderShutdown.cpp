@@ -155,9 +155,9 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// Shader binding resources
-	defaultBindSet.Destroy();
-	particleShaderBinds.Destroy();
-	downSampleBinds.Destroy();
+	for( auto bindSet : bindSets ) {
+		bindSet.second.Destroy();
+	}
 
 	FreeRegisteredBindParms();
 	bindParmsList.Reset();

@@ -129,21 +129,25 @@ void Renderer::InitApi()
 
 void Renderer::InitShaderResources()
 {
-	{
-		defaultBindSet.Create( g_defaultBindings, g_defaultBindCount );
-		particleShaderBinds.Create( g_particleCsBindings, g_particleCsBindCount );;
-		downSampleBinds.Create( g_downsampleBindings, g_downsampleBindCount );
+	ShaderBindSet& defaultBindSet = bindSets[ Hash( "defaultBindSet" ) ];
+	ShaderBindSet& particleShaderBinds = bindSets[ Hash( "particleShaderBinds" ) ];
+	ShaderBindSet& downSampleBinds = bindSets[ Hash( "downSampleBinds" ) ];
 
+	defaultBindSet.Create( g_defaultBindings, g_defaultBindCount );
+	particleShaderBinds.Create( g_particleCsBindings, g_particleCsBindCount );
+	downSampleBinds.Create( g_downsampleBindings, g_downsampleBindCount );
+
+	{
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
 		for ( uint32_t i = 0; i < programCount; ++i )
 		{
 			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
 			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
 			{
-				if ( prog.shaders[ i ].type == shaderType_t::COMPUTE ) {
-					prog.bindset = &particleShaderBinds;
-				}
-				else {
+				auto it = bindSets.find( prog.bindHash );
+				if( it != bindSets.end() ) {
+					prog.bindset = &it->second;
+				} else {
 					prog.bindset = &defaultBindSet;
 				}
 			}
@@ -170,6 +174,8 @@ void Renderer::InitShaderResources()
 	{
 		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 		particleState.updateDescriptorSets = true;
+
+	//	downScale.parms[ i ] = RegisterBindParm( &downSampleBinds );
 	}
 
 	materialBuffer.Reset();

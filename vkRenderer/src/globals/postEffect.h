@@ -8,12 +8,14 @@ class ShaderBindParms;
 class PostEffect
 {
 private:
-	DrawPass*		pass;
-	std::string		dbgName;
+	DrawPass*			pass;
+	std::string			dbgName;
 
 public:
-	void		Init( const char* name, FrameBuffer& fb, const bool clear, const bool present );
-	void		Shutdown();
+	ShaderBindParms*	parms[ MaxFrameStates ];
 
-	void		Execute( ShaderBindParms* parms );
+	void				Init( const char* name, FrameBuffer& fb, const bool clear, const bool present );
+	void				Shutdown();
+
+	void				Execute( ShaderBindParms* parms );
 };
