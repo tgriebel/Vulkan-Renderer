@@ -100,8 +100,6 @@ void Renderer::UploadTextures()
 	}
 
 	// 1. Upload Data
-	//BeginUploadCommands( uploadContext );
-
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
 		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
@@ -137,7 +135,6 @@ void Renderer::UploadTextures()
 		Image& texture = textureAsset->Get();
 		GenerateMipmaps( uploadContext, texture );
 	}
-	//EndUploadCommands( uploadContext );
 
 	// 3. Add to resource type lists
 	{
