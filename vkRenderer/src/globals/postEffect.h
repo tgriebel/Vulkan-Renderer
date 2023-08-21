@@ -5,17 +5,18 @@
 
 class ShaderBindParms;
 
-class PostEffect
+class ImageProcess
 {
 private:
-	DrawPass*			pass;
+	Asset<GpuProgram>*	progAsset;
+	GpuBuffer			buffer;
 	std::string			dbgName;
 
 public:
-	ShaderBindParms*	parms[ MaxFrameStates ];
+	DrawPass*			pass;
 
-	void				Init( const char* name, FrameBuffer& fb, const bool clear, const bool present );
+	void				Init( const char* name, const hdl_t progHdl, FrameBuffer& fb, const bool clear, const bool present );
 	void				Shutdown();
 
-	void				Execute( ShaderBindParms* parms );
+	void				Execute( CommandContext& cmdContext );
 };

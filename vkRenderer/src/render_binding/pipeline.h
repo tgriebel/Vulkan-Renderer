@@ -83,7 +83,7 @@ void DestroyPipelineCache();
 bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset );
 void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
-void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
+hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
 void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
 void CreateComputePipeline( const Asset<GpuProgram>& prog );
 void DestroyComputePipeline( const Asset<GpuProgram>& prog );

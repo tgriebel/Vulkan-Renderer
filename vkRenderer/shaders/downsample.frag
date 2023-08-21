@@ -28,13 +28,14 @@
 
 #include "globals.h"
 
-PS_LAYOUT_STANDARD( sampler2D )
+PS_LAYOUT_BASIC_IO
+
+GLOBALS_LAYOUT( 0, 0 )
+CODE_IMAGE_LAYOUT( 0, 1, sampler2D )
+IMAGE_PROCESS_LAYOUT( 0, 2 )
 
 void main()
 {
-    const uint viewlId = pushConstants.viewId;
-
-    const view_t view = viewUbo.views[ viewlId ];
-    const ivec2 pixelLocation = ivec2( view.dimensions.xy * fragTexCoord.xy );
+    const ivec2 pixelLocation = ivec2( imageProcess.dimensions.xy * fragTexCoord.xy );
     outColor = vec4( texelFetch( codeSamplers[ 0 ], pixelLocation, 0 ).rgb, 1.0f );
 }

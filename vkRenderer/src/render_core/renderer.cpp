@@ -431,12 +431,12 @@ void Renderer::SubmitFrame()
 	{
 		gfxContext.Begin();
 
-		//downScale.Execute();
-
 		schedule.Reset();
 		while( schedule.PendingTasks() > 0 ) {
 			schedule.IssueNext( gfxContext );
 		}
+
+		downScale.Execute( gfxContext );
 
 		gfxContext.End();
 	}
@@ -582,6 +582,12 @@ void Renderer::UpdateBindSets()
 	{
 		particleState.parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
 		particleState.parms[ i ]->Bind( bind_particleWriteBuffer, &frameState.particleBuffer );
+	}
+
+	{
+		downScale.pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
+		downScale.pass->parms[ i ]->Bind( bind_sourceImage, &mainColorImage );
+	//	downScale.pass->parms[ i ]->Bind( bind_imageProcess, &frameState.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
 	}
 }
 

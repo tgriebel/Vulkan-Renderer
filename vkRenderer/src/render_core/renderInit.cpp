@@ -75,7 +75,7 @@ void Renderer::Init()
 	renderViews[ 0 ]->Commit();
 	view2Ds[ 0 ]->Commit();
 
-	downScale.Init( "DownScale", tempColor, true, false );
+	downScale.Init( "DownScale", AssetLibGpuProgram::Handle( "DownSample" ), tempColor, true, false );
 
 	InitShaderResources();
 
@@ -175,7 +175,7 @@ void Renderer::InitShaderResources()
 		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
 		particleState.updateDescriptorSets = true;
 
-	//	downScale.parms[ i ] = RegisterBindParm( &downSampleBinds );
+		downScale.pass->parms[ i ] = RegisterBindParm( &downSampleBinds );
 	}
 
 	materialBuffer.Reset();
@@ -354,34 +354,6 @@ void Renderer::BuildPipelines()
 }
 
 
-void Renderer::CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region )
-{
-	// Image resource
-	{
-		CreateImage( "tempColor", info, GPU_IMAGE_READ, frameBufferMemory, tempColorImage );
-	}
-
-	// Frame buffer
-	{
-		frameBufferCreateInfo_t fbInfo = {};
-		fbInfo.name = "TempColorFB";
-		fbInfo.color0[ 0 ] = &tempColorImage;
-		fbInfo.width = tempColorImage.info.width;
-		fbInfo.height = tempColorImage.info.height;
-		fbInfo.lifetime = LIFETIME_TEMP;
-
-		tempColor.Create( fbInfo );
-	}
-
-	// Frame buffer
-	{
-		view2Ds[ 1 ] = &views[ MaxViews - 1 ];
-		view2Ds[ 1 ]->Init( "Temp Canvas", region, MaxViews - 1, tempColor );
-		view2Ds[ 1 ]->Commit();
-	}
-}
-
-
 void Renderer::CreateFramebuffers()
 {
 	int width = 0;
@@ -435,6 +407,34 @@ void Renderer::CreateFramebuffers()
 		imageInfo_t stencilInfo = depthStencilImage.info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
 		frameState.stencilImageView.Init( depthStencilImage, stencilInfo );
+	}
+
+	// Temp image
+	{
+		imageInfo_t info{};
+		info.width = width / 2;
+		info.height = height / 2;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = config.mainColorSubSamples;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		CreateImage( "tempColor", info, GPU_IMAGE_READ, frameBufferMemory, tempColorImage );
+	}
+
+	// Temp Frame buffer
+	{
+		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.name = "TempColorFB";
+		fbInfo.color0[ 0 ] = &tempColorImage;
+		fbInfo.width = tempColorImage.info.width;
+		fbInfo.height = tempColorImage.info.height;
+		fbInfo.lifetime = LIFETIME_TEMP;
+
+		tempColor.Create( fbInfo );
 	}
 
 	// Shadow map

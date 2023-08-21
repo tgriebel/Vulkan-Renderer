@@ -79,6 +79,14 @@ struct view_t
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
+#define IMAGE_PROCESS_LAYOUT( S, N )		layout( set = S, binding = N ) uniform ImageProcess						\
+											{																		\
+												vec4	dimensions;													\
+												vec4	generic0;													\
+												vec4	generic1;													\
+												vec4	generic2;													\
+											} imageProcess;
+
 #define MODEL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer UniformBufferObject				\
 											{																		\
 												mat4        model[MaxSurfaces];										\

@@ -96,7 +96,7 @@ private:
 	RenderView*							renderViews[ Max3DViews ];
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
-	PostEffect							downScale;
+	ImageProcess						downScale;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
@@ -179,7 +179,6 @@ private:
 	void								CreateBuffers();
 	void								CreateFramebuffers();
 	void								DestroyFramebuffers();
-	void								CreateTempCanvas( const imageInfo_t& info, const renderViewRegion_t region );
 
 	// Draw Frame
 	void								CommitModel( RenderView& view, const Entity& ent );

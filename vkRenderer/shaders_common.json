@@ -81,6 +81,11 @@
       "cs": "clearCS.spv",
 	  "bindset": "particleShaderBinds",
     },
-
+	{
+      "name": "DownSample",
+      "vs": "fullscreenVS.spv",
+      "ps": "downsamplePS.spv",
+	  "bindset": "downSampleBinds",
+    },
   ]
 }

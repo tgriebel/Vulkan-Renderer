@@ -192,7 +192,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 }
 
 
-void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
+hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
 	state.stateBits = pass->stateBits;
@@ -203,7 +203,7 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 
 	auto it = g_pipelineLib.find( pipelineHdl.Get() );
 	if ( it != g_pipelineLib.end() ) {
-		return;
+		return pipelineHdl;
 	}
 
 	const GpuProgram& prog = progAsset.Get();
@@ -438,6 +438,8 @@ void CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog
 	}
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
+
+	return pipelineHdl;
 }
 
 
