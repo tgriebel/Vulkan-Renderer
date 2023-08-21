@@ -55,6 +55,7 @@ struct renderConfig_t
 	bool			present;
 };
 
+
 struct ComputeState
 {
 	int32_t				x;
@@ -63,6 +64,17 @@ struct ComputeState
 	bool				updateDescriptorSets;
 	ShaderBindParms*	parms[ MaxFrameStates ];
 };
+
+
+class RenderContext
+{
+public:
+	// Memory
+	AllocatorMemory		localMemory;
+	AllocatorMemory		frameBufferMemory;
+	AllocatorMemory		sharedMemory;
+};
+
 
 class Renderer
 {
@@ -116,6 +128,7 @@ private:
 	uint32_t							ibBufElements = 0;
 	
 	// Render context
+	RenderContext						renderContext;
 	GfxContext							gfxContext;
 	ComputeContext						computeContext;
 	UploadContext						uploadContext;
@@ -144,11 +157,6 @@ private:
 	FrameBuffer							tempColor;
 
 	uint32_t							shadowCount = 0;
-
-	// Memory
-	AllocatorMemory						localMemory;
-	AllocatorMemory						frameBufferMemory;
-	AllocatorMemory						sharedMemory;
 
 	// Shader binding
 	bindParmArray_t						bindParmsList;

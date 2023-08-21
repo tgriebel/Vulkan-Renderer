@@ -84,3 +84,12 @@ struct particleBufferObject_t
 	vec2f	velocity;
 	vec4f	color;
 };
+
+
+struct imageProcessObject_t
+{
+	vec4f	dimensions;
+	vec4f	generic0;
+	vec4f	generic1;
+	vec4f	generic2;
+};

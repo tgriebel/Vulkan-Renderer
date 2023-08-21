@@ -241,8 +241,8 @@ void Renderer::InitGPU()
 {
 	{
 		// Memory Allocations
-		sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
-		localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
+		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
+		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
 	}
 
 	InitShaderResources();
@@ -272,7 +272,7 @@ void Renderer::RecreateSwapChain()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
-	frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
+	renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
 
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
@@ -436,7 +436,7 @@ void Renderer::SubmitFrame()
 			schedule.IssueNext( gfxContext );
 		}
 
-		downScale.Execute( gfxContext );
+		//downScale.Execute( gfxContext );
 
 		gfxContext.End();
 	}
@@ -587,7 +587,7 @@ void Renderer::UpdateBindSets()
 	{
 		downScale.pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
 		downScale.pass->parms[ i ]->Bind( bind_sourceImage, &mainColorImage );
-	//	downScale.pass->parms[ i ]->Bind( bind_imageProcess, &frameState.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
+		downScale.pass->parms[ i ]->Bind( bind_imageProcess, &downScale.buffer );
 	}
 }
 
@@ -670,6 +670,14 @@ void Renderer::UpdateBuffers()
 
 	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
+
+	{
+		imageProcessObject_t process = {};
+		process.dimensions = vec4f( 1.0f, 1.0f, 0.0f, 0.0f );
+
+		downScale.buffer.SetPos( 0 );
+		downScale.buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+	}
 }
 
 

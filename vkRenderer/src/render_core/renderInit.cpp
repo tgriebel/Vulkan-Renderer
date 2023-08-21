@@ -75,7 +75,16 @@ void Renderer::Init()
 	renderViews[ 0 ]->Commit();
 	view2Ds[ 0 ]->Commit();
 
-	downScale.Init( "DownScale", AssetLibGpuProgram::Handle( "DownSample" ), tempColor, true, false );
+	{
+		imageProcessCreateInfo_t downSampleProcess = {};
+		downSampleProcess.name = "DownScale";
+		downSampleProcess.clear = true;
+		downSampleProcess.progHdl = AssetLibGpuProgram::Handle( "DownSample" );
+		downSampleProcess.fb = &tempColor;
+		downSampleProcess.context = &renderContext;
+
+		downScale.Init( downSampleProcess );
+	}
 
 	InitShaderResources();
 
@@ -104,8 +113,8 @@ void Renderer::InitApi()
 
 	{
 		// Memory Allocations
-		sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
-		localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
+		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
+		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
 	}
 
 	InitConfig();
@@ -115,7 +124,7 @@ void Renderer::InitApi()
 
 	{
 		// Create Frame Resources
-		frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
+		renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
 
 		CreateSyncObjects();
 		CreateFramebuffers();
@@ -374,7 +383,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "shadowMap", info, GPU_IMAGE_READ, frameBufferMemory, shadowMapImage[ shadowIx ] );
+		CreateImage( "shadowMap", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, shadowMapImage[ shadowIx ] );
 	}
 
 	// Main images
@@ -390,13 +399,13 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "mainColor", info, GPU_IMAGE_READ, frameBufferMemory, mainColorImage );
+		CreateImage( "mainColor", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, mainColorImage );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		CreateImage( "viewDepth", info, GPU_IMAGE_READ, frameBufferMemory, depthStencilImage );
+		CreateImage( "viewDepth", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, depthStencilImage );
 	}
 
 	{
@@ -422,7 +431,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "tempColor", info, GPU_IMAGE_READ, frameBufferMemory, tempColorImage );
+		CreateImage( "tempColor", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, tempColorImage );
 	}
 
 	// Temp Frame buffer
@@ -534,23 +543,23 @@ void Renderer::FreeRegisteredBindParms()
 void Renderer::CreateBuffers()
 {
 	{
-		frameState.globalConstants.Create( "Globals", LIFETIME_PERSISTENT, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, sharedMemory );
-		frameState.viewParms.Create( "View", LIFETIME_PERSISTENT, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState.surfParms.Create( "Surf", LIFETIME_PERSISTENT, MaxViews * MaxSurfaces, sizeof( uniformBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState.materialBuffers.Create( "Material", LIFETIME_PERSISTENT, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState.lightParms.Create( "Light", LIFETIME_PERSISTENT, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
-		frameState.particleBuffer.Create( "Particle", LIFETIME_PERSISTENT, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, sharedMemory );
+		frameState.globalConstants.Create(	"Globals",	LIFETIME_PERSISTENT,	1,						sizeof( viewBufferObject_t ),		bufferType_t::UNIFORM, renderContext.sharedMemory );
+		frameState.viewParms.Create(		"View",		LIFETIME_PERSISTENT,	MaxViews,				sizeof( viewBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
+		frameState.surfParms.Create(		"Surf",		LIFETIME_PERSISTENT,	MaxViews * MaxSurfaces,	sizeof( uniformBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
+		frameState.materialBuffers.Create(	"Material",	LIFETIME_PERSISTENT,	MaxMaterials,			sizeof( materialBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
+		frameState.lightParms.Create(		"Light",	LIFETIME_PERSISTENT,	MaxLights,				sizeof( lightBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
+		frameState.particleBuffer.Create(	"Particle",	LIFETIME_PERSISTENT,	MaxParticles,			sizeof( particleBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
 
 		for ( size_t v = 0; v < MaxViews; ++v ) {
 			frameState.surfParmPartitions[ v ] = frameState.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 	}
 
-	vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, localMemory );
-	ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, localMemory );
+	vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
+	ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
 
-	geoStagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, sharedMemory );
-	textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, sharedMemory );
+	geoStagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+	textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
 }
 
 
@@ -575,8 +584,8 @@ void Renderer::CreateCodeTextures() {
 	info.tiling = IMAGE_TILING_MORTON;
 
 	// Default Images
-	CreateImage( "_white", info, GPU_IMAGE_READ, localMemory, rc.whiteImage );
-	CreateImage( "_black", info, GPU_IMAGE_READ, localMemory, rc.blackImage );
+	CreateImage( "_white", info, GPU_IMAGE_READ, renderContext.localMemory, rc.whiteImage );
+	CreateImage( "_black", info, GPU_IMAGE_READ, renderContext.localMemory, rc.blackImage );
 }
 
 

@@ -186,6 +186,8 @@ void Renderer::UpdateFrameDescSet()
 	//	particleState.updateDescriptorSets = false;
 	}
 
+	AppendDescriptorWrites( *downScale.pass->parms[ context.bufferId ], context.bufferId, descriptorWrites );
+
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		RenderView& view = views[ viewIx ];

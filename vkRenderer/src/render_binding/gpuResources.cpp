@@ -217,6 +217,8 @@ void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 	{
 		memcpy( (uint8_t*)mappedData + m_buffer[ id ].offset, data, sizeInBytes );
 		m_buffer[ id ].offset += GetAlignedSize( sizeInBytes, m_buffer[ id ].alloc.GetAlignment() );
+	} else {
+		assert( 0 );
 	}
 }
 

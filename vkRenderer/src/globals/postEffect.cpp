@@ -1,30 +1,31 @@
 #include "postEffect.h"
 
 #include <gfxcore/scene/scene.h>
+#include "../render_core/renderer.h"
 
 extern AssetManager g_assets;
 
-void ImageProcess::Init( const char* name, const hdl_t progHdl, FrameBuffer& fb, const bool clear, const bool present )
+void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 {
-	dbgName = name;
+	dbgName = info.name;
 
 	pass = new DrawPass();
 
 	pass->name = GetPassDebugName( DRAWPASS_POST_2D );
 	pass->viewport.x = 0;
 	pass->viewport.y = 0;
-	pass->viewport.width = fb.GetWidth();
-	pass->viewport.height = fb.GetHeight();
-	pass->fb = &fb;
+	pass->viewport.width = info.fb->GetWidth();
+	pass->viewport.height = info.fb->GetHeight();
+	pass->fb = info.fb;
 
 	pass->transitionState.bits = 0;
 	pass->stateBits = GFX_STATE_NONE;
 	pass->passId = drawPass_t( DRAWPASS_POST_2D );
 
-	pass->transitionState.flags.clear = clear;
+	pass->transitionState.flags.clear = info.clear;
 	pass->transitionState.flags.store = true;
-	pass->transitionState.flags.presentAfter = present;
-	pass->transitionState.flags.readAfter = !present;
+	pass->transitionState.flags.presentAfter = info.present;
+	pass->transitionState.flags.readAfter = !info.present;
 
 	pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 	pass->clearDepth = 0.0f;
@@ -33,14 +34,16 @@ void ImageProcess::Init( const char* name, const hdl_t progHdl, FrameBuffer& fb,
 	pass->stateBits |= GFX_STATE_BLEND_ENABLE;
 	pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
 
-	progAsset = g_assets.gpuPrograms.Find( progHdl );
+	progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
-	//buffer.Create()
+	buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
 }
 
 
 void ImageProcess::Shutdown()
 {
+	buffer.Destroy();
+
 	delete pass;
 }
 

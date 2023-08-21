@@ -90,7 +90,7 @@ void Renderer::DestroyFramebuffers()
 	}
 	mainColor.Destroy();
 
-	frameBufferMemory.Destroy();
+	renderContext.frameBufferMemory.Destroy();
 }
 
 
@@ -109,8 +109,8 @@ void Renderer::ShutdownShaderResources()
 	vb.Destroy();
 
 	// Memory
-	localMemory.Destroy();
-	sharedMemory.Destroy();
+	renderContext.localMemory.Destroy();
+	renderContext.sharedMemory.Destroy();
 
 	// Staging
 	geoStagingBuffer.Destroy();
