@@ -32,7 +32,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 			attachments[ count ].format = vk_GetTextureFormat( passState.semantic.colorAttach0.fmt );
 		}
 		attachments[ count ].samples = vk_GetSampleCount( passState.semantic.colorAttach0.samples );
-		attachments[ count ].loadOp = passState.semantic.colorTrans0.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[ count ].loadOp = passState.semantic.colorTrans0.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
 		attachments[ count ].storeOp = passState.semantic.colorTrans0.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;

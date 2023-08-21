@@ -28,11 +28,10 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	pass->transitionState.flags.readAfter = !info.present;
 
 	pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-	pass->clearDepth = 0.0f;
-	pass->clearStencil = 0;
 
 	pass->stateBits |= GFX_STATE_BLEND_ENABLE;
-	pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
+	pass->stateBits |= GFX_STATE_MSAA_ENABLE;
+	pass->sampleRate = info.fb->GetColor()->info.subsamples;
 
 	progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
@@ -50,13 +49,11 @@ void ImageProcess::Shutdown()
 
 void ImageProcess::Execute( CommandContext& cmdContext )
 {
-	cmdContext.MarkerInsert( dbgName, ColorToVector( Color::LGrey ) );
+	cmdContext.MarkerBeginRegion( dbgName.c_str(), ColorToVector( Color::White ) );
 
 	hdl_t pipeLineHandle = CreateGraphicsPipeline( pass, *progAsset );
 
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
-
-	cmdContext.MarkerBeginRegion( pass->name, ColorToVector( Color::White ) );
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

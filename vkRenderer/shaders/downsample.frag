@@ -31,11 +31,12 @@
 PS_LAYOUT_BASIC_IO
 
 GLOBALS_LAYOUT( 0, 0 )
-CODE_IMAGE_LAYOUT( 0, 1, sampler2D )
+CODE_IMAGE_LAYOUT( 0, 1, sampler2DMS )
 IMAGE_PROCESS_LAYOUT( 0, 2 )
 
 void main()
 {
     const ivec2 pixelLocation = ivec2( imageProcess.dimensions.xy * fragTexCoord.xy );
     outColor = vec4( texelFetch( codeSamplers[ 0 ], pixelLocation, 0 ).rgb, 1.0f );
+    //outColor = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 }

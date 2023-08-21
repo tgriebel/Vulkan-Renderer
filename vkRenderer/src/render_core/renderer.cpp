@@ -436,7 +436,7 @@ void Renderer::SubmitFrame()
 			schedule.IssueNext( gfxContext );
 		}
 
-		//downScale.Execute( gfxContext );
+		downScale.Execute( gfxContext );
 
 		gfxContext.End();
 	}

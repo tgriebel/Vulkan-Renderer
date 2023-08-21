@@ -78,7 +78,7 @@ void Renderer::Init()
 	{
 		imageProcessCreateInfo_t downSampleProcess = {};
 		downSampleProcess.name = "DownScale";
-		downSampleProcess.clear = true;
+		downSampleProcess.clear = false;
 		downSampleProcess.progHdl = AssetLibGpuProgram::Handle( "DownSample" );
 		downSampleProcess.fb = &tempColor;
 		downSampleProcess.context = &renderContext;

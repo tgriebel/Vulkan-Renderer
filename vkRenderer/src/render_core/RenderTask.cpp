@@ -188,6 +188,7 @@ void RenderTask::RenderViewSurfaces( CommandContext& cmdContext )
 			cmdContext.MarkerEndRegion();
 #endif
 			vkCmdEndRenderPass( cmdBuffer );
+			cmdContext.MarkerEndRegion();
 			continue;
 		}
 

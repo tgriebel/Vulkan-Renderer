@@ -31,13 +31,13 @@
 VS_LAYOUT_BASIC_IO
 
 vec2 positions[ 3 ] = vec2[] (
-	vec2( 0.0, 0.0 ),
-	vec2( 2.0, 0.0 ),
-	vec2( 0.0, 2.0 )
+	vec2( -1.0f, -1.0f ),
+	vec2( 3.0f, -1.0f ),
+	vec2( -1.0f, 3.0f )
 );
 
 void main() {
-	worldPosition = vec4( positions[ gl_VertexIndex ], 0.0, 1.0 );
+	worldPosition = vec4( positions[ gl_VertexIndex ].xy, 0.0, 1.0 );
 	gl_Position = worldPosition;
 	fragColor = inColor;
 	fragTexCoord = inTexCoord;
