@@ -20,14 +20,15 @@ struct renderPassAttachmentBits_t
 	imageSamples_t	samples : 8;
 	imageFmt_t		fmt		: 8;
 };
+
 union renderPassTransitionFlags_t
 {
 	struct renderPassTransitionBits_t 
 	{
-		uint8_t				clear		: 1;
-		uint8_t				store		: 1;
-		uint8_t				readAfter	: 1;
-		uint8_t				presentAfter: 1;
+		uint8_t				clear			: 1;
+		uint8_t				store			: 1;
+		uint8_t				readAfter		: 1;
+		uint8_t				present			: 1;
 	} flags;
 	uint8_t bits;
 };

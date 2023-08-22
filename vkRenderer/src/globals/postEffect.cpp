@@ -24,7 +24,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	pass->transitionState.flags.clear = info.clear;
 	pass->transitionState.flags.store = true;
-	pass->transitionState.flags.presentAfter = info.present;
+	pass->transitionState.flags.present = info.present;
 	pass->transitionState.flags.readAfter = !info.present;
 
 	pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
@@ -58,7 +58,7 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = pass->fb->GetVkRenderPass( pass->transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.flags.present ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 

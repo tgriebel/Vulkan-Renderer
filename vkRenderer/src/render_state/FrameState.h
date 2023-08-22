@@ -200,6 +200,11 @@ public:
 	{
 		state = transitionState;
 	}
+
+	renderPassTransitionFlags_t CurrentState() const
+	{
+		return state;
+	}
 #endif
 
 	void Create( const frameBufferCreateInfo_t& createInfo );

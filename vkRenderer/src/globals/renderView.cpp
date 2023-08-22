@@ -49,7 +49,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->transitionState.flags.clear = true;
 			pass->transitionState.flags.store = true;
 			pass->transitionState.flags.readAfter = true;
-			pass->transitionState.flags.presentAfter = false;
+			pass->transitionState.flags.present = false;
 
 			pass->stateBits |= GFX_STATE_DEPTH_TEST;
 			pass->stateBits |= GFX_STATE_DEPTH_WRITE;
@@ -66,7 +66,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->transitionState.flags.clear = true;
 			pass->transitionState.flags.store = true;
 			pass->transitionState.flags.readAfter = false;
-			pass->transitionState.flags.presentAfter = false;
+			pass->transitionState.flags.present = false;
 
 			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 			pass->clearDepth = 0.0f;
@@ -80,7 +80,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->transitionState.flags.clear = false;
 			pass->transitionState.flags.store = true;
 			pass->transitionState.flags.readAfter = false;
-			pass->transitionState.flags.presentAfter = true;
+			pass->transitionState.flags.present = true;
 
 			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 			pass->clearDepth = 0.0f;
@@ -94,7 +94,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->transitionState.flags.clear = false;
 			pass->transitionState.flags.store = true;
 			pass->transitionState.flags.readAfter = true;
-			pass->transitionState.flags.presentAfter = false;
+			pass->transitionState.flags.present = false;
 
 			gfxStateBits_t stateBits = GFX_STATE_NONE;
 			if ( passIx == DRAWPASS_DEPTH )

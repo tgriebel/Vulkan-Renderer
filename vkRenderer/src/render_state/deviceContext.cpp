@@ -185,7 +185,7 @@ void vk_BeginRenderPass( GfxContext* gfxContext, DrawPass* pass )
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = pass->fb->GetVkRenderPass( pass->transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.flags.present ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
