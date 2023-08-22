@@ -82,15 +82,20 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].storeOp = passState.semantic.colorTrans0.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		if( passState.semantic.colorTrans0.flags.presentBefore ) {
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		} else if ( passState.semantic.colorTrans0.flags.readOnly ) {
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else {
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		}
 
 		if ( passState.semantic.colorTrans0.flags.presentAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		}
-		else if ( passState.semantic.colorTrans0.flags.readAfter ) {
+		} else if ( passState.semantic.colorTrans0.flags.readAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		}
-		else {
+		} else {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		}
 
