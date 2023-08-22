@@ -5,6 +5,7 @@
 #include "../render_core/GpuSync.h"
 
 class CommandContext;
+class GfxContext;
 class RenderView;
 
 class GpuTask
@@ -24,7 +25,7 @@ private:
 
 	void Init( RenderView* view, drawPass_t begin, drawPass_t end );
 	void Shuntdown();
-	void RenderViewSurfaces( CommandContext& context );
+	void RenderViewSurfaces( GfxContext* context );
 
 public:
 	RenderTask()

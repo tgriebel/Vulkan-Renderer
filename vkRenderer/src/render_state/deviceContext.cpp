@@ -23,6 +23,7 @@
 
 #include "deviceContext.h"
 #include "../render_core/swapChain.h"
+#include "../render_core/drawpass.h"
 
 DeviceContext context;
 
@@ -176,6 +177,71 @@ VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 	}
 
 	return shaderModule;
+}
+
+
+void vk_BeginRenderPass( GfxContext* gfxContext, DrawPass* pass )
+{
+	VkRenderPassBeginInfo passInfo{ };
+	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	passInfo.renderPass = pass->fb->GetVkRenderPass( pass->transitionState );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
+	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
+	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
+
+	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
+	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
+
+	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
+	const uint32_t attachmentsCount = pass->fb->GetLayers();
+
+	passInfo.clearValueCount = 0;
+	passInfo.pClearValues = nullptr;
+
+	std::array<VkClearValue, 5> clearValues{ };
+	assert( attachmentsCount <= 5 );
+
+	if ( pass->transitionState.flags.clear )
+	{
+		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+			clearValues[ i ].color = clearColor;
+		}
+
+		for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
+			clearValues[ i ].depthStencil = clearDepth;
+		}
+
+		passInfo.clearValueCount = attachmentsCount;
+		passInfo.pClearValues = clearValues.data();
+	}
+
+	VkCommandBuffer cmdBuffer = gfxContext->CommandBuffer();
+
+	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+	const viewport_t& viewport = pass->viewport;
+
+	VkViewport vk_viewport{ };
+	vk_viewport.x = static_cast<float>( viewport.x );
+	vk_viewport.y = static_cast<float>( viewport.y );
+	vk_viewport.width = static_cast<float>( viewport.width );
+	vk_viewport.height = static_cast<float>( viewport.height );
+	vk_viewport.minDepth = 0.0f;
+	vk_viewport.maxDepth = 1.0f;
+	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
+
+	VkRect2D rect{ };
+	rect.extent.width = viewport.width;
+	rect.extent.height = viewport.height;
+	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
+
+	pass->fb->SetCurrentState( pass->transitionState );
+}
+
+
+void vk_EndRenderPass( GfxContext* gfxContext, DrawPass* pass )
+{
+	vkCmdEndRenderPass( gfxContext->CommandBuffer() );
 }
 
 

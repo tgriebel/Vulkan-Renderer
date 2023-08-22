@@ -86,24 +86,25 @@ class FrameBuffer
 private:
 	static const uint32_t MaxAttachmentCount = 5;
 
-	Image*				color0[ MaxFrameStates ];
-	Image*				color1[ MaxFrameStates ];
-	Image*				color2[ MaxFrameStates ];
-	Image*				depth[ MaxFrameStates ];
-	Image*				stencil[ MaxFrameStates ];
+	Image*						color0[ MaxFrameStates ];
+	Image*						color1[ MaxFrameStates ];
+	Image*						color2[ MaxFrameStates ];
+	Image*						depth[ MaxFrameStates ];
+	Image*						stencil[ MaxFrameStates ];
 
-	uint32_t			width;
-	uint32_t			height;
-	uint32_t			colorCount;
-	uint32_t			dsCount;
-	uint32_t			attachmentCount;
-	uint32_t			bufferCount;
+	uint32_t					width;
+	uint32_t					height;
+	uint32_t					colorCount;
+	uint32_t					dsCount;
+	uint32_t					attachmentCount;
+	uint32_t					bufferCount;
 
-	resourceLifetime_t	lifetime;
+	resourceLifetime_t			lifetime;
 
 #ifdef USE_VULKAN
-	VkFramebuffer		buffers[ MaxFrameStates ][ PassPermCount ];
-	VkRenderPass		renderPasses[ PassPermCount ];
+	VkFramebuffer				buffers[ MaxFrameStates ][ PassPermCount ];
+	VkRenderPass				renderPasses[ PassPermCount ];
+	renderPassTransitionFlags_t	state;
 #endif
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
@@ -193,6 +194,11 @@ public:
 	VkRenderPass GetVkRenderPass( renderPassTransitionFlags_t transitionState = {} )
 	{
 		return renderPasses[ transitionState.bits ];
+	}
+
+	void SetCurrentState( const renderPassTransitionFlags_t& transitionState )
+	{
+		state = transitionState;
 	}
 #endif
 

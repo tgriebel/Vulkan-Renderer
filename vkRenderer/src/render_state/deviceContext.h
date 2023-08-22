@@ -87,6 +87,7 @@ extern DeviceContext context;
 struct imageInfo_t;
 class GpuImage;
 class AllocatorMemory;
+class DrawPass;
 
 bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
@@ -95,6 +96,8 @@ bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFo
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
+void				vk_BeginRenderPass( GfxContext* context, DrawPass* pass );
+void				vk_EndRenderPass( GfxContext* context, DrawPass* pass );
 VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
 void				vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
 void				vk_MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );
