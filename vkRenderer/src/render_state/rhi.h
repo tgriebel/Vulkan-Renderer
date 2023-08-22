@@ -21,53 +21,44 @@ struct renderPassAttachmentBits_t
 	imageFmt_t		fmt		: 8;
 };
 
+struct renderPassTransition_t
+{
+	uint8_t	clear		: 1;
+	uint8_t	store		: 1;
+	uint8_t	readAfter	: 1;
+	uint8_t	present		: 1;
+};
+
+struct renderPassState_t
+{
+	uint8_t	readOnly	: 1;
+	uint8_t	present		: 1;
+};
+
 union renderPassTransitionFlags_t
 {
-	struct renderPassTransitionBits_t 
+	struct renderPassStateBits_t
 	{
-		uint8_t				clear			: 1;
-		uint8_t				store			: 1;
-		uint8_t				readAfter		: 1;
-		uint8_t				present			: 1;
+		uint8_t	clear			: 1;
+		uint8_t	store			: 1;
+		uint8_t	readAfter		: 1;
+		uint8_t	presentAfter	: 1;
+		uint8_t	readOnly		: 1;
+		uint8_t	presentBefore	: 1;
 	} flags;
-	uint8_t bits;
+	uint8_t						bits;
 };
 static_assert( sizeof( imageSamples_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( imageFmt_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( renderPassAttachmentBits_t ) == 2, "Bits overflowed" );
 static_assert( sizeof( renderPassTransitionFlags_t ) == 1, "Bits overflowed" );
 
-static const uint32_t PassPermCount = 16;
+static const uint32_t PassPermBits = 6;
+static const uint32_t PassPermCount = ( 1 << PassPermBits );
 
 static const uint32_t VkPassBitsSize = 16;
-struct vk_RenderPassBits_t
-{
-	union
-	{
-		struct vkRenderPassState_t
-		{
-			renderPassAttachmentBits_t		colorAttach0;
-			renderPassAttachmentBits_t		colorAttach1;
-			renderPassAttachmentBits_t		colorAttach2;
-			renderPassAttachmentBits_t		depthAttach;
-			renderPassAttachmentBits_t		stencilAttach;
-			renderPassTransitionFlags_t		colorTrans0;
-			renderPassTransitionFlags_t		colorTrans1;
-			renderPassTransitionFlags_t		colorTrans2;
-			renderPassTransitionFlags_t		depthTrans;
-			renderPassTransitionFlags_t		stencilTrans;
-			vk_RenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
-		} semantic;
-		uint8_t bytes[ VkPassBitsSize ];
-	};
 
-	vk_RenderPassBits_t()
-	{
-		memset( bytes, 0, VkPassBitsSize );
-	}
-};
-static_assert( sizeof( vk_RenderPassBits_t ) == VkPassBitsSize, "Bits overflowed" );
-
+struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
 
 static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )

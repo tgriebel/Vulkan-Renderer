@@ -6,11 +6,41 @@
 
 extern SwapChain g_swapChain;
 
+struct vk_RenderPassBits_t
+{
+	union
+	{
+		struct vkRenderPassState_t
+		{
+			renderPassAttachmentBits_t		colorAttach0;
+			renderPassAttachmentBits_t		colorAttach1;
+			renderPassAttachmentBits_t		colorAttach2;
+			renderPassAttachmentBits_t		depthAttach;
+			renderPassAttachmentBits_t		stencilAttach;
+			renderPassTransitionFlags_t		colorTrans0;
+			renderPassTransitionFlags_t		colorTrans1;
+			renderPassTransitionFlags_t		colorTrans2;
+			renderPassTransitionFlags_t		depthTrans;
+			renderPassTransitionFlags_t		stencilTrans;
+			vk_RenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
+		} semantic;
+		uint8_t bytes[ VkPassBitsSize ];
+	};
+
+	vk_RenderPassBits_t()
+	{
+		memset( bytes, 0, VkPassBitsSize );
+	}
+};
+static_assert( sizeof( vk_RenderPassBits_t ) == VkPassBitsSize, "Bits overflowed" );
+
+
 struct renderPassTuple_t
 {
 	VkRenderPass		pass;
 	vk_RenderPassBits_t	state;
 };
+
 
 static std::unordered_map<uint64_t, renderPassTuple_t> renderPassCache;
 
@@ -41,7 +71,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 	if ( ( passState.semantic.attachmentMask & RENDER_PASS_MASK_COLOR0 ) != 0 )
 	{
-		if ( passState.semantic.colorTrans0.flags.present ) {
+		if ( passState.semantic.colorTrans0.flags.presentAfter ) {
 			attachments[ count ].format = vk_GetTextureFormat( g_swapChain.GetBackBufferFormat() );
 		}
 		else {
@@ -54,7 +84,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-		if ( passState.semantic.colorTrans0.flags.present ) {
+		if ( passState.semantic.colorTrans0.flags.presentAfter ) {
 			attachments[ count ].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		}
 		else if ( passState.semantic.colorTrans0.flags.readAfter ) {
@@ -260,7 +290,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	{
 		const renderPassTransitionFlags_t& state = perms[ permIx ];
 
-		if( ( canPresent == false ) && state.flags.present ) {
+		if( ( canPresent == false ) && state.flags.presentAfter ) {
 			continue;
 		}
 
@@ -359,7 +389,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	height = createInfo.height;
 	lifetime = createInfo.lifetime;
 
-	state.bits = 0;
+	state = {};
 }
 
 

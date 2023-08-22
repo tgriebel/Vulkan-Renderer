@@ -18,7 +18,7 @@ public:
 	gfxStateBits_t				stateBits;
 	imageSamples_t				sampleRate;
 	viewport_t					viewport;
-	renderPassTransitionFlags_t transitionState;
+	renderPassTransition_t		transitionState;
 
 	Array<Image*, 100>			codeImages[ MaxFrameStates ];
 	ShaderBindParms*			parms[ MaxFrameStates ];

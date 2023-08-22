@@ -40,16 +40,16 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		pass->viewport.height = height;
 		pass->fb = &fb;
 
-		pass->transitionState.bits = 0;
+		pass->transitionState = {};
 		pass->stateBits = GFX_STATE_NONE;
 		pass->passId = drawPass_t( passIx );
 
 		if ( passIx == DRAWPASS_SHADOW )
 		{
-			pass->transitionState.flags.clear = true;
-			pass->transitionState.flags.store = true;
-			pass->transitionState.flags.readAfter = true;
-			pass->transitionState.flags.present = false;
+			pass->transitionState.clear = true;
+			pass->transitionState.store = true;
+			pass->transitionState.readAfter = true;
+			pass->transitionState.present = false;
 
 			pass->stateBits |= GFX_STATE_DEPTH_TEST;
 			pass->stateBits |= GFX_STATE_DEPTH_WRITE;
@@ -63,10 +63,10 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		}
 		else if ( passIx == DRAWPASS_POST_2D )
 		{
-			pass->transitionState.flags.clear = true;
-			pass->transitionState.flags.store = true;
-			pass->transitionState.flags.readAfter = false;
-			pass->transitionState.flags.present = false;
+			pass->transitionState.clear = true;
+			pass->transitionState.store = true;
+			pass->transitionState.readAfter = false;
+			pass->transitionState.present = false;
 
 			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 			pass->clearDepth = 0.0f;
@@ -77,10 +77,10 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		}
 		else if ( passIx == DRAWPASS_DEBUG_2D )
 		{
-			pass->transitionState.flags.clear = false;
-			pass->transitionState.flags.store = true;
-			pass->transitionState.flags.readAfter = false;
-			pass->transitionState.flags.present = true;
+			pass->transitionState.clear = false;
+			pass->transitionState.store = true;
+			pass->transitionState.readAfter = false;
+			pass->transitionState.present = true;
 
 			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 			pass->clearDepth = 0.0f;
@@ -91,10 +91,10 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		}
 		else
 		{
-			pass->transitionState.flags.clear = false;
-			pass->transitionState.flags.store = true;
-			pass->transitionState.flags.readAfter = true;
-			pass->transitionState.flags.present = false;
+			pass->transitionState.clear = false;
+			pass->transitionState.store = true;
+			pass->transitionState.readAfter = true;
+			pass->transitionState.present = false;
 
 			gfxStateBits_t stateBits = GFX_STATE_NONE;
 			if ( passIx == DRAWPASS_DEPTH )
@@ -106,7 +106,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 				stateBits |= GFX_STATE_CULL_MODE_BACK;
 				stateBits |= GFX_STATE_STENCIL_ENABLE;
 
-				pass->transitionState.flags.clear = true;
+				pass->transitionState.clear = true;
 			}
 			else if ( passIx == DRAWPASS_TRANS )
 			{
@@ -127,7 +127,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 				stateBits |= GFX_STATE_WIREFRAME_ENABLE;
 				stateBits |= GFX_STATE_MSAA_ENABLE;
 
-				pass->transitionState.flags.readAfter = true;
+				pass->transitionState.readAfter = true;
 			}
 			else if ( passIx == DRAWPASS_DEBUG_3D )
 			{
