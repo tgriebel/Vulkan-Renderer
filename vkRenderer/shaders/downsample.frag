@@ -38,5 +38,4 @@ void main()
 {
     const ivec2 pixelLocation = ivec2( imageProcess.dimensions.xy * fragTexCoord.xy );
     outColor = vec4( texelFetch( codeSamplers[ 0 ], pixelLocation, 0 ).rgb, 1.0f );
-    //outColor = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 }

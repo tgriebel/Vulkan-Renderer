@@ -36,11 +36,17 @@ vec2 positions[ 3 ] = vec2[] (
 	vec2( -1.0f, 3.0f )
 );
 
+vec2 uvs[ 3 ] = vec2[](
+	vec2( 0.0f, 0.0f ),
+	vec2( 4.0f, 0.0f ),
+	vec2( 0.0f, 4.0f )
+);
+
 void main() {
 	worldPosition = vec4( positions[ gl_VertexIndex ].xy, 0.0, 1.0 );
 	gl_Position = worldPosition;
-	fragColor = inColor;
-	fragTexCoord = inTexCoord;
-	fragNormal = inNormal;
+	fragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	fragTexCoord = vec4( uvs[ gl_VertexIndex ], 0.0, 0.0 );
+	fragNormal = vec3( 0.0f, 0.0f, 1.0f );
 	clipPosition = gl_Position;
 }
