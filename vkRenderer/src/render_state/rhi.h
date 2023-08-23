@@ -60,6 +60,7 @@ static const uint32_t VkPassBitsSize = 16;
 
 struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
+void vk_ClearRenderPassCache();
 
 static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )
 {

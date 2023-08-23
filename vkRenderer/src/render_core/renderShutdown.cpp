@@ -43,6 +43,8 @@ void Renderer::Shutdown()
 
 void Renderer::Cleanup()
 {
+	vk_ClearRenderPassCache();
+
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
@@ -88,6 +90,7 @@ void Renderer::DestroyFramebuffers()
 		delete shadowMapImage[ shadowIx ].gpuImage;
 		shadowMap[ shadowIx ].Destroy();
 	}
+	tempColor.Destroy();
 	mainColor.Destroy();
 
 	renderContext.frameBufferMemory.Destroy();

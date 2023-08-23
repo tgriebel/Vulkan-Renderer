@@ -239,6 +239,16 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 }
 
 
+void vk_ClearRenderPassCache()
+{
+	for( auto it : renderPassCache ) {
+		if ( it.second.pass != VK_NULL_HANDLE ) {
+			vkDestroyRenderPass( context.device, it.second.pass, nullptr );
+		}
+	}
+}
+
+
 void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
 	if ( bufferCount > 0 ) {
@@ -431,11 +441,7 @@ void FrameBuffer::Destroy()
 					buffers[ frameIx ][ i ] = VK_NULL_HANDLE;
 				}		
 			}
-			if ( renderPasses != VK_NULL_HANDLE )
-			{
-				vkDestroyRenderPass( context.device, renderPasses[ i ], nullptr );
-				renderPasses[ i ] = VK_NULL_HANDLE;
-			}
+			renderPasses[ i ] = VK_NULL_HANDLE;
 		}
 	}
 	colorCount = 0;
