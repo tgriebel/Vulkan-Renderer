@@ -672,8 +672,8 @@ void Renderer::UpdateBuffers()
 	//state.particleBuffer.CopyData();
 
 	{
-		const uint32_t w = downScale.pass->fb->GetWidth();
-		const uint32_t h = downScale.pass->fb->GetHeight();
+		const float w = float( downScale.pass->fb->GetWidth() );
+		const float h = float( downScale.pass->fb->GetHeight() );
 
 		imageProcessObject_t process = {};
 		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
