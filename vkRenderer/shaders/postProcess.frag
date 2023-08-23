@@ -60,7 +60,7 @@ void main()
 
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	for( int i = 0; i < int(globals.numSamples); ++i ) {
-		sceneColor.rgb += texelFetch( codeSamplers[ textureId0 ], pixelLocation, i ).rgb;
+		sceneColor.rgb += LinearToSrgb( texelFetch( codeSamplers[ textureId0 ], pixelLocation, i ).rgb );
 	}
 	sceneColor /= globals.numSamples;
 
@@ -80,8 +80,8 @@ void main()
 
 	outColor.a = 1.0f;
 	if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
-		outColor.rgb = globals.toneMap.rgb * mix( LinearToSrgb( sceneColor ).rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
+		outColor.rgb = globals.toneMap.rgb * mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
 	} else {
-		outColor.rgb = globals.toneMap.rgb * LinearToSrgb( sceneColor ).rgb;
+		outColor.rgb = globals.toneMap.rgb * sceneColor.rgb;
 	}
 }
