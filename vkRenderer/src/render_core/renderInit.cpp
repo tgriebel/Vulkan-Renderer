@@ -219,7 +219,7 @@ void Renderer::InitImGui( RenderView& view )
 	vkInfo.CheckVkResultFn = nullptr;
 
 	assert( view.passes[ DRAWPASS_DEBUG_2D ] != nullptr );
-	const renderPassTransition_t transitionState = view.passes[ DRAWPASS_DEBUG_2D ]->transitionState;
+	const renderPassTransition_t transitionState = view.TransitionState();
 	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_DEBUG_2D ]->fb->GetVkRenderPass( transitionState ) );
 
 	// Setup Dear ImGui style

@@ -42,15 +42,16 @@ class RenderView
 private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
-	const FrameBuffer*	m_framebuffer;
-	viewport_t			m_viewport;
-	mat4x4f				m_viewMatrix;
-	mat4x4f				m_projMatrix;
-	mat4x4f				m_viewprojMatrix;
-	const char*			m_name;
-	renderViewRegion_t	m_region;
-	int					m_viewId;
-	bool				m_committed;
+	const FrameBuffer*		m_framebuffer;
+	renderPassTransition_t	m_transitionState;
+	viewport_t				m_viewport;
+	mat4x4f					m_viewMatrix;
+	mat4x4f					m_projMatrix;
+	mat4x4f					m_viewprojMatrix;
+	const char*				m_name;
+	renderViewRegion_t		m_region;
+	int						m_viewId;
+	bool					m_committed;
 
 public:
 
@@ -84,6 +85,7 @@ public:
 
 	drawPass_t				ViewRegionPassBegin();
 	drawPass_t				ViewRegionPassEnd();
+	renderPassTransition_t	TransitionState() const;
 
 	void					Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb );
 	void					Resize();

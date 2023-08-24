@@ -106,6 +106,43 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	vkCmdBindVertexBuffers( cmdContext->CommandBuffer(), 0, 1, vertexBuffers, offsets );
 	vkCmdBindIndexBuffer( cmdContext->CommandBuffer(), renderView->drawGroup.ib->GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
+	const renderPassTransition_t& transitionState = renderView->TransitionState();
+
+	VkRenderPassBeginInfo passInfo{ };
+	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	passInfo.renderPass = pass->fb->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, transitionState.present ? context.swapChainIndex : context.bufferId );
+	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
+	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
+
+	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
+	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
+
+	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
+	const uint32_t attachmentsCount = pass->fb->GetLayers();
+
+	passInfo.clearValueCount = 0;
+	passInfo.pClearValues = nullptr;
+
+	std::array<VkClearValue, 5> clearValues{ };
+	assert( attachmentsCount <= 5 );
+
+	if ( transitionState.clear )
+	{
+		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+			clearValues[ i ].color = clearColor;
+		}
+
+		for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
+			clearValues[ i ].depthStencil = clearDepth;
+		}
+
+		passInfo.clearValueCount = attachmentsCount;
+		passInfo.pClearValues = clearValues.data();
+	}
+
+	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
 		DrawPass* pass = renderView->passes[ passIx ];
@@ -115,7 +152,21 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 		cmdContext->MarkerBeginRegion( pass->name, ColorToVector( Color::White ) );
 
-		vk_BeginRenderPass( cmdContext, pass );
+		const viewport_t& viewport = pass->viewport;
+
+		VkViewport vk_viewport{ };
+		vk_viewport.x = static_cast<float>( viewport.x );
+		vk_viewport.y = static_cast<float>( viewport.y );
+		vk_viewport.width = static_cast<float>( viewport.width );
+		vk_viewport.height = static_cast<float>( viewport.height );
+		vk_viewport.minDepth = 0.0f;
+		vk_viewport.maxDepth = 1.0f;
+		vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
+
+		VkRect2D rect{ };
+		rect.extent.width = viewport.width;
+		rect.extent.height = viewport.height;
+		vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
 
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();
@@ -135,7 +186,6 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
 			cmdContext->MarkerEndRegion();
 #endif
-			vk_EndRenderPass( cmdContext, pass );
 			cmdContext->MarkerEndRegion();
 			continue;
 		}
@@ -178,11 +228,11 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
 			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, renderView->drawGroup.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
-		}
-
-		vk_EndRenderPass( cmdContext, pass );
+		}	
 		cmdContext->MarkerEndRegion();
 	}
+
+	vkCmdEndRenderPass( cmdBuffer );
 }
 
 

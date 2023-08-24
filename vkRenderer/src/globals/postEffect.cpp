@@ -18,20 +18,20 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	pass->viewport.height = info.fb->GetHeight();
 	pass->fb = info.fb;
 
-	pass->transitionState = {};
 	pass->stateBits = GFX_STATE_NONE;
 	pass->passId = drawPass_t( DRAWPASS_POST_2D );
-
-	pass->transitionState.clear = info.clear;
-	pass->transitionState.store = true;
-	pass->transitionState.present = info.present;
-	pass->transitionState.readAfter = !info.present;
 
 	pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
 	pass->stateBits |= GFX_STATE_BLEND_ENABLE;
 	pass->stateBits |= GFX_STATE_MSAA_ENABLE;
 	pass->sampleRate = info.fb->GetColor()->info.subsamples;
+
+	transitionState = {};
+	transitionState.clear = info.clear;
+	transitionState.store = true;
+	transitionState.present = info.present;
+	transitionState.readAfter = !info.present;
 
 	progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
@@ -57,8 +57,8 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->fb->GetVkRenderPass( pass->transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( pass->transitionState, pass->transitionState.present ? context.swapChainIndex : context.bufferId );
+	passInfo.renderPass = pass->fb->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, transitionState.present ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
@@ -74,7 +74,7 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	std::array<VkClearValue, 5> clearValues{ };
 	assert( attachmentsCount <= 5 );
 
-	if ( pass->transitionState.clear )
+	if ( transitionState.clear )
 	{
 		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
 			clearValues[ i ].color = clearColor;

@@ -20,8 +20,9 @@ struct imageProcessCreateInfo_t
 class ImageProcess
 {
 private:
-	Asset<GpuProgram>*	progAsset;
-	std::string			dbgName;
+	Asset<GpuProgram>*		progAsset;
+	std::string				dbgName;
+	renderPassTransition_t	transitionState;
 
 public:
 	DrawPass*			pass;
