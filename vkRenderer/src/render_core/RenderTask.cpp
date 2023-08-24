@@ -115,8 +115,12 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
-	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
-	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
+	const vec4f clearColor = renderView->ClearColor();
+	const float clearDepth = renderView->ClearDepth();
+	const uint32_t clearStencil = renderView->ClearStencil();
+
+	const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
+	const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
 
 	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
 	const uint32_t attachmentsCount = pass->fb->GetLayers();
@@ -130,11 +134,11 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	if ( transitionState.clear )
 	{
 		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
-			clearValues[ i ].color = clearColor;
+			clearValues[ i ].color = vk_clearColor;
 		}
 
 		for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
-			clearValues[ i ].depthStencil = clearDepth;
+			clearValues[ i ].depthStencil = vk_clearDepth;
 		}
 
 		passInfo.clearValueCount = attachmentsCount;

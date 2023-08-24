@@ -47,28 +47,15 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 			pass->stateBits |= GFX_STATE_DEPTH_TEST;
 			pass->stateBits |= GFX_STATE_DEPTH_WRITE;
 			pass->stateBits |= GFX_STATE_DEPTH_OP_0;
-
-			pass->clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
-			pass->clearDepth = 1.0f;
-			pass->clearStencil = 0;
-
 			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
 		}
 		else if ( passIx == DRAWPASS_POST_2D )
 		{
-			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-			pass->clearDepth = 0.0f;
-			pass->clearStencil = 0;
-
 			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
 			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
 		}
 		else if ( passIx == DRAWPASS_DEBUG_2D )
 		{
-			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-			pass->clearDepth = 0.0f;
-			pass->clearStencil = 0;
-
 			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
 			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
 		}
@@ -117,10 +104,6 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 				stateBits |= GFX_STATE_MSAA_ENABLE;
 			}
 			pass->stateBits = stateBits;
-
-			pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-			pass->clearDepth = 0.0f;
-			pass->clearStencil = 0;
 			pass->sampleRate = samples;
 		}
 
@@ -133,6 +116,10 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		m_transitionState.store = true;
 		m_transitionState.readAfter = true;
 		m_transitionState.present = false;
+
+		m_clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
+		m_clearDepth = 1.0f;
+		m_clearStencil = 0;
 	}
 	else if( region == renderViewRegion_t::STANDARD_RASTER )
 	{
@@ -140,6 +127,10 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		m_transitionState.store = true;
 		m_transitionState.readAfter = true;
 		m_transitionState.present = false;
+
+		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+		m_clearDepth = 0.0f;
+		m_clearStencil = 0;
 	}
 	else if ( region == renderViewRegion_t::POST )
 	{
@@ -147,6 +138,10 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		m_transitionState.store = true;
 		m_transitionState.readAfter = true;
 		m_transitionState.present = true;
+
+		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+		m_clearDepth = 0.0f;
+		m_clearStencil = 0;
 	}
 
 	m_viewId = viewId;
@@ -176,7 +171,7 @@ void RenderView::SetViewRect( const int32_t x, const int32_t y, const uint32_t w
 }
 
 
-drawPass_t RenderView::ViewRegionPassBegin()
+drawPass_t RenderView::ViewRegionPassBegin() const
 {
 	switch ( m_region )
 	{
@@ -188,7 +183,7 @@ drawPass_t RenderView::ViewRegionPassBegin()
 }
 
 
-drawPass_t RenderView::ViewRegionPassEnd()
+drawPass_t RenderView::ViewRegionPassEnd() const
 {
 	switch ( m_region )
 	{
@@ -203,6 +198,24 @@ drawPass_t RenderView::ViewRegionPassEnd()
 renderPassTransition_t RenderView::TransitionState() const
 {
 	return m_transitionState;
+}
+
+
+const vec4f& RenderView::ClearColor() const
+{
+	return m_clearColor;
+}
+
+
+float RenderView::ClearDepth() const
+{
+	return m_clearDepth;
+}
+
+
+uint32_t RenderView::ClearStencil() const
+{
+	return m_clearStencil;
 }
 
 

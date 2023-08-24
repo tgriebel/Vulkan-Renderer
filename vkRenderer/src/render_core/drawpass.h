@@ -10,10 +10,6 @@ class DrawPass
 public:
 	const char*					name;
 
-	vec4f						clearColor;
-	float						clearDepth;
-	uint32_t					clearStencil;
-
 	drawPass_t					passId;
 	gfxStateBits_t				stateBits;
 	imageSamples_t				sampleRate;

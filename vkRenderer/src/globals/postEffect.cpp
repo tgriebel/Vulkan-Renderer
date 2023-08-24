@@ -7,7 +7,7 @@ extern AssetManager g_assets;
 
 void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 {
-	dbgName = info.name;
+	m_dbgName = info.name;
 
 	pass = new DrawPass();
 
@@ -21,19 +21,19 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	pass->stateBits = GFX_STATE_NONE;
 	pass->passId = drawPass_t( DRAWPASS_POST_2D );
 
-	pass->clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
 	pass->stateBits |= GFX_STATE_BLEND_ENABLE;
 	pass->stateBits |= GFX_STATE_MSAA_ENABLE;
 	pass->sampleRate = info.fb->GetColor()->info.subsamples;
 
-	transitionState = {};
-	transitionState.clear = info.clear;
-	transitionState.store = true;
-	transitionState.present = info.present;
-	transitionState.readAfter = !info.present;
+	m_transitionState = {};
+	m_transitionState.clear = info.clear;
+	m_transitionState.store = true;
+	m_transitionState.present = info.present;
+	m_transitionState.readAfter = !info.present;
 
-	progAsset = g_assets.gpuPrograms.Find( info.progHdl );
+	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
 	buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
 }
@@ -49,21 +49,21 @@ void ImageProcess::Shutdown()
 
 void ImageProcess::Execute( CommandContext& cmdContext )
 {
-	cmdContext.MarkerBeginRegion( dbgName.c_str(), ColorToVector( Color::White ) );
+	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
 
-	hdl_t pipeLineHandle = CreateGraphicsPipeline( pass, *progAsset );
+	hdl_t pipeLineHandle = CreateGraphicsPipeline( pass, *m_progAsset );
 
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->fb->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, transitionState.present ? context.swapChainIndex : context.bufferId );
+	passInfo.renderPass = pass->fb->GetVkRenderPass( m_transitionState );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( m_transitionState, m_transitionState.present ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
-	const VkClearColorValue clearColor = { pass->clearColor[ 0 ], pass->clearColor[ 1 ], pass->clearColor[ 2 ], pass->clearColor[ 3 ] };
-	const VkClearDepthStencilValue clearDepth = { pass->clearDepth, pass->clearStencil };
+	const VkClearColorValue clearColor = { m_clearColor[ 0 ], m_clearColor[ 1 ], m_clearColor[ 2 ], m_clearColor[ 3 ] };
+	const VkClearDepthStencilValue clearDepth = { m_clearDepth, m_clearStencil };
 
 	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
 	const uint32_t attachmentsCount = pass->fb->GetLayers();
@@ -74,7 +74,7 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	std::array<VkClearValue, 5> clearValues{ };
 	assert( attachmentsCount <= 5 );
 
-	if ( transitionState.clear )
+	if ( m_transitionState.clear )
 	{
 		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
 			clearValues[ i ].color = clearColor;

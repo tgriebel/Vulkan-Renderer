@@ -43,6 +43,9 @@ private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
 	const FrameBuffer*		m_framebuffer;
+	vec4f					m_clearColor;
+	float					m_clearDepth;
+	uint32_t				m_clearStencil;
 	renderPassTransition_t	m_transitionState;
 	viewport_t				m_viewport;
 	mat4x4f					m_viewMatrix;
@@ -83,12 +86,15 @@ public:
 		}
 	}
 
-	drawPass_t				ViewRegionPassBegin();
-	drawPass_t				ViewRegionPassEnd();
-	renderPassTransition_t	TransitionState() const;
-
 	void					Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb );
 	void					Resize();
+
+	drawPass_t				ViewRegionPassBegin() const;
+	drawPass_t				ViewRegionPassEnd() const;
+	renderPassTransition_t	TransitionState() const;
+	const vec4f&			ClearColor() const;
+	float					ClearDepth() const;
+	uint32_t				ClearStencil() const;
 
 	void					SetCamera( const Camera& camera, const bool reverseZ = true );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
