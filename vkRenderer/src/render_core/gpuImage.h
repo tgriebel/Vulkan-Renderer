@@ -70,6 +70,7 @@ public:
 		return vk_image[ 0 ];
 	}
 
+
 	inline VkImageView GetVkImageView() const
 	{
 		return vk_view[ 0 ];
@@ -87,7 +88,6 @@ public:
 		vk_view[ 0 ] = VK_NULL_HANDLE;
 	}
 #endif
-
 	inline const char* GetDebugName() const
 	{
 		return m_dbgName;

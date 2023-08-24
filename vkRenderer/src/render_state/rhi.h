@@ -29,7 +29,7 @@ struct renderPassTransition_t
 	uint8_t	present		: 1;
 };
 
-struct renderPassState_t
+struct imageState_t
 {
 	uint8_t	readOnly	: 1;
 	uint8_t	present		: 1;

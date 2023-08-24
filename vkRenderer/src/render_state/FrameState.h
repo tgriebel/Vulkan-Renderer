@@ -104,7 +104,6 @@ private:
 #ifdef USE_VULKAN
 	VkFramebuffer				buffers[ MaxFrameStates ][ PassPermCount ];
 	VkRenderPass				renderPasses[ PassPermCount ];
-	renderPassState_t			state;
 #endif
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
@@ -186,41 +185,34 @@ public:
 	}
 
 #ifdef USE_VULKAN
-	VkFramebuffer GetVkBuffer( renderPassTransition_t transitionState = {}, const uint32_t bufferId = 0 ) const
+	VkFramebuffer GetVkBuffer( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
+		const uint32_t id = GetBufferId( bufferId );
+
 		renderPassTransitionFlags_t flags = {};
 		flags.flags.presentAfter = transitionState.present;
 		flags.flags.readAfter = transitionState.readAfter;
 		flags.flags.store = transitionState.store;
 		flags.flags.clear = transitionState.clear;
-		flags.flags.readOnly = state.readOnly;
-		flags.flags.presentBefore = state.present;
+		flags.flags.readOnly = false;
+		flags.flags.presentBefore = false;
 
-		return buffers[ GetBufferId( bufferId ) ][ flags.bits ];
+		return buffers[ id ][ flags.bits ];
 	}
 
-	VkRenderPass GetVkRenderPass( renderPassTransition_t transitionState = {} )
+	VkRenderPass GetVkRenderPass( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 )
 	{
+		const uint32_t id = GetBufferId( bufferId );
+
 		renderPassTransitionFlags_t flags = {};
 		flags.flags.presentAfter = transitionState.present;
 		flags.flags.readAfter = transitionState.readAfter;
 		flags.flags.store = transitionState.store;
 		flags.flags.clear = transitionState.clear;
-		flags.flags.readOnly = state.readOnly;
-		flags.flags.presentBefore = state.present;
+		flags.flags.readOnly = false;
+		flags.flags.presentBefore = false;
 
 		return renderPasses[ flags.bits ];
-	}
-
-	void SetCurrentState( const bool present, const bool readOnly )
-	{
-		state.present = present;
-		state.readOnly = readOnly;
-	}
-
-	renderPassState_t CurrentState() const
-	{
-		return state;
 	}
 #endif
 

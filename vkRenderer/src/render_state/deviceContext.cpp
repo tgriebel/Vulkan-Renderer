@@ -234,8 +234,6 @@ void vk_BeginRenderPass( GfxContext* gfxContext, DrawPass* pass )
 	rect.extent.width = viewport.width;
 	rect.extent.height = viewport.height;
 	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
-
-	pass->fb->SetCurrentState( pass->transitionState.present, pass->transitionState.readAfter );
 }
 
 
