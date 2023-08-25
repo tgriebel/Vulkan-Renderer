@@ -331,13 +331,16 @@ void Renderer::UploadAssets()
 
 	UploadTextures();
 
-	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
-	{
-		TransitionImageLayout( uploadContext, shadowMapImage[ shadowIx ], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
+	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
+		TransitionImageLayout( uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}	
-	TransitionImageLayout( uploadContext, mainColorImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
-	TransitionImageLayout( uploadContext, tempColorImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
-	TransitionImageLayout( uploadContext, depthStencilImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
+	TransitionImageLayout( uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	TransitionImageLayout( uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	TransitionImageLayout( uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
+	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
+	//	TransitionImageLayout( uploadContext, g_swapChain.GetFrameBuffer()->GetColor(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR );
+	}
 
 	uploadContext.End();
 	uploadContext.Submit();

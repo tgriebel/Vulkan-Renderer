@@ -79,11 +79,11 @@ void Renderer::UpdateTextureData()
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
 		textureStagingBuffer.CopyData( image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
 
-		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+		TransitionImageLayout( uploadContext, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		CopyBufferToImage( uploadContext, image, textureStagingBuffer, currentOffset );
 	
-		TransitionImageLayout( uploadContext, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+		TransitionImageLayout( uploadContext, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 	
 		imageAsset->CompleteUpload();
 	}
@@ -113,7 +113,7 @@ void Renderer::UploadTextures()
 		texture.gpuImage = new GpuImage();
 		texture.gpuImage->Create( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory );
 
-		TransitionImageLayout( uploadContext, texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL );
+		TransitionImageLayout( uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
 		textureStagingBuffer.CopyData( texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );

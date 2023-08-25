@@ -173,7 +173,7 @@ private:
 	void								RecreateSwapChain();
 
 	// Image Functions
-	void								TransitionImageLayout( UploadContext& uploadContext, Image& image, VkImageLayout oldLayout, VkImageLayout newLayout );
+	void								TransitionImageLayout( UploadContext& uploadContext, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 	void								CopyBufferToImage( UploadContext& uploadContext, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 	void								GenerateMipmaps( UploadContext& uploadContext, Image& image );
 
