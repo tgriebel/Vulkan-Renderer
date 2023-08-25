@@ -56,11 +56,21 @@ void Renderer::TransitionImageLayout( UploadContext& uploadContext, Image& image
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image.gpuImage->GetVkImage();
-	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseMipLevel = 0;
 	barrier.subresourceRange.levelCount = image.info.mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = image.info.layers;
+
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_NONE;
+	if ( ( image.info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ) {
+		barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
+	}
+	if ( ( image.info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ) {
+		barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+	}
+	if ( ( image.info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ) {
+		barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	}
 
 	VkPipelineStageFlags sourceStage;
 	VkPipelineStageFlags destinationStage;
