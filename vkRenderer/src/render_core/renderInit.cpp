@@ -383,7 +383,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "shadowMap", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, shadowMapImage[ shadowIx ] );
+		CreateImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, shadowMapImage[ shadowIx ] );
 	}
 
 	// Main images
@@ -399,13 +399,13 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "mainColor", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, mainColorImage );
+		CreateImage( "mainColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, mainColorImage );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		CreateImage( "viewDepth", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, depthStencilImage );
+		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilImage );
 	}
 
 	{
@@ -431,7 +431,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "tempColor", info, GPU_IMAGE_READ, renderContext.frameBufferMemory, tempColorImage );
+		CreateImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, tempColorImage );
 	}
 
 	// Temp Frame buffer

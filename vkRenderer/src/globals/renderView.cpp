@@ -112,10 +112,12 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 
 	if( region == renderViewRegion_t::SHADOW )
 	{
-		m_transitionState.clear = true;
-		m_transitionState.store = true;
-		m_transitionState.readAfter = true;
-		m_transitionState.present = false;
+		m_transitionState.flags.clear = true;
+		m_transitionState.flags.store = true;
+		m_transitionState.flags.readOnly = true;
+		m_transitionState.flags.readAfter = true;
+		m_transitionState.flags.presentBefore = false;
+		m_transitionState.flags.presentAfter = false;
 
 		m_clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
 		m_clearDepth = 1.0f;
@@ -123,10 +125,12 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 	}
 	else if( region == renderViewRegion_t::STANDARD_RASTER )
 	{
-		m_transitionState.clear = true;
-		m_transitionState.store = true;
-		m_transitionState.readAfter = true;
-		m_transitionState.present = false;
+		m_transitionState.flags.clear = true;
+		m_transitionState.flags.store = true;
+		m_transitionState.flags.readOnly = true;
+		m_transitionState.flags.readAfter = true;
+		m_transitionState.flags.presentBefore = false;
+		m_transitionState.flags.presentAfter = false;
 
 		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 		m_clearDepth = 0.0f;
@@ -134,10 +138,12 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 	}
 	else if ( region == renderViewRegion_t::POST )
 	{
-		m_transitionState.clear = true;
-		m_transitionState.store = true;
-		m_transitionState.readAfter = true;
-		m_transitionState.present = true;
+		m_transitionState.flags.clear = true;
+		m_transitionState.flags.store = true;
+		m_transitionState.flags.readOnly = false;
+		m_transitionState.flags.readAfter = false;
+		m_transitionState.flags.presentBefore = true;
+		m_transitionState.flags.presentAfter = true;
 
 		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 		m_clearDepth = 0.0f;

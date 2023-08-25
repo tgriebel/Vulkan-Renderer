@@ -330,12 +330,22 @@ void Renderer::UploadAssets()
 	UploadModelsToGPU();
 
 	UploadTextures();
+
+	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
+	{
+		TransitionImageLayout( uploadContext, shadowMapImage[ shadowIx ], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
+	}	
+	TransitionImageLayout( uploadContext, mainColorImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+	TransitionImageLayout( uploadContext, tempColorImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL );
+	TransitionImageLayout( uploadContext, depthStencilImage, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL );
+
 	uploadContext.End();
 	uploadContext.Submit();
-	vkQueueWaitIdle( context.gfxContext );
 
 	UpdateGpuMaterials();
 	UpdateDescriptorSets();
+
+	FlushGPU();
 }
 
 
@@ -436,7 +446,7 @@ void Renderer::SubmitFrame()
 			schedule.IssueNext( gfxContext );
 		}
 
-		downScale.Execute( gfxContext );
+		//downScale.Execute( gfxContext );
 
 		gfxContext.End();
 	}

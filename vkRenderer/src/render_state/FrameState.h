@@ -188,31 +188,13 @@ public:
 	VkFramebuffer GetVkBuffer( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
 		const uint32_t id = GetBufferId( bufferId );
-
-		renderPassTransitionFlags_t flags = {};
-		flags.flags.presentAfter = transitionState.present;
-		flags.flags.readAfter = transitionState.readAfter;
-		flags.flags.store = transitionState.store;
-		flags.flags.clear = transitionState.clear;
-		flags.flags.readOnly = false;
-		flags.flags.presentBefore = false;
-
-		return buffers[ id ][ flags.bits ];
+		return buffers[ id ][ transitionState.bits ];
 	}
 
 	VkRenderPass GetVkRenderPass( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 )
 	{
 		const uint32_t id = GetBufferId( bufferId );
-
-		renderPassTransitionFlags_t flags = {};
-		flags.flags.presentAfter = transitionState.present;
-		flags.flags.readAfter = transitionState.readAfter;
-		flags.flags.store = transitionState.store;
-		flags.flags.clear = transitionState.clear;
-		flags.flags.readOnly = false;
-		flags.flags.presentBefore = false;
-
-		return renderPasses[ flags.bits ];
+		return renderPasses[ transitionState.bits ];
 	}
 #endif
 

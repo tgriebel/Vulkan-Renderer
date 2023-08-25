@@ -111,7 +111,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = pass->fb->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, transitionState.present ? context.swapChainIndex : context.bufferId );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
@@ -131,7 +131,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	std::array<VkClearValue, 5> clearValues{ };
 	assert( attachmentsCount <= 5 );
 
-	if ( transitionState.clear )
+	if ( transitionState.flags.clear )
 	{
 		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
 			clearValues[ i ].color = vk_clearColor;

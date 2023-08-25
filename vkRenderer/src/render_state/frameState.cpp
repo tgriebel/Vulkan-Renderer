@@ -17,11 +17,11 @@ struct vk_RenderPassBits_t
 			renderPassAttachmentBits_t		colorAttach2;
 			renderPassAttachmentBits_t		depthAttach;
 			renderPassAttachmentBits_t		stencilAttach;
-			renderPassTransitionFlags_t		colorTrans0;
-			renderPassTransitionFlags_t		colorTrans1;
-			renderPassTransitionFlags_t		colorTrans2;
-			renderPassTransitionFlags_t		depthTrans;
-			renderPassTransitionFlags_t		stencilTrans;
+			renderPassTransition_t			colorTrans0;
+			renderPassTransition_t			colorTrans1;
+			renderPassTransition_t			colorTrans2;
+			renderPassTransition_t			depthTrans;
+			renderPassTransition_t			stencilTrans;
 			vk_RenderPassAttachmentMask_t	attachmentMask; // Mask for which attachments are used
 		} semantic;
 		uint8_t bytes[ VkPassBitsSize ];
@@ -88,7 +88,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		} else if ( passState.semantic.colorTrans0.flags.readOnly ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
-			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		}
 
 		if ( passState.semantic.colorTrans0.flags.presentAfter ) {
@@ -117,7 +117,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		if ( passState.semantic.colorTrans1.flags.readOnly ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
-			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		}
 
 		if ( passState.semantic.colorTrans1.flags.readAfter ) {
@@ -144,7 +144,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		if ( passState.semantic.colorTrans2.flags.readOnly ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
-			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		}
 
 		if ( passState.semantic.colorTrans2.flags.readAfter ) {
@@ -173,7 +173,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		if ( passState.semantic.depthTrans.flags.readOnly ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else {
-			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
 		if ( passState.semantic.depthTrans.flags.readAfter ) {
@@ -203,7 +203,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		if ( passState.semantic.stencilTrans.flags.readOnly ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else {
-			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
 		if ( passState.semantic.stencilTrans.flags.readAfter ) {
@@ -255,7 +255,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		throw std::runtime_error( "Framebuffer already initialized." );
 	}
 
-	renderPassTransitionFlags_t perms[ PassPermCount ];
+	renderPassTransition_t perms[ PassPermCount ];
 	for ( uint32_t i = 0; i < PassPermCount; ++i ) {
 		perms[ i ].bits = i;
 	}
@@ -321,7 +321,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	// Initialization
 	for( uint32_t permIx = 0; permIx < PassPermCount; ++permIx )
 	{
-		const renderPassTransitionFlags_t& state = perms[ permIx ];
+		const renderPassTransition_t& state = perms[ permIx ];
 
 		if( ( canPresent == false ) && state.flags.presentAfter ) {
 			continue;

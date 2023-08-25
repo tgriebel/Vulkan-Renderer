@@ -28,10 +28,10 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	pass->sampleRate = info.fb->GetColor()->info.subsamples;
 
 	m_transitionState = {};
-	m_transitionState.clear = info.clear;
-	m_transitionState.store = true;
-	m_transitionState.present = info.present;
-	m_transitionState.readAfter = !info.present;
+	m_transitionState.flags.clear = info.clear;
+	m_transitionState.flags.store = true;
+	m_transitionState.flags.presentAfter = info.present;
+	m_transitionState.flags.readAfter = !info.present;
 
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
@@ -58,7 +58,7 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = pass->fb->GetVkRenderPass( m_transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( m_transitionState, m_transitionState.present ? context.swapChainIndex : context.bufferId );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( m_transitionState, m_transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
@@ -74,7 +74,7 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	std::array<VkClearValue, 5> clearValues{ };
 	assert( attachmentsCount <= 5 );
 
-	if ( m_transitionState.clear )
+	if ( m_transitionState.flags.clear )
 	{
 		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
 			clearValues[ i ].color = clearColor;

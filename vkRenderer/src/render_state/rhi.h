@@ -21,21 +21,7 @@ struct renderPassAttachmentBits_t
 	imageFmt_t		fmt		: 8;
 };
 
-struct renderPassTransition_t
-{
-	uint8_t	clear		: 1;
-	uint8_t	store		: 1;
-	uint8_t	readAfter	: 1;
-	uint8_t	present		: 1;
-};
-
-struct imageState_t
-{
-	uint8_t	readOnly	: 1;
-	uint8_t	present		: 1;
-};
-
-union renderPassTransitionFlags_t
+union renderPassTransition_t
 {
 	struct renderPassStateBits_t
 	{
@@ -51,7 +37,7 @@ union renderPassTransitionFlags_t
 static_assert( sizeof( imageSamples_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( imageFmt_t ) == 1, "Bits overflowed" );
 static_assert( sizeof( renderPassAttachmentBits_t ) == 2, "Bits overflowed" );
-static_assert( sizeof( renderPassTransitionFlags_t ) == 1, "Bits overflowed" );
+static_assert( sizeof( renderPassTransition_t ) == 1, "Bits overflowed" );
 
 static const uint32_t PassPermBits = 6;
 static const uint32_t PassPermCount = ( 1 << PassPermBits );

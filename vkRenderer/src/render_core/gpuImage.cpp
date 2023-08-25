@@ -16,8 +16,8 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	imageInfo.arrayLayers = info.layers;
 	imageInfo.format = vk_GetTextureFormat( info.fmt );
 	imageInfo.tiling = ( info.tiling == IMAGE_TILING_LINEAR ) ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
-	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
 	imageInfo.usage = 0;
