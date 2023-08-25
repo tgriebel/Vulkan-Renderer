@@ -63,7 +63,7 @@ void Renderer::Init()
 
 	{
 		view2Ds[ 0 ] = &views[ viewCount ];
-		view2Ds[ 0 ]->Init( "Post", renderViewRegion_t::POST, viewCount, g_swapChain.framebuffers );
+		view2Ds[ 0 ]->Init( "Post", renderViewRegion_t::POST, viewCount, *g_swapChain.GetFrameBuffer() );
 		++viewCount;
 	}
 

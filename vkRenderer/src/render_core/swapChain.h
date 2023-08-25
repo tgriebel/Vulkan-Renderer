@@ -45,8 +45,7 @@ private:
 #ifdef USE_VULKAN
 	VkSwapchainKHR				vk_swapChain;
 #endif
-public:
-	FrameBuffer					framebuffers;
+	FrameBuffer					m_framebuffers;
 
 public:
 
@@ -70,9 +69,15 @@ public:
 	}
 	
 
+	inline FrameBuffer* GetFrameBuffer()
+	{
+		return &m_framebuffers;
+	}
+
+
 	inline const FrameBuffer* GetFrameBuffer() const
 	{
-		return &framebuffers;
+		return &m_framebuffers;
 	}
 
 

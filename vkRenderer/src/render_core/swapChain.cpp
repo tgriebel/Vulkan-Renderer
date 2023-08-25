@@ -182,13 +182,13 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	fbInfo.height = m_swapChainImages[ 0 ].info.height;
 	fbInfo.lifetime = LIFETIME_PERSISTENT;
 
-	framebuffers.Create( fbInfo );
+	m_framebuffers.Create( fbInfo );
 }
 
 
 void SwapChain::Destroy()
 {
-	framebuffers.Destroy();
+	m_framebuffers.Destroy();
 
 	for ( size_t i = 0; i < m_imageCount; i++ )
 	{
