@@ -143,20 +143,20 @@ struct view_t
 												layout( offset = 8 ) uint viewId;									\
 											} pushConstants;
 
-#define VS_IN								layout( set = 0, location = 0 ) in vec3 inPosition;						\
-											layout( set = 0, location = 1 ) in vec4 inColor;						\
-											layout( set = 0, location = 2 ) in vec3 inNormal;						\
-											layout( set = 0, location = 3 ) in vec3 inTangent;						\
-											layout( set = 0, location = 4 ) in vec3 inBitangent;					\
-											layout( set = 0, location = 5 ) in vec4 inTexCoord;
+#define VS_IN								layout( location = 0 ) in vec3 inPosition;								\
+											layout( location = 1 ) in vec4 inColor;									\
+											layout( location = 2 ) in vec3 inNormal;								\
+											layout( location = 3 ) in vec3 inTangent;								\
+											layout( location = 4 ) in vec3 inBitangent;								\
+											layout( location = 5 ) in vec4 inTexCoord;
 
-#define VS_OUT								layout( set = 0, location = 0 ) out vec4 fragColor;						\
-											layout( set = 0, location = 1 ) out vec3 fragNormal;					\
-											layout( set = 0, location = 2 ) out mat3 fragTangentBasis;				\
-											layout( set = 0, location = 5 ) out vec4 fragTexCoord;					\
-											layout( set = 0, location = 6 ) out vec4 clipPosition;					\
-											layout( set = 0, location = 7 ) out vec4 worldPosition;					\
-											layout( set = 0, location = 8 ) out flat uint objectId;
+#define VS_OUT								layout( location = 0 ) out vec4 fragColor;								\
+											layout( location = 1 ) out vec3 fragNormal;								\
+											layout( location = 2 ) out mat3 fragTangentBasis;						\
+											layout( location = 5 ) out vec4 fragTexCoord;							\
+											layout( location = 6 ) out vec4 clipPosition;							\
+											layout( location = 7 ) out vec4 worldPosition;							\
+											layout( location = 8 ) out flat uint objectId;
 
 #define VS_LAYOUT_BASIC_IO					VS_IN																	\
 											VS_OUT
@@ -174,15 +174,15 @@ struct view_t
 											VS_IN																	\
 											VS_OUT
 
-#define PS_IN								layout( set = 0, location = 0 ) in vec4 fragColor;						\
-											layout( set = 0, location = 1 ) in vec3 fragNormal;						\
-											layout( set = 0, location = 2 ) in mat3 fragTangentBasis;				\
-											layout( set = 0, location = 5 ) in vec4 fragTexCoord;					\
-											layout( set = 0, location = 6 ) in vec4 clipPosition;					\
-											layout( set = 0, location = 7 ) in vec4 worldPosition;					\
-											layout( set = 0, location = 8 ) in flat uint objectId;
+#define PS_IN								layout( location = 0 ) in vec4 fragColor;								\
+											layout( location = 1 ) in vec3 fragNormal;								\
+											layout( location = 2 ) in mat3 fragTangentBasis;						\
+											layout( location = 5 ) in vec4 fragTexCoord;							\
+											layout( location = 6 ) in vec4 clipPosition;							\
+											layout( location = 7 ) in vec4 worldPosition;							\
+											layout( location = 8 ) in flat uint objectId;
 
-#define PS_OUT								layout( set = 0, location = 0 ) out vec4 outColor;
+#define PS_OUT								layout( location = 0 ) out vec4 outColor;
 
 #define PS_LAYOUT_BASIC_IO					PS_IN																	\
 											PS_OUT

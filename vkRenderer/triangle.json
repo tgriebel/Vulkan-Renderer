@@ -1,0 +1,66 @@
+{
+  "sceneClass": "default",
+  "type": "scene",
+  "shaders": [
+	{
+      "name": "Default",
+      "vs": "defaultVS.spv",
+      "ps": "defaultPS.spv",
+    },
+  ],
+  "images": [
+    {
+	  "name": "checker.png",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_low.jpg",
+	  "type": "CUBE"
+	}
+  ],
+  "materials": [
+    {
+      "name": "Grid",
+	  "KdR": 1.0,
+      "tr": 0.0,
+      "ns": 0.0,
+      "ni": 0.0,
+      "d": 1.0,
+      "illum": 0.0,
+      "shaders": {
+          "DRAWPASS_SHADOW": "Shadow",
+          "DRAWPASS_DEPTH": "LitDepth",
+          "DRAWPASS_OPAQUE": "LitOpaque",
+		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+      },
+	  "textures": {
+		  "GGX_COLOR_MAP_SLOT" : "grid2.png"
+	  }
+    },
+  ],
+  "models": [
+  	{
+      "name" : "cube",
+      "model" : "cube.obj"
+    },
+  ],
+  "entities": [
+    {
+      "name" : "_skybox",
+      "model" : "_skybox",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 0.0,
+	  "rx" : 0.0,
+	  "ry" : 0.0,
+	  "rz" : 0.0,
+	  "sx" : 1.0,
+	  "sy" : 1.0,
+	  "sz" : 1.0
+    },
+	{
+      "name" : "grid",
+      "model" : "grid",
+    },
+  ]
+}
