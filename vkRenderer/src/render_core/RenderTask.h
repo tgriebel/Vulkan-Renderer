@@ -12,6 +12,7 @@ class GpuTask
 {
 public:
 	virtual void Execute( CommandContext& context ) = 0;
+	virtual ~GpuTask() {};
 };
 
 
@@ -51,6 +52,8 @@ class ComputeTask : public GpuTask
 {
 public:
 	void Execute( CommandContext& context ) override;
+	~ComputeTask()
+	{}
 };
 
 

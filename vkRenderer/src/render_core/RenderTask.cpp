@@ -280,12 +280,16 @@ void RenderSchedule::Reset()
 
 void RenderSchedule::Clear()
 {
+	for( size_t i = 0; i < tasks.size(); ++i ) {
+		delete tasks[ i ];
+	}
 	tasks.clear();
 }
 
 
 void RenderSchedule::Queue( GpuTask* task )
 {
+	// FIXME: must own pointer
 	tasks.push_back( task );
 }
 

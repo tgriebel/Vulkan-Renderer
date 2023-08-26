@@ -70,6 +70,8 @@ void Renderer::Cleanup()
 		gfxContext.frameFence[ i ].Destroy();
 	}
 
+	schedule.Clear();
+
 	context.Destroy( g_window );
 	
 	g_window.~Window();
