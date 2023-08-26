@@ -172,11 +172,6 @@ private:
 	void								Cleanup();
 	void								RecreateSwapChain();
 
-	// Image Functions
-	void								TransitionImageLayout( UploadContext& uploadContext, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
-	void								CopyBufferToImage( UploadContext& uploadContext, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
-	void								GenerateMipmaps( UploadContext& uploadContext, Image& image );
-
 	// API Resource Functions
 	void								CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
 	ShaderBindParms*					RegisterBindParm( const ShaderBindSet* set );

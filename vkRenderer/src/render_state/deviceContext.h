@@ -95,6 +95,9 @@ QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR s
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
+void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image );
+void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
 VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
 void				vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );

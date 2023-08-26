@@ -32,37 +32,6 @@
 
 extern AssetManager g_assets;
 
-void Renderer::CopyBufferToImage( UploadContext& uploadContext, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
-{
-	const uint32_t layers = texture.info.layers;
-
-	VkBufferImageCopy region{ };
-	memset( &region, 0, sizeof( region ) );
-	region.bufferOffset = bufferOffset;
-
-	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	region.imageSubresource.mipLevel = 0;
-	region.imageSubresource.baseArrayLayer = 0;
-	region.imageSubresource.layerCount = layers;
-
-	region.imageOffset = { 0, 0, 0 };
-	region.imageExtent = {
-		texture.info.width,
-		texture.info.height,
-		1
-	};
-
-	vkCmdCopyBufferToImage(
-		uploadContext.CommandBuffer(),
-		buffer.GetVkObject(),
-		texture.gpuImage->GetVkImage(),
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&region
-	);
-}
-
-
 void Renderer::UpdateTextureData()
 {
 	const uint32_t textureCount = static_cast<uint32_t>( updateTextures.size() );
@@ -79,11 +48,11 @@ void Renderer::UpdateTextureData()
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
 		textureStagingBuffer.CopyData( image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
 
-		TransitionImageLayout( uploadContext, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+		Transition( &uploadContext, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
-		CopyBufferToImage( uploadContext, image, textureStagingBuffer, currentOffset );
+		CopyBufferToImage( &uploadContext, image, textureStagingBuffer, currentOffset );
 	
-		TransitionImageLayout( uploadContext, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+		Transition( &uploadContext, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 	
 		imageAsset->CompleteUpload();
 	}
@@ -113,12 +82,12 @@ void Renderer::UploadTextures()
 		texture.gpuImage = new GpuImage();
 		texture.gpuImage->Create( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory );
 
-		TransitionImageLayout( uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+		Transition( &uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
 		textureStagingBuffer.CopyData( texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
 
-		CopyBufferToImage( uploadContext, texture, textureStagingBuffer, currentOffset );
+		CopyBufferToImage( &uploadContext, texture, textureStagingBuffer, currentOffset );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.gpuImage->SetId( imageFreeSlot );
@@ -133,7 +102,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
-		GenerateMipmaps( uploadContext, texture );
+		GenerateMipmaps( &uploadContext, texture );
 	}
 
 	// 3. Add to resource type lists

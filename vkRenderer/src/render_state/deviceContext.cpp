@@ -24,6 +24,7 @@
 #include "deviceContext.h"
 #include "../render_core/swapChain.h"
 #include "../render_core/drawpass.h"
+#include "../render_core/gpuImage.h"
 
 DeviceContext context;
 
@@ -161,6 +162,236 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 		throw std::runtime_error( "Failed to create texture image view!" );
 	}
 	return imageView;
+}
+
+
+void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
+	VkImageMemoryBarrier barrier{ };
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = image.gpuImage->GetVkImage();
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = image.info.mipLevels;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = image.info.layers;
+
+	const bool hasColorAspect = ( image.info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0;
+	const bool hasDepthAspect = ( image.info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
+	const bool hasStencilAspect = ( image.info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
+
+	VkImageLayout oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	VkImageLayout newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	if ( ( current & GPU_IMAGE_READ ) != 0 ) {
+		oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+	}
+	else if ( ( current & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
+		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	}
+	else if ( ( current & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
+		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	}
+	if ( ( next & GPU_IMAGE_READ ) != 0 ) {
+		newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
+		newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
+		newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	}
+
+	barrier.oldLayout = oldLayout;
+	barrier.newLayout = newLayout;
+
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_NONE;
+	barrier.subresourceRange.aspectMask |= hasColorAspect ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
+	barrier.subresourceRange.aspectMask |= hasDepthAspect ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
+	barrier.subresourceRange.aspectMask |= hasStencilAspect ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+
+	VkPipelineStageFlags sourceStage;
+	VkPipelineStageFlags destinationStage;
+
+	if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL )
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL )
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL )
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
+	{
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else
+	{
+		throw std::invalid_argument( "unsupported layout transition!" );
+	}
+
+	vkCmdPipelineBarrier(
+		cmdBuffer,
+		sourceStage, destinationStage,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+}
+
+
+void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
+{
+	VkFormatProperties formatProperties;
+	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( image.info.fmt ), &formatProperties );
+
+	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
+	{
+		throw std::runtime_error( "texture image format does not support linear blitting!" );
+	}
+
+	VkImageMemoryBarrier barrier{ };
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.image = image.gpuImage->GetVkImage();
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = image.info.layers;
+	barrier.subresourceRange.levelCount = 1;
+
+	int32_t mipWidth = image.info.width;
+	int32_t mipHeight = image.info.height;
+
+	for ( uint32_t i = 1; i < image.info.mipLevels; i++ )
+	{
+		barrier.subresourceRange.baseMipLevel = i - 1;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+		vkCmdPipelineBarrier(	cmdBuffer,
+								VK_PIPELINE_STAGE_TRANSFER_BIT,
+								VK_PIPELINE_STAGE_TRANSFER_BIT,
+								0,
+								0, nullptr,
+								0, nullptr,
+								1, &barrier );
+
+		VkImageBlit blit{ };
+		blit.srcOffsets[ 0 ] = { 0, 0, 0 };
+		blit.srcOffsets[ 1 ] = { mipWidth, mipHeight, 1 };
+		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.srcSubresource.mipLevel = i - 1;
+		blit.srcSubresource.baseArrayLayer = 0;
+		blit.srcSubresource.layerCount = image.info.layers;
+		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
+		blit.dstOffsets[ 1 ] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
+		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.dstSubresource.mipLevel = i;
+		blit.dstSubresource.baseArrayLayer = 0;
+		blit.dstSubresource.layerCount = image.info.layers;
+
+		vkCmdBlitImage( cmdBuffer,
+						image.gpuImage->GetVkImage(),
+						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+						image.gpuImage->GetVkImage(),
+						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+						1,
+						&blit,
+						VK_FILTER_LINEAR );
+
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		vkCmdPipelineBarrier(	cmdBuffer,
+								VK_PIPELINE_STAGE_TRANSFER_BIT,
+								VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+								0,
+								0, nullptr,
+								0, nullptr,
+								1, &barrier );
+
+		if ( mipWidth > 1 ) mipWidth /= 2;
+		if ( mipHeight > 1 ) mipHeight /= 2;
+	}
+
+	barrier.subresourceRange.baseMipLevel = image.info.mipLevels - 1;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+	vkCmdPipelineBarrier(	cmdBuffer,
+							VK_PIPELINE_STAGE_TRANSFER_BIT,
+							VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+							0,
+							0, nullptr,
+							0, nullptr,
+							1, &barrier );
+}
+
+
+void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
+{
+	const uint32_t layers = texture.info.layers;
+
+	VkBufferImageCopy region{ };
+	memset( &region, 0, sizeof( region ) );
+	region.bufferOffset = bufferOffset;
+
+	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	region.imageSubresource.mipLevel = 0;
+	region.imageSubresource.baseArrayLayer = 0;
+	region.imageSubresource.layerCount = layers;
+
+	region.imageOffset = { 0, 0, 0 };
+	region.imageExtent = {
+		texture.info.width,
+		texture.info.height,
+		1
+	};
+
+	vkCmdCopyBufferToImage( cmdBuffer,
+							buffer.GetVkObject(),
+							texture.gpuImage->GetVkImage(),
+							VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+							1,
+							&region
+	);
 }
 
 

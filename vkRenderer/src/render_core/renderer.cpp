@@ -332,11 +332,11 @@ void Renderer::UploadAssets()
 	UploadTextures();
 
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
-		TransitionImageLayout( uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
+		Transition( &uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}	
-	TransitionImageLayout( uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	TransitionImageLayout( uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	TransitionImageLayout( uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 	//	TransitionImageLayout( uploadContext, g_swapChain.GetFrameBuffer()->GetColor(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR );

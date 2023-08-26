@@ -244,3 +244,21 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 		vkCmdDispatch( cmdBuffer, x, y, z );
 	}
 }
+
+
+void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), image, current, next );
+}
+
+
+void GenerateMipmaps( CommandContext* cmdCommand, Image& image )
+{
+	vk_GenerateMipmaps( cmdCommand->CommandBuffer(), image );
+}
+
+
+void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
+{
+	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), texture, buffer, bufferOffset );
+}

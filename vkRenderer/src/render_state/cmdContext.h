@@ -27,6 +27,7 @@
 #include "../render_core/GpuSync.h"
 
 class ShaderBindParms;
+class GpuBuffer;
 
 enum pipelineQueue_t
 {
@@ -163,3 +164,8 @@ public:
 		queueType = QUEUE_GRAPHICS;
 	}
 };
+
+
+void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
+void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );

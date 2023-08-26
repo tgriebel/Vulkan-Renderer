@@ -257,6 +257,20 @@ enum resourceLifetime_t
 };
 
 
+enum gpuImageStateFlags_t : uint8_t
+{
+	GPU_IMAGE_NONE = 0,
+	GPU_IMAGE_READ = ( 1 << 0 ),
+	GPU_IMAGE_WRITE = ( 1 << 1 ),
+	GPU_IMAGE_TRANSFER_SRC = ( 1 << 2 ),
+	GPU_IMAGE_TRANSFER_DST = ( 1 << 3 ),
+	GPU_IMAGE_PERSISTENT = ( 1 << 4 ),
+	GPU_IMAGE_RW = ( GPU_IMAGE_READ | GPU_IMAGE_WRITE ),
+	GPU_IMAGE_ALL = 0xFF,
+};
+DEFINE_ENUM_OPERATORS( gpuImageStateFlags_t, uint8_t )
+
+
 #if defined( USE_IMGUI )
 struct imguiControls_t
 {
