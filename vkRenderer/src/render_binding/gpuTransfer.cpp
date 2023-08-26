@@ -39,7 +39,6 @@ void Renderer::UpdateTextureData()
 		return;
 	}
 
-	VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );

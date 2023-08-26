@@ -187,14 +187,21 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImage
 	if ( ( current & GPU_IMAGE_READ ) != 0 ) {
 		oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 	}
+	else if ( ( current & GPU_IMAGE_PRESENT ) != 0 ) {
+		oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	}
 	else if ( ( current & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
 		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 	}
 	else if ( ( current & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
 		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
+
 	if ( ( next & GPU_IMAGE_READ ) != 0 ) {
 		newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_PRESENT ) != 0 ) {
+		newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	}
 	else if ( ( next & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
 		newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
@@ -245,6 +252,14 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImage
 
 		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR )
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	}
 	else if ( oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
 	{

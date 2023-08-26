@@ -339,7 +339,7 @@ void Renderer::UploadAssets()
 	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
-	//	TransitionImageLayout( uploadContext, g_swapChain.GetFrameBuffer()->GetColor(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR );
+		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 	}
 
 	uploadContext.End();

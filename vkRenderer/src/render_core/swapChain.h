@@ -47,6 +47,11 @@ private:
 #endif
 	FrameBuffer					m_framebuffer;
 
+	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
+	{
+		return Min( bufferId, MaxSwapChainBuffers - 1 );
+	}
+
 public:
 
 	static swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface );
@@ -66,6 +71,18 @@ public:
 	inline uint32_t GetBufferCount() const
 	{
 		return m_imageCount;
+	}
+
+
+	inline Image* GetBackBuffer( const uint32_t bufferId )
+	{
+		return &m_swapChainImages[ GetBufferId( bufferId ) ];
+	}
+
+
+	inline const Image* GetBackBuffer( const uint32_t bufferId ) const
+	{
+		return &m_swapChainImages[ GetBufferId( bufferId ) ];
 	}
 	
 

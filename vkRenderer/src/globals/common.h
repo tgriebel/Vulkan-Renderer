@@ -96,7 +96,7 @@ const uint32_t	MaxCodeImages					= 3;
 const uint64_t	MaxSharedMemory					= MB( 1024 );
 const uint64_t	MaxLocalMemory					= MB( 1024 );
 const uint64_t	MaxFrameBufferMemory			= GB( 2 );
-const uint64_t	MaxFrameStates					= 3;
+const uint32_t	MaxFrameStates					= 3;
 const uint64_t	MaxTimeStampQueries				= 12;
 const uint64_t	MaxOcclusionQueries				= 12;
 const uint32_t	DefaultDisplayWidth				= 1280;
@@ -265,6 +265,7 @@ enum gpuImageStateFlags_t : uint8_t
 	GPU_IMAGE_TRANSFER_SRC = ( 1 << 2 ),
 	GPU_IMAGE_TRANSFER_DST = ( 1 << 3 ),
 	GPU_IMAGE_PERSISTENT = ( 1 << 4 ),
+	GPU_IMAGE_PRESENT = ( 1 << 5 ),
 	GPU_IMAGE_RW = ( GPU_IMAGE_READ | GPU_IMAGE_WRITE ),
 	GPU_IMAGE_ALL = 0xFF,
 };
