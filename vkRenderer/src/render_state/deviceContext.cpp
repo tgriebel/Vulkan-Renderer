@@ -380,6 +380,99 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 }
 
 
+void vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst )
+{
+	VkFormatProperties formatProperties;
+	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( dst.info.fmt ), &formatProperties );
+
+	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
+	{
+		throw std::runtime_error( "texture image format does not support linear blitting!" );
+	}
+
+	VkImageMemoryBarrier barrier{ };
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.image = src.gpuImage->GetVkImage();
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = src.info.layers;
+	barrier.subresourceRange.levelCount = 1;
+
+	const int32_t srcWidth = src.info.width;
+	const int32_t srcHeight = src.info.height;
+	const int32_t dstWidth = dst.info.width;
+	const int32_t dstHeight = dst.info.height;
+
+	{
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+		vkCmdPipelineBarrier( cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier );
+
+		VkImageBlit blit{ };
+		blit.srcOffsets[ 0 ] = { 0, 0, 0 };
+		blit.srcOffsets[ 1 ] = { srcWidth, srcHeight, 1 };
+		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.srcSubresource.mipLevel = 0;
+		blit.srcSubresource.baseArrayLayer = 0;
+		blit.srcSubresource.layerCount = src.info.layers;
+		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
+		blit.dstOffsets[ 1 ] = { dstWidth, dstHeight, 1 };
+		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.dstSubresource.mipLevel = 0;
+		blit.dstSubresource.baseArrayLayer = 0;
+		blit.dstSubresource.layerCount = dst.info.layers;
+
+		vkCmdBlitImage( cmdBuffer,
+						src.gpuImage->GetVkImage(),
+						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+						dst.gpuImage->GetVkImage(),
+						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+						1,
+						&blit,
+						VK_FILTER_LINEAR );
+
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		vkCmdPipelineBarrier(	cmdBuffer,
+								VK_PIPELINE_STAGE_TRANSFER_BIT,
+								VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+								0,
+								0, nullptr,
+								0, nullptr,
+								1, &barrier );
+	}
+
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+	vkCmdPipelineBarrier(	cmdBuffer,
+							VK_PIPELINE_STAGE_TRANSFER_BIT,
+							VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+							0,
+							0, nullptr,
+							0, nullptr,
+							1, &barrier );
+}
+
+
 void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
 	const uint32_t layers = texture.info.layers;

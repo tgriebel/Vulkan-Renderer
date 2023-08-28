@@ -148,7 +148,9 @@ private:
 
 	Image								shadowMapImage[ MaxShadowViews ];
 	Image								mainColorImage;
+	Image								mainColorResolved;
 	Image								tempColorImage;
+	Image								mainColorDownsampled;
 	Image								depthStencilImage;
 
 	FrameState							frameState;

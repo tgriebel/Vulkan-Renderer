@@ -449,6 +449,9 @@ void Renderer::SubmitFrame()
 			schedule.IssueNext( gfxContext );
 		}
 
+		// TODO: must use resolve image
+		//CopyImage( &gfxContext, mainColorImage, mainColorDownsampled );
+
 		//downScale.Execute( gfxContext );
 
 		gfxContext.End();

@@ -399,13 +399,32 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "mainColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, mainColorImage );
+		CreateImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorImage );
+		
+		//info.subsamples = IMAGE_SMP_1;
+		//CreateImage( "mainColorResolved", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorResolved );
 
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
 		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilImage );
+	}
+
+	// Downsampled image
+	{
+		imageInfo_t info{};
+		info.width = width / 2;
+		info.height = height / 2;
+		info.mipLevels = MipCount( info.width, info.height );
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		CreateImage( "mainColorDownsampled", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, mainColorDownsampled );
 	}
 
 	{

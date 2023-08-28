@@ -307,6 +307,9 @@
     <None Include="shaders\pixelDefault.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\resolve.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

@@ -258,6 +258,12 @@ void GenerateMipmaps( CommandContext* cmdCommand, Image& image )
 }
 
 
+void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
+{
+	vk_CopyImage( cmdCommand->CommandBuffer(), src, dst );
+}
+
+
 void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
 	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), texture, buffer, bufferOffset );
