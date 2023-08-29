@@ -193,7 +193,7 @@ bool ShaderBindSet::HasBinding( const ShaderBinding& binding ) const
 void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffer )
 {
 	if( bindSet->HasBinding( binding ) ) {
-		attachments[ binding.GetHash() ] = buffer;
+		attachments[ 0 ][ binding.GetHash() ] = buffer;
 	} else {
 		assert( 0 );
 	}
@@ -203,7 +203,7 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffe
 void ShaderBindParms::Bind( const ShaderBinding& binding, const Image* texture )
 {
 	if ( bindSet->HasBinding( binding ) ) {
-		attachments[ binding.GetHash() ] = texture;
+		attachments[ 0 ][ binding.GetHash() ] = texture;
 	}
 	else {
 		assert( 0 );
@@ -216,7 +216,7 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ImageArray* imag
 	if ( bindSet->HasBinding( binding ) )
 	{
 		assert( imageArray->Count() <= binding.GetMaxDescriptorCount() );
-		attachments[ binding.GetHash() ] = imageArray;
+		attachments[ 0 ][ binding.GetHash() ] = imageArray;
 	}
 	else {
 		assert( 0 );
@@ -226,8 +226,8 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ImageArray* imag
 
 const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding* binding ) const
 {
-	auto it = attachments.find( binding->GetHash() );
-	if ( it != attachments.end() ) {
+	auto it = attachments[ 0 ].find( binding->GetHash() );
+	if ( it != attachments[ 0 ].end() ) {
 		return &it->second;
 	}
 	return nullptr;
@@ -237,10 +237,10 @@ const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding* bin
 const ShaderAttachment* ShaderBindParms::GetAttachment( const uint32_t id ) const
 {
 	assert(0); // UNTESTED
-	auto it = attachments.begin();
+	auto it = attachments[ 0 ].begin();
 	std::advance( it, id );
 
-	if ( it != attachments.end() ) {
+	if ( it != attachments[ 0 ].end() ) {
 		return &it->second;
 	}
 	return nullptr;

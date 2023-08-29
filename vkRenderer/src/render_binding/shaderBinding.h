@@ -192,10 +192,10 @@ class ShaderBindParms
 {
 private:
 	const ShaderBindSet*							bindSet;
-	std::unordered_map<uint32_t, ShaderAttachment>	attachments;
+	std::unordered_map<uint32_t, ShaderAttachment>	attachments[ MaxFrameStates ];
 
 #ifdef USE_VULKAN
-	VkDescriptorSet									vk_descriptorSet;
+	VkDescriptorSet									vk_descriptorSets[ MaxFrameStates ];
 #endif
 
 public:
@@ -203,30 +203,34 @@ public:
 #ifdef USE_VULKAN
 	ShaderBindParms()
 	{
-		vk_descriptorSet = VK_NULL_HANDLE;
+		InitApiObjects();
 	}
 
 	ShaderBindParms::ShaderBindParms( const ShaderBindSet* set )
 	{
 		bindSet = set;
-		attachments.reserve( bindSet->Count() );
+		for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
+			attachments[ i ].reserve( bindSet->Count() );
+		}
 
 		InitApiObjects();
 	}
 
 	inline VkDescriptorSet GetVkObject() const
 	{
-		return vk_descriptorSet;
+		return vk_descriptorSets[ 0 ];
 	}
 
 	inline void SetVkObject( const VkDescriptorSet descSet )
 	{
-		vk_descriptorSet = descSet;
+		vk_descriptorSets[ 0 ] = descSet;
 	}
 
 	void InitApiObjects()
 	{
-		vk_descriptorSet = VK_NULL_HANDLE;
+		for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
+			vk_descriptorSets[ i ] = VK_NULL_HANDLE;
+		}
 	}
 #endif
 
@@ -237,11 +241,12 @@ public:
 
 	inline bool IsValid()
 	{
-		return ( static_cast<uint32_t>( attachments.size() ) == bindSet->Count() );
+		return ( static_cast<uint32_t>( attachments[ 0 ].size() ) == bindSet->Count() );
 	}
-	void					Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
-	void					Bind( const ShaderBinding& binding, const Image* texture );
-	void					Bind( const ShaderBinding& binding, const ImageArray* imageArray );
-	const ShaderAttachment*	GetAttachment( const ShaderBinding* binding ) const;
-	const ShaderAttachment*	GetAttachment( const uint32_t id ) const;
+
+	void						Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
+	void						Bind( const ShaderBinding& binding, const Image* texture );
+	void						Bind( const ShaderBinding& binding, const ImageArray* imageArray );
+	const ShaderAttachment*		GetAttachment( const ShaderBinding* binding ) const;
+	const ShaderAttachment*		GetAttachment( const uint32_t id ) const;
 };
