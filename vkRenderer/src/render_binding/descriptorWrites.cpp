@@ -20,7 +20,7 @@ union descriptorInfo_t
 class DescriptorWritesBuilder
 {
 private:
-	static const uint32_t MaxPoolSize = 100;
+	static const uint32_t MaxPoolSize = 512;
 	uint32_t							bufferInfoPoolFreeList = 0;
 	uint32_t							imageInfoPoolFreeList = 0;
 	uint32_t							bufferInfoArrayPoolFreeList = 0;
@@ -60,18 +60,21 @@ public:
 	[[nodiscard]]
 	std::vector<VkDescriptorBufferInfo>& NextBufferInfoArray()
 	{
+		assert( bufferInfoArrayPoolFreeList < MaxPoolSize );
 		return bufferInfoArrayPool[ bufferInfoArrayPoolFreeList++ ];
 	}
 
 	[[nodiscard]]
 	std::vector<VkDescriptorImageInfo>& NextImageInfoArray()
 	{
+		assert( imageInfoArrayPoolFreeList < MaxPoolSize );
 		return imageInfoArrayPool[ imageInfoArrayPoolFreeList++ ];
 	}
 
 	[[nodiscard]]
 	VkDescriptorBufferInfo& NextBufferInfo()
 	{
+		assert( bufferInfoPoolFreeList < MaxPoolSize );
 		bufferInfoPool[ bufferInfoPoolFreeList ] = {};
 		return bufferInfoPool[ bufferInfoPoolFreeList++ ];
 	}
@@ -79,6 +82,7 @@ public:
 	[[nodiscard]]
 	VkDescriptorImageInfo& NextImageInfo()
 	{
+		assert( imageInfoPoolFreeList < MaxPoolSize );
 		imageInfoPool[ imageInfoPoolFreeList ] = {};
 		return imageInfoPool[ imageInfoPoolFreeList++ ];
 	}
@@ -180,32 +184,16 @@ void Renderer::UpdateFrameDescSet()
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
 
-	//if( particleState.updateDescriptorSets )
+	const uint32_t bindParmCount = bindParmsList.Count();
+	for ( uint32_t i = 0; i < bindParmCount; ++i )
 	{
-		AppendDescriptorWrites( *particleState.parms[ context.bufferId ], context.bufferId, descriptorWrites );
-	//	particleState.updateDescriptorSets = false;
-	}
-
-	AppendDescriptorWrites( *downScale.pass->parms[ context.bufferId ], context.bufferId, descriptorWrites );
-
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		RenderView& view = views[ viewIx ];
-		if ( view.IsCommitted() == false ) {
+		if( bindParmsList[ i ].IsValid() == false ) {
 			continue;
 		}
-		for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
-		{
-			DrawPass* pass = view.passes[ i ];
-			if ( pass != nullptr ) {
-				AppendDescriptorWrites( *pass->parms[ context.bufferId ], context.bufferId, descriptorWrites );
-			//	pass->updateDescriptorSets = false;
-			}
-		}
+		AppendDescriptorWrites( bindParmsList[ i ], context.bufferId, descriptorWrites );
 	}
 
-	//if( descriptorWrites.size() > 0 ) 
-	{
+	if( descriptorWrites.size() > 0 ) {
 		vkUpdateDescriptorSets( context.device, static_cast<uint32_t>( descriptorWrites.size() ), descriptorWrites.data(), 0, nullptr );
 	}
 }
