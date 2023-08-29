@@ -228,11 +228,6 @@ public:
 	{
 		vk_descriptorSet = VK_NULL_HANDLE;
 	}
-
-	inline bool IsValid()
-	{
-		return ( vk_descriptorSet != VK_NULL_HANDLE );
-	}
 #endif
 
 	inline const ShaderBindSet* GetSet() const
@@ -240,9 +235,13 @@ public:
 		return bindSet;
 	}
 
-	void Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
-	void Bind( const ShaderBinding& binding, const Image* texture );
-	void Bind( const ShaderBinding& binding, const ImageArray* imageArray );
-	const ShaderAttachment* GetAttachment( const ShaderBinding* binding ) const;
-	const ShaderAttachment* GetAttachment( const uint32_t id ) const;
+	inline bool IsValid()
+	{
+		return ( static_cast<uint32_t>( attachments.size() ) == bindSet->Count() );
+	}
+	void					Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
+	void					Bind( const ShaderBinding& binding, const Image* texture );
+	void					Bind( const ShaderBinding& binding, const ImageArray* imageArray );
+	const ShaderAttachment*	GetAttachment( const ShaderBinding* binding ) const;
+	const ShaderAttachment*	GetAttachment( const uint32_t id ) const;
 };
