@@ -1,2 +1,5 @@
-﻿  descriptorWrites.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_binding\descriptorWrites.cpp(196,6): error C2065: 'descriptorWrites2': undeclared identifier
+﻿  renderCommand.cpp
+  RenderTask.cpp
+  vulkinTestApp.cpp
+  Generating Code...
+  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

@@ -216,34 +216,17 @@ public:
 		InitApiObjects();
 	}
 
-	inline VkDescriptorSet GetVkObject() const
-	{
-		return vk_descriptorSets[ 0 ];
-	}
-
-	inline void SetVkObject( const VkDescriptorSet descSet )
-	{
-		vk_descriptorSets[ 0 ] = descSet;
-	}
-
-	void InitApiObjects()
-	{
-		for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
-			vk_descriptorSets[ i ] = VK_NULL_HANDLE;
-		}
-	}
+	VkDescriptorSet				GetVkObject() const;
+	void						SetVkObject( const VkDescriptorSet descSet[ MaxFrameStates ] );
+	void						InitApiObjects();
 #endif
 
-	inline const ShaderBindSet* GetSet() const
+	inline const ShaderBindSet*	GetSet() const
 	{
 		return bindSet;
 	}
 
-	inline bool IsValid()
-	{
-		return ( static_cast<uint32_t>( attachments[ 0 ].size() ) == bindSet->Count() );
-	}
-
+	bool						IsValid();
 	void						Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
 	void						Bind( const ShaderBinding& binding, const Image* texture );
 	void						Bind( const ShaderBinding& binding, const ImageArray* imageArray );

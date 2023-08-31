@@ -190,10 +190,42 @@ bool ShaderBindSet::HasBinding( const ShaderBinding& binding ) const
 }
 
 
+#ifdef USE_VULKAN
+VkDescriptorSet ShaderBindParms::GetVkObject() const
+{
+	return vk_descriptorSets[ context.bufferId ];
+}
+
+
+void ShaderBindParms::SetVkObject( const VkDescriptorSet descSet[ MaxFrameStates ] )
+{
+	for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
+	{
+		assert( descSet[ frameIx ] != VK_NULL_HANDLE );
+		vk_descriptorSets[ frameIx ] = descSet[ frameIx ];
+	}
+}
+
+
+void ShaderBindParms::InitApiObjects()
+{
+	for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
+		vk_descriptorSets[ i ] = VK_NULL_HANDLE;
+	}
+}
+#endif
+
+
+bool ShaderBindParms::IsValid()
+{
+	return ( static_cast<uint32_t>( attachments[ context.bufferId ].size() ) == bindSet->Count() );
+}
+
+
 void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffer )
 {
 	if( bindSet->HasBinding( binding ) ) {
-		attachments[ 0 ][ binding.GetHash() ] = buffer;
+		attachments[ context.bufferId ][ binding.GetHash() ] = buffer;
 	} else {
 		assert( 0 );
 	}
@@ -203,7 +235,7 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffe
 void ShaderBindParms::Bind( const ShaderBinding& binding, const Image* texture )
 {
 	if ( bindSet->HasBinding( binding ) ) {
-		attachments[ 0 ][ binding.GetHash() ] = texture;
+		attachments[ context.bufferId ][ binding.GetHash() ] = texture;
 	}
 	else {
 		assert( 0 );
@@ -216,7 +248,7 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ImageArray* imag
 	if ( bindSet->HasBinding( binding ) )
 	{
 		assert( imageArray->Count() <= binding.GetMaxDescriptorCount() );
-		attachments[ 0 ][ binding.GetHash() ] = imageArray;
+		attachments[ context.bufferId ][ binding.GetHash() ] = imageArray;
 	}
 	else {
 		assert( 0 );
@@ -226,8 +258,8 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ImageArray* imag
 
 const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding* binding ) const
 {
-	auto it = attachments[ 0 ].find( binding->GetHash() );
-	if ( it != attachments[ 0 ].end() ) {
+	auto it = attachments[ context.bufferId ].find( binding->GetHash() );
+	if ( it != attachments[ context.bufferId ].end() ) {
 		return &it->second;
 	}
 	return nullptr;
@@ -237,10 +269,10 @@ const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding* bin
 const ShaderAttachment* ShaderBindParms::GetAttachment( const uint32_t id ) const
 {
 	assert(0); // UNTESTED
-	auto it = attachments[ 0 ].begin();
+	auto it = attachments[ context.bufferId ].begin();
 	std::advance( it, id );
 
-	if ( it != attachments[ 0 ].end() ) {
+	if ( it != attachments[ context.bufferId ].end() ) {
 		return &it->second;
 	}
 	return nullptr;

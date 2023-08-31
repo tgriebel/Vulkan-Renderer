@@ -16,7 +16,7 @@ public:
 	viewport_t					viewport;
 
 	Array<Image*, 100>			codeImages[ MaxFrameStates ];
-	ShaderBindParms*			parms[ MaxFrameStates ];
+	ShaderBindParms*			parms;
 	FrameBuffer*				fb;
 
 	bool						updateDescriptorSets;

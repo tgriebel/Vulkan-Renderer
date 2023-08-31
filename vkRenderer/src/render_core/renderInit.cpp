@@ -172,19 +172,16 @@ void Renderer::InitShaderResources()
 			if ( pass == nullptr ) {
 				continue;
 			}
-			for ( uint32_t i = 0; i < frameStateCount; ++i ) {
-				pass->parms[ i ] = RegisterBindParm( &defaultBindSet );			
-			}
+			pass->parms = RegisterBindParm( &defaultBindSet );
 			pass->updateDescriptorSets = true;
 		}
 	}
 
-	for ( uint32_t i = 0; i < MaxFrameStates; ++i )
 	{
-		particleState.parms[ i ] = RegisterBindParm( &particleShaderBinds );
+		particleState.parms = RegisterBindParm( &particleShaderBinds );
 		particleState.updateDescriptorSets = true;
 
-		downScale.pass->parms[ i ] = RegisterBindParm( &downSampleBinds );
+		downScale.pass->parms = RegisterBindParm( &downSampleBinds );
 	}
 
 	materialBuffer.Reset();
@@ -514,16 +511,19 @@ void Renderer::AllocRegisteredBindParms()
 
 	const uint32_t bindParmCount = bindParmsList.Count();
 
-	layouts.reserve( bindParmCount );
-	descSets.reserve( bindParmCount );
+	layouts.reserve( MaxFrameStates * bindParmCount );
+	descSets.reserve( MaxFrameStates * bindParmCount );
 
-	for ( uint32_t i = 0; i < bindParmCount; ++i )
+	for ( uint32_t bindIx = 0; bindIx < bindParmCount; ++bindIx )
 	{
-		ShaderBindParms& parms = bindParmsList[i];
+		ShaderBindParms& parms = bindParmsList[ bindIx ];
 		const ShaderBindSet* set = parms.GetSet();
 
-		layouts.push_back( set->GetVkObject() );
-		descSets.push_back( VK_NULL_HANDLE );
+		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
+		{
+			layouts.push_back( set->GetVkObject() );
+			descSets.push_back( VK_NULL_HANDLE );
+		}
 	}
 
 	VkDescriptorSetAllocateInfo allocInfo{ };
@@ -536,10 +536,10 @@ void Renderer::AllocRegisteredBindParms()
 		throw std::runtime_error( "Failed to allocate descriptor sets!" );
 	}
 
-	for ( uint32_t i = 0; i < bindParmCount; ++i )
+	for ( uint32_t bindIx = 0; bindIx < bindParmCount; ++bindIx )
 	{
-		ShaderBindParms& parms = bindParmsList[ i ];
-		parms.SetVkObject( descSets[i] );
+		ShaderBindParms& parms = bindParmsList[ bindIx ];
+		parms.SetVkObject( &descSets[ MaxFrameStates * bindIx ] );
 	}
 }
 

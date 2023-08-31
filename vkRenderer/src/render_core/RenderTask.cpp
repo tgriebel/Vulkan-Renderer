@@ -219,7 +219,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 				}
 
 				const uint32_t descSetCount = 1;
-				VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms[ context.bufferId ]->GetVkObject() };
+				VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms->GetVkObject() };
 
 				vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 				vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );

@@ -436,7 +436,7 @@ void Renderer::SubmitFrame()
 
 		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		computeContext.Dispatch( progHdl, *particleState.parms[ context.bufferId ], MaxParticles / 256 );
+		computeContext.Dispatch( progHdl, *particleState.parms, MaxParticles / 256 );
 
 		computeContext.End();
 	}
@@ -549,7 +549,7 @@ void Renderer::UpdateViews( const Scene* scene )
 
 void Renderer::UpdateBindSets()
 {
-	const uint32_t i = context.bufferId;
+	const uint32_t i = 0;//context.bufferId;
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -583,27 +583,27 @@ void Renderer::UpdateBindSets()
 				pass->codeImages[ i ][ 2 ] = &shadowMapImage[ 2 ];
 			}
 
-			pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
-			pass->parms[ i ]->Bind( bind_viewBuffer, &frameState.viewParms );
-			pass->parms[ i ]->Bind( bind_modelBuffer, &frameState.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
-			pass->parms[ i ]->Bind( bind_image2DArray, &gpuImages2D );
-			pass->parms[ i ]->Bind( bind_imageCubeArray, &gpuImagesCube );
-			pass->parms[ i ]->Bind( bind_materialBuffer, &frameState.materialBuffers );
-			pass->parms[ i ]->Bind( bind_lightBuffer, &frameState.lightParms );
-			pass->parms[ i ]->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
-			pass->parms[ i ]->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &frameState.stencilImageView : pass->codeImages[ i ][ 0 ] );
+			pass->parms->Bind( bind_globalsBuffer, &frameState.globalConstants );
+			pass->parms->Bind( bind_viewBuffer, &frameState.viewParms );
+			pass->parms->Bind( bind_modelBuffer, &frameState.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
+			pass->parms->Bind( bind_image2DArray, &gpuImages2D );
+			pass->parms->Bind( bind_imageCubeArray, &gpuImagesCube );
+			pass->parms->Bind( bind_materialBuffer, &frameState.materialBuffers );
+			pass->parms->Bind( bind_lightBuffer, &frameState.lightParms );
+			pass->parms->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
+			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &frameState.stencilImageView : pass->codeImages[ i ][ 0 ] );
 		}
 	}
 
 	{
-		particleState.parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
-		particleState.parms[ i ]->Bind( bind_particleWriteBuffer, &frameState.particleBuffer );
+		particleState.parms->Bind( bind_globalsBuffer, &frameState.globalConstants );
+		particleState.parms->Bind( bind_particleWriteBuffer, &frameState.particleBuffer );
 	}
 
 	{
-		downScale.pass->parms[ i ]->Bind( bind_globalsBuffer, &frameState.globalConstants );
-		downScale.pass->parms[ i ]->Bind( bind_sourceImage, &mainColorImage );
-		downScale.pass->parms[ i ]->Bind( bind_imageProcess, &downScale.buffer );
+		downScale.pass->parms->Bind( bind_globalsBuffer, &frameState.globalConstants );
+		downScale.pass->parms->Bind( bind_sourceImage, &mainColorImage );
+		downScale.pass->parms->Bind( bind_imageProcess, &downScale.buffer );
 	}
 }
 
