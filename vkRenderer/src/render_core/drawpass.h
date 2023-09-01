@@ -15,7 +15,7 @@ public:
 	imageSamples_t				sampleRate;
 	viewport_t					viewport;
 
-	Array<Image*, 100>			codeImages[ MaxFrameStates ];
+	Array<Image*, 100>			codeImages;
 	ShaderBindParms*			parms;
 	FrameBuffer*				fb;
 

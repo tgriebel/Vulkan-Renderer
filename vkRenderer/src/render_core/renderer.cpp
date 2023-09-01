@@ -549,8 +549,6 @@ void Renderer::UpdateViews( const Scene* scene )
 
 void Renderer::UpdateBindSets()
 {
-	const uint32_t i = 0;//context.bufferId;
-
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		if( views[ viewIx ].IsCommitted() == false ) {
@@ -563,24 +561,24 @@ void Renderer::UpdateBindSets()
 				continue;
 			}
 
-			pass->codeImages[ i ].Resize( 3 );
+			pass->codeImages.Resize( 3 );
 			if ( passIx == DRAWPASS_SHADOW )
 			{				
-				pass->codeImages[ i ][ 0 ] = gpuImages2D[ 0 ];
-				pass->codeImages[ i ][ 1 ] = gpuImages2D[ 0 ];
-				pass->codeImages[ i ][ 2 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ 0 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ 1 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ 2 ] = gpuImages2D[ 0 ];
 			}
 			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
 			{
-				pass->codeImages[ i ][ 0 ] = &mainColorImage;
-				pass->codeImages[ i ][ 1 ] = &frameState.depthImageView;
-				pass->codeImages[ i ][ 2 ] = &frameState.stencilImageView;
+				pass->codeImages[ 0 ] = &mainColorImage;
+				pass->codeImages[ 1 ] = &frameState.depthImageView;
+				pass->codeImages[ 2 ] = &frameState.stencilImageView;
 			}
 			else
 			{
-				pass->codeImages[ i ][ 0 ] = &shadowMapImage[ 0 ];
-				pass->codeImages[ i ][ 1 ] = &shadowMapImage[ 1 ];
-				pass->codeImages[ i ][ 2 ] = &shadowMapImage[ 2 ];
+				pass->codeImages[ 0 ] = &shadowMapImage[ 0 ];
+				pass->codeImages[ 1 ] = &shadowMapImage[ 1 ];
+				pass->codeImages[ 2 ] = &shadowMapImage[ 2 ];
 			}
 
 			pass->parms->Bind( bind_globalsBuffer, &frameState.globalConstants );
@@ -590,8 +588,8 @@ void Renderer::UpdateBindSets()
 			pass->parms->Bind( bind_imageCubeArray, &gpuImagesCube );
 			pass->parms->Bind( bind_materialBuffer, &frameState.materialBuffers );
 			pass->parms->Bind( bind_lightBuffer, &frameState.lightParms );
-			pass->parms->Bind( bind_imageCodeArray, &pass->codeImages[ i ] );
-			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &frameState.stencilImageView : pass->codeImages[ i ][ 0 ] );
+			pass->parms->Bind( bind_imageCodeArray, &pass->codeImages );
+			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &frameState.stencilImageView : pass->codeImages[ 0 ] );
 		}
 	}
 
