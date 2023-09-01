@@ -267,8 +267,9 @@ public:
 		return bindSet;
 	}
 
-	bool						IsValid();
+	bool						IsValid() const;
+	bool						AttachmentChanged( const ShaderBinding& binding ) const;
 	void						Bind( const ShaderBinding& binding, const ShaderAttachment attachment );
-	const ShaderAttachment*		GetAttachment( const ShaderBinding* binding ) const;
+	const ShaderAttachment*		GetAttachment( const ShaderBinding& binding ) const;
 	const ShaderAttachment*		GetAttachment( const uint32_t id ) const;
 };

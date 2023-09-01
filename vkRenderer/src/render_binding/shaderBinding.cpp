@@ -222,9 +222,20 @@ void ShaderBindParms::InitApiObjects()
 #endif
 
 
-bool ShaderBindParms::IsValid()
+bool ShaderBindParms::IsValid() const
 {
 	return ( static_cast<uint32_t>( attachments[ context.bufferId ].size() ) == bindSet->Count() );
+}
+
+
+bool ShaderBindParms::AttachmentChanged( const ShaderBinding& binding ) const
+{
+	const uint32_t hash = binding.GetHash();
+	auto it = dirty[ context.bufferId ].find( hash );
+	if( it != dirty[ context.bufferId ].end() ) {
+		return it->second;
+	}
+	return false;
 }
 
 
@@ -238,7 +249,7 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment
 		assert( GetBindSemantic( binding.GetType() ) == attachment.GetSemantic() );
 
 		const uint32_t hash = binding.GetHash();
-		dirty[ context.bufferId ][ hash  ] = ( attachments[ context.bufferId ][ hash ] != attachment );
+		dirty[ context.bufferId ][ hash ] = ( attachments[ context.bufferId ][ hash ] != attachment );
 		attachments[ context.bufferId ][ hash ] = attachment;
 	} else {
 		assert( 0 );
@@ -246,9 +257,9 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment
 }
 
 
-const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding* binding ) const
+const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding& binding ) const
 {
-	auto it = attachments[ context.bufferId ].find( binding->GetHash() );
+	auto it = attachments[ context.bufferId ].find( binding.GetHash() );
 	if ( it != attachments[ context.bufferId ].end() ) {
 		return &it->second;
 	}

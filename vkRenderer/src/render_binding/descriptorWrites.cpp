@@ -100,7 +100,12 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 	for ( uint32_t i = 0; i < count; ++i )
 	{
 		const ShaderBinding* binding = set->GetBinding( i );
-		const ShaderAttachment* attachment = parms.GetAttachment( binding );
+
+		if( parms.AttachmentChanged( *binding ) == false ) {
+			continue;
+		}
+
+		const ShaderAttachment* attachment = parms.GetAttachment( *binding );
 		assert( attachment != nullptr );
 
 		VkWriteDescriptorSet writeInfo = {};
