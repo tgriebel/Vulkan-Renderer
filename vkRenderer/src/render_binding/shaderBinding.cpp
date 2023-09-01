@@ -59,6 +59,12 @@ bindType_t ShaderBinding::GetType() const
 }
 
 
+bool ShaderBinding::IsArrayType() const
+{
+	return ( GetBindSemantic( m_state.type ) == bindSemantic_t::IMAGE_ARRAY );
+}
+
+
 uint32_t ShaderBinding::GetMaxDescriptorCount() const
 {
 	return m_state.maxDescriptorCount;
@@ -222,35 +228,19 @@ bool ShaderBindParms::IsValid()
 }
 
 
-void ShaderBindParms::Bind( const ShaderBinding& binding, const GpuBuffer* buffer )
+void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment attachment )
 {
-	if( bindSet->HasBinding( binding ) ) {
-		attachments[ context.bufferId ][ binding.GetHash() ] = buffer;
-	} else {
-		assert( 0 );
-	}
-}
-
-
-void ShaderBindParms::Bind( const ShaderBinding& binding, const Image* texture )
-{
-	if ( bindSet->HasBinding( binding ) ) {
-		attachments[ context.bufferId ][ binding.GetHash() ] = texture;
-	}
-	else {
-		assert( 0 );
-	}
-}
-
-
-void ShaderBindParms::Bind( const ShaderBinding& binding, const ImageArray* imageArray )
-{
-	if ( bindSet->HasBinding( binding ) )
+	if( bindSet->HasBinding( binding ) )
 	{
-		assert( imageArray->Count() <= binding.GetMaxDescriptorCount() );
-		attachments[ context.bufferId ][ binding.GetHash() ] = imageArray;
-	}
-	else {
+		if( binding.IsArrayType() ) {
+			assert( attachment.GetImageArray()->Count() <= binding.GetMaxDescriptorCount() );
+		}
+		assert( GetBindSemantic( binding.GetType() ) == attachment.GetSemantic() );
+
+		const uint32_t hash = binding.GetHash();
+		dirty[ context.bufferId ][ hash  ] = ( attachments[ context.bufferId ][ hash ] != attachment );
+		attachments[ context.bufferId ][ hash ] = attachment;
+	} else {
 		assert( 0 );
 	}
 }

@@ -111,7 +111,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 		writeInfo.dstArrayElement = 0;
 		writeInfo.dstBinding = binding->GetSlot();
 
-		if ( attachment->GetType() == ShaderAttachment::type_t::BUFFER ) {
+		if ( attachment->GetSemantic() == bindSemantic_t::BUFFER ) {
 			const GpuBuffer* buffer = attachment->GetBuffer();
 
 			VkDescriptorBufferInfo& info = writeBuilder.NextBufferInfo();
@@ -123,7 +123,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 			writeInfo.pBufferInfo = &info;
 		}
-		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE ) {
+		else if ( attachment->GetSemantic() == bindSemantic_t::IMAGE ) {
 			const Image* image = attachment->GetImage();
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
@@ -140,7 +140,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 			writeInfo.pImageInfo = &info;
 		}
-		else if ( attachment->GetType() == ShaderAttachment::type_t::IMAGE_ARRAY ) {
+		else if ( attachment->GetSemantic() == bindSemantic_t::IMAGE_ARRAY ) {
 			std::vector<VkDescriptorImageInfo>& infos = writeBuilder.NextImageInfoArray();
 
 			const ImageArray& images = *attachment->GetImageArray();

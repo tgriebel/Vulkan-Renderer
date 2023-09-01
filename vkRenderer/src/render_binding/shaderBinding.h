@@ -30,7 +30,7 @@
 class GpuBuffer;
 class GpuImage;
 
-enum bindType_t
+enum class bindType_t
 {
 	CONSTANT_BUFFER,
 	IMAGE_2D,
@@ -45,6 +45,15 @@ enum bindType_t
 };
 
 
+enum class bindSemantic_t
+{
+	UNKNOWN,
+	BUFFER,
+	IMAGE,
+	IMAGE_ARRAY,
+};
+
+
 enum bindStateFlag_t
 {
 	BIND_STATE_VS = ( 1 << 0 ),
@@ -52,6 +61,32 @@ enum bindStateFlag_t
 	BIND_STATE_CS = ( 1 << 2 ),
 	BIND_STATE_ALL = ( 1 << 3 ) - 1
 };
+
+
+static inline bindSemantic_t GetBindSemantic( const bindType_t bindType )
+{
+	bindSemantic_t bindSemantic = bindSemantic_t::UNKNOWN;
+	switch ( bindType )
+	{
+		case bindType_t::CONSTANT_BUFFER:
+		case bindType_t::READ_BUFFER:
+		case bindType_t::WRITE_BUFFER:
+		case bindType_t::READ_IMAGE_BUFFER:
+		case bindType_t::WRITE_IMAGE_BUFFER:
+			return bindSemantic_t::BUFFER;
+
+		case bindType_t::IMAGE_2D:
+		case bindType_t::IMAGE_3D:
+		case bindType_t::IMAGE_CUBE:
+			return bindSemantic_t::IMAGE;
+
+		case bindType_t::IMAGE_2D_ARRAY:
+		case bindType_t::IMAGE_CUBE_ARRAY:
+			return bindSemantic_t::IMAGE_ARRAY;
+	}
+	return bindSemantic_t::UNKNOWN;
+}
+
 
 class ShaderBindSet;
 
@@ -84,6 +119,7 @@ public:
 
 	uint32_t		GetSlot() const;
 	bindType_t		GetType() const;
+	bool			IsArrayType() const;
 	uint32_t		GetMaxDescriptorCount() const;
 	bindStateFlag_t	GetBindFlags() const;
 	uint32_t		GetHash() const;
@@ -94,21 +130,15 @@ public:
 
 class ShaderAttachment
 {
-public:
-	enum class type_t
-	{
-		BUFFER,
-		IMAGE,
-		IMAGE_ARRAY,
-	};
 private:
 	union attach_t
 	{
 		const GpuBuffer*	buffer;
 		const Image*		image;
 		const ImageArray*	imageArray;
+		const void*			ptr;
 	} u;
-	type_t type;
+	bindSemantic_t semantic;
 public:
 
 
@@ -118,39 +148,49 @@ public:
 	ShaderAttachment( const GpuBuffer* buffer )
 	{
 		u.buffer = buffer;
-		type = type_t::BUFFER;
+		semantic = bindSemantic_t::BUFFER;
 	}
 
 	ShaderAttachment( const Image* image )
 	{
 		u.image = image;
-		type = type_t::IMAGE;
+		semantic = bindSemantic_t::IMAGE;
 	}
 
 	ShaderAttachment( const ImageArray* imageArray )
 	{
 		u.imageArray = imageArray;
-		type = type_t::IMAGE_ARRAY;
+		semantic = bindSemantic_t::IMAGE_ARRAY;
 	}
 
-	inline type_t GetType() const
+	inline bool operator==( const ShaderAttachment& rhs ) const
 	{
-		return type;
+		return ( u.ptr == rhs.u.ptr );
+	}
+
+	inline bool operator!=( const ShaderAttachment& rhs ) const
+	{
+		return ( u.ptr != rhs.u.ptr );
+	}
+
+	inline bindSemantic_t GetSemantic() const
+	{
+		return semantic;
 	}
 
 	inline const GpuBuffer* GetBuffer() const
 	{
-		return ( type == type_t::BUFFER ) ? u.buffer : nullptr;
+		return ( semantic == bindSemantic_t::BUFFER ) ? u.buffer : nullptr;
 	}
 
 	inline const Image* GetImage() const
 	{
-		return ( type == type_t::IMAGE ) ? u.image : nullptr;
+		return ( semantic == bindSemantic_t::IMAGE ) ? u.image : nullptr;
 	}
 
 	inline const ImageArray* GetImageArray() const
 	{
-		return ( type == type_t::IMAGE_ARRAY ) ? u.imageArray : nullptr;
+		return ( semantic == bindSemantic_t::IMAGE_ARRAY ) ? u.imageArray : nullptr;
 	}
 };
 
@@ -193,6 +233,7 @@ class ShaderBindParms
 private:
 	const ShaderBindSet*							bindSet;
 	std::unordered_map<uint32_t, ShaderAttachment>	attachments[ MaxFrameStates ];
+	std::unordered_map<uint32_t, bool>				dirty[ MaxFrameStates ];
 
 #ifdef USE_VULKAN
 	VkDescriptorSet									vk_descriptorSets[ MaxFrameStates ];
@@ -227,9 +268,7 @@ public:
 	}
 
 	bool						IsValid();
-	void						Bind( const ShaderBinding& binding, const GpuBuffer* buffer );
-	void						Bind( const ShaderBinding& binding, const Image* texture );
-	void						Bind( const ShaderBinding& binding, const ImageArray* imageArray );
+	void						Bind( const ShaderBinding& binding, const ShaderAttachment attachment );
 	const ShaderAttachment*		GetAttachment( const ShaderBinding* binding ) const;
 	const ShaderAttachment*		GetAttachment( const uint32_t id ) const;
 };

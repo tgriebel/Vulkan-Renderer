@@ -1,7 +1,7 @@
 #include "bindings.h"
 #include "../globals/common.h"
 
-#define BINDING( NAME, TYPE, COUNT, FLAGS )	ShaderBinding bind_##NAME( #NAME, TYPE, COUNT, FLAGS )
+#define BINDING( NAME, TYPE, COUNT, FLAGS )	ShaderBinding bind_##NAME( #NAME, bindType_t::TYPE, COUNT, FLAGS )
 
 BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 
