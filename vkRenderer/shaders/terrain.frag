@@ -27,6 +27,7 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "globals.h"
+#include "color.h"
 
 PS_LAYOUT_STANDARD( sampler2D )
 

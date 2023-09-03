@@ -248,6 +248,9 @@
     <ClInclude Include="src\globals\drawGroup.h">
       <Filter>globals</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\color.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

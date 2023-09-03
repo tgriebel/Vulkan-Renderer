@@ -28,6 +28,7 @@
 
 #include "globals.h"
 #include "light.h"
+#include "color.h"
 
 PS_LAYOUT_STANDARD( sampler2D )
 
