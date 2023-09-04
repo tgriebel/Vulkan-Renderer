@@ -207,5 +207,4 @@ private:
 	void								UpdateBuffers();
 	void								UpdateFrameDescSet();
 	void								BuildPipelines();
-	void								UpdateDescriptorSets();
 };

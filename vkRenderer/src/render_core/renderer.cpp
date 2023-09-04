@@ -288,7 +288,6 @@ void Renderer::RecreateSwapChain()
 void Renderer::Resize()
 {
 	RecreateSwapChain();
-	UpdateDescriptorSets();
 }
 
 
@@ -346,7 +345,6 @@ void Renderer::UploadAssets()
 	uploadContext.Submit();
 
 	UpdateGpuMaterials();
-	UpdateDescriptorSets();
 
 	FlushGPU();
 }
@@ -375,8 +373,8 @@ void Renderer::Render()
 
 	UpdateGpuMaterials();
 	UpdateBuffers();
-	//UpdateFrameDescSet( context.bufferId );
-	//UpdateDescriptorSets(); // need to allow dynamic views
+	UpdateBindSets();
+	UpdateFrameDescSet();
 
 	SubmitFrame();
 
@@ -384,20 +382,6 @@ void Renderer::Render()
 
 	g_renderDebugData.frameTimeMs = static_cast<float>( frameTimer.GetElapsed() );
 	g_renderDebugData.frameNumber = m_frameNumber;
-}
-
-
-void Renderer::UpdateDescriptorSets()
-{
-	const uint32_t frameBufferCount = static_cast<uint32_t>( g_swapChain.GetBufferCount() );
-	for ( uint32_t i = 0; i < frameBufferCount; i++ )
-	{
-		context.bufferId = i; // FIXME: HACK
-		UpdateBuffers();
-		UpdateBindSets();
-		UpdateFrameDescSet();
-	}
-	context.bufferId = 0;
 }
 
 
