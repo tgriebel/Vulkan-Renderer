@@ -239,6 +239,16 @@ bool ShaderBindParms::AttachmentChanged( const ShaderBinding& binding ) const
 }
 
 
+void ShaderBindParms::Clear()
+{
+	for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
+	{
+		attachments[ frameIx ].clear();
+		dirty[ frameIx ].clear();
+	}
+}
+
+
 void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment attachment )
 {
 	if( bindSet->HasBinding( binding ) )
@@ -251,6 +261,19 @@ void ShaderBindParms::Bind( const ShaderBinding& binding, const ShaderAttachment
 		const uint32_t hash = binding.GetHash();
 		dirty[ context.bufferId ][ hash ] = ( attachments[ context.bufferId ][ hash ] != attachment );
 		attachments[ context.bufferId ][ hash ] = attachment;
+	} else {
+		assert( 0 );
+	}
+}
+
+
+void ShaderBindParms::Unbind( const ShaderBinding& binding )
+{
+	if ( bindSet->HasBinding( binding ) )
+	{
+		const uint32_t hash = binding.GetHash();
+		dirty[ context.bufferId ][ hash ] = true;
+		attachments[ context.bufferId ][ hash ] = ShaderAttachment();
 	} else {
 		assert( 0 );
 	}

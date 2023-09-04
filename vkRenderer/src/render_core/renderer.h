@@ -179,6 +179,7 @@ private:
 	ShaderBindParms*					RegisterBindParm( const ShaderBindSet* set );
 	void								AllocRegisteredBindParms();
 	void								FreeRegisteredBindParms();
+	void								RefreshRegisteredBindParms();
 	void								CreateSyncObjects();
 	void								CreateCodeTextures();
 	void								CreateBuffers();

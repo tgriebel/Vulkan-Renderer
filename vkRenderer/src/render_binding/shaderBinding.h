@@ -143,7 +143,10 @@ public:
 
 
 	ShaderAttachment()
-	{}
+	{
+		u.ptr = nullptr;
+		semantic = bindSemantic_t::UNKNOWN;
+	}
 
 	ShaderAttachment( const GpuBuffer* buffer )
 	{
@@ -269,7 +272,9 @@ public:
 
 	bool						IsValid() const;
 	bool						AttachmentChanged( const ShaderBinding& binding ) const;
+	void						Clear();
 	void						Bind( const ShaderBinding& binding, const ShaderAttachment attachment );
+	void						Unbind( const ShaderBinding& binding );
 	const ShaderAttachment*		GetAttachment( const ShaderBinding& binding ) const;
 	const ShaderAttachment*		GetAttachment( const uint32_t id ) const;
 };

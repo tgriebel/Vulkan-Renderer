@@ -559,6 +559,14 @@ void Renderer::FreeRegisteredBindParms()
 }
 
 
+void Renderer::RefreshRegisteredBindParms()
+{
+	for ( uint32_t i = 0; i < bindParmsList.Count(); ++i ) {
+		bindParmsList[ i ].Clear();
+	}	
+}
+
+
 void Renderer::CreateBuffers()
 {
 	{

@@ -288,6 +288,7 @@ void Renderer::RecreateSwapChain()
 void Renderer::Resize()
 {
 	RecreateSwapChain();
+	RefreshRegisteredBindParms();
 }
 
 
