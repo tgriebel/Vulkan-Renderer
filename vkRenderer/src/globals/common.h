@@ -119,16 +119,6 @@ typedef void ( *debugMenuFuncPtr )( );
 class Renderer;
 class Serializer;
 
-struct vsInput_t
-{
-	vec3f pos;
-	vec4f color;
-	vec3f normal;
-	vec3f tangent;
-	vec3f bitangent;
-	vec4f texCoord;
-};
-
 
 enum renderFlags_t
 {
@@ -142,134 +132,11 @@ enum renderFlags_t
 };
 
 
-struct pipelineObject_t;
-
-const static uint32_t KeyMaterialBits = 32;
-const static uint32_t KeyStencilBits = 8;
-
-union sortKey_t
-{
-	uint64_t	materialId : KeyMaterialBits;
-	uint64_t	stencilBit : KeyStencilBits;
-	uint64_t	key;
-};
-
-
-struct drawSurf_t
-{
-	uint32_t			uploadId;
-	uint32_t			objectId;
-	sortKey_t			sortKey;
-	renderFlags_t		flags;
-	uint8_t				stencilBit;
-	uint32_t			hash;
-
-	const char*			dbgName;
-
-	hdl_t				pipelineObject[ DRAWPASS_COUNT ];
-};
-
-
-inline uint32_t Hash( const drawSurf_t& surf ) {
-	uint64_t shaderIds[ DRAWPASS_COUNT ];
-	for ( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
-		shaderIds[ i ] = surf.pipelineObject[ i ].Get();
-	}
-	uint32_t shaderHash = Hash( reinterpret_cast<const uint8_t*>( &shaderIds ), sizeof( shaderIds[ 0 ] ) * DRAWPASS_COUNT );
-	uint32_t stateHash = Hash( reinterpret_cast<const uint8_t*>( &surf ), offsetof( drawSurf_t, hash ) );
-	return ( shaderHash ^ stateHash );
-}
-
-
-struct drawSurfInstance_t
-{
-	mat4x4f		modelMatrix;
-	uint32_t	surfId;
-	uint32_t	id;
-};
-
-
-inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
-{
-	bool isEqual = true;
-	const uint32_t sizeBytes = sizeof( drawSurf_t );
-	const uint8_t* lhsBytes = reinterpret_cast< const uint8_t* >( &lhs );
-	const uint8_t* rhsBytes = reinterpret_cast< const uint8_t* >( &rhs );
-	for( int i = 0; i < sizeBytes; ++i ) {
-		isEqual = isEqual && ( lhsBytes[ i ] == rhsBytes[ i ] );
-	}
-	return isEqual;
-}
-
-
-inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
-{
-	if ( surf0.sortKey.materialId == surf1.sortKey.materialId ) {
-		return ( surf0.objectId < surf1.objectId );
-	} else {
-		return ( surf0.sortKey.materialId < surf1.sortKey.materialId );
-	}
-}
-
-
-template<> struct std::hash<drawSurf_t> {
-	size_t operator()( drawSurf_t const& surf ) const {
-		return Hash( reinterpret_cast<const uint8_t*>( &surf ), sizeof( surf ) );
-	}
-};
-
-
-static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
-{
-	if ( surf.pipelineObject[ pass ] == INVALID_HDL ) {
-		return true;
-	}
-
-	if ( ( surf.flags & SKIP_OPAQUE ) != 0 )
-	{
-		if ( ( pass == DRAWPASS_SHADOW ) ||
-			( pass == DRAWPASS_DEPTH ) ||
-			( pass == DRAWPASS_TERRAIN ) ||
-			( pass == DRAWPASS_OPAQUE ) ||
-			( pass == DRAWPASS_SKYBOX ) ||
-			( pass == DRAWPASS_DEBUG_3D )
-			) {
-			return true;
-		}
-	}
-
-	if ( ( pass == DRAWPASS_DEBUG_3D ) && ( ( surf.flags & DEBUG_SOLID ) == 0 ) ) {
-		return true;
-	}
-
-	if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surf.flags & WIREFRAME ) == 0 ) ) {
-		return true;
-	}
-
-	return false;
-}
-
-
 enum resourceLifetime_t
 {
 	LIFETIME_TEMP,
 	LIFETIME_PERSISTENT,
 };
-
-
-enum gpuImageStateFlags_t : uint8_t
-{
-	GPU_IMAGE_NONE = 0,
-	GPU_IMAGE_READ = ( 1 << 0 ),
-	GPU_IMAGE_WRITE = ( 1 << 1 ),
-	GPU_IMAGE_TRANSFER_SRC = ( 1 << 2 ),
-	GPU_IMAGE_TRANSFER_DST = ( 1 << 3 ),
-	GPU_IMAGE_PERSISTENT = ( 1 << 4 ),
-	GPU_IMAGE_PRESENT = ( 1 << 5 ),
-	GPU_IMAGE_RW = ( GPU_IMAGE_READ | GPU_IMAGE_WRITE ),
-	GPU_IMAGE_ALL = 0xFF,
-};
-DEFINE_ENUM_OPERATORS( gpuImageStateFlags_t, uint8_t )
 
 
 #if defined( USE_IMGUI )

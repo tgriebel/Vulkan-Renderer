@@ -17,6 +17,37 @@ extern imguiControls_t			g_imguiControls;
 extern Scene*		g_scene;
 extern Window		g_window;
 
+static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
+{
+	if ( surf.pipelineObject[ pass ] == INVALID_HDL ) {
+		return true;
+	}
+
+	if ( ( surf.flags & SKIP_OPAQUE ) != 0 )
+	{
+		if ( ( pass == DRAWPASS_SHADOW ) ||
+			( pass == DRAWPASS_DEPTH ) ||
+			( pass == DRAWPASS_TERRAIN ) ||
+			( pass == DRAWPASS_OPAQUE ) ||
+			( pass == DRAWPASS_SKYBOX ) ||
+			( pass == DRAWPASS_DEBUG_3D )
+			) {
+			return true;
+		}
+	}
+
+	if ( ( pass == DRAWPASS_DEBUG_3D ) && ( ( surf.flags & DEBUG_SOLID ) == 0 ) ) {
+		return true;
+	}
+
+	if ( ( pass == DRAWPASS_DEBUG_WIREFRAME ) && ( ( surf.flags & WIREFRAME ) == 0 ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+
 static void DrawDebugMenu( RenderView& view )
 {
 #if defined( USE_IMGUI )

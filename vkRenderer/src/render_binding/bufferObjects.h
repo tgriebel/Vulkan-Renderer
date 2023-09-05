@@ -25,6 +25,17 @@
 
 #include "../globals/common.h"
 
+struct vsInput_t
+{
+	vec3f pos;
+	vec4f color;
+	vec3f normal;
+	vec3f tangent;
+	vec3f bitangent;
+	vec4f texCoord;
+};
+
+
 struct uniformBufferObject_t
 {
 	mat4x4f model;

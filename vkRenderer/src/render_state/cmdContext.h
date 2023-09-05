@@ -29,6 +29,8 @@
 class ShaderBindParms;
 class GpuBuffer;
 
+enum gpuImageStateFlags_t : uint8_t;
+
 enum pipelineQueue_t
 {
 	QUEUE_UNKNOWN,
