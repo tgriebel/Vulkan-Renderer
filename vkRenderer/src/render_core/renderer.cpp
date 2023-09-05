@@ -289,6 +289,23 @@ void Renderer::Resize()
 {
 	RecreateSwapChain();
 	RefreshRegisteredBindParms();
+
+	uploadContext.Begin();
+	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
+		Transition( &uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	}
+	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
+	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
+		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+	}
+
+	uploadContext.End();
+	uploadContext.Submit();
+
+	FlushGPU();
 }
 
 
