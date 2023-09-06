@@ -45,9 +45,7 @@ void CommandContext::Begin()
 	beginInfo.flags = 0; // Optional
 	beginInfo.pInheritanceInfo = nullptr; // Optional
 
-	if ( vkBeginCommandBuffer( CommandBuffer(), &beginInfo ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to begin recording command buffer!" );
-	}
+	VK_CHECK_RESULT( vkBeginCommandBuffer( CommandBuffer(), &beginInfo ) );
 
 	isOpen = true;
 }
@@ -55,10 +53,7 @@ void CommandContext::Begin()
 
 void CommandContext::End()
 {
-	if ( vkEndCommandBuffer( CommandBuffer() ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to record command buffer!" );
-	}
-
+	VK_CHECK_RESULT( vkEndCommandBuffer( CommandBuffer() ) );
 	isOpen = false;
 }
 
@@ -71,9 +66,7 @@ void CommandContext::Create( const char* name )
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ queueType ];
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		if ( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create graphics command pool!" );
-		}
+		VK_CHECK_RESULT( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) );
 		vk_MarkerSetObjectName( (uint64_t)commandPool, VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT, name );
 	}
 
@@ -85,9 +78,7 @@ void CommandContext::Create( const char* name )
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = static_cast<uint32_t>( MaxFrameStates );
 
-		if ( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to allocate graphics command buffers!" );
-		}
+		VK_CHECK_RESULT( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) );
 
 		for ( size_t i = 0; i < MaxFrameStates; i++ )
 		{
@@ -198,9 +189,7 @@ void CommandContext::Submit( const GpuFence* fence )
 
 	VkQueue vk_queue = ( queueType == QUEUE_COMPUTE ) ? context.computeContext : context.gfxContext;
 
-	if ( vkQueueSubmit( vk_queue, 1, &submitInfo, vk_fence ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to submit draw command buffers!" );
-	}
+	VK_CHECK_RESULT( vkQueueSubmit( vk_queue, 1, &submitInfo, vk_fence ) );
 }
 
 
@@ -214,9 +203,7 @@ void ComputeContext::Submit()
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &CommandBuffer();
 
-	if ( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to submit compute command buffers!" );
-	}
+	VK_CHECK_RESULT( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) );
 }
 
 

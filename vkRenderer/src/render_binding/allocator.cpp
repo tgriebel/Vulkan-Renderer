@@ -81,9 +81,7 @@ void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t reg
 	allocInfo.memoryTypeIndex = typeIndex;
 
 	VkDeviceMemory memory;
-	if ( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to allocate buffer memory!" );
-	}
+	VK_CHECK_RESULT( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) );
 
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
@@ -91,9 +89,7 @@ void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t reg
 
 	void* memPtr = nullptr;
 	if ( ( type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) == 0 ) {
-		if ( vkMapMemory( context.device, memory, 0, VK_WHOLE_SIZE, 0, &memPtr ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to map memory to context.device memory!" );
-		}
+		VK_CHECK_RESULT( vkMapMemory( context.device, memory, 0, VK_WHOLE_SIZE, 0, &memPtr ) );
 	}
 
 	Bind( memory, memPtr, sizeBytes, typeIndex );

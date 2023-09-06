@@ -132,9 +132,7 @@ void ShaderBindSet::Create( const ShaderBinding bindings[], const uint32_t bindC
 	layoutInfo.bindingCount = static_cast<uint32_t>( layoutBindings.size() );
 	layoutInfo.pBindings = layoutBindings.data();
 
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &vk_layout ) != VK_SUCCESS ) {
-		throw std::runtime_error( "CreateBindingLayout: Failed to create compute descriptor set layout!" );
-	}
+	VK_CHECK_RESULT( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &vk_layout ) );
 #else
 	assert(0);
 #endif

@@ -145,9 +145,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if ( vkCreateSwapchainKHR( context.device, &createInfo, nullptr, &vk_swapChain ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create swap chain!" );
-	}
+	VK_CHECK_RESULT( vkCreateSwapchainKHR( context.device, &createInfo, nullptr, &vk_swapChain ) );
 
 	VkImage vk_swapChainImages[ MaxSwapChainBuffers ];
 	vkGetSwapchainImagesKHR( context.device, vk_swapChain, &m_imageCount, nullptr );

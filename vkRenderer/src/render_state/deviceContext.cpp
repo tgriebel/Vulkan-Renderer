@@ -158,9 +158,7 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 	viewInfo.subresourceRange.layerCount = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : 1;
 
 	VkImageView imageView;
-	if ( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create texture image view!" );
-	}
+	VK_CHECK_RESULT( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) );
 	return imageView;
 }
 
@@ -530,9 +528,7 @@ VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 	createInfo.pCode = reinterpret_cast<const uint32_t*>( code.data() );
 
 	VkShaderModule shaderModule;
-	if ( vkCreateShaderModule( context.device, &createInfo, nullptr, &shaderModule ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create shader module!" );
-	}
+	VK_CHECK_RESULT( vkCreateShaderModule( context.device, &createInfo, nullptr, &shaderModule ) );
 
 	return shaderModule;
 }
@@ -708,9 +704,7 @@ void DeviceContext::Create( Window& window )
 		createInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
-		if ( vkCreateInstance( &createInfo, nullptr, &instance ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create instance!" );
-		}
+		VK_CHECK_RESULT( vkCreateInstance( &createInfo, nullptr, &instance ) );
 	}
 
 	// Debug Messenger
@@ -722,9 +716,7 @@ void DeviceContext::Create( Window& window )
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		vk_PopulateDebugMessengerCreateInfo( createInfo );
 
-		if ( vk_CreateDebugUtilsMessengerEXT( instance, &createInfo, nullptr, &debugMessenger ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to set up debug messenger!" );
-		}
+		VK_CHECK_RESULT( vk_CreateDebugUtilsMessengerEXT( instance, &createInfo, nullptr, &debugMessenger ) );
 	}
 
 	// Window Surface
@@ -824,9 +816,7 @@ void DeviceContext::Create( Window& window )
 		descIndexing.pNext = NULL;
 		createInfo.pNext = &descIndexing;
 
-		if ( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create logical context.device!" );
-		}
+		VK_CHECK_RESULT( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) );
 
 		vkGetDeviceQueue( device, indices.graphicsFamily.value(), 0, &gfxContext );
 		vkGetDeviceQueue( device, indices.presentFamily.value(), 0, &presentQueue );
@@ -891,9 +881,7 @@ void DeviceContext::Create( Window& window )
 		samplerInfo.maxLod = 16.0f;
 		samplerInfo.mipLodBias = 0.0f;
 
-		if ( vkCreateSampler( device, &samplerInfo, nullptr, &bilinearSampler ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create texture sampler!" );
-		}
+		VK_CHECK_RESULT( vkCreateSampler( device, &samplerInfo, nullptr, &bilinearSampler ) );
 	}
 
 	// Depth sampler
@@ -916,9 +904,7 @@ void DeviceContext::Create( Window& window )
 		samplerInfo.maxLod = 16.0f;
 		samplerInfo.mipLodBias = 0.0f;
 
-		if ( vkCreateSampler( device, &samplerInfo, nullptr, &depthShadowSampler ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create depth sampler!" );
-		}
+		VK_CHECK_RESULT( vkCreateSampler( device, &samplerInfo, nullptr, &depthShadowSampler ) );
 	}
 
 	// Descriptor Pool
@@ -938,10 +924,7 @@ void DeviceContext::Create( Window& window )
 		poolInfo.maxSets = DescriptorPoolMaxSets;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
-		if ( vkCreateDescriptorPool( device, &poolInfo, nullptr, &descriptorPool ) != VK_SUCCESS )
-		{
-			throw std::runtime_error( "Failed to create descriptor pool!" );
-		}
+		VK_CHECK_RESULT( vkCreateDescriptorPool( device, &poolInfo, nullptr, &descriptorPool ) );
 	}
 
 	// Query Pool (Statistics)

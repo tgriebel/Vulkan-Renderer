@@ -43,9 +43,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 		imageInfo.flags = ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
-	if ( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ 0 ] ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create image!" );
-	}
+	VK_CHECK_RESULT( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ 0 ] ) );
 
 	VkMemoryRequirements memRequirements;
 	vkGetImageMemoryRequirements( context.device, vk_image[ 0 ], &memRequirements );

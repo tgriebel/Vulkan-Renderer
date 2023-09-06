@@ -532,9 +532,7 @@ void Renderer::AllocRegisteredBindParms()
 	allocInfo.descriptorSetCount = static_cast<uint32_t>( layouts.size() );
 	allocInfo.pSetLayouts = layouts.data();
 
-	if ( vkAllocateDescriptorSets( context.device, &allocInfo, descSets.data() ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to allocate descriptor sets!" );
-	}
+	VK_CHECK_RESULT( vkAllocateDescriptorSets( context.device, &allocInfo, descSets.data() ) );
 
 	for ( uint32_t bindIx = 0; bindIx < bindParmCount; ++bindIx )
 	{

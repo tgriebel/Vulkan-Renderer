@@ -271,9 +271,7 @@ float Window::GetWindowFrameBufferAspect( const bool wait )
 #ifdef USE_VULKAN
 void Window::CreateGlfwSurface()
 {
-	if ( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create window surface!" );
-	}
+	VK_CHECK_RESULT( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) );
 }
 
 

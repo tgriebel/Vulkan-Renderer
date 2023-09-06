@@ -412,10 +412,7 @@ void Renderer::WaitForEndFrame()
 		gfxContext.frameFence[ context.bufferId ].Wait();
 	}
 
-	VkResult result = vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.swapChainIndex );
-	if ( result != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to acquire swap chain image!" );
-	}
+	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.swapChainIndex ) );
 
 #ifdef USE_IMGUI
 	ImGui_ImplVulkan_NewFrame();

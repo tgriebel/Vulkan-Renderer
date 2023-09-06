@@ -21,9 +21,7 @@ void GpuSemaphore::Create( const char* name, const bool isBinary )
 	}
 
 	for( uint32_t i = 0; i < MaxFrameStates; ++i ) {
-		if ( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &semaphores[ i ] ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create semaphore!" );
-		}
+		VK_CHECK_RESULT( vkCreateSemaphore( context.device, &semaphoreInfo, nullptr, &semaphores[ i ] ) );
 		vk_MarkerSetObjectName( (uint64_t)semaphores[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT, name );
 	}
 #endif

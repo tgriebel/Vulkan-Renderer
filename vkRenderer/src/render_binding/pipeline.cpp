@@ -121,9 +121,7 @@ void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout 
 	layoutInfo.bindingCount = static_cast<uint32_t>( layoutBindings.size() );
 	layoutInfo.pBindings = layoutBindings.data();
 
-	if ( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) != VK_SUCCESS ) {
-		throw std::runtime_error( "CreateBindingLayout: Failed to create compute descriptor set layout!" );
-	}
+	VK_CHECK_RESULT( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) );
 }
 
 
@@ -368,9 +366,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
 	pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 
-	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS )	{
-		throw std::runtime_error( "Failed to create pipeline layout!" );
-	}
+	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
 	const bool depthTestEnable = ( ( state.stateBits & GFX_STATE_DEPTH_TEST ) != 0 );
 	const bool depthWriteEnable = ( ( state.stateBits & GFX_STATE_DEPTH_WRITE ) != 0 );
@@ -433,9 +429,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	pipelineInfo.basePipelineIndex = -1; // Optional
 	pipelineInfo.pDepthStencilState = &depthStencil;
 
-	if ( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create graphics pipeline!" );
-	}
+	VK_CHECK_RESULT( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 
@@ -493,9 +487,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	VkDescriptorSetLayout layouts[] = { layout };
 	pipelineLayoutInfo.pSetLayouts = layouts;
 
-	if ( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create pipeline layout!" );
-	}
+	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
 	VkComputePipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -504,9 +496,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	pipelineInfo.stage = computeShaderStageInfo;
 	pipelineInfo.pNext = nullptr;
 
-	if ( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create compute pipeline!" );
-	}
+	VK_CHECK_RESULT( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }

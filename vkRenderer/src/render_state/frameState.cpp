@@ -229,9 +229,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &subpass;
 
-	if ( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &pass ) != VK_SUCCESS ) {
-		throw std::runtime_error( "Failed to create render pass!" );
-	}
+	VK_CHECK_RESULT( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &pass ) );
 
 	renderPassCache[ passHash ] = renderPassTuple_t{ pass, passState };
 
@@ -405,9 +403,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			framebufferInfo.height = createInfo.height;
 			framebufferInfo.layers = 1;
 
-			if ( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ frameIx ][ permIx ] ) != VK_SUCCESS ) {
-				throw std::runtime_error( "Failed to create framebuffer!" );
-			}
+			VK_CHECK_RESULT( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &buffers[ frameIx ][ permIx ] ) );
 
 			vk_MarkerSetObjectName( (uint64_t)buffers[ frameIx ][ permIx ], VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, createInfo.name );
 

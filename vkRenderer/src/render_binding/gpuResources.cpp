@@ -150,9 +150,7 @@ void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, con
 
 	for( uint32_t bufferId = 0; bufferId < m_bufferCount; ++bufferId )
 	{
-		if ( vkCreateBuffer( context.device, &bufferInfo, nullptr, &m_buffer[ bufferId ].buffer ) != VK_SUCCESS ) {
-			throw std::runtime_error( "Failed to create buffer!" );
-		}
+		VK_CHECK_RESULT( vkCreateBuffer( context.device, &bufferInfo, nullptr, &m_buffer[ bufferId ].buffer ) );
 
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements( context.device, m_buffer[ bufferId ].buffer, &memRequirements );
