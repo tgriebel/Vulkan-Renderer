@@ -4,7 +4,7 @@
       "name": "Basic",
       "vs": "simpleVS.spv",
       "ps": "simplePS.spv",
-	  "bindset": "defaultBindSet",
+	  "bindset": "bindset_default",
     },
     {
       "name": "Shadow",
@@ -79,13 +79,19 @@
 	{
       "name": "ClearParticles",
       "cs": "clearCS.spv",
-	  "bindset": "particleShaderBinds",
+	  "bindset": "bindset_particle",
     },
 	{
       "name": "DownSample",
       "vs": "fullscreenVS.spv",
       "ps": "downsamplePS.spv",
-	  "bindset": "downSampleBinds",
+	  "bindset": "bindset_imageProcess",
+    },
+	{
+      "name": "Resolve",
+      "vs": "fullscreenVS.spv",
+      "ps": "resolvePS.spv",
+	  "bindset": "bindset_imageProcess",
     },
   ]
 }

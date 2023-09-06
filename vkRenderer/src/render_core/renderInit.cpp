@@ -76,14 +76,25 @@ void Renderer::Init()
 	view2Ds[ 0 ]->Commit();
 
 	{
-		imageProcessCreateInfo_t downSampleProcess = {};
-		downSampleProcess.name = "DownScale";
-		downSampleProcess.clear = false;
-		downSampleProcess.progHdl = AssetLibGpuProgram::Handle( "DownSample" );
-		downSampleProcess.fb = &tempColor;
-		downSampleProcess.context = &renderContext;
+		imageProcessCreateInfo_t info = {};
+		info.name = "DownScale";
+		info.clear = false;
+		info.progHdl = AssetLibGpuProgram::Handle( "DownSample" );
+		info.fb = &tempColor;
+		info.context = &renderContext;
 
-		downScale.Init( downSampleProcess );
+		downScale.Init( info );
+	}
+
+	{
+		imageProcessCreateInfo_t info = {};
+		info.name = "Resolve";
+		info.clear = false;
+		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
+		info.fb = &mainColorResolved;
+		info.context = &renderContext;
+
+		resolve.Init( info );
 	}
 
 	InitShaderResources();
@@ -138,13 +149,12 @@ void Renderer::InitApi()
 
 void Renderer::InitShaderResources()
 {
-	ShaderBindSet& defaultBindSet = bindSets[ Hash( "defaultBindSet" ) ];
-	ShaderBindSet& particleShaderBinds = bindSets[ Hash( "particleShaderBinds" ) ];
-	ShaderBindSet& downSampleBinds = bindSets[ Hash( "downSampleBinds" ) ];
+	#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = bindSets[ Hash( "bindset_"#NAME ) ];	\
+								bindset_##NAME.Create( g_##NAME##Bindings, g_##NAME##BindCount );
 
-	defaultBindSet.Create( g_defaultBindings, g_defaultBindCount );
-	particleShaderBinds.Create( g_particleCsBindings, g_particleCsBindCount );
-	downSampleBinds.Create( g_downsampleBindings, g_downsampleBindCount );
+	BIND_SET( default )
+	BIND_SET( particle )
+	BIND_SET( imageProcess )
 
 	{
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
@@ -157,7 +167,7 @@ void Renderer::InitShaderResources()
 				if( it != bindSets.end() ) {
 					prog.bindset = &it->second;
 				} else {
-					prog.bindset = &defaultBindSet;
+					prog.bindset = &bindset_default;
 				}
 			}
 		}
@@ -172,16 +182,18 @@ void Renderer::InitShaderResources()
 			if ( pass == nullptr ) {
 				continue;
 			}
-			pass->parms = RegisterBindParm( &defaultBindSet );
+			pass->parms = RegisterBindParm( &bindset_default );
 			pass->updateDescriptorSets = true;
 		}
 	}
 
 	{
-		particleState.parms = RegisterBindParm( &particleShaderBinds );
+		particleState.parms = RegisterBindParm( &bindset_particle );
 		particleState.updateDescriptorSets = true;
 
-		downScale.pass->parms = RegisterBindParm( &downSampleBinds );
+		downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
+
+	//	downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
 	}
 
 	materialBuffer.Reset();
@@ -398,14 +410,27 @@ void Renderer::CreateFramebuffers()
 
 		CreateImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorImage );
 		
-		//info.subsamples = IMAGE_SMP_1;
-		//CreateImage( "mainColorResolved", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorResolved );
-
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
 		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilImage );
+	}
+
+	// Resolve image
+	{
+		imageInfo_t info{};
+		info.width = width;
+		info.height = height;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, mainColorResolvedImage );
 	}
 
 	// Downsampled image
@@ -448,6 +473,18 @@ void Renderer::CreateFramebuffers()
 		info.tiling = IMAGE_TILING_MORTON;
 
 		CreateImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, tempColorImage );
+	}
+
+	// Main Color Resolved Frame buffer
+	{
+		frameBufferCreateInfo_t fbInfo = {};
+		fbInfo.name = "MainColorResolveFB";
+		fbInfo.color0[ 0 ] = &mainColorResolvedImage;
+		fbInfo.width = mainColorResolvedImage.info.width;
+		fbInfo.height = mainColorResolvedImage.info.height;
+		fbInfo.lifetime = LIFETIME_TEMP;
+
+		mainColorResolved.Create( fbInfo );
 	}
 
 	// Temp Frame buffer

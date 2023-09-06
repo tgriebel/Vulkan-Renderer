@@ -36,13 +36,13 @@ const ShaderBinding g_defaultBindings[ g_defaultBindCount ] =
 												bind_imageStencil
 											};
 
-const ShaderBinding g_particleCsBindings[ g_particleCsBindCount ] =
+const ShaderBinding g_particleBindings[ g_particleBindCount ] =
 											{
 												bind_globalsBuffer,
 												bind_particleWriteBuffer 
 											};
 
-const ShaderBinding g_downsampleBindings[ g_downsampleBindCount ] =
+const ShaderBinding g_imageProcessBindings[ g_imageProcessBindCount ] =
 											{
 												bind_globalsBuffer,
 												bind_sourceImage,

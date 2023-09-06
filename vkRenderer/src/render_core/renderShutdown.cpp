@@ -49,6 +49,7 @@ void Renderer::Cleanup()
 	g_swapChain.Destroy();
 
 	downScale.Shutdown();
+	resolve.Shutdown();
 
 	ShutdownImGui();
 
@@ -87,6 +88,7 @@ void Renderer::DestroyFramebuffers()
 	delete mainColorImage.gpuImage;
 	delete depthStencilImage.gpuImage;
 	delete mainColorDownsampled.gpuImage;
+	delete mainColorResolvedImage.gpuImage;
 
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
@@ -95,6 +97,7 @@ void Renderer::DestroyFramebuffers()
 	}
 	tempColor.Destroy();
 	mainColor.Destroy();
+	mainColorResolved.Destroy();
 
 	renderContext.frameBufferMemory.Destroy();
 }

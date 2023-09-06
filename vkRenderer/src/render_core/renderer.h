@@ -109,6 +109,7 @@ private:
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
 	ImageProcess						downScale;
+	ImageProcess						resolve;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
@@ -148,7 +149,7 @@ private:
 
 	Image								shadowMapImage[ MaxShadowViews ];
 	Image								mainColorImage;
-	Image								mainColorResolved;
+	Image								mainColorResolvedImage;
 	Image								tempColorImage;
 	Image								mainColorDownsampled;
 	Image								depthStencilImage;
@@ -156,6 +157,7 @@ private:
 	FrameState							frameState;
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
+	FrameBuffer							mainColorResolved;
 	FrameBuffer							tempColor;
 
 	uint32_t							shadowCount = 0;

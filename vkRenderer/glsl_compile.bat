@@ -16,3 +16,4 @@ C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\crt.frag -o shader
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\clear.comp -o shaders_bin\clearCS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\fullscreen.vert -o shaders_bin\fullscreenVS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\downsample.frag -o shaders_bin\downsamplePS.spv -g
+C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\resolve.frag -o shaders_bin\resolvePS.spv -g

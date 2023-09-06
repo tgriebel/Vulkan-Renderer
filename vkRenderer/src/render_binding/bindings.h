@@ -22,8 +22,8 @@ extern ShaderBinding	bind_imageProcess;
 const uint32_t g_defaultBindCount = 9;
 extern const ShaderBinding g_defaultBindings[ g_defaultBindCount ];
 
-const uint32_t g_particleCsBindCount = 2;
-extern const ShaderBinding g_particleCsBindings[ g_particleCsBindCount ];
+const uint32_t g_particleBindCount = 2;
+extern const ShaderBinding g_particleBindings[ g_particleBindCount ];
 
-const uint32_t g_downsampleBindCount = 3;
-extern const ShaderBinding g_downsampleBindings[ g_downsampleBindCount ];
+const uint32_t g_imageProcessBindCount = 3;
+extern const ShaderBinding g_imageProcessBindings[ g_imageProcessBindCount ];

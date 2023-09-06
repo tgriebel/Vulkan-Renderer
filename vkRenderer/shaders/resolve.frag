@@ -38,5 +38,10 @@ IMAGE_PROCESS_LAYOUT( 0, 2 )
 void main()
 {
     const ivec2 pixelLocation = ivec2( imageProcess.dimensions.xy * fragTexCoord.xy );
-    outColor = vec4( texelFetch( codeSamplers[ 0 ], pixelLocation, 0 ).rgb, 1.0f );
+
+	outColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	for ( int i = 0; i < int( globals.numSamples ); ++i ) {
+		outColor.rgb += LinearToSrgb( texelFetch( codeSamplers[ 0 ], pixelLocation, i ).rgb );
+	}
+	outColor /= globals.numSamples;
 }
