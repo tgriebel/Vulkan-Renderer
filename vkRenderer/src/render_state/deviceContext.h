@@ -89,6 +89,8 @@ class GpuImage;
 class AllocatorMemory;
 class DrawPass;
 
+enum imageSamples_t : uint8_t;
+
 bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
 QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
@@ -99,6 +101,7 @@ void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuIm
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst );
 void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
+imageSamples_t		vk_MaxImageSamples();
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
 VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
 void				vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );

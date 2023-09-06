@@ -503,6 +503,25 @@ void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer&
 }
 
 
+imageSamples_t vk_MaxImageSamples()
+{
+	imageSamples_t samples = IMAGE_SMP_1;
+
+	VkSampleCountFlags frameBufferCount = context.deviceProperties.limits.framebufferColorSampleCounts;
+	VkSampleCountFlags depthBufferCount = context.deviceProperties.limits.framebufferDepthSampleCounts;
+	VkSampleCountFlags counts = ( frameBufferCount & depthBufferCount );
+
+	if ( counts & VK_SAMPLE_COUNT_64_BIT ) { samples = IMAGE_SMP_64; }
+	else if ( counts & VK_SAMPLE_COUNT_32_BIT ) { samples = IMAGE_SMP_32; }
+	else if ( counts & VK_SAMPLE_COUNT_16_BIT ) { samples = IMAGE_SMP_16; }
+	else if ( counts & VK_SAMPLE_COUNT_8_BIT ) { samples = IMAGE_SMP_8; }
+	else if ( counts & VK_SAMPLE_COUNT_4_BIT ) { samples = IMAGE_SMP_4; }
+	else if ( counts & VK_SAMPLE_COUNT_2_BIT ) { samples = IMAGE_SMP_2; }
+
+	return samples;
+}
+
+
 VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 {
 	VkShaderModuleCreateInfo createInfo{ };
