@@ -78,8 +78,7 @@ void Renderer::UploadTextures()
 
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
-		texture.gpuImage = new GpuImage();
-		texture.gpuImage->Create( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory );
+		CreateImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, texture );
 
 		Transition( &uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
