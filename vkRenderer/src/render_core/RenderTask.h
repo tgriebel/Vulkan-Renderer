@@ -25,7 +25,7 @@ private:
 	GpuSemaphore	finishedSemaphore;
 
 	void Init( RenderView* view, drawPass_t begin, drawPass_t end );
-	void Shuntdown();
+	void Shutdown();
 	void RenderViewSurfaces( GfxContext* context );
 
 public:
@@ -41,7 +41,7 @@ public:
 
 	~RenderTask()
 	{
-		Shuntdown();
+		Shutdown();
 	}
 
 	void Execute( CommandContext& context ) override;

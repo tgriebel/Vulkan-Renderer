@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "../render_core/drawpass.h"
+#include "../render_core/RenderTask.h"
 
 class ShaderBindParms;
 class RenderContext;
@@ -17,7 +18,7 @@ struct imageProcessCreateInfo_t
 };
 
 
-class ImageProcess
+class ImageProcess : public GpuTask
 {
 private:
 	Asset<GpuProgram>*		m_progAsset;
@@ -30,6 +31,13 @@ private:
 public:
 	DrawPass*			pass;
 	GpuBuffer			buffer;
+
+	ImageProcess() {}
+
+	ImageProcess( const imageProcessCreateInfo_t& info )
+	{
+		Init( info );
+	}
 
 	void				Init( const imageProcessCreateInfo_t& info );
 	void				Shutdown();

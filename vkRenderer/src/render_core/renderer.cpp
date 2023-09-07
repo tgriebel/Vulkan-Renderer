@@ -690,28 +690,6 @@ void Renderer::UpdateBuffers()
 
 	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
-
-	{
-		const float w = float( resolve.pass->fb->GetWidth() );
-		const float h = float( resolve.pass->fb->GetHeight() );
-
-		imageProcessObject_t process = {};
-		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
-
-		resolve.buffer.SetPos( 0 );
-		resolve.buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
-	}
-
-	{
-		const float w = float( downScale.pass->fb->GetWidth() );
-		const float h = float( downScale.pass->fb->GetHeight() );
-
-		imageProcessObject_t process = {};
-		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
-
-		downScale.buffer.SetPos( 0 );
-		downScale.buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
-	}
 }
 
 

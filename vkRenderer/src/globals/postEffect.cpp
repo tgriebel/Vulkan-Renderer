@@ -53,6 +53,17 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
 
+	{
+		const float w = float( pass->fb->GetWidth() );
+		const float h = float( pass->fb->GetHeight() );
+
+		imageProcessObject_t process = {};
+		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+
+		buffer.SetPos( 0 );
+		buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+	}
+
 	hdl_t pipeLineHandle = CreateGraphicsPipeline( pass, *m_progAsset );
 
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
