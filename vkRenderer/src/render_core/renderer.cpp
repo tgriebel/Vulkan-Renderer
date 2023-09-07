@@ -449,6 +449,7 @@ void Renderer::SubmitFrame()
 		}
 
 		// TODO: must use resolve image
+		//resolve.Execute( gfxContext );
 		//CopyImage( &gfxContext, mainColorImage, mainColorDownsampled );
 
 		//downScale.Execute( gfxContext );
@@ -598,6 +599,12 @@ void Renderer::UpdateBindSets()
 	}
 
 	{
+		resolve.pass->parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
+		resolve.pass->parms->Bind( bind_sourceImage,			&mainColorImage );
+		resolve.pass->parms->Bind( bind_imageProcess,			&resolve.buffer );
+	}
+
+	{
 		downScale.pass->parms->Bind( bind_globalsBuffer,		&frameState.globalConstants );
 		downScale.pass->parms->Bind( bind_sourceImage,			&mainColorImage );
 		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
@@ -683,6 +690,17 @@ void Renderer::UpdateBuffers()
 
 	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
+
+	{
+		const float w = float( resolve.pass->fb->GetWidth() );
+		const float h = float( resolve.pass->fb->GetHeight() );
+
+		imageProcessObject_t process = {};
+		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+
+		resolve.buffer.SetPos( 0 );
+		resolve.buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+	}
 
 	{
 		const float w = float( downScale.pass->fb->GetWidth() );

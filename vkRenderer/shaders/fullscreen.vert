@@ -38,8 +38,8 @@ vec2 positions[ 3 ] = vec2[] (
 
 vec2 uvs[ 3 ] = vec2[](
 	vec2( 0.0f, 0.0f ),
-	vec2( 4.0f, 0.0f ),
-	vec2( 0.0f, 4.0f )
+	vec2( 2.0f, 0.0f ),
+	vec2( 0.0f, 2.0f )
 );
 
 void main() {

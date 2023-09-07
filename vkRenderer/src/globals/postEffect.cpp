@@ -7,6 +7,8 @@ extern AssetManager g_assets;
 
 void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 {
+	ScopedLogTimer timer( "ImageProcessInit", timerPrecision_t::MICROSECOND, &TimerPrint );
+
 	m_dbgName = info.name;
 
 	pass = new DrawPass();

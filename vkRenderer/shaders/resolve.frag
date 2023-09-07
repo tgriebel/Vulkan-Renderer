@@ -43,5 +43,7 @@ void main()
 	for ( int i = 0; i < int( globals.numSamples ); ++i ) {
 		outColor.rgb += LinearToSrgb( texelFetch( codeSamplers[ 0 ], pixelLocation, i ).rgb );
 	}
-	outColor /= globals.numSamples;
+	outColor.rgb /= globals.numSamples;
+	outColor.rgb = SrgbToLinear( outColor.rgb );
+	outColor.a = 1.0f;
 }

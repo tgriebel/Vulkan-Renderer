@@ -191,9 +191,8 @@ void Renderer::InitShaderResources()
 		particleState.parms = RegisterBindParm( &bindset_particle );
 		particleState.updateDescriptorSets = true;
 
+		resolve.pass->parms = RegisterBindParm( &bindset_imageProcess );
 		downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
-
-	//	downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
 	}
 
 	materialBuffer.Reset();
