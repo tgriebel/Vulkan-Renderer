@@ -599,10 +599,11 @@ void Renderer::UpdateBindSets()
 		particleState.parms->Bind( bind_particleWriteBuffer,	&frameState.particleBuffer );
 	}
 
+	if( resolve != nullptr )
 	{
-		resolve.pass->parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
-		resolve.pass->parms->Bind( bind_sourceImage,			&mainColorImage );
-		resolve.pass->parms->Bind( bind_imageProcess,			&resolve.buffer );
+		resolve->pass->parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
+		resolve->pass->parms->Bind( bind_sourceImage,			&mainColorImage );
+		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
 	}
 
 	{

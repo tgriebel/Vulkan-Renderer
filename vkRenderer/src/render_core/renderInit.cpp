@@ -94,7 +94,7 @@ void Renderer::Init()
 		info.fb = &mainColorResolved;
 		info.context = &renderContext;
 
-		resolve.Init( info );
+		resolve = new ImageProcess( info );
 	}
 
 	InitShaderResources();
@@ -107,7 +107,7 @@ void Renderer::Init()
 		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
-	schedule.Queue( &resolve ); // FIXME: TEMP, don't mix dynamic/static pointers
+	schedule.Queue( resolve );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 }
 
@@ -192,7 +192,9 @@ void Renderer::InitShaderResources()
 		particleState.parms = RegisterBindParm( &bindset_particle );
 		particleState.updateDescriptorSets = true;
 
-		resolve.pass->parms = RegisterBindParm( &bindset_imageProcess );
+		if( resolve != nullptr ) {
+			resolve->pass->parms = RegisterBindParm( &bindset_imageProcess );
+		}
 		downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
 	}
 

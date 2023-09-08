@@ -312,7 +312,7 @@ void RenderSchedule::Reset()
 void RenderSchedule::Clear()
 {
 	for( size_t i = 0; i < tasks.size(); ++i ) {
-	//	delete tasks[ i ];
+		delete tasks[ i ];
 	}
 	tasks.clear();
 }

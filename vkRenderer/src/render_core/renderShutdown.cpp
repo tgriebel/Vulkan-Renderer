@@ -49,7 +49,10 @@ void Renderer::Cleanup()
 	g_swapChain.Destroy();
 
 	downScale.Shutdown();
-	resolve.Shutdown();
+
+	if( resolve != nullptr ) {
+		resolve->Shutdown();
+	}
 
 	ShutdownImGui();
 
