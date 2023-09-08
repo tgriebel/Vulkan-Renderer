@@ -124,6 +124,8 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 			info.offset = buffer->GetBaseOffset();
 			info.range = buffer->GetSize();
 
+			info.range = ( info.range == 0 ) ? VK_WHOLE_SIZE : info.range;
+
 			assert( info.buffer != nullptr );
 
 			writeInfo.pBufferInfo = &info;

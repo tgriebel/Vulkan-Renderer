@@ -295,6 +295,7 @@ void Renderer::Resize()
 		Transition( &uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}
 	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
@@ -352,6 +353,7 @@ void Renderer::UploadAssets()
 		Transition( &uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}	
 	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
@@ -449,7 +451,6 @@ void Renderer::SubmitFrame()
 		}
 
 		// TODO: must use resolve image
-		//resolve.Execute( gfxContext );
 		//CopyImage( &gfxContext, mainColorImage, mainColorDownsampled );
 
 		//downScale.Execute( gfxContext );

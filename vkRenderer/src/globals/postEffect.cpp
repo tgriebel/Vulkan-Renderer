@@ -34,6 +34,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_transitionState.flags.store = true;
 	m_transitionState.flags.presentAfter = info.present;
 	m_transitionState.flags.readAfter = !info.present;
+	m_transitionState.flags.readOnly = true;
 
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
