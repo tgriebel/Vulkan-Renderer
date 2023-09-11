@@ -144,17 +144,17 @@ public:
 		return height;
 	}
 
-	inline uint32_t GetColorLayers() const
+	inline uint32_t ColorLayerCount() const
 	{
 		return colorCount;
 	}
 
-	inline uint32_t GetDepthLayers() const
+	inline uint32_t DepthLayerCount() const
 	{
 		return colorCount;
 	}
 
-	inline uint32_t GetLayers() const
+	inline uint32_t LayerCount() const
 	{
 		return attachmentCount;
 	}

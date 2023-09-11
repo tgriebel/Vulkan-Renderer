@@ -11,7 +11,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 	m_viewport.height = height;
 
 	imageSamples_t samples = IMAGE_SMP_1;
-	if ( fb.GetColorLayers() > 0 ) {
+	if ( fb.ColorLayerCount() > 0 ) {
 		samples = fb.GetColor()->info.subsamples;
 	} else {
 		samples = fb.GetDepth()->info.subsamples;

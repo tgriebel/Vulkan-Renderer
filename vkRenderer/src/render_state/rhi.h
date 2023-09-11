@@ -113,17 +113,17 @@ static inline VkImageViewType vk_GetTextureType( imageType_t type )
 
 static inline VkSampleCountFlagBits vk_GetSampleCount( const imageSamples_t sampleCount )
 {
-	switch ( sampleCount )
-	{
-		case IMAGE_SMP_1:			return VK_SAMPLE_COUNT_1_BIT;
-		case IMAGE_SMP_2:			return VK_SAMPLE_COUNT_2_BIT;
-		case IMAGE_SMP_4:			return VK_SAMPLE_COUNT_4_BIT;
-		case IMAGE_SMP_8:			return VK_SAMPLE_COUNT_8_BIT;
-		case IMAGE_SMP_16:			return VK_SAMPLE_COUNT_16_BIT;
-		case IMAGE_SMP_32:			return VK_SAMPLE_COUNT_32_BIT;
-		case IMAGE_SMP_64:			return VK_SAMPLE_COUNT_64_BIT;
-		default: assert( false );	break;
-	}
+	//switch ( sampleCount )
+	//{
+	//	case IMAGE_SMP_1:			return VK_SAMPLE_COUNT_1_BIT;
+	//	case IMAGE_SMP_2:			return VK_SAMPLE_COUNT_2_BIT;
+	//	case IMAGE_SMP_4:			return VK_SAMPLE_COUNT_4_BIT;
+	//	case IMAGE_SMP_8:			return VK_SAMPLE_COUNT_8_BIT;
+	//	case IMAGE_SMP_16:			return VK_SAMPLE_COUNT_16_BIT;
+	//	case IMAGE_SMP_32:			return VK_SAMPLE_COUNT_32_BIT;
+	//	case IMAGE_SMP_64:			return VK_SAMPLE_COUNT_64_BIT;
+	//	default: assert( false );	break;
+	//}
 	return VK_SAMPLE_COUNT_1_BIT;
 }
 

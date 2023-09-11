@@ -183,6 +183,7 @@ struct view_t
 											layout( location = 8 ) in flat uint objectId;
 
 #define PS_OUT								layout( location = 0 ) out vec4 outColor;
+#define PS_LAYOUT_MRT_1_OUT					layout( location = 1 ) out vec4 outColor1;
 
 #define PS_LAYOUT_BASIC_IO					PS_IN																	\
 											PS_OUT

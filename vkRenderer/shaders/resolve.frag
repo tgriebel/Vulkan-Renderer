@@ -30,9 +30,10 @@
 #include "color.h"
 
 PS_LAYOUT_BASIC_IO
+PS_LAYOUT_MRT_1_OUT
 
 GLOBALS_LAYOUT( 0, 0 )
-CODE_IMAGE_LAYOUT( 0, 1, sampler2DMS )
+CODE_IMAGE_LAYOUT( 0, 1, sampler2D )
 IMAGE_PROCESS_LAYOUT( 0, 2 )
 
 void main()
@@ -46,4 +47,6 @@ void main()
 	outColor.rgb /= globals.numSamples;
 	outColor.rgb = SrgbToLinear( outColor.rgb );
 	outColor.a = 1.0f;
+
+	outColor1 = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 }

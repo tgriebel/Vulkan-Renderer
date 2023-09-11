@@ -571,7 +571,7 @@ void Renderer::UpdateBindSets()
 			}
 			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
 			{
-				pass->codeImages[ 0 ] = &mainColorImage;
+				pass->codeImages[ 0 ] = &mainColorResolvedImage;
 				pass->codeImages[ 1 ] = &frameState.depthImageView;
 				pass->codeImages[ 2 ] = &frameState.stencilImageView;
 			}

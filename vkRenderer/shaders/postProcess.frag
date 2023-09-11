@@ -29,7 +29,7 @@
 #include "globals.h"
 #include "color.h"
 
-PS_LAYOUT_STANDARD( sampler2DMS )
+PS_LAYOUT_STANDARD( sampler2D )
 
 void main()
 {
@@ -59,11 +59,12 @@ void main()
 
 	stencilCoverage /= 4.0f;
 
+	const int resolveSamples = 1;
+
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-	for( int i = 0; i < int(globals.numSamples); ++i ) {
+	for( int i = 0; i < resolveSamples; ++i ) {
 		sceneColor.rgb += LinearToSrgb( texelFetch( codeSamplers[ textureId0 ], pixelLocation, i ).rgb );
 	}
-	sceneColor /= globals.numSamples;
 
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;

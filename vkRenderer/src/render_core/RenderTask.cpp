@@ -153,8 +153,8 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
 	const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
 
-	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
-	const uint32_t attachmentsCount = pass->fb->GetLayers();
+	const uint32_t colorAttachmentsCount = pass->fb->ColorLayerCount();
+	const uint32_t attachmentsCount = pass->fb->LayerCount();
 
 	passInfo.clearValueCount = 0;
 	passInfo.pClearValues = nullptr;

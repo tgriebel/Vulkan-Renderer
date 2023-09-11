@@ -88,7 +88,7 @@ void Renderer::Init()
 
 	{
 		imageProcessCreateInfo_t info = {};
-		info.name = "Resolve";
+		info.name = "ResolveMain";
 		info.clear = false;
 		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
 		info.fb = &mainColorResolved;
@@ -427,10 +427,10 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
+		info.fmt = mainColorImage.info.fmt;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
+		info.aspect = mainColorImage.info.aspect;
+		info.tiling = mainColorImage.info.tiling;
 
 		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, mainColorResolvedImage );
 	}
@@ -451,6 +451,7 @@ void Renderer::CreateFramebuffers()
 		CreateImage( "mainColorDownsampled", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, mainColorDownsampled );
 	}
 
+	// Depth-stencil views
 	{
 		imageInfo_t depthInfo = depthStencilImage.info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
@@ -459,6 +460,22 @@ void Renderer::CreateFramebuffers()
 		imageInfo_t stencilInfo = depthStencilImage.info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
 		frameState.stencilImageView.Init( depthStencilImage, stencilInfo );
+	}
+
+	// Resolve depth-stencil image
+	{
+		imageInfo_t info{};
+		info.width = width;
+		info.height = height;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_8;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = depthStencilImage.info.tiling;
+
+		CreateImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilResolvedImage );
 	}
 
 	// Temp image
@@ -482,6 +499,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.name = "MainColorResolveFB";
 		fbInfo.color0[ 0 ] = &mainColorResolvedImage;
+		fbInfo.color1[ 0 ] = &depthStencilResolvedImage;
 		fbInfo.width = mainColorResolvedImage.info.width;
 		fbInfo.height = mainColorResolvedImage.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;

@@ -36,6 +36,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_transitionState.flags.readAfter = !info.present;
 	m_transitionState.flags.readOnly = true;
 
+	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
 	buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
@@ -79,8 +80,8 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	const VkClearColorValue clearColor = { m_clearColor[ 0 ], m_clearColor[ 1 ], m_clearColor[ 2 ], m_clearColor[ 3 ] };
 	const VkClearDepthStencilValue clearDepth = { m_clearDepth, m_clearStencil };
 
-	const uint32_t colorAttachmentsCount = pass->fb->GetColorLayers();
-	const uint32_t attachmentsCount = pass->fb->GetLayers();
+	const uint32_t colorAttachmentsCount = pass->fb->ColorLayerCount();
+	const uint32_t attachmentsCount = pass->fb->LayerCount();
 
 	passInfo.clearValueCount = 0;
 	passInfo.pClearValues = nullptr;

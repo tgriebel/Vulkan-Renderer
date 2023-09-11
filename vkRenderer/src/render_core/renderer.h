@@ -153,6 +153,7 @@ private:
 	Image								tempColorImage;
 	Image								mainColorDownsampled;
 	Image								depthStencilImage;
+	Image								depthStencilResolvedImage;
 
 	FrameState							frameState;
 	FrameBuffer							shadowMap[ MaxShadowMaps ];

@@ -286,10 +286,13 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 
 	VkPipelineMultisampleStateCreateInfo multisampling{ };
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	if ( state.stateBits & GFX_STATE_MSAA_ENABLE ) {
+	if ( state.stateBits & GFX_STATE_MSAA_ENABLE )
+	{
 		multisampling.sampleShadingEnable = VK_TRUE;
 		multisampling.rasterizationSamples = vk_GetSampleCount( state.samplingRate );
-	} else {
+	}
+	else
+	{
 		multisampling.sampleShadingEnable = VK_FALSE;
 		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 	}
@@ -305,40 +308,43 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 
 	const bool blendEnable = ( ( state.stateBits & GFX_STATE_BLEND_ENABLE ) != 0 );
 
-	VkPipelineColorBlendAttachmentState colorBlendAttachment{ };
-	if( blendEnable )
+	const uint32_t colorAttachmentCount = pass->fb->ColorLayerCount();
+
+	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
+	colorBlendAttachments.resize( colorAttachmentCount );
+
+	for( uint32_t i = 0; i < colorAttachmentCount; ++i )
 	{
-		colorBlendAttachment.colorWriteMask = colorFlags;
-		colorBlendAttachment.blendEnable = VK_TRUE;
-		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-	}
-	else
-	{
-		colorBlendAttachment.colorWriteMask = colorFlags;
-		colorBlendAttachment.blendEnable = VK_FALSE;
-		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+		if( blendEnable )
+		{
+			colorBlendAttachments[ i ].colorWriteMask = colorFlags;
+			colorBlendAttachments[ i ].blendEnable = VK_TRUE;
+			colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			colorBlendAttachments[ i ].colorBlendOp = VK_BLEND_OP_ADD;
+			colorBlendAttachments[ i ].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachments[ i ].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachments[ i ].alphaBlendOp = VK_BLEND_OP_ADD;
+		}
+		else
+		{
+			colorBlendAttachments[ i ].colorWriteMask = colorFlags;
+			colorBlendAttachments[ i ].blendEnable = VK_FALSE;
+			colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			colorBlendAttachments[ i ].colorBlendOp = VK_BLEND_OP_ADD;
+			colorBlendAttachments[ i ].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			colorBlendAttachments[ i ].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachments[ i ].alphaBlendOp = VK_BLEND_OP_ADD;
+		}
 	}
 
 	VkPipelineColorBlendStateCreateInfo colorBlending{ };
 	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	colorBlending.logicOpEnable = VK_FALSE;
 	colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[ 0 ] = 0.0f; // Optional
-	colorBlending.blendConstants[ 1 ] = 0.0f; // Optional
-	colorBlending.blendConstants[ 2 ] = 0.0f; // Optional
-	colorBlending.blendConstants[ 3 ] = 0.0f; // Optional
+	colorBlending.attachmentCount = static_cast<uint32_t>( colorBlendAttachments.size() );
+	colorBlending.pAttachments = colorBlendAttachments.data();
 
 	VkDynamicState dynamicStates[] = {
 		VK_DYNAMIC_STATE_VIEWPORT,
