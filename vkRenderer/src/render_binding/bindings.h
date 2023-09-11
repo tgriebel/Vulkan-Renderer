@@ -2,28 +2,52 @@
 
 #include "shaderBinding.h"
 
-extern ShaderBinding	bind_globalsBuffer;
+#define BINDING( NAME, TYPE, COUNT, FLAGS )	static const ShaderBinding bind_##NAME( #NAME, bindType_t::TYPE, COUNT, FLAGS )
+
+BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 
 // Compute Resources
-extern ShaderBinding	bind_particleWriteBuffer;
+BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
+
+// Post Effect Resources
+BINDING( sourceImages,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
+BINDING( imageProcess,		CONSTANT_BUFFER,	1,						BIND_STATE_PS );
 
 // Raster Resources
-extern ShaderBinding	bind_viewBuffer;
-extern ShaderBinding	bind_modelBuffer;
-extern ShaderBinding	bind_image2DArray;
-extern ShaderBinding	bind_imageCubeArray;
-extern ShaderBinding	bind_materialBuffer;
-extern ShaderBinding	bind_lightBuffer;
-extern ShaderBinding	bind_imageCodeArray;
-extern ShaderBinding	bind_imageStencil;
-extern ShaderBinding	bind_sourceImages;
-extern ShaderBinding	bind_imageProcess;
+BINDING( viewBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( modelBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( image2DArray,		IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_ALL );
+BINDING( imageCubeArray,	IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL );
+BINDING( materialBuffer,	READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( lightBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( imageCodeArray,	IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL );
+BINDING( imageStencil,		IMAGE_2D,			1,						BIND_STATE_ALL );
 
-const uint32_t g_defaultBindCount = 9;
-extern const ShaderBinding g_defaultBindings[ g_defaultBindCount ];
 
-const uint32_t g_particleBindCount = 2;
-extern const ShaderBinding g_particleBindings[ g_particleBindCount ];
+static const ShaderBinding g_defaultBindings[] =
+{
+	bind_globalsBuffer,
+	bind_viewBuffer,
+	bind_modelBuffer,
+	bind_image2DArray,
+	bind_imageCubeArray,
+	bind_materialBuffer,
+	bind_lightBuffer,
+	bind_imageCodeArray,
+	bind_imageStencil
+};
 
-const uint32_t g_imageProcessBindCount = 3;
-extern const ShaderBinding g_imageProcessBindings[ g_imageProcessBindCount ];
+
+static const ShaderBinding g_particleBindings[] =
+{
+	bind_globalsBuffer,
+	bind_particleWriteBuffer
+};
+
+
+static const ShaderBinding g_imageProcessBindings[] =
+{
+	bind_globalsBuffer,
+	bind_sourceImages,
+	bind_imageProcess,
+};

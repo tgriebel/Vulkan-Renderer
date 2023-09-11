@@ -151,7 +151,7 @@ void Renderer::InitApi()
 void Renderer::InitShaderResources()
 {
 	#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = bindSets[ Hash( "bindset_"#NAME ) ];	\
-								bindset_##NAME.Create( g_##NAME##Bindings, g_##NAME##BindCount );
+								bindset_##NAME.Create( g_##NAME##Bindings, COUNTARRAY( g_##NAME##Bindings ) );
 
 	BIND_SET( default )
 	BIND_SET( particle )
