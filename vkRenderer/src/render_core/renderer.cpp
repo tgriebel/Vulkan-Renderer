@@ -601,14 +601,24 @@ void Renderer::UpdateBindSets()
 
 	if( resolve != nullptr )
 	{
+		resolve->pass->codeImages.Resize( 3 );
+		resolve->pass->codeImages[ 0 ] = &mainColorImage;
+		resolve->pass->codeImages[ 1 ] = &frameState.depthImageView;
+		resolve->pass->codeImages[ 2 ] = &frameState.stencilImageView;
+
 		resolve->pass->parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
-		resolve->pass->parms->Bind( bind_sourceImage,			&mainColorImage );
+		resolve->pass->parms->Bind( bind_sourceImages,			&resolve->pass->codeImages );
 		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
 	}
 
 	{
+		downScale.pass->codeImages.Resize( 3 );
+		downScale.pass->codeImages[ 0 ] = &mainColorImage;
+		downScale.pass->codeImages[ 1 ] = &frameState.depthImageView;
+		downScale.pass->codeImages[ 2 ] = &frameState.stencilImageView;
+
 		downScale.pass->parms->Bind( bind_globalsBuffer,		&frameState.globalConstants );
-		downScale.pass->parms->Bind( bind_sourceImage,			&mainColorImage );
+		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );
 		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
 	}
 }

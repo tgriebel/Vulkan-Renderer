@@ -9,7 +9,7 @@ BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
 
 // Post Effect Resources
-BINDING( sourceImage, IMAGE_2D, 1, BIND_STATE_PS );
+BINDING( sourceImages, IMAGE_2D_ARRAY, MaxCodeImages, BIND_STATE_PS );
 BINDING( imageProcess, CONSTANT_BUFFER, 1, BIND_STATE_PS );
 
 // Raster Resources
@@ -45,6 +45,6 @@ const ShaderBinding g_particleBindings[ g_particleBindCount ] =
 const ShaderBinding g_imageProcessBindings[ g_imageProcessBindCount ] =
 											{
 												bind_globalsBuffer,
-												bind_sourceImage,
+												bind_sourceImages,
 												bind_imageProcess,
 											};

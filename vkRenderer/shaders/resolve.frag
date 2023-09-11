@@ -48,5 +48,10 @@ void main()
 	outColor.rgb = SrgbToLinear( outColor.rgb );
 	outColor.a = 1.0f;
 
-	outColor1 = vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+	outColor1 = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+
+	for ( int i = 0; i < int( globals.numSamples ); ++i ) {
+		outColor1.r += ( texelFetch( codeSamplers[ 1 ], pixelLocation, i ).r );
+	}
+	outColor1.rgb /= globals.numSamples;
 }
