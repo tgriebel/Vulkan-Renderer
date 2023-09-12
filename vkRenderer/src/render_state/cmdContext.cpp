@@ -241,17 +241,29 @@ void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t 
 
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image )
 {
+	cmdCommand->MarkerBeginRegion( "GenerateMips", ColorToVector( ColorWhite ) );
+
 	vk_GenerateMipmaps( cmdCommand->CommandBuffer(), image );
+
+	cmdCommand->MarkerEndRegion();
 }
 
 
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 {
+	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
+
 	vk_CopyImage( cmdCommand->CommandBuffer(), src, dst );
+
+	cmdCommand->MarkerEndRegion();
 }
 
 
 void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
+	cmdCommand->MarkerBeginRegion( "CopyBufferToImage", ColorToVector( ColorWhite ) );
+
 	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), texture, buffer, bufferOffset );
+
+	cmdCommand->MarkerEndRegion();
 }

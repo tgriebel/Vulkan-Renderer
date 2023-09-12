@@ -1,7 +1,4 @@
-﻿  binding.cpp
-  descriptorWrites.cpp
-  shaderBinding.cpp
-  renderInit.cpp
-  renderer.cpp
+﻿  renderer.cpp
+  cmdContext.cpp
   Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
