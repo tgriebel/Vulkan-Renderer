@@ -432,7 +432,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = mainColorImage.info.aspect;
 		info.tiling = mainColorImage.info.tiling;
 
-		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, mainColorResolvedImage );
+		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorResolvedImage );
 	}
 
 	// Downsampled image
@@ -443,10 +443,10 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = MipCount( info.width, info.height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
+		info.fmt = mainColorImage.info.fmt;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
+		info.aspect = mainColorImage.info.aspect;;
+		info.tiling = mainColorImage.info.tiling;;
 
 		CreateImage( "mainColorDownsampled", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, mainColorDownsampled );
 	}
