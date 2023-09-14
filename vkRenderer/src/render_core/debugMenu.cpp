@@ -1,11 +1,14 @@
 
 #include "../globals/common.h"
 #include "gpuImage.h"
+#include "debugMenu.h"
 #include <gfxcore/scene/assetManager.h>
 #include <gfxcore/scene/scene.h>
 #include <sstream>
 
 extern AssetManager g_assets;
+
+renderDebugData_t g_renderDebugData;
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
@@ -17,8 +20,6 @@ extern AssetManager g_assets;
 extern imguiControls_t g_imguiControls;
 
 static const int defaultWidth = 100;
-
-renderDebugData_t g_renderDebugData;
 
 struct ImguiStyle
 {

@@ -578,8 +578,8 @@ void Renderer::UpdateBindSets()
 			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
 			{
 				pass->codeImages[ 0 ] = &mainColorResolvedImage;
-				pass->codeImages[ 1 ] = &frameState.depthImageView;
-				pass->codeImages[ 2 ] = &frameState.stencilImageView;
+				pass->codeImages[ 1 ] = &mainColorResolvedImage;
+				pass->codeImages[ 2 ] = &mainColorResolvedImage;
 			}
 			else
 			{
@@ -596,7 +596,7 @@ void Renderer::UpdateBindSets()
 			pass->parms->Bind( bind_materialBuffer,	&frameState.materialBuffers );
 			pass->parms->Bind( bind_lightBuffer,	&frameState.lightParms );
 			pass->parms->Bind( bind_imageCodeArray,	&pass->codeImages );
-			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &frameState.stencilImageView : pass->codeImages[ 0 ] );
+			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &stencilResolvedImageView : pass->codeImages[ 0 ] );
 		}
 	}
 
@@ -619,9 +619,9 @@ void Renderer::UpdateBindSets()
 
 	{
 		downScale.pass->codeImages.Resize( 3 );
-		downScale.pass->codeImages[ 0 ] = &mainColorImage;
-		downScale.pass->codeImages[ 1 ] = &frameState.depthImageView;
-		downScale.pass->codeImages[ 2 ] = &frameState.stencilImageView;
+		downScale.pass->codeImages[ 0 ] = &mainColorResolvedImage;
+		downScale.pass->codeImages[ 1 ] = &mainColorResolvedImage;
+		downScale.pass->codeImages[ 2 ] = &mainColorResolvedImage;
 
 		downScale.pass->parms->Bind( bind_globalsBuffer,		&frameState.globalConstants );
 		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );

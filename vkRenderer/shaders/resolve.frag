@@ -33,7 +33,11 @@ PS_LAYOUT_BASIC_IO
 PS_LAYOUT_MRT_1_OUT
 
 GLOBALS_LAYOUT( 0, 0 )
+#ifdef USE_MSAA
+CODE_IMAGE_LAYOUT( 0, 1, sampler2DMS )
+#else
 CODE_IMAGE_LAYOUT( 0, 1, sampler2D )
+#endif
 IMAGE_PROCESS_LAYOUT( 0, 2 )
 
 void main()

@@ -90,7 +90,11 @@ void Renderer::Init()
 		imageProcessCreateInfo_t info = {};
 		info.name = "ResolveMain";
 		info.clear = false;
-		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
+		if ( ForceDisableMSAA ) {
+			info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
+		} else {
+			info.progHdl = AssetLibGpuProgram::Handle( "ResolveMSAA" );
+		}
 		info.fb = &mainColorResolved;
 		info.context = &renderContext;
 
@@ -476,6 +480,12 @@ void Renderer::CreateFramebuffers()
 		info.tiling = depthStencilImage.info.tiling;
 
 		CreateImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilResolvedImage );
+	}
+
+	// Depth-stencil views
+	{
+		depthResolvedImageView.Init( depthStencilResolvedImage, depthStencilResolvedImage.info );
+		stencilResolvedImageView.Init( depthStencilResolvedImage, depthStencilResolvedImage.info );
 	}
 
 	// Temp image

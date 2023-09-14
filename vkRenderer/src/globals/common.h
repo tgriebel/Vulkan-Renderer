@@ -101,6 +101,7 @@ const uint64_t	MaxTimeStampQueries				= 12;
 const uint64_t	MaxOcclusionQueries				= 12;
 const uint32_t	DefaultDisplayWidth				= 1280;
 const uint32_t	DefaultDisplayHeight			= 720;
+const bool		ForceDisableMSAA				= true;
 
 const std::string ModelPath = ".\\models\\";
 const std::string TexturePath = ".\\textures\\";

@@ -93,5 +93,11 @@
       "ps": "resolvePS.spv",
 	  "bindset": "bindset_imageProcess",
     },
+	{
+      "name": "ResolveMSAA",
+      "vs": "fullscreenVS.spv",
+      "ps": "resolvePS_msaa.spv",
+	  "bindset": "bindset_imageProcess",
+    },
   ]
 }

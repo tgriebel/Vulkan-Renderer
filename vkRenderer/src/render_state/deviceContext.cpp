@@ -503,6 +503,10 @@ void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer&
 
 imageSamples_t vk_MaxImageSamples()
 {
+	if( ForceDisableMSAA ) {
+		return IMAGE_SMP_1;
+	}
+
 	imageSamples_t samples = IMAGE_SMP_1;
 
 	VkSampleCountFlags frameBufferCount = context.deviceProperties.limits.framebufferColorSampleCounts;
