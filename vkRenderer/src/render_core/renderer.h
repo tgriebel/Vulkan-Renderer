@@ -100,6 +100,7 @@ private:
 
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
+	static const uint32_t				OutlineStencilBit = 0x01;
 
 	renderConfig_t						config;
 	renderConstants_t					rc;

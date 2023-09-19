@@ -11,8 +11,11 @@ const static uint32_t KeyStencilBits = 8;
 
 union sortKey_t
 {
-	uint64_t	materialId : KeyMaterialBits;
-	uint64_t	stencilBit : KeyStencilBits;
+	struct
+	{
+		uint64_t	materialId : KeyMaterialBits;
+		uint64_t	stencilBit : KeyStencilBits;
+	};
 	uint64_t	key;
 };
 

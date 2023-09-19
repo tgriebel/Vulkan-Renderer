@@ -186,12 +186,15 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.surfId = 0;
 		instance.id = 0;
 		surf.uploadId = ( model.uploadId + i );
-		surf.sortKey.materialId = material.uploadId;
+		surf.stencilBit = ent.outline ? OutlineStencilBit : 0;
 		surf.objectId = 0;
-		surf.flags = renderFlags;
-		surf.stencilBit = ent.outline ? 0x01 : 0;
+		surf.flags = renderFlags;	
 		surf.hash = Hash( surf );
 		surf.dbgName = materialAsset->GetName().c_str();
+
+		surf.sortKey = {};
+		surf.sortKey.materialId = material.uploadId;
+		surf.sortKey.stencilBit = surf.stencilBit;
 
 		if( materialAsset->IsUploaded() == false ) {
 			uploadMaterials.insert( materialHdl );
