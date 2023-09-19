@@ -474,7 +474,7 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_8;
+		info.fmt = IMAGE_FMT_RG_32;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = depthStencilImage.info.tiling;

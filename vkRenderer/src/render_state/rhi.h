@@ -66,6 +66,7 @@ static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )
 		case IMAGE_FMT_BGRA_8:		return VK_FORMAT_B8G8R8A8_SRGB;
 		case IMAGE_FMT_RGB_16:		return VK_FORMAT_R16G16B16_SFLOAT;
 		case IMAGE_FMT_RGBA_16:		return VK_FORMAT_R16G16B16A16_SFLOAT;
+		case IMAGE_FMT_RG_32:		return VK_FORMAT_R32G32_SFLOAT;
 		default: assert( false );	break;
 	}
 	return VK_FORMAT_R8G8B8A8_SRGB;
@@ -90,6 +91,7 @@ static inline imageFmt_t vk_GetTextureFormat( VkFormat fmt )
 		case VK_FORMAT_B8G8R8A8_SRGB:			return IMAGE_FMT_BGRA_8;
 		case VK_FORMAT_R16G16B16_SFLOAT:		return IMAGE_FMT_RGB_16;
 		case VK_FORMAT_R16G16B16A16_SFLOAT:		return IMAGE_FMT_RGBA_16;
+		case VK_FORMAT_R32G32_SFLOAT:			return IMAGE_FMT_RG_32;
 		default: assert( false );	break;
 	}
 	return IMAGE_FMT_RGBA_8;
