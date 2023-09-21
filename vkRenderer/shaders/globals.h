@@ -200,3 +200,8 @@ struct view_t
 											PUSH_CONSTANTS															\
 											PS_IN																	\
 											PS_OUT
+
+#define PS_LAYOUT_IMAGE_PROCESS( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
+											CODE_IMAGE_LAYOUT( 0, 1, SAMPLER )										\
+											STENCIL_LAYOUT( 0, 2, SAMPLER )											\
+											IMAGE_PROCESS_LAYOUT( 0, 3 )

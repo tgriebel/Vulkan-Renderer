@@ -581,7 +581,7 @@ void Renderer::UpdateBindSets()
 			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
 			{
 				pass->codeImages[ 0 ] = &mainColorResolvedImage;
-				pass->codeImages[ 1 ] = &mainColorResolvedImage;
+				pass->codeImages[ 1 ] = &depthStencilResolvedImage;
 				pass->codeImages[ 2 ] = &mainColorResolvedImage;
 			}
 			else
@@ -617,6 +617,7 @@ void Renderer::UpdateBindSets()
 
 		resolve->pass->parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
 		resolve->pass->parms->Bind( bind_sourceImages,			&resolve->pass->codeImages );
+		resolve->pass->parms->Bind( bind_imageStencil,			&frameState.stencilImageView );
 		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
 	}
 
@@ -628,6 +629,7 @@ void Renderer::UpdateBindSets()
 
 		downScale.pass->parms->Bind( bind_globalsBuffer,		&frameState.globalConstants );
 		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );
+		downScale.pass->parms->Bind( bind_imageStencil,			&frameState.stencilImageView );
 		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
 	}
 }

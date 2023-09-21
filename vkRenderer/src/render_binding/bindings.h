@@ -10,8 +10,8 @@ BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
 
 // Post Effect Resources
-BINDING( sourceImages,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
 BINDING( imageProcess,		CONSTANT_BUFFER,	1,						BIND_STATE_PS );
+BINDING( sourceImages,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
 
 // Raster Resources
 BINDING( viewBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
@@ -49,5 +49,6 @@ static const ShaderBinding g_imageProcessBindings[] =
 {
 	bind_globalsBuffer,
 	bind_sourceImages,
+	bind_imageStencil,
 	bind_imageProcess,
 };

@@ -52,10 +52,10 @@ void main()
 	const ivec2 pixelLocation = ivec2( view.dimensions.xy * fragTexCoord.xy );
 
 	float stencilCoverage = 0;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, 1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
-	stencilCoverage += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( 1, 1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
+	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( -1, -1 ), 0 ).g;
+	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( 1, -1 ), 0 ).g;
+	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( -1, 1 ), 0 ).g;
+	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( 1, 1 ), 0 ).g;
 
 	stencilCoverage /= 4.0f;
 

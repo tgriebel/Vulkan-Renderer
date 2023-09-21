@@ -32,13 +32,11 @@
 PS_LAYOUT_BASIC_IO
 PS_LAYOUT_MRT_1_OUT
 
-GLOBALS_LAYOUT( 0, 0 )
 #ifdef USE_MSAA
-CODE_IMAGE_LAYOUT( 0, 1, sampler2DMS )
+PS_LAYOUT_IMAGE_PROCESS( sampler2DMS )
 #else
-CODE_IMAGE_LAYOUT( 0, 1, sampler2D )
+PS_LAYOUT_IMAGE_PROCESS( sampler2D )
 #endif
-IMAGE_PROCESS_LAYOUT( 0, 2 )
 
 void main()
 {
@@ -54,8 +52,10 @@ void main()
 
 	outColor1 = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 
-	for ( int i = 0; i < int( globals.numSamples ); ++i ) {
+	for ( int i = 0; i < int( globals.numSamples ); ++i )
+	{
 		outColor1.r += ( texelFetch( codeSamplers[ 1 ], pixelLocation, i ).r );
+		outColor1.g += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
 	}
 	outColor1.rgb /= globals.numSamples;
 }
