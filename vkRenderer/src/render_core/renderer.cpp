@@ -488,46 +488,75 @@ void Renderer::UpdateViews( const Scene* scene )
 	int height;
 	g_window.GetWindowSize( width, height );
 
-	shadowCount = 0;
-	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
-	assert( lightCount <= MaxLights );
-
-	frameState.lightParms.SetPos( 0 );
-
-	for( uint32_t i = 0; i < lightCount; ++i )
+	// Update Frame Globals
 	{
-		const light_t& light = scene->lights[ i ];
-		if ( ( light.flags & LIGHT_FLAGS_HIDDEN ) != 0 ) {
-			continue;
-		}
+		frameState.globalConstants.SetPos( 0 );
 
-		lightBufferObject_t lightObject = {};
-		lightObject.intensity = light.intensity * ColorToVector( light.color );
-		lightObject.lightDir = light.dir;
-		lightObject.lightPos = light.pos;
+		globalUboConstants_t globals = {};
+		static auto startTime = std::chrono::high_resolution_clock::now();
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
 
-		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
-			lightObject.shadowViewId = 0xFF;
-		}
-		else
-		{
-			lightObject.shadowViewId = shadowCount;
+		float intPart = 0;
+		const float fracPart = modf( time, &intPart );
 
-			Camera shadowCam;
-			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
-			shadowCam.SetClip( 0.1f, 1000.0f );
-			shadowCam.SetFov( Radians( 90.0f ) );
-			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+		globals.time = vec4f( time, intPart, fracPart, 1.0f );
+#if defined( USE_IMGUI )
+		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
+		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
+		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
+#else
+		globals.generic = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
+		globals.tonemap = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
+#endif
+		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 
-			shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
-			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
-		}
-		frameState.lightParms.CopyData( &lightObject, sizeof( lightObject ) );
-
-		++shadowCount;
-		assert( shadowCount < MaxShadowMaps );
+		frameState.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
+	// Update Shadow/Lights
+	{
+		shadowCount = 0;
+		const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
+		assert( lightCount <= MaxLights );
+
+		frameState.lightParms.SetPos( 0 );
+
+		for( uint32_t i = 0; i < lightCount; ++i )
+		{
+			const light_t& light = scene->lights[ i ];
+			if ( ( light.flags & LIGHT_FLAGS_HIDDEN ) != 0 ) {
+				continue;
+			}
+
+			lightBufferObject_t lightObject = {};
+			lightObject.intensity = light.intensity * ColorToVector( light.color );
+			lightObject.lightDir = light.dir;
+			lightObject.lightPos = light.pos;
+
+			if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
+				lightObject.shadowViewId = 0xFF;
+			}
+			else
+			{
+				lightObject.shadowViewId = shadowCount;
+
+				Camera shadowCam;
+				shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
+				shadowCam.SetClip( 0.1f, 1000.0f );
+				shadowCam.SetFov( Radians( 90.0f ) );
+				shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+
+				shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
+				shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
+			}
+			frameState.lightParms.CopyData( &lightObject, sizeof( lightObject ) );
+
+			++shadowCount;
+			assert( shadowCount < MaxShadowMaps );
+		}
+	}
 
 	// Main view
 	{
@@ -553,6 +582,24 @@ void Renderer::UpdateViews( const Scene* scene )
 			activeViews[ activeViewCount ] = &views[ i ];
 			++activeViewCount;
 		}	
+	}
+
+	frameState.viewParms.SetPos( 0 );
+
+	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
+	{
+		const RenderView& view = views[ viewIx ];
+
+		viewBufferObject_t viewBuffer = {};
+		if ( view.IsCommitted() )
+		{
+			const vec2i& frameSize = view.GetFrameSize();
+			viewBuffer.view = view.GetViewMatrix();
+			viewBuffer.proj = view.GetProjMatrix();
+			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
+			viewBuffer.numLights = view.numLights;
+		}
+		frameState.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 	}
 }
 
@@ -638,49 +685,6 @@ void Renderer::UpdateBindSets()
 void Renderer::UpdateBuffers()
 {
 	FrameState& state = frameState;
-
-	state.globalConstants.SetPos( 0 );
-	{
-		globalUboConstants_t globals = {};
-		static auto startTime = std::chrono::high_resolution_clock::now();
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
-
-		float intPart = 0;
-		const float fracPart = modf( time, &intPart );
-
-		globals.time = vec4f( time, intPart, fracPart, 1.0f );
-#if defined( USE_IMGUI )
-		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
-		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
-		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
-#else
-		globals.generic = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
-		globals.tonemap = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
-#endif
-		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
-
-		state.globalConstants.CopyData( &globals, sizeof( globals ) );
-	}
-
-	state.viewParms.SetPos( 0 );
-
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		const RenderView& view = views[ viewIx ];
-
-		viewBufferObject_t viewBuffer = {};
-		if( view.IsCommitted() )
-		{
-			const vec2i& frameSize = view.GetFrameSize();
-			viewBuffer.view = view.GetViewMatrix();
-			viewBuffer.proj = view.GetProjMatrix();
-			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
-			viewBuffer.numLights = view.numLights;
-		}
-		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
-	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
