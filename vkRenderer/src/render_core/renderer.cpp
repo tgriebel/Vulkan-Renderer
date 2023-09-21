@@ -560,8 +560,6 @@ void Renderer::UpdateViews( const Scene* scene )
 
 	// Main view
 	{
-		const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
-
 		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
 		renderViews[ 0 ]->SetCamera( scene->camera );
 
