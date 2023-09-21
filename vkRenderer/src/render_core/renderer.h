@@ -145,7 +145,6 @@ private:
 	ImageArray							gpuImages2D;
 	ImageArray							gpuImagesCube;
 	materialBufferArray_t				materialBuffer;
-	lightBufferArray_t					lightsBuffer;
 	surfUploadArray_t					surfUploads;
 
 	Image								shadowMapImage[ MaxShadowViews ];
