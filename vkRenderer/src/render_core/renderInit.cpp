@@ -112,6 +112,9 @@ void Renderer::Init()
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( resolve );
+	schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
+	schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
+	schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 }
 
@@ -452,7 +455,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = mainColorImage.info.aspect;;
 		info.tiling = mainColorImage.info.tiling;;
 
-		CreateImage( "mainColorDownsampled", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, mainColorDownsampled );
+		CreateImage( "mainColorDownsampled", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorDownsampled );
 	}
 
 	// Depth-stencil views

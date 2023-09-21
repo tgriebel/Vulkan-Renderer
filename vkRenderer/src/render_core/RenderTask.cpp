@@ -297,6 +297,24 @@ void RenderTask::Execute( CommandContext& context )
 }
 
 
+void TransitionImageTask::Execute( CommandContext& context )
+{
+	Transition( &context, *m_img, m_srcState, m_dstState );
+}
+
+
+void CopyImageTask::Execute( CommandContext& context )
+{
+	CopyImage( &context, *m_src, *m_dst );
+}
+
+
+void MipImageTask::Execute( CommandContext& context )
+{
+	GenerateMipmaps( &context, *m_img );
+}
+
+
 uint32_t RenderSchedule::PendingTasks() const
 {
 	return ( static_cast<uint32_t>( tasks.size() ) - currentTask );

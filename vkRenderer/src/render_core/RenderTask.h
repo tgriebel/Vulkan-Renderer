@@ -7,6 +7,10 @@
 class CommandContext;
 class GfxContext;
 class RenderView;
+class Image;
+
+enum gpuImageStateFlags_t : uint8_t;
+
 
 class GpuTask
 {
@@ -53,6 +57,66 @@ class ComputeTask : public GpuTask
 public:
 	void Execute( CommandContext& context ) override;
 	~ComputeTask()
+	{}
+};
+
+
+class TransitionImageTask : public GpuTask
+{
+private:
+	Image*					m_img;
+	gpuImageStateFlags_t	m_srcState;
+	gpuImageStateFlags_t	m_dstState;
+
+public:
+
+	TransitionImageTask( Image* img, const gpuImageStateFlags_t srcState, const gpuImageStateFlags_t dstState )
+	{
+		m_img = img;
+		m_srcState = srcState;
+		m_dstState = dstState;
+	}
+
+	void Execute( CommandContext& context ) override;
+	~TransitionImageTask()
+	{}
+};
+
+
+class CopyImageTask : public GpuTask
+{
+private:
+	Image*	m_src;
+	Image*	m_dst;
+
+public:
+
+	CopyImageTask( Image* src, Image* dst )
+	{
+		m_src = src;
+		m_dst = dst;
+	}
+
+	void Execute( CommandContext& context ) override;
+	~CopyImageTask()
+	{}
+};
+
+
+class MipImageTask : public GpuTask
+{
+private:
+	Image* m_img;
+
+public:
+
+	MipImageTask( Image* img )
+	{
+		m_img = img;
+	}
+
+	void Execute( CommandContext& context ) override;
+	~MipImageTask()
 	{}
 };
 

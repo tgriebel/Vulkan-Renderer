@@ -457,13 +457,6 @@ void Renderer::SubmitFrame()
 			schedule.IssueNext( gfxContext );
 		}
 
-		// TODO: must use resolve image
-		//Transition( &gfxContext, mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
-		//CopyImage( &gfxContext, mainColorResolvedImage, mainColorDownsampled );
-		//GenerateMipmaps( &gfxContext, mainColorDownsampled );
-
-		//downScale.Execute( gfxContext );
-
 		gfxContext.End();
 	}
 
