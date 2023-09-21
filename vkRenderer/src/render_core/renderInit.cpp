@@ -202,6 +202,8 @@ void Renderer::InitShaderResources()
 		downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
 	}
 
+	materialBuffer.Reset();
+
 	AllocRegisteredBindParms();
 
 	CreateCodeTextures();

@@ -492,7 +492,7 @@ void Renderer::UpdateViews( const Scene* scene )
 	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
 	assert( lightCount <= MaxLights );
 
-	frameState.lightParms.SetPos( 0 );
+	lightsBuffer.Reset();
 
 	for( uint32_t i = 0; i < lightCount; ++i )
 	{
@@ -521,8 +521,8 @@ void Renderer::UpdateViews( const Scene* scene )
 
 			shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
 			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
-		}
-		frameState.lightParms.CopyData( &lightObject, sizeof( lightObject ) );
+		}	
+		lightsBuffer.Append( lightObject );
 
 		++shadowCount;
 		assert( shadowCount < MaxShadowMaps );
@@ -707,6 +707,9 @@ void Renderer::UpdateBuffers()
 
 	state.materialBuffers.SetPos( 0 );
 	state.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
+
+	state.lightParms.SetPos( 0 );
+	state.lightParms.CopyData( lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
 	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
