@@ -93,7 +93,6 @@ void Renderer::DestroyFramebuffers()
 	delete tempColorImage.gpuImage;
 	delete mainColorImage.gpuImage;
 	delete depthStencilImage.gpuImage;
-	delete mainColorDownsampled.gpuImage;
 	delete mainColorResolvedImage.gpuImage;
 	delete depthStencilResolvedImage.gpuImage;
 

@@ -112,9 +112,11 @@ void Renderer::Init()
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( resolve );
-	schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
-	schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
-	schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
+	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
+	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
+	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
+	schedule.Queue( new TransitionImageTask( &mainColorResolvedImage, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST ) );
+	schedule.Queue( new MipImageTask( &mainColorResolvedImage ) );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 }
 
@@ -431,7 +433,7 @@ void Renderer::CreateFramebuffers()
 		imageInfo_t info{};
 		info.width = width;
 		info.height = height;
-		info.mipLevels = 1;
+		info.mipLevels = MipCount( info.width, info.height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = mainColorImage.info.fmt;
@@ -439,23 +441,10 @@ void Renderer::CreateFramebuffers()
 		info.aspect = mainColorImage.info.aspect;
 		info.tiling = mainColorImage.info.tiling;
 
-		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorResolvedImage );
-	}
+		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, mainColorResolvedImage );
 
-	// Downsampled image
-	{
-		imageInfo_t info{};
-		info.width = width / 2;
-		info.height = height / 2;
-		info.mipLevels = MipCount( info.width, info.height );
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = mainColorImage.info.fmt;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = mainColorImage.info.aspect;;
-		info.tiling = mainColorImage.info.tiling;;
-
-		CreateImage( "mainColorDownsampled", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorDownsampled );
+		info.mipLevels = 1;
+		mainColorResolvedImageView.Init( mainColorResolvedImage, info );
 	}
 
 	// Depth-stencil views
@@ -511,10 +500,10 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.name = "MainColorResolveFB";
-		fbInfo.color0[ 0 ] = &mainColorResolvedImage;
+		fbInfo.color0[ 0 ] = &mainColorResolvedImageView;
 		fbInfo.color1[ 0 ] = &depthStencilResolvedImage;
-		fbInfo.width = mainColorResolvedImage.info.width;
-		fbInfo.height = mainColorResolvedImage.info.height;
+		fbInfo.width = mainColorResolvedImageView.info.width;
+		fbInfo.height = mainColorResolvedImageView.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColorResolved.Create( fbInfo );

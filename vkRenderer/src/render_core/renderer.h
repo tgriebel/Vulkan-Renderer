@@ -164,12 +164,12 @@ private:
 	Image								mainColorImage;
 	Image								mainColorResolvedImage;
 	Image								tempColorImage;
-	Image								mainColorDownsampled;
 	Image								depthStencilImage;
 	Image								depthStencilResolvedImage;
 
 	ImageView							depthResolvedImageView;
 	ImageView							stencilResolvedImageView;
+	ImageView							mainColorResolvedImageView;
 
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;

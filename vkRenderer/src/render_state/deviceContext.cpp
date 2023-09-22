@@ -219,7 +219,10 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImage
 	VkPipelineStageFlags sourceStage;
 	VkPipelineStageFlags destinationStage;
 
-	if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL )
+	if ( (	( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED ) ||
+			( oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) ||
+			( oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL ) ) &&
+			( newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ) )
 	{
 		barrier.srcAccessMask = 0;
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;

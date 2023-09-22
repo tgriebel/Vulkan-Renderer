@@ -299,7 +299,6 @@ void Renderer::Resize()
 	}
 	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
@@ -359,7 +358,6 @@ void Renderer::UploadAssets()
 	}	
 	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
