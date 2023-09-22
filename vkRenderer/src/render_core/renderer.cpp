@@ -88,7 +88,7 @@ void Renderer::Commit( const Scene* scene )
 		view.drawGroup.vb = &vb;
 		view.drawGroup.ib = &ib;
 	}
-	UpdateViews( scene );
+	CommitViews( scene );
 }
 
 
@@ -475,52 +475,55 @@ void Renderer::SubmitFrame()
 }
 
 
-void Renderer::UpdateViews( const Scene* scene )
+void Renderer::CommitLight( const light_t& light )
+{
+	if ( ( light.flags & LIGHT_FLAGS_HIDDEN ) != 0 ) {
+		return;
+	}
+
+	lightBufferObject_t lightObject = {};
+	lightObject.intensity = light.intensity * ColorToVector( light.color );
+	lightObject.lightDir = light.dir;
+	lightObject.lightPos = light.pos;
+
+	if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
+		lightObject.shadowViewId = 0xFF;
+	}
+	else
+	{
+		lightObject.shadowViewId = shadowCount;
+
+		Camera shadowCam;
+		shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
+		shadowCam.SetClip( 0.1f, 1000.0f );
+		shadowCam.SetFov( Radians( 90.0f ) );
+		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+
+		shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
+		shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
+	}
+	committedLights.Append( lightObject );
+
+	++shadowCount;
+	assert( shadowCount < MaxShadowMaps );
+}
+
+
+void Renderer::CommitViews( const Scene* scene )
 {
 	int width;
 	int height;
 	g_window.GetWindowSize( width, height );
 
-	shadowCount = 0;
 	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
 	assert( lightCount <= MaxLights );
 
-	lightsBuffer.Reset();
+	shadowCount = 0;
+	committedLights.Reset();
 
-	for( uint32_t i = 0; i < lightCount; ++i )
-	{
-		const light_t& light = scene->lights[ i ];
-		if ( ( light.flags & LIGHT_FLAGS_HIDDEN ) != 0 ) {
-			continue;
-		}
-
-		lightBufferObject_t lightObject = {};
-		lightObject.intensity = light.intensity * ColorToVector( light.color );
-		lightObject.lightDir = light.dir;
-		lightObject.lightPos = light.pos;
-
-		if ( ( light.flags & LIGHT_FLAGS_SHADOW ) == 0 ) {
-			lightObject.shadowViewId = 0xFF;
-		}
-		else
-		{
-			lightObject.shadowViewId = shadowCount;
-
-			Camera shadowCam;
-			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
-			shadowCam.SetClip( 0.1f, 1000.0f );
-			shadowCam.SetFov( Radians( 90.0f ) );
-			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
-
-			shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
-			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
-		}	
-		lightsBuffer.Append( lightObject );
-
-		++shadowCount;
-		assert( shadowCount < MaxShadowMaps );
+	for( uint32_t i = 0; i < lightCount; ++i ) {
+		CommitLight( scene->lights[ i ] );
 	}
-
 
 	// Main view
 	{
@@ -702,7 +705,7 @@ void Renderer::UpdateBuffers()
 	state.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
 
 	state.lightParms.SetPos( 0 );
-	state.lightParms.CopyData( lightsBuffer.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
+	state.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
 	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();

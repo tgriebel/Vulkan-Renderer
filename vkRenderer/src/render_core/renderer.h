@@ -93,10 +93,10 @@ public:
 	void								AttachDebugMenu( const debugMenuFuncPtr funcPtr );
 
 private:
-	using lightBufferArray_t	= Array<lightBufferObject_t, MaxLights>;
-	using materialBufferArray_t	= Array<materialBufferObject_t, MaxMaterials>;
-	using bindParmArray_t		= Array<ShaderBindParms, DescriptorPoolMaxSets>;
-	using surfUploadArray_t		= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
+	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
+	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;
+	using bindParmArray_t			= Array<ShaderBindParms, DescriptorPoolMaxSets>;
+	using surfUploadArray_t			= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
 
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
@@ -145,7 +145,7 @@ private:
 	ImageArray							gpuImages2D;
 	ImageArray							gpuImagesCube;
 	materialBufferArray_t				materialBuffer;
-	lightBufferArray_t					lightsBuffer;
+	committedLightsArray_t				committedLights;
 	surfUploadArray_t					surfUploads;
 
 	Image								shadowMapImage[ MaxShadowViews ];
@@ -200,13 +200,15 @@ private:
 	void								WaitForEndFrame();
 	void								SubmitFrame();
 
+	void								CommitViews( const Scene* scene );
+	void								CommitLight( const light_t& light );
+
 	// Update/Upload
 	void								BeginUploadCommands( UploadContext& uploadContext );
 	void								EndUploadCommands( UploadContext& uploadContext );
 	void								CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	void								UploadAssets();
-	void								UpdateViews( const Scene* scene );
 	void								UpdateTextureData();
 	void								UploadTextures();
 	void								UpdateGpuMaterials();
