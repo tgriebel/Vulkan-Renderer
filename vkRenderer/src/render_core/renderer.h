@@ -167,9 +167,9 @@ private:
 	Image								depthStencilImage;
 	Image								depthStencilResolvedImage;
 
+	ImageView							mainColorResolvedImageView;
 	ImageView							depthResolvedImageView;
 	ImageView							stencilResolvedImageView;
-	ImageView							mainColorResolvedImageView;
 
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;

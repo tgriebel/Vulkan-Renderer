@@ -87,6 +87,7 @@ void Renderer::DestroyFramebuffers()
 	renderContext.depthImageView.Destroy();
 	renderContext.stencilImageView.Destroy();
 
+	mainColorResolvedImageView.Destroy();
 	depthResolvedImageView.Destroy();
 	stencilResolvedImageView.Destroy();
 
