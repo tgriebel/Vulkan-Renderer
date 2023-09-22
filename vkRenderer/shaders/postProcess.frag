@@ -59,12 +59,8 @@ void main()
 
 	stencilCoverage /= 4.0f;
 
-	const int resolveSamples = 1;
-
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-	for( int i = 0; i < resolveSamples; ++i ) {
-		sceneColor.rgb += LinearToSrgb( texelFetch( codeSamplers[ textureId0 ], pixelLocation, i ).rgb );
-	}
+	sceneColor.rgb = LinearToSrgb( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb );
 
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;
@@ -72,13 +68,14 @@ void main()
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
 	outColor.rgb = vec3( 0.0f );
-	//const float focalDepth = 0.01f;
-	//const float focalRange = 0.25f;
-	//float coc = ( sceneDepth - focalDepth ) / focalRange;
-	//coc = clamp( coc, -1.0, 1.0f );
-	//if ( coc < 0.0f ) {
-	//	outColor.rgb = coc * -vec3( 1.0f, 0.0f, 0.0f );
-	//}
+	const float focalDepth = 0.01f;
+	const float focalRange = 0.25f;
+	float coc = ( sceneDepth - focalDepth ) / focalRange;
+	const int MAX_MIP_LEVELS = 3;
+	coc = clamp( coc, -1.0, 1.0f );
+	if ( coc < 0.0f ) {
+	//	sceneColor.rgb = LinearToSrgb( textureLod( codeSamplers[ textureId0 ], fragTexCoord.xy, int( coc * MAX_MIP_LEVELS ) ).rgb );
+	}
 
 	outColor.a = 1.0f;
 	if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
