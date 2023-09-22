@@ -30,29 +30,6 @@
 #include <gfxcore/asset_types/texture.h>
 #include "../render_binding/imageView.h"
 
-class FrameState
-{
-public:
-	ImageView		depthImageView;
-	ImageView		stencilImageView;
-
-	// FIXME: Lights and surfaces should be relative to a given render view.
-	// Textures, materials, and view parms are all global
-
-	GpuBuffer		globalConstants;
-	GpuBuffer		viewParms;
-	GpuBuffer		surfParms;
-	GpuBuffer		materialBuffers;
-	GpuBuffer		lightParms;
-	GpuBuffer		particleBuffer;
-
-	GpuBufferView	surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
-
-	void Create();
-	void Destroy();
-};
-
-
 struct frameBufferCreateInfo_t
 {
 	uint32_t			width;

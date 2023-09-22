@@ -462,11 +462,11 @@ void Renderer::CreateFramebuffers()
 	{
 		imageInfo_t depthInfo = depthStencilImage.info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		frameState.depthImageView.Init( depthStencilImage, depthInfo );
+		renderContext.depthImageView.Init( depthStencilImage, depthInfo );
 
 		imageInfo_t stencilInfo = depthStencilImage.info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		frameState.stencilImageView.Init( depthStencilImage, stencilInfo );
+		renderContext.stencilImageView.Init( depthStencilImage, stencilInfo );
 	}
 
 	// Resolve depth-stencil image
@@ -552,8 +552,8 @@ void Renderer::CreateFramebuffers()
 		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
 			fbInfo.color0[ frameIx ] = &mainColorImage;
-			fbInfo.depth[ frameIx ] = &frameState.depthImageView;
-			fbInfo.stencil[ frameIx ] = &frameState.stencilImageView;
+			fbInfo.depth[ frameIx ] = &renderContext.depthImageView;
+			fbInfo.stencil[ frameIx ] = &renderContext.stencilImageView;
 		}
 		fbInfo.width = mainColorImage.info.width;
 		fbInfo.height = mainColorImage.info.height;
@@ -638,15 +638,15 @@ void Renderer::RefreshRegisteredBindParms()
 void Renderer::CreateBuffers()
 {
 	{
-		frameState.globalConstants.Create(	"Globals",	LIFETIME_PERSISTENT,	1,						sizeof( viewBufferObject_t ),		bufferType_t::UNIFORM, renderContext.sharedMemory );
-		frameState.viewParms.Create(		"View",		LIFETIME_PERSISTENT,	MaxViews,				sizeof( viewBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
-		frameState.surfParms.Create(		"Surf",		LIFETIME_PERSISTENT,	MaxViews * MaxSurfaces,	sizeof( uniformBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
-		frameState.materialBuffers.Create(	"Material",	LIFETIME_PERSISTENT,	MaxMaterials,			sizeof( materialBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
-		frameState.lightParms.Create(		"Light",	LIFETIME_PERSISTENT,	MaxLights,				sizeof( lightBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
-		frameState.particleBuffer.Create(	"Particle",	LIFETIME_PERSISTENT,	MaxParticles,			sizeof( particleBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
+		renderContext.globalConstants.Create(	"Globals",	LIFETIME_PERSISTENT,	1,						sizeof( viewBufferObject_t ),		bufferType_t::UNIFORM, renderContext.sharedMemory );
+		renderContext.viewParms.Create(			"View",		LIFETIME_PERSISTENT,	MaxViews,				sizeof( viewBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
+		renderContext.surfParms.Create(			"Surf",		LIFETIME_PERSISTENT,	MaxViews * MaxSurfaces,	sizeof( uniformBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
+		renderContext.materialBuffers.Create(	"Material",	LIFETIME_PERSISTENT,	MaxMaterials,			sizeof( materialBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
+		renderContext.lightParms.Create(		"Light",	LIFETIME_PERSISTENT,	MaxLights,				sizeof( lightBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
+		renderContext.particleBuffer.Create(	"Particle",	LIFETIME_PERSISTENT,	MaxParticles,			sizeof( particleBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
 
 		for ( size_t v = 0; v < MaxViews; ++v ) {
-			frameState.surfParmPartitions[ v ] = frameState.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
+			renderContext.surfParmPartitions[ v ] = renderContext.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 	}
 

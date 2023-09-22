@@ -84,8 +84,8 @@ void Renderer::Cleanup()
 
 void Renderer::DestroyFramebuffers()
 {
-	frameState.depthImageView.Destroy();
-	frameState.stencilImageView.Destroy();
+	renderContext.depthImageView.Destroy();
+	renderContext.stencilImageView.Destroy();
 
 	depthResolvedImageView.Destroy();
 	stencilResolvedImageView.Destroy();
@@ -134,12 +134,12 @@ void Renderer::ShutdownShaderResources()
 
 	// Buffers
 	{
-		frameState.globalConstants.Destroy();
-		frameState.viewParms.Destroy();
-		frameState.surfParms.Destroy();
-		frameState.materialBuffers.Destroy();
-		frameState.lightParms.Destroy();
-		frameState.particleBuffer.Destroy();
+		renderContext.globalConstants.Destroy();
+		renderContext.viewParms.Destroy();
+		renderContext.surfParms.Destroy();
+		renderContext.materialBuffers.Destroy();
+		renderContext.lightParms.Destroy();
+		renderContext.particleBuffer.Destroy();
 	}
 
 	// Images

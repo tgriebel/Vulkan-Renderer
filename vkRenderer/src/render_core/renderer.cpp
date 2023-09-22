@@ -587,33 +587,33 @@ void Renderer::UpdateBindSets()
 				pass->codeImages[ 2 ] = &shadowMapImage[ 2 ];
 			}
 
-			pass->parms->Bind( bind_globalsBuffer,	&frameState.globalConstants );
-			pass->parms->Bind( bind_viewBuffer,		&frameState.viewParms );
-			pass->parms->Bind( bind_modelBuffer,	&frameState.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
+			pass->parms->Bind( bind_globalsBuffer,	&renderContext.globalConstants );
+			pass->parms->Bind( bind_viewBuffer,		&renderContext.viewParms );
+			pass->parms->Bind( bind_modelBuffer,	&renderContext.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
 			pass->parms->Bind( bind_image2DArray,	&gpuImages2D );
 			pass->parms->Bind( bind_imageCubeArray,	&gpuImagesCube );
-			pass->parms->Bind( bind_materialBuffer,	&frameState.materialBuffers );
-			pass->parms->Bind( bind_lightBuffer,	&frameState.lightParms );
+			pass->parms->Bind( bind_materialBuffer,	&renderContext.materialBuffers );
+			pass->parms->Bind( bind_lightBuffer,	&renderContext.lightParms );
 			pass->parms->Bind( bind_imageCodeArray,	&pass->codeImages );
 			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &stencilResolvedImageView : pass->codeImages[ 0 ] );
 		}
 	}
 
 	{
-		particleState.parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
-		particleState.parms->Bind( bind_particleWriteBuffer,	&frameState.particleBuffer );
+		particleState.parms->Bind( bind_globalsBuffer,			&renderContext.globalConstants );
+		particleState.parms->Bind( bind_particleWriteBuffer,	&renderContext.particleBuffer );
 	}
 
 	if( resolve != nullptr )
 	{
 		resolve->pass->codeImages.Resize( 3 );
 		resolve->pass->codeImages[ 0 ] = &mainColorImage;
-		resolve->pass->codeImages[ 1 ] = &frameState.depthImageView;
-		resolve->pass->codeImages[ 2 ] = &frameState.stencilImageView;
+		resolve->pass->codeImages[ 1 ] = &renderContext.depthImageView;
+		resolve->pass->codeImages[ 2 ] = &renderContext.stencilImageView;
 
-		resolve->pass->parms->Bind( bind_globalsBuffer,			&frameState.globalConstants );
+		resolve->pass->parms->Bind( bind_globalsBuffer,			&renderContext.globalConstants );
 		resolve->pass->parms->Bind( bind_sourceImages,			&resolve->pass->codeImages );
-		resolve->pass->parms->Bind( bind_imageStencil,			&frameState.stencilImageView );
+		resolve->pass->parms->Bind( bind_imageStencil,			&renderContext.stencilImageView );
 		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
 	}
 
@@ -623,9 +623,9 @@ void Renderer::UpdateBindSets()
 		downScale.pass->codeImages[ 1 ] = &mainColorResolvedImage;
 		downScale.pass->codeImages[ 2 ] = &mainColorResolvedImage;
 
-		downScale.pass->parms->Bind( bind_globalsBuffer,		&frameState.globalConstants );
+		downScale.pass->parms->Bind( bind_globalsBuffer,		&renderContext.globalConstants );
 		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );
-		downScale.pass->parms->Bind( bind_imageStencil,			&frameState.stencilImageView );
+		downScale.pass->parms->Bind( bind_imageStencil,			&renderContext.stencilImageView );
 		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
 	}
 }
@@ -633,9 +633,7 @@ void Renderer::UpdateBindSets()
 
 void Renderer::UpdateBuffers()
 {
-	FrameState& state = frameState;
-
-	state.globalConstants.SetPos( 0 );
+	renderContext.globalConstants.SetPos( 0 );
 	{
 		globalUboConstants_t globals = {};
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -657,10 +655,10 @@ void Renderer::UpdateBuffers()
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 
-		state.globalConstants.CopyData( &globals, sizeof( globals ) );
+		renderContext.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
-	state.viewParms.SetPos( 0 );
+	renderContext.viewParms.SetPos( 0 );
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -675,7 +673,7 @@ void Renderer::UpdateBuffers()
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
 		}
-		state.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+		renderContext.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
@@ -697,17 +695,17 @@ void Renderer::UpdateBuffers()
 			uboBuffer[ objectId ] = ubo;
 		}
 
-		state.surfParmPartitions[ viewId ].SetPos( 0 );
-		state.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+		renderContext.surfParmPartitions[ viewId ].SetPos( 0 );
+		renderContext.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
 	}
 
-	state.materialBuffers.SetPos( 0 );
-	state.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
+	renderContext.materialBuffers.SetPos( 0 );
+	renderContext.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
 
-	state.lightParms.SetPos( 0 );
-	state.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
+	renderContext.lightParms.SetPos( 0 );
+	renderContext.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
-	state.particleBuffer.SetPos( frameState.particleBuffer.GetMaxSize() );
+	renderContext.particleBuffer.SetPos( renderContext.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
 }
 

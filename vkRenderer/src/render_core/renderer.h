@@ -69,6 +69,18 @@ struct ComputeState
 class RenderContext
 {
 public:
+	GpuBuffer			globalConstants;
+	GpuBuffer			surfParms;
+	GpuBuffer			materialBuffers;
+	GpuBuffer			lightParms;
+	GpuBuffer			particleBuffer;
+
+	// TODO: move view-specific data
+	GpuBuffer			viewParms;
+	ImageView			depthImageView;
+	ImageView			stencilImageView;
+	GpuBufferView		surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
+
 	// Memory
 	AllocatorMemory		localMemory;
 	AllocatorMemory		frameBufferMemory;
@@ -159,7 +171,6 @@ private:
 	ImageView							depthResolvedImageView;
 	ImageView							stencilResolvedImageView;
 
-	FrameState							frameState;
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
 	FrameBuffer							mainColorResolved;
