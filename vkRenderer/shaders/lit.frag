@@ -69,8 +69,8 @@ void main()
     const vec3 viewDiffuse = dot( v, n ).xxx;
 
     const vec3 r = reflect( -v, n );
-    const int MAX_MIP_LEVELS = 12;
-    const vec4 envMap = vec4( SrgbToLinear( textureLod( cubeSamplers[0], vec3( r.x, r.z, r.y ), perceptualRoughness * MAX_MIP_LEVELS ).rgb ), 1.0f ); // FIXME: HACK
+    const int MipLevels = textureQueryLevels( cubeSamplers[ 0 ] );
+    const vec4 envMap = vec4( SrgbToLinear( textureLod( cubeSamplers[0], vec3( r.x, r.z, r.y ), perceptualRoughness * MipLevels ).rgb ), 1.0f ); // FIXME: HACK
 
     float NoV = abs( dot( n, v ) );
 
