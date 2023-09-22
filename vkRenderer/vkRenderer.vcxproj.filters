@@ -86,9 +86,6 @@
     <ClCompile Include="src\render_binding\binding.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_state\frameState.cpp">
-      <Filter>render state</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_binding\descriptorWrites.cpp">
       <Filter>render binding</Filter>
     </ClCompile>
@@ -118,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="src\globals\drawGroup.cpp">
       <Filter>globals</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_state\frameBuffer.cpp">
+      <Filter>render state</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -185,9 +185,6 @@
     <ClInclude Include="src\render_state\deviceContext.h">
       <Filter>render state</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_state\FrameState.h">
-      <Filter>render state</Filter>
-    </ClInclude>
     <ClInclude Include="src\globals\common.h">
       <Filter>globals</Filter>
     </ClInclude>
@@ -250,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="shaders\color.h">
       <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_state\frameBuffer.h">
+      <Filter>render state</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

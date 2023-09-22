@@ -207,7 +207,7 @@
     <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="src\render_state\cmdContext.h" />
     <ClInclude Include="src\render_state\deviceContext.h" />
-    <ClInclude Include="src\render_state\FrameState.h" />
+    <ClInclude Include="src\render_state\frameBuffer.h" />
     <ClInclude Include="src\render_state\rhi.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
@@ -254,7 +254,7 @@
     <ClCompile Include="src\render_core\swapChain.cpp" />
     <ClCompile Include="src\render_state\cmdContext.cpp" />
     <ClCompile Include="src\render_state\deviceContext.cpp" />
-    <ClCompile Include="src\render_state\frameState.cpp" />
+    <ClCompile Include="src\render_state\frameBuffer.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp">

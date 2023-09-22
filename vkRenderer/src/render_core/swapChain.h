@@ -29,7 +29,7 @@
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 #include "../render_core/gpuImage.h"
-#include "../render_state/FrameState.h"
+#include "../render_state/frameBuffer.h"
 
 QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 
