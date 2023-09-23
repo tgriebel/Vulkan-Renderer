@@ -381,6 +381,76 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 }
 
 
+void vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAsset, DrawPass* pass )
+{
+	hdl_t pipeLineHandle = CreateGraphicsPipeline( pass, *progAsset );
+
+	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
+
+	renderPassTransition_t transitionState = {};
+	transitionState.flags.clear = false;
+	transitionState.flags.store = true;
+	transitionState.flags.presentAfter = false;
+	transitionState.flags.readAfter = true;
+	transitionState.flags.readOnly = true;
+
+	VkRenderPassBeginInfo passInfo{ };
+	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	passInfo.renderPass = pass->fb->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, context.bufferId );
+	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
+	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
+
+	const VkClearColorValue clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	const VkClearDepthStencilValue clearDepth = { 0, 0 };
+
+	const uint32_t colorAttachmentsCount = pass->fb->ColorLayerCount();
+	const uint32_t attachmentsCount = pass->fb->LayerCount();
+
+	passInfo.clearValueCount = 0;
+	passInfo.pClearValues = nullptr;
+
+	std::array<VkClearValue, 1> clearValues{ clearColor };
+	assert( attachmentsCount <= 1 );
+
+	passInfo.clearValueCount = 1;
+	passInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+	const viewport_t& viewport = pass->viewport;
+
+	VkViewport vk_viewport{ };
+	vk_viewport.x = static_cast<float>( viewport.x );
+	vk_viewport.y = static_cast<float>( viewport.y );
+	vk_viewport.width = static_cast<float>( viewport.width );
+	vk_viewport.height = static_cast<float>( viewport.height );
+	vk_viewport.minDepth = 0.0f;
+	vk_viewport.maxDepth = 1.0f;
+	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
+
+	VkRect2D rect{ };
+	rect.extent.width = viewport.width;
+	rect.extent.height = viewport.height;
+	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
+
+	pipelineObject_t* pipelineObject = nullptr;
+	GetPipelineObject( pipeLineHandle, &pipelineObject );
+	if ( pipelineObject != nullptr ) {
+		const uint32_t descSetCount = 1;
+		VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms->GetVkObject() };
+		assert( 0 ); //TODO: set-up parms
+
+		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
+
+		vkCmdDraw( cmdBuffer, 3, 1, 0, 0 );
+	}
+
+	vkCmdEndRenderPass( cmdBuffer );
+}
+
+
 void vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst )
 {
 	VkFormatProperties formatProperties;

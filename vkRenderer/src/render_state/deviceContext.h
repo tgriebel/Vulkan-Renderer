@@ -99,6 +99,7 @@ uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags propert
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image );
+void				vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAsset, DrawPass* pass );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst );
 void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 imageSamples_t		vk_MaxImageSamples();
