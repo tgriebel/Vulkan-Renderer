@@ -3,9 +3,20 @@
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
 
+struct imageSubResourceView_t
+{
+	uint32_t baseMip;
+	// uint32_t baseArray;
+	uint32_t mipLevels;
+	// uint32_t arrayCount;
+};
+
+
 class ImageView : public Image
 {
 public:
+	imageSubResourceView_t subResourceView;
+
 	ImageView() : Image()
 	{}
 
@@ -20,6 +31,12 @@ public:
 	ImageView( const Image& image, const imageInfo_t& imageInfo ) : Image()
 	{
 		Init( image, imageInfo );
+	}
+
+
+	ImageView( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subResourceView ) : Image()
+	{
+		Init( image, imageInfo, subResourceView );
 	}
 
 	
@@ -38,10 +55,21 @@ public:
 
 	void Init( const Image& image, const imageInfo_t& imageInfo )
 	{
+		imageSubResourceView_t subView;
+		subView.baseMip = 0;
+		subView.mipLevels = imageInfo.mipLevels;
+
+		Init( image, imageInfo, subView );
+	}
+
+
+	void Init( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView )
+	{
 		info = imageInfo;
+		subResourceView = subView;
 #ifdef USE_VULKAN
 		const VkImage img = image.gpuImage->GetVkImage();
-		const VkImageView view = vk_CreateImageView( image.gpuImage->GetVkImage(), info );
+		const VkImageView view = vk_CreateImageView( image.gpuImage->GetVkImage(), info, subResourceView );
 
 		gpuImage = new GpuImage( image.gpuImage->GetDebugName(), img, view );
 #endif

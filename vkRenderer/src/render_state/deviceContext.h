@@ -85,6 +85,7 @@ extern DeviceContext context;
 }
 
 struct imageInfo_t;
+struct imageSubResourceView_t;
 class GpuImage;
 class AllocatorMemory;
 class DrawPass;
@@ -97,6 +98,7 @@ QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR s
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
+VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image );
 void				vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAsset, DrawPass* pass );

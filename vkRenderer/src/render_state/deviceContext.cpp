@@ -141,10 +141,22 @@ uint32_t vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags propertie
 
 VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 {
+	imageSubResourceView_t subResourceView;
+	subResourceView.baseMip = 0;
+	subResourceView.mipLevels = info.mipLevels;
+
+	return vk_CreateImageView( image, info, subResourceView );
+}
+
+
+VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView )
+{
 	VkImageAspectFlags aspectFlags = 0;
 	aspectFlags |= ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
 	aspectFlags |= ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
 	aspectFlags |= ( info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+
+	assert( subResourceView.mipLevels >= 1 );
 
 	VkImageViewCreateInfo viewInfo{ };
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -152,8 +164,8 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 	viewInfo.viewType = vk_GetTextureType( info.type );
 	viewInfo.format = vk_GetTextureFormat( info.fmt );
 	viewInfo.subresourceRange.aspectMask = aspectFlags;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = info.mipLevels;
+	viewInfo.subresourceRange.baseMipLevel = subResourceView.baseMip;
+	viewInfo.subresourceRange.levelCount = subResourceView.mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : 1;
 
@@ -306,6 +318,13 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 	barrier.subresourceRange.layerCount = image.info.layers;
 	barrier.subresourceRange.levelCount = 1;
 
+	std::vector<ImageView> views;
+	views.resize( image.info.mipLevels );
+
+	for ( uint32_t i = 0; i < image.info.mipLevels; i++ ) {
+		views[ i ].Init( image, image.info, imageSubResourceView_t{ i, 1 } );
+	}
+
 	int32_t mipWidth = image.info.width;
 	int32_t mipHeight = image.info.height;
 
@@ -361,8 +380,8 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 								0, nullptr,
 								1, &barrier );
 
-		if ( mipWidth > 1 ) mipWidth /= 2;
-		if ( mipHeight > 1 ) mipHeight /= 2;
+		mipWidth = ( mipWidth > 1 ) ? ( mipWidth /= 2 ) : mipWidth;
+		mipHeight = ( mipHeight > 1 ) ? ( mipHeight /= 2 ) : mipHeight;
 	}
 
 	barrier.subresourceRange.baseMipLevel = image.info.mipLevels - 1;
@@ -378,6 +397,10 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 							0, nullptr,
 							0, nullptr,
 							1, &barrier );
+
+	for ( uint32_t i = 0; i < image.info.mipLevels; i++ ) {
+		views[ i ].Destroy();
+	}
 }
 
 
@@ -401,8 +424,7 @@ void vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAs
 	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
 	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
 
-	const VkClearColorValue clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-	const VkClearDepthStencilValue clearDepth = { 0, 0 };
+	const VkClearColorValue vk_clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	const uint32_t colorAttachmentsCount = pass->fb->ColorLayerCount();
 	const uint32_t attachmentsCount = pass->fb->LayerCount();
@@ -410,8 +432,18 @@ void vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAs
 	passInfo.clearValueCount = 0;
 	passInfo.pClearValues = nullptr;
 
-	std::array<VkClearValue, 1> clearValues{ clearColor };
-	assert( attachmentsCount <= 1 );
+	std::array<VkClearValue, 3> clearValues{ };
+	assert( attachmentsCount <= 3 );
+
+	if ( transitionState.flags.clear )
+	{
+		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+			clearValues[ i ].color = vk_clearColor;
+		}
+
+		passInfo.clearValueCount = attachmentsCount;
+		passInfo.pClearValues = clearValues.data();
+	}
 
 	passInfo.clearValueCount = 1;
 	passInfo.pClearValues = clearValues.data();
