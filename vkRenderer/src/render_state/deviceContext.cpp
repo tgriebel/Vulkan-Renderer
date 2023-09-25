@@ -23,7 +23,7 @@
 
 #include "deviceContext.h"
 #include "../render_core/swapChain.h"
-#include "../render_core/drawpass.h"
+#include "../draw_passes/drawpass.h"
 #include "../render_core/gpuImage.h"
 
 DeviceContext context;

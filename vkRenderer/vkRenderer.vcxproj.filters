@@ -12,10 +12,10 @@
       <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="scenes\sceneParser.cpp">
-      <Filter>scenes</Filter>
+      <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="scenes\chessScene.cpp">
-      <Filter>scenes</Filter>
+      <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="external\imgui\imgui.cpp">
       <Filter>external\imgui</Filter>
@@ -42,82 +42,82 @@
       <Filter>external\tinyfiledialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\renderCommand.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\renderer.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\renderInit.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\renderShutdown.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\gpuTransfer.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\pipeline.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_state\deviceContext.cpp">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
     </ClCompile>
     <ClCompile Include="src\globals\render_util.cpp">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClCompile>
     <ClCompile Include="src\io\io.cpp">
-      <Filter>io</Filter>
+      <Filter>IO</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\debugMenu.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="scenes\nesScene.cpp">
-      <Filter>scenes</Filter>
+      <Filter>Scenes</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\gpuImage.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\shaderBinding.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\gpuResources.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\binding.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\descriptorWrites.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\imageView.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\swapChain.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\globals\renderView.cpp">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\allocator.cpp">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_state\cmdContext.cpp">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\GpuSync.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\RenderTask.cpp">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="src\globals\postEffect.cpp">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClCompile>
     <ClCompile Include="src\globals\drawGroup.cpp">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClCompile>
     <ClCompile Include="src\render_state\frameBuffer.cpp">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -129,7 +129,7 @@
       <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="scenes\chessScene.h">
-      <Filter>scenes</Filter>
+      <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="window.h">
       <Filter>app</Filter>
@@ -138,7 +138,7 @@
       <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="scenes\sceneParser.h">
-      <Filter>scenes</Filter>
+      <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="external\imgui\imconfig.h">
       <Filter>external\imgui</Filter>
@@ -168,88 +168,88 @@
       <Filter>external\tinyfiledialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\renderer.h">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\swapChain.h">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\allocator.h">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\gpuResources.h">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\pipeline.h">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_state\deviceContext.h">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
     </ClInclude>
     <ClInclude Include="src\globals\common.h">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClInclude>
     <ClInclude Include="src\globals\render_util.h">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClInclude>
     <ClInclude Include="src\globals\renderConstants.h">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClInclude>
     <ClInclude Include="src\globals\renderview.h">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClInclude>
     <ClInclude Include="src\io\io.h">
-      <Filter>io</Filter>
+      <Filter>IO</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\debugMenu.h">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="scenes\nesScene.h">
-      <Filter>scenes</Filter>
+      <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\gpuImage.h">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\render_state\rhi.h">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\bindings.h">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\shaderBinding.h">
-      <Filter>render binding</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render_core\drawpass.h">
-      <Filter>render core</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\imageView.h">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="shaders\light.h">
       <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\render_state\cmdContext.h">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\bufferObjects.h">
-      <Filter>render binding</Filter>
+      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\GpuSync.h">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\RenderTask.h">
-      <Filter>render core</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\globals\postEffect.h">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClInclude>
     <ClInclude Include="src\globals\drawGroup.h">
-      <Filter>globals</Filter>
+      <Filter>Globals</Filter>
     </ClInclude>
     <ClInclude Include="shaders\color.h">
       <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\render_state\frameBuffer.h">
-      <Filter>render state</Filter>
+      <Filter>Device Context</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\drawpass.h">
+      <Filter>Draw Passes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -318,21 +318,6 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{560cce8d-e0a9-4227-bef7-b0e8ec17db07}</UniqueIdentifier>
     </Filter>
-    <Filter Include="scenes">
-      <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="render core">
-      <UniqueIdentifier>{51ec1bcd-b056-4e9a-913c-15fa9ccc8313}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="render binding">
-      <UniqueIdentifier>{5cf06efa-78fe-44b3-8c91-a428376bb362}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="render state">
-      <UniqueIdentifier>{52899a06-18bc-47e8-b7e9-c9bf879dc260}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="globals">
-      <UniqueIdentifier>{21795e6f-c830-4219-add7-37b00412d994}</UniqueIdentifier>
-    </Filter>
     <Filter Include="app">
       <UniqueIdentifier>{8422073c-36ab-49db-80da-32a9dbf106f4}</UniqueIdentifier>
     </Filter>
@@ -342,11 +327,29 @@
     <Filter Include="external\imgui">
       <UniqueIdentifier>{90cea79c-20c6-4910-b690-2955a612a086}</UniqueIdentifier>
     </Filter>
-    <Filter Include="io">
-      <UniqueIdentifier>{10252c62-08b9-4c28-a3e6-9dc33fa9a25a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="external\tinyfiledialogs">
       <UniqueIdentifier>{ef848272-6ac6-4f38-b6f0-14d00456cc67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Draw Passes">
+      <UniqueIdentifier>{3d060c57-dcc9-4ff1-9ad5-ca87ea5bbaa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Binding">
+      <UniqueIdentifier>{5cf06efa-78fe-44b3-8c91-a428376bb362}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{51ec1bcd-b056-4e9a-913c-15fa9ccc8313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Globals">
+      <UniqueIdentifier>{21795e6f-c830-4219-add7-37b00412d994}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO">
+      <UniqueIdentifier>{10252c62-08b9-4c28-a3e6-9dc33fa9a25a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Device Context">
+      <UniqueIdentifier>{52899a06-18bc-47e8-b7e9-c9bf879dc260}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

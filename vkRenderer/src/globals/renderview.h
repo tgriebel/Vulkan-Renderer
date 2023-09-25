@@ -26,7 +26,7 @@
 #include <gfxcore/scene/scene.h>
 #include "common.h"
 #include "drawGroup.h"
-#include "../render_core/drawpass.h"
+#include "../draw_passes/drawpass.h"
 
 enum class renderViewRegion_t : uint32_t
 {

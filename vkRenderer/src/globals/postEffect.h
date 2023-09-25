@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common.h"
-#include "../render_core/drawpass.h"
+#include "../draw_passes/drawpass.h"
 #include "../render_core/RenderTask.h"
 
 class ShaderBindParms;
