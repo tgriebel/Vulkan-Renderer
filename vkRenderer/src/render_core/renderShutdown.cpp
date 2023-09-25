@@ -37,11 +37,11 @@
 void Renderer::Shutdown()
 {
 	FlushGPU();
-	Cleanup();
+	Destroy();
 }
 
 
-void Renderer::Cleanup()
+void Renderer::Destroy()
 {
 	vk_ClearRenderPassCache();
 

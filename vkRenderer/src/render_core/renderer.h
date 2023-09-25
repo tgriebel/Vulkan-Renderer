@@ -189,7 +189,7 @@ private:
 	void								InitImGui( RenderView& view );
 	void								ShutdownImGui();
 	void								ShutdownShaderResources();
-	void								Cleanup();
+	void								Destroy();
 	void								RecreateSwapChain();
 
 	// API Resource Functions
