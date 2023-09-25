@@ -30,84 +30,56 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 
 	for ( uint32_t passIx = beginPass; passIx <= endPass; ++passIx )
 	{
-		DrawPass* pass = new DrawPass();
-
-		pass->name = GetPassDebugName( drawPass_t( passIx ) );
-		pass->viewport.x = 0;
-		pass->viewport.y = 0;
-		pass->viewport.width = width;
-		pass->viewport.height = height;
-		pass->fb = &fb;
-
-		pass->stateBits = GFX_STATE_NONE;
-		pass->passId = drawPass_t( passIx );
-
-		if ( passIx == DRAWPASS_SHADOW )
+		switch( passIx )
 		{
-			pass->stateBits |= GFX_STATE_DEPTH_TEST;
-			pass->stateBits |= GFX_STATE_DEPTH_WRITE;
-			pass->stateBits |= GFX_STATE_DEPTH_OP_0;
-			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
-		}
-		else if ( passIx == DRAWPASS_POST_2D )
-		{
-			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
-			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
-		}
-		else if ( passIx == DRAWPASS_DEBUG_2D )
-		{
-			pass->stateBits |= GFX_STATE_BLEND_ENABLE;
-			pass->sampleRate = imageSamples_t::IMAGE_SMP_1;
-		}
-		else
-		{
-			gfxStateBits_t stateBits = GFX_STATE_NONE;
-			if ( passIx == DRAWPASS_DEPTH )
-			{
-				stateBits |= GFX_STATE_DEPTH_TEST;
-				stateBits |= GFX_STATE_DEPTH_WRITE;
-				stateBits |= GFX_STATE_COLOR_MASK;
-				stateBits |= GFX_STATE_MSAA_ENABLE;
-				stateBits |= GFX_STATE_CULL_MODE_BACK;
-				stateBits |= GFX_STATE_STENCIL_ENABLE;
-			}
-			else if ( passIx == DRAWPASS_TRANS )
-			{
-				stateBits |= GFX_STATE_DEPTH_TEST;
-				stateBits |= GFX_STATE_CULL_MODE_BACK;
-				stateBits |= GFX_STATE_MSAA_ENABLE;
-				stateBits |= GFX_STATE_BLEND_ENABLE;
-			}
-			else if ( passIx == DRAWPASS_EMISSIVE )
-			{
-				stateBits |= GFX_STATE_DEPTH_TEST;
-				stateBits |= GFX_STATE_CULL_MODE_BACK;
-				stateBits |= GFX_STATE_MSAA_ENABLE;
-				stateBits |= GFX_STATE_BLEND_ENABLE;
-			}
-			else if ( passIx == DRAWPASS_DEBUG_WIREFRAME )
-			{
-				stateBits |= GFX_STATE_WIREFRAME_ENABLE;
-				stateBits |= GFX_STATE_MSAA_ENABLE;
-			}
-			else if ( passIx == DRAWPASS_DEBUG_3D )
-			{
-				stateBits |= GFX_STATE_CULL_MODE_BACK;
-				stateBits |= GFX_STATE_BLEND_ENABLE;
-				stateBits |= GFX_STATE_MSAA_ENABLE;
-			}
-			else
-			{
-				stateBits |= GFX_STATE_DEPTH_TEST;
-				stateBits |= GFX_STATE_DEPTH_WRITE;
-				stateBits |= GFX_STATE_CULL_MODE_BACK;
-				stateBits |= GFX_STATE_MSAA_ENABLE;
-			}
-			pass->stateBits = stateBits;
-			pass->sampleRate = samples;
+			case DRAWPASS_SHADOW:
+				passes[ passIx ] = new ShadowPass();
+				break;
+			case DRAWPASS_DEPTH:
+				passes[ passIx ] = new DepthPass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_TERRAIN:
+				passes[ passIx ] = new TerrainPass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_OPAQUE:
+				passes[ passIx ] = new OpaquePass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_SKYBOX:
+				passes[ passIx ] = new SkyboxPass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_TRANS:
+				passes[ passIx ] = new TransPass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_EMISSIVE:
+				passes[ passIx ] = new EmissivePass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_DEBUG_3D:
+				passes[ passIx ] = new Debug3dPass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_DEBUG_WIREFRAME:
+				passes[ passIx ] = new WireframePass();
+				passes[ passIx ]->sampleRate = samples;
+				break;
+			case DRAWPASS_POST_2D:
+				passes[ passIx ] = new PostPass();
+				break;
+			case DRAWPASS_DEBUG_2D:
+				passes[ passIx ] = new Debug2dPass();
+				break;
 		}
 
-		passes[ passIx ] = pass;
+		passes[ passIx ]->viewport.x = 0;
+		passes[ passIx ]->viewport.y = 0;
+		passes[ passIx ]->viewport.width = width;
+		passes[ passIx ]->viewport.height = height;
+		passes[ passIx ]->fb = &fb;
 	}
 
 	if( region == renderViewRegion_t::SHADOW )

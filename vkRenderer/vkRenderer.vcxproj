@@ -230,6 +230,7 @@
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\draw_passes\drawpass.cpp" />
     <ClCompile Include="src\globals\drawGroup.cpp" />
     <ClCompile Include="src\globals\postEffect.cpp" />
     <ClCompile Include="src\globals\renderView.cpp" />

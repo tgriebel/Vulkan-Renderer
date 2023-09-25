@@ -11,17 +11,14 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_dbgName = info.name;
 
-	pass = new DrawPass();
+	pass = new PostPass();
 
-	pass->name = GetPassDebugName( DRAWPASS_POST_2D );
+	pass->name = "Fullscreen Pass";
 	pass->viewport.x = 0;
 	pass->viewport.y = 0;
 	pass->viewport.width = info.fb->GetWidth();
 	pass->viewport.height = info.fb->GetHeight();
 	pass->fb = info.fb;
-
-	pass->stateBits = GFX_STATE_NONE;
-	pass->passId = drawPass_t( DRAWPASS_POST_2D );
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
