@@ -108,6 +108,7 @@ void PostPass::Init( FrameBuffer* frameBuffer )
 
 	stateBits = GFX_STATE_NONE;
 	stateBits |= GFX_STATE_BLEND_ENABLE;
+	//stateBits |= GFX_STATE_MSAA_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }

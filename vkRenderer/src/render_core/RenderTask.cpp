@@ -164,10 +164,10 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->fb->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->fb->GetVkBuffer( transitionState, transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
-	passInfo.renderArea.offset = { pass->viewport.x, pass->viewport.y };
-	passInfo.renderArea.extent = { pass->viewport.width, pass->viewport.height };
+	passInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = pass->GetFrameBuffer()->GetVkBuffer( transitionState, transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
+	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
+	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
 	const vec4f clearColor = renderView->ClearColor();
 	const float clearDepth = renderView->ClearDepth();
@@ -176,8 +176,8 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
 	const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
 
-	const uint32_t colorAttachmentsCount = pass->fb->ColorLayerCount();
-	const uint32_t attachmentsCount = pass->fb->LayerCount();
+	const uint32_t colorAttachmentsCount = pass->GetFrameBuffer()->ColorLayerCount();
+	const uint32_t attachmentsCount = pass->GetFrameBuffer()->LayerCount();
 
 	passInfo.clearValueCount = 0;
 	passInfo.pClearValues = nullptr;
@@ -210,7 +210,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 		cmdContext->MarkerBeginRegion( pass->Name(), ColorToVector( Color::White ) );
 
-		const viewport_t& viewport = pass->viewport;
+		const viewport_t& viewport = pass->GetViewport();
 
 		VkViewport vk_viewport{ };
 		vk_viewport.x = static_cast<float>( viewport.x );

@@ -156,8 +156,8 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
-	state.stateBits = pass->stateBits;
-	state.samplingRate = pass->sampleRate;
+	state.stateBits = pass->StateBits();
+	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
@@ -173,8 +173,8 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
-	state.stateBits = pass->stateBits;
-	state.samplingRate = pass->sampleRate;
+	state.stateBits = pass->StateBits();
+	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
@@ -193,8 +193,8 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
-	state.stateBits = pass->stateBits;
-	state.samplingRate = pass->sampleRate;
+	state.stateBits = pass->StateBits();
+	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
@@ -248,16 +248,16 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	VkViewport viewport{ };
-	viewport.x = static_cast<float>( pass->viewport.x );
-	viewport.y = static_cast<float>( pass->viewport.y );
-	viewport.width = static_cast<float>( pass->viewport.width );
-	viewport.height = static_cast<float>( pass->viewport.height );
+	viewport.x = static_cast<float>( pass->GetViewport().x );
+	viewport.y = static_cast<float>( pass->GetViewport().y );
+	viewport.width = static_cast<float>( pass->GetViewport().width );
+	viewport.height = static_cast<float>( pass->GetViewport().height );
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor{ };
-	scissor.offset = { pass->viewport.x, pass->viewport.y };
-	scissor.extent = { pass->viewport.width, pass->viewport.height };
+	scissor.offset = { pass->GetViewport().x, pass->GetViewport().y };
+	scissor.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
 	VkPipelineViewportStateCreateInfo viewportState{ };
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -286,16 +286,8 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 
 	VkPipelineMultisampleStateCreateInfo multisampling{ };
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	if ( state.stateBits & GFX_STATE_MSAA_ENABLE )
-	{
-		multisampling.sampleShadingEnable = VK_TRUE;
-		multisampling.rasterizationSamples = vk_GetSampleCount( state.samplingRate );
-	}
-	else
-	{
-		multisampling.sampleShadingEnable = VK_FALSE;
-		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-	}
+	multisampling.sampleShadingEnable = ( state.stateBits & GFX_STATE_MSAA_ENABLE ) ? VK_TRUE : VK_FALSE;
+	multisampling.rasterizationSamples = vk_GetSampleCount( state.samplingRate );
 	multisampling.minSampleShading = 0.25f;
 	multisampling.pSampleMask = nullptr; // Optional
 	multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
@@ -308,7 +300,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 
 	const bool blendEnable = ( ( state.stateBits & GFX_STATE_BLEND_ENABLE ) != 0 );
 
-	const uint32_t colorAttachmentCount = pass->fb->ColorLayerCount();
+	const uint32_t colorAttachmentCount = pass->GetFrameBuffer()->ColorLayerCount();
 
 	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
 	colorBlendAttachments.resize( colorAttachmentCount );
@@ -429,7 +421,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
-	pipelineInfo.renderPass = pass->fb->GetVkRenderPass();
+	pipelineInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass();
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional

@@ -113,8 +113,7 @@ void RenderView::Resize()
 		if ( pass == nullptr ) {
 			continue;
 		}
-		pass->viewport.width = pass->fb->GetWidth();
-		pass->viewport.height = pass->fb->GetHeight();
+		pass->SetViewport( 0, 0, pass->GetFrameBuffer()->GetWidth(), pass->GetFrameBuffer()->GetHeight() );
 	}
 }
 

@@ -15,8 +15,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
-	pass->stateBits |= GFX_STATE_BLEND_ENABLE;
-	pass->stateBits |= GFX_STATE_MSAA_ENABLE;
+	pass->stateBits |= GFX_STATE_MSAA_ENABLE; // Needed for sampling MS?
 
 	m_transitionState = {};
 	m_transitionState.flags.clear = info.clear;
@@ -45,8 +44,8 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
 
 	{
-		const float w = float( pass->fb->GetWidth() );
-		const float h = float( pass->fb->GetHeight() );
+		const float w = float( pass->GetFrameBuffer()->GetWidth() );
+		const float h = float( pass->GetFrameBuffer()->GetHeight() );
 
 		imageProcessObject_t process = {};
 		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );

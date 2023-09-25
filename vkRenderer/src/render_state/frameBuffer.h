@@ -173,7 +173,7 @@ public:
 		return buffers[ id ][ transitionState.bits ];
 	}
 
-	VkRenderPass GetVkRenderPass( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 )
+	VkRenderPass GetVkRenderPass( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
 		const uint32_t id = GetBufferId( bufferId );
 		return renderPasses[ transitionState.bits ];

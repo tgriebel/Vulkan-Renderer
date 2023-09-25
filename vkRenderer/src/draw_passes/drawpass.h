@@ -30,9 +30,15 @@
 
 class DrawPass
 {
+private:
+	viewport_t			viewport;
+	FrameBuffer*		fb;
+
 protected:
-	const char*		name;
-	drawPass_t		passId;
+	const char*			name;
+	drawPass_t			passId;
+	imageSamples_t		sampleRate;
+
 
 	void SetFrameBuffer( FrameBuffer* frameBuffer )
 	{
@@ -62,15 +68,38 @@ public:
 		return stateBits;
 	}
 
+	inline imageSamples_t SampleRate() const
+	{
+		return sampleRate;
+	}
+
+	inline void SetViewport( const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height )
+	{
+		viewport.x = x;
+		viewport.y = y;
+		viewport.width = width;
+		viewport.height = height;
+	}
+
+	inline const viewport_t& GetViewport() const
+	{
+		return viewport;
+	}
+
+	inline const FrameBuffer* GetFrameBuffer() const
+	{
+		return fb;
+	}
+
+	inline FrameBuffer* GetFrameBuffer()
+	{
+		return fb;
+	}
+
 	gfxStateBits_t				stateBits;
-	imageSamples_t				sampleRate;
-	viewport_t					viewport;
 
 	Array<Image*, 100>			codeImages;
 	ShaderBindParms*			parms;
-	FrameBuffer*				fb;
-
-	bool						updateDescriptorSets;
 };
 
 

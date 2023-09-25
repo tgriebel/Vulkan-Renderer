@@ -193,7 +193,6 @@ void Renderer::InitShaderResources()
 				continue;
 			}
 			pass->parms = RegisterBindParm( &bindset_default );
-			pass->updateDescriptorSets = true;
 		}
 	}
 
@@ -240,7 +239,7 @@ void Renderer::InitImGui( RenderView& view )
 
 	assert( view.passes[ DRAWPASS_DEBUG_2D ] != nullptr );
 	const renderPassTransition_t transitionState = view.TransitionState();
-	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_DEBUG_2D ]->fb->GetVkRenderPass( transitionState ) );
+	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_DEBUG_2D ]->GetFrameBuffer()->GetVkRenderPass( transitionState ) );
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
