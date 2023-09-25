@@ -128,12 +128,17 @@ public:
 
 	inline uint32_t DepthLayerCount() const
 	{
-		return colorCount;
+		return dsCount;
 	}
 
 	inline uint32_t LayerCount() const
 	{
 		return attachmentCount;
+	}
+
+	inline imageSamples_t SampleCount() const
+	{
+		return ( ColorLayerCount() > 0 ) ? GetColor()->info.subsamples : GetDepth()->info.subsamples;
 	}
 
 	inline const Image* GetColor( const uint32_t bufferId = 0 ) const

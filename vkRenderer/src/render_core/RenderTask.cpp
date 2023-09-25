@@ -208,7 +208,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			continue;
 		}
 
-		cmdContext->MarkerBeginRegion( pass->name, ColorToVector( Color::White ) );
+		cmdContext->MarkerBeginRegion( pass->Name(), ColorToVector( Color::White ) );
 
 		const viewport_t& viewport = pass->viewport;
 

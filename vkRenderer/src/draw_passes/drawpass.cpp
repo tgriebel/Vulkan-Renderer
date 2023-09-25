@@ -23,7 +23,7 @@
 
 #include "drawpass.h"
 
-void ShadowPass::Init()
+void ShadowPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Shadow Pass";
 	passId = DRAWPASS_SHADOW;
@@ -33,11 +33,11 @@ void ShadowPass::Init()
 	stateBits |= GFX_STATE_DEPTH_WRITE;
 	stateBits |= GFX_STATE_DEPTH_OP_0;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void DepthPass::Init()
+void DepthPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Depth Pass";
 	passId = DRAWPASS_DEPTH;
@@ -50,11 +50,11 @@ void DepthPass::Init()
 	stateBits |= GFX_STATE_CULL_MODE_BACK;
 	stateBits |= GFX_STATE_STENCIL_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void OpaquePass::Init()
+void OpaquePass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Opaque Pass";
 	passId = DRAWPASS_OPAQUE;
@@ -65,11 +65,11 @@ void OpaquePass::Init()
 	stateBits |= GFX_STATE_CULL_MODE_BACK;
 	stateBits |= GFX_STATE_MSAA_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void TransPass::Init()
+void TransPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Trans Pass";
 	passId = DRAWPASS_TRANS;
@@ -82,11 +82,11 @@ void TransPass::Init()
 	stateBits |= GFX_STATE_CULL_MODE_BACK;
 	stateBits |= GFX_STATE_STENCIL_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void EmissivePass::Init()
+void EmissivePass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Emissive Pass";
 	passId = DRAWPASS_EMISSIVE;
@@ -97,11 +97,11 @@ void EmissivePass::Init()
 	stateBits |= GFX_STATE_MSAA_ENABLE;
 	stateBits |= GFX_STATE_BLEND_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void PostPass::Init()
+void PostPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Post Pass";
 	passId = DRAWPASS_POST_2D;
@@ -109,11 +109,11 @@ void PostPass::Init()
 	stateBits = GFX_STATE_NONE;
 	stateBits |= GFX_STATE_BLEND_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void TerrainPass::Init()
+void TerrainPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Terrain Pass";
 	passId = DRAWPASS_TERRAIN;
@@ -124,11 +124,11 @@ void TerrainPass::Init()
 	stateBits |= GFX_STATE_CULL_MODE_BACK;
 	stateBits |= GFX_STATE_MSAA_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void SkyboxPass::Init()
+void SkyboxPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Skybox Pass";
 	passId = DRAWPASS_SKYBOX;
@@ -139,11 +139,11 @@ void SkyboxPass::Init()
 	stateBits |= GFX_STATE_CULL_MODE_BACK;
 	stateBits |= GFX_STATE_MSAA_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void WireframePass::Init()
+void WireframePass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Wireframe Pass";
 	passId = DRAWPASS_DEBUG_WIREFRAME;
@@ -152,11 +152,11 @@ void WireframePass::Init()
 	stateBits |= GFX_STATE_WIREFRAME_ENABLE;
 	stateBits |= GFX_STATE_MSAA_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void Debug2dPass::Init()
+void Debug2dPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Debug 2D Pass";
 	passId = DRAWPASS_DEBUG_2D;
@@ -164,11 +164,11 @@ void Debug2dPass::Init()
 	stateBits = GFX_STATE_NONE;
 	stateBits |= GFX_STATE_BLEND_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }
 
 
-void Debug3dPass::Init()
+void Debug3dPass::Init( FrameBuffer* frameBuffer )
 {
 	name = "Debug 3D Pass";
 	passId = DRAWPASS_DEBUG_3D;
@@ -178,5 +178,5 @@ void Debug3dPass::Init()
 	stateBits |= GFX_STATE_BLEND_ENABLE;
 	stateBits |= GFX_STATE_MSAA_ENABLE;
 
-	sampleRate = imageSamples_t::IMAGE_SMP_1;
+	SetFrameBuffer( frameBuffer );
 }

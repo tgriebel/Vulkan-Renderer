@@ -30,21 +30,38 @@
 
 class DrawPass
 {
+protected:
+	const char*		name;
+	drawPass_t		passId;
+
+	void SetFrameBuffer( FrameBuffer* frameBuffer )
+	{
+		sampleRate = frameBuffer->SampleCount();
+		viewport.x = 0;
+		viewport.y = 0;
+		viewport.width = frameBuffer->GetWidth();
+		viewport.height = frameBuffer->GetHeight();
+		fb = frameBuffer;
+	}
+
 public:
-	virtual void Init() = 0;
-	drawPass_t GetType() const
+	virtual void Init( FrameBuffer* fb ) = 0;
+
+	inline drawPass_t Type() const
 	{
 		return passId;
 	}
 
-	const char* GetName() const
+	inline const char* Name() const
 	{
 		return name;
 	}
 
-	const char*					name;
+	inline gfxStateBits_t StateBits() const
+	{
+		return stateBits;
+	}
 
-	drawPass_t					passId;
 	gfxStateBits_t				stateBits;
 	imageSamples_t				sampleRate;
 	viewport_t					viewport;
@@ -60,72 +77,72 @@ public:
 class ShadowPass : public DrawPass
 {
 public:
-	ShadowPass()
+	ShadowPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class DepthPass : public DrawPass
 {
 public:
-	DepthPass()
+	DepthPass( FrameBuffer* fb )
 	{
-		Init();
+		Init(fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class OpaquePass : public DrawPass
 {
 public:
-	OpaquePass()
+	OpaquePass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class TransPass : public DrawPass
 {
 public:
-	TransPass()
+	TransPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class EmissivePass : public DrawPass
 {
 public:
-	EmissivePass()
+	EmissivePass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class PostPass : public DrawPass
 {
 public:
-	PostPass()
+	PostPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
@@ -133,58 +150,58 @@ public:
 class TerrainPass : public DrawPass
 {
 public:
-	TerrainPass()
+	TerrainPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class SkyboxPass : public DrawPass
 {
 public:
-	SkyboxPass()
+	SkyboxPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class WireframePass : public DrawPass
 {
 public:
-	WireframePass()
+	WireframePass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class Debug2dPass : public DrawPass
 {
 public:
-	Debug2dPass()
+	Debug2dPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };
 
 
 class Debug3dPass : public DrawPass
 {
 public:
-	Debug3dPass()
+	Debug3dPass( FrameBuffer* fb )
 	{
-		Init();
+		Init( fb );
 	}
 
-	virtual void Init();
+	virtual void Init( FrameBuffer* fb );
 };

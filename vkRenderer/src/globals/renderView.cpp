@@ -10,13 +10,6 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 	m_viewport.width = width;
 	m_viewport.height = height;
 
-	imageSamples_t samples = IMAGE_SMP_1;
-	if ( fb.ColorLayerCount() > 0 ) {
-		samples = fb.GetColor()->info.subsamples;
-	} else {
-		samples = fb.GetDepth()->info.subsamples;
-	}
-
 	m_name = name;
 	m_region = region;
 	m_framebuffer = &fb;
@@ -33,53 +26,39 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		switch( passIx )
 		{
 			case DRAWPASS_SHADOW:
-				passes[ passIx ] = new ShadowPass();
+				passes[ passIx ] = new ShadowPass( &fb );
 				break;
 			case DRAWPASS_DEPTH:
-				passes[ passIx ] = new DepthPass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new DepthPass( &fb );
 				break;
 			case DRAWPASS_TERRAIN:
-				passes[ passIx ] = new TerrainPass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new TerrainPass( &fb );
 				break;
 			case DRAWPASS_OPAQUE:
-				passes[ passIx ] = new OpaquePass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new OpaquePass( &fb );
 				break;
 			case DRAWPASS_SKYBOX:
-				passes[ passIx ] = new SkyboxPass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new SkyboxPass( &fb );
 				break;
 			case DRAWPASS_TRANS:
-				passes[ passIx ] = new TransPass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new TransPass( &fb );
 				break;
 			case DRAWPASS_EMISSIVE:
-				passes[ passIx ] = new EmissivePass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new EmissivePass( &fb );
 				break;
 			case DRAWPASS_DEBUG_3D:
-				passes[ passIx ] = new Debug3dPass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new Debug3dPass( &fb );
 				break;
 			case DRAWPASS_DEBUG_WIREFRAME:
-				passes[ passIx ] = new WireframePass();
-				passes[ passIx ]->sampleRate = samples;
+				passes[ passIx ] = new WireframePass( &fb );
 				break;
 			case DRAWPASS_POST_2D:
-				passes[ passIx ] = new PostPass();
+				passes[ passIx ] = new PostPass( &fb );
 				break;
 			case DRAWPASS_DEBUG_2D:
-				passes[ passIx ] = new Debug2dPass();
+				passes[ passIx ] = new Debug2dPass( &fb );
 				break;
 		}
-
-		passes[ passIx ]->viewport.x = 0;
-		passes[ passIx ]->viewport.y = 0;
-		passes[ passIx ]->viewport.width = width;
-		passes[ passIx ]->viewport.height = height;
-		passes[ passIx ]->fb = &fb;
 	}
 
 	if( region == renderViewRegion_t::SHADOW )
