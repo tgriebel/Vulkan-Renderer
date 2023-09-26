@@ -31,6 +31,12 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 }
 
 
+void ImageProcess::Resize()
+{
+	pass->SetViewport( 0, 0, pass->GetFrameBuffer()->GetWidth(), pass->GetFrameBuffer()->GetHeight() );
+}
+
+
 void ImageProcess::Shutdown()
 {
 	buffer.Destroy();

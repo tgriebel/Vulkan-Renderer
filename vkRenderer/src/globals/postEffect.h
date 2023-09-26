@@ -40,6 +40,7 @@ public:
 	}
 
 	void				Init( const imageProcessCreateInfo_t& info );
+	void				Resize();
 	void				Shutdown();
 
 	void				Execute( CommandContext& cmdContext );

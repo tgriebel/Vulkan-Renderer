@@ -285,6 +285,10 @@ void Renderer::RecreateSwapChain()
 		views[ viewIx ].Resize();
 		views[ viewIx ].SetViewRect( 0, 0, width, height );
 	}
+
+	if( resolve != nullptr ) {
+		resolve->Resize();
+	}
 }
 
 
