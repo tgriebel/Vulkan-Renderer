@@ -66,6 +66,10 @@ public:
 	void Init( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView )
 	{
 		info = imageInfo;
+		info.mipLevels = subView.mipLevels;
+
+		MipDimensions( subView.baseMip, info.width, info.height, &info.width, &info.height );
+
 		subResourceView = subView;
 #ifdef USE_VULKAN
 		const VkImage img = image.gpuImage->GetVkImage();

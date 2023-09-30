@@ -52,7 +52,7 @@ DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 struct pipelineState_t
 {
 	gfxStateBits_t				stateBits;
-	imageSamples_t			samplingRate;
+	imageSamples_t				samplingRate;
 	hdl_t						progHdl;
 	renderPassAttachmentBits_t	passBits;
 };

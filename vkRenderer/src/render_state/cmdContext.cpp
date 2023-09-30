@@ -20,9 +20,18 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include <gfxcore/scene/assetManager.h> // FIXME: shouldn't expose this everywhere
+
 #include "cmdContext.h"
 #include "deviceContext.h"
 #include "../render_binding/pipeline.h"
+#include "../render_binding/imageView.h"
+#include "../render_state/frameBuffer.h"
+#include "../render_binding/bufferObjects.h"
+#include "../render_binding/bindings.h"
+#include "../globals/postEffect.h"
+
+extern AssetManager g_assets;
 
 /////////////////////////////////////////////
 // Base Command Context
@@ -237,7 +246,7 @@ void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t 
 {
 	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
 
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), image, current, next );
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, current, next );
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -247,7 +256,7 @@ void GenerateMipmaps( CommandContext* cmdCommand, Image& image )
 {
 	cmdCommand->MarkerBeginRegion( "GenerateMips", ColorToVector( ColorWhite ) );
 
-	vk_GenerateMipmaps( cmdCommand->CommandBuffer(), image );
+	vk_GenerateMipmaps( cmdCommand->CommandBuffer(), &image );
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -257,7 +266,7 @@ void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 {
 	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
 
-	vk_CopyImage( cmdCommand->CommandBuffer(), src, dst );
+	vk_CopyImage( cmdCommand->CommandBuffer(), &src, &dst );
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -267,7 +276,92 @@ void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& b
 {
 	cmdCommand->MarkerBeginRegion( "CopyBufferToImage", ColorToVector( ColorWhite ) );
 
-	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), texture, buffer, bufferOffset );
+	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), &texture, buffer, bufferOffset );
+
+	cmdCommand->MarkerEndRegion();
+}
+
+
+void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, downSampleMode_t mode )
+{
+	cmdCommand->MarkerBeginRegion( "GenerateDownsampleMips", ColorToVector( ColorWhite ) );
+
+	std::vector<ImageView> views;
+	views.resize( image.info.mipLevels );
+
+	std::vector<DrawPass*> passes;
+	passes.resize( image.info.mipLevels );
+
+	std::vector<FrameBuffer> frameBuffers;
+	frameBuffers.resize( image.info.mipLevels );
+
+	for ( uint32_t i = 0; i < image.info.mipLevels; i++ )
+	{
+		imageSubResourceView_t subView = {};
+		subView.baseMip = i;
+		subView.mipLevels = 1;
+
+		views[ i ].Init( image, image.info, subView );
+
+		{
+			frameBufferCreateInfo_t fbInfo = {};
+			fbInfo.name = "TempDownsample";
+			fbInfo.color0[ 0 ] = &views[ i ];
+			fbInfo.width = views[ i ].info.width;
+			fbInfo.height = views[ i ].info.height;
+			fbInfo.lifetime = LIFETIME_TEMP;
+
+			frameBuffers[ i ].Create( fbInfo );
+		}
+		passes[ i ] = new PostPass( &frameBuffers[ i ] );
+	}
+
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ 0 ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
+	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
+
+	GpuBuffer buffer;
+	//buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
+
+	for ( uint32_t i = 1; i < image.info.mipLevels; i++ )
+	{
+		vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ i ], GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+
+		//{
+		//	const float w = float( passes[ i ]->GetFrameBuffer()->GetWidth() );
+		//	const float h = float( passes[ i ]->GetFrameBuffer()->GetHeight() );
+
+		//	imageProcessObject_t process = {};
+		//	process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+
+		//	buffer.SetPos( 0 );
+		//	buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+		//}
+
+		//passes[ i ]->codeImages.Resize( 3 );
+		//passes[ i ]->codeImages[ 0 ] = &views[ i - 1 ];
+		//passes[ i ]->codeImages[ 1 ] = &views[ i - 1 ];
+		//passes[ i ]->codeImages[ 2 ] = &views[ i - 1 ];
+
+		//passes[ i ]->parms->Bind( bind_globalsBuffer, &renderContext.globalConstants );
+		//passes[ i ]->parms->Bind( bind_sourceImages, &passes[ i ]->codeImages );
+		//passes[ i ]->parms->Bind( bind_imageStencil, &renderContext.stencilImageView );
+		//passes[ i ]->parms->Bind( bind_imageProcess, &buffer );
+
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( passes[ i ], *progAsset );
+		vk_RenderImageShader( cmdCommand->CommandBuffer(), pipeLineHandle, passes[ i ] );
+
+		vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+	}
+
+	for ( uint32_t i = 0; i < image.info.mipLevels; i++ )
+	{
+		views[ i ].Destroy();
+		if ( passes[ i ] != nullptr ) {
+			delete passes[ i ];
+		}
+		frameBuffers[ i ].Destroy();
+	}
 
 	cmdCommand->MarkerEndRegion();
 }

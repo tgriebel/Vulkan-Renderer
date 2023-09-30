@@ -335,6 +335,7 @@ void CopyImageTask::Execute( CommandContext& context )
 void MipImageTask::Execute( CommandContext& context )
 {
 	GenerateMipmaps( &context, *m_img );
+//	GenerateDownsampleMips( &context, *m_img, downSampleMode_t::DOWNSAMPLE_LINEAR );
 }
 
 

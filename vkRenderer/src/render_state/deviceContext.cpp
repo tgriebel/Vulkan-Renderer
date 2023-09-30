@@ -28,6 +28,7 @@
 
 DeviceContext context;
 
+
 bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
 	uint32_t extensionCount;
@@ -175,21 +176,21 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 }
 
 
-void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = image.gpuImage->GetVkImage();
+	barrier.image = image->gpuImage->GetVkImage();
 	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = image.info.mipLevels;
+	barrier.subresourceRange.levelCount = image->info.mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = image.info.layers;
+	barrier.subresourceRange.layerCount = image->info.layers;
 
-	const bool hasColorAspect = ( image.info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0;
-	const bool hasDepthAspect = ( image.info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
-	const bool hasStencilAspect = ( image.info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
+	const bool hasColorAspect = ( image->info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0;
+	const bool hasDepthAspect = ( image->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
+	const bool hasStencilAspect = ( image->info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
 
 	VkImageLayout oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	VkImageLayout newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -298,10 +299,10 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImage
 }
 
 
-void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
+void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 {
 	VkFormatProperties formatProperties;
-	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( image.info.fmt ), &formatProperties );
+	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( image->info.fmt ), &formatProperties );
 
 	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
 	{
@@ -310,25 +311,18 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.image = image.gpuImage->GetVkImage();
+	barrier.image = image->gpuImage->GetVkImage();
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = image.info.layers;
+	barrier.subresourceRange.layerCount = image->info.layers;
 	barrier.subresourceRange.levelCount = 1;
 
-	std::vector<ImageView> views;
-	views.resize( image.info.mipLevels );
+	int32_t mipWidth = image->info.width;
+	int32_t mipHeight = image->info.height;
 
-	for ( uint32_t i = 0; i < image.info.mipLevels; i++ ) {
-		views[ i ].Init( image, image.info, imageSubResourceView_t{ i, 1 } );
-	}
-
-	int32_t mipWidth = image.info.width;
-	int32_t mipHeight = image.info.height;
-
-	for ( uint32_t i = 1; i < image.info.mipLevels; i++ )
+	for ( uint32_t i = 1; i < image->info.mipLevels; i++ )
 	{
 		barrier.subresourceRange.baseMipLevel = i - 1;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -350,18 +344,18 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.srcSubresource.mipLevel = i - 1;
 		blit.srcSubresource.baseArrayLayer = 0;
-		blit.srcSubresource.layerCount = image.info.layers;
+		blit.srcSubresource.layerCount = image->info.layers;
 		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
 		blit.dstOffsets[ 1 ] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.dstSubresource.mipLevel = i;
 		blit.dstSubresource.baseArrayLayer = 0;
-		blit.dstSubresource.layerCount = image.info.layers;
+		blit.dstSubresource.layerCount = image->info.layers;
 
 		vkCmdBlitImage( cmdBuffer,
-						image.gpuImage->GetVkImage(),
+						image->gpuImage->GetVkImage(),
 						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-						image.gpuImage->GetVkImage(),
+						image->gpuImage->GetVkImage(),
 						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 						1,
 						&blit,
@@ -384,7 +378,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 		mipHeight = ( mipHeight > 1 ) ? ( mipHeight /= 2 ) : mipHeight;
 	}
 
-	barrier.subresourceRange.baseMipLevel = image.info.mipLevels - 1;
+	barrier.subresourceRange.baseMipLevel = image->info.mipLevels - 1;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -397,19 +391,95 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image )
 							0, nullptr,
 							0, nullptr,
 							1, &barrier );
-
-	for ( uint32_t i = 0; i < image.info.mipLevels; i++ ) {
-		views[ i ].Destroy();
-	}
 }
 
 
-void vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAsset, DrawPass* pass )
+// FIXME: Move this function to a higher-level
+void vk_GenerateDownsampleMips( VkCommandBuffer cmdBuffer, Image* image, downSampleMode_t mode )
 {
-	hdl_t pipeLineHandle = CreateGraphicsPipeline( pass, *progAsset );
+	/*
+	std::vector<ImageView> views;
+	views.resize( image->info.mipLevels );
 
-	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
+	std::vector<DrawPass*> passes;
+	passes.resize( image->info.mipLevels );
 
+	std::vector<FrameBuffer> frameBuffers;
+	frameBuffers.resize( image->info.mipLevels );
+
+	for ( uint32_t i = 0; i < image->info.mipLevels; i++ )
+	{
+		imageSubResourceView_t subView = {};
+		subView.baseMip = i;
+		subView.mipLevels = 1;
+
+		views[ i ].Init( *image, image->info, subView );
+
+		{
+			frameBufferCreateInfo_t fbInfo = {};
+			fbInfo.name = "TempDownsample";
+			fbInfo.color0[ 0 ] = &views[ i ];
+			fbInfo.width = views[ i ].info.width;
+			fbInfo.height = views[ i ].info.height;
+			fbInfo.lifetime = LIFETIME_TEMP;
+
+			frameBuffers[ i ].Create( fbInfo );
+		}
+		passes[ i ] = new PostPass( &frameBuffers[ i ] );
+	}
+
+	vk_TransitionImageLayout( cmdBuffer, &views[ 0 ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
+	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
+
+	//GpuBuffer buffer;
+	//buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
+
+	for ( uint32_t i = 1; i < image->info.mipLevels; i++ )
+	{
+		vk_TransitionImageLayout( cmdBuffer, &views[ i ], GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+
+		//{
+		//	const float w = float( passes[ i ]->GetFrameBuffer()->GetWidth() );
+		//	const float h = float( passes[ i ]->GetFrameBuffer()->GetHeight() );
+
+		//	imageProcessObject_t process = {};
+		//	process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+
+		//	buffer.SetPos( 0 );
+		//	buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+		//}
+
+		//passes[ i ]->codeImages.Resize( 3 );
+		//passes[ i ]->codeImages[ 0 ] = &views[ i - 1 ];
+		//passes[ i ]->codeImages[ 1 ] = &views[ i - 1 ];
+		//passes[ i ]->codeImages[ 2 ] = &views[ i - 1 ];
+
+		//passes[ i ]->parms->Bind( bind_globalsBuffer, &renderContext.globalConstants );
+		//passes[ i ]->parms->Bind( bind_sourceImages, &passes[ i ]->codeImages );
+		//passes[ i ]->parms->Bind( bind_imageStencil, &renderContext.stencilImageView );
+		//passes[ i ]->parms->Bind( bind_imageProcess, &buffer );
+
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( passes[ i ], *progAsset );
+		vk_RenderImageShader( cmdBuffer, pipeLineHandle, passes[ i ] );
+
+		vk_TransitionImageLayout( cmdBuffer, &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+	}
+
+	for ( uint32_t i = 0; i < image->info.mipLevels; i++ )
+	{
+		views[ i ].Destroy();
+		if ( passes[ i ] != nullptr ) {
+			delete passes[ i ];
+		}
+		frameBuffers[ i ].Destroy();
+	}
+	*/
+}
+
+
+void vk_RenderImageShader( VkCommandBuffer cmdBuffer, const hdl_t pipeLineHandle, DrawPass* pass )
+{
 	renderPassTransition_t transitionState = {};
 	transitionState.flags.clear = false;
 	transitionState.flags.store = true;
@@ -482,10 +552,10 @@ void vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAs
 }
 
 
-void vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst )
+void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 {
 	VkFormatProperties formatProperties;
-	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( dst.info.fmt ), &formatProperties );
+	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( dst->info.fmt ), &formatProperties );
 
 	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
 	{
@@ -494,18 +564,18 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst )
 
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.image = src.gpuImage->GetVkImage();
+	barrier.image = src->gpuImage->GetVkImage();
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = src.info.layers;
+	barrier.subresourceRange.layerCount = src->info.layers;
 	barrier.subresourceRange.levelCount = 1;
 
-	const int32_t srcWidth = src.info.width;
-	const int32_t srcHeight = src.info.height;
-	const int32_t dstWidth = dst.info.width;
-	const int32_t dstHeight = dst.info.height;
+	const int32_t srcWidth = src->info.width;
+	const int32_t srcHeight = src->info.height;
+	const int32_t dstWidth = dst->info.width;
+	const int32_t dstHeight = dst->info.height;
 
 	{
 		barrier.subresourceRange.baseMipLevel = 0;
@@ -528,18 +598,18 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst )
 		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.srcSubresource.mipLevel = 0;
 		blit.srcSubresource.baseArrayLayer = 0;
-		blit.srcSubresource.layerCount = src.info.layers;
+		blit.srcSubresource.layerCount = src->info.layers;
 		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
 		blit.dstOffsets[ 1 ] = { dstWidth, dstHeight, 1 };
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.dstSubresource.mipLevel = 0;
 		blit.dstSubresource.baseArrayLayer = 0;
-		blit.dstSubresource.layerCount = dst.info.layers;
+		blit.dstSubresource.layerCount = dst->info.layers;
 
 		vkCmdBlitImage( cmdBuffer,
-						src.gpuImage->GetVkImage(),
+						src->gpuImage->GetVkImage(),
 						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-						dst.gpuImage->GetVkImage(),
+						dst->gpuImage->GetVkImage(),
 						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 						1,
 						&blit,
@@ -561,9 +631,9 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst )
 }
 
 
-void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
+void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
-	const uint32_t layers = texture.info.layers;
+	const uint32_t layers = texture->info.layers;
 
 	VkBufferImageCopy region{ };
 	memset( &region, 0, sizeof( region ) );
@@ -576,14 +646,14 @@ void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer&
 
 	region.imageOffset = { 0, 0, 0 };
 	region.imageExtent = {
-		texture.info.width,
-		texture.info.height,
+		texture->info.width,
+		texture->info.height,
 		1
 	};
 
 	vkCmdCopyBufferToImage( cmdBuffer,
 							buffer.GetVkObject(),
-							texture.gpuImage->GetVkImage(),
+							texture->gpuImage->GetVkImage(),
 							VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 							1,
 							&region

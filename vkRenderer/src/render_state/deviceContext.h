@@ -27,6 +27,12 @@
 
 class Window;
 
+enum downSampleMode_t : uint32_t
+{
+	DOWNSAMPLE_LINEAR,
+	DOWNSAMPLE_GAUSSIAN,
+};
+
 struct swapChainInfo_t
 {
 	VkSurfaceCapabilitiesKHR		capabilities;
@@ -91,6 +97,7 @@ class AllocatorMemory;
 class DrawPass;
 
 enum imageSamples_t : uint8_t;
+enum downSampleMode_t : uint32_t;
 
 bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
@@ -99,11 +106,12 @@ bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFo
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView );
-void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
-void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image& image );
-void				vk_RenderImageShader( CommandContext& cmdContext, Asset<GpuProgram>* progAsset, DrawPass* pass );
-void				vk_CopyImage( VkCommandBuffer cmdBuffer, Image& src, Image& dst );
-void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
+void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image );
+void				vk_GenerateDownsampleMips( VkCommandBuffer cmdBuffer, Image* image, downSampleMode_t mode );
+void				vk_RenderImageShader( VkCommandBuffer cmdBuffer, const hdl_t pipeLineHandle, DrawPass* pass );
+void				vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst );
+void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 imageSamples_t		vk_MaxImageSamples();
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
 VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
