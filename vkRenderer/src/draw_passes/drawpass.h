@@ -31,23 +31,24 @@
 class DrawPass
 {
 private:
-	viewport_t			viewport;
-	FrameBuffer*		fb;
+	viewport_t			m_viewport;
+	FrameBuffer*		m_fb;
 
 protected:
-	const char*			name;
-	drawPass_t			passId;
-	imageSamples_t		sampleRate;
+	const char*			m_name;
+	drawPass_t			m_passId;
+	imageSamples_t		m_sampleRate;
+	gfxStateBits_t		m_stateBits;
 
 
 	void SetFrameBuffer( FrameBuffer* frameBuffer )
 	{
-		sampleRate = frameBuffer->SampleCount();
-		viewport.x = 0;
-		viewport.y = 0;
-		viewport.width = frameBuffer->GetWidth();
-		viewport.height = frameBuffer->GetHeight();
-		fb = frameBuffer;
+		m_sampleRate = frameBuffer->SampleCount();
+		m_viewport.x = 0;
+		m_viewport.y = 0;
+		m_viewport.width = frameBuffer->GetWidth();
+		m_viewport.height = frameBuffer->GetHeight();
+		m_fb = frameBuffer;
 	}
 
 public:
@@ -55,48 +56,46 @@ public:
 
 	inline drawPass_t Type() const
 	{
-		return passId;
+		return m_passId;
 	}
 
 	inline const char* Name() const
 	{
-		return name;
+		return m_name;
 	}
 
 	inline gfxStateBits_t StateBits() const
 	{
-		return stateBits;
+		return m_stateBits;
 	}
 
 	inline imageSamples_t SampleRate() const
 	{
-		return sampleRate;
+		return m_sampleRate;
 	}
 
 	inline void SetViewport( const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height )
 	{
-		viewport.x = x;
-		viewport.y = y;
-		viewport.width = width;
-		viewport.height = height;
+		m_viewport.x = x;
+		m_viewport.y = y;
+		m_viewport.width = width;
+		m_viewport.height = height;
 	}
 
 	inline const viewport_t& GetViewport() const
 	{
-		return viewport;
+		return m_viewport;
 	}
 
 	inline const FrameBuffer* GetFrameBuffer() const
 	{
-		return fb;
+		return m_fb;
 	}
 
 	inline FrameBuffer* GetFrameBuffer()
 	{
-		return fb;
+		return m_fb;
 	}
-
-	gfxStateBits_t				stateBits;
 
 	Array<Image*, 100>			codeImages;
 	ShaderBindParms*			parms;
@@ -166,9 +165,14 @@ public:
 class PostPass : public DrawPass
 {
 public:
-	PostPass( FrameBuffer* fb )
+	PostPass( FrameBuffer* fb, const bool resolve = false )
 	{
 		Init( fb );
+
+		// FIXME: Hack. What's going on?
+		if ( resolve ) {
+			m_stateBits |= GFX_STATE_BIT_16;
+		}
 	}
 
 	virtual void Init( FrameBuffer* fb );

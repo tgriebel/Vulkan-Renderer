@@ -15,6 +15,7 @@ struct imageProcessCreateInfo_t
 	RenderContext*	context;
 	bool			clear;
 	bool			present;
+	bool			resolve;
 };
 
 

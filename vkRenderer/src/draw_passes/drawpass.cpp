@@ -25,13 +25,13 @@
 
 void ShadowPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Shadow Pass";
-	passId = DRAWPASS_SHADOW;
+	m_name = "Shadow Pass";
+	m_passId = DRAWPASS_SHADOW;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_DEPTH_WRITE;
-	stateBits |= GFX_STATE_DEPTH_OP_0;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_DEPTH_WRITE;
+	m_stateBits |= GFX_STATE_DEPTH_OP_0;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -39,16 +39,15 @@ void ShadowPass::Init( FrameBuffer* frameBuffer )
 
 void DepthPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Depth Pass";
-	passId = DRAWPASS_DEPTH;
+	m_name = "Depth Pass";
+	m_passId = DRAWPASS_DEPTH;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_DEPTH_WRITE;
-	stateBits |= GFX_STATE_COLOR_MASK;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_STENCIL_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_DEPTH_WRITE;
+	m_stateBits |= GFX_STATE_COLOR_MASK;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
+	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -56,14 +55,13 @@ void DepthPass::Init( FrameBuffer* frameBuffer )
 
 void OpaquePass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Opaque Pass";
-	passId = DRAWPASS_OPAQUE;
+	m_name = "Opaque Pass";
+	m_passId = DRAWPASS_OPAQUE;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_DEPTH_WRITE;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_DEPTH_WRITE;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -71,16 +69,15 @@ void OpaquePass::Init( FrameBuffer* frameBuffer )
 
 void TransPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Trans Pass";
-	passId = DRAWPASS_TRANS;
+	m_name = "Trans Pass";
+	m_passId = DRAWPASS_TRANS;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_DEPTH_WRITE;
-	stateBits |= GFX_STATE_COLOR_MASK;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_STENCIL_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_DEPTH_WRITE;
+	m_stateBits |= GFX_STATE_COLOR_MASK;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
+	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -88,14 +85,13 @@ void TransPass::Init( FrameBuffer* frameBuffer )
 
 void EmissivePass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Emissive Pass";
-	passId = DRAWPASS_EMISSIVE;
+	m_name = "Emissive Pass";
+	m_passId = DRAWPASS_EMISSIVE;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
-	stateBits |= GFX_STATE_BLEND_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
+	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -103,12 +99,11 @@ void EmissivePass::Init( FrameBuffer* frameBuffer )
 
 void PostPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Post Pass";
-	passId = DRAWPASS_POST_2D;
+	m_name = "Post Pass";
+	m_passId = DRAWPASS_POST_2D;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_BLEND_ENABLE;
-	//stateBits |= GFX_STATE_MSAA_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -116,14 +111,13 @@ void PostPass::Init( FrameBuffer* frameBuffer )
 
 void TerrainPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Terrain Pass";
-	passId = DRAWPASS_TERRAIN;
+	m_name = "Terrain Pass";
+	m_passId = DRAWPASS_TERRAIN;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_DEPTH_WRITE;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_DEPTH_WRITE;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -131,14 +125,13 @@ void TerrainPass::Init( FrameBuffer* frameBuffer )
 
 void SkyboxPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Skybox Pass";
-	passId = DRAWPASS_SKYBOX;
+	m_name = "Skybox Pass";
+	m_passId = DRAWPASS_SKYBOX;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_DEPTH_TEST;
-	stateBits |= GFX_STATE_DEPTH_WRITE;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
+	m_stateBits |= GFX_STATE_DEPTH_WRITE;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -146,12 +139,11 @@ void SkyboxPass::Init( FrameBuffer* frameBuffer )
 
 void WireframePass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Wireframe Pass";
-	passId = DRAWPASS_DEBUG_WIREFRAME;
+	m_name = "Wireframe Pass";
+	m_passId = DRAWPASS_DEBUG_WIREFRAME;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_WIREFRAME_ENABLE;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_WIREFRAME_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -159,11 +151,11 @@ void WireframePass::Init( FrameBuffer* frameBuffer )
 
 void Debug2dPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Debug 2D Pass";
-	passId = DRAWPASS_DEBUG_2D;
+	m_name = "Debug 2D Pass";
+	m_passId = DRAWPASS_DEBUG_2D;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_BLEND_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -171,13 +163,12 @@ void Debug2dPass::Init( FrameBuffer* frameBuffer )
 
 void Debug3dPass::Init( FrameBuffer* frameBuffer )
 {
-	name = "Debug 3D Pass";
-	passId = DRAWPASS_DEBUG_3D;
+	m_name = "Debug 3D Pass";
+	m_passId = DRAWPASS_DEBUG_3D;
 
-	stateBits = GFX_STATE_NONE;
-	stateBits |= GFX_STATE_CULL_MODE_BACK;
-	stateBits |= GFX_STATE_BLEND_ENABLE;
-	stateBits |= GFX_STATE_MSAA_ENABLE;
+	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
+	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
 	SetFrameBuffer( frameBuffer );
 }

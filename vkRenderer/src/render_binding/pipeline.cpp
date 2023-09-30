@@ -286,7 +286,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 
 	VkPipelineMultisampleStateCreateInfo multisampling{ };
 	multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampling.sampleShadingEnable = ( state.stateBits & GFX_STATE_MSAA_ENABLE ) ? VK_TRUE : VK_FALSE;
+	multisampling.sampleShadingEnable = ForceDisableMSAA ? VK_FALSE : VK_TRUE;
 	multisampling.rasterizationSamples = vk_GetSampleCount( state.samplingRate );
 	multisampling.minSampleShading = 0.25f;
 	multisampling.pSampleMask = nullptr; // Optional

@@ -11,11 +11,9 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_dbgName = info.name;
 
-	pass = new PostPass( info.fb );
+	pass = new PostPass( info.fb, info.resolve );
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-
-	pass->stateBits |= GFX_STATE_MSAA_ENABLE; // Needed for sampling MS?
 
 	m_transitionState = {};
 	m_transitionState.flags.clear = info.clear;

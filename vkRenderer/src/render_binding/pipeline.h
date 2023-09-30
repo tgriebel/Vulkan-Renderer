@@ -44,7 +44,7 @@ enum gfxStateBits_t : uint64_t
 	GFX_STATE_BLEND_ENABLE		= ( 1 << 13 ),
 	GFX_STATE_WIREFRAME_ENABLE	= ( 1 << 14 ),
 	GFX_STATE_STENCIL_ENABLE	= ( 1 << 15 ),
-	GFX_STATE_MSAA_ENABLE		= ( 1 << 16 ),
+	GFX_STATE_BIT_16			= ( 1 << 16 ),
 };
 DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 

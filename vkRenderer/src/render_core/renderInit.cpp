@@ -90,6 +90,7 @@ void Renderer::Init()
 		imageProcessCreateInfo_t info = {};
 		info.name = "ResolveMain";
 		info.clear = false;
+		info.resolve = true;
 		if ( ForceDisableMSAA ) {
 			info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
 		} else {
