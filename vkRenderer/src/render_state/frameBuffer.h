@@ -30,6 +30,7 @@
 #include <gfxcore/asset_types/texture.h>
 #include "../render_binding/imageView.h"
 
+
 struct frameBufferCreateInfo_t
 {
 	uint32_t			width;
@@ -63,77 +64,82 @@ class FrameBuffer
 private:
 	static const uint32_t MaxAttachmentCount = 5;
 
-	Image*						color0[ MaxFrameStates ];
-	Image*						color1[ MaxFrameStates ];
-	Image*						color2[ MaxFrameStates ];
-	Image*						depth[ MaxFrameStates ];
-	Image*						stencil[ MaxFrameStates ];
+	Image*						m_color0[ MaxFrameStates ];
+	Image*						m_color1[ MaxFrameStates ];
+	Image*						m_color2[ MaxFrameStates ];
+	Image*						m_depth[ MaxFrameStates ];
+	Image*						m_stencil[ MaxFrameStates ];
 
-	uint32_t					width;
-	uint32_t					height;
-	uint32_t					colorCount;
-	uint32_t					dsCount;
-	uint32_t					attachmentCount;
-	uint32_t					bufferCount;
+	uint32_t					m_width;
+	uint32_t					m_height;
+	uint32_t					m_colorCount;
+	uint32_t					m_dsCount;
+	uint32_t					m_attachmentCount;
+	uint32_t					m_bufferCount;
 
-	resourceLifetime_t			lifetime;
+	resourceLifetime_t			m_lifetime;
+	renderPassAttachmentMask_t	m_attachmentMask;
+	renderAttachmentBits_t		m_attachmentBits;
 
 #ifdef USE_VULKAN
-	VkFramebuffer				buffers[ MaxFrameStates ][ PassPermCount ];
-	VkRenderPass				renderPasses[ PassPermCount ];
+	VkFramebuffer				vk_buffers[ MaxFrameStates ][ PassPermCount ];
+	VkRenderPass				vk_renderPasses[ PassPermCount ];
 #endif
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
 	{
-		const uint32_t bufferCount = ( lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
+		const uint32_t bufferCount = ( m_lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
 		return Min( bufferId, bufferCount - 1 );
 	}
 
 public:
 
 	FrameBuffer() :
-		attachmentCount( 0 ),
-		bufferCount( 0 ),
-		colorCount( 0 ),
-		dsCount( 0 ),
-		width( 0 ),
-		height( 0 )
+		m_attachmentCount( 0 ),
+		m_bufferCount( 0 ),
+		m_colorCount( 0 ),
+		m_dsCount( 0 ),
+		m_width( 0 ),
+		m_height( 0 )
 	{
-		memset( color0, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( color1, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( color2, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( depth, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( stencil, 0, sizeof( Image* ) * MaxFrameStates );
+		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
+		{
+			m_color0[ frameIx ] = nullptr;
+			m_color1[ frameIx ] = nullptr;
+			m_color2[ frameIx ] = nullptr;
+			m_depth[ frameIx ] = nullptr;
+			m_stencil[ frameIx ] = nullptr;
+		}
 	}
 
 	inline bool IsValid() const
 	{
-		return ( buffers != VK_NULL_HANDLE );
+		return ( vk_buffers != VK_NULL_HANDLE );
 	}
 
 	inline uint32_t GetWidth() const
 	{
-		return width;
+		return m_width;
 	}
 
 	inline uint32_t GetHeight() const
 	{
-		return height;
+		return m_height;
 	}
 
 	inline uint32_t ColorLayerCount() const
 	{
-		return colorCount;
+		return m_colorCount;
 	}
 
 	inline uint32_t DepthLayerCount() const
 	{
-		return dsCount;
+		return m_dsCount;
 	}
 
 	inline uint32_t LayerCount() const
 	{
-		return attachmentCount;
+		return m_attachmentCount;
 	}
 
 	inline imageSamples_t SampleCount() const
@@ -143,40 +149,51 @@ public:
 
 	inline const Image* GetColor( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 0 ) ? color0[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_colorCount > 0 ) ? m_color0[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetColor1( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 1 ) ? color1[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_colorCount > 1 ) ? m_color1[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetColor2( const uint32_t bufferId = 0 ) const
 	{
-		return ( colorCount > 2 ) ? color2[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_colorCount > 2 ) ? m_color2[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetDepth( const uint32_t bufferId = 0 ) const
 	{
-		return ( dsCount >= 1 ) ? depth[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_dsCount >= 1 ) ? m_depth[ GetBufferId( bufferId ) ] : nullptr;
 	}
 
 	inline const Image* GetStencil( const uint32_t bufferId = 0 ) const
 	{
-		return ( dsCount >= 1 ) ? stencil[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_dsCount >= 1 ) ? m_stencil[ GetBufferId( bufferId ) ] : nullptr;
+	}
+
+	inline renderAttachmentBits_t GetAttachmentBits() const
+	{
+		return m_attachmentBits;
+	}
+
+	inline renderPassAttachmentMask_t GetAttachmentMask() const
+	{
+		return m_attachmentMask;
 	}
 
 #ifdef USE_VULKAN
 	VkFramebuffer GetVkBuffer( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
 		const uint32_t id = GetBufferId( bufferId );
-		return buffers[ id ][ transitionState.bits ];
+		assert( id < MaxFrameStates );
+		return vk_buffers[ id ][ transitionState.bits ];
 	}
 
 	VkRenderPass GetVkRenderPass( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
 	{
-		const uint32_t id = GetBufferId( bufferId );
-		return renderPasses[ transitionState.bits ];
+		assert( transitionState.bits < PassPermCount );
+		return vk_renderPasses[ transitionState.bits ];
 	}
 #endif
 

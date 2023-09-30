@@ -159,6 +159,7 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 	state.stateBits = pass->StateBits();
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
+	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
@@ -176,6 +177,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	state.stateBits = pass->StateBits();
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
+	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
@@ -196,6 +198,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	state.stateBits = pass->StateBits();
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
+	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 

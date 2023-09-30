@@ -11,7 +11,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_dbgName = info.name;
 
-	pass = new PostPass( info.fb, info.resolve );
+	pass = new PostPass( info.fb );
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 

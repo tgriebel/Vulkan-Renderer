@@ -4,15 +4,16 @@
 #include "../render_state/deviceContext.h"
 #include "../render_binding/shaderBinding.h"
 
-enum vk_RenderPassAttachmentMask_t : uint8_t
+enum renderPassAttachmentMask_t : uint8_t
 {
+	RENDER_PASS_MASK_NONE = 0,
 	RENDER_PASS_MASK_COLOR0 = ( 1 << 0 ),
 	RENDER_PASS_MASK_COLOR1 = ( 1 << 1 ),
 	RENDER_PASS_MASK_COLOR2 = ( 1 << 2 ),
 	RENDER_PASS_MASK_DEPTH = ( 1 << 3 ),
 	RENDER_PASS_MASK_STENCIL = ( 1 << 4 ),
 };
-DEFINE_ENUM_OPERATORS( vk_RenderPassAttachmentMask_t, uint8_t )
+DEFINE_ENUM_OPERATORS( renderPassAttachmentMask_t, uint8_t )
 
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#renderpass-compatibility
 struct renderPassAttachmentBits_t
@@ -20,6 +21,19 @@ struct renderPassAttachmentBits_t
 	imageSamples_t	samples : 8;
 	imageFmt_t		fmt		: 8;
 };
+static_assert( sizeof( renderPassAttachmentBits_t ) == 2, "Bits overflowed" );
+
+
+struct renderAttachmentBits_t
+{
+	renderPassAttachmentBits_t	color0;
+	renderPassAttachmentBits_t	color1;
+	renderPassAttachmentBits_t	color2;
+	renderPassAttachmentBits_t	depth;
+	renderPassAttachmentBits_t	stencil;
+};
+static_assert( sizeof( renderAttachmentBits_t ) == 10, "Bits overflowed" );
+
 
 union renderPassTransition_t
 {

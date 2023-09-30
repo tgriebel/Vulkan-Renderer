@@ -165,14 +165,9 @@ public:
 class PostPass : public DrawPass
 {
 public:
-	PostPass( FrameBuffer* fb, const bool resolve = false )
+	PostPass( FrameBuffer* fb )
 	{
 		Init( fb );
-
-		// FIXME: Hack. What's going on?
-		if ( resolve ) {
-			m_stateBits |= GFX_STATE_BIT_16;
-		}
 	}
 
 	virtual void Init( FrameBuffer* fb );
