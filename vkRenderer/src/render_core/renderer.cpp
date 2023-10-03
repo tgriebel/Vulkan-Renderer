@@ -79,31 +79,16 @@ void Renderer::Commit( const Scene* scene )
 		if( view.IsCommitted() == false ) {
 			continue;
 		}
-		view.drawGroup.committedModelCnt = 0;
+		view.drawGroup.Reset();
 		for ( uint32_t entIx = 0; entIx < entCount; ++entIx ) {
 			CommitModel( view, *scene->entities[ entIx ] );
 		}
-		MergeSurfaces( view );
 
-		view.drawGroup.vb = &vb;
-		view.drawGroup.ib = &ib;
+		view.drawGroup.Sort();
+		view.drawGroup.Merge();
+		view.drawGroup.AssignGeometryResources( &geometry );
 	}
 	CommitViews( scene );
-}
-
-
-void Renderer::MergeSurfaces( RenderView& view )
-{
-	view.drawGroup.Sort();
-	view.drawGroup.Merge();
-
-	// FIXME
-	{
-		uint32_t totalCount = 0;
-		for ( uint32_t i = 0; i < view.drawGroup.mergedModelCnt; ++i ) {
-			view.drawGroup.uploads[ i ] = surfUploads[ view.drawGroup.merged[ i ].uploadId ];
-		}
-	}
 }
 
 
@@ -120,13 +105,10 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 	for ( uint32_t i = 0; i < model.surfCount; ++i )
 	{
-		drawSurfInstance_t& instance = view.drawGroup.instances[ view.drawGroup.committedModelCnt ];
-		drawSurf_t& surf = view.drawGroup.surfaces[ view.drawGroup.committedModelCnt ];
-
 		if( model.uploadId == -1 )
 		{
-			model.uploadId = surfUploads.Count();
-			surfUploads.Grow( model.surfCount );
+			model.uploadId = geometry.surfUploads.Count();
+			geometry.surfUploads.Grow( model.surfCount );
 		}
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : model.surfs[ i ].materialHdl;
@@ -182,6 +164,9 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			}
 		}
 
+		drawSurfInstance_t& instance = view.drawGroup.NextInstance();
+		drawSurf_t& surf = view.drawGroup.NextSurface();
+
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
@@ -234,8 +219,6 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			surf.pipelineObject[ passIx ] = FindPipelineObject( pass, *prog );
 			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
 		}
-
-		++view.drawGroup.committedModelCnt;
 	}
 }
 
@@ -349,7 +332,7 @@ void Renderer::UploadAssets()
 	ClearPipelineCache();
 	BuildPipelines();
 
-	geoStagingBuffer.SetPos( 0 );
+	geometry.stagingBuffer.SetPos( 0 );
 	textureStagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
@@ -387,7 +370,7 @@ void Renderer::Render()
 
 	BuildPipelines();
 
-	geoStagingBuffer.SetPos( 0 );
+	geometry.stagingBuffer.SetPos( 0 );
 	textureStagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
@@ -687,14 +670,14 @@ void Renderer::UpdateBuffers()
 		const uint32_t viewId = view.GetViewId();
 
 		static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
-		assert( view.drawGroup.committedModelCnt < MaxSurfaces );
-		for ( uint32_t surfIx = 0; surfIx < view.drawGroup.committedModelCnt; ++surfIx )
+		assert( view.drawGroup.InstanceCount() < MaxSurfaces );
+
+		const drawSurfInstance_t* instances = view.drawGroup.Instances();
+
+		for ( uint32_t surfIx = 0; surfIx < view.drawGroup.InstanceCount(); ++surfIx )
 		{
-			uniformBufferObject_t ubo;
-			ubo.model = view.drawGroup.sortedInstances[ surfIx ].modelMatrix;
-			const drawSurf_t& surf = view.drawGroup.merged[ view.drawGroup.sortedInstances[ surfIx ].surfId ];
-			const uint32_t objectId = ( view.drawGroup.sortedInstances[ surfIx ].id + surf.objectId );
-			uboBuffer[ objectId ] = ubo;
+			const uint32_t instanceId = view.drawGroup.InstanceId( surfIx );
+			uboBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix;
 		}
 
 		renderContext.surfParmPartitions[ viewId ].SetPos( 0 );

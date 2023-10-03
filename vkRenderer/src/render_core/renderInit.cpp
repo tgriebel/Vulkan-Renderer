@@ -565,6 +565,8 @@ ShaderBindParms* Renderer::RegisterBindParm( const ShaderBindSet* set )
 
 void Renderer::AllocRegisteredBindParms()
 {
+	SCOPED_TIMER_PRINT( AllocRegisteredBindParms )
+
 	std::vector<VkDescriptorSetLayout> layouts;
 	std::vector<VkDescriptorSet> descSets;
 
@@ -639,10 +641,10 @@ void Renderer::CreateBuffers()
 		}
 	}
 
-	vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
-	ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
+	geometry.vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
+	geometry.ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
 
-	geoStagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+	geometry.stagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
 	textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
 }
 

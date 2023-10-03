@@ -121,15 +121,15 @@ void Renderer::ShutdownImGui()
 
 void Renderer::ShutdownShaderResources()
 {
-	ib.Destroy();
-	vb.Destroy();
+	geometry.ib.Destroy();
+	geometry.vb.Destroy();
 
 	// Memory
 	renderContext.localMemory.Destroy();
 	renderContext.sharedMemory.Destroy();
 
 	// Staging
-	geoStagingBuffer.Destroy();
+	geometry.stagingBuffer.Destroy();
 	textureStagingBuffer.Destroy();
 
 	// Buffers

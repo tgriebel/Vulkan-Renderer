@@ -5,6 +5,8 @@
 #include "common.h"
 
 class GpuBuffer;
+class ShaderBindParms;
+class GeometryContext;
 
 const static uint32_t KeyMaterialBits = 32;
 const static uint32_t KeyStencilBits = 8;
@@ -87,15 +89,26 @@ template<> struct std::hash<drawSurf_t> {
 
 class DrawGroup
 {
+private:
+	const GeometryContext*	geo;
+
+	uint32_t				committedModelCount;
+	uint32_t				instanceModelCount;
+	uint32_t				mergedModelCount;
+	drawSurf_t				surfaces[ MaxSurfaces ];
+	drawSurf_t				sortedSurfaces[ MaxSurfaces ];
+	drawSurfInstance_t		instances[ MaxSurfaces ];
+	drawSurfInstance_t		sortedInstances[ MaxSurfaces ];
+
 public:
 
 	DrawGroup()
 	{
-		committedModelCnt = 0;
-		mergedModelCnt = 0;
+		instanceModelCount = 0;
+		committedModelCount = 0;
+		mergedModelCount = 0;
 
-		ib = nullptr;
-		vb = nullptr;
+		geo = nullptr;
 
 		memset( surfaces,			0, MaxSurfaces );
 		memset( sortedSurfaces,		0, MaxSurfaces );
@@ -106,18 +119,65 @@ public:
 		memset( instanceCounts,		0, MaxSurfaces );
 	}
 
-	void	Sort();
-	void	Merge();
+	void			Sort();
+	void			Merge();
 
-	GpuBuffer*				ib;	// FIXME: don't use a pointer
-	GpuBuffer*				vb;
+	inline void	Reset()
+	{
+		instanceModelCount = 0;
+		committedModelCount = 0;
+		mergedModelCount = 0;
+	}
 
-	uint32_t				committedModelCnt;
-	uint32_t				mergedModelCnt;
-	drawSurf_t				surfaces[ MaxSurfaces ];
-	drawSurf_t				sortedSurfaces[ MaxSurfaces ];
-	drawSurfInstance_t		instances[ MaxSurfaces ];
-	drawSurfInstance_t		sortedInstances[ MaxSurfaces ];
+	inline uint32_t	InstanceCount() const
+	{
+		return committedModelCount;
+	}
+
+	inline uint32_t	Count() const
+	{
+		return mergedModelCount;
+	}
+
+	inline const drawSurfInstance_t* Instances() const
+	{
+		assert( instanceModelCount > 0 );
+		return &sortedInstances[ 0 ];
+	}
+
+	inline const GeometryContext* Geometry() const
+	{
+		assert( geo != nullptr );
+		return geo;
+	}
+
+	inline uint32_t InstanceId( const uint32_t instanceIx ) const
+	{
+		const drawSurf_t& surf = merged[ sortedInstances[ instanceIx ].surfId ];
+		const uint32_t objectId = ( sortedInstances[ instanceIx ].id + surf.objectId );
+		return objectId;
+	}
+
+	inline drawSurfInstance_t& NextInstance()
+	{
+		assert( instanceModelCount < MaxSurfaces );
+		drawSurfInstance_t& instance = instances[ instanceModelCount ];
+		++instanceModelCount;
+		return instance;
+	}
+
+	inline drawSurf_t& NextSurface()
+	{
+		assert( committedModelCount < MaxSurfaces );
+		drawSurf_t& surf = surfaces[ committedModelCount ];
+		++committedModelCount;
+		return surf;
+	}
+
+	void AssignGeometryResources( const GeometryContext* context );
+
+	//ShaderBindParms*		parms;	// A draw group has coherent raster state so share parms. Anything that doesn't goes to a new group
+
 	drawSurf_t				merged[ MaxSurfaces ];
 	surfaceUpload_t			uploads[ MaxSurfaces ];
 	uint32_t				instanceCounts[ MaxSurfaces ];

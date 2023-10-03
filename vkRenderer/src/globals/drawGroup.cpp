@@ -1,5 +1,6 @@
 #include <numeric>
 #include "DrawGroup.h"
+#include "../render_core/renderer.h"
 
 void DrawGroup::Sort()
 {
@@ -17,12 +18,12 @@ void DrawGroup::Sort()
 		}
 	};
 
-	std::vector<uint32_t> sortIndices( committedModelCnt );
+	std::vector<uint32_t> sortIndices( committedModelCount );
 	std::iota( sortIndices.begin(), sortIndices.end(), 0 );
 
 	std::sort( sortIndices.begin(), sortIndices.end(), Comparator( this ) );
 
-	for ( uint32_t srcIndex = 0; srcIndex < committedModelCnt; ++srcIndex )
+	for ( uint32_t srcIndex = 0; srcIndex < committedModelCount; ++srcIndex )
 	{
 		const uint32_t dstIndex = sortIndices[ srcIndex ];
 		sortedSurfaces[ dstIndex ] = surfaces[ srcIndex ];
@@ -33,14 +34,14 @@ void DrawGroup::Sort()
 
 void DrawGroup::Merge()
 {
-	mergedModelCnt = 0;
+	mergedModelCount = 0;
 	std::unordered_map< uint32_t, uint32_t > uniqueSurfs;
-	uniqueSurfs.reserve( committedModelCnt );
-	for ( uint32_t i = 0; i < committedModelCnt; ++i ) {
+	uniqueSurfs.reserve( committedModelCount );
+	for ( uint32_t i = 0; i < committedModelCount; ++i ) {
 		drawSurfInstance_t& instance = sortedInstances[ i ];
 		auto it = uniqueSurfs.find( sortedSurfaces[ i ].hash );
 		if ( it == uniqueSurfs.end() ) {
-			const uint32_t surfId = mergedModelCnt;
+			const uint32_t surfId = mergedModelCount;
 			uniqueSurfs[ sortedSurfaces[ i ].hash ] = surfId;
 
 			instanceCounts[ surfId ] = 1;
@@ -49,7 +50,7 @@ void DrawGroup::Merge()
 			instance.id = 0;
 			instance.surfId = surfId;
 
-			++mergedModelCnt;
+			++mergedModelCount;
 		}
 		else {
 			instance.id = instanceCounts[ it->second ];
@@ -58,9 +59,20 @@ void DrawGroup::Merge()
 		}
 	}
 	uint32_t totalCount = 0;
-	for ( uint32_t i = 0; i < mergedModelCnt; ++i )
+	for ( uint32_t i = 0; i < mergedModelCount; ++i )
 	{
 		merged[ i ].objectId += totalCount;
 		totalCount += instanceCounts[ i ];
+	}
+}
+
+
+void DrawGroup::AssignGeometryResources( const GeometryContext* context )
+{
+	geo = context;
+
+	// Cache upload records
+	for ( uint32_t i = 0; i < mergedModelCount; ++i ) {
+		uploads[ i ] = geo->surfUploads[ merged[ i ].uploadId ];
 	}
 }

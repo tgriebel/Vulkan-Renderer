@@ -88,6 +88,18 @@ public:
 };
 
 
+class GeometryContext
+{
+public:
+	using surfUploadArray_t	= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
+
+	GpuBuffer			stagingBuffer;
+	GpuBuffer			vb;
+	GpuBuffer			ib;
+	surfUploadArray_t	surfUploads;
+};
+
+
 class Renderer
 {
 public:
@@ -108,7 +120,7 @@ private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;
 	using bindParmArray_t			= Array<ShaderBindParms, DescriptorPoolMaxSets>;
-	using surfUploadArray_t			= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
+
 
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;
@@ -150,15 +162,12 @@ private:
 	GpuSemaphore						uploadFinishedSemaphore;
 
 	// Shader resources
-	GpuBuffer							geoStagingBuffer;
+	GeometryContext						geometry;
 	GpuBuffer							textureStagingBuffer;
-	GpuBuffer							vb;	// move
-	GpuBuffer							ib;
 	ImageArray							gpuImages2D;
 	ImageArray							gpuImagesCube;
 	materialBufferArray_t				materialBuffer;
 	committedLightsArray_t				committedLights;
-	surfUploadArray_t					surfUploads;
 
 	Image								shadowMapImage[ MaxShadowViews ];
 	Image								mainColorImage;
@@ -206,7 +215,6 @@ private:
 
 	// Draw Frame
 	void								CommitModel( RenderView& view, const Entity& ent );
-	void								MergeSurfaces( RenderView& view );
 	void								FlushGPU();
 	void								WaitForEndFrame();
 	void								SubmitFrame();

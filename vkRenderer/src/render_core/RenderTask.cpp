@@ -22,6 +22,7 @@
 */
 
 #include "RenderTask.h"
+#include "renderer.h"
 #include "../render_state/cmdContext.h"
 #include "../globals/renderview.h"
 
@@ -155,10 +156,12 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
 
-	VkBuffer vertexBuffers[] = { renderView->drawGroup.vb->GetVkObject() };
+	const GeometryContext* geo = renderView->drawGroup.Geometry();
+
+	VkBuffer vertexBuffers[] = { geo->vb.GetVkObject() };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers( cmdContext->CommandBuffer(), 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( cmdContext->CommandBuffer(), renderView->drawGroup.ib->GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
+	vkCmdBindIndexBuffer( cmdContext->CommandBuffer(), geo->ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 	const renderPassTransition_t& transitionState = renderView->TransitionState();
 
@@ -248,7 +251,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			continue;
 		}
 
-		for ( size_t surfIx = 0; surfIx < renderView->drawGroup.mergedModelCnt; surfIx++ )
+		for ( size_t surfIx = 0; surfIx < renderView->drawGroup.Count(); surfIx++ )
 		{
 			drawSurf_t& surface = renderView->drawGroup.merged[ surfIx ];
 			surfaceUpload_t& upload = renderView->drawGroup.uploads[ surfIx ];
