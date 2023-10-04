@@ -253,8 +253,8 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 		for ( size_t surfIx = 0; surfIx < renderView->drawGroup.Count(); surfIx++ )
 		{
-			drawSurf_t& surface = renderView->drawGroup.merged[ surfIx ];
-			surfaceUpload_t& upload = renderView->drawGroup.uploads[ surfIx ];
+			const drawSurf_t& surface = renderView->drawGroup.DrawSurf( surfIx );
+			const surfaceUpload_t& upload = renderView->drawGroup.SurfUpload( surfIx );
 
 			if ( SkipPass( surface, drawPass_t( passIx ) ) ) {
 				continue;
@@ -288,7 +288,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			pushConstants_t pushConstants = { surface.objectId, uint32_t( surface.sortKey.materialId ), uint32_t( renderView->GetViewId() ) };
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, renderView->drawGroup.instanceCounts[ surfIx ], upload.firstIndex, upload.vertexOffset, 0 );
+			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, renderView->drawGroup.InstanceCount( surfIx ), upload.firstIndex, upload.vertexOffset, 0 );
 		}	
 		cmdContext->MarkerEndRegion();
 	}

@@ -218,6 +218,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 			surf.pipelineObject[ passIx ] = FindPipelineObject( pass, *prog );
 			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
+
+			//view.drawGroup[ passIx ];
 		}
 	}
 }

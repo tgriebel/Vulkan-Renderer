@@ -95,8 +95,11 @@ private:
 	uint32_t				committedModelCount;
 	uint32_t				instanceModelCount;
 	uint32_t				mergedModelCount;
+	uint32_t				instanceCounts[ MaxSurfaces ];
 	drawSurf_t				surfaces[ MaxSurfaces ];
 	drawSurf_t				sortedSurfaces[ MaxSurfaces ];
+	drawSurf_t				merged[ MaxSurfaces ];
+	surfaceUpload_t			uploads[ MaxSurfaces ];
 	drawSurfInstance_t		instances[ MaxSurfaces ];
 	drawSurfInstance_t		sortedInstances[ MaxSurfaces ];
 
@@ -158,6 +161,21 @@ public:
 		return objectId;
 	}
 
+	inline const drawSurf_t& DrawSurf( const uint32_t surfIx ) const
+	{
+		return merged[ surfIx ];
+	}
+
+	inline const surfaceUpload_t& SurfUpload( const uint32_t surfIx ) const
+	{
+		return uploads[ surfIx ];
+	}
+
+	inline const uint32_t InstanceCount( const uint32_t surfIx ) const
+	{
+		return instanceCounts[ surfIx ];
+	}
+
 	inline drawSurfInstance_t& NextInstance()
 	{
 		assert( instanceModelCount < MaxSurfaces );
@@ -177,8 +195,4 @@ public:
 	void AssignGeometryResources( const GeometryContext* context );
 
 	//ShaderBindParms*		parms;	// A draw group has coherent raster state so share parms. Anything that doesn't goes to a new group
-
-	drawSurf_t				merged[ MaxSurfaces ];
-	surfaceUpload_t			uploads[ MaxSurfaces ];
-	uint32_t				instanceCounts[ MaxSurfaces ];
 };
