@@ -36,7 +36,7 @@ struct vsInput_t
 };
 
 
-struct uniformBufferObject_t
+struct surfaceBufferObject_t
 {
 	mat4x4f model;
 };

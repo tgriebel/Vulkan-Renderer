@@ -631,7 +631,7 @@ void Renderer::CreateBuffers()
 	{
 		renderContext.globalConstants.Create(	"Globals",	LIFETIME_PERSISTENT,	1,						sizeof( viewBufferObject_t ),		bufferType_t::UNIFORM, renderContext.sharedMemory );
 		renderContext.viewParms.Create(			"View",		LIFETIME_PERSISTENT,	MaxViews,				sizeof( viewBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
-		renderContext.surfParms.Create(			"Surf",		LIFETIME_PERSISTENT,	MaxViews * MaxSurfaces,	sizeof( uniformBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
+		renderContext.surfParms.Create(			"Surf",		LIFETIME_PERSISTENT,	MaxViews * MaxSurfaces,	sizeof( surfaceBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
 		renderContext.materialBuffers.Create(	"Material",	LIFETIME_PERSISTENT,	MaxMaterials,			sizeof( materialBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
 		renderContext.lightParms.Create(		"Light",	LIFETIME_PERSISTENT,	MaxLights,				sizeof( lightBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
 		renderContext.particleBuffer.Create(	"Particle",	LIFETIME_PERSISTENT,	MaxParticles,			sizeof( particleBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );

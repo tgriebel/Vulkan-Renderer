@@ -43,7 +43,7 @@ extern Window		g_window;
 
 static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 {
-	if ( surf.pipelineObject[ pass ] == INVALID_HDL ) {
+	if ( surf.pipelineObject == INVALID_HDL ) {
 		return true;
 	}
 
@@ -154,15 +154,6 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 		throw std::runtime_error( "Missing pass state!" );
 	}
 
-	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
-
-	const GeometryContext* geo = renderView->drawGroup.Geometry();
-
-	VkBuffer vertexBuffers[] = { geo->vb.GetVkObject() };
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers( cmdContext->CommandBuffer(), 0, 1, vertexBuffers, offsets );
-	vkCmdBindIndexBuffer( cmdContext->CommandBuffer(), geo->ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
-
 	const renderPassTransition_t& transitionState = renderView->TransitionState();
 
 	VkRenderPassBeginInfo passInfo{ };
@@ -202,7 +193,11 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 		passInfo.pClearValues = clearValues.data();
 	}
 
+	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
+
 	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+	uint32_t modelOffset = 0;
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
@@ -210,6 +205,15 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 		if ( pass == nullptr ) {
 			continue;
 		}
+
+		const DrawGroup* drawGroup = &renderView->drawGroup[ passIx ];
+
+		const GeometryContext* geo = drawGroup->Geometry();
+
+		VkBuffer vertexBuffers[] = { geo->vb.GetVkObject() };
+		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindVertexBuffers( cmdContext->CommandBuffer(), 0, 1, vertexBuffers, offsets );
+		vkCmdBindIndexBuffer( cmdContext->CommandBuffer(), geo->ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
 
 		cmdContext->MarkerBeginRegion( pass->Name(), ColorToVector( Color::White ) );
 
@@ -251,17 +255,19 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			continue;
 		}
 
-		for ( size_t surfIx = 0; surfIx < renderView->drawGroup.Count(); surfIx++ )
+		const uint32_t surfaceCount = drawGroup->Count();
+
+		for ( uint32_t surfIx = 0; surfIx < surfaceCount; ++surfIx )
 		{
-			const drawSurf_t& surface = renderView->drawGroup.DrawSurf( surfIx );
-			const surfaceUpload_t& upload = renderView->drawGroup.SurfUpload( surfIx );
+			const drawSurf_t& surface = drawGroup->DrawSurf( surfIx );
+			const surfaceUpload_t& upload = drawGroup->SurfUpload( surfIx );
 
 			if ( SkipPass( surface, drawPass_t( passIx ) ) ) {
 				continue;
 			}
 
 			pipelineObject_t* pipelineObject = nullptr;
-			GetPipelineObject( surface.pipelineObject[ passIx ], &pipelineObject );
+			GetPipelineObject( surface.pipelineObject, &pipelineObject );
 			if ( pipelineObject == nullptr ) {
 				continue;
 			}
@@ -285,10 +291,14 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 			assert( surface.sortKey.materialId < ( 1ull << KeyMaterialBits ) );
 
-			pushConstants_t pushConstants = { surface.objectId, uint32_t( surface.sortKey.materialId ), uint32_t( renderView->GetViewId() ) };
+			pushConstants_t pushConstants = {};
+			pushConstants.viewId = uint32_t( renderView->GetViewId() );
+			pushConstants.objectId = surface.objectOffset + renderView->drawGroupOffset[ passIx ];
+			pushConstants.materialId = uint32_t( surface.sortKey.materialId );
+
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
 
-			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, renderView->drawGroup.InstanceCount( surfIx ), upload.firstIndex, upload.vertexOffset, 0 );
+			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, drawGroup->InstanceCount( surfIx ), upload.firstIndex, upload.vertexOffset, 0 );
 		}	
 		cmdContext->MarkerEndRegion();
 	}

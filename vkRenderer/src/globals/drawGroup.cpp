@@ -37,12 +37,18 @@ void DrawGroup::Merge()
 	mergedModelCount = 0;
 	std::unordered_map< uint32_t, uint32_t > uniqueSurfs;
 	uniqueSurfs.reserve( committedModelCount );
+
+	uint32_t surfaceHashes[ MaxSurfaces ];
+	for ( uint32_t i = 0; i < committedModelCount; ++i ) {
+		surfaceHashes[ i ] = Hash( sortedSurfaces[ i ] );
+	}
+
 	for ( uint32_t i = 0; i < committedModelCount; ++i ) {
 		drawSurfInstance_t& instance = sortedInstances[ i ];
-		auto it = uniqueSurfs.find( sortedSurfaces[ i ].hash );
+		auto it = uniqueSurfs.find( surfaceHashes[ i ] );
 		if ( it == uniqueSurfs.end() ) {
 			const uint32_t surfId = mergedModelCount;
-			uniqueSurfs[ sortedSurfaces[ i ].hash ] = surfId;
+			uniqueSurfs[ surfaceHashes[ i ] ] = surfId;
 
 			instanceCounts[ surfId ] = 1;
 			merged[ surfId ] = sortedSurfaces[ i ];
@@ -61,7 +67,7 @@ void DrawGroup::Merge()
 	uint32_t totalCount = 0;
 	for ( uint32_t i = 0; i < mergedModelCount; ++i )
 	{
-		merged[ i ].objectId += totalCount;
+		merged[ i ].objectOffset += totalCount;
 		totalCount += instanceCounts[ i ];
 	}
 }

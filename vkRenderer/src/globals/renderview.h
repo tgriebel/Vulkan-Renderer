@@ -73,6 +73,9 @@ public:
 		m_viewId = -1;
 		m_committed = false;
 
+		numLights = 0;
+		memset( drawGroupOffset, 0, sizeof( drawGroupOffset ) );
+
 		m_framebuffer = nullptr;
 		m_region = renderViewRegion_t::UNKNOWN;
 	}
@@ -114,7 +117,8 @@ public:
 
 	uint32_t				lights[ MaxLights ];
 	uint32_t				numLights;
+	uint32_t				drawGroupOffset[ DRAWPASS_COUNT ];
 	DrawPass*				passes[ DRAWPASS_COUNT ];
-	DrawGroup				drawGroup;
+	DrawGroup				drawGroup[ DRAWPASS_COUNT ];
 	debugMenuArray_t		debugMenus;
 };

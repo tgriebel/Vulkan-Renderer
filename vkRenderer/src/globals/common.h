@@ -121,7 +121,7 @@ class Renderer;
 class Serializer;
 
 
-enum renderFlags_t
+enum renderFlags_t : uint32_t
 {
 	NONE		= 0,
 	HIDDEN		= ( 1 << 0 ),

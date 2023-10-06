@@ -79,14 +79,25 @@ void Renderer::Commit( const Scene* scene )
 		if( view.IsCommitted() == false ) {
 			continue;
 		}
-		view.drawGroup.Reset();
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			view.drawGroup[ passIx ].Reset();
+		}
+
 		for ( uint32_t entIx = 0; entIx < entCount; ++entIx ) {
 			CommitModel( view, *scene->entities[ entIx ] );
 		}
 
-		view.drawGroup.Sort();
-		view.drawGroup.Merge();
-		view.drawGroup.AssignGeometryResources( &geometry );
+		uint32_t drawGroupOffset = 0;
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			view.drawGroup[ passIx ].Sort();
+			view.drawGroup[ passIx ].Merge();
+			view.drawGroup[ passIx ].AssignGeometryResources( &geometry );
+
+			view.drawGroupOffset[ passIx ] = drawGroupOffset;
+			drawGroupOffset += view.drawGroup[ passIx ].InstanceCount();
+		}
 	}
 	CommitViews( scene );
 }
@@ -164,22 +175,22 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			}
 		}
 
-		drawSurfInstance_t& instance = view.drawGroup.NextInstance();
-		drawSurf_t& surf = view.drawGroup.NextSurface();
+		drawSurfInstance_t instance = {};
+		drawSurf_t surf = {};
 
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
 		surf.uploadId = ( model.uploadId + i );
 		surf.stencilBit = ent.outline ? OutlineStencilBit : 0;
-		surf.objectId = 0;
+		surf.objectOffset = 0;
 		surf.flags = renderFlags;	
-		surf.hash = Hash( surf );
-		surf.dbgName = materialAsset->GetName().c_str();
-
+		
 		surf.sortKey = {};
 		surf.sortKey.materialId = material.uploadId;
 		surf.sortKey.stencilBit = surf.stencilBit;
+
+		surf.dbgName = materialAsset->GetName().c_str();
 
 		if( materialAsset->IsUploaded() == false ) {
 			uploadMaterials.insert( materialHdl );
@@ -201,7 +212,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
-			surf.pipelineObject[ passIx ] = INVALID_HDL;
+			surf.pipelineObject = INVALID_HDL;
 			if ( material.GetShader( drawPass_t( passIx ) ).IsValid() == false ) {
 				continue;
 			}
@@ -216,10 +227,10 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 
-			surf.pipelineObject[ passIx ] = FindPipelineObject( pass, *prog );
-			assert( surf.pipelineObject[ passIx ] != INVALID_HDL );
+			surf.pipelineObject = FindPipelineObject( pass, *prog );
+			assert( surf.pipelineObject != INVALID_HDL );
 
-			//view.drawGroup[ passIx ];
+			view.drawGroup[ passIx ].Add( surf, instance );
 		}
 	}
 }
@@ -671,19 +682,26 @@ void Renderer::UpdateBuffers()
 		}
 		const uint32_t viewId = view.GetViewId();
 
-		static uniformBufferObject_t uboBuffer[ MaxSurfaces ];
-		assert( view.drawGroup.InstanceCount() < MaxSurfaces );
+		static surfaceBufferObject_t surfBuffer[ MaxSurfaces ];
 
-		const drawSurfInstance_t* instances = view.drawGroup.Instances();
-
-		for ( uint32_t surfIx = 0; surfIx < view.drawGroup.InstanceCount(); ++surfIx )
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
-			const uint32_t instanceId = view.drawGroup.InstanceId( surfIx );
-			uboBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix;
+			assert( view.drawGroup[ passIx ].InstanceCount() < MaxSurfaces );
+
+			if( view.drawGroup[ passIx ].InstanceCount() == 0 ) {
+				continue;
+			}
+
+			const drawSurfInstance_t* instances = view.drawGroup[ passIx ].Instances();
+			for ( uint32_t surfIx = 0; surfIx < view.drawGroup[ passIx ].InstanceCount(); ++surfIx )
+			{
+				const uint32_t instanceId = view.drawGroupOffset[ passIx ] + view.drawGroup[ passIx ].InstanceId( surfIx );
+				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix;
+			}
 		}
 
 		renderContext.surfParmPartitions[ viewId ].SetPos( 0 );
-		renderContext.surfParmPartitions[ viewId ].CopyData( uboBuffer, sizeof( uniformBufferObject_t ) * MaxSurfaces );
+		renderContext.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( surfaceBufferObject_t ) * MaxSurfaces );
 	}
 
 	renderContext.materialBuffers.SetPos( 0 );

@@ -24,26 +24,24 @@ union sortKey_t
 
 struct drawSurf_t
 {
-	uint32_t			uploadId;
-	uint32_t			objectId;
 	sortKey_t			sortKey;
+	uint32_t			uploadId;
+	uint32_t			objectOffset;
 	renderFlags_t		flags;
 	uint8_t				stencilBit;
-	uint32_t			hash;
 
 	const char*			dbgName;
 
-	hdl_t				pipelineObject[ DRAWPASS_COUNT ];
+	hdl_t				pipelineObject;
 };
+static_assert( sizeof( drawSurf_t ) == 40, "Informative" );
 
 
 inline uint32_t Hash( const drawSurf_t& surf ) {
-	uint64_t shaderIds[ DRAWPASS_COUNT ];
-	for ( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
-		shaderIds[ i ] = surf.pipelineObject[ i ].Get();
-	}
-	uint32_t shaderHash = Hash( reinterpret_cast<const uint8_t*>( &shaderIds ), sizeof( shaderIds[ 0 ] ) * DRAWPASS_COUNT );
-	uint32_t stateHash = Hash( reinterpret_cast<const uint8_t*>( &surf ), offsetof( drawSurf_t, hash ) );
+	uint64_t shaderIds;
+	shaderIds = surf.pipelineObject.Get();
+	uint32_t shaderHash = Hash( reinterpret_cast<const uint8_t*>( &shaderIds ), sizeof( shaderIds ) );
+	uint32_t stateHash = Hash( reinterpret_cast<const uint8_t*>( &surf ), offsetof( drawSurf_t, dbgName ) );
 	return ( shaderHash ^ stateHash );
 }
 
@@ -51,9 +49,10 @@ inline uint32_t Hash( const drawSurf_t& surf ) {
 struct drawSurfInstance_t
 {
 	mat4x4f		modelMatrix;
-	uint32_t	surfId;
-	uint32_t	id;
+	uint16_t	surfId;
+	uint16_t	id;
 };
+static_assert( sizeof( drawSurfInstance_t ) == 68, "Informative" );
 
 
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
@@ -72,7 +71,7 @@ inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
 inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
 {
 	if ( surf0.sortKey.materialId == surf1.sortKey.materialId ) {
-		return ( surf0.objectId < surf1.objectId );
+		return ( surf0.objectOffset < surf1.objectOffset );
 	}
 	else {
 		return ( surf0.sortKey.materialId < surf1.sortKey.materialId );
@@ -93,7 +92,6 @@ private:
 	const GeometryContext*	geo;
 
 	uint32_t				committedModelCount;
-	uint32_t				instanceModelCount;
 	uint32_t				mergedModelCount;
 	uint32_t				instanceCounts[ MaxSurfaces ];
 	drawSurf_t				surfaces[ MaxSurfaces ];
@@ -107,7 +105,6 @@ public:
 
 	DrawGroup()
 	{
-		instanceModelCount = 0;
 		committedModelCount = 0;
 		mergedModelCount = 0;
 
@@ -127,7 +124,6 @@ public:
 
 	inline void	Reset()
 	{
-		instanceModelCount = 0;
 		committedModelCount = 0;
 		mergedModelCount = 0;
 	}
@@ -157,7 +153,7 @@ public:
 	inline uint32_t InstanceId( const uint32_t instanceIx ) const
 	{
 		const drawSurf_t& surf = merged[ sortedInstances[ instanceIx ].surfId ];
-		const uint32_t objectId = ( sortedInstances[ instanceIx ].id + surf.objectId );
+		const uint32_t objectId = ( sortedInstances[ instanceIx ].id + surf.objectOffset );
 		return objectId;
 	}
 
@@ -176,20 +172,14 @@ public:
 		return instanceCounts[ surfIx ];
 	}
 
-	inline drawSurfInstance_t& NextInstance()
-	{
-		assert( instanceModelCount < MaxSurfaces );
-		drawSurfInstance_t& instance = instances[ instanceModelCount ];
-		++instanceModelCount;
-		return instance;
-	}
-
-	inline drawSurf_t& NextSurface()
+	inline void Add( const drawSurf_t& surf, const drawSurfInstance_t& instance )
 	{
 		assert( committedModelCount < MaxSurfaces );
-		drawSurf_t& surf = surfaces[ committedModelCount ];
+
+		surfaces[ committedModelCount ] = surf;
+		instances[ committedModelCount ] = instance;
+
 		++committedModelCount;
-		return surf;
 	}
 
 	void AssignGeometryResources( const GeometryContext* context );
