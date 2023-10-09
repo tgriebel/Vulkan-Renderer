@@ -153,7 +153,7 @@ public:
 
 	inline const drawSurfInstance_t* Instances() const
 	{
-		assert( instanceModelCount > 0 );
+		assert( committedModelCount > 0 );
 		return &sortedInstances[ 0 ];
 	}
 

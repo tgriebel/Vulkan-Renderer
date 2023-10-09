@@ -450,6 +450,9 @@ void DrawManipDebugMenu()
 				boundEnt->name = ent->name + "_bounds";
 				boundEnt->SetFlag( ENT_FLAG_WIREFRAME );
 				boundEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+				boundEnt->SetOrigin( origin );
+				boundEnt->SetScale( 0.5f * Multiply( s, vec3f( X.Length(), Y.Length(), Z.Length() ) ) );
+				boundEnt->SetRotation( rotation );
 
 				g_scene->entities.push_back( boundEnt );
 				g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "cube" ), *boundEnt );

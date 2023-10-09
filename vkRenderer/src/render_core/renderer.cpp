@@ -178,7 +178,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		drawSurfInstance_t instance = {};
 		drawSurf_t surf = {};
 
-		instance.modelMatrix = ent.GetMatrix();
+		instance.modelMatrix = ent.GetMatrix().Transpose();
 		instance.surfId = 0;
 		instance.id = 0;
 		surf.uploadId = ( model.uploadId + i );
