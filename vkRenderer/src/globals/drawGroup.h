@@ -10,13 +10,26 @@ class GeometryContext;
 
 const static uint32_t KeyMaterialBits = 32;
 const static uint32_t KeyStencilBits = 8;
+const static uint32_t KeyVisBits = 1;
+
+struct surfaceUpload_t
+{
+	surfaceUpload_t() : vertexCount( 0 ), indexCount( 0 ), vertexOffset( 0 ), firstIndex( 0 ) {}
+
+	uint32_t					vertexCount;
+	uint32_t					indexCount;
+	uint32_t					vertexOffset;
+	uint32_t					firstIndex;
+};
+
 
 union sortKey_t
 {
 	struct
 	{
-		uint64_t	materialId : KeyMaterialBits;
-		uint64_t	stencilBit : KeyStencilBits;
+		uint64_t	materialId	: KeyMaterialBits;
+		uint64_t	stencilBit	: KeyStencilBits;
+		uint64_t	visible		: KeyVisBits;
 	};
 	uint64_t	key;
 };
