@@ -437,21 +437,18 @@ void DrawManipDebugMenu()
 			ent->SetScale( scale );
 			ent->SetRotation( rotation );
 
-			if ( ImGui::Button( "Add Bounds" ) )
+			if ( ImGui::Button( "Add OBB" ) )
 			{
-				AABB bounds = ent->GetBounds();
-				const vec3f X = bounds.GetMax()[ 0 ] - bounds.GetMin()[ 0 ];
-				const vec3f Y = bounds.GetMax()[ 1 ] - bounds.GetMin()[ 1 ];
-				const vec3f Z = bounds.GetMax()[ 2 ] - bounds.GetMin()[ 2 ];
-
-				//mat4x4f m = CreateMatrix4x4( )
+				AABB bounds = ent->GetLocalBounds();
+				const vec3f boundScale = 0.5f * ( bounds.GetMax() - bounds.GetMin() );
+				const vec3f boundCenter = vec3f( ent->GetMatrix() * vec4f( bounds.GetCenter(), 1.0f ) );
 
 				Entity* boundEnt = new Entity( *ent );
 				boundEnt->name = ent->name + "_bounds";
 				boundEnt->SetFlag( ENT_FLAG_WIREFRAME );
 				boundEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
-				boundEnt->SetOrigin( origin );
-				boundEnt->SetScale( 0.5f * Multiply( s, vec3f( X.Length(), Y.Length(), Z.Length() ) ) );
+				boundEnt->SetOrigin( boundCenter );
+				boundEnt->SetScale( Multiply( vec3f( scale ), vec3f( boundScale[ 0 ], boundScale[ 1 ], boundScale[ 2 ] ) ) );
 				boundEnt->SetRotation( rotation );
 
 				g_scene->entities.push_back( boundEnt );
