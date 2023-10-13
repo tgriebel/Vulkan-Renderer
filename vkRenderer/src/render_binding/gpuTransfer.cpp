@@ -105,8 +105,8 @@ void Renderer::UploadTextures()
 
 	// 3. Add to resource type lists
 	{
-		gpuImages2D.Resize( MaxImageDescriptors );
-		gpuImagesCube.Resize( MaxImageDescriptors );
+		resources.gpuImages2D.Resize( MaxImageDescriptors );
+		resources.gpuImagesCube.Resize( MaxImageDescriptors );
 
 		// Find first cubemap. FIXME: Hacky, just done so there aren't nulls in the list
 		Image* firstCube = nullptr;
@@ -137,12 +137,12 @@ void Renderer::UploadTextures()
 			switch ( texture.info.type )
 			{
 				case IMAGE_TYPE_2D:
-					gpuImages2D[ uploadId ] = &texture;
-					gpuImagesCube[ uploadId ] = firstCube;
+					resources.gpuImages2D[ uploadId ] = &texture;
+					resources.gpuImagesCube[ uploadId ] = firstCube;
 					break;
 				case IMAGE_TYPE_CUBE:
-					gpuImages2D[ uploadId ] = &g_assets.textureLib.GetDefault()->Get();
-					gpuImagesCube[ uploadId ] = &texture;
+					resources.gpuImages2D[ uploadId ] = &g_assets.textureLib.GetDefault()->Get();
+					resources.gpuImagesCube[ uploadId ] = &texture;
 					break;
 			}
 		}
@@ -150,8 +150,8 @@ void Renderer::UploadTextures()
 		// Fill defaults
 		for ( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
 		{
-			gpuImages2D[ i ] = &g_assets.textureLib.GetDefault()->Get();
-			gpuImagesCube[ i ] = firstCube;
+			resources.gpuImages2D[ i ] = &g_assets.textureLib.GetDefault()->Get();
+			resources.gpuImagesCube[ i ] = firstCube;
 		}
 	}
 
@@ -241,8 +241,8 @@ void Renderer::UploadModelsToGPU()
 			Surface& surf = model.surfs[ s ];	
 			surfaceUpload_t& upload = geometry.surfUploads[ model.uploadId + s ];
 
-			upload.vertexOffset = vbBufElements;
-			upload.firstIndex = ibBufElements;
+			upload.vertexOffset = geometry.vbBufElements;
+			upload.firstIndex = geometry.ibBufElements;
 
 			// Upload Vertex Buffer
 			{
@@ -276,9 +276,9 @@ void Renderer::UploadModelsToGPU()
 				CopyGpuBuffer( geometry.stagingBuffer, geometry.vb, vbCopyRegion );
 
 				upload.vertexCount = vertexCount;
-				vbBufElements += vertexCount;
+				geometry.vbBufElements += vertexCount;
 
-				assert( vbBufElements < MaxVertices );
+				assert( geometry.vbBufElements < MaxVertices );
 			}
 
 			// Upload Index Buffer
@@ -296,9 +296,9 @@ void Renderer::UploadModelsToGPU()
 
 				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
 				upload.indexCount = indexCount;
-				ibBufElements += indexCount;
+				geometry.ibBufElements += indexCount;
 
-				assert( ibBufElements < MaxIndices );
+				assert( geometry.ibBufElements < MaxIndices );
 			}
 		}
 		modelAsset->CompleteUpload();

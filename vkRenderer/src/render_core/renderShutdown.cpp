@@ -84,22 +84,22 @@ void Renderer::Destroy()
 
 void Renderer::DestroyFramebuffers()
 {
-	renderContext.depthImageView.Destroy();
-	renderContext.stencilImageView.Destroy();
+	resources.depthImageView.Destroy();
+	resources.stencilImageView.Destroy();
 
-	mainColorResolvedImageView.Destroy();
-	depthResolvedImageView.Destroy();
-	stencilResolvedImageView.Destroy();
+	resources.mainColorResolvedImageView.Destroy();
+	resources.depthResolvedImageView.Destroy();
+	resources.stencilResolvedImageView.Destroy();
 
-	delete tempColorImage.gpuImage;
-	delete mainColorImage.gpuImage;
-	delete depthStencilImage.gpuImage;
-	delete mainColorResolvedImage.gpuImage;
-	delete depthStencilResolvedImage.gpuImage;
+	delete resources.tempColorImage.gpuImage;
+	delete resources.mainColorImage.gpuImage;
+	delete resources.depthStencilImage.gpuImage;
+	delete resources.mainColorResolvedImage.gpuImage;
+	delete resources.depthStencilResolvedImage.gpuImage;
 
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
-		delete shadowMapImage[ shadowIx ].gpuImage;
+		delete resources.shadowMapImage[ shadowIx ].gpuImage;
 		shadowMap[ shadowIx ].Destroy();
 	}
 	tempColor.Destroy();
@@ -134,12 +134,12 @@ void Renderer::ShutdownShaderResources()
 
 	// Buffers
 	{
-		renderContext.globalConstants.Destroy();
-		renderContext.viewParms.Destroy();
-		renderContext.surfParms.Destroy();
-		renderContext.materialBuffers.Destroy();
-		renderContext.lightParms.Destroy();
-		renderContext.particleBuffer.Destroy();
+		resources.globalConstants.Destroy();
+		resources.viewParms.Destroy();
+		resources.surfParms.Destroy();
+		resources.materialBuffers.Destroy();
+		resources.lightParms.Destroy();
+		resources.particleBuffer.Destroy();
 	}
 
 	// Images
@@ -155,8 +155,8 @@ void Renderer::ShutdownShaderResources()
 
 	for ( uint32_t i = 0; i < MaxImageDescriptors; ++i )
 	{
-		gpuImages2D[ i ] = nullptr;
-		gpuImagesCube[ i ] = nullptr;
+		resources.gpuImages2D[ i ] = nullptr;
+		resources.gpuImagesCube[ i ] = nullptr;
 	}
 
 	// PSO

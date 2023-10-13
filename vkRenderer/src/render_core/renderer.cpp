@@ -256,8 +256,8 @@ void Renderer::ShutdownGPU()
 	ShutdownShaderResources();
 
 	imageFreeSlot = 0;
-	vbBufElements = 0;
-	ibBufElements = 0;
+	geometry.vbBufElements = 0;
+	geometry.ibBufElements = 0;
 }
 
 
@@ -295,13 +295,13 @@ void Renderer::Resize()
 
 	uploadContext.Begin();
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
-		Transition( &uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
+		Transition( &uploadContext, resources.shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}
-	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
@@ -354,13 +354,13 @@ void Renderer::UploadAssets()
 	UploadTextures();
 
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {
-		Transition( &uploadContext, shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
+		Transition( &uploadContext, resources.shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}	
-	Transition( &uploadContext, mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-	Transition( &uploadContext, depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
@@ -568,62 +568,62 @@ void Renderer::UpdateBindSets()
 			pass->codeImages.Resize( 3 );
 			if ( passIx == DRAWPASS_SHADOW )
 			{				
-				pass->codeImages[ 0 ] = gpuImages2D[ 0 ];
-				pass->codeImages[ 1 ] = gpuImages2D[ 0 ];
-				pass->codeImages[ 2 ] = gpuImages2D[ 0 ];
+				pass->codeImages[ 0 ] = resources.gpuImages2D[ 0 ];
+				pass->codeImages[ 1 ] = resources.gpuImages2D[ 0 ];
+				pass->codeImages[ 2 ] = resources.gpuImages2D[ 0 ];
 			}
 			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
 			{
-				pass->codeImages[ 0 ] = &mainColorResolvedImage;
-				pass->codeImages[ 1 ] = &depthStencilResolvedImage;
-				pass->codeImages[ 2 ] = &mainColorResolvedImage;
+				pass->codeImages[ 0 ] = &resources.mainColorResolvedImage;
+				pass->codeImages[ 1 ] = &resources.depthStencilResolvedImage;
+				pass->codeImages[ 2 ] = &resources.mainColorResolvedImage;
 			}
 			else
 			{
-				pass->codeImages[ 0 ] = &shadowMapImage[ 0 ];
-				pass->codeImages[ 1 ] = &shadowMapImage[ 1 ];
-				pass->codeImages[ 2 ] = &shadowMapImage[ 2 ];
+				pass->codeImages[ 0 ] = &resources.shadowMapImage[ 0 ];
+				pass->codeImages[ 1 ] = &resources.shadowMapImage[ 1 ];
+				pass->codeImages[ 2 ] = &resources.shadowMapImage[ 2 ];
 			}
 
-			pass->parms->Bind( bind_globalsBuffer,	&renderContext.globalConstants );
-			pass->parms->Bind( bind_viewBuffer,		&renderContext.viewParms );
-			pass->parms->Bind( bind_modelBuffer,	&renderContext.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
-			pass->parms->Bind( bind_image2DArray,	&gpuImages2D );
-			pass->parms->Bind( bind_imageCubeArray,	&gpuImagesCube );
-			pass->parms->Bind( bind_materialBuffer,	&renderContext.materialBuffers );
-			pass->parms->Bind( bind_lightBuffer,	&renderContext.lightParms );
+			pass->parms->Bind( bind_globalsBuffer,	&resources.globalConstants );
+			pass->parms->Bind( bind_viewBuffer,		&resources.viewParms );
+			pass->parms->Bind( bind_modelBuffer,	&resources.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
+			pass->parms->Bind( bind_image2DArray,	&resources.gpuImages2D );
+			pass->parms->Bind( bind_imageCubeArray,	&resources.gpuImagesCube );
+			pass->parms->Bind( bind_materialBuffer,	&resources.materialBuffers );
+			pass->parms->Bind( bind_lightBuffer,	&resources.lightParms );
 			pass->parms->Bind( bind_imageCodeArray,	&pass->codeImages );
-			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &stencilResolvedImageView : pass->codeImages[ 0 ] );
+			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &resources.stencilResolvedImageView : pass->codeImages[ 0 ] );
 		}
 	}
 
 	{
-		particleState.parms->Bind( bind_globalsBuffer,			&renderContext.globalConstants );
-		particleState.parms->Bind( bind_particleWriteBuffer,	&renderContext.particleBuffer );
+		particleState.parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
+		particleState.parms->Bind( bind_particleWriteBuffer,	&resources.particleBuffer );
 	}
 
 	if( resolve != nullptr )
 	{
 		resolve->pass->codeImages.Resize( 3 );
-		resolve->pass->codeImages[ 0 ] = &mainColorImage;
-		resolve->pass->codeImages[ 1 ] = &renderContext.depthImageView;
-		resolve->pass->codeImages[ 2 ] = &renderContext.stencilImageView;
+		resolve->pass->codeImages[ 0 ] = &resources.mainColorImage;
+		resolve->pass->codeImages[ 1 ] = &resources.depthImageView;
+		resolve->pass->codeImages[ 2 ] = &resources.stencilImageView;
 
-		resolve->pass->parms->Bind( bind_globalsBuffer,			&renderContext.globalConstants );
+		resolve->pass->parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
 		resolve->pass->parms->Bind( bind_sourceImages,			&resolve->pass->codeImages );
-		resolve->pass->parms->Bind( bind_imageStencil,			&renderContext.stencilImageView );
+		resolve->pass->parms->Bind( bind_imageStencil,			&resources.stencilImageView );
 		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
 	}
 
 	{
 		downScale.pass->codeImages.Resize( 3 );
-		downScale.pass->codeImages[ 0 ] = &mainColorResolvedImage;
-		downScale.pass->codeImages[ 1 ] = &mainColorResolvedImage;
-		downScale.pass->codeImages[ 2 ] = &mainColorResolvedImage;
+		downScale.pass->codeImages[ 0 ] = &resources.mainColorResolvedImage;
+		downScale.pass->codeImages[ 1 ] = &resources.mainColorResolvedImage;
+		downScale.pass->codeImages[ 2 ] = &resources.mainColorResolvedImage;
 
-		downScale.pass->parms->Bind( bind_globalsBuffer,		&renderContext.globalConstants );
+		downScale.pass->parms->Bind( bind_globalsBuffer,		&resources.globalConstants );
 		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );
-		downScale.pass->parms->Bind( bind_imageStencil,			&renderContext.stencilImageView );
+		downScale.pass->parms->Bind( bind_imageStencil,			&resources.stencilImageView );
 		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
 	}
 }
@@ -631,7 +631,7 @@ void Renderer::UpdateBindSets()
 
 void Renderer::UpdateBuffers()
 {
-	renderContext.globalConstants.SetPos( 0 );
+	resources.globalConstants.SetPos( 0 );
 	{
 		globalUboConstants_t globals = {};
 		static auto startTime = std::chrono::high_resolution_clock::now();
@@ -653,10 +653,10 @@ void Renderer::UpdateBuffers()
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 
-		renderContext.globalConstants.CopyData( &globals, sizeof( globals ) );
+		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
-	renderContext.viewParms.SetPos( 0 );
+	resources.viewParms.SetPos( 0 );
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -671,7 +671,7 @@ void Renderer::UpdateBuffers()
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
 		}
-		renderContext.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+		resources.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
@@ -700,17 +700,17 @@ void Renderer::UpdateBuffers()
 			}
 		}
 
-		renderContext.surfParmPartitions[ viewId ].SetPos( 0 );
-		renderContext.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( surfaceBufferObject_t ) * MaxSurfaces );
+		resources.surfParmPartitions[ viewId ].SetPos( 0 );
+		resources.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( surfaceBufferObject_t ) * MaxSurfaces );
 	}
 
-	renderContext.materialBuffers.SetPos( 0 );
-	renderContext.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
+	resources.materialBuffers.SetPos( 0 );
+	resources.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
 
-	renderContext.lightParms.SetPos( 0 );
-	renderContext.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
+	resources.lightParms.SetPos( 0 );
+	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
 
-	renderContext.particleBuffer.SetPos( renderContext.particleBuffer.GetMaxSize() );
+	resources.particleBuffer.SetPos( resources.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();
 }
 

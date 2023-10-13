@@ -66,7 +66,35 @@ struct ComputeState
 };
 
 
+// Renderer system and resources accessible to sub-systems
 class RenderContext
+{
+public:
+	// Memory
+	AllocatorMemory		localMemory;
+	AllocatorMemory		frameBufferMemory;
+	AllocatorMemory		sharedMemory;
+};
+
+
+// Bundle of all resources needed to represent geometry on the GPU
+class GeometryContext
+{
+public:
+	using surfUploadArray_t	= Array<surfaceUpload_t, MaxSurfaces * MaxViews>;
+
+	GpuBuffer			stagingBuffer;
+	GpuBuffer			vb;
+	GpuBuffer			ib;
+	surfUploadArray_t	surfUploads;
+
+	uint32_t			vbBufElements = 0;
+	uint32_t			ibBufElements = 0;
+};
+
+
+// Resources that are globally accessible for shader binding
+class ResourceContext
 {
 public:
 	GpuBuffer			globalConstants;
@@ -77,26 +105,24 @@ public:
 
 	// TODO: move view-specific data
 	GpuBuffer			viewParms;
+	Image				mainColorImage;
+	Image				depthStencilImage;
 	ImageView			depthImageView;
 	ImageView			stencilImageView;
 	GpuBufferView		surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 
-	// Memory
-	AllocatorMemory		localMemory;
-	AllocatorMemory		frameBufferMemory;
-	AllocatorMemory		sharedMemory;
-};
+	// Code images
+	ImageView			mainColorResolvedImageView;
+	ImageView			depthResolvedImageView;
+	ImageView			stencilResolvedImageView;
+	Image				shadowMapImage[ MaxShadowViews ];
+	Image				mainColorResolvedImage;
+	Image				tempColorImage;
+	Image				depthStencilResolvedImage;
 
-
-class GeometryContext
-{
-public:
-	using surfUploadArray_t	= Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
-
-	GpuBuffer			stagingBuffer;
-	GpuBuffer			vb;
-	GpuBuffer			ib;
-	surfUploadArray_t	surfUploads;
+	// Data images
+	ImageArray			gpuImages2D;
+	ImageArray			gpuImagesCube;
 };
 
 
@@ -150,8 +176,6 @@ private:
 	std::set<hdl_t>						uploadMaterials;
 
 	uint32_t							imageFreeSlot = 0;
-	uint32_t							vbBufElements = 0;
-	uint32_t							ibBufElements = 0;
 	
 	// Render context
 	RenderContext						renderContext;
@@ -163,22 +187,10 @@ private:
 
 	// Shader resources
 	GeometryContext						geometry;
+	ResourceContext						resources;
 	GpuBuffer							textureStagingBuffer;
-	ImageArray							gpuImages2D;
-	ImageArray							gpuImagesCube;
 	materialBufferArray_t				materialBuffer;
 	committedLightsArray_t				committedLights;
-
-	Image								shadowMapImage[ MaxShadowViews ];
-	Image								mainColorImage;
-	Image								mainColorResolvedImage;
-	Image								tempColorImage;
-	Image								depthStencilImage;
-	Image								depthStencilResolvedImage;
-
-	ImageView							mainColorResolvedImageView;
-	ImageView							depthResolvedImageView;
-	ImageView							stencilResolvedImageView;
 
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;

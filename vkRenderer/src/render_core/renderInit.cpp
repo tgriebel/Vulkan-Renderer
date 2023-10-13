@@ -116,8 +116,8 @@ void Renderer::Init()
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
 	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
-	schedule.Queue( new TransitionImageTask( &mainColorResolvedImage, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST ) );
-	schedule.Queue( new MipImageTask( &mainColorResolvedImage ) );
+	schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST ) );
+	schedule.Queue( new MipImageTask( &resources.mainColorResolvedImage ) );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 }
 
@@ -155,17 +155,23 @@ void Renderer::InitApi()
 		computeContext.Create( "Compute Context" );
 		uploadContext.Create( "Upload Context" );
 	}
+
+	{
+		#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = bindSets[ Hash( "bindset_"#NAME ) ];			\
+									bindset_##NAME.Create( g_##NAME##Bindings, COUNTARRAY( g_##NAME##Bindings ) );
+
+		BIND_SET( default )
+		BIND_SET( particle )
+		BIND_SET( imageProcess )
+	}
 }
 
 
 void Renderer::InitShaderResources()
 {
-	#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = bindSets[ Hash( "bindset_"#NAME ) ];	\
-								bindset_##NAME.Create( g_##NAME##Bindings, COUNTARRAY( g_##NAME##Bindings ) );
-
-	BIND_SET( default )
-	BIND_SET( particle )
-	BIND_SET( imageProcess )
+	const ShaderBindSet& bindset_default = bindSets[ Hash( "bindset_default" ) ];
+	const ShaderBindSet& bindset_imageProcess = bindSets[ Hash( "bindset_imageProcess" ) ];
+	const ShaderBindSet& bindset_particle = bindSets[ Hash( "bindset_particle" ) ];
 
 	{
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
@@ -211,8 +217,41 @@ void Renderer::InitShaderResources()
 
 	AllocRegisteredBindParms();
 
-	CreateCodeTextures();
-	CreateBuffers();
+	{
+		imageInfo_t info{};
+		info.width = 256;
+		info.height = 256;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_BGRA_8;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.type = IMAGE_TYPE_2D;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		// Default Images
+		CreateImage( "_white", info, GPU_IMAGE_READ, renderContext.localMemory, rc.whiteImage );
+		CreateImage( "_black", info, GPU_IMAGE_READ, renderContext.localMemory, rc.blackImage );
+	}
+
+	{
+		resources.globalConstants.Create( "Globals", LIFETIME_PERSISTENT, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, renderContext.sharedMemory );
+		resources.viewParms.Create( "View", LIFETIME_PERSISTENT, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.surfParms.Create( "Surf", LIFETIME_PERSISTENT, MaxViews * MaxSurfaces, sizeof( surfaceBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.materialBuffers.Create( "Material", LIFETIME_PERSISTENT, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.lightParms.Create( "Light", LIFETIME_PERSISTENT, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.particleBuffer.Create( "Particle", LIFETIME_PERSISTENT, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+
+		for ( size_t v = 0; v < MaxViews; ++v ) {
+			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
+		}
+
+		geometry.vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
+		geometry.ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
+
+		geometry.stagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+	}
 }
 
 
@@ -403,7 +442,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, shadowMapImage[ shadowIx ] );
+		CreateImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.shadowMapImage[ shadowIx ] );
 	}
 
 	// Main images
@@ -419,13 +458,13 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, mainColorImage );
+		CreateImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.mainColorImage );
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilImage );
+		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.depthStencilImage );
 	}
 
 	// Resolve image
@@ -436,26 +475,26 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = MipCount( info.width, info.height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = mainColorImage.info.fmt;
+		info.fmt = resources.mainColorImage.info.fmt;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = mainColorImage.info.aspect;
-		info.tiling = mainColorImage.info.tiling;
+		info.aspect = resources.mainColorImage.info.aspect;
+		info.tiling = resources.mainColorImage.info.tiling;
 
-		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, mainColorResolvedImage );
+		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resources.mainColorResolvedImage );
 
 		info.mipLevels = 1;
-		mainColorResolvedImageView.Init( mainColorResolvedImage, info );
+		resources.mainColorResolvedImageView.Init( resources.mainColorResolvedImage, info );
 	}
 
 	// Depth-stencil views
 	{
-		imageInfo_t depthInfo = depthStencilImage.info;
+		imageInfo_t depthInfo = resources.depthStencilImage.info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		renderContext.depthImageView.Init( depthStencilImage, depthInfo );
+		resources.depthImageView.Init( resources.depthStencilImage, depthInfo );
 
-		imageInfo_t stencilInfo = depthStencilImage.info;
+		imageInfo_t stencilInfo = resources.depthStencilImage.info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		renderContext.stencilImageView.Init( depthStencilImage, stencilInfo );
+		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo );
 	}
 
 	// Resolve depth-stencil image
@@ -469,15 +508,15 @@ void Renderer::CreateFramebuffers()
 		info.fmt = IMAGE_FMT_RG_32;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = depthStencilImage.info.tiling;
+		info.tiling = resources.depthStencilImage.info.tiling;
 
-		CreateImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, depthStencilResolvedImage );
+		CreateImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.depthStencilResolvedImage );
 	}
 
 	// Depth-stencil views
 	{
-		depthResolvedImageView.Init( depthStencilResolvedImage, depthStencilResolvedImage.info );
-		stencilResolvedImageView.Init( depthStencilResolvedImage, depthStencilResolvedImage.info );
+		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info );
+		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info );
 	}
 
 	// Temp image
@@ -493,17 +532,17 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, tempColorImage );
+		CreateImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.tempColorImage );
 	}
 
 	// Main Color Resolved Frame buffer
 	{
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.name = "MainColorResolveFB";
-		fbInfo.color0[ 0 ] = &mainColorResolvedImageView;
-		fbInfo.color1[ 0 ] = &depthStencilResolvedImage;
-		fbInfo.width = mainColorResolvedImageView.info.width;
-		fbInfo.height = mainColorResolvedImageView.info.height;
+		fbInfo.color0[ 0 ] = &resources.mainColorResolvedImageView;
+		fbInfo.color1[ 0 ] = &resources.depthStencilResolvedImage;
+		fbInfo.width = resources.mainColorResolvedImageView.info.width;
+		fbInfo.height = resources.mainColorResolvedImageView.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColorResolved.Create( fbInfo );
@@ -513,9 +552,9 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.name = "TempColorFB";
-		fbInfo.color0[ 0 ] = &tempColorImage;
-		fbInfo.width = tempColorImage.info.width;
-		fbInfo.height = tempColorImage.info.height;
+		fbInfo.color0[ 0 ] = &resources.tempColorImage;
+		fbInfo.width = resources.tempColorImage.info.width;
+		fbInfo.height = resources.tempColorImage.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		tempColor.Create( fbInfo );
@@ -526,9 +565,9 @@ void Renderer::CreateFramebuffers()
 	{	
 		frameBufferCreateInfo_t fbInfo = {};
 		fbInfo.name = "ShadowMapFB";
-		fbInfo.depth[ 0 ] = &shadowMapImage[ shadowIx ];
-		fbInfo.width = shadowMapImage[ shadowIx ].info.width;
-		fbInfo.height = shadowMapImage[ shadowIx ].info.height;
+		fbInfo.depth[ 0 ] = &resources.shadowMapImage[ shadowIx ];
+		fbInfo.width = resources.shadowMapImage[ shadowIx ].info.width;
+		fbInfo.height = resources.shadowMapImage[ shadowIx ].info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		shadowMap[ shadowIx ].Create( fbInfo );
@@ -540,12 +579,12 @@ void Renderer::CreateFramebuffers()
 		fbInfo.name = "MainColorFB";
 		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
-			fbInfo.color0[ frameIx ] = &mainColorImage;
-			fbInfo.depth[ frameIx ] = &renderContext.depthImageView;
-			fbInfo.stencil[ frameIx ] = &renderContext.stencilImageView;
+			fbInfo.color0[ frameIx ] = &resources.mainColorImage;
+			fbInfo.depth[ frameIx ] = &resources.depthImageView;
+			fbInfo.stencil[ frameIx ] = &resources.stencilImageView;
 		}
-		fbInfo.width = mainColorImage.info.width;
-		fbInfo.height = mainColorImage.info.height;
+		fbInfo.width = resources.mainColorImage.info.width;
+		fbInfo.height = resources.mainColorImage.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );
@@ -626,52 +665,11 @@ void Renderer::RefreshRegisteredBindParms()
 }
 
 
-void Renderer::CreateBuffers()
-{
-	{
-		renderContext.globalConstants.Create(	"Globals",	LIFETIME_PERSISTENT,	1,						sizeof( viewBufferObject_t ),		bufferType_t::UNIFORM, renderContext.sharedMemory );
-		renderContext.viewParms.Create(			"View",		LIFETIME_PERSISTENT,	MaxViews,				sizeof( viewBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
-		renderContext.surfParms.Create(			"Surf",		LIFETIME_PERSISTENT,	MaxViews * MaxSurfaces,	sizeof( surfaceBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
-		renderContext.materialBuffers.Create(	"Material",	LIFETIME_PERSISTENT,	MaxMaterials,			sizeof( materialBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
-		renderContext.lightParms.Create(		"Light",	LIFETIME_PERSISTENT,	MaxLights,				sizeof( lightBufferObject_t ),		bufferType_t::STORAGE, renderContext.sharedMemory );
-		renderContext.particleBuffer.Create(	"Particle",	LIFETIME_PERSISTENT,	MaxParticles,			sizeof( particleBufferObject_t ),	bufferType_t::STORAGE, renderContext.sharedMemory );
-
-		for ( size_t v = 0; v < MaxViews; ++v ) {
-			renderContext.surfParmPartitions[ v ] = renderContext.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
-		}
-	}
-
-	geometry.vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
-	geometry.ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
-
-	geometry.stagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
-	textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
-}
-
-
 void Renderer::CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
 {
 	outImage.info = info;
 	outImage.gpuImage = new GpuImage();
 	outImage.gpuImage->Create( name, outImage.info, flags, memory );
-}
-
-
-void Renderer::CreateCodeTextures() {
-	imageInfo_t info{};
-	info.width = 256;
-	info.height = 256;
-	info.mipLevels = 1;
-	info.layers = 1;
-	info.subsamples = IMAGE_SMP_1;
-	info.fmt = IMAGE_FMT_BGRA_8;
-	info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-	info.type = IMAGE_TYPE_2D;
-	info.tiling = IMAGE_TILING_MORTON;
-
-	// Default Images
-	CreateImage( "_white", info, GPU_IMAGE_READ, renderContext.localMemory, rc.whiteImage );
-	CreateImage( "_black", info, GPU_IMAGE_READ, renderContext.localMemory, rc.blackImage );
 }
 
 
