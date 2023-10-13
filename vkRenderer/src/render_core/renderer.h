@@ -220,8 +220,6 @@ private:
 	void								FreeRegisteredBindParms();
 	void								RefreshRegisteredBindParms();
 	void								CreateSyncObjects();
-	void								CreateCodeTextures();
-	void								CreateBuffers();
 	void								CreateFramebuffers();
 	void								DestroyFramebuffers();
 
