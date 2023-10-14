@@ -52,6 +52,67 @@ void CreateCodeAssets()
 				}
 			}			
 		}
+
+		const uint32_t debugColor = 14;
+
+		static const Color* colors[ debugColor ] =
+		{
+			&ColorRed,
+			&ColorGreen,
+			&ColorBlue,
+			&ColorWhite,
+			&ColorBlack,
+			&ColorLGrey,
+			&ColorDGrey,
+			&ColorBrown,
+			&ColorCyan,
+			&ColorYellow,
+			&ColorPurple,
+			&ColorOrange,
+			&ColorPink,
+			&ColorGold,
+		};
+
+		const char* names[ debugColor ] =
+		{
+			"Red",
+			"Green",
+			"Blue",
+			"White",
+			"Black",
+			"Light Grey",
+			"Dark Grey",
+			"Brown",
+			"Cyan",
+			"Yellow",
+			"Purple",
+			"Orange",
+			"Pink",
+			"Gold"			
+		};
+
+		for ( uint32_t t = 0; t < debugColor; ++t )
+		{
+			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
+			Image& texture = g_assets.textureLib.Find( handle )->Get();
+
+			texture.info.width = 16;
+			texture.info.height = 16;
+			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
+			texture.info.layers = 1;
+			texture.info.type = IMAGE_TYPE_2D;
+			texture.info.channels = 4;
+			texture.info.fmt = IMAGE_FMT_RGBA_8;
+			texture.info.tiling = IMAGE_TILING_MORTON;
+
+			texture.cpuImage.Init( texture.info.width, texture.info.height );
+
+			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
+				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
+					texture.cpuImage.SetPixel( x, y, colors[ t ]->AsRGBA() );
+				}
+			}
+		}
 	}
 
 	// Materials
