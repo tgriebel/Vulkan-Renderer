@@ -1,18 +1,22 @@
+#include "../render_core/renderer.h"
 #include "renderview.h"
+#include "../render_binding/bindings.h"
 
-void RenderView::Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb )
+void RenderView::Init( const renderViewCreateInfo_t& info )
 {
 	const uint32_t frameStateCount = MaxFrameStates;
 
-	const uint32_t width = fb.GetWidth();
-	const uint32_t height = fb.GetHeight();
+	const uint32_t width = info.fb->GetWidth();
+	const uint32_t height = info.fb->GetHeight();
 
 	m_viewport.width = width;
 	m_viewport.height = height;
 
-	m_name = name;
-	m_region = region;
-	m_framebuffer = &fb;
+	m_name = info.name;
+	m_region = info.region;
+	m_framebuffer = info.fb;
+	m_resources = info.resources;
+	m_viewId = info.viewId;
 
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
 		passes[ passIx ] = nullptr;
@@ -26,42 +30,45 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		switch( passIx )
 		{
 			case DRAWPASS_SHADOW:
-				passes[ passIx ] = new ShadowPass( &fb );
+				passes[ passIx ] = new ShadowPass( info.fb );
 				break;
 			case DRAWPASS_DEPTH:
-				passes[ passIx ] = new DepthPass( &fb );
+				passes[ passIx ] = new DepthPass( info.fb );
 				break;
 			case DRAWPASS_TERRAIN:
-				passes[ passIx ] = new TerrainPass( &fb );
+				passes[ passIx ] = new TerrainPass( info.fb );
 				break;
 			case DRAWPASS_OPAQUE:
-				passes[ passIx ] = new OpaquePass( &fb );
+				passes[ passIx ] = new OpaquePass( info.fb );
 				break;
 			case DRAWPASS_SKYBOX:
-				passes[ passIx ] = new SkyboxPass( &fb );
+				passes[ passIx ] = new SkyboxPass( info.fb );
 				break;
 			case DRAWPASS_TRANS:
-				passes[ passIx ] = new TransPass( &fb );
+				passes[ passIx ] = new TransPass( info.fb );
 				break;
 			case DRAWPASS_EMISSIVE:
-				passes[ passIx ] = new EmissivePass( &fb );
+				passes[ passIx ] = new EmissivePass( info.fb );
 				break;
 			case DRAWPASS_DEBUG_3D:
-				passes[ passIx ] = new Debug3dPass( &fb );
+				passes[ passIx ] = new Debug3dPass( info.fb );
 				break;
 			case DRAWPASS_DEBUG_WIREFRAME:
-				passes[ passIx ] = new WireframePass( &fb );
+				passes[ passIx ] = new WireframePass( info.fb );
 				break;
 			case DRAWPASS_POST_2D:
-				passes[ passIx ] = new PostPass( &fb );
+				passes[ passIx ] = new PostPass( info.fb );
 				break;
 			case DRAWPASS_DEBUG_2D:
-				passes[ passIx ] = new Debug2dPass( &fb );
+				passes[ passIx ] = new Debug2dPass( info.fb );
 				break;
 		}
+
+		const ShaderBindSet& bindset_global = info.context->bindSets[ Hash( "bindset_global" ) ];
+		passes[ passIx ]->parms = info.context->RegisterBindParm( &bindset_global );
 	}
 
-	if( region == renderViewRegion_t::SHADOW )
+	if( info.region == renderViewRegion_t::SHADOW )
 	{
 		m_transitionState.flags.clear = true;
 		m_transitionState.flags.store = true;
@@ -74,7 +81,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		m_clearDepth = 1.0f;
 		m_clearStencil = 0;
 	}
-	else if( region == renderViewRegion_t::STANDARD_RASTER )
+	else if( info.region == renderViewRegion_t::STANDARD_RASTER )
 	{
 		m_transitionState.flags.clear = true;
 		m_transitionState.flags.store = true;
@@ -87,7 +94,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		m_clearDepth = 0.0f;
 		m_clearStencil = 0;
 	}
-	else if ( region == renderViewRegion_t::POST )
+	else if ( info.region == renderViewRegion_t::POST )
 	{
 		m_transitionState.flags.clear = true;
 		m_transitionState.flags.store = true;
@@ -101,7 +108,7 @@ void RenderView::Init( const char* name, renderViewRegion_t region, const int vi
 		m_clearStencil = 0;
 	}
 
-	m_viewId = viewId;
+
 }
 
 

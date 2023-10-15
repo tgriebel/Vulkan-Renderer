@@ -191,13 +191,13 @@ void Renderer::UpdateFrameDescSet()
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
 
-	const uint32_t bindParmCount = bindParmsList.Count();
+	const uint32_t bindParmCount = renderContext.bindParmsList.Count();
 	for ( uint32_t i = 0; i < bindParmCount; ++i )
 	{
-		if( bindParmsList[ i ].IsValid() == false ) {
+		if( renderContext.bindParmsList[ i ].IsValid() == false ) {
 			continue;
 		}
-		AppendDescriptorWrites( bindParmsList[ i ], context.bufferId, descriptorWrites );
+		AppendDescriptorWrites( renderContext.bindParmsList[ i ], context.bufferId, descriptorWrites );
 	}
 
 	if( descriptorWrites.size() > 0 ) {

@@ -49,21 +49,45 @@ void Renderer::Init()
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{
+		renderViewCreateInfo_t info{};
+		info.name = "Shadow View";
+		info.region = renderViewRegion_t::SHADOW;
+		info.viewId = viewCount;
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fb = &shadowMap[ i ];
+
 		shadowViews[ i ] = &views[ viewCount ];
-		shadowViews[ i ]->Init( "Shadow View", renderViewRegion_t::SHADOW, viewCount, shadowMap[ i ] );
+		shadowViews[ i ]->Init( info );
 		++viewCount;
 	}
 
 	for ( uint32_t i = 0; i < Max3DViews; ++i )
 	{
+		renderViewCreateInfo_t info{};
+		info.name = "Main View";
+		info.region = renderViewRegion_t::STANDARD_RASTER;
+		info.viewId = viewCount;
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fb = &mainColor;
+
 		renderViews[ i ] = &views[ viewCount ];
-		renderViews[ i ]->Init( "Main View", renderViewRegion_t::STANDARD_RASTER, viewCount, mainColor );
+		renderViews[ i ]->Init( info );
 		++viewCount;
 	}
 
 	{
+		renderViewCreateInfo_t info{};
+		info.name = "Post";
+		info.region = renderViewRegion_t::POST;
+		info.viewId = viewCount;
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fb = g_swapChain.GetFrameBuffer();
+
 		view2Ds[ 0 ] = &views[ viewCount ];
-		view2Ds[ 0 ]->Init( "Post", renderViewRegion_t::POST, viewCount, *g_swapChain.GetFrameBuffer() );
+		view2Ds[ 0 ]->Init( info );
 		++viewCount;
 	}
 
@@ -157,10 +181,10 @@ void Renderer::InitApi()
 	}
 
 	{
-		#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = bindSets[ Hash( "bindset_"#NAME ) ];			\
+		#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = renderContext.bindSets[ Hash( "bindset_"#NAME ) ];	\
 									bindset_##NAME.Create( g_##NAME##Bindings, COUNTARRAY( g_##NAME##Bindings ) );
 
-		BIND_SET( default )
+		BIND_SET( global )
 		BIND_SET( particle )
 		BIND_SET( imageProcess )
 	}
@@ -169,9 +193,9 @@ void Renderer::InitApi()
 
 void Renderer::InitShaderResources()
 {
-	const ShaderBindSet& bindset_default = bindSets[ Hash( "bindset_default" ) ];
-	const ShaderBindSet& bindset_imageProcess = bindSets[ Hash( "bindset_imageProcess" ) ];
-	const ShaderBindSet& bindset_particle = bindSets[ Hash( "bindset_particle" ) ];
+	const ShaderBindSet& bindset_global = renderContext.bindSets[ Hash( "bindset_global" ) ];
+	const ShaderBindSet& bindset_imageProcess = renderContext.bindSets[ Hash( "bindset_imageProcess" ) ];
+	const ShaderBindSet& bindset_particle = renderContext.bindSets[ Hash( "bindset_particle" ) ];
 
 	{
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
@@ -180,42 +204,29 @@ void Renderer::InitShaderResources()
 			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
 			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
 			{
-				auto it = bindSets.find( prog.bindHash );
-				if( it != bindSets.end() ) {
+				auto it = renderContext.bindSets.find( prog.bindHash );
+				if( it != renderContext.bindSets.end() ) {
 					prog.bindset = &it->second;
 				} else {
-					prog.bindset = &bindset_default;
+					prog.bindset = &bindset_global;
 				}
 			}
 		}
 	}
 
-	const uint32_t frameStateCount = g_swapChain.GetBufferCount();
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
-		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
-		{
-			DrawPass* pass = views[ viewIx ].passes[ passIx ];
-			if ( pass == nullptr ) {
-				continue;
-			}
-			pass->parms = RegisterBindParm( &bindset_default );
-		}
-	}
-
-	{
-		particleState.parms = RegisterBindParm( &bindset_particle );
+		particleState.parms = renderContext.RegisterBindParm( &bindset_particle );
 		particleState.updateDescriptorSets = true;
 
 		if( resolve != nullptr ) {
-			resolve->pass->parms = RegisterBindParm( &bindset_imageProcess );
+			resolve->pass->parms = renderContext.RegisterBindParm( &bindset_imageProcess );
 		}
-		downScale.pass->parms = RegisterBindParm( &bindset_imageProcess );
+		downScale.pass->parms = renderContext.RegisterBindParm( &bindset_imageProcess );
 	}
 
 	materialBuffer.Reset();
 
-	AllocRegisteredBindParms();
+	renderContext.AllocRegisteredBindParms();
 
 	{
 		imageInfo_t info{};
@@ -592,7 +603,7 @@ void Renderer::CreateFramebuffers()
 }
 
 
-ShaderBindParms* Renderer::RegisterBindParm( const ShaderBindSet* set )
+ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 {
 	ShaderBindParms parms = ShaderBindParms( set );
 
@@ -602,7 +613,7 @@ ShaderBindParms* Renderer::RegisterBindParm( const ShaderBindSet* set )
 }
 
 
-void Renderer::AllocRegisteredBindParms()
+void RenderContext::AllocRegisteredBindParms()
 {
 	SCOPED_TIMER_PRINT( AllocRegisteredBindParms )
 
@@ -642,7 +653,7 @@ void Renderer::AllocRegisteredBindParms()
 }
 
 
-void Renderer::FreeRegisteredBindParms()
+void RenderContext::FreeRegisteredBindParms()
 {
 	std::vector<VkDescriptorSet> descSets;
 	descSets.reserve( bindParmsList.Count() );
@@ -657,7 +668,7 @@ void Renderer::FreeRegisteredBindParms()
 }
 
 
-void Renderer::RefreshRegisteredBindParms()
+void RenderContext::RefreshRegisteredBindParms()
 {
 	for ( uint32_t i = 0; i < bindParmsList.Count(); ++i ) {
 		bindParmsList[ i ].Clear();

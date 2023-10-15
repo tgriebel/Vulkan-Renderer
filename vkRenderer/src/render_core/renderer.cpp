@@ -291,7 +291,7 @@ void Renderer::RecreateSwapChain()
 void Renderer::Resize()
 {
 	RecreateSwapChain();
-	RefreshRegisteredBindParms();
+	renderContext.RefreshRegisteredBindParms();
 
 	uploadContext.Begin();
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx ) {

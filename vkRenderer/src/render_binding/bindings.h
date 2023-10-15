@@ -24,7 +24,7 @@ BINDING( imageCodeArray,	IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL );
 BINDING( imageStencil,		IMAGE_2D,			1,						BIND_STATE_ALL );
 
 
-static const ShaderBinding g_defaultBindings[] =
+static const ShaderBinding g_globalBindings[] =
 {
 	bind_globalsBuffer,
 	bind_viewBuffer,

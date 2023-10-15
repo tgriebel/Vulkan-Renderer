@@ -97,7 +97,7 @@ public:
 		return m_fb;
 	}
 
-	Array<Image*, 100>			codeImages;
+	Array<const Image*, 100>	codeImages;
 	ShaderBindParms*			parms;
 };
 

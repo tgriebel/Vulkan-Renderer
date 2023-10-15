@@ -171,10 +171,10 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// Shader binding resources
-	for( auto bindSet : bindSets ) {
+	for( auto bindSet : renderContext.bindSets ) {
 		bindSet.second.Destroy();
 	}
 
-	FreeRegisteredBindParms();
-	bindParmsList.Reset();
+	renderContext.FreeRegisteredBindParms();
+	renderContext.bindParmsList.Reset();
 }

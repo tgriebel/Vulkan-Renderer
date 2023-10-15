@@ -113,7 +113,7 @@ const std::string BakedMaterialExtension = ".mtl.bin";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 
-using ImageArray = Array<Image*, MaxImageDescriptors>;
+using ImageArray = Array<const Image*, MaxImageDescriptors>;
 
 typedef void ( *debugMenuFuncPtr )( );
 

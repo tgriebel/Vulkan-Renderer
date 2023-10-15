@@ -28,6 +28,9 @@
 #include "drawGroup.h"
 #include "../draw_passes/drawpass.h"
 
+class ResourceContext;
+class RenderContext;
+
 enum class renderViewRegion_t : uint32_t
 {
 	SHADOW			= 0,
@@ -37,11 +40,24 @@ enum class renderViewRegion_t : uint32_t
 	UNKNOWN,
 };
 
+
+struct renderViewCreateInfo_t
+{
+	const char*				name;
+	renderViewRegion_t		region;
+	int						viewId;
+	const ResourceContext*	resources;
+	RenderContext*			context;
+	FrameBuffer*			fb;
+};
+
+
 class RenderView
 {
 private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
+	const ResourceContext*	m_resources;
 	const FrameBuffer*		m_framebuffer;
 	vec4f					m_clearColor;
 	float					m_clearDepth;
@@ -89,7 +105,7 @@ public:
 		}
 	}
 
-	void					Init( const char* name, renderViewRegion_t region, const int viewId, FrameBuffer& fb );
+	void					Init( const renderViewCreateInfo_t& info );
 	void					Resize();
 
 	drawPass_t				ViewRegionPassBegin() const;

@@ -70,10 +70,21 @@ struct ComputeState
 class RenderContext
 {
 public:
+	using bindParmArray_t = Array<ShaderBindParms, DescriptorPoolMaxSets>;
+
+	// Shader binding
+	bindParmArray_t		bindParmsList;
+	bindSetMap_t		bindSets;
+
 	// Memory
 	AllocatorMemory		localMemory;
 	AllocatorMemory		frameBufferMemory;
 	AllocatorMemory		sharedMemory;
+
+	ShaderBindParms*	RegisterBindParm( const ShaderBindSet* set );
+	void				AllocRegisteredBindParms();
+	void				FreeRegisteredBindParms();
+	void				RefreshRegisteredBindParms();
 };
 
 
@@ -145,7 +156,7 @@ public:
 private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;
-	using bindParmArray_t			= Array<ShaderBindParms, DescriptorPoolMaxSets>;
+
 
 
 	static const uint32_t				ShadowMapWidth = 1024;
@@ -199,10 +210,6 @@ private:
 
 	uint32_t							shadowCount = 0;
 
-	// Shader binding
-	bindParmArray_t						bindParmsList;
-	bindSetMap_t						bindSets;
-
 	// Init/Shutdown
 	void								InitApi();
 	void								InitShaderResources();
@@ -215,10 +222,6 @@ private:
 
 	// API Resource Functions
 	void								CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
-	ShaderBindParms*					RegisterBindParm( const ShaderBindSet* set );
-	void								AllocRegisteredBindParms();
-	void								FreeRegisteredBindParms();
-	void								RefreshRegisteredBindParms();
 	void								CreateSyncObjects();
 	void								CreateFramebuffers();
 	void								DestroyFramebuffers();
