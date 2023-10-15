@@ -178,7 +178,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		drawSurfInstance_t instance = {};
 		drawSurf_t surf = {};
 
-		instance.modelMatrix = ent.GetMatrix().Transpose();
+		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
 		surf.uploadId = ( model.uploadId + i );
@@ -696,7 +696,7 @@ void Renderer::UpdateBuffers()
 			for ( uint32_t surfIx = 0; surfIx < view.drawGroup[ passIx ].InstanceCount(); ++surfIx )
 			{
 				const uint32_t instanceId = view.drawGroupOffset[ passIx ] + view.drawGroup[ passIx ].InstanceId( surfIx );
-				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix;
+				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();
 			}
 		}
 
