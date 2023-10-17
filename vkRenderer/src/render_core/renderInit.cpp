@@ -613,6 +613,12 @@ ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 }
 
 
+const ShaderBindSet* RenderContext::LookupBindSet( const char* name )
+{
+	return &bindSets[ Hash( name ) ];
+}
+
+
 void RenderContext::AllocRegisteredBindParms()
 {
 	SCOPED_TIMER_PRINT( AllocRegisteredBindParms )

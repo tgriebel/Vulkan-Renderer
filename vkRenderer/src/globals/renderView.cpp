@@ -64,8 +64,8 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 				break;
 		}
 
-		const ShaderBindSet& bindset_global = info.context->bindSets[ Hash( "bindset_global" ) ];
-		passes[ passIx ]->parms = info.context->RegisterBindParm( &bindset_global );
+		const ShaderBindSet* bindset_global = info.context->LookupBindSet( "bindset_global"  );
+		passes[ passIx ]->parms = info.context->RegisterBindParm( bindset_global );
 	}
 
 	if( info.region == renderViewRegion_t::SHADOW )

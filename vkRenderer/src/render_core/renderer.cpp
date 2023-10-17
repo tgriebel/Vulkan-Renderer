@@ -553,6 +553,16 @@ void Renderer::CommitViews( const Scene* scene )
 
 void Renderer::UpdateBindSets()
 {
+	ShaderBindParms* globalParms = renderContext.RegisterBindParm( renderContext.LookupBindSet( "bindset_global" ) );
+
+	globalParms->Bind( bind_globalsBuffer, &resources.globalConstants );
+	globalParms->Bind( bind_viewBuffer, &resources.viewParms );
+	globalParms->Bind( bind_image2DArray, &resources.gpuImages2D );
+	globalParms->Bind( bind_imageCubeArray, &resources.gpuImagesCube );
+	globalParms->Bind( bind_materialBuffer, &resources.materialBuffers );
+
+	renderContext.globalParms = globalParms;
+
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		if( views[ viewIx ].IsCommitted() == false ) {

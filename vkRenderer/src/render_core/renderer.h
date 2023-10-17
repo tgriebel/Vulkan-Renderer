@@ -69,22 +69,28 @@ struct ComputeState
 // Renderer system and resources accessible to sub-systems
 class RenderContext
 {
-public:
+private:
 	using bindParmArray_t = Array<ShaderBindParms, DescriptorPoolMaxSets>;
 
 	// Shader binding
-	bindParmArray_t		bindParmsList;
-	bindSetMap_t		bindSets;
+	bindParmArray_t			bindParmsList;
+	bindSetMap_t			bindSets;
+
+public:
+	ShaderBindParms*		globalParms;
 
 	// Memory
-	AllocatorMemory		localMemory;
-	AllocatorMemory		frameBufferMemory;
-	AllocatorMemory		sharedMemory;
+	AllocatorMemory			localMemory;
+	AllocatorMemory			frameBufferMemory;
+	AllocatorMemory			sharedMemory;
 
-	ShaderBindParms*	RegisterBindParm( const ShaderBindSet* set );
-	void				AllocRegisteredBindParms();
-	void				FreeRegisteredBindParms();
-	void				RefreshRegisteredBindParms();
+	ShaderBindParms*		RegisterBindParm( const ShaderBindSet* set );
+	const ShaderBindSet*	LookupBindSet( const char* name );
+	void					AllocRegisteredBindParms();
+	void					FreeRegisteredBindParms();
+	void					RefreshRegisteredBindParms();
+
+	friend class Renderer;
 };
 
 
