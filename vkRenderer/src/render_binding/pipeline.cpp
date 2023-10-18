@@ -192,7 +192,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 }
 
 
-hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
+hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state = {};
 	state.stateBits = pass->StateBits();
@@ -208,7 +208,7 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	}
 
 	const GpuProgram& prog = progAsset.Get();
-	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
+	VkDescriptorSetLayout shaderBindLayout = prog.bindset->GetVkObject();
 	
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
@@ -354,10 +354,10 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 1;
-
-	VkDescriptorSetLayout layouts[] = { layout };
+	
+	VkDescriptorSetLayout layouts[] = { shaderBindLayout }; //
 	pipelineLayoutInfo.pSetLayouts = layouts;
+	pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
 	
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 

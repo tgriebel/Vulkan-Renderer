@@ -28,6 +28,7 @@
 
 class ShaderBindParms;
 class GpuBuffer;
+class RenderContext;
 
 enum gpuImageStateFlags_t : uint8_t;
 enum downSampleMode_t : uint32_t;
@@ -91,6 +92,7 @@ class CommandContext
 protected:
 	pipelineQueue_t				queueType;
 	bool						isOpen;
+
 private:
 	std::vector<GpuSemaphore*>	waitSemaphores;
 	std::vector<GpuSemaphore*>	signalSemaphores;
@@ -98,6 +100,8 @@ private:
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffers[ MaxFrameStates ];
 #endif
+	const RenderContext*		renderContext;
+
 public:
 	CommandContext()
 	{
@@ -124,6 +128,11 @@ public:
 	void						Wait( GpuSemaphore* semaphore );
 	void						Signal( GpuSemaphore* semaphore );
 	void						Submit( const GpuFence* fence = nullptr );
+
+	inline const RenderContext*	RenderContext()
+	{
+		return renderContext;
+	}
 };
 
 

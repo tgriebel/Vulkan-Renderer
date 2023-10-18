@@ -281,6 +281,8 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 					vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
 				}
 
+				const RenderContext* renderContext = cmdContext->RenderContext();
+
 				const uint32_t descSetCount = 1;
 				VkDescriptorSet descSetArray[ descSetCount ] = { pass->parms->GetVkObject() };
 

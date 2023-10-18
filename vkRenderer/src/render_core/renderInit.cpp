@@ -427,7 +427,7 @@ void Renderer::BuildPipelines()
 
 		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
 		for ( uint32_t passIx = 0; passIx < passCount; ++passIx ) {
-			CreateGraphicsPipeline( passes[ passIx ], *progAsset );
+			CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset );
 		}	
 	}
 }

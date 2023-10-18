@@ -27,6 +27,8 @@
 #include "../globals/common.h"
 #include "../render_state/rhi.h"
 
+class RenderContext;
+
 enum gfxStateBits_t : uint64_t
 {
 	GFX_STATE_NONE				= 0,
@@ -79,12 +81,12 @@ struct pushConstants_t
 
 class ShaderBindSet;
 
-void ClearPipelineCache();
-void DestroyPipelineCache();
-bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
-hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset );
-void CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
-hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
-void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
-void CreateComputePipeline( const Asset<GpuProgram>& prog );
-void DestroyComputePipeline( const Asset<GpuProgram>& prog );
+void	ClearPipelineCache();
+void	DestroyPipelineCache();
+bool	GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
+hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset );
+void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
+hdl_t	CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& prog );
+void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
+void	CreateComputePipeline( const Asset<GpuProgram>& prog );
+void	DestroyComputePipeline( const Asset<GpuProgram>& prog );

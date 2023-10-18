@@ -348,7 +348,7 @@ void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, downSampl
 		//passes[ i ]->parms->Bind( bind_imageStencil, &renderContext.stencilImageView );
 		//passes[ i ]->parms->Bind( bind_imageProcess, &buffer );
 
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( passes[ i ], *progAsset );
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdCommand->RenderContext(), passes[ i ], *progAsset );
 		vk_RenderImageShader( cmdCommand->CommandBuffer(), pipeLineHandle, passes[ i ] );
 
 		vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
