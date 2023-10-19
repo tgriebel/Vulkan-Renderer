@@ -175,9 +175,9 @@ void Renderer::InitApi()
 		CreateSyncObjects();
 		CreateFramebuffers();
 
-		gfxContext.Create( "GFX Context" );
-		computeContext.Create( "Compute Context" );
-		uploadContext.Create( "Upload Context" );
+		gfxContext.Create( "GFX Context", &renderContext );
+		computeContext.Create( "Compute Context", &renderContext );
+		uploadContext.Create( "Upload Context", &renderContext );
 	}
 
 	{
@@ -185,6 +185,7 @@ void Renderer::InitApi()
 									bindset_##NAME.Create( g_##NAME##Bindings, COUNTARRAY( g_##NAME##Bindings ) );
 
 		BIND_SET( global )
+		BIND_SET( pass )
 		BIND_SET( particle )
 		BIND_SET( imageProcess )
 	}
@@ -194,6 +195,7 @@ void Renderer::InitApi()
 void Renderer::InitShaderResources()
 {
 	const ShaderBindSet& bindset_global = renderContext.bindSets[ Hash( "bindset_global" ) ];
+	const ShaderBindSet& bindset_pass = renderContext.bindSets[ Hash( "bindset_pass" ) ];
 	const ShaderBindSet& bindset_imageProcess = renderContext.bindSets[ Hash( "bindset_imageProcess" ) ];
 	const ShaderBindSet& bindset_particle = renderContext.bindSets[ Hash( "bindset_particle" ) ];
 
@@ -208,11 +210,13 @@ void Renderer::InitShaderResources()
 				if( it != renderContext.bindSets.end() ) {
 					prog.bindset = &it->second;
 				} else {
-					prog.bindset = &bindset_global;
+					prog.bindset = &bindset_pass;
 				}
 			}
 		}
 	}
+
+	renderContext.globalParms = renderContext.RegisterBindParm( &bindset_global );
 
 	{
 		particleState.parms = renderContext.RegisterBindParm( &bindset_particle );

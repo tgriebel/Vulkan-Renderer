@@ -4,7 +4,6 @@
       "name": "Basic",
       "vs": "simpleVS.spv",
       "ps": "simplePS.spv",
-	  "bindset": "bindset_default",
     },
     {
       "name": "Shadow",

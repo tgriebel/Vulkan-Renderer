@@ -209,6 +209,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	const GpuProgram& prog = progAsset.Get();
 	VkDescriptorSetLayout shaderBindLayout = prog.bindset->GetVkObject();
+	VkDescriptorSetLayout globalBindLayout = renderContext->globalParms->GetSet()->GetVkObject();
 	
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
@@ -355,7 +356,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	
-	VkDescriptorSetLayout layouts[] = { shaderBindLayout }; //
+	VkDescriptorSetLayout layouts[] = { globalBindLayout, shaderBindLayout };
 	pipelineLayoutInfo.pSetLayouts = layouts;
 	pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
 	

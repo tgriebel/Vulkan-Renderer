@@ -109,7 +109,7 @@ VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, 
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image );
 void				vk_GenerateDownsampleMips( VkCommandBuffer cmdBuffer, Image* image, downSampleMode_t mode );
-void				vk_RenderImageShader( VkCommandBuffer cmdBuffer, const hdl_t pipeLineHandle, DrawPass* pass );
+void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst );
 void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 imageSamples_t		vk_MaxImageSamples();

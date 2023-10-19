@@ -24,6 +24,7 @@
 
 #include "cmdContext.h"
 #include "deviceContext.h"
+#include "../render_core/renderer.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/imageView.h"
 #include "../render_state/frameBuffer.h"
@@ -67,8 +68,10 @@ void CommandContext::End()
 }
 
 
-void CommandContext::Create( const char* name )
+void CommandContext::Create( const char* name, RenderContext* renderContext )
 {
+	m_renderContext = renderContext;
+
 	// Pool creation
 	{
 		VkCommandPoolCreateInfo poolInfo{ };
@@ -348,8 +351,8 @@ void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, downSampl
 		//passes[ i ]->parms->Bind( bind_imageStencil, &renderContext.stencilImageView );
 		//passes[ i ]->parms->Bind( bind_imageProcess, &buffer );
 
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdCommand->RenderContext(), passes[ i ], *progAsset );
-		vk_RenderImageShader( cmdCommand->CommandBuffer(), pipeLineHandle, passes[ i ] );
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdCommand->GetRenderContext(), passes[ i ], *progAsset );
+		vk_RenderImageShader( *cmdCommand, pipeLineHandle, passes[ i ] );
 
 		vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 	}

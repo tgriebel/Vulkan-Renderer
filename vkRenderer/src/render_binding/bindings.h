@@ -28,20 +28,16 @@ static const ShaderBinding g_globalBindings[] =
 {
 	bind_globalsBuffer,
 	bind_viewBuffer,
-	bind_modelBuffer,
 	bind_image2DArray,
 	bind_imageCubeArray,
 	bind_materialBuffer,
-	bind_lightBuffer,
-	bind_imageCodeArray,
-	bind_imageStencil
 };
 
 
 static const ShaderBinding g_passBindings[] =
 {
-	bind_modelBuffer,
 	bind_lightBuffer,
+	bind_modelBuffer,
 	bind_imageCodeArray,
 	bind_imageStencil
 };
@@ -56,7 +52,6 @@ static const ShaderBinding g_particleBindings[] =
 
 static const ShaderBinding g_imageProcessBindings[] =
 {
-	bind_globalsBuffer,
 	bind_sourceImages,
 	bind_imageStencil,
 	bind_imageProcess,

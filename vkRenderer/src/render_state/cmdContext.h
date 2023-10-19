@@ -100,7 +100,7 @@ private:
 	VkCommandPool				commandPool;
 	VkCommandBuffer				commandBuffers[ MaxFrameStates ];
 #endif
-	const RenderContext*		renderContext;
+	RenderContext*				m_renderContext;
 
 public:
 	CommandContext()
@@ -120,7 +120,7 @@ public:
 #endif
 	void						Begin();
 	void						End();
-	void						Create( const char* name );
+	void						Create( const char* name, RenderContext* context );
 	void						Destroy();
 	void						MarkerBeginRegion( const char* pMarkerName, const vec4f& color );
 	void						MarkerEndRegion();
@@ -129,9 +129,9 @@ public:
 	void						Signal( GpuSemaphore* semaphore );
 	void						Submit( const GpuFence* fence = nullptr );
 
-	inline const RenderContext*	RenderContext()
+	inline const RenderContext*	GetRenderContext()
 	{
-		return renderContext;
+		return m_renderContext;
 	}
 };
 

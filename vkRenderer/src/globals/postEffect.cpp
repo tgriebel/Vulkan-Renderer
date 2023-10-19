@@ -58,9 +58,9 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 		buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
 	}
 
-	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.RenderContext(), pass, *m_progAsset );
+	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), pass, *m_progAsset );
 
-	vk_RenderImageShader( cmdContext.CommandBuffer(), pipeLineHandle, pass );
+	vk_RenderImageShader( cmdContext, pipeLineHandle, pass );
 
 	cmdContext.MarkerEndRegion();
 }

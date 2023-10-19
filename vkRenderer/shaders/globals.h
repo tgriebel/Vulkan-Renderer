@@ -163,13 +163,13 @@ struct view_t
 
 #define VS_LAYOUT_STANDARD( SAMPLER )		GLOBALS_LAYOUT( 0, 0 )													\
 											VIEW_LAYOUT( 0, 1)														\
-											MODEL_LAYOUT( 0, 2 )													\
-											SAMPLER_2D_LAYOUT( 0, 3 )												\
-											SAMPLER_CUBE_LAYOUT( 0, 4 )												\
-											MATERIAL_LAYOUT( 0, 5 )													\
-											LIGHT_LAYOUT( 0, 6 )													\
-											CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
-											STENCIL_LAYOUT( 0, 8, SAMPLER )											\
+											SAMPLER_2D_LAYOUT( 0, 2 )												\
+											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+											MATERIAL_LAYOUT( 0, 4 )													\
+											LIGHT_LAYOUT( 1, 0 )													\
+											MODEL_LAYOUT( 1, 1 )													\
+											CODE_IMAGE_LAYOUT( 1, 2, SAMPLER )										\
+											STENCIL_LAYOUT( 1, 3, SAMPLER )											\
 											PUSH_CONSTANTS															\
 											VS_IN																	\
 											VS_OUT
@@ -190,18 +190,22 @@ struct view_t
 
 #define PS_LAYOUT_STANDARD( SAMPLER )		GLOBALS_LAYOUT( 0, 0 )													\
 											VIEW_LAYOUT( 0, 1)														\
-											MODEL_LAYOUT( 0, 2 )													\
-											SAMPLER_2D_LAYOUT( 0, 3 )												\
-											SAMPLER_CUBE_LAYOUT( 0, 4 )												\
-											MATERIAL_LAYOUT( 0, 5 )													\
-											LIGHT_LAYOUT( 0, 6 )													\
-											CODE_IMAGE_LAYOUT( 0, 7, SAMPLER )										\
-											STENCIL_LAYOUT( 0, 8, SAMPLER )											\
+											SAMPLER_2D_LAYOUT( 0, 2 )												\
+											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+											MATERIAL_LAYOUT( 0, 4 )													\
+											LIGHT_LAYOUT( 1, 0 )													\
+											MODEL_LAYOUT( 1, 1 )													\
+											CODE_IMAGE_LAYOUT( 1, 2, SAMPLER )										\
+											STENCIL_LAYOUT( 1, 3, SAMPLER )											\
 											PUSH_CONSTANTS															\
 											PS_IN																	\
 											PS_OUT
 
 #define PS_LAYOUT_IMAGE_PROCESS( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
-											CODE_IMAGE_LAYOUT( 0, 1, SAMPLER )										\
-											STENCIL_LAYOUT( 0, 2, SAMPLER )											\
-											IMAGE_PROCESS_LAYOUT( 0, 3 )
+											VIEW_LAYOUT( 0, 1)														\
+											SAMPLER_2D_LAYOUT( 0, 2 )												\
+											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+											MATERIAL_LAYOUT( 0, 4 )													\
+											CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
+											STENCIL_LAYOUT( 1, 1, SAMPLER )											\
+											IMAGE_PROCESS_LAYOUT( 1, 2 )

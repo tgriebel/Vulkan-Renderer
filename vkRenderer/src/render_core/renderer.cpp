@@ -553,15 +553,13 @@ void Renderer::CommitViews( const Scene* scene )
 
 void Renderer::UpdateBindSets()
 {
-	ShaderBindParms* globalParms = renderContext.RegisterBindParm( renderContext.LookupBindSet( "bindset_global" ) );
+	ShaderBindParms* globalParms = renderContext.globalParms;
 
 	globalParms->Bind( bind_globalsBuffer, &resources.globalConstants );
 	globalParms->Bind( bind_viewBuffer, &resources.viewParms );
 	globalParms->Bind( bind_image2DArray, &resources.gpuImages2D );
 	globalParms->Bind( bind_imageCubeArray, &resources.gpuImagesCube );
 	globalParms->Bind( bind_materialBuffer, &resources.materialBuffers );
-
-	renderContext.globalParms = globalParms;
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
@@ -595,12 +593,7 @@ void Renderer::UpdateBindSets()
 				pass->codeImages[ 2 ] = &resources.shadowMapImage[ 2 ];
 			}
 
-			pass->parms->Bind( bind_globalsBuffer,	&resources.globalConstants );
-			pass->parms->Bind( bind_viewBuffer,		&resources.viewParms );
 			pass->parms->Bind( bind_modelBuffer,	&resources.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
-			pass->parms->Bind( bind_image2DArray,	&resources.gpuImages2D );
-			pass->parms->Bind( bind_imageCubeArray,	&resources.gpuImagesCube );
-			pass->parms->Bind( bind_materialBuffer,	&resources.materialBuffers );
 			pass->parms->Bind( bind_lightBuffer,	&resources.lightParms );
 			pass->parms->Bind( bind_imageCodeArray,	&pass->codeImages );
 			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &resources.stencilResolvedImageView : pass->codeImages[ 0 ] );
@@ -619,7 +612,6 @@ void Renderer::UpdateBindSets()
 		resolve->pass->codeImages[ 1 ] = &resources.depthImageView;
 		resolve->pass->codeImages[ 2 ] = &resources.stencilImageView;
 
-		resolve->pass->parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
 		resolve->pass->parms->Bind( bind_sourceImages,			&resolve->pass->codeImages );
 		resolve->pass->parms->Bind( bind_imageStencil,			&resources.stencilImageView );
 		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
@@ -631,7 +623,6 @@ void Renderer::UpdateBindSets()
 		downScale.pass->codeImages[ 1 ] = &resources.mainColorResolvedImage;
 		downScale.pass->codeImages[ 2 ] = &resources.mainColorResolvedImage;
 
-		downScale.pass->parms->Bind( bind_globalsBuffer,		&resources.globalConstants );
 		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );
 		downScale.pass->parms->Bind( bind_imageStencil,			&resources.stencilImageView );
 		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
