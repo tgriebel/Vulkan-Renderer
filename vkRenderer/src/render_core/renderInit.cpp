@@ -109,6 +109,10 @@ void Renderer::Init()
 		info.resources = &resources;
 
 		downScale.Init( info );
+
+		downScale.SetSourceImage( 0, &resources.mainColorResolvedImage );
+		downScale.SetSourceImage( 1, &resources.mainColorResolvedImage );
+		downScale.SetSourceImage( 2, &resources.mainColorResolvedImage );
 	}
 
 	{
@@ -126,6 +130,10 @@ void Renderer::Init()
 		info.resources = &resources;
 
 		resolve = new ImageProcess( info );
+
+		resolve->SetSourceImage( 0, &resources.mainColorImage );
+		resolve->SetSourceImage( 1, &resources.depthImageView );
+		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
 	InitShaderResources();

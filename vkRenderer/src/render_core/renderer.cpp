@@ -610,19 +610,6 @@ void Renderer::UpdateBindSets()
 		particleState.parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
 		particleState.parms->Bind( bind_particleWriteBuffer,	&resources.particleBuffer );
 	}
-
-	if( resolve != nullptr )
-	{
-		resolve->SetSourceImage( 0, &resources.mainColorImage );
-		resolve->SetSourceImage( 1, &resources.depthImageView );
-		resolve->SetSourceImage( 2, &resources.stencilImageView );
-	}
-
-	{
-		downScale.SetSourceImage( 0, &resources.mainColorResolvedImage );
-		downScale.SetSourceImage( 1, &resources.mainColorResolvedImage );
-		downScale.SetSourceImage( 2, &resources.mainColorResolvedImage );
-	}
 }
 
 
