@@ -399,7 +399,6 @@ void Renderer::Render()
 	UpdateGpuMaterials();
 	UpdateBuffers();
 	UpdateBindSets();
-	UpdateFrameDescSet();
 
 	SubmitFrame();
 
@@ -437,28 +436,35 @@ void Renderer::FlushGPU()
 
 void Renderer::SubmitFrame()
 {
-	{
-		computeContext.Begin();
+	//{
+	//	computeContext.Begin();
 
-		const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
+	//	const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
 
-		computeContext.Dispatch( progHdl, *particleState.parms, MaxParticles / 256 );
+	//	computeContext.Dispatch( progHdl, *particleState.parms, MaxParticles / 256 );
 
-		computeContext.End();
-	}
+	//	computeContext.End();
+	//}
 
 	{
 		gfxContext.Begin();
 
 		schedule.Reset();
+
+		schedule.FrameBegin();
+
+		UpdateFrameDescSet();
+
 		while( schedule.PendingTasks() > 0 ) {
 			schedule.IssueNext( gfxContext );
 		}
 
+		schedule.FrameEnd();
+
 		gfxContext.End();
 	}
 
-	computeContext.Submit();
+	//computeContext.Submit();
 
 	{
 		gfxContext.Wait( &gfxContext.presentSemaphore );
@@ -607,25 +613,15 @@ void Renderer::UpdateBindSets()
 
 	if( resolve != nullptr )
 	{
-		resolve->pass->codeImages.Resize( 3 );
-		resolve->pass->codeImages[ 0 ] = &resources.mainColorImage;
-		resolve->pass->codeImages[ 1 ] = &resources.depthImageView;
-		resolve->pass->codeImages[ 2 ] = &resources.stencilImageView;
-
-		resolve->pass->parms->Bind( bind_sourceImages,			&resolve->pass->codeImages );
-		resolve->pass->parms->Bind( bind_imageStencil,			&resources.stencilImageView );
-		resolve->pass->parms->Bind( bind_imageProcess,			&resolve->buffer );
+		resolve->SetSourceImage( 0, &resources.mainColorImage );
+		resolve->SetSourceImage( 1, &resources.depthImageView );
+		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
 	{
-		downScale.pass->codeImages.Resize( 3 );
-		downScale.pass->codeImages[ 0 ] = &resources.mainColorResolvedImage;
-		downScale.pass->codeImages[ 1 ] = &resources.mainColorResolvedImage;
-		downScale.pass->codeImages[ 2 ] = &resources.mainColorResolvedImage;
-
-		downScale.pass->parms->Bind( bind_sourceImages,			&downScale.pass->codeImages );
-		downScale.pass->parms->Bind( bind_imageStencil,			&resources.stencilImageView );
-		downScale.pass->parms->Bind( bind_imageProcess,			&downScale.buffer );
+		downScale.SetSourceImage( 0, &resources.mainColorResolvedImage );
+		downScale.SetSourceImage( 1, &resources.mainColorResolvedImage );
+		downScale.SetSourceImage( 2, &resources.mainColorResolvedImage );
 	}
 }
 

@@ -2,6 +2,7 @@
 
 #include <gfxcore/scene/scene.h>
 #include "../render_core/renderer.h"
+#include "../render_binding/bindings.h"
 
 extern AssetManager g_assets;
 
@@ -13,6 +14,8 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	pass = new PostPass( info.fb );
 
+	pass->codeImages.Resize( 3 );
+
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
 	m_transitionState = {};
@@ -22,10 +25,19 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_transitionState.flags.readAfter = !info.present;
 	m_transitionState.flags.readOnly = true;
 
+	m_resources = info.resources;
+	m_context = info.context;
+
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
-	buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
+	buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+}
+
+
+void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
+{
+	pass->codeImages[ slot ] = image;
 }
 
 
@@ -43,10 +55,8 @@ void ImageProcess::Shutdown()
 }
 
 
-void ImageProcess::Execute( CommandContext& cmdContext )
+void ImageProcess::FrameBegin()
 {
-	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
-
 	{
 		const float w = float( pass->GetFrameBuffer()->GetWidth() );
 		const float h = float( pass->GetFrameBuffer()->GetHeight() );
@@ -57,6 +67,22 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 		buffer.SetPos( 0 );
 		buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
 	}
+
+	pass->parms->Bind( bind_sourceImages, &pass->codeImages );
+	pass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
+	pass->parms->Bind( bind_imageProcess, &buffer );
+}
+
+
+void ImageProcess::FrameEnd()
+{
+
+}
+
+
+void ImageProcess::Execute( CommandContext& cmdContext )
+{
+	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
 
 	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), pass, *m_progAsset );
 

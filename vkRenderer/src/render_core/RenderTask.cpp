@@ -382,6 +382,28 @@ void RenderSchedule::Queue( GpuTask* task )
 }
 
 
+void RenderSchedule::FrameBegin()
+{
+	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
+	for( uint32_t i = 0; i < taskCount; ++i )
+	{
+		GpuTask* task = tasks[ i ];
+		task->FrameBegin();
+	}
+}
+
+
+void RenderSchedule::FrameEnd()
+{
+	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
+	for ( uint32_t i = 0; i < taskCount; ++i )
+	{
+		GpuTask* task = tasks[ i ];
+		task->FrameEnd();
+	}
+}
+
+
 void RenderSchedule::IssueNext( CommandContext& context )
 {
 	GpuTask* task = tasks[ currentTask ];

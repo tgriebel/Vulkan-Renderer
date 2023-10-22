@@ -106,6 +106,7 @@ void Renderer::Init()
 		info.progHdl = AssetLibGpuProgram::Handle( "DownSample" );
 		info.fb = &tempColor;
 		info.context = &renderContext;
+		info.resources = &resources;
 
 		downScale.Init( info );
 	}
@@ -122,6 +123,7 @@ void Renderer::Init()
 		}
 		info.fb = &mainColorResolved;
 		info.context = &renderContext;
+		info.resources = &resources;
 
 		resolve = new ImageProcess( info );
 	}

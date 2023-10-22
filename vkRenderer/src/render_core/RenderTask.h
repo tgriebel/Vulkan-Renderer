@@ -15,7 +15,10 @@ enum gpuImageStateFlags_t : uint8_t;
 class GpuTask
 {
 public:
-	virtual void Execute( CommandContext& context ) = 0;
+	virtual void	FrameBegin() = 0;
+	virtual void	FrameEnd() = 0;
+	virtual void	Execute( CommandContext& context ) = 0;
+
 	virtual ~GpuTask() {};
 };
 
@@ -48,6 +51,9 @@ public:
 		Shutdown();
 	}
 
+	void FrameBegin() {}
+	void FrameEnd() {}
+
 	void Execute( CommandContext& context ) override;
 };
 
@@ -55,6 +61,9 @@ public:
 class ComputeTask : public GpuTask
 {
 public:
+	void FrameBegin() {}
+	void FrameEnd() {}
+
 	void Execute( CommandContext& context ) override;
 	~ComputeTask()
 	{}
@@ -77,6 +86,9 @@ public:
 		m_dstState = dstState;
 	}
 
+	void FrameBegin() {}
+	void FrameEnd() {}
+
 	void Execute( CommandContext& context ) override;
 	~TransitionImageTask()
 	{}
@@ -97,6 +109,9 @@ public:
 		m_dst = dst;
 	}
 
+	void FrameBegin() {}
+	void FrameEnd() {}
+
 	void Execute( CommandContext& context ) override;
 	~CopyImageTask()
 	{}
@@ -114,6 +129,9 @@ public:
 	{
 		m_img = img;
 	}
+
+	void FrameBegin() {}
+	void FrameEnd() {}
 
 	void Execute( CommandContext& context ) override;
 	~MipImageTask()
@@ -136,5 +154,7 @@ public:
 	void		Reset();
 	void		Clear();
 	void		Queue( GpuTask* task );
+	void		FrameBegin();
+	void		FrameEnd();
 	void		IssueNext( CommandContext& context );
 };
