@@ -65,6 +65,7 @@
 extern Scene* g_scene;
 
 SwapChain g_swapChain;
+renderConstants_t rc;
 
 #if defined( USE_IMGUI )
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
@@ -362,6 +363,8 @@ void Renderer::UploadAssets()
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
+	Transition( &uploadContext, rc.whiteImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 	}
@@ -577,26 +580,6 @@ void Renderer::UpdateBindSets()
 			DrawPass* pass = views[ viewIx ].passes[ passIx ];
 			if( pass == nullptr ) {
 				continue;
-			}
-
-			pass->codeImages.Resize( 3 );
-			if ( passIx == DRAWPASS_SHADOW )
-			{				
-				pass->codeImages[ 0 ] = resources.gpuImages2D[ 0 ];
-				pass->codeImages[ 1 ] = resources.gpuImages2D[ 0 ];
-				pass->codeImages[ 2 ] = resources.gpuImages2D[ 0 ];
-			}
-			else if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
-			{
-				pass->codeImages[ 0 ] = &resources.mainColorResolvedImage;
-				pass->codeImages[ 1 ] = &resources.depthStencilResolvedImage;
-				pass->codeImages[ 2 ] = &resources.mainColorResolvedImage;
-			}
-			else
-			{
-				pass->codeImages[ 0 ] = &resources.shadowMapImage[ 0 ];
-				pass->codeImages[ 1 ] = &resources.shadowMapImage[ 1 ];
-				pass->codeImages[ 2 ] = &resources.shadowMapImage[ 2 ];
 			}
 
 			pass->parms->Bind( bind_modelBuffer,	&resources.surfParmPartitions[ views[ viewIx ].GetViewId() ] );

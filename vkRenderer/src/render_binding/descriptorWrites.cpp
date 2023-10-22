@@ -3,6 +3,7 @@
 #include <numeric>
 #include <map>
 #include "../render_core/renderer.h"
+#include "../globals/renderConstants.h"
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/entity.h>
 #include <sstream>
@@ -132,6 +133,9 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 		}
 		else if ( attachment->GetSemantic() == bindSemantic_t::IMAGE ) {
 			const Image* image = attachment->GetImage();
+			if ( image == nullptr ) {
+				image = &rc.whiteImage;
+			}
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = context.bilinearSampler;
@@ -152,19 +156,24 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 			const ImageArray& images = *attachment->GetImageArray();
 
+			const uint32_t descCount = binding->GetMaxDescriptorCount();
 			const uint32_t imageCount = images.Count();
-			infos.resize( imageCount );
-			writeInfo.descriptorCount = imageCount;
+			assert( imageCount <= descCount );
 
-			assert( imageCount <= binding->GetMaxDescriptorCount() );
+			infos.resize( descCount );
+			writeInfo.descriptorCount = descCount;
 
-			for ( uint32_t imageIx = 0; imageIx < imageCount; ++imageIx )
+			for ( uint32_t descIx = 0; descIx < descCount; ++descIx )
 			{
-				const Image* image = images[ imageIx ];
-				VkDescriptorImageInfo& info = infos[ imageIx ];
+				const Image* image = &rc.whiteImage;
+				if ( ( descIx < imageCount ) && ( images[ descIx ] != nullptr ) ) {
+					image = images[ descIx ];
+				}
+
+				VkDescriptorImageInfo& info = infos[ descIx ];
 
 				info = {};
-				info.imageView = images[ imageIx ]->gpuImage->GetVkImageView();
+				info.imageView = image->gpuImage->GetVkImageView();
 				assert( info.imageView != nullptr );
 
 				if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )

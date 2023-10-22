@@ -45,6 +45,9 @@ void Renderer::Init()
 {
 	InitApi();
 
+	resources.gpuImages2D.Resize( MaxImageDescriptors );
+	resources.gpuImagesCube.Resize( MaxImageDescriptors );
+
 	viewCount = 0;
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )

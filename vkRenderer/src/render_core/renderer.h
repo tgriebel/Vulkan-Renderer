@@ -49,6 +49,8 @@ extern imguiControls_t g_imguiControls;
 extern Window						g_window;
 extern SwapChain					g_swapChain;
 
+extern renderConstants_t	rc;
+
 struct renderConfig_t
 {
 	imageSamples_t	mainColorSubSamples;
@@ -170,7 +172,6 @@ private:
 	static const uint32_t				OutlineStencilBit = 0x01;
 
 	renderConfig_t						config;
-	renderConstants_t					rc;
 	RenderView							views[ MaxViews ];
 	RenderView*							activeViews[ MaxViews ];
 	RenderView*							renderViews[ Max3DViews ];

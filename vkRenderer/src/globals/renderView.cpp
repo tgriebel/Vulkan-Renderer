@@ -64,9 +64,26 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 				break;
 		}
 
+		DrawPass* pass = passes[ passIx ];
+		
+		if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
+		{
+			pass->codeImages.Resize( 2 );
+			pass->codeImages[ 0 ] = &m_resources->mainColorResolvedImage;
+			pass->codeImages[ 1 ] = &m_resources->depthStencilResolvedImage;
+		}
+		else
+		{
+			pass->codeImages.Resize( 3 );
+			pass->codeImages[ 0 ] = &m_resources->shadowMapImage[ 0 ];
+			pass->codeImages[ 1 ] = &m_resources->shadowMapImage[ 1 ];
+			pass->codeImages[ 2 ] = &m_resources->shadowMapImage[ 2 ];
+		}
+
 		const ShaderBindSet* bindset_pass = info.context->LookupBindSet( "bindset_pass"  );
-		passes[ passIx ]->parms = info.context->RegisterBindParm( bindset_pass );
+		pass->parms = info.context->RegisterBindParm( bindset_pass );
 	}
+
 
 	if( info.region == renderViewRegion_t::SHADOW )
 	{

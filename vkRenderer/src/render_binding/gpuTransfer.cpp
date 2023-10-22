@@ -105,9 +105,6 @@ void Renderer::UploadTextures()
 
 	// 3. Add to resource type lists
 	{
-		resources.gpuImages2D.Resize( MaxImageDescriptors );
-		resources.gpuImagesCube.Resize( MaxImageDescriptors );
-
 		// Find first cubemap. FIXME: Hacky, just done so there aren't nulls in the list
 		Image* firstCube = nullptr;
 		for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
