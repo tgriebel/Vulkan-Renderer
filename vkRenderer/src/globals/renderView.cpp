@@ -129,6 +129,31 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 }
 
 
+void RenderView::FrameBegin()
+{
+	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	{
+		DrawPass* pass = passes[ passIx ];
+		if ( pass == nullptr ) {
+			continue;
+		}
+
+		pass->parms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] );
+		pass->parms->Bind( bind_lightBuffer, &m_resources->lightParms );
+		pass->parms->Bind( bind_imageCodeArray, &pass->codeImages );
+		pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &m_resources->stencilResolvedImageView : pass->codeImages[ 0 ] );
+	}
+}
+
+
+
+void RenderView::FrameEnd()
+{
+
+	
+}
+
+
 void RenderView::Resize()
 {
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )

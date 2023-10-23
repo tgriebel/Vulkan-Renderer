@@ -570,25 +570,6 @@ void Renderer::UpdateBindSets()
 	globalParms->Bind( bind_imageCubeArray, &resources.gpuImagesCube );
 	globalParms->Bind( bind_materialBuffer, &resources.materialBuffers );
 
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		if( views[ viewIx ].IsCommitted() == false ) {
-			continue;
-		}
-		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
-		{
-			DrawPass* pass = views[ viewIx ].passes[ passIx ];
-			if( pass == nullptr ) {
-				continue;
-			}
-
-			pass->parms->Bind( bind_modelBuffer,	&resources.surfParmPartitions[ views[ viewIx ].GetViewId() ] );
-			pass->parms->Bind( bind_lightBuffer,	&resources.lightParms );
-			pass->parms->Bind( bind_imageCodeArray,	&pass->codeImages );
-			pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &resources.stencilResolvedImageView : pass->codeImages[ 0 ] );
-		}
-	}
-
 	{
 		particleState.parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
 		particleState.parms->Bind( bind_particleWriteBuffer,	&resources.particleBuffer );

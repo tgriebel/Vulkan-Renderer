@@ -106,6 +106,8 @@ public:
 	}
 
 	void					Init( const renderViewCreateInfo_t& info );
+	void					FrameBegin();
+	void					FrameEnd();
 	void					Resize();
 
 	drawPass_t				ViewRegionPassBegin() const;

@@ -51,8 +51,8 @@ public:
 		Shutdown();
 	}
 
-	void FrameBegin() {}
-	void FrameEnd() {}
+	void FrameBegin();
+	void FrameEnd();
 
 	void Execute( CommandContext& context ) override;
 };

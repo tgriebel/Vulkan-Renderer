@@ -325,6 +325,22 @@ void RenderTask::Shutdown()
 }
 
 
+void RenderTask::FrameBegin()
+{
+	if( renderView != nullptr ) {
+		renderView->FrameBegin();
+	}
+}
+
+
+void RenderTask::FrameEnd()
+{
+	if ( renderView != nullptr ) {
+		renderView->FrameEnd();
+	}
+}
+
+
 void RenderTask::Execute( CommandContext& context )
 {
 	context.MarkerBeginRegion( renderView->GetName(), ColorToVector( Color::White ) );
