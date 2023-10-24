@@ -156,6 +156,7 @@ void Renderer::Init()
 	schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST ) );
 	schedule.Queue( new MipImageTask( &resources.mainColorResolvedImage ) );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
 }
 
 
@@ -233,7 +234,7 @@ void Renderer::InitShaderResources()
 
 	{
 		particleState.parms = renderContext.RegisterBindParm( &bindset_particle );
-		particleState.updateDescriptorSets = true;
+		particleState.x = ( MaxParticles / 256 );
 
 		if( resolve != nullptr ) {
 			resolve->pass->parms = renderContext.RegisterBindParm( &bindset_imageProcess );

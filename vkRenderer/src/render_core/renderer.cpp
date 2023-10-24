@@ -439,17 +439,8 @@ void Renderer::FlushGPU()
 
 void Renderer::SubmitFrame()
 {
-	//{
-	//	computeContext.Begin();
-
-	//	const hdl_t progHdl = g_assets.gpuPrograms.RetrieveHdl( "ClearParticles" );
-
-	//	computeContext.Dispatch( progHdl, *particleState.parms, MaxParticles / 256 );
-
-	//	computeContext.End();
-	//}
-
 	{
+		computeContext.Begin();
 		gfxContext.Begin();
 
 		schedule.Reset();
@@ -465,9 +456,10 @@ void Renderer::SubmitFrame()
 		schedule.FrameEnd();
 
 		gfxContext.End();
+		computeContext.End();
 	}
 
-	//computeContext.Submit();
+	computeContext.Submit();
 
 	{
 		gfxContext.Wait( &gfxContext.presentSemaphore );

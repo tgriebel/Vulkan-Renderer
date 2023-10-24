@@ -60,11 +60,10 @@ struct renderConfig_t
 
 struct ComputeState
 {
+	ShaderBindParms*	parms;
 	int32_t				x;
 	int32_t				y;
 	int32_t				z;
-	bool				updateDescriptorSets;
-	ShaderBindParms*	parms;
 };
 
 
@@ -164,8 +163,6 @@ public:
 private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;
-
-
 
 	static const uint32_t				ShadowMapWidth = 1024;
 	static const uint32_t				ShadowMapHeight = 1024;

@@ -351,6 +351,32 @@ void RenderTask::Execute( CommandContext& context )
 }
 
 
+ComputeTask::ComputeTask( const char* csName, ComputeState* state )
+{
+	m_state = state;
+	m_progHdl = g_assets.gpuPrograms.RetrieveHdl( csName );
+}
+
+
+void ComputeTask::FrameBegin()
+{
+
+}
+
+
+void ComputeTask::FrameEnd()
+{
+
+}
+
+
+void ComputeTask::Execute( CommandContext& context )
+{
+	ComputeContext* computeContext = reinterpret_cast<ComputeContext*>( &context );
+	computeContext->Dispatch( m_progHdl, *m_state->parms, m_state->x, m_state->y, m_state->z );
+}
+
+
 void TransitionImageTask::Execute( CommandContext& context )
 {
 	Transition( &context, *m_img, m_srcState, m_dstState );

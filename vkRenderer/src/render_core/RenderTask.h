@@ -8,9 +8,9 @@ class CommandContext;
 class GfxContext;
 class RenderView;
 class Image;
+struct ComputeState;
 
 enum gpuImageStateFlags_t : uint8_t;
-
 
 class GpuTask
 {
@@ -60,9 +60,15 @@ public:
 
 class ComputeTask : public GpuTask
 {
+private:
+	ComputeState*		m_state;
+	hdl_t				m_progHdl;
+
 public:
-	void FrameBegin() {}
-	void FrameEnd() {}
+	ComputeTask( const char* csName, ComputeState* state );
+
+	void FrameBegin();
+	void FrameEnd();
 
 	void Execute( CommandContext& context ) override;
 	~ComputeTask()
