@@ -141,7 +141,7 @@ void RenderView::FrameBegin()
 		pass->parms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] );
 		pass->parms->Bind( bind_lightBuffer, &m_resources->lightParms );
 		pass->parms->Bind( bind_imageCodeArray, &pass->codeImages );
-		pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &m_resources->stencilResolvedImageView : pass->codeImages[ 0 ] );
+		pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &m_resources->stencilResolvedImageView : &rc.whiteImage );
 	}
 }
 

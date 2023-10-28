@@ -1,8 +1,2 @@
-﻿  scene.cpp
-  descriptorWrites.cpp
-  RenderTask.cpp
-  debugMenu.cpp
-  renderInit.cpp
-  renderer.cpp
-  Generating Code...
+﻿  renderView.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
