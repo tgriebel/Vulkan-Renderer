@@ -368,6 +368,8 @@ void Renderer::BuildPipelines()
 		return;
 	}
 
+	FlushGPU();
+
 	// 2. Destroy shaders
 	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
