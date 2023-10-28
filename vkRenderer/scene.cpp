@@ -409,37 +409,7 @@ void DrawAssetDebugMenu()
 			for ( uint32_t s = 0; s < shaderCount; ++s )
 			{
 				Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( s );
-				GpuProgram& shader = shaderAsset->Get();
-				const char* shaderName = shaderAsset->GetName().c_str();
-				if ( ImGui::TreeNode( shaderName ) )
-				{
-					if ( ImGui::BeginTable( shaderName, 3, tableFlags ) )
-					{
-						ImGui::TableSetupColumn( "Name" );
-						ImGui::TableSetupColumn( "Type" );
-						ImGui::TableSetupColumn( "Bytes" );
-						ImGui::TableHeadersRow();
-
-						for ( uint32_t i = 0; i < shader.shaderCount; ++i )
-						{
-							ImGui::TableNextRow();
-							ImGui::TableSetColumnIndex( 0 );
-							ImGui::Text( shader.shaders[ i ].name.c_str() );
-							ImGui::TableSetColumnIndex( 1 );
-							switch ( shader.shaders[ i ].type )
-							{
-								case VERTEX: ImGui::Text( "Vertex" ); break;
-								case PIXEL: ImGui::Text( "Pixel" ); break;
-								case COMPUTE: ImGui::Text( "Compute" ); break;
-							}
-							ImGui::TableSetColumnIndex( 2 );
-							ImGui::Text( "%u", shader.shaders[ i ].blob.size() );				
-						}
-
-						ImGui::EndTable();
-					}
-					ImGui::TreePop();
-				}
+				DebugMenuShaderTreeNode( shaderAsset );
 			}
 			ImGui::TreePop();
 		}

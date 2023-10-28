@@ -338,6 +338,44 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 }
 
 
+void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset )
+{
+	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
+
+	GpuProgram& shader = shaderAsset->Get();
+	const char* shaderName = shaderAsset->GetName().c_str();
+	if ( ImGui::TreeNode( shaderName ) )
+	{
+		if ( ImGui::BeginTable( shaderName, 3, tableFlags ) )
+		{
+			ImGui::TableSetupColumn( "Name" );
+			ImGui::TableSetupColumn( "Type" );
+			ImGui::TableSetupColumn( "Bytes" );
+			ImGui::TableHeadersRow();
+
+			for ( uint32_t i = 0; i < shader.shaderCount; ++i )
+			{
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex( 0 );
+				ImGui::Text( shader.shaders[ i ].name.c_str() );
+				ImGui::TableSetColumnIndex( 1 );
+				switch ( shader.shaders[ i ].type )
+				{
+				case VERTEX: ImGui::Text( "Vertex" ); break;
+				case PIXEL: ImGui::Text( "Pixel" ); break;
+				case COMPUTE: ImGui::Text( "Compute" ); break;
+				}
+				ImGui::TableSetColumnIndex( 2 );
+				ImGui::Text( "%u", shader.shaders[ i ].blob.size() );
+			}
+
+			ImGui::EndTable();
+		}
+		ImGui::TreePop();
+	}
+}
+
+
 void DebugMenuLightEdit( Scene* scene )
 {
 	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
