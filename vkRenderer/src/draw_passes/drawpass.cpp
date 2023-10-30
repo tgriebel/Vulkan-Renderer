@@ -22,6 +22,11 @@
 */
 
 #include "drawpass.h"
+#include "../render_binding/bindings.h"
+#include "../globals/renderConstants.h"
+#include "../render_core/renderer.h"
+
+extern renderConstants_t rc;
 
 void ShadowPass::Init( FrameBuffer* frameBuffer )
 {
@@ -33,7 +38,27 @@ void ShadowPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_DEPTH_OP_0;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void ShadowPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void ShadowPass::FrameEnd()
+{
+
 }
 
 
@@ -49,7 +74,27 @@ void DepthPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void DepthPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void DepthPass::FrameEnd()
+{
+
 }
 
 
@@ -63,7 +108,27 @@ void OpaquePass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void OpaquePass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void OpaquePass::FrameEnd()
+{
+
 }
 
 
@@ -79,7 +144,26 @@ void TransPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+void TransPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void TransPass::FrameEnd()
+{
+
 }
 
 
@@ -93,7 +177,27 @@ void EmissivePass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void EmissivePass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void EmissivePass::FrameEnd()
+{
+
 }
 
 
@@ -105,7 +209,26 @@ void PostPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
+	codeImages.Resize( 2 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void PostPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->mainColorResolvedImage;
+	codeImages[ 1 ] = &resources->depthStencilResolvedImage;
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &resources->stencilResolvedImageView );
+}
+
+
+void PostPass::FrameEnd()
+{
+
 }
 
 
@@ -119,7 +242,27 @@ void TerrainPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void TerrainPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void TerrainPass::FrameEnd()
+{
+
 }
 
 
@@ -133,7 +276,27 @@ void SkyboxPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void SkyboxPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void SkyboxPass::FrameEnd()
+{
+
 }
 
 
@@ -145,7 +308,27 @@ void WireframePass::Init( FrameBuffer* frameBuffer )
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_WIREFRAME_ENABLE;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void WireframePass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void WireframePass::FrameEnd()
+{
+
 }
 
 
@@ -157,7 +340,26 @@ void Debug2dPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
+	codeImages.Resize( 2 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void Debug2dPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->mainColorResolvedImage;
+	codeImages[ 1 ] = &resources->depthStencilResolvedImage;
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &resources->stencilResolvedImageView );
+}
+
+
+void Debug2dPass::FrameEnd()
+{
+
 }
 
 
@@ -170,5 +372,25 @@ void Debug3dPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
+	codeImages.Resize( 3 );
+
 	SetFrameBuffer( frameBuffer );
+}
+
+
+void Debug3dPass::FrameBegin( const ResourceContext* resources )
+{
+	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+
+	parms->Bind( bind_lightBuffer, &resources->lightParms );
+	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageStencil, &rc.whiteImage );
+}
+
+
+void Debug3dPass::FrameEnd()
+{
+
 }

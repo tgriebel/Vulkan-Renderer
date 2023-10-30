@@ -28,6 +28,8 @@
 #include "../render_binding/shaderBinding.h"
 #include "../render_state/frameBuffer.h"
 
+class ResourceContext;
+
 class DrawPass
 {
 private:
@@ -53,6 +55,9 @@ protected:
 
 public:
 	virtual void Init( FrameBuffer* fb ) = 0;
+
+	virtual void FrameBegin( const ResourceContext* resources ) = 0;
+	virtual void FrameEnd() = 0;
 
 	inline drawPass_t Type() const
 	{
@@ -111,6 +116,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -123,6 +130,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -135,6 +144,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -147,6 +158,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -159,6 +172,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -171,6 +186,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -184,6 +201,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -196,6 +215,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -208,6 +229,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -220,6 +243,8 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };
 
 
@@ -232,4 +257,6 @@ public:
 	}
 
 	virtual void Init( FrameBuffer* fb );
+	virtual void FrameBegin( const ResourceContext* resources );
+	virtual void FrameEnd();
 };

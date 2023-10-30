@@ -64,24 +64,8 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 				break;
 		}
 
-		DrawPass* pass = passes[ passIx ];
-		
-		if ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) )
-		{
-			pass->codeImages.Resize( 2 );
-			pass->codeImages[ 0 ] = &m_resources->mainColorResolvedImage;
-			pass->codeImages[ 1 ] = &m_resources->depthStencilResolvedImage;
-		}
-		else
-		{
-			pass->codeImages.Resize( 3 );
-			pass->codeImages[ 0 ] = &m_resources->shadowMapImage[ 0 ];
-			pass->codeImages[ 1 ] = &m_resources->shadowMapImage[ 1 ];
-			pass->codeImages[ 2 ] = &m_resources->shadowMapImage[ 2 ];
-		}
-
 		const ShaderBindSet* bindset_pass = info.context->LookupBindSet( "bindset_pass"  );
-		pass->parms = info.context->RegisterBindParm( bindset_pass );
+		passes[ passIx ]->parms = info.context->RegisterBindParm( bindset_pass );
 	}
 
 
@@ -138,10 +122,8 @@ void RenderView::FrameBegin()
 			continue;
 		}
 
-		pass->parms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] );
-		pass->parms->Bind( bind_lightBuffer, &m_resources->lightParms );
-		pass->parms->Bind( bind_imageCodeArray, &pass->codeImages );
-		pass->parms->Bind( bind_imageStencil, ( ( passIx == DRAWPASS_POST_2D ) || ( passIx == DRAWPASS_DEBUG_2D ) ) ? &m_resources->stencilResolvedImageView : &rc.whiteImage );
+		pass->parms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] ); // TODO: move to per-view parms
+		pass->FrameBegin( m_resources );
 	}
 }
 
@@ -149,8 +131,14 @@ void RenderView::FrameBegin()
 
 void RenderView::FrameEnd()
 {
-
-	
+	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	{
+		DrawPass* pass = passes[ passIx ];
+		if ( pass == nullptr ) {
+			continue;
+		}
+		pass->FrameEnd();
+	}
 }
 
 
