@@ -32,6 +32,14 @@ static const ShaderBinding g_globalBindings[] =
 	bind_imageCubeArray,
 	bind_materialBuffer,
 };
+const uint64_t bindset_global = Hash( "bindset_global" );
+
+
+static const ShaderBinding g_viewBindings[] =
+{
+	bind_modelBuffer,
+};
+const uint64_t bindset_view = Hash( "bindset_view" );
 
 
 static const ShaderBinding g_passBindings[] =
@@ -41,6 +49,7 @@ static const ShaderBinding g_passBindings[] =
 	bind_imageCodeArray,
 	bind_imageStencil
 };
+const uint64_t bindset_pass = Hash( "bindset_pass" );
 
 
 static const ShaderBinding g_particleBindings[] =
@@ -48,6 +57,7 @@ static const ShaderBinding g_particleBindings[] =
 	bind_globalsBuffer,
 	bind_particleWriteBuffer
 };
+const uint64_t bindset_particle = Hash( "bindset_particle" );
 
 
 static const ShaderBinding g_imageProcessBindings[] =
@@ -56,3 +66,4 @@ static const ShaderBinding g_imageProcessBindings[] =
 	bind_imageStencil,
 	bind_imageProcess,
 };
+const uint64_t bindset_imageProcess = Hash( "bindset_imageProcess" );

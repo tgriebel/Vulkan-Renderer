@@ -195,23 +195,32 @@ void Renderer::InitApi()
 	}
 
 	{
-		#define BIND_SET( NAME )	ShaderBindSet& bindset_##NAME = renderContext.bindSets[ Hash( "bindset_"#NAME ) ];	\
-									bindset_##NAME.Create( g_##NAME##Bindings, COUNTARRAY( g_##NAME##Bindings ) );
+		ShaderBindSet* bindset = nullptr;
 
-		BIND_SET( global )
-		BIND_SET( pass )
-		BIND_SET( particle )
-		BIND_SET( imageProcess )
+		bindset = &renderContext.bindSets[ bindset_global ];
+		bindset->Create( g_globalBindings, COUNTARRAY( g_globalBindings ) );
+
+		bindset = &renderContext.bindSets[ bindset_view ];
+		bindset->Create( g_viewBindings, COUNTARRAY( g_viewBindings ) );
+
+		bindset = &renderContext.bindSets[ bindset_pass ];
+		bindset->Create( g_passBindings, COUNTARRAY( g_passBindings ) );
+
+		bindset = &renderContext.bindSets[ bindset_particle ];
+		bindset->Create( g_particleBindings, COUNTARRAY( g_particleBindings ) );
+
+		bindset = &renderContext.bindSets[ bindset_imageProcess ];
+		bindset->Create( g_imageProcessBindings, COUNTARRAY( g_imageProcessBindings ) );
 	}
 }
 
 
 void Renderer::InitShaderResources()
 {
-	const ShaderBindSet& bindset_global = renderContext.bindSets[ Hash( "bindset_global" ) ];
-	const ShaderBindSet& bindset_pass = renderContext.bindSets[ Hash( "bindset_pass" ) ];
-	const ShaderBindSet& bindset_imageProcess = renderContext.bindSets[ Hash( "bindset_imageProcess" ) ];
-	const ShaderBindSet& bindset_particle = renderContext.bindSets[ Hash( "bindset_particle" ) ];
+	const ShaderBindSet& globalBindSet = renderContext.bindSets[ bindset_global ];
+	const ShaderBindSet& passBindSet = renderContext.bindSets[ bindset_pass ];
+	const ShaderBindSet& imageProcessBindSet = renderContext.bindSets[ bindset_imageProcess ];
+	const ShaderBindSet& particleBindSet = renderContext.bindSets[ bindset_particle ];
 
 	{
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
@@ -224,22 +233,22 @@ void Renderer::InitShaderResources()
 				if( it != renderContext.bindSets.end() ) {
 					prog.bindset = &it->second;
 				} else {
-					prog.bindset = &bindset_pass;
+					prog.bindset = &passBindSet;
 				}
 			}
 		}
 	}
 
-	renderContext.globalParms = renderContext.RegisterBindParm( &bindset_global );
+	renderContext.globalParms = renderContext.RegisterBindParm( &globalBindSet );
 
 	{
-		particleState.parms = renderContext.RegisterBindParm( &bindset_particle );
+		particleState.parms = renderContext.RegisterBindParm( &particleBindSet );
 		particleState.x = ( MaxParticles / 256 );
 
 		if( resolve != nullptr ) {
-			resolve->pass->parms = renderContext.RegisterBindParm( &bindset_imageProcess );
+			resolve->pass->parms = renderContext.RegisterBindParm( &imageProcessBindSet );
 		}
-		downScale.pass->parms = renderContext.RegisterBindParm( &bindset_imageProcess );
+		downScale.pass->parms = renderContext.RegisterBindParm( &imageProcessBindSet );
 	}
 
 	materialBuffer.Reset();
