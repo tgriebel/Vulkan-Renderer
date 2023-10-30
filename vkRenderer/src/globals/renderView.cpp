@@ -18,6 +18,8 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_resources = info.resources;
 	m_viewId = info.viewId;
 
+	m_viewParms = info.context->RegisterBindParm( bindset_view );
+
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
 		passes[ passIx ] = nullptr;
 	}

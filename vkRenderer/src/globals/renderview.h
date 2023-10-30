@@ -59,6 +59,7 @@ private:
 
 	const ResourceContext*	m_resources;
 	const FrameBuffer*		m_framebuffer;
+	ShaderBindParms*		m_viewParms;
 	vec4f					m_clearColor;
 	float					m_clearDepth;
 	uint32_t				m_clearStencil;

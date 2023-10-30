@@ -86,7 +86,10 @@ public:
 	AllocatorMemory			sharedMemory;
 
 	ShaderBindParms*		RegisterBindParm( const ShaderBindSet* set );
-	const ShaderBindSet*	LookupBindSet( const char* name );
+	ShaderBindParms*		RegisterBindParm( const uint64_t setId );
+	ShaderBindParms*		RegisterBindParm( const char* setName );
+	const ShaderBindSet*	LookupBindSet( const uint64_t setId ) const;
+	const ShaderBindSet*	LookupBindSet( const char* name ) const;
 	void					AllocRegisteredBindParms();
 	void					FreeRegisteredBindParms();
 	void					RefreshRegisteredBindParms();

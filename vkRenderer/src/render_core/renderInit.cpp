@@ -218,6 +218,7 @@ void Renderer::InitApi()
 void Renderer::InitShaderResources()
 {
 	const ShaderBindSet& globalBindSet = renderContext.bindSets[ bindset_global ];
+	const ShaderBindSet& viewBindSet = renderContext.bindSets[ bindset_view ];
 	const ShaderBindSet& passBindSet = renderContext.bindSets[ bindset_pass ];
 	const ShaderBindSet& imageProcessBindSet = renderContext.bindSets[ bindset_imageProcess ];
 	const ShaderBindSet& particleBindSet = renderContext.bindSets[ bindset_particle ];
@@ -642,9 +643,32 @@ ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 }
 
 
-const ShaderBindSet* RenderContext::LookupBindSet( const char* name )
+ShaderBindParms* RenderContext::RegisterBindParm( const uint64_t setId )
 {
-	return &bindSets[ Hash( name ) ];
+	return RegisterBindParm( &bindSets[ setId ] );
+}
+
+
+ShaderBindParms* RenderContext::RegisterBindParm( const const char* setName )
+{
+	return RegisterBindParm( &bindSets[ Hash( setName ) ] );
+}
+
+
+const ShaderBindSet* RenderContext::LookupBindSet( const uint64_t setId ) const
+{
+	auto it = bindSets.find( setId );
+	if( it != bindSets.end() ) {
+		return &it->second;
+	} else {
+		return nullptr;
+	}
+}
+
+
+const ShaderBindSet* RenderContext::LookupBindSet( const char* name ) const
+{
+	return LookupBindSet( Hash( name ) );
 }
 
 
