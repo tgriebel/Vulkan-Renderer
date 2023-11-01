@@ -45,7 +45,6 @@ const uint64_t bindset_view = Hash( "bindset_view" );
 static const ShaderBinding g_passBindings[] =
 {
 	bind_lightBuffer,
-	bind_modelBuffer,
 	bind_imageCodeArray,
 	bind_imageStencil
 };

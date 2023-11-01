@@ -117,6 +117,7 @@ public:
 	const vec4f&			ClearColor() const;
 	float					ClearDepth() const;
 	uint32_t				ClearStencil() const;
+	const ShaderBindParms*	BindParms() const;
 
 	void					SetCamera( const Camera& camera, const bool reverseZ = true );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );

@@ -501,7 +501,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	const uint32_t flagCount = 1;
+	const uint32_t flagCount = 2;
 
 	char name[ TOKEN_LEN ] = "";
 	char vsShader[ TOKEN_LEN ] = "";
@@ -520,6 +520,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 		{ "cs", reinterpret_cast<void*>( csShader ), &ParseStringObject },
 		{ "bindset", reinterpret_cast<void*>( &bindSet ), &ParseStringObject },
 		{ "sampling_ms", reinterpret_cast<void*>( &flags[ 0 ] ), &ParseBoolObject },
+		{ "image_shader", reinterpret_cast<void*>( &flags[ 1 ] ), &ParseBoolObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -534,6 +535,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 	loader->SetBasePath( "shaders_bin/" );
 	loader->AddFilePaths( vsShader, psShader, csShader );
 	loader->SetBindSet( bindSet );
+	loader->SetFlags( (shaderFlags_t)shaderFlags );
 	shaders->AddDeferred( name, Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 
 	return st.tx;

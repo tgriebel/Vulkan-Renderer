@@ -117,18 +117,17 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 
 void RenderView::FrameBegin()
 {
+	m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] );
+
 	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 	{
 		DrawPass* pass = passes[ passIx ];
 		if ( pass == nullptr ) {
 			continue;
 		}
-
-		pass->parms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] ); // TODO: move to per-view parms
 		pass->FrameBegin( m_resources );
 	}
 }
-
 
 
 void RenderView::FrameEnd()
@@ -211,6 +210,12 @@ float RenderView::ClearDepth() const
 uint32_t RenderView::ClearStencil() const
 {
 	return m_clearStencil;
+}
+
+
+const ShaderBindParms* RenderView::BindParms() const
+{
+	return m_viewParms;
 }
 
 

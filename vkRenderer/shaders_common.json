@@ -85,18 +85,21 @@
       "vs": "fullscreenVS.spv",
       "ps": "downsamplePS.spv",
 	  "bindset": "bindset_imageProcess",
+	  "image_shader": true,
     },
 	{
       "name": "Resolve",
       "vs": "fullscreenVS.spv",
       "ps": "resolvePS.spv",
 	  "bindset": "bindset_imageProcess",
+	  "image_shader": true,
     },
 	{
       "name": "ResolveMSAA",
       "vs": "fullscreenVS.spv",
       "ps": "resolvePS_msaa.spv",
 	  "bindset": "bindset_imageProcess",
+	  "image_shader": true,
     },
   ]
 }

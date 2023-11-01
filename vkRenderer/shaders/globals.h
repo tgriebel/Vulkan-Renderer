@@ -166,10 +166,10 @@ struct view_t
 											SAMPLER_2D_LAYOUT( 0, 2 )												\
 											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
 											MATERIAL_LAYOUT( 0, 4 )													\
-											LIGHT_LAYOUT( 1, 0 )													\
-											MODEL_LAYOUT( 1, 1 )													\
-											CODE_IMAGE_LAYOUT( 1, 2, SAMPLER )										\
-											STENCIL_LAYOUT( 1, 3, SAMPLER )											\
+											MODEL_LAYOUT( 1, 0 )													\
+											LIGHT_LAYOUT( 2, 0 )													\
+											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
+											STENCIL_LAYOUT( 2, 2, SAMPLER )											\
 											PUSH_CONSTANTS															\
 											VS_IN																	\
 											VS_OUT
@@ -193,10 +193,10 @@ struct view_t
 											SAMPLER_2D_LAYOUT( 0, 2 )												\
 											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
 											MATERIAL_LAYOUT( 0, 4 )													\
-											LIGHT_LAYOUT( 1, 0 )													\
-											MODEL_LAYOUT( 1, 1 )													\
-											CODE_IMAGE_LAYOUT( 1, 2, SAMPLER )										\
-											STENCIL_LAYOUT( 1, 3, SAMPLER )											\
+											MODEL_LAYOUT( 1, 0 )													\
+											LIGHT_LAYOUT( 2, 0 )													\
+											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
+											STENCIL_LAYOUT( 2, 2, SAMPLER )											\
 											PUSH_CONSTANTS															\
 											PS_IN																	\
 											PS_OUT

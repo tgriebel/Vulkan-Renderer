@@ -27,6 +27,7 @@
 #include "../render_core/renderer.h"
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
+#include "../render_binding/bindings.h"
 #include "shaderBinding.h"
 #include <gfxcore/core/assetLib.h>
 #include <gfxcore/scene/scene.h>
@@ -209,7 +210,8 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	const GpuProgram& prog = progAsset.Get();
 	VkDescriptorSetLayout shaderBindLayout = prog.bindset->GetVkObject();
-	VkDescriptorSetLayout globalBindLayout = renderContext->globalParms->GetSet()->GetVkObject();
+	VkDescriptorSetLayout globalBindLayout = renderContext->LookupBindSet( bindset_global )->GetVkObject();
+	VkDescriptorSetLayout viewBindLayout = renderContext->LookupBindSet( bindset_view )->GetVkObject();
 	
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
@@ -356,9 +358,18 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	
-	VkDescriptorSetLayout layouts[] = { globalBindLayout, shaderBindLayout };
-	pipelineLayoutInfo.pSetLayouts = layouts;
-	pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
+	if( ( prog.flags & SHADER_FLAG_IMAGE_SHADER ) != 0 )
+	{
+		VkDescriptorSetLayout layouts[] = { globalBindLayout, shaderBindLayout };
+		pipelineLayoutInfo.pSetLayouts = layouts;
+		pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
+	}
+	else
+	{
+		VkDescriptorSetLayout layouts[] = { globalBindLayout, viewBindLayout, shaderBindLayout };
+		pipelineLayoutInfo.pSetLayouts = layouts;
+		pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
+	}
 	
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
