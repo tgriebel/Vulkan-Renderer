@@ -209,10 +209,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	}
 
 	const GpuProgram& prog = progAsset.Get();
-	VkDescriptorSetLayout shaderBindLayout = prog.bindset->GetVkObject();
-	VkDescriptorSetLayout globalBindLayout = renderContext->LookupBindSet( bindset_global )->GetVkObject();
-	VkDescriptorSetLayout viewBindLayout = renderContext->LookupBindSet( bindset_view )->GetVkObject();
-	
+
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
 
@@ -354,22 +351,16 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 	dynamicState.dynamicStateCount = 3;
 	dynamicState.pDynamicStates = dynamicStates;
+	
+	VkDescriptorSetLayout layouts[GpuProgram::MaxBindSets];
+	for( uint32_t i = 0; i < prog.bindsetCount; ++i ) {
+		layouts[ i ] = prog.bindsets[ i ]->GetVkObject();
+	}
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	
-	if( ( prog.flags & SHADER_FLAG_IMAGE_SHADER ) != 0 )
-	{
-		VkDescriptorSetLayout layouts[] = { globalBindLayout, shaderBindLayout };
-		pipelineLayoutInfo.pSetLayouts = layouts;
-		pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
-	}
-	else
-	{
-		VkDescriptorSetLayout layouts[] = { globalBindLayout, viewBindLayout, shaderBindLayout };
-		pipelineLayoutInfo.pSetLayouts = layouts;
-		pipelineLayoutInfo.setLayoutCount = COUNTARRAY( layouts );
-	}
+	pipelineLayoutInfo.pSetLayouts = layouts;
+	pipelineLayoutInfo.setLayoutCount = prog.bindsetCount;
 	
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
@@ -481,7 +472,11 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	}
 
 	const GpuProgram& prog = progAsset.Get();
-	VkDescriptorSetLayout layout = prog.bindset->GetVkObject();
+
+	VkDescriptorSetLayout layouts[ GpuProgram::MaxBindSets ];
+	for ( uint32_t i = 0; i < prog.bindsetCount; ++i ) {
+		layouts[ i ] = prog.bindsets[ i ]->GetVkObject();
+	}
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
@@ -495,10 +490,8 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 1;
-
-	VkDescriptorSetLayout layouts[] = { layout };
 	pipelineLayoutInfo.pSetLayouts = layouts;
+	pipelineLayoutInfo.setLayoutCount = prog.bindsetCount;
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 

@@ -228,14 +228,30 @@ void Renderer::InitShaderResources()
 		for ( uint32_t i = 0; i < programCount; ++i )
 		{
 			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
+			
+			prog.bindsetCount = 0;
+
+			if( prog.type == pipelineType_t::RASTER )
+			{
+				prog.bindsets[ prog.bindsetCount ] = &globalBindSet;
+				prog.bindsetCount += 1;
+
+				if ( ( prog.flags & SHADER_FLAG_IMAGE_SHADER ) == 0 )
+				{			
+					prog.bindsets[ prog.bindsetCount ] = &viewBindSet;
+					prog.bindsetCount += 1;
+				}
+			}
+
 			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
 			{
 				auto it = renderContext.bindSets.find( prog.bindHash );
 				if( it != renderContext.bindSets.end() ) {
-					prog.bindset = &it->second;
+					prog.bindsets[ prog.bindsetCount ] = &it->second;
 				} else {
-					prog.bindset = &passBindSet;
+					prog.bindsets[ prog.bindsetCount ] = &passBindSet;
 				}
+				prog.bindsetCount += 1;
 			}
 		}
 	}
