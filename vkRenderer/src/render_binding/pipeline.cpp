@@ -34,17 +34,6 @@
 
 static std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 
-static VkVertexInputBindingDescription GetVertexBindingDescription()
-{
-	VkVertexInputBindingDescription bindingDescription{ };
-	bindingDescription.binding = 0;
-	bindingDescription.stride = sizeof( vsInput_t );
-	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-	return bindingDescription;
-}
-
-
 static const uint32_t MaxVertexAttribs = 6;
 static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertexAttributeDescriptions()
 {
@@ -231,7 +220,11 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
-	auto bindingDescription = GetVertexBindingDescription();
+	VkVertexInputBindingDescription bindingDescription{ };
+	bindingDescription.binding = 0;
+	bindingDescription.stride = sizeof( vsInput_t );
+	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
 	auto attributeDescriptions = GetVertexAttributeDescriptions();
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{ };
