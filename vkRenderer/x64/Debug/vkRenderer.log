@@ -1,2 +1,45 @@
-﻿  pipeline.cpp
+﻿  scene.cpp
+  chessScene.cpp
+  nesScene.cpp
+  sceneParser.cpp
+  drawpass.cpp
+  drawGroup.cpp
+  postEffect.cpp
+  renderView.cpp
+  render_util.cpp
+  io.cpp
+  allocator.cpp
+  binding.cpp
+  descriptorWrites.cpp
+  gpuResources.cpp
+  gpuTransfer.cpp
+  imageView.cpp
+  pipeline.cpp
+  shaderBinding.cpp
+  GpuSync.cpp
+  RenderTask.cpp
+  Generating Code...
+  Compiling...
+  debugMenu.cpp
+  gpuImage.cpp
+  renderCommand.cpp
+  renderInit.cpp
+C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_core\renderInit.cpp(668,57): warning C4114: same type qualifier used more than once
+  renderShutdown.cpp
+  renderer.cpp
+  swapChain.cpp
+  cmdContext.cpp
+  deviceContext.cpp
+  frameBuffer.cpp
+  vulkinTestApp.cpp
+  window.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+Chess.lib(chessState.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+Chess.lib(chess.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+Chess.lib(util.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+Chess.lib(piece.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\Chess.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(serializer.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(systemUtils.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(timer.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

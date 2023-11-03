@@ -1076,18 +1076,22 @@ void DeviceContext::Create( Window& window )
 
 	// Descriptor Pool
 	{
-		std::array<VkDescriptorPoolSize, 3> poolSizes{ };
+		const uint32_t subPoolCount = 4;
+
+		VkDescriptorPoolSize poolSizes[ subPoolCount ];
 		poolSizes[ 0 ].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		poolSizes[ 0 ].descriptorCount = DescriptorPoolMaxUniformBuffers;
-		poolSizes[ 1 ].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[ 1 ].descriptorCount = DescriptorPoolMaxComboImages;
-		poolSizes[ 2 ].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		poolSizes[ 2 ].descriptorCount = DescriptorPoolMaxImages;
+		poolSizes[ 1 ].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		poolSizes[ 1 ].descriptorCount = DescriptorPoolMaxStorageBuffers;
+		poolSizes[ 2 ].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[ 2 ].descriptorCount = DescriptorPoolMaxComboImages;
+		poolSizes[ 3 ].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		poolSizes[ 3 ].descriptorCount = DescriptorPoolMaxImages;
 
 		VkDescriptorPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = static_cast<uint32_t>( poolSizes.size() );
-		poolInfo.pPoolSizes = poolSizes.data();
+		poolInfo.poolSizeCount = subPoolCount;
+		poolInfo.pPoolSizes = poolSizes;
 		poolInfo.maxSets = DescriptorPoolMaxSets;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
