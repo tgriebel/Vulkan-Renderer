@@ -269,13 +269,13 @@ float Window::GetWindowFrameBufferAspect( const bool wait )
 }
 
 #ifdef USE_VULKAN
-void Window::CreateGlfwSurface()
+void Window::CreateGlfwSurface( const VkInstance instance )
 {
-	VK_CHECK_RESULT( glfwCreateWindowSurface( context.instance, window, nullptr, &vk_surface ) );
+	VK_CHECK_RESULT( glfwCreateWindowSurface( instance, window, nullptr, &vk_surface ) );
 }
 
 
-void Window::DestroyGlfwSurface()
+void Window::DestroyGlfwSurface( const VkInstance instance )
 {
 	vkDestroySurfaceKHR( context.instance, vk_surface, nullptr );
 }

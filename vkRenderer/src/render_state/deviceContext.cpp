@@ -888,7 +888,7 @@ void DeviceContext::Create( Window& window )
 
 	// Window Surface
 	{
-		window.CreateGlfwSurface();
+		window.CreateGlfwSurface( context.instance );
 	}
 
 	// Pick physical device
@@ -1163,7 +1163,7 @@ void DeviceContext::Destroy( Window& window )
 		}
 	}
 
-	window.DestroyGlfwSurface();
+	window.DestroyGlfwSurface( context.instance );
 	
 	vkDestroyInstance( instance, nullptr );
 }

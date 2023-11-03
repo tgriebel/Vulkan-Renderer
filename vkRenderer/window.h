@@ -36,8 +36,8 @@ public:
 	void					RequestImageResize() { needsImageResize = true; }
 
 #ifdef USE_VULKAN
-	void					CreateGlfwSurface();
-	void					DestroyGlfwSurface();
+	void					CreateGlfwSurface( const VkInstance instance );
+	void					DestroyGlfwSurface( const VkInstance instance );
 #endif
 
 private:
