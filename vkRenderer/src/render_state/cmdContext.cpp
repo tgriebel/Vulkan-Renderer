@@ -285,86 +285,11 @@ void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& b
 }
 
 
-void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, downSampleMode_t mode )
+void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, DrawPass* pass, downSampleMode_t mode )
 {
 	cmdCommand->MarkerBeginRegion( "GenerateDownsampleMips", ColorToVector( ColorWhite ) );
 
-	std::vector<ImageView> views;
-	views.resize( image.info.mipLevels );
-
-	std::vector<DrawPass*> passes;
-	passes.resize( image.info.mipLevels );
-
-	std::vector<FrameBuffer> frameBuffers;
-	frameBuffers.resize( image.info.mipLevels );
-
-	for ( uint32_t i = 0; i < image.info.mipLevels; i++ )
-	{
-		imageSubResourceView_t subView = {};
-		subView.baseMip = i;
-		subView.mipLevels = 1;
-
-		views[ i ].Init( image, image.info, subView );
-
-		{
-			frameBufferCreateInfo_t fbInfo = {};
-			fbInfo.name = "TempDownsample";
-			fbInfo.color0[ 0 ] = &views[ i ];
-			fbInfo.width = views[ i ].info.width;
-			fbInfo.height = views[ i ].info.height;
-			fbInfo.lifetime = LIFETIME_TEMP;
-
-			frameBuffers[ i ].Create( fbInfo );
-		}
-		passes[ i ] = new PostPass( &frameBuffers[ i ] );
-	}
-
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ 0 ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
-
-	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
-
-	GpuBuffer buffer;
-	//buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
-
-	for ( uint32_t i = 1; i < image.info.mipLevels; i++ )
-	{
-		vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ i ], GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
-
-		//{
-		//	const float w = float( passes[ i ]->GetFrameBuffer()->GetWidth() );
-		//	const float h = float( passes[ i ]->GetFrameBuffer()->GetHeight() );
-
-		//	imageProcessObject_t process = {};
-		//	process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
-
-		//	buffer.SetPos( 0 );
-		//	buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
-		//}
-
-		//passes[ i ]->codeImages.Resize( 3 );
-		//passes[ i ]->codeImages[ 0 ] = &views[ i - 1 ];
-		//passes[ i ]->codeImages[ 1 ] = &views[ i - 1 ];
-		//passes[ i ]->codeImages[ 2 ] = &views[ i - 1 ];
-
-		//passes[ i ]->parms->Bind( bind_globalsBuffer, &renderContext.globalConstants );
-		//passes[ i ]->parms->Bind( bind_sourceImages, &passes[ i ]->codeImages );
-		//passes[ i ]->parms->Bind( bind_imageStencil, &renderContext.stencilImageView );
-		//passes[ i ]->parms->Bind( bind_imageProcess, &buffer );
-
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdCommand->GetRenderContext(), passes[ i ], *progAsset );
-		vk_RenderImageShader( *cmdCommand, pipeLineHandle, passes[ i ] );
-
-		vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
-	}
-
-	for ( uint32_t i = 0; i < image.info.mipLevels; i++ )
-	{
-		views[ i ].Destroy();
-		if ( passes[ i ] != nullptr ) {
-			delete passes[ i ];
-		}
-		frameBuffers[ i ].Destroy();
-	}
+	vk_GenerateDownsampleMips( *cmdCommand, &image, pass, mode );
 
 	cmdCommand->MarkerEndRegion();
 }

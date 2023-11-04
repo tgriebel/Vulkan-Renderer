@@ -26,6 +26,7 @@
 #include "../draw_passes/drawpass.h"
 #include "../render_core/gpuImage.h"
 #include "../render_core/renderer.h"
+#include "../render_binding/bindings.h"
 
 DeviceContext context;
 
@@ -396,9 +397,12 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 
 
 // FIXME: Move this function to a higher-level
-void vk_GenerateDownsampleMips( VkCommandBuffer cmdBuffer, Image* image, downSampleMode_t mode )
+void vk_GenerateDownsampleMips( CommandContext& cmdContext, Image* image, DrawPass* pass, downSampleMode_t mode )
 {
-	/*
+	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
+
+	const RenderContext* renderContext = cmdContext.GetRenderContext();
+
 	std::vector<ImageView> views;
 	views.resize( image->info.mipLevels );
 
@@ -433,36 +437,15 @@ void vk_GenerateDownsampleMips( VkCommandBuffer cmdBuffer, Image* image, downSam
 
 	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
 
-	//GpuBuffer buffer;
-	//buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, info.context->sharedMemory );
-
 	for ( uint32_t i = 1; i < image->info.mipLevels; i++ )
 	{
 		vk_TransitionImageLayout( cmdBuffer, &views[ i ], GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
-		//{
-		//	const float w = float( passes[ i ]->GetFrameBuffer()->GetWidth() );
-		//	const float h = float( passes[ i ]->GetFrameBuffer()->GetHeight() );
+		passes[ i ]->codeImages.Resize( 1 );
+		passes[ i ]->codeImages[ 0 ] = &views[ i - 1 ];
 
-		//	imageProcessObject_t process = {};
-		//	process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
-
-		//	buffer.SetPos( 0 );
-		//	buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
-		//}
-
-		//passes[ i ]->codeImages.Resize( 3 );
-		//passes[ i ]->codeImages[ 0 ] = &views[ i - 1 ];
-		//passes[ i ]->codeImages[ 1 ] = &views[ i - 1 ];
-		//passes[ i ]->codeImages[ 2 ] = &views[ i - 1 ];
-
-		//passes[ i ]->parms->Bind( bind_globalsBuffer, &renderContext.globalConstants );
-		//passes[ i ]->parms->Bind( bind_sourceImages, &passes[ i ]->codeImages );
-		//passes[ i ]->parms->Bind( bind_imageStencil, &renderContext.stencilImageView );
-		//passes[ i ]->parms->Bind( bind_imageProcess, &buffer );
-
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( passes[ i ], *progAsset );
-		vk_RenderImageShader( cmdBuffer, pipeLineHandle, passes[ i ] );
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( renderContext, passes[ i ], *progAsset );
+		vk_RenderImageShader( cmdContext, pipeLineHandle, passes[ i ] );
 
 		vk_TransitionImageLayout( cmdBuffer, &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 	}
@@ -475,7 +458,6 @@ void vk_GenerateDownsampleMips( VkCommandBuffer cmdBuffer, Image* image, downSam
 		}
 		frameBuffers[ i ].Destroy();
 	}
-	*/
 }
 
 
