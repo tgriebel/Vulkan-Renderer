@@ -157,7 +157,6 @@ public:
 	{}
 
 	uint32_t	PendingTasks() const;
-	void		Reset();
 	void		Clear();
 	void		Queue( GpuTask* task );
 	void		FrameBegin();

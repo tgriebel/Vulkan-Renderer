@@ -443,8 +443,6 @@ void Renderer::SubmitFrame()
 		computeContext.Begin();
 		gfxContext.Begin();
 
-		schedule.Reset();
-
 		schedule.FrameBegin();
 
 		renderContext.UpdateBindParms();

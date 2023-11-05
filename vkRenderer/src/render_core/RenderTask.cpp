@@ -402,12 +402,6 @@ uint32_t RenderSchedule::PendingTasks() const
 }
 
 
-void RenderSchedule::Reset()
-{
-	currentTask = 0;
-}
-
-
 void RenderSchedule::Clear()
 {
 	for( size_t i = 0; i < tasks.size(); ++i ) {
@@ -426,6 +420,8 @@ void RenderSchedule::Queue( GpuTask* task )
 
 void RenderSchedule::FrameBegin()
 {
+	currentTask = 0;
+
 	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
 	for( uint32_t i = 0; i < taskCount; ++i )
 	{
