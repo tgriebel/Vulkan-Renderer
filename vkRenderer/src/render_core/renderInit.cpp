@@ -270,8 +270,6 @@ void Renderer::InitShaderResources()
 
 	materialBuffer.Reset();
 
-	renderContext.AllocRegisteredBindParms();
-
 	{
 		imageInfo_t info{};
 		info.width = 256;
@@ -653,6 +651,7 @@ ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 {
 	ShaderBindParms parms = ShaderBindParms( set );
 
+	pendingIndices.Append( bindParmsList.Count() );
 	bindParmsList.Append( parms );
 
 	return &bindParmsList[ bindParmsList.Count() - 1 ];
@@ -665,7 +664,7 @@ ShaderBindParms* RenderContext::RegisterBindParm( const uint64_t setId )
 }
 
 
-ShaderBindParms* RenderContext::RegisterBindParm( const const char* setName )
+ShaderBindParms* RenderContext::RegisterBindParm( const char* setName )
 {
 	return RegisterBindParm( &bindSets[ Hash( setName ) ] );
 }
@@ -690,18 +689,22 @@ const ShaderBindSet* RenderContext::LookupBindSet( const char* name ) const
 
 void RenderContext::AllocRegisteredBindParms()
 {
-	SCOPED_TIMER_PRINT( AllocRegisteredBindParms )
+	//SCOPED_TIMER_PRINT( AllocRegisteredBindParms )
+
+	const uint32_t pendingParmCount = pendingIndices.Count();
+	if( pendingParmCount == 0 ) {
+		return;
+	}
 
 	std::vector<VkDescriptorSetLayout> layouts;
 	std::vector<VkDescriptorSet> descSets;
 
-	const uint32_t bindParmCount = bindParmsList.Count();
+	layouts.reserve( MaxFrameStates * pendingParmCount );
+	descSets.reserve( MaxFrameStates * pendingParmCount );
 
-	layouts.reserve( MaxFrameStates * bindParmCount );
-	descSets.reserve( MaxFrameStates * bindParmCount );
-
-	for ( uint32_t bindIx = 0; bindIx < bindParmCount; ++bindIx )
+	for ( uint32_t i = 0; i < pendingParmCount; ++i )
 	{
+		const uint32_t bindIx = pendingIndices[ i ];
 		ShaderBindParms& parms = bindParmsList[ bindIx ];
 		const ShaderBindSet* set = parms.GetSet();
 
@@ -720,11 +723,13 @@ void RenderContext::AllocRegisteredBindParms()
 
 	VK_CHECK_RESULT( vkAllocateDescriptorSets( context.device, &allocInfo, descSets.data() ) );
 
-	for ( uint32_t bindIx = 0; bindIx < bindParmCount; ++bindIx )
+	for ( uint32_t i = 0; i < pendingParmCount; ++i )
 	{
+		const uint32_t bindIx = pendingIndices[ i ];
 		ShaderBindParms& parms = bindParmsList[ bindIx ];
 		parms.SetVkObject( &descSets[ MaxFrameStates * bindIx ] );
 	}
+	pendingIndices.Reset();
 }
 
 
@@ -740,6 +745,9 @@ void RenderContext::FreeRegisteredBindParms()
 	}
 
 	vkFreeDescriptorSets( context.device, context.descriptorPool, static_cast<uint32_t>( descSets.size() ), descSets.data() );
+
+	pendingIndices.Reset();
+	bindParmsList.Reset();
 }
 
 

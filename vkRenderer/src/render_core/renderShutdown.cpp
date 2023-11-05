@@ -176,5 +176,4 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	renderContext.FreeRegisteredBindParms();
-	renderContext.bindParmsList.Reset();
 }

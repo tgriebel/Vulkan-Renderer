@@ -72,9 +72,11 @@ class RenderContext
 {
 private:
 	using bindParmArray_t = Array<ShaderBindParms, DescriptorPoolMaxSets>;
+	using pendingArray_t = Array<uint32_t, DescriptorPoolMaxSets>;
 
 	// Shader binding
 	bindParmArray_t			bindParmsList;
+	pendingArray_t			pendingIndices;
 	bindSetMap_t			bindSets;
 
 public:
@@ -90,11 +92,12 @@ public:
 	ShaderBindParms*		RegisterBindParm( const char* setName );
 	const ShaderBindSet*	LookupBindSet( const uint64_t setId ) const;
 	const ShaderBindSet*	LookupBindSet( const char* name ) const;
+	void					UpdateBindParms();
 	void					AllocRegisteredBindParms();
 	void					FreeRegisteredBindParms();
 	void					RefreshRegisteredBindParms();
 
-	friend class Renderer;
+	friend class Renderer; // TODO: Need an interface for bind sets
 };
 
 

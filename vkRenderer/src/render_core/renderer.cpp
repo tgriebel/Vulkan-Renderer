@@ -447,7 +447,7 @@ void Renderer::SubmitFrame()
 
 		schedule.FrameBegin();
 
-		UpdateFrameDescSet();
+		renderContext.UpdateBindParms();
 
 		while( schedule.PendingTasks() > 0 ) {
 			schedule.IssueNext( gfxContext );
@@ -566,6 +566,8 @@ void Renderer::UpdateBindSets()
 		particleState.parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
 		particleState.parms->Bind( bind_particleWriteBuffer,	&resources.particleBuffer );
 	}
+
+	renderContext.AllocRegisteredBindParms();
 }
 
 

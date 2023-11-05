@@ -195,18 +195,18 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 }
 
 
-void Renderer::UpdateFrameDescSet()
+void RenderContext::UpdateBindParms()
 {
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
 
-	const uint32_t bindParmCount = renderContext.bindParmsList.Count();
+	const uint32_t bindParmCount = bindParmsList.Count();
 	for ( uint32_t i = 0; i < bindParmCount; ++i )
 	{
-		if( renderContext.bindParmsList[ i ].IsValid() == false ) {
+		if( bindParmsList[ i ].IsValid() == false ) {
 			continue;
 		}
-		AppendDescriptorWrites( renderContext.bindParmsList[ i ], context.bufferId, descriptorWrites );
+		AppendDescriptorWrites( bindParmsList[ i ], context.bufferId, descriptorWrites );
 	}
 
 	if( descriptorWrites.size() > 0 ) {
