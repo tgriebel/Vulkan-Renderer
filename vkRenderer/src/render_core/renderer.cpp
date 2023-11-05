@@ -564,8 +564,6 @@ void Renderer::UpdateBindSets()
 		particleState.parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
 		particleState.parms->Bind( bind_particleWriteBuffer,	&resources.particleBuffer );
 	}
-
-	renderContext.AllocRegisteredBindParms();
 }
 
 

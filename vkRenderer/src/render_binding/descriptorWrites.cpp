@@ -197,6 +197,8 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 void RenderContext::UpdateBindParms()
 {
+	AllocRegisteredBindParms();
+
 	writeBuilder.Reset();
 	std::vector<VkWriteDescriptorSet> descriptorWrites;
 
