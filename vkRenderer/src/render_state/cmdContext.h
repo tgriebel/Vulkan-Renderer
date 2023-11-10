@@ -30,6 +30,8 @@ class ShaderBindParms;
 class GpuBuffer;
 class RenderContext;
 class DrawPass;
+class ImageView;
+class FrameBuffer;
 
 enum gpuImageStateFlags_t : uint8_t;
 enum downSampleMode_t : uint32_t;
@@ -183,4 +185,4 @@ void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t 
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
 void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
-void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, DrawPass* pass, downSampleMode_t mode );
+void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode );

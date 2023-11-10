@@ -6,9 +6,9 @@
 struct imageSubResourceView_t
 {
 	uint32_t baseMip;
-	// uint32_t baseArray;
+	uint32_t baseArray;
 	uint32_t mipLevels;
-	// uint32_t arrayCount;
+	uint32_t arrayCount;
 };
 
 
@@ -58,6 +58,8 @@ public:
 		imageSubResourceView_t subView;
 		subView.baseMip = 0;
 		subView.mipLevels = imageInfo.mipLevels;
+		subView.baseArray = 0;
+		subView.arrayCount = imageInfo.layers;
 
 		Init( image, imageInfo, subView );
 	}
@@ -67,6 +69,7 @@ public:
 	{
 		info = imageInfo;
 		info.mipLevels = subView.mipLevels;
+		info.layers = subView.arrayCount;
 
 		MipDimensions( subView.baseMip, info.width, info.height, &info.width, &info.height );
 

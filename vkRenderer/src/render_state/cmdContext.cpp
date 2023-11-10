@@ -31,6 +31,7 @@
 #include "../render_binding/bufferObjects.h"
 #include "../render_binding/bindings.h"
 #include "../globals/postEffect.h"
+#include "../render_binding/imageView.h"
 
 extern AssetManager g_assets;
 
@@ -249,7 +250,21 @@ void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t 
 {
 	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
 
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, current, next );
+	imageSubResourceView_t subview {};
+	subview.mipLevels = image.info.mipLevels;
+	subview.arrayCount = image.info.layers;
+
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, subview, current, next );
+
+	cmdCommand->MarkerEndRegion();
+}
+
+
+void Transition( CommandContext* cmdCommand, ImageView& imageView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
+	cmdCommand->MarkerBeginRegion( "Transition Image View", ColorToVector( ColorWhite ) );
+
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &imageView, imageView.subResourceView, current, next );
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -285,11 +300,11 @@ void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& b
 }
 
 
-void GenerateDownsampleMips( CommandContext* cmdCommand, Image& image, DrawPass* pass, downSampleMode_t mode )
+void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode )
 {
 	cmdCommand->MarkerBeginRegion( "GenerateDownsampleMips", ColorToVector( ColorWhite ) );
 
-	vk_GenerateDownsampleMips( *cmdCommand, &image, pass, mode );
+	vk_GenerateDownsampleMips( *cmdCommand, views, passes, mode );
 
 	cmdCommand->MarkerEndRegion();
 }

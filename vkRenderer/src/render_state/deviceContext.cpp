@@ -178,17 +178,17 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 }
 
 
-void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, const imageSubResourceView_t& subView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image->gpuImage->GetVkImage();
-	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = image->info.mipLevels;
-	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = image->info.layers;
+	barrier.subresourceRange.baseMipLevel = 0;//subView.baseMip;
+	barrier.subresourceRange.levelCount = image->info.mipLevels;//subView.mipLevels;
+	barrier.subresourceRange.baseArrayLayer = 0;//subView.baseArray;
+	barrier.subresourceRange.layerCount = image->info.layers;//subView.arrayCount;
 
 	const bool hasColorAspect = ( image->info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0;
 	const bool hasDepthAspect = ( image->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
@@ -221,6 +221,9 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, gpuImage
 	}
 	else if ( ( next & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
 		newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_WRITE ) != 0 ) {
+		newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
 	barrier.oldLayout = oldLayout;
@@ -299,6 +302,36 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, gpuImage
 		1, &barrier
 	);
 }
+
+
+/*
+* TODO: merge with copy image
+void vk_Blit( VkCommandBuffer cmdBuffer, const int32_t srcRegion[ 2 ][ 3 ], const Image* src, const imageSubResourceView_t& srcSubView, const int32_t dstRegion[ 2 ][ 3 ], Image* dst, const imageSubResourceView_t& dstSubView )
+{
+	VkImageBlit blit{ };
+	blit.srcOffsets[ 0 ] = { srcRegion[ 0 ][ 0 ], srcRegion[ 0 ][ 1 ], srcRegion[ 0 ][ 2 ] };
+	blit.srcOffsets[ 1 ] = { srcRegion[ 1 ][ 0 ], srcRegion[ 1 ][ 1 ], srcRegion[ 1 ][ 2 ] };
+	blit.srcSubresource.aspectMask = vk_GetAspectFlags( src->info.aspect );
+	blit.srcSubresource.mipLevel = srcSubView.baseMip;
+	blit.srcSubresource.baseArrayLayer = srcSubView.baseArray;
+	blit.srcSubresource.layerCount = srcSubView.arrayCount;
+	blit.dstOffsets[ 0 ] = { dstRegion[ 0 ][ 0 ], dstRegion[ 0 ][ 1 ], dstRegion[ 0 ][ 2 ] };
+	blit.dstOffsets[ 1 ] = { dstRegion[ 1 ][ 0 ], dstRegion[ 1 ][ 1 ], dstRegion[ 1 ][ 2 ] };
+	blit.dstSubresource.aspectMask = vk_GetAspectFlags( dst->info.aspect );
+	blit.dstSubresource.mipLevel = dstSubView.baseMip;
+	blit.dstSubresource.baseArrayLayer = dstSubView.baseArray;
+	blit.dstSubresource.layerCount = dstSubView.arrayCount;
+
+	vkCmdBlitImage( cmdBuffer,
+		src->gpuImage->GetVkImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		dst->gpuImage->GetVkImage(),
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		&blit,
+		VK_FILTER_LINEAR );
+}
+*/
 
 
 void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
@@ -396,67 +429,22 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 }
 
 
-// FIXME: Move this function to a higher-level
-void vk_GenerateDownsampleMips( CommandContext& cmdContext, Image* image, DrawPass* pass, downSampleMode_t mode )
+void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
 	const RenderContext* renderContext = cmdContext.GetRenderContext();
 
-	std::vector<ImageView> views;
-	views.resize( image->info.mipLevels );
-
-	std::vector<DrawPass*> passes;
-	passes.resize( image->info.mipLevels );
-
-	std::vector<FrameBuffer> frameBuffers;
-	frameBuffers.resize( image->info.mipLevels );
-
-	for ( uint32_t i = 0; i < image->info.mipLevels; i++ )
-	{
-		imageSubResourceView_t subView = {};
-		subView.baseMip = i;
-		subView.mipLevels = 1;
-
-		views[ i ].Init( *image, image->info, subView );
-
-		{
-			frameBufferCreateInfo_t fbInfo = {};
-			fbInfo.name = "TempDownsample";
-			fbInfo.color0[ 0 ] = &views[ i ];
-			fbInfo.width = views[ i ].info.width;
-			fbInfo.height = views[ i ].info.height;
-			fbInfo.lifetime = LIFETIME_TEMP;
-
-			frameBuffers[ i ].Create( fbInfo );
-		}
-		passes[ i ] = new PostPass( &frameBuffers[ i ] );
-	}
-
-	vk_TransitionImageLayout( cmdBuffer, &views[ 0 ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
-
 	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
 
-	for ( uint32_t i = 1; i < image->info.mipLevels; i++ )
+	const uint32_t mipLevels = static_cast<uint32_t>( views.size() );
+	for ( uint32_t i = 1; i < 2; i++ )
 	{
-		vk_TransitionImageLayout( cmdBuffer, &views[ i ], GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
-
-		passes[ i ]->codeImages.Resize( 1 );
-		passes[ i ]->codeImages[ 0 ] = &views[ i - 1 ];
-
 		hdl_t pipeLineHandle = CreateGraphicsPipeline( renderContext, passes[ i ], *progAsset );
 		vk_RenderImageShader( cmdContext, pipeLineHandle, passes[ i ] );
 
-		vk_TransitionImageLayout( cmdBuffer, &views[ i ], GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
-	}
-
-	for ( uint32_t i = 0; i < image->info.mipLevels; i++ )
-	{
-		views[ i ].Destroy();
-		if ( passes[ i ] != nullptr ) {
-			delete passes[ i ];
-		}
-		frameBuffers[ i ].Destroy();
+	//	vk_TransitionImageLayout( cmdBuffer, &views[i], views[i].subResourceView, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
+	//	vk_CopyImage( cmdBuffer, &views[ i - 1 ],  &views[ i ] );
 	}
 }
 
@@ -554,8 +542,9 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = src->info.layers;
-	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.layerCount = src->info.layers;	
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = src->info.mipLevels;
 
 	const int32_t srcWidth = src->info.width;
 	const int32_t srcHeight = src->info.height;
@@ -563,7 +552,6 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 	const int32_t dstHeight = dst->info.height;
 
 	{
-		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -730,8 +718,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vk_DebugCallback( VkDebugUtilsMessageSever
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData )
 {
-
-	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+	std::cerr << "[Vulkan Validation - ";
+	if( ( messageType &= VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT ) != 0 ) {
+		std::cerr << "Error";
+	} else if ( ( messageType &= VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT ) != 0 ) {
+		std::cerr << "Performance";
+	}
+	std::cerr << "]\t";
+	std::cerr << pCallbackData->pMessage << "\n" << std::endl;
 	return VK_FALSE;
 }
 
@@ -754,7 +748,13 @@ void vk_PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& cr
 		createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 	}
 
-	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	VkDebugUtilsMessageTypeFlagsEXT messageFlags = 0;
+	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT;
+	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT;
+
+	createInfo.messageType = messageFlags;
 	createInfo.pfnUserCallback = vk_DebugCallback;
 }
 
@@ -810,7 +810,7 @@ void DeviceContext::Create( Window& window )
 
 		VkApplicationInfo appInfo{ };
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Extensia";
+		appInfo.pApplicationName = "Extensa";
 		appInfo.applicationVersion = VK_MAKE_VERSION( 1, 0, 0 );
 		appInfo.pEngineName = "No Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION( 1, 0, 0 );
@@ -825,10 +825,9 @@ void DeviceContext::Create( Window& window )
 		std::vector<VkExtensionProperties> extensionProperties( extensionCount );
 		vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, extensionProperties.data() );
 
-		std::cout << "available extensions:\n";
+		std::cout << "Available extensions:\n";
 
-		for ( const auto& extension : extensionProperties )
-		{
+		for ( const auto& extension : extensionProperties ) {
 			std::cout << '\t' << extension.extensionName << '\n';
 		}
 

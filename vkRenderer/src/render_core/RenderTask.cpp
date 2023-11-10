@@ -25,6 +25,8 @@
 #include "renderer.h"
 #include "../render_state/cmdContext.h"
 #include "../globals/renderview.h"
+#include "../render_binding/gpuResources.h"
+#include "../render_binding/bindings.h"
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
@@ -389,10 +391,123 @@ void CopyImageTask::Execute( CommandContext& context )
 }
 
 
+void MipImageTask::Init( const mipProcessCreateInfo_t& info )
+{
+	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );
+
+	m_dbgName = info.name;
+	m_image = info.img;
+	m_mode = info.mode;
+	m_context = info.context;
+	m_resources = info.resources;
+
+	{
+		m_tempImage.info = m_image->info;
+		m_tempImage.info.mipLevels = 1;
+		MipDimensions( 1, m_image->info.width, m_image->info.height, &m_tempImage.info.width, &m_tempImage.info.height );
+		
+		m_tempImage.gpuImage = new GpuImage();
+		m_tempImage.gpuImage->Create( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->localMemory );
+
+		frameBufferCreateInfo_t info{};
+		info.name = "TempDownsample";
+		info.color0[0] = &m_tempImage;
+		info.width = m_tempImage.info.width;
+		info.height = m_tempImage.info.height;
+		info.lifetime = resourceLifetime_t::LIFETIME_TEMP;
+		m_tempBuffer.Create( info );
+	}
+
+	const uint32_t mipLevels = m_image->info.mipLevels;
+
+	m_passes.resize( mipLevels );
+	m_views.resize( mipLevels );
+
+	// The last view is only needed to create a frame buffer 
+	for ( uint32_t i = 0; i < m_image->info.mipLevels; ++i )
+	{
+		imageSubResourceView_t subView = {};
+		subView.baseMip = i;
+		subView.mipLevels = 1;
+
+		m_views[ i ].Init( *m_image, m_image->info, subView );
+
+		//m_frameBuffers[ i ].
+	}
+
+	// Create buffer
+	{
+		m_buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( mipProcessParms_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+
+		const float w = float( m_views[ 0 ].info.width );
+		const float h = float( m_views[ 0 ].info.height );
+
+		imageProcessObject_t process = {};
+		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+
+		m_buffer.SetPos( 0 );
+		m_buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+	}
+
+	// All but the first image need a framebuffer since they are being written to
+	for ( uint32_t i = 1; i < m_image->info.mipLevels; ++i )
+	{
+		m_passes[ i ] = new PostPass( &m_tempBuffer );
+		m_passes[ i ]->SetViewport( 0, 0, m_views[ i ].info.width, m_views[ i ].info.height );
+		m_passes[ i ]->codeImages.Resize( 1 );
+		m_passes[ i ]->codeImages[ 0 ] = &m_views[ i - 1 ];
+
+		m_passes[ i ]->parms = m_context->RegisterBindParm( bindset_imageProcess );
+	}
+}
+
+
+void MipImageTask::FrameBegin()
+{
+	for ( uint32_t i = 1; i < m_image->info.mipLevels; ++i )
+	{
+		m_passes[ i ]->parms->Bind( bind_sourceImages, &m_passes[ i ]->codeImages );
+		m_passes[ i ]->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
+		m_passes[ i ]->parms->Bind( bind_imageProcess, &m_buffer );
+	}
+}
+
+
+void MipImageTask::FrameEnd()
+{
+
+}
+
+
+void MipImageTask::Shutdown()
+{
+	for ( uint32_t i = 0; i < m_image->info.mipLevels; i++ )
+	{
+		m_views[ i ].Destroy();
+		if ( m_passes[ i ] != nullptr ) {
+			delete m_passes[ i ];
+		}
+	}
+	m_buffer.Destroy();
+
+	m_tempImage.gpuImage->Destroy();
+	delete m_tempImage.gpuImage;
+
+	m_tempBuffer.Destroy();
+}
+
+
 void MipImageTask::Execute( CommandContext& context )
 {
-	GenerateMipmaps( &context, *m_img );
-//	GenerateDownsampleMips( &context, *m_img, downSampleMode_t::DOWNSAMPLE_LINEAR );
+	if( m_mode == DOWNSAMPLE_LINEAR )
+	{
+		Transition( &context, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
+		GenerateMipmaps( &context, *m_image );
+	}
+	else
+	{
+		GenerateDownsampleMips( &context, m_views, m_passes, m_mode );
+	}
 }
 
 

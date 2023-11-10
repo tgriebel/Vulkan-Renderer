@@ -3,12 +3,38 @@
 #include <queue>
 #include <GfxCore/asset_types/material.h>
 #include "../render_core/GpuSync.h"
+#include "../render_state/frameBuffer.h"
+#include "../render_binding/imageView.h"
 
 class CommandContext;
 class GfxContext;
 class RenderView;
+class RenderContext;
+class ResourceContext;
 class Image;
 struct ComputeState;
+
+enum downSampleMode_t : uint32_t;
+
+struct mipProcessCreateInfo_t
+{
+	const char*			name;
+	Image*				img;
+	downSampleMode_t	mode;
+	RenderContext*		context;
+	ResourceContext*	resources;
+};
+
+union mipProcessParms_t
+{
+	struct downsample
+	{
+		uint32_t a;
+		uint32_t b;
+		uint32_t c;
+		uint32_t d;
+	};
+};
 
 enum gpuImageStateFlags_t : uint8_t;
 
@@ -127,21 +153,34 @@ public:
 class MipImageTask : public GpuTask
 {
 private:
-	Image* m_img;
+	Image*					m_image;
+	downSampleMode_t		m_mode;
+	std::string				m_dbgName;
+	RenderContext*			m_context;
+	ResourceContext*		m_resources;
+	Image					m_tempImage;
+	FrameBuffer				m_tempBuffer;
+	std::vector<ImageView>	m_views;
+	std::vector<DrawPass*>	m_passes;
+	GpuBuffer				m_buffer;
+
+	void Init( const mipProcessCreateInfo_t& info );
+	void Shutdown();
 
 public:
 
-	MipImageTask( Image* img )
+	MipImageTask( const mipProcessCreateInfo_t& info )
 	{
-		m_img = img;
+		Init( info );
 	}
 
-	void FrameBegin() {}
-	void FrameEnd() {}
+	void FrameBegin();
+	void FrameEnd();
 
 	void Execute( CommandContext& context ) override;
-	~MipImageTask()
-	{}
+	~MipImageTask() {
+		Shutdown();
+	}
 };
 
 

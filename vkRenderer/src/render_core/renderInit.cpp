@@ -139,6 +139,18 @@ void Renderer::Init()
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
+	MipImageTask* mipTask;
+	{
+		mipProcessCreateInfo_t info{};
+		info.name = "MainColorDownsample";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.img = &resources.mainColorResolvedImage;
+		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+
+		mipTask = new MipImageTask( info );
+	}
+
 	InitShaderResources();
 
 	InitImGui( *view2Ds[ 0 ] );
@@ -153,8 +165,8 @@ void Renderer::Init()
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
 	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
-	schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST ) );
-	schedule.Queue( new MipImageTask( &resources.mainColorResolvedImage ) );
+	//schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ ) );
+	schedule.Queue( mipTask );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
 }

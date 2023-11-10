@@ -62,7 +62,7 @@ struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
 void vk_ClearRenderPassCache();
 
-static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )
+static inline VkFormat vk_GetTextureFormat( const imageFmt_t fmt )
 {
 	switch ( fmt )
 	{
@@ -87,7 +87,7 @@ static inline VkFormat vk_GetTextureFormat( imageFmt_t fmt )
 }
 
 
-static inline imageFmt_t vk_GetTextureFormat( VkFormat fmt )
+static inline imageFmt_t vk_GetTextureFormat( const VkFormat fmt )
 {
 	switch ( fmt )
 	{
@@ -112,7 +112,30 @@ static inline imageFmt_t vk_GetTextureFormat( VkFormat fmt )
 }
 
 
-static inline VkImageViewType vk_GetTextureType( imageType_t type )
+static inline VkImageAspectFlagBits vk_GetAspectFlags( const imageAspectFlags_t flags )
+{
+	uint32_t count = 0;
+	uint32_t bits = flags;
+
+	uint32_t vkFlags = 0;
+
+	while ( bits )
+	{
+		uint32_t bitFlag = bits & 0x1;
+		switch ( bitFlag )
+		{
+			case IMAGE_ASPECT_COLOR_FLAG:		vkFlags |= VK_IMAGE_ASPECT_COLOR_BIT;	break;
+			case IMAGE_ASPECT_DEPTH_FLAG:		vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;	break;
+			case IMAGE_ASPECT_STENCIL_FLAG:		vkFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;	break;
+		}
+		bits &= ( bits - 1 );
+		count++;
+	}
+	return VkImageAspectFlagBits( vkFlags );
+}
+
+
+static inline VkImageViewType vk_GetTextureType( const imageType_t type )
 {
 	switch ( type ) {
 		default:
