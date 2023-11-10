@@ -68,7 +68,7 @@ const bool EnableValidationLayers = true;
 #endif
 
 const bool		ValidateVerbose					= false;
-const bool		ValidateWarnings				= false;
+const bool		ValidateWarnings				= true;
 const bool		ValidateErrors					= true;
 
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1000;
