@@ -146,7 +146,7 @@ void Renderer::Init()
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.mainColorResolvedImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
 
 		mipTask = new MipImageTask( info );
 	}

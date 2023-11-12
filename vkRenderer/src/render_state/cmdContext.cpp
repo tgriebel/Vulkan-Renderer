@@ -284,7 +284,7 @@ void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 {
 	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
 
-	vk_CopyImage( cmdCommand->CommandBuffer(), &src, &dst );
+	vk_CopyImage( cmdCommand->CommandBuffer(), src, dst );
 
 	cmdCommand->MarkerEndRegion();
 }

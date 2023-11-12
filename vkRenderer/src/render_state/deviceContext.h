@@ -94,6 +94,7 @@ extern DeviceContext context;
 
 struct imageInfo_t;
 struct imageSubResourceView_t;
+union renderPassTransition_t;
 class GpuImage;
 class AllocatorMemory;
 class DrawPass;
@@ -111,8 +112,9 @@ VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, 
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, const imageSubResourceView_t& subView, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image );
 void				vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode );
-void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass );
-void				vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst );
+void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass, const renderPassTransition_t& transitionState );
+void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst );
+void				vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst );
 void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset );
 imageSamples_t		vk_MaxImageSamples();
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );

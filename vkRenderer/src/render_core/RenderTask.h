@@ -159,10 +159,11 @@ private:
 	RenderContext*			m_context;
 	ResourceContext*		m_resources;
 	Image					m_tempImage;
-	FrameBuffer				m_tempBuffer;
 	std::vector<ImageView>	m_views;
 	std::vector<DrawPass*>	m_passes;
+	std::vector<FrameBuffer> m_frameBuffers;
 	GpuBuffer				m_buffer;
+	bool					m_firstFrame;
 
 	void Init( const mipProcessCreateInfo_t& info );
 	void Shutdown();

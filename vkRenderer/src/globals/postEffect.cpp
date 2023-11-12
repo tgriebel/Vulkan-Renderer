@@ -86,7 +86,7 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 
 	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), pass, *m_progAsset );
 
-	vk_RenderImageShader( cmdContext, pipeLineHandle, pass );
+	vk_RenderImageShader( cmdContext, pipeLineHandle, pass, m_transitionState );
 
 	cmdContext.MarkerEndRegion();
 }

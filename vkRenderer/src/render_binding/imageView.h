@@ -60,6 +60,8 @@ public:
 		subView.mipLevels = imageInfo.mipLevels;
 		subView.baseArray = 0;
 		subView.arrayCount = imageInfo.layers;
+		assert( subView.mipLevels >= 1 );
+		assert( subView.arrayCount >= 1 );
 
 		Init( image, imageInfo, subView );
 	}
@@ -70,6 +72,8 @@ public:
 		info = imageInfo;
 		info.mipLevels = subView.mipLevels;
 		info.layers = subView.arrayCount;
+		assert( info.layers >= 1 );
+		assert( info.mipLevels >= 1 );
 
 		MipDimensions( subView.baseMip, info.width, info.height, &info.width, &info.height );
 

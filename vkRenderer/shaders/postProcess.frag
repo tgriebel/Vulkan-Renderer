@@ -60,7 +60,7 @@ void main()
 	stencilCoverage /= 4.0f;
 
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-	sceneColor.rgb = LinearToSrgb( texelFetch( codeSamplers[ textureId0 ], pixelLocation, 0 ).rgb );
+	sceneColor.rgb = LinearToSrgb( texture( codeSamplers[ textureId0 ], fragTexCoord.xy, 0 ).rgb );
 
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;

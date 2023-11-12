@@ -31,6 +31,21 @@
 DeviceContext context;
 
 
+struct copyImageParms_t
+{
+	imageSubResourceView_t	subView;
+	int32_t					x;
+	int32_t					y;
+	int32_t					z;
+	int32_t					width;
+	int32_t					height;
+	int32_t					depth;
+	int32_t					mipLevel;
+};
+
+static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms );
+
+
 bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
 	uint32_t extensionCount;
@@ -304,36 +319,6 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, const im
 }
 
 
-/*
-* TODO: merge with copy image
-void vk_Blit( VkCommandBuffer cmdBuffer, const int32_t srcRegion[ 2 ][ 3 ], const Image* src, const imageSubResourceView_t& srcSubView, const int32_t dstRegion[ 2 ][ 3 ], Image* dst, const imageSubResourceView_t& dstSubView )
-{
-	VkImageBlit blit{ };
-	blit.srcOffsets[ 0 ] = { srcRegion[ 0 ][ 0 ], srcRegion[ 0 ][ 1 ], srcRegion[ 0 ][ 2 ] };
-	blit.srcOffsets[ 1 ] = { srcRegion[ 1 ][ 0 ], srcRegion[ 1 ][ 1 ], srcRegion[ 1 ][ 2 ] };
-	blit.srcSubresource.aspectMask = vk_GetAspectFlags( src->info.aspect );
-	blit.srcSubresource.mipLevel = srcSubView.baseMip;
-	blit.srcSubresource.baseArrayLayer = srcSubView.baseArray;
-	blit.srcSubresource.layerCount = srcSubView.arrayCount;
-	blit.dstOffsets[ 0 ] = { dstRegion[ 0 ][ 0 ], dstRegion[ 0 ][ 1 ], dstRegion[ 0 ][ 2 ] };
-	blit.dstOffsets[ 1 ] = { dstRegion[ 1 ][ 0 ], dstRegion[ 1 ][ 1 ], dstRegion[ 1 ][ 2 ] };
-	blit.dstSubresource.aspectMask = vk_GetAspectFlags( dst->info.aspect );
-	blit.dstSubresource.mipLevel = dstSubView.baseMip;
-	blit.dstSubresource.baseArrayLayer = dstSubView.baseArray;
-	blit.dstSubresource.layerCount = dstSubView.arrayCount;
-
-	vkCmdBlitImage( cmdBuffer,
-		src->gpuImage->GetVkImage(),
-		VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-		dst->gpuImage->GetVkImage(),
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&blit,
-		VK_FILTER_LINEAR );
-}
-*/
-
-
 void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 {
 	VkFormatProperties formatProperties;
@@ -437,21 +422,8 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 
 	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
 
-	const uint32_t mipLevels = static_cast<uint32_t>( views.size() );
-	for ( uint32_t i = 1; i < 2; i++ )
-	{
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( renderContext, passes[ i ], *progAsset );
-		vk_RenderImageShader( cmdContext, pipeLineHandle, passes[ i ] );
-
-	//	vk_TransitionImageLayout( cmdBuffer, &views[i], views[i].subResourceView, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
-	//	vk_CopyImage( cmdBuffer, &views[ i - 1 ],  &views[ i ] );
-	}
-}
-
-
-void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass )
-{
-	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
+	ImageView* sampledView = &views[ 0 ];
+	ImageView* writeView = &views[ 1 ];
 
 	renderPassTransition_t transitionState = {};
 	transitionState.flags.clear = false;
@@ -459,6 +431,51 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 	transitionState.flags.presentAfter = false;
 	transitionState.flags.readAfter = true;
 	transitionState.flags.readOnly = true;
+
+	const uint32_t mipLevels = static_cast<uint32_t>( views.size() );
+	for ( uint32_t i = 1; i < 2; i++ )
+	{
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( renderContext, passes[ i ], *progAsset );
+		vk_RenderImageShader( cmdContext, pipeLineHandle, passes[ i ], transitionState );
+
+		const FrameBuffer* fb = passes[ i ]->GetFrameBuffer();
+		const Image* fbImage = fb->GetColor();
+
+		copyImageParms_t srcCopy{};
+		srcCopy.subView.baseArray = 0;
+		srcCopy.subView.arrayCount = 1;
+		srcCopy.subView.baseMip = 0;
+		srcCopy.subView.mipLevels = 1;
+		srcCopy.x = 0;
+		srcCopy.y = 0;
+		srcCopy.z = 0;
+		srcCopy.width = fb->GetWidth();
+		srcCopy.height = fb->GetHeight();
+		srcCopy.depth = 1;
+		srcCopy.mipLevel = 0;
+
+		copyImageParms_t dstCopy{};
+		dstCopy.subView = writeView->subResourceView;
+		dstCopy.x = 0;
+		dstCopy.y = 0;
+		dstCopy.z = 0;
+		dstCopy.width = writeView->info.width;
+		dstCopy.height = writeView->info.height;
+		dstCopy.depth = 1;
+		dstCopy.mipLevel = writeView->subResourceView.baseMip;
+
+		vk_CopyImage( cmdBuffer, fbImage, srcCopy, writeView, dstCopy );
+		//vk_TransitionImageLayout( cmdBuffer, writeView, writeView->subResourceView, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+
+		sampledView = &views[ i - 1 ];
+		writeView = &views[ i ];
+	}
+}
+
+
+void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass, const renderPassTransition_t& transitionState )
+{
+	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -525,7 +542,7 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 }
 
 
-void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
+static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms )
 {
 	VkFormatProperties formatProperties;
 	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( dst->info.fmt ), &formatProperties );
@@ -535,27 +552,34 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 		throw std::runtime_error( "texture image format does not support linear blitting!" );
 	}
 
-	VkImageMemoryBarrier barrier{ };
-	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.image = src->gpuImage->GetVkImage();
-	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = src->info.layers;	
-	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = src->info.mipLevels;
+	VkImageMemoryBarrier srcBarrier{ };
+	srcBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	srcBarrier.image = src->gpuImage->GetVkImage();
+	srcBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	srcBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	srcBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	srcBarrier.subresourceRange.baseArrayLayer = srcParms.subView.baseArray;
+	srcBarrier.subresourceRange.layerCount = srcParms.subView.arrayCount;
+	srcBarrier.subresourceRange.baseMipLevel = srcParms.mipLevel;
+	srcBarrier.subresourceRange.levelCount = 1;
 
-	const int32_t srcWidth = src->info.width;
-	const int32_t srcHeight = src->info.height;
-	const int32_t dstWidth = dst->info.width;
-	const int32_t dstHeight = dst->info.height;
+	VkImageMemoryBarrier dstBarrier{ };
+	dstBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	dstBarrier.image = dst->gpuImage->GetVkImage();
+	dstBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	dstBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	dstBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	dstBarrier.subresourceRange.baseArrayLayer = dstParms.subView.baseArray;
+	dstBarrier.subresourceRange.layerCount = dstParms.subView.arrayCount;
+	dstBarrier.subresourceRange.baseMipLevel = dstParms.mipLevel;
+	dstBarrier.subresourceRange.levelCount = 1;
 
+	// Transition source image
 	{
-		barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		srcBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
 		vkCmdPipelineBarrier( cmdBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -563,21 +587,37 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 			0,
 			0, nullptr,
 			0, nullptr,
-			1, &barrier );
+			1, &srcBarrier );
 
+		dstBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		dstBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		dstBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		dstBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+		vkCmdPipelineBarrier( cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &dstBarrier );
+	}
+
+	// Perform blit
+	{
 		VkImageBlit blit{ };
-		blit.srcOffsets[ 0 ] = { 0, 0, 0 };
-		blit.srcOffsets[ 1 ] = { srcWidth, srcHeight, 1 };
+		blit.srcOffsets[ 0 ] = { srcParms.x, srcParms.y, srcParms.z };
+		blit.srcOffsets[ 1 ] = { srcParms.width, srcParms.height, srcParms.depth };
 		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		blit.srcSubresource.mipLevel = 0;
-		blit.srcSubresource.baseArrayLayer = 0;
-		blit.srcSubresource.layerCount = src->info.layers;
-		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
-		blit.dstOffsets[ 1 ] = { dstWidth, dstHeight, 1 };
+		blit.srcSubresource.mipLevel = srcParms.mipLevel;
+		blit.srcSubresource.baseArrayLayer = srcParms.subView.baseArray;
+		blit.srcSubresource.layerCount = srcParms.subView.arrayCount;
+		blit.dstOffsets[ 0 ] = { dstParms.x, dstParms.y, dstParms.z };
+		blit.dstOffsets[ 1 ] = { dstParms.width, dstParms.height, dstParms.depth };
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		blit.dstSubresource.mipLevel = 0;
-		blit.dstSubresource.baseArrayLayer = 0;
-		blit.dstSubresource.layerCount = dst->info.layers;
+		blit.dstSubresource.baseArrayLayer = dstParms.subView.baseArray;
+		blit.dstSubresource.layerCount = dstParms.subView.arrayCount;
+		blit.dstSubresource.mipLevel = dstParms.mipLevel;
 
 		vkCmdBlitImage( cmdBuffer,
 						src->gpuImage->GetVkImage(),
@@ -587,11 +627,14 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 						1,
 						&blit,
 						VK_FILTER_LINEAR );
+	}
 
-		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	// Transition source and destination images
+	{
+		srcBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		srcBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
 		vkCmdPipelineBarrier(	cmdBuffer,
 								VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -599,8 +642,79 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, Image* src, Image* dst )
 								0,
 								0, nullptr,
 								0, nullptr,
-								1, &barrier );
+								1, &srcBarrier );
+
+		dstBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		dstBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		dstBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		dstBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		vkCmdPipelineBarrier( cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &dstBarrier );
 	}
+}
+
+
+void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst )
+{
+	copyImageParms_t srcCopy{};
+	srcCopy.subView.baseArray = 0;
+	srcCopy.subView.arrayCount = src.info.layers;
+	srcCopy.subView.baseMip = 0;
+	srcCopy.subView.mipLevels = src.info.mipLevels;
+	srcCopy.x = 0;
+	srcCopy.y = 0;
+	srcCopy.z = 0;
+	srcCopy.width = src.info.width;
+	srcCopy.height = src.info.height;
+	srcCopy.depth = 1;
+	srcCopy.mipLevel = 0;
+
+	copyImageParms_t dstCopy{};
+	dstCopy.subView.baseArray = 0;
+	dstCopy.subView.arrayCount = dst.info.layers;
+	dstCopy.subView.baseMip = 0;
+	dstCopy.subView.mipLevels = dst.info.mipLevels;
+	dstCopy.x = 0;
+	dstCopy.y = 0;
+	dstCopy.z = 0;
+	dstCopy.width = dst.info.width;
+	dstCopy.height = dst.info.height;
+	dstCopy.depth = 1;
+	dstCopy.mipLevel = 0;
+
+	vk_CopyImage( cmdBuffer, &src, srcCopy, &dst, dstCopy );
+}
+
+
+void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst )
+{
+	copyImageParms_t srcCopy{};
+	srcCopy.subView = src.subResourceView;
+	srcCopy.x = 0;
+	srcCopy.y = 0;
+	srcCopy.z = 0;
+	srcCopy.width = src.info.width;
+	srcCopy.height = src.info.height;
+	srcCopy.depth = 1;
+	srcCopy.mipLevel = src.subResourceView.baseMip;
+
+	copyImageParms_t dstCopy{};
+	dstCopy.subView = dst.subResourceView;
+	dstCopy.x = 0;
+	dstCopy.y = 0;
+	dstCopy.z = 0;
+	dstCopy.width = dst.info.width;
+	dstCopy.height = dst.info.height;
+	dstCopy.depth = 1;
+	dstCopy.mipLevel = dstCopy.subView.baseMip;
+
+	vk_CopyImage( cmdBuffer, &src, srcCopy, &dst, dstCopy );
 }
 
 
