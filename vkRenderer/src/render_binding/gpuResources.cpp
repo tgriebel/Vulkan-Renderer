@@ -237,6 +237,7 @@ GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t e
 	{
 		view.m_buffer[ bufferId ] = m_buffer[ bufferId ];
 		view.m_buffer[ bufferId ].baseOffset = baseElementIx * m_elementPadding;
+		assert( view.m_buffer[ bufferId ].baseOffset <= maxSize );
 		view.m_buffer[ bufferId ].baseOffset = Clamp( view.m_buffer[ bufferId ].baseOffset, m_buffer[ bufferId ].baseOffset, maxSize );
 	}
 	view.m_end = Min( view.m_buffer[ 0 ].baseOffset + elementCount * m_elementPadding, maxSize );

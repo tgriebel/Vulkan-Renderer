@@ -406,6 +406,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	m_passes.resize( mipLevels );
 	m_views.resize( mipLevels );
 	m_frameBuffers.resize( mipLevels );
+	m_bufferViews.resize( mipLevels );
 
 	{
 		m_tempImage.info = m_image->info;
@@ -415,6 +416,9 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_tempImage.gpuImage = new GpuImage();
 		m_tempImage.gpuImage->Create( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->localMemory );
 	}
+
+	// Create buffer
+	m_buffer.Create( "Resource buffer", LIFETIME_TEMP, mipLevels, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	// The last view is only needed to create a frame buffer 
 	for ( uint32_t i = 0; i < m_image->info.mipLevels; ++i )
@@ -426,36 +430,33 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		subView.arrayCount = 1;
 
 		m_views[ i ].Init( *m_image, m_image->info, subView );
-
+	}
+	
+	// All but the first image need a framebuffer since they are being written to
+	for ( uint32_t i = 1; i < mipLevels; ++i )
+	{
 		frameBufferCreateInfo_t info{};
 		info.name = "MipDownsample";
 		info.color0[ 0 ] = &m_tempImage;
-		info.width = m_tempImage.info.width;
-		info.height = m_tempImage.info.height;
+		info.width = m_views[ i ].info.width;
+		info.height = m_views[ i ].info.height;
 		info.lifetime = resourceLifetime_t::LIFETIME_TEMP;
 
 		m_frameBuffers[ i ].Create( info );
-	}
 
-	// Create buffer
-	{
-		m_buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( mipProcessParms_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+		imageProcessObject_t imageProcessParms{};
 
-		const float w = float( m_views[ 0 ].info.width );
-		const float h = float( m_views[ 0 ].info.height );
+		const float w = float( m_views[ i - 1 ].info.width );
+		const float h = float( m_views[ i - 1 ].info.height );
+		imageProcessParms.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 
-		imageProcessObject_t process = {};
-		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+		m_bufferViews[ i ] = m_buffer.GetView( i, 1 );
 
-		m_buffer.SetPos( 0 );
-		m_buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
-	}
+		m_bufferViews[ i ].SetPos( 0 );
+		m_bufferViews[ i ].CopyData( &imageProcessParms, sizeof( imageProcessObject_t ) );
 
-	// All but the first image need a framebuffer since they are being written to
-	for ( uint32_t i = 1; i < m_image->info.mipLevels; ++i )
-	{
 		m_passes[ i ] = new PostPass( &m_frameBuffers[ i ] );
-		m_passes[ i ]->SetViewport( 0, 0, m_views[ i ].info.width, m_views[ i ].info.height );
+		//m_passes[ i ]->SetViewport( 0, 0, m_views[ i ].info.width, m_views[ i ].info.height );
 		m_passes[ i ]->codeImages.Resize( 1 );
 		m_passes[ i ]->codeImages[ 0 ] = &m_views[ i - 1 ];
 
@@ -471,7 +472,7 @@ void MipImageTask::FrameBegin()
 	{
 		m_passes[ i ]->parms->Bind( bind_sourceImages, &m_passes[ i ]->codeImages );
 		m_passes[ i ]->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
-		m_passes[ i ]->parms->Bind( bind_imageProcess, &m_buffer );
+		m_passes[ i ]->parms->Bind( bind_imageProcess, &m_bufferViews[ i ] );
 	}
 }
 

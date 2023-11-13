@@ -422,22 +422,26 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 
 	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
 
-	ImageView* sampledView = &views[ 0 ];
-	ImageView* writeView = &views[ 1 ];
+	ImageView* sampledView = nullptr;
+	ImageView* writeView = nullptr;
 
 	renderPassTransition_t transitionState = {};
-	transitionState.flags.clear = false;
+	transitionState.flags.clear = true;
 	transitionState.flags.store = true;
 	transitionState.flags.presentAfter = false;
 	transitionState.flags.readAfter = true;
 	transitionState.flags.readOnly = true;
 
 	const uint32_t mipLevels = static_cast<uint32_t>( views.size() );
-	for ( uint32_t i = 1; i < 2; i++ )
+	for ( uint32_t i = 1; i < mipLevels; i++ )
 	{
+		sampledView = &views[ i - 1 ];
+		writeView = &views[ i ];
+
 		hdl_t pipeLineHandle = CreateGraphicsPipeline( renderContext, passes[ i ], *progAsset );
 		vk_RenderImageShader( cmdContext, pipeLineHandle, passes[ i ], transitionState );
 
+		const viewport_t& viewport = passes[ i ]->GetViewport();
 		const FrameBuffer* fb = passes[ i ]->GetFrameBuffer();
 		const Image* fbImage = fb->GetColor();
 
@@ -449,8 +453,8 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 		srcCopy.x = 0;
 		srcCopy.y = 0;
 		srcCopy.z = 0;
-		srcCopy.width = fb->GetWidth();
-		srcCopy.height = fb->GetHeight();
+		srcCopy.width = viewport.width;
+		srcCopy.height = viewport.height;
 		srcCopy.depth = 1;
 		srcCopy.mipLevel = 0;
 
@@ -465,10 +469,6 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 		dstCopy.mipLevel = writeView->subResourceView.baseMip;
 
 		vk_CopyImage( cmdBuffer, fbImage, srcCopy, writeView, dstCopy );
-		//vk_TransitionImageLayout( cmdBuffer, writeView, writeView->subResourceView, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
-
-		sampledView = &views[ i - 1 ];
-		writeView = &views[ i ];
 	}
 }
 
@@ -484,7 +484,7 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
 	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
-	const VkClearColorValue vk_clearColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	const VkClearColorValue vk_clearColor = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 	const uint32_t colorAttachmentsCount = pass->GetFrameBuffer()->ColorLayerCount();
 	const uint32_t attachmentsCount = pass->GetFrameBuffer()->LayerCount();
@@ -578,11 +578,11 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 	{
 		srcBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		srcBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		srcBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
 		vkCmdPipelineBarrier( cmdBuffer,
-			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			VK_PIPELINE_STAGE_TRANSFER_BIT,
 			0,
 			0, nullptr,

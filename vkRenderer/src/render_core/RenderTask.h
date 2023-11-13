@@ -153,17 +153,18 @@ public:
 class MipImageTask : public GpuTask
 {
 private:
-	Image*					m_image;
-	downSampleMode_t		m_mode;
-	std::string				m_dbgName;
-	RenderContext*			m_context;
-	ResourceContext*		m_resources;
-	Image					m_tempImage;
-	std::vector<ImageView>	m_views;
-	std::vector<DrawPass*>	m_passes;
-	std::vector<FrameBuffer> m_frameBuffers;
-	GpuBuffer				m_buffer;
-	bool					m_firstFrame;
+	Image*						m_image;
+	downSampleMode_t			m_mode;
+	std::string					m_dbgName;
+	RenderContext*				m_context;
+	ResourceContext*			m_resources;
+	Image						m_tempImage;
+	GpuBuffer					m_buffer;
+	std::vector<ImageView>		m_views;
+	std::vector<DrawPass*>		m_passes;
+	std::vector<FrameBuffer>	m_frameBuffers;
+	std::vector<GpuBufferView>	m_bufferViews;
+	bool						m_firstFrame;
 
 	void Init( const mipProcessCreateInfo_t& info );
 	void Shutdown();
