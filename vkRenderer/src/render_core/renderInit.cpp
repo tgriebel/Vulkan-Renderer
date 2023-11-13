@@ -273,11 +273,6 @@ void Renderer::InitShaderResources()
 	{
 		particleState.parms = renderContext.RegisterBindParm( &particleBindSet );
 		particleState.x = ( MaxParticles / 256 );
-
-		if( resolve != nullptr ) {
-			resolve->pass->parms = renderContext.RegisterBindParm( &imageProcessBindSet );
-		}
-		downScale.pass->parms = renderContext.RegisterBindParm( &imageProcessBindSet );
 	}
 
 	materialBuffer.Reset();

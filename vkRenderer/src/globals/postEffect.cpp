@@ -12,9 +12,9 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_dbgName = info.name;
 
-	pass = new PostPass( info.fb );
+	m_pass = new PostPass( info.fb );
 
-	pass->codeImages.Resize( 3 );
+	m_pass->codeImages.Resize( 3 );
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
@@ -25,52 +25,62 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_transitionState.flags.readAfter = !info.present;
 	m_transitionState.flags.readOnly = true;
 
+	m_constants[ 0 ] = info.constants[ 0 ];
+	m_constants[ 1 ] = info.constants[ 1 ];
+	m_constants[ 2 ] = info.constants[ 2 ];
+
 	m_resources = info.resources;
 	m_context = info.context;
 
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
-	buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+
+	m_pass->parms = m_context->RegisterBindParm( bindset_imageProcess );
 }
 
 
 void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 {
-	pass->codeImages[ slot ] = image;
+	m_pass->codeImages[ slot ] = image;
 }
 
 
 void ImageProcess::Resize()
 {
-	pass->SetViewport( 0, 0, pass->GetFrameBuffer()->GetWidth(), pass->GetFrameBuffer()->GetHeight() );
+	m_pass->SetViewport( 0, 0, m_pass->GetFrameBuffer()->GetWidth(), m_pass->GetFrameBuffer()->GetHeight() );
 }
 
 
 void ImageProcess::Shutdown()
 {
-	buffer.Destroy();
+	m_buffer.Destroy();
 
-	delete pass;
+	delete m_pass;
 }
 
 
 void ImageProcess::FrameBegin()
 {
 	{
-		const float w = float( pass->GetFrameBuffer()->GetWidth() );
-		const float h = float( pass->GetFrameBuffer()->GetHeight() );
+		const viewport_t& viewport = m_pass->GetViewport();
+		const float w = float( viewport.width );
+		const float h = float( viewport.height );
 
 		imageProcessObject_t process = {};
 		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+		process.generic0 = m_constants[ 0 ];
+		process.generic1 = m_constants[ 1 ];
+		process.generic2 = m_constants[ 2 ];
 
-		buffer.SetPos( 0 );
-		buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+		m_buffer.SetPos( 0 );
+		m_buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
 	}
 
-	pass->parms->Bind( bind_sourceImages, &pass->codeImages );
-	pass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
-	pass->parms->Bind( bind_imageProcess, &buffer );
+	m_pass->parms->Bind( bind_sourceImages, &m_pass->codeImages );
+	m_pass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
+	m_pass->parms->Bind( bind_imageProcess, &m_buffer );
 }
 
 
@@ -84,9 +94,9 @@ void ImageProcess::Execute( CommandContext& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
 
-	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), pass, *m_progAsset );
+	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), m_pass, *m_progAsset );
 
-	vk_RenderImageShader( cmdContext, pipeLineHandle, pass, m_transitionState );
+	vk_RenderImageShader( cmdContext, pipeLineHandle, m_pass, m_transitionState );
 
 	cmdContext.MarkerEndRegion();
 }

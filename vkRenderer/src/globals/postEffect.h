@@ -13,6 +13,7 @@ struct imageProcessCreateInfo_t
 	const char*			name;
 	hdl_t				progHdl;
 	FrameBuffer*		fb;
+	vec4f				constants[ 3 ];
 	RenderContext*		context;
 	ResourceContext*	resources;
 	bool				clear;
@@ -27,16 +28,16 @@ private:
 	Asset<GpuProgram>*		m_progAsset;
 	std::string				m_dbgName;
 	renderPassTransition_t	m_transitionState;
+	vec4f					m_constants[ 3 ];
 	vec4f					m_clearColor;
 	float					m_clearDepth;
 	uint32_t				m_clearStencil;
 	ResourceContext*		m_resources;
 	RenderContext*			m_context;
+	DrawPass*				m_pass;
+	GpuBuffer				m_buffer;
 
 public:
-	DrawPass*			pass;
-	GpuBuffer			buffer;
-
 	ImageProcess() {}
 
 	ImageProcess( const imageProcessCreateInfo_t& info )
