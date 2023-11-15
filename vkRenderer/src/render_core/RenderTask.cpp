@@ -274,10 +274,10 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 				continue;
 			}
 
-			cmdContext->MarkerInsert( surface.dbgName, ColorToVector( Color::LGrey ) );
-
 			if ( lastKey.key != surface.sortKey.key )
 			{
+				cmdContext->MarkerInsert( surface.dbgName, ColorToVector( Color::LGrey ) );
+
 				if ( passIx == DRAWPASS_DEPTH ) {
 					// vkCmdSetDepthBias
 					vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
