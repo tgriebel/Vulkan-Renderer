@@ -31,6 +31,7 @@
 #include "color.h"
 
 PS_LAYOUT_STANDARD( sampler2D )
+PS_LAYOUT_MRT_1_OUT
 
 void main()
 {
@@ -149,6 +150,8 @@ void main()
     }
     outColor.rgb = Lo.rgb + ambient;
     outColor.a = 1.0f;
+
+    outColor1.rgb = n;
 
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
 	outColor.a = material.Tr;

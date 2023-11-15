@@ -544,6 +544,7 @@ void Renderer::CreateFramebuffers()
 		info.tiling = IMAGE_TILING_MORTON;
 
 		CreateImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.mainColorImage );
+		CreateImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.gBufferLayerImage );
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
@@ -665,6 +666,7 @@ void Renderer::CreateFramebuffers()
 		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
 			fbInfo.color0[ frameIx ] = &resources.mainColorImage;
+			fbInfo.color1[ frameIx ] = &resources.gBufferLayerImage;
 			fbInfo.depth[ frameIx ] = &resources.depthImageView;
 			fbInfo.stencil[ frameIx ] = &resources.stencilImageView;
 		}

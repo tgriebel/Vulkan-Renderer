@@ -130,6 +130,7 @@ public:
 	// TODO: move view-specific data
 	GpuBuffer			viewParms;
 	Image				mainColorImage;
+	Image				gBufferLayerImage;
 	Image				depthStencilImage;
 	ImageView			depthImageView;
 	ImageView			stencilImageView;

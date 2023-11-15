@@ -364,6 +364,7 @@ void Renderer::UploadAssets()
 		Transition( &uploadContext, resources.shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}	
 	Transition( &uploadContext, resources.mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.gBufferLayerImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
