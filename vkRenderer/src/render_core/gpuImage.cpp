@@ -43,26 +43,30 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 		imageInfo.flags = ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
-	VK_CHECK_RESULT( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ 0 ] ) );
+	const uint32_t bufferCount = GetBufferCount();
+	for ( uint32_t i = 0; i < bufferCount; ++i )
+	{
+		VK_CHECK_RESULT( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ i ] ) );
 
-	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements( context.device, vk_image[ 0 ], &memRequirements );
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements( context.device, vk_image[ i ], &memRequirements );
 
-	VkMemoryAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = memory.GetVkMemoryType();
+		VkMemoryAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = memory.GetVkMemoryType();
 
-	Allocation alloc;
-	if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
-		vkBindImageMemory( context.device, vk_image[ 0 ], memory.GetVkObject(), alloc.GetOffset() );
-	} else {
-		throw std::runtime_error( "Buffer could not be allocated!" );
+		Allocation alloc;
+		if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
+			vkBindImageMemory( context.device, vk_image[ i ], memory.GetVkObject(), alloc.GetOffset() );
+		} else {
+			throw std::runtime_error( "Buffer could not be allocated!" );
+		}
+
+		vk_MarkerSetObjectName( (uint64_t)vk_image[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
+
+		vk_view[ i ] = vk_CreateImageView( vk_image[ i ], info );
 	}
-
-	vk_MarkerSetObjectName( (uint64_t)vk_image[ 0 ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
-
-	vk_view[ 0 ] = vk_CreateImageView( vk_image[ 0 ], info );
 }
 
 

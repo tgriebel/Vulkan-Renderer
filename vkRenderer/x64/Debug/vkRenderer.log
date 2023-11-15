@@ -1,1 +1,21 @@
-﻿  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
+﻿  drawpass.cpp
+  drawGroup.cpp
+  postEffect.cpp
+  renderView.cpp
+  gpuTransfer.cpp
+  imageView.cpp
+  shaderBinding.cpp
+  RenderTask.cpp
+  debugMenu.cpp
+  gpuImage.cpp
+  renderCommand.cpp
+  renderInit.cpp
+  renderShutdown.cpp
+  renderer.cpp
+  swapChain.cpp
+  cmdContext.cpp
+  deviceContext.cpp
+  frameBuffer.cpp
+  vulkinTestApp.cpp
+  Generating Code...
+  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

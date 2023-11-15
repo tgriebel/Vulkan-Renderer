@@ -31,13 +31,27 @@ protected:
 	const char*			m_dbgName;
 	int					m_id;
 
+	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
+	{
+		const uint32_t bufferCount = GetBufferCount();
+		return Min( bufferId, bufferCount - 1 );
+	}
+
+	inline uint32_t GetBufferCount() const
+	{
+		return ( m_lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
+	}
+
 public:
 
 	GpuImage()
 	{
 #ifdef USE_VULKAN
-		vk_image[ 0 ]  = VK_NULL_HANDLE;
-		vk_view[ 0 ] = VK_NULL_HANDLE;
+		for( uint32_t i = 0; i < MaxFrameStates; ++i )
+		{
+			vk_image[ i ]  = VK_NULL_HANDLE;
+			vk_view[ i ] = VK_NULL_HANDLE;
+		}
 #endif
 		m_dbgName = "";
 		m_id = -1;
@@ -68,27 +82,27 @@ public:
 	}
 
 
-	inline VkImage GetVkImage() const
+	inline VkImage GetVkImage( const uint32_t bufferId = 0 ) const
 	{
-		return vk_image[ 0 ];
+		return vk_image[ GetBufferId( bufferId ) ];
 	}
 
 
-	inline VkImageView GetVkImageView() const
+	inline VkImageView GetVkImageView( const uint32_t bufferId = 0 ) const
 	{
-		return vk_view[ 0 ];
+		return vk_view[ GetBufferId( bufferId ) ];
 	}
 
 
-	inline void DetachVkImage()
+	inline void DetachVkImage( const uint32_t bufferId = 0 )
 	{
-		vk_image[ 0 ] = VK_NULL_HANDLE;
+		vk_image[ GetBufferId( bufferId ) ] = VK_NULL_HANDLE;
 	}
 
 
-	inline void DetachVkImageView()
+	inline void DetachVkImageView( const uint32_t bufferId = 0 )
 	{
-		vk_view[ 0 ] = VK_NULL_HANDLE;
+		vk_view[ GetBufferId( bufferId ) ] = VK_NULL_HANDLE;
 	}
 #endif
 	inline const char* GetDebugName() const
