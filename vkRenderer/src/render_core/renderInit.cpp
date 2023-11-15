@@ -233,19 +233,19 @@ void Renderer::InitApi()
 		ShaderBindSet* bindset = nullptr;
 
 		bindset = &renderContext.bindSets[ bindset_global ];
-		bindset->Create( g_globalBindings, COUNTARRAY( g_globalBindings ) );
+		bindset->Create( "GlobalBindings", g_globalBindings, COUNTARRAY( g_globalBindings ) );
 
 		bindset = &renderContext.bindSets[ bindset_view ];
-		bindset->Create( g_viewBindings, COUNTARRAY( g_viewBindings ) );
+		bindset->Create( "ViewBindings", g_viewBindings, COUNTARRAY( g_viewBindings ) );
 
 		bindset = &renderContext.bindSets[ bindset_pass ];
-		bindset->Create( g_passBindings, COUNTARRAY( g_passBindings ) );
+		bindset->Create( "PassBindings", g_passBindings, COUNTARRAY( g_passBindings ) );
 
 		bindset = &renderContext.bindSets[ bindset_particle ];
-		bindset->Create( g_particleBindings, COUNTARRAY( g_particleBindings ) );
+		bindset->Create( "ParticleBindings", g_particleBindings, COUNTARRAY( g_particleBindings ) );
 
 		bindset = &renderContext.bindSets[ bindset_imageProcess ];
-		bindset->Create( g_imageProcessBindings, COUNTARRAY( g_imageProcessBindings ) );
+		bindset->Create( "ImageProcessBindings", g_imageProcessBindings, COUNTARRAY( g_imageProcessBindings ) );
 	}
 }
 

@@ -83,7 +83,7 @@ uint32_t ShaderBinding::GetHash() const
 }
 
 
-void ShaderBindSet::Create( const ShaderBinding bindings[], const uint32_t bindCount )
+void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], const uint32_t bindCount )
 {
 	if ( bindCount == 0 )
 	{
@@ -133,6 +133,8 @@ void ShaderBindSet::Create( const ShaderBinding bindings[], const uint32_t bindC
 	layoutInfo.pBindings = layoutBindings.data();
 
 	VK_CHECK_RESULT( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &vk_layout ) );
+
+	vk_MarkerSetObjectName( (uint64_t)vk_layout, VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name );
 #else
 	assert(0);
 #endif
