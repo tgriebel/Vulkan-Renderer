@@ -43,6 +43,7 @@ class GpuTask
 public:
 	virtual void	FrameBegin() = 0;
 	virtual void	FrameEnd() = 0;
+	virtual void	Resize() = 0;
 	virtual void	Execute( CommandContext& context ) = 0;
 
 	virtual ~GpuTask() {};
@@ -77,6 +78,8 @@ public:
 		Shutdown();
 	}
 
+	void Resize() {}
+
 	void FrameBegin();
 	void FrameEnd();
 
@@ -92,6 +95,8 @@ private:
 
 public:
 	ComputeTask( const char* csName, ComputeState* state );
+
+	void Resize() {}
 
 	void FrameBegin();
 	void FrameEnd();
@@ -118,6 +123,8 @@ public:
 		m_dstState = dstState;
 	}
 
+	void Resize() {}
+
 	void FrameBegin() {}
 	void FrameEnd() {}
 
@@ -140,6 +147,8 @@ public:
 		m_src = src;
 		m_dst = dst;
 	}
+
+	void Resize() {}
 
 	void FrameBegin() {}
 	void FrameEnd() {}
@@ -175,6 +184,8 @@ public:
 	{
 		Init( info );
 	}
+
+	void Resize() {}
 
 	void FrameBegin();
 	void FrameEnd();

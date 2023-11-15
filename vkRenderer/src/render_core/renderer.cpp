@@ -286,6 +286,12 @@ void Renderer::RecreateSwapChain()
 	if( resolve != nullptr ) {
 		resolve->Resize();
 	}
+
+	for ( uint32_t i = 0; i < 2; ++i ) {
+		if ( pingPongQueue[ i ] != nullptr ) {
+			pingPongQueue[ i ]->Resize();
+		}
+	}
 }
 
 

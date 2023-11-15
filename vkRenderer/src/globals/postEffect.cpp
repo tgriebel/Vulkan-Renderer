@@ -14,7 +14,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_pass = new PostPass( info.fb );
 
-	m_pass->codeImages.Resize( 3 );
+	m_pass->codeImages.Resize( info.inputImages );
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
@@ -43,7 +43,10 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 {
-	m_pass->codeImages[ slot ] = image;
+	assert( m_pass->codeImages.Count() > slot );
+	if( slot < m_pass->codeImages.Count() ) {
+		m_pass->codeImages[ slot ] = image;
+	}
 }
 
 

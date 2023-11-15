@@ -16,6 +16,7 @@ struct imageProcessCreateInfo_t
 	vec4f				constants[ 3 ];
 	RenderContext*		context;
 	ResourceContext*	resources;
+	uint32_t			inputImages;
 	bool				clear;
 	bool				present;
 	bool				resolve;

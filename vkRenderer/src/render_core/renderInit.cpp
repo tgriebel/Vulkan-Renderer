@@ -110,6 +110,7 @@ void Renderer::Init()
 		info.fb = &tempColor;
 		info.context = &renderContext;
 		info.resources = &resources;
+		info.inputImages = 3;
 
 		downScale.Init( info );
 
@@ -131,12 +132,32 @@ void Renderer::Init()
 		info.fb = &mainColorResolved;
 		info.context = &renderContext;
 		info.resources = &resources;
+		info.inputImages = 3;
 
 		resolve = new ImageProcess( info );
 
 		resolve->SetSourceImage( 0, &resources.mainColorImage );
 		resolve->SetSourceImage( 1, &resources.depthImageView );
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
+	}
+
+	{
+		imageProcessCreateInfo_t info = {};
+		info.name = "Separable Gaussian";
+		info.progHdl = AssetLibGpuProgram::Handle( "SeparableGaussianBlur" );
+		info.fb = &tempColor;
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.inputImages = 1;
+		info.constants[ 0 ][ 0 ] = 1.0f;
+
+		pingPongQueue[ 0 ] = new ImageProcess( info );
+		pingPongQueue[ 0 ]->SetSourceImage( 0, &resources.mainColorResolvedImage );
+
+		info.fb = &mainColorResolved;
+		info.constants[ 0 ][ 0 ] = 0.0f;
+		pingPongQueue[ 1 ] = new ImageProcess( info );
+		pingPongQueue[ 1 ]->SetSourceImage( 0, &resources.tempColorImage );
 	}
 
 	MipImageTask* mipTask;
@@ -146,7 +167,7 @@ void Renderer::Init()
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.mainColorResolvedImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
+		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
 
 		mipTask = new MipImageTask( info );
 	}
@@ -166,7 +187,9 @@ void Renderer::Init()
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
 	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
 	//schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ ) );
-	schedule.Queue( mipTask );
+	//schedule.Queue( mipTask );
+	schedule.Queue( pingPongQueue[ 0 ] );
+	schedule.Queue( pingPongQueue[ 1 ] );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
 }
@@ -584,11 +607,11 @@ void Renderer::CreateFramebuffers()
 	// Temp image
 	{
 		imageInfo_t info{};
-		info.width = width / 2;
-		info.height = height / 2;
+		info.width = width;
+		info.height = height;
 		info.mipLevels = 1;
 		info.layers = 1;
-		info.subsamples = config.mainColorSubSamples;
+		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_RGBA_16;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;

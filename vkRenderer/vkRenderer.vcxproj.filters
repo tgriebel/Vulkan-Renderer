@@ -316,6 +316,9 @@
     <None Include="shaders\resolve.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\gaussian.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

@@ -101,5 +101,12 @@
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true,
     },
+	{
+      "name": "SeparableGaussianBlur",
+      "vs": "fullscreenVS.spv",
+      "ps": "gaussianPS.spv",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true,
+    },
   ]
 }
