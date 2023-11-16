@@ -36,13 +36,6 @@
 extern imguiControls_t			g_imguiControls;
 #endif
 
-#include "../../window.h"
-#include "../../input.h"
-#include "debugMenu.h"
-
-extern Scene*		g_scene;
-extern Window		g_window;
-
 static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 {
 	if ( surf.pipelineObject == INVALID_HDL ) {
@@ -71,77 +64,6 @@ static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 	}
 
 	return false;
-}
-
-
-static void DrawDebugMenu( RenderView& view )
-{
-#if defined( USE_IMGUI )
-	if ( ImGui::BeginMainMenuBar() )
-	{
-		if ( ImGui::BeginMenu( "File" ) )
-		{
-			if ( ImGui::MenuItem( "Open Scene", "CTRL+O" ) ) {
-				g_imguiControls.openSceneFileDialog = true;
-			}
-			if ( ImGui::MenuItem( "Reload", "CTRL+R" ) ) {
-				g_imguiControls.reloadScene = true;
-			}
-			if ( ImGui::MenuItem( "Import Obj", "CTRL+I" ) ) {
-				g_imguiControls.openModelImportFileDialog = true;
-			}
-			ImGui::EndMenu();
-		}
-		if ( ImGui::BeginMenu( "Edit" ) )
-		{
-			if ( ImGui::MenuItem( "Undo", "CTRL+Z" ) ) {}
-			if ( ImGui::MenuItem( "Redo", "CTRL+Y", false, false ) ) {}  // Disabled item
-			ImGui::Separator();
-			if ( ImGui::MenuItem( "Cut", "CTRL+X" ) ) {}
-			if ( ImGui::MenuItem( "Copy", "CTRL+C" ) ) {}
-			if ( ImGui::MenuItem( "Paste", "CTRL+V" ) ) {}
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
-
-	ImGui::Begin( "Control Panel" );
-
-	if ( ImGui::BeginTabBar( "Tabs" ) )
-	{
-		for ( uint32_t i = 0; i < view.debugMenus.Count(); ++i ) {
-			( *view.debugMenus[ i ] )( );
-		}
-		ImGui::EndTabBar();
-	}
-
-	ImGui::Separator();
-
-	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
-	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
-
-	char entityName[ 256 ];
-	if ( g_imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, g_assets.modelLib.FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
-	}
-	else {
-		memset( &entityName[ 0 ], 0, 256 );
-	}
-
-	ImGui::Text( "Mouse: (%f, %f)", (float)g_window.input.GetMouse().x, (float)g_window.input.GetMouse().y );
-	ImGui::Text( "Mouse Dt: (%f, %f)", (float)g_window.input.GetMouse().dx, (float)g_window.input.GetMouse().dy );
-	const vec4f cameraOrigin = g_scene->camera.GetOrigin();
-	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
-
-	const vec2f ndc = g_window.GetNdc( g_window.input.GetMouse().x, g_window.input.GetMouse().y );
-
-	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
-	ImGui::Text( "Frame Number: %d", g_renderDebugData.frameNumber );
-	ImGui::SameLine();
-	ImGui::Text( "FPS: %f", 1000.0f / g_renderDebugData.frameTimeMs );
-
-	ImGui::End();
-#endif
 }
 
 
@@ -242,14 +164,11 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 		hdl_t pipelineHandle = INVALID_HDL;
 		pipelineObject_t* pipelineObject = nullptr;
 
+		// FIXME: HACK. Needs to be done once-per-frame
 		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
 		{
 #ifdef USE_IMGUI
 			cmdContext->MarkerBeginRegion( "Debug Menus", ColorToVector( Color::White ) );
-
-			DrawDebugMenu( *renderView );
-			ImGui::Begin( "Control Panel" );
-			ImGui::End();
 
 			// Render dear imgui into screen
 			ImGui::Render();
