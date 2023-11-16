@@ -256,7 +256,6 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
 			cmdContext->MarkerEndRegion();
 #endif
-			cmdContext->MarkerEndRegion();
 			continue;
 		}
 
