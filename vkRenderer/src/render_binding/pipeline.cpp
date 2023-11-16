@@ -334,15 +334,18 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	colorBlending.attachmentCount = static_cast<uint32_t>( colorBlendAttachments.size() );
 	colorBlending.pAttachments = colorBlendAttachments.data();
 
-	VkDynamicState dynamicStates[] = {
-		VK_DYNAMIC_STATE_VIEWPORT,
-		VK_DYNAMIC_STATE_SCISSOR,
-		VK_DYNAMIC_STATE_LINE_WIDTH
-	};
+	uint32_t dynamicStatesCount = 0;
+	VkDynamicState dynamicStates[4];
+	if( pass->Type() == drawPass_t::DRAWPASS_DEPTH ) {
+		dynamicStates[ dynamicStatesCount++ ] = VK_DYNAMIC_STATE_STENCIL_REFERENCE;
+	}
+	dynamicStates[ dynamicStatesCount++ ] = VK_DYNAMIC_STATE_VIEWPORT;
+	dynamicStates[ dynamicStatesCount++ ] = VK_DYNAMIC_STATE_SCISSOR;
+	dynamicStates[ dynamicStatesCount++ ] = VK_DYNAMIC_STATE_LINE_WIDTH;
 
 	VkPipelineDynamicStateCreateInfo dynamicState{ };
 	dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynamicState.dynamicStateCount = 3;
+	dynamicState.dynamicStateCount = dynamicStatesCount;
 	dynamicState.pDynamicStates = dynamicStates;
 	
 	VkDescriptorSetLayout layouts[GpuProgram::MaxBindSets];
