@@ -239,6 +239,9 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 		lastKey.materialId = INVALID_HDL.Get();
 		lastKey.stencilBit = 0;
 
+		hdl_t pipelineHandle = INVALID_HDL;
+		pipelineObject_t* pipelineObject = nullptr;
+
 		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
 		{
 #ifdef USE_IMGUI
@@ -268,28 +271,32 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 				continue;
 			}
 
-			pipelineObject_t* pipelineObject = nullptr;
-			GetPipelineObject( surface.pipelineObject, &pipelineObject );
-			if ( pipelineObject == nullptr ) {
-				continue;
-			}
-
 			if ( lastKey.key != surface.sortKey.key )
 			{
 				cmdContext->MarkerInsert( surface.dbgName, ColorToVector( Color::LGrey ) );
 
 				if ( passIx == DRAWPASS_DEPTH ) {
-					// vkCmdSetDepthBias
-					vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+					if ( lastKey.stencilBit != surface.sortKey.stencilBit ) {
+						vkCmdSetStencilReference( cmdBuffer, VK_STENCIL_FACE_FRONT_BIT, surface.stencilBit );
+					}
 				}
 
-				const RenderContext* renderContext = cmdContext->GetRenderContext();
+				if( surface.pipelineObject != pipelineHandle )
+				{
+					GetPipelineObject( surface.pipelineObject, &pipelineObject );
+					if ( pipelineObject == nullptr ) {
+						continue;
+					}
 
-				const uint32_t descSetCount = 3;
-				VkDescriptorSet descSetArray[ descSetCount ] = { renderContext->globalParms->GetVkObject(), renderView->BindParms()->GetVkObject(), pass->parms->GetVkObject() };
+					const RenderContext* renderContext = cmdContext->GetRenderContext();
 
-				vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
-				vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
+					const uint32_t descSetCount = 3;
+					VkDescriptorSet descSetArray[ descSetCount ] = { renderContext->globalParms->GetVkObject(), renderView->BindParms()->GetVkObject(), pass->parms->GetVkObject() };
+
+					vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+					vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
+					pipelineHandle = surface.pipelineObject;
+				}
 				lastKey = surface.sortKey;
 			}
 
