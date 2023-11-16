@@ -278,7 +278,6 @@ void Renderer::InitShaderResources()
 				}
 			}
 
-			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
 			{
 				auto it = renderContext.bindSets.find( prog.bindHash );
 				if( it != renderContext.bindSets.end() ) {
