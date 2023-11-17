@@ -82,12 +82,12 @@
           "DRAWPASS_SKYBOX": "Sky"
       }
       "textures": {
-          "CUBE_RIGHT_SLOT" : "gray.jpg",
-          "CUBE_LEFT_SLOT" : "gray.jpg",
-          "CUBE_TOP_SLOT" : "gray.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "gray.jpg",
-          "CUBE_FRONT_SLOT" : "gray.jpg",
-          "CUBE_BACK_SLOT" : "gray.jpg",
+          "CUBE_RIGHT_SLOT" : "skybox80s.png",
+          "CUBE_LEFT_SLOT" : "skybox80s.png",
+          "CUBE_TOP_SLOT" : "skybox80s.png",	  
+          "CUBE_BOTTOM_SLOT" : "skybox80s.png",
+          "CUBE_FRONT_SLOT" : "skybox80s.png",
+          "CUBE_BACK_SLOT" : "skybox80s.png",
       }
     }
   ],
@@ -131,7 +131,7 @@
 	{
       "name" : "car",
       "model" : "911_scene.obj",
-	  "rx" : -90.0,
+	  "rx" : 90.0,
     },
 	{
       "name" : "sphere",
