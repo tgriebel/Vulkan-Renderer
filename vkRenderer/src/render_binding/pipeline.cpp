@@ -336,7 +336,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	uint32_t dynamicStatesCount = 0;
 	VkDynamicState dynamicStates[4];
-	if( pass->Type() == drawPass_t::DRAWPASS_DEPTH ) {
+	if( ( ( state.stateBits & GFX_STATE_STENCIL_ENABLE ) != 0 ) ) {
 		dynamicStates[ dynamicStatesCount++ ] = VK_DYNAMIC_STATE_STENCIL_REFERENCE;
 	}
 	dynamicStates[ dynamicStatesCount++ ] = VK_DYNAMIC_STATE_VIEWPORT;
