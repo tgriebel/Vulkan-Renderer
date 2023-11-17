@@ -151,7 +151,7 @@ void main()
     outColor.rgb = Lo.rgb + ambient;
     outColor.a = 1.0f;
 
-    outColor1.rgb = n;
+    outColor1.rgb = 0.5f * ( n + vec3( 1.0f, 1.0f, 1.0f ) );
 
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
 	outColor.a = material.Tr;
