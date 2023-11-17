@@ -289,14 +289,23 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
 	multisampling.alphaToOneEnable = VK_FALSE; // Optional
 
-	VkColorComponentFlags colorFlags = ( VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT );
-	if ( state.stateBits & GFX_STATE_COLOR_MASK ) {
-		colorFlags = 0;
+	const VkColorComponentFlags allColorFlags = ( VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT );
+
+	VkColorComponentFlags colorFlags[3] = {};
+	if ( ( state.stateBits & GFX_STATE_COLOR0_MASK ) == 0 ) {
+		colorFlags[ 0 ] = allColorFlags;
+	}
+	if ( ( state.stateBits & GFX_STATE_COLOR1_MASK ) == 0 ) {
+		colorFlags[ 1 ] = allColorFlags;
+	}
+	if ( ( state.stateBits & GFX_STATE_COLOR2_MASK ) == 0 ) {
+		colorFlags[ 2 ] = allColorFlags;
 	}
 
 	const bool blendEnable = ( ( state.stateBits & GFX_STATE_BLEND_ENABLE ) != 0 );
 
 	const uint32_t colorAttachmentCount = pass->GetFrameBuffer()->ColorLayerCount();
+	assert( colorAttachmentCount <= 3 );
 
 	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
 	colorBlendAttachments.resize( colorAttachmentCount );
@@ -305,7 +314,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	{
 		if( blendEnable )
 		{
-			colorBlendAttachments[ i ].colorWriteMask = colorFlags;
+			colorBlendAttachments[ i ].colorWriteMask = colorFlags[ i ];
 			colorBlendAttachments[ i ].blendEnable = VK_TRUE;
 			colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 			colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
@@ -316,7 +325,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 		}
 		else
 		{
-			colorBlendAttachments[ i ].colorWriteMask = colorFlags;
+			colorBlendAttachments[ i ].colorWriteMask = colorFlags[ i ];
 			colorBlendAttachments[ i ].blendEnable = VK_FALSE;
 			colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 			colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;

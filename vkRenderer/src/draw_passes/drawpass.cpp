@@ -70,7 +70,8 @@ void DepthPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_DEPTH_TEST;
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
-	m_stateBits |= GFX_STATE_COLOR_MASK;
+	m_stateBits |= GFX_STATE_COLOR0_MASK;
+	m_stateBits |= GFX_STATE_COLOR1_MASK;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
 
@@ -138,6 +139,7 @@ void TransPass::Init( FrameBuffer* frameBuffer )
 	m_passId = DRAWPASS_TRANS;
 
 	m_stateBits = GFX_STATE_NONE;
+	m_stateBits |= GFX_STATE_DEPTH_TEST;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
