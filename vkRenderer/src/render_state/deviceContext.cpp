@@ -263,6 +263,22 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, const im
 		sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
+	{
+		barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else if ( oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL )
+	{
+		barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
 	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL )
 	{
 		barrier.srcAccessMask = 0;
@@ -905,8 +921,10 @@ std::vector<const char*> vk_GetRequiredExtensions()
 
 	std::vector<const char*> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
 
-	if ( EnableValidationLayers ) {
+	if ( EnableValidationLayers )
+	{
 		extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+		extensions.push_back( VK_EXT_DEBUG_REPORT_EXTENSION_NAME );
 	}
 
 	return extensions;

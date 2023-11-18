@@ -95,6 +95,17 @@ void ImageProcess::FrameEnd()
 
 void ImageProcess::Execute( CommandContext& cmdContext )
 {
+	const uint32_t codeImageCount = m_pass->codeImages.Count();
+	for( uint32_t i = 0; i < codeImageCount; ++i ) {
+		// HACK: depth-stencil transitions are creating validation issues
+		if( ( m_pass->codeImages[ i ]->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ) {
+			continue;
+		}
+		if ( ( m_pass->codeImages[ i ]->info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ) {
+			continue;
+		}
+		Transition( &cmdContext, *const_cast<Image*>(m_pass->codeImages[ i ]), GPU_IMAGE_WRITE, GPU_IMAGE_READ );
+	}
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
 
 	hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), m_pass, *m_progAsset );
