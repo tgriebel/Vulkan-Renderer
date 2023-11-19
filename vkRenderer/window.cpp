@@ -160,7 +160,6 @@ void Window::BeginFrame()
 	input.NewFrame();
 
 #if defined( USE_IMGUI )
-	ImGui::NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 #endif
 }

@@ -174,14 +174,10 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 		hdl_t pipelineHandle = INVALID_HDL;
 		pipelineObject_t* pipelineObject = nullptr;
 
-		// FIXME: HACK. Needs to be done once-per-frame
 		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
 		{
 #ifdef USE_IMGUI
 			cmdContext->MarkerBeginRegion( "Debug Menus", ColorToVector( Color::White ) );
-
-			// Render dear imgui into screen
-			ImGui::Render();
 			ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
 			cmdContext->MarkerEndRegion();
 #endif
@@ -483,6 +479,11 @@ void RenderSchedule::FrameBegin()
 		GpuTask* task = tasks[ i ];
 		task->FrameBegin();
 	}
+
+#ifdef USE_IMGUI
+	// Prepare dear imgui render data
+	ImGui::Render();
+#endif
 }
 
 
