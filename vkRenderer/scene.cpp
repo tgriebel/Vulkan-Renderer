@@ -20,6 +20,13 @@ extern imguiControls_t			g_imguiControls;
 #endif
 extern Window					g_window;
 
+void DrawSceneDebugMenu();
+void DrawAssetDebugMenu();
+void DrawManipDebugMenu();
+void DrawEntityDebugMenu();
+void DrawOutlinerDebugMenu();
+void DeviceDebugMenu();
+
 void CreateCodeAssets()
 {
 	// Textures
@@ -362,6 +369,18 @@ void UpdateScene( Scene* scene )
 		ImGui::EndMainMenuBar();
 	}
 	ImGui::Begin( "Control Panel" );
+
+	if ( ImGui::BeginTabBar( "Tabs" ) )
+	{
+		DrawSceneDebugMenu();
+		DrawAssetDebugMenu();
+		DrawManipDebugMenu();
+		DrawEntityDebugMenu();
+		DrawOutlinerDebugMenu();
+		DeviceDebugMenu();
+
+		ImGui::EndTabBar();
+	}
 
 	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
 	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );

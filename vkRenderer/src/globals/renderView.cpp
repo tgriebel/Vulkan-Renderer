@@ -327,3 +327,8 @@ void RenderView::SetCamera( const Camera& camera, const bool reverseZ )
 	m_viewport.near = camera.GetNearClip();
 	m_viewport.far = camera.GetFarClip();
 }
+
+void RenderView::AttachDebugMenu( const debugMenuFuncPtr funcPtr )
+{
+	debugMenus.Append( funcPtr );
+}

@@ -135,6 +135,8 @@ public:
 	const void				Commit();
 	const bool				IsCommitted() const;
 
+	void					AttachDebugMenu( const debugMenuFuncPtr funcPtr );
+
 	uint32_t				lights[ MaxLights ];
 	uint32_t				numLights;
 	uint32_t				drawGroupOffset[ DRAWPASS_COUNT ];

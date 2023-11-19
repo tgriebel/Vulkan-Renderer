@@ -165,8 +165,6 @@ public:
 	void								ShutdownGPU();
 	void								Resize();
 
-	void								AttachDebugMenu( const debugMenuFuncPtr funcPtr );
-
 private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;

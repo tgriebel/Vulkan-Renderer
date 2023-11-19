@@ -672,12 +672,6 @@ void Renderer::InitConfig()
 }
 
 
-void Renderer::AttachDebugMenu( const debugMenuFuncPtr funcPtr )
-{
-	view2Ds[ 0 ]->debugMenus.Append( funcPtr );
-}
-
-
 void DeviceDebugMenu()
 {
 #if defined( USE_IMGUI )
