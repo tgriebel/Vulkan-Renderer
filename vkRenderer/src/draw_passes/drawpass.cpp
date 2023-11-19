@@ -206,7 +206,7 @@ void EmissivePass::FrameEnd()
 void PostPass::Init( FrameBuffer* frameBuffer )
 {
 	m_name = "Post Pass";
-	m_passId = DRAWPASS_POST_2D;
+	m_passId = DRAWPASS_2D;
 
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;

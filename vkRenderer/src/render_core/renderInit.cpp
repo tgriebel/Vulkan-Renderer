@@ -82,8 +82,8 @@ void Renderer::Init()
 
 	{
 		renderViewCreateInfo_t info{};
-		info.name = "Post";
-		info.region = renderViewRegion_t::POST;
+		info.name = "2D";
+		info.region = renderViewRegion_t::STANDARD_2D;
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;

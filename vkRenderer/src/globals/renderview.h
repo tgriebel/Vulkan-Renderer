@@ -35,7 +35,7 @@ enum class renderViewRegion_t : uint32_t
 {
 	SHADOW			= 0,
 	STANDARD_RASTER = 1,
-	POST			= 2,
+	STANDARD_2D		= 2,
 	COUNT,
 	UNKNOWN,
 };

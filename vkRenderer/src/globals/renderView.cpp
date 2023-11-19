@@ -140,7 +140,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			case DRAWPASS_DEBUG_WIREFRAME:
 				passes[ passIx ] = new WireframePass( info.fb );
 				break;
-			case DRAWPASS_POST_2D:
+			case DRAWPASS_2D:
 				passes[ passIx ] = new PostPass( info.fb );
 				break;
 			case DRAWPASS_DEBUG_2D:
@@ -179,7 +179,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		m_clearDepth = 0.0f;
 		m_clearStencil = 0;
 	}
-	else if ( info.region == renderViewRegion_t::POST )
+	else if ( info.region == renderViewRegion_t::STANDARD_2D )
 	{
 		m_transitionState.flags.clear = true;
 		m_transitionState.flags.store = true;
@@ -257,7 +257,7 @@ drawPass_t RenderView::ViewRegionPassBegin() const
 	{
 		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_BEGIN;
 		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_BEGIN;
-		case renderViewRegion_t::POST:				return DRAWPASS_POST_BEGIN;
+		case renderViewRegion_t::STANDARD_2D:		return DRAWPASS_2D_BEGIN;
 	}
 	return DRAWPASS_COUNT;
 }
@@ -269,7 +269,7 @@ drawPass_t RenderView::ViewRegionPassEnd() const
 	{
 		case renderViewRegion_t::SHADOW:			return DRAWPASS_SHADOW_END;
 		case renderViewRegion_t::STANDARD_RASTER:	return DRAWPASS_MAIN_END;
-		case renderViewRegion_t::POST:				return DRAWPASS_POST_END;
+		case renderViewRegion_t::STANDARD_2D:		return DRAWPASS_2D_END;
 	}
 	return DRAWPASS_COUNT;
 }

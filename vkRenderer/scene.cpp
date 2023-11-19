@@ -120,7 +120,7 @@ void CreateCodeAssets()
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
-			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
+			material.AddShader( DRAWPASS_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
 			for ( uint32_t i = 0; i < Material::MaxMaterialTextures; ++i ) {
 				material.AddTexture( i, i );
 			}
@@ -130,7 +130,7 @@ void CreateCodeAssets()
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
-			material.AddShader( DRAWPASS_POST_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
+			material.AddShader( DRAWPASS_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
 			g_assets.materialLib.Add( "IMAGE2D", material );
 		}
 

@@ -146,9 +146,9 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 		}
-		else if ( view.GetRegion() == renderViewRegion_t::POST )
+		else if ( view.GetRegion() == renderViewRegion_t::STANDARD_2D )
 		{
-			if ( material.GetShader( DRAWPASS_POST_2D ) == INVALID_HDL ) {
+			if ( material.GetShader( DRAWPASS_2D ) == INVALID_HDL ) {
 				continue;
 			}
 		}
