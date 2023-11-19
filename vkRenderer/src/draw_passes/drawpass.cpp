@@ -28,6 +28,21 @@
 
 extern renderConstants_t rc;
 
+void DrawPass::InsertResourceBarriers( CommandContext& cmdContext )
+{
+	const uint32_t codeImageCount = codeImages.Count();
+	for ( uint32_t i = 0; i < codeImageCount; ++i ) {
+		// HACK: depth-stencil transitions are creating validation issues
+		if ( ( codeImages[ i ]->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ) {
+			continue;
+		}
+		if ( ( codeImages[ i ]->info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ) {
+			continue;
+		}
+		Transition( &cmdContext, *codeImages[ i ], GPU_IMAGE_WRITE, GPU_IMAGE_READ );
+	}
+}
+
 void ShadowPass::Init( FrameBuffer* frameBuffer )
 {
 	m_name = "Shadow Pass";

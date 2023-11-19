@@ -246,7 +246,7 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 }
 
 
-void Transition( CommandContext* cmdCommand, Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
 	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
 

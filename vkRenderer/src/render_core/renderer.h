@@ -181,7 +181,6 @@ private:
 	RenderView*							renderViews[ Max3DViews ];
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
-	ImageProcess						downScale;
 	ImageProcess*						resolve = nullptr;
 	ImageProcess*						pingPongQueue[2] = {};
 	uint32_t							viewCount;

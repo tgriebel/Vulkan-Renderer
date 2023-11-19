@@ -48,8 +48,6 @@ void Renderer::Destroy()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
-	downScale.Shutdown();
-
 	if( resolve != nullptr ) {
 		resolve->Shutdown();
 	}

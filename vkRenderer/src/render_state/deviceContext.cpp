@@ -193,7 +193,7 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 }
 
 
-void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, Image* image, const imageSubResourceView_t& subView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;

@@ -102,6 +102,8 @@ public:
 		return m_fb;
 	}
 
+	void InsertResourceBarriers( CommandContext& cmdContext );
+
 	Array<const Image*, 100>	codeImages;
 	ShaderBindParms*			parms;
 };

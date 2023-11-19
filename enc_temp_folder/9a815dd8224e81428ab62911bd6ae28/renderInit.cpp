@@ -143,7 +143,6 @@ void Renderer::Init()
 		pingPongQueue[ 1 ]->SetSourceImage( 0, &resources.tempColorImage );
 	}
 
-	/*
 	MipImageTask* mipTask;
 	{
 		mipProcessCreateInfo_t info{};
@@ -155,7 +154,6 @@ void Renderer::Init()
 
 		mipTask = new MipImageTask( info );
 	}
-	*/
 
 	InitShaderResources();
 
