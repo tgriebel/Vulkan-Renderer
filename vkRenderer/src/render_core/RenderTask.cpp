@@ -119,6 +119,16 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
 
+	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
+	{
+		DrawPass* pass = renderView->passes[ passIx ];
+		if ( pass == nullptr ) {
+			continue;
+		}
+		// These barriers could be tighter by places them in between passes
+		pass->InsertResourceBarriers( *cmdContext );
+	}
+
 	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 	uint32_t modelOffset = 0;

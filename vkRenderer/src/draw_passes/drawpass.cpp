@@ -53,18 +53,12 @@ void ShadowPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_DEPTH_OP_0;
 
-	codeImages.Resize( 3 );
-
 	SetFrameBuffer( frameBuffer );
 }
 
 
 void ShadowPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
-
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
 	parms->Bind( bind_imageStencil, &rc.whiteImage );
@@ -90,18 +84,12 @@ void DepthPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
 
-	codeImages.Resize( 3 );
-
 	SetFrameBuffer( frameBuffer );
 }
 
 
 void DepthPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
-
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
 	parms->Bind( bind_imageStencil, &rc.whiteImage );
@@ -290,18 +278,12 @@ void SkyboxPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 
-	codeImages.Resize( 3 );
-
 	SetFrameBuffer( frameBuffer );
 }
 
 
 void SkyboxPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
-
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
 	parms->Bind( bind_imageStencil, &rc.whiteImage );
@@ -322,18 +304,12 @@ void WireframePass::Init( FrameBuffer* frameBuffer )
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_WIREFRAME_ENABLE;
 
-	codeImages.Resize( 3 );
-
 	SetFrameBuffer( frameBuffer );
 }
 
 
 void WireframePass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
-
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
 	parms->Bind( bind_imageStencil, &rc.whiteImage );
@@ -386,18 +362,12 @@ void Debug3dPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
-	codeImages.Resize( 3 );
-
 	SetFrameBuffer( frameBuffer );
 }
 
 
 void Debug3dPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
-
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
 	parms->Bind( bind_imageStencil, &rc.whiteImage );
