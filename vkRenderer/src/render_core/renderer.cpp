@@ -597,6 +597,9 @@ void Renderer::UpdateBuffers()
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
+		globals.whiteId = rc.whiteImage.gpuImage->GetId();
+		globals.blackId = rc.blackImage.gpuImage->GetId();
+		globals.isTextured = true;
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}

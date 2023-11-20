@@ -99,6 +99,9 @@ struct view_t
 												vec4        shadowParms;											\
 												vec4        toneMap;												\
 												uint		numSamples;												\
+												uint		whiteId;												\
+												uint		blackId;												\
+												uint		isTextured;												\
 											} globals;
 
 #define VIEW_LAYOUT( S, N )					layout( set = S, binding = N ) buffer ViewUniformBuffer					\

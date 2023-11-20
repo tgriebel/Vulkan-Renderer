@@ -41,10 +41,11 @@ void main()
     const view_t view = viewUbo.views[ viewlId ];
     const material_t material = materialUbo.materials[ materialId ];
 
-	const bool isTextured = material.textured != 0;
-    const int albedoTexId = isTextured ? material.textureId0 : -1;
-    const int normalTexId = isTextured ? material.textureId1 : -1;
-    const int roughnessTexId = isTextured ? material.textureId2 : -1;
+	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
+    const uint albedoTexId = isTextured ? material.textureId0 : globals.whiteId;
+    const uint normalTexId = isTextured ? material.textureId1 : globals.whiteId;
+    const uint roughnessTexId = isTextured ? material.textureId2 : globals.whiteId;
+    const uint metalnessTexId = isTextured ? material.textureId3 : globals.whiteId;
 	
 	const vec3 diffuseColor = material.Kd.rgb;
     const vec3 specularColor = material.Ks.rgb;
@@ -56,9 +57,10 @@ void main()
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
     const vec3 modelOrigin = vec3( modelMat[ 3 ][ 0 ], modelMat[ 3 ][ 1 ], modelMat[ 3 ][ 2 ] );
 
-    const vec4 albedoTex = ( albedoTexId >= 0 ) ? SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) ) : vec4( diffuseColor, 1.0f );
-    const vec3 normalTex = ( normalTexId >= 0 ) ? 2.0f * texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb - vec3( 1.0f, 1.0f, 1.0f ) : vec3( 0.0f, 0.0f, 1.0f );
-    const vec4 roughnessTex = ( roughnessTexId >= 0 ) ? texture( texSampler[ roughnessTexId ], fragTexCoord.xy ) : vec4( specularColor, 1.0f );
+    const vec4 albedoTex = SrgbToLinear( texture( texSampler[ albedoTexId ], fragTexCoord.xy ) );
+    const vec3 normalTex = 2.0f * texture( texSampler[ normalTexId ], fragTexCoord.xy ).rgb - vec3( 1.0f, 1.0f, 1.0f );
+    const vec4 roughnessTex = texture( texSampler[ roughnessTexId ], fragTexCoord.xy );
+    const vec4 metalnessTex = texture( texSampler[ metalnessTexId ], fragTexCoord.xy );
 
     const float perceptualRoughness = globals.generic.y * roughnessTex.r;
 
@@ -75,7 +77,7 @@ void main()
 
     float NoV = abs( dot( n, v ) );
 
-    float metallic = 0.0f;
+    float metallic = metalnessTex.r;
 	
 	const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;

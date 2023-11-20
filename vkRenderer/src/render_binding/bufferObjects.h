@@ -58,6 +58,9 @@ struct globalUboConstants_t
 	vec4f		shadowParms;
 	vec4f		tonemap;
 	uint32_t	numSamples;
+	uint32_t	whiteId;
+	uint32_t	blackId;
+	uint32_t	isTextured;
 	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };
 
