@@ -61,7 +61,7 @@ void ShadowPass::FrameBegin( const ResourceContext* resources )
 {
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -92,7 +92,7 @@ void DepthPass::FrameBegin( const ResourceContext* resources )
 {
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -126,7 +126,7 @@ void OpaquePass::FrameBegin( const ResourceContext* resources )
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -159,7 +159,7 @@ void TransPass::FrameBegin( const ResourceContext* resources )
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -193,7 +193,7 @@ void EmissivePass::FrameBegin( const ResourceContext* resources )
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -258,7 +258,7 @@ void TerrainPass::FrameBegin( const ResourceContext* resources )
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -286,7 +286,7 @@ void SkyboxPass::FrameBegin( const ResourceContext* resources )
 {
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -312,7 +312,7 @@ void WireframePass::FrameBegin( const ResourceContext* resources )
 {
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 
@@ -370,7 +370,7 @@ void Debug3dPass::FrameBegin( const ResourceContext* resources )
 {
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageStencil, &rc.whiteImage );
+	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 
 

@@ -134,7 +134,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 		else if ( attachment->GetSemantic() == bindSemantic_t::IMAGE ) {
 			const Image* image = attachment->GetImage();
 			if ( image == nullptr ) {
-				image = &rc.whiteImage;
+				image = rc.whiteImage;
 			}
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
@@ -165,7 +165,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 			for ( uint32_t descIx = 0; descIx < descCount; ++descIx )
 			{
-				const Image* image = &rc.whiteImage;
+				const Image* image = rc.whiteImage;
 				if ( ( descIx < imageCount ) && ( images[ descIx ] != nullptr ) ) {
 					image = images[ descIx ];
 				}

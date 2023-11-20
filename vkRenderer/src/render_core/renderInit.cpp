@@ -285,20 +285,8 @@ void Renderer::InitShaderResources()
 	materialBuffer.Reset();
 
 	{
-		imageInfo_t info{};
-		info.width = 256;
-		info.height = 256;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_BGRA_8;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.type = IMAGE_TYPE_2D;
-		info.tiling = IMAGE_TILING_MORTON;
-
-		// Default Images
-		CreateImage( "_white", info, GPU_IMAGE_READ, renderContext.localMemory, rc.whiteImage );
-		CreateImage( "_black", info, GPU_IMAGE_READ, renderContext.localMemory, rc.blackImage );
+		rc.whiteImage = &g_assets.textureLib.Find( "_white" )->Get();
+		rc.blackImage = &g_assets.textureLib.Find( "_black" )->Get();
 	}
 
 	{

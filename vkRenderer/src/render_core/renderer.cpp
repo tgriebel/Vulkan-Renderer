@@ -370,8 +370,6 @@ void Renderer::UploadAssets()
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
-	Transition( &uploadContext, rc.whiteImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 	}
@@ -597,8 +595,8 @@ void Renderer::UpdateBuffers()
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
-		globals.whiteId = rc.whiteImage.gpuImage->GetId();
-		globals.blackId = rc.blackImage.gpuImage->GetId();
+		globals.whiteId = rc.whiteImage->gpuImage->GetId();
+		globals.blackId = rc.blackImage->gpuImage->GetId();
 		globals.isTextured = true;
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );

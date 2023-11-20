@@ -82,20 +82,20 @@ void CreateCodeAssets()
 
 		const char* names[ debugColor ] =
 		{
-			"Red",
-			"Green",
-			"Blue",
-			"White",
-			"Black",
-			"Light Grey",
-			"Dark Grey",
-			"Brown",
-			"Cyan",
-			"Yellow",
-			"Purple",
-			"Orange",
-			"Pink",
-			"Gold"			
+			"_red",
+			"_green",
+			"_blue",
+			"_white",
+			"_black",
+			"_lightGrey",
+			"_darkGrey",
+			"_brown",
+			"_cyan",
+			"_yellow",
+			"_purple",
+			"_orange",
+			"_pink",
+			"_gold"			
 		};
 
 		for ( uint32_t t = 0; t < debugColor; ++t )
@@ -103,8 +103,8 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			texture.info.width = 16;
-			texture.info.height = 16;
+			texture.info.width = 1;
+			texture.info.height = 1;
 			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
 			texture.info.layers = 1;
 			texture.info.type = IMAGE_TYPE_2D;
@@ -112,13 +112,13 @@ void CreateCodeAssets()
 			texture.info.fmt = IMAGE_FMT_RGBA_8;
 			texture.info.tiling = IMAGE_TILING_MORTON;
 
-			texture.cpuImage.Init( texture.info.width, texture.info.height );
+			RGBA abgr;
+			abgr.r = colors[ t ]->a();
+			abgr.g = colors[ t ]->b();
+			abgr.b = colors[ t ]->g();
+			abgr.a = colors[ t ]->r();
 
-			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
-				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
-					texture.cpuImage.SetPixel( x, y, colors[ t ]->AsRGBA() );
-				}
-			}
+			texture.cpuImage.Init( texture.info.width, texture.info.height, abgr );
 		}
 	}
 

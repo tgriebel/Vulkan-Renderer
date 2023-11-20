@@ -148,9 +148,6 @@ void Renderer::ShutdownShaderResources()
 	}
 
 	// Images
-	delete rc.whiteImage.gpuImage;
-	delete rc.blackImage.gpuImage;
-
 	const uint32_t textureCount = g_assets.textureLib.Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
