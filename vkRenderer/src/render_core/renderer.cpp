@@ -597,6 +597,11 @@ void Renderer::UpdateBuffers()
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.whiteId = rc.whiteImage->gpuImage->GetId();
 		globals.blackId = rc.blackImage->gpuImage->GetId();
+		globals.defaultAlbedoId = rc.albImage->gpuImage->GetId();
+		globals.defaultNormalId = rc.nmlImage->gpuImage->GetId();
+		globals.defaultRoughnessId = rc.rghImage->gpuImage->GetId();
+		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
+		globals.checkerboardId = rc.checkerboardImage->gpuImage->GetId();
 		globals.isTextured = true;
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );

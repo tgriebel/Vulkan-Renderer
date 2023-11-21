@@ -60,6 +60,11 @@ struct globalUboConstants_t
 	uint32_t	numSamples;
 	uint32_t	whiteId;
 	uint32_t	blackId;
+	uint32_t	defaultAlbedoId;
+	uint32_t	defaultNormalId;
+	uint32_t	defaultRoughnessId;
+	uint32_t	defaultMetalId;
+	uint32_t	checkerboardId;
 	uint32_t	isTextured;
 	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };

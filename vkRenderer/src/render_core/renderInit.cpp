@@ -285,8 +285,25 @@ void Renderer::InitShaderResources()
 	materialBuffer.Reset();
 
 	{
+		rc.redImage = &g_assets.textureLib.Find( "_red" )->Get();
+		rc.blueImage = &g_assets.textureLib.Find( "_green" )->Get();
+		rc.greenImage = &g_assets.textureLib.Find( "_blue" )->Get();
 		rc.whiteImage = &g_assets.textureLib.Find( "_white" )->Get();
 		rc.blackImage = &g_assets.textureLib.Find( "_black" )->Get();
+		rc.lightGreyImage = &g_assets.textureLib.Find( "_lightGrey" )->Get();
+		rc.darkGreyImage = &g_assets.textureLib.Find( "_darkGrey" )->Get();
+		rc.brownImage = &g_assets.textureLib.Find( "_brown" )->Get();
+		rc.cyanImage = &g_assets.textureLib.Find( "_cyan" )->Get();
+		rc.yellowImage = &g_assets.textureLib.Find( "_yellow" )->Get();
+		rc.purpleImage = &g_assets.textureLib.Find( "_purple" )->Get();
+		rc.orangeImage = &g_assets.textureLib.Find( "_orange" )->Get();
+		rc.pinkImage = &g_assets.textureLib.Find( "_pink" )->Get();
+		rc.goldImage = &g_assets.textureLib.Find( "_gold" )->Get();
+		rc.albImage = &g_assets.textureLib.Find( "_alb" )->Get();
+		rc.nmlImage = &g_assets.textureLib.Find( "_nml" )->Get();
+		rc.rghImage = &g_assets.textureLib.Find( "_rgh" )->Get();
+		rc.mtlImage = &g_assets.textureLib.Find( "_mtl" )->Get();
+		rc.checkerboardImage = &g_assets.textureLib.Find( "_checkerboard" )->Get();
 	}
 
 	{

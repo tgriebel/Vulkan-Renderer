@@ -101,6 +101,11 @@ struct view_t
 												uint		numSamples;												\
 												uint		whiteId;												\
 												uint		blackId;												\
+												uint		defaultAlbedoId;										\
+												uint		defaultNormalId;										\
+												uint		defaultRoughnessId;										\
+												uint		defaultMetalId;											\
+												uint		checkerboardId;											\
 												uint		isTextured;												\
 											} globals;
 

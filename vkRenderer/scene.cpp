@@ -60,9 +60,14 @@ void CreateCodeAssets()
 			}			
 		}
 
-		const uint32_t debugColor = 14;
+		const uint32_t debugColorCount = 18;
 
-		static const Color* colors[ debugColor ] =
+		const Color colorAlb = Color( 0.5f, 0.5f, 0.5f );
+		const Color colorNml = Color( 0.0f, 0.0f, 0.5f );
+		const Color colorRgh = Color( 1.0f, 0.0f, 0.0f );
+		const Color colorMtl = Color( 0.0f, 0.0f, 0.0f );
+
+		static const Color* colors[ debugColorCount ] =
 		{
 			&ColorRed,
 			&ColorGreen,
@@ -78,9 +83,13 @@ void CreateCodeAssets()
 			&ColorOrange,
 			&ColorPink,
 			&ColorGold,
+			&colorAlb,
+			&colorNml,
+			&colorRgh,
+			&colorMtl,
 		};
 
-		const char* names[ debugColor ] =
+		const char* names[ debugColorCount ] =
 		{
 			"_red",
 			"_green",
@@ -95,31 +104,57 @@ void CreateCodeAssets()
 			"_purple",
 			"_orange",
 			"_pink",
-			"_gold"			
+			"_gold",
+			"_alb",
+			"_nml",
+			"_rgh",
+			"_mtl",
 		};
 
-		for ( uint32_t t = 0; t < debugColor; ++t )
+		imageInfo_t info {};
+		info.width = 1;
+		info.height = 1;
+		info.mipLevels = MipCount( info.width, info.height );
+		info.layers = 1;
+		info.type = IMAGE_TYPE_2D;
+		info.channels = 4;
+		info.fmt = IMAGE_FMT_RGBA_8;
+		info.tiling = IMAGE_TILING_MORTON;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.subsamples = IMAGE_SMP_1;
+
+		for ( uint32_t t = 0; t < debugColorCount; ++t )
 		{
 			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
+			texture.info = info;
 
-			texture.info.width = 1;
-			texture.info.height = 1;
-			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
-			texture.info.layers = 1;
-			texture.info.type = IMAGE_TYPE_2D;
-			texture.info.channels = 4;
-			texture.info.fmt = IMAGE_FMT_RGBA_8;
-			texture.info.tiling = IMAGE_TILING_MORTON;
-
-			RGBA abgr;
-			abgr.r = colors[ t ]->a();
-			abgr.g = colors[ t ]->b();
-			abgr.b = colors[ t ]->g();
-			abgr.a = colors[ t ]->r();
-
-			texture.cpuImage.Init( texture.info.width, texture.info.height, abgr );
+			texture.cpuImage.Init( texture.info.width, texture.info.height, colors[ t ]->AsRGBA() );
 		}
+
+		// Checkerboard
+		{
+			hdl_t handle = g_assets.textureLib.Add( "_checkerboard", Image() );
+			Image& texture = g_assets.textureLib.Find( handle )->Get();
+
+			texture.info = info;
+			texture.info.width = 32;
+			texture.info.height = 32;
+			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
+
+			texture.cpuImage.Init( texture.info.width, texture.info.height );
+
+			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
+				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
+					if( ( x % 2 ) == ( y % 2 ) ) {
+						texture.cpuImage.SetPixel( x, y, ColorBlack.AsRGBA() );
+					} else {
+						texture.cpuImage.SetPixel( x, y, ColorWhite.AsRGBA() );
+					}
+				}
+			}		
+		}
+		g_assets.textureLib.SetDefault( "_checkerboard" );
 	}
 
 	// Materials
@@ -152,6 +187,7 @@ void CreateCodeAssets()
 			material.AddShader( DRAWPASS_DEBUG_3D, AssetLibGpuProgram::Handle( "DebugSolid" ) );
 			g_assets.materialLib.Add( "DEBUG_3D", material );
 		}
+		g_assets.materialLib.SetDefault( "DEBUG_WIRE" );
 	}
 
 	// Models
@@ -166,6 +202,7 @@ void CreateCodeAssets()
 			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 			g_assets.modelLib.Add( "_quadTexDebug", model );
 		}
+		g_assets.modelLib.SetDefault( "_quadTexDebug" );
 	}
 }
 
