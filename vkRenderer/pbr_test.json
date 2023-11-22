@@ -8,7 +8,7 @@
 	  "type": "2D"
 	},
 	{
-	  "name": "grid.png",
+	  "name": "grid2.png",
 	  "type": "2D"
 	},
 	{
@@ -46,6 +46,10 @@
 	{
 	  "name": "chapel_low.jpg",
 	  "type": "CUBE"
+	},
+	{
+	  "name": "skybox80s.png",
+	  "type": "2D"
 	}
   ],
   "materials": [
@@ -64,7 +68,7 @@
 		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "grid.png"
+		  "GGX_COLOR_MAP_SLOT" : "grid2.png"
 	  }
     },
 	{
@@ -103,7 +107,7 @@
 	{
       "name" : "grid",
       "model" : "_terrain",
-	  "argStr0" : "WHITE_WOOD",
+	  "argStr0" : "Grid",
 	  "argInt0" : 100,
 	  "argInt1" : 100,
 	  "argFlt0" : 1.0,

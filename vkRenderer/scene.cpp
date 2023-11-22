@@ -128,8 +128,9 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 			texture.info = info;
-
-			texture.cpuImage.Init( texture.info.width, texture.info.height, colors[ t ]->AsRGBA() );
+			
+			RGBA pixel = Swizzle( colors[ t ]->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+			texture.cpuImage.Init( texture.info.width, texture.info.height, pixel );
 		}
 
 		// Checkerboard
@@ -146,11 +147,9 @@ void CreateCodeAssets()
 
 			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
 				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
-					if( ( x % 2 ) == ( y % 2 ) ) {
-						texture.cpuImage.SetPixel( x, y, ColorBlack.AsRGBA() );
-					} else {
-						texture.cpuImage.SetPixel( x, y, ColorWhite.AsRGBA() );
-					}
+					const Color color = ( ( x % 2 ) == ( y % 2 ) ) ? ColorBlack : ColorWhite;
+					const RGBA pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+					texture.cpuImage.SetPixel( x, y, ColorWhite.AsRGBA() );
 				}
 			}		
 		}
