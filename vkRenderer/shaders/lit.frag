@@ -82,7 +82,7 @@ void main()
 	const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;
 
-	const vec3 albedoColor = albedoTex.rgb;
+	const vec3 albedoColor = albedoTex.rgb * diffuseColor;
     const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * material.Ka.rgb;
 	
     vec3 F0 = vec3( 0.04f ); 

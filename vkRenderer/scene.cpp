@@ -62,7 +62,7 @@ void CreateCodeAssets()
 
 		const uint32_t debugColorCount = 18;
 
-		const Color colorAlb = Color( 0.5f, 0.5f, 0.5f );
+		const Color colorAlb = Color( 1.0f, 1.0f, 1.0f );
 		const Color colorNml = Color( 0.0f, 0.0f, 0.5f );
 		const Color colorRgh = Color( 1.0f, 0.0f, 0.0f );
 		const Color colorMtl = Color( 0.0f, 0.0f, 0.0f );

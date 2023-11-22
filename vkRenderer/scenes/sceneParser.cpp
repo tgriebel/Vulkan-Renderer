@@ -485,9 +485,9 @@ int ParseMaterialObject( parseState_t& st, void* object )
 		{ "textures", &m, &ParseMaterialTextureObject },
 	};
 
-	m.SetParms( mParms );
-
 	ParseObject( st, objectMap, objectCount );
+
+	m.SetParms( mParms );
 
 	materials->Add( name, m );
 
