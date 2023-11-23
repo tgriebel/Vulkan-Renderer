@@ -111,11 +111,13 @@ void Renderer::DestroyFramebuffers()
 	mainColor.Destroy();
 	mainColorResolved.Destroy();
 
-	delete resources.cubeFbImage.gpuImage;
+	delete resources.cubeFbColorImage.gpuImage;
+	delete resources.cubeFbDepthImage.gpuImage;
 
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
 		resources.cubeImageViews[ i ].Destroy();
+		resources.cubeDepthImageViews[ i ].Destroy();
 		cubeMapFrameBuffer[ i ].Destroy();
 	}
 

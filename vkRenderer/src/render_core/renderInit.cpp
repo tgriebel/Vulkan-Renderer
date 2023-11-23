@@ -563,27 +563,35 @@ void Renderer::CreateFramebuffers()
 
 	// Cube images
 	{
-		imageInfo_t info{};
-		info.width = 256;
-		info.height = 256;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
+		imageInfo_t colorInfo{};
+		colorInfo.width = 256;
+		colorInfo.height = 256;
+		colorInfo.mipLevels = 1;
+		colorInfo.layers = 6;
+		colorInfo.subsamples = IMAGE_SMP_1;
+		colorInfo.fmt = IMAGE_FMT_RGBA_16;
+		colorInfo.type = IMAGE_TYPE_2D;
+		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		colorInfo.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "cubeColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbImage );
+		CreateImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbColorImage );
+
+		imageInfo_t depthInfo = colorInfo;
+		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+		depthInfo.fmt = IMAGE_FMT_D_16;
+
+		CreateImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbDepthImage );
 
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
 			imageSubResourceView_t subView;
 			subView.arrayCount = 1;
-			subView.baseArray = 0;
+			subView.baseArray = i;
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
-			resources.cubeImageViews[ i ].Init( resources.cubeFbImage, info, subView );
+
+			resources.cubeImageViews[ i ].Init( resources.cubeFbColorImage, colorInfo, subView );
+			resources.cubeDepthImageViews[ i ].Init( resources.cubeFbDepthImage, depthInfo, subView );
 		}
 	}
 
@@ -718,6 +726,7 @@ void Renderer::CreateFramebuffers()
 			fbInfo.name = "CubeColorFB";
 			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
 				fbInfo.color0[ frameIx ] = &resources.cubeImageViews[ i ];
+				fbInfo.depth[ frameIx ] = &resources.cubeDepthImageViews[ i ];
 			}
 			fbInfo.width = 256;
 			fbInfo.height = 256;
