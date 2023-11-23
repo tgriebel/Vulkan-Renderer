@@ -50,6 +50,7 @@ void Renderer::Init()
 
 	viewCount = 0;
 
+	// Shadow Views
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{
 		renderViewCreateInfo_t info{};
@@ -65,7 +66,7 @@ void Renderer::Init()
 		++viewCount;
 	}
 
-	for ( uint32_t i = 0; i < Max3DViews; ++i )
+	// Raster Views
 	{
 		renderViewCreateInfo_t info{};
 		info.name = "Main View";
@@ -75,11 +76,27 @@ void Renderer::Init()
 		info.resources = &resources;
 		info.fb = &mainColor;
 
-		renderViews[ i ] = &views[ viewCount ];
-		renderViews[ i ]->Init( info );
+		renderViews[ 0 ] = &views[ viewCount ];
+		renderViews[ 0 ]->Init( info );
 		++viewCount;
+
+		for ( uint32_t i = 1; i < Max3DViews; ++i )
+		{
+			renderViewCreateInfo_t info{};
+			info.name = "Cube View";
+			info.region = renderViewRegion_t::STANDARD_RASTER;
+			info.viewId = viewCount;
+			info.context = &renderContext;
+			info.resources = &resources;
+			info.fb = &cubeMapFrameBuffer[ i ];
+
+			renderViews[ i ] = &views[ viewCount ];
+			renderViews[ i ]->Init( info );
+			++viewCount;
+		}
 	}
 
+	// 2D views
 	{
 		renderViewCreateInfo_t info{};
 		info.name = "2D";
@@ -100,6 +117,7 @@ void Renderer::Init()
 		shadowViews[ i ]->Commit();
 	}
 	renderViews[ 0 ]->Commit();
+	renderViews[ 1 ]->Commit();
 	view2Ds[ 0 ]->Commit();
 
 	{
@@ -167,6 +185,7 @@ void Renderer::Init()
 		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	schedule.Queue( new RenderTask( renderViews[ 1 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( resolve );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
@@ -542,6 +561,32 @@ void Renderer::CreateFramebuffers()
 		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.depthStencilImage );
 	}
 
+	// Cube images
+	{
+		imageInfo_t info{};
+		info.width = 256;
+		info.height = 256;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		CreateImage( "cubeColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbImage );
+
+		for ( uint32_t i = 0; i < 6; ++i )
+		{
+			imageSubResourceView_t subView;
+			subView.arrayCount = 1;
+			subView.baseArray = 0;
+			subView.baseMip = 0;
+			subView.mipLevels = 1;
+			resources.cubeImageViews[ i ].Init( resources.cubeFbImage, info, subView );
+		}
+	}
+
 	// Resolve image
 	{
 		imageInfo_t info{};
@@ -664,6 +709,22 @@ void Renderer::CreateFramebuffers()
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );
+	}
+
+	// Cubemap Render
+	{
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			frameBufferCreateInfo_t fbInfo = {};
+			fbInfo.name = "CubeColorFB";
+			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
+				fbInfo.color0[ frameIx ] = &resources.cubeImageViews[ i ];
+			}
+			fbInfo.width = 256;
+			fbInfo.height = 256;
+			fbInfo.lifetime = LIFETIME_TEMP;
+
+			cubeMapFrameBuffer[ i ].Create( fbInfo );
+		}
 	}
 }
 

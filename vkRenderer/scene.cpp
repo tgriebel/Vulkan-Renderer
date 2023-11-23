@@ -278,37 +278,37 @@ void UpdateScene( Scene* scene )
 		// FIXME: race conditions
 		// Need to do a ping-pong update
 		if ( g_window.input.IsKeyPressed( 'D' ) ) {
-			scene->camera.MoveRight( cameraSpeed * dt );
+			scene->mainCamera->MoveRight( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( 'A' ) ) {
-			scene->camera.MoveRight( -cameraSpeed * dt );
+			scene->mainCamera->MoveRight( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( 'W' ) ) {
-			scene->camera.MoveForward( cameraSpeed * dt );
+			scene->mainCamera->MoveForward( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( 'S' ) ) {
-			scene->camera.MoveForward( -cameraSpeed * dt );
+			scene->mainCamera->MoveForward( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '8' ) ) {
-			scene->camera.AdjustPitch( -cameraSpeed * dt );
+			scene->mainCamera->AdjustPitch( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '2' ) ) {
-			scene->camera.AdjustPitch( cameraSpeed * dt );
+			scene->mainCamera->AdjustPitch( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '4' ) ) {
-			scene->camera.AdjustYaw( cameraSpeed * dt );
+			scene->mainCamera->AdjustYaw( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '6' ) ) {
-			scene->camera.AdjustYaw( -cameraSpeed * dt );
+			scene->mainCamera->AdjustYaw( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '+' ) ) {
-			scene->camera.SetFov( scene->camera.GetFov() + Radians( 0.1f ) );
+			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ) );
 		}
 		if ( g_window.input.IsKeyPressed( '-' ) ) {
-			scene->camera.SetFov( scene->camera.GetFov() - Radians( 0.1f ) );
+			scene->mainCamera->SetFov( scene->mainCamera->GetFov() - Radians( 0.1f ) );
 		}
 	}
-	scene->camera.SetAspectRatio( g_window.GetWindowFrameBufferAspect() );
+	scene->mainCamera->SetAspectRatio( g_window.GetWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( mouse.centered )
@@ -316,20 +316,20 @@ void UpdateScene( Scene* scene )
 		const float maxSpeed = mouse.speed;
 		const float yawDelta = maxSpeed * mouse.dx;
 		const float pitchDelta = -maxSpeed * mouse.dy;
-		scene->camera.AdjustYaw( yawDelta );
-		scene->camera.AdjustPitch( pitchDelta );
+		scene->mainCamera->AdjustYaw( yawDelta );
+		scene->mainCamera->AdjustPitch( pitchDelta );
 	}
 	else if ( mouse.leftDown )
 	{
-		Ray ray = scene->camera.GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
+		Ray ray = scene->mainCamera->GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
 		scene->selectedEntity = scene->GetTracedEntity( ray );
 	}
 
 	// Skybox
 	vec3f skyBoxOrigin;
-	skyBoxOrigin[ 0 ] = scene->camera.GetOrigin()[ 0 ];
-	skyBoxOrigin[ 1 ] = scene->camera.GetOrigin()[ 1 ];
-	skyBoxOrigin[ 2 ] = scene->camera.GetOrigin()[ 2 ] - 0.5f;
+	skyBoxOrigin[ 0 ] = scene->mainCamera->GetOrigin()[ 0 ];
+	skyBoxOrigin[ 1 ] = scene->mainCamera->GetOrigin()[ 1 ];
+	skyBoxOrigin[ 2 ] = scene->mainCamera->GetOrigin()[ 2 ] - 0.5f;
 	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
 	
@@ -431,7 +431,7 @@ void UpdateScene( Scene* scene )
 
 	ImGui::Text( "Mouse: (%f, %f)", (float)g_window.input.GetMouse().x, (float)g_window.input.GetMouse().y );
 	ImGui::Text( "Mouse Dt: (%f, %f)", (float)g_window.input.GetMouse().dx, (float)g_window.input.GetMouse().dy );
-	const vec4f cameraOrigin = g_scene->camera.GetOrigin();
+	const vec4f cameraOrigin = g_scene->mainCamera->GetOrigin();
 	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
 
 	const vec2f ndc = g_window.GetNdc( g_window.input.GetMouse().x, g_window.input.GetMouse().y );

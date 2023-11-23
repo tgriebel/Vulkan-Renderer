@@ -530,11 +530,19 @@ void Renderer::CommitViews( const Scene* scene )
 	// Main view
 	{
 		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
-		renderViews[ 0 ]->SetCamera( scene->camera );
+		renderViews[ 0 ]->SetCamera( *scene->mainCamera );
 
 		renderViews[ 0 ]->numLights = lightCount;
 		for ( uint32_t i = 0; i < lightCount; ++i ) {
 			renderViews[ 0 ]->lights[ i ] = i;
+		}
+
+		renderViews[ 1 ]->SetViewRect( 0, 0, 256, 256 );
+		renderViews[ 1 ]->SetCamera( scene->cameras[ 0 ] );
+
+		renderViews[ 1 ]->numLights = lightCount;
+		for ( uint32_t i = 0; i < lightCount; ++i ) {
+			renderViews[ 1 ]->lights[ i ] = i;
 		}
 	}
 

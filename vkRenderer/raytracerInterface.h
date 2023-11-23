@@ -49,7 +49,7 @@ static void TraceScene( const bool rasterize = false )
 	//g_window.GetWindowSize( rtview.targetSize[0], rtview.targetSize[1] );
 	ImageBuffer<Color> rtimage( rtview.targetSize[ 0 ], rtview.targetSize[ 1 ], 1, Color::Black, "testRayTrace" );
 	{
-		rtview.camera = rtScene.scene->camera;
+		rtview.camera = *rtScene.scene->mainCamera;
 		rtview.viewTransform = rtview.camera.GetViewMatrix();
 		rtview.projTransform = rtview.camera.GetPerspectiveMatrix();
 		rtview.projView = rtview.projTransform * rtview.viewTransform;

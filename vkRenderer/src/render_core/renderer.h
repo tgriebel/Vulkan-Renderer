@@ -130,6 +130,8 @@ public:
 	// TODO: move view-specific data
 	GpuBuffer			viewParms;
 	Image				mainColorImage;
+	Image				cubeFbImage;
+	ImageView			cubeImageViews[ 6 ];
 	Image				gBufferLayerImage;
 	Image				depthStencilImage;
 	ImageView			depthImageView;
@@ -214,6 +216,7 @@ private:
 
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
+	FrameBuffer							cubeMapFrameBuffer[ 6 ];
 	FrameBuffer							mainColorResolved;
 	FrameBuffer							tempColor;
 
