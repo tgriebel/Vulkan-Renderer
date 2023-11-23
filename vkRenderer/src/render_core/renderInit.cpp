@@ -173,8 +173,8 @@ void Renderer::Init()
 	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
 	//schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ ) );
 	//schedule.Queue( mipTask );
-	schedule.Queue( pingPongQueue[ 0 ] );
-	schedule.Queue( pingPongQueue[ 1 ] );
+	//schedule.Queue( pingPongQueue[ 0 ] );
+	//schedule.Queue( pingPongQueue[ 1 ] );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
 }
