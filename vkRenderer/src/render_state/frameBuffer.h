@@ -33,8 +33,6 @@
 
 struct frameBufferCreateInfo_t
 {
-	uint32_t			width;
-	uint32_t			height;
 	resourceLifetime_t	lifetime;
 	const char*			name;
 	Image*				color0[ MaxFrameStates ];
@@ -44,8 +42,6 @@ struct frameBufferCreateInfo_t
 	Image*				stencil[ MaxFrameStates ];
 
 	frameBufferCreateInfo_t() :
-		width( 0 ),
-		height( 0 ),
 		lifetime( LIFETIME_TEMP )
 	{
 		name = "";

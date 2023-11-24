@@ -176,8 +176,6 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	for ( uint32_t i = 0; i < m_imageCount; ++i ) {
 		fbInfo.color0[ i ] = &m_swapChainImages[ i ];
 	}
-	fbInfo.width = m_swapChainImages[ 0 ].info.width;
-	fbInfo.height = m_swapChainImages[ 0 ].info.height;
 	fbInfo.lifetime = LIFETIME_PERSISTENT;
 
 	m_framebuffer.Create( fbInfo );

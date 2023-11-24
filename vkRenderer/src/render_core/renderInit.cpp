@@ -118,7 +118,7 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = false;
+	const bool useCubeViews = true;
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();
@@ -675,12 +675,10 @@ void Renderer::CreateFramebuffers()
 
 	// Main Color Resolved Frame buffer
 	{
-		frameBufferCreateInfo_t fbInfo = {};
+		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "MainColorResolveFB";
 		fbInfo.color0[ 0 ] = &resources.mainColorResolvedImageView;
 		fbInfo.color1[ 0 ] = &resources.depthStencilResolvedImage;
-		fbInfo.width = resources.mainColorResolvedImageView.info.width;
-		fbInfo.height = resources.mainColorResolvedImageView.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColorResolved.Create( fbInfo );
@@ -688,11 +686,9 @@ void Renderer::CreateFramebuffers()
 
 	// Temp Frame buffer
 	{
-		frameBufferCreateInfo_t fbInfo = {};
+		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "TempColorFB";
 		fbInfo.color0[ 0 ] = &resources.tempColorImage;
-		fbInfo.width = resources.tempColorImage.info.width;
-		fbInfo.height = resources.tempColorImage.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		tempColor.Create( fbInfo );
@@ -701,11 +697,9 @@ void Renderer::CreateFramebuffers()
 	// Shadow map
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{	
-		frameBufferCreateInfo_t fbInfo = {};
+		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "ShadowMapFB";
 		fbInfo.depth[ 0 ] = &resources.shadowMapImage[ shadowIx ];
-		fbInfo.width = resources.shadowMapImage[ shadowIx ].info.width;
-		fbInfo.height = resources.shadowMapImage[ shadowIx ].info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		shadowMap[ shadowIx ].Create( fbInfo );
@@ -713,7 +707,7 @@ void Renderer::CreateFramebuffers()
 
 	// Main Scene 3D Render
 	{
-		frameBufferCreateInfo_t fbInfo = {};
+		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "MainColorFB";
 		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
@@ -722,8 +716,6 @@ void Renderer::CreateFramebuffers()
 			fbInfo.depth[ frameIx ] = &resources.depthImageView;
 			fbInfo.stencil[ frameIx ] = &resources.stencilImageView;
 		}
-		fbInfo.width = resources.mainColorImage.info.width;
-		fbInfo.height = resources.mainColorImage.info.height;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColor.Create( fbInfo );
@@ -732,14 +724,12 @@ void Renderer::CreateFramebuffers()
 	// Cubemap Render
 	{
 		for ( uint32_t i = 0; i < 6; ++i ) {
-			frameBufferCreateInfo_t fbInfo = {};
+			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "CubeColorFB";
 			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
 				fbInfo.color0[ frameIx ] = &resources.cubeImageViews[ i ];
 				fbInfo.depth[ frameIx ] = &resources.cubeDepthImageViews[ i ];
 			}
-			fbInfo.width = 256;
-			fbInfo.height = 256;
 			fbInfo.lifetime = LIFETIME_TEMP;
 
 			cubeMapFrameBuffer[ i ].Create( fbInfo );
@@ -863,6 +853,10 @@ void RenderContext::RefreshRegisteredBindParms()
 void Renderer::CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
 {
 	outImage.info = info;
+	outImage.subResourceView.baseArray = 0;
+	outImage.subResourceView.arrayCount = info.layers;
+	outImage.subResourceView.baseMip = 0;
+	outImage.subResourceView.mipLevels = info.mipLevels;
 	outImage.gpuImage = new GpuImage();
 	outImage.gpuImage->Create( name, outImage.info, flags, memory );
 }

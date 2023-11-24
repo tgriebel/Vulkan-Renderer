@@ -3,20 +3,9 @@
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
 
-struct imageSubResourceView_t
-{
-	uint32_t baseMip;
-	uint32_t baseArray;
-	uint32_t mipLevels;
-	uint32_t arrayCount;
-};
-
-
 class ImageView : public Image
 {
 public:
-	imageSubResourceView_t subResourceView;
-
 	ImageView() : Image()
 	{}
 

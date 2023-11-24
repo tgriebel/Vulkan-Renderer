@@ -367,8 +367,6 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		frameBufferCreateInfo_t info{};
 		info.name = "MipDownsample";
 		info.color0[ 0 ] = &m_tempImage;
-		info.width = m_views[ i ].info.width;
-		info.height = m_views[ i ].info.height;
 		info.lifetime = resourceLifetime_t::LIFETIME_TEMP;
 
 		m_frameBuffers[ i ].Create( info );

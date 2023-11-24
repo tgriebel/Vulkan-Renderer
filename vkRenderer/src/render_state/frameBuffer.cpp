@@ -271,21 +271,37 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 	m_attachmentCount = m_colorCount + m_dsCount;
 
+	Image* images[ MaxAttachmentCount ][ MaxFrameStates ];
+	for ( uint32_t frameIx = 0; frameIx < m_bufferCount; ++frameIx )
+	{
+		images[ 0 ][ frameIx ] = createInfo.color0[ frameIx ];
+		images[ 1 ][ frameIx ] = createInfo.color1[ frameIx ];
+		images[ 2 ][ frameIx ] = createInfo.color2[ frameIx ];
+		images[ 3 ][ frameIx ] = createInfo.depth[ frameIx ];
+		images[ 4 ][ frameIx ] = createInfo.stencil[ frameIx ];
+	}
+
+	uint32_t firstValidIx = MaxAttachmentCount;
+	for ( uint32_t imageIx = 0; imageIx < MaxAttachmentCount; ++imageIx ) {
+		if ( images[ imageIx ][ 0 ] != nullptr ) {
+			firstValidIx = imageIx;
+			break;
+		}
+	}
+
 	// Validation
 	{
+		if( firstValidIx == MaxAttachmentCount ) {
+			throw std::runtime_error( "No images provided." );
+		}
+
 		if ( ( createInfo.color0[ 0 ] == nullptr ) &&
 			( ( createInfo.color1[ 0 ] != nullptr ) || ( createInfo.color2[ 0 ] != nullptr ) ) ) {
 			throw std::runtime_error( "Color attachment 0 has to be used if 1 and 2 are." );
 		}
 
-		Image* images[ MaxAttachmentCount ][ MaxFrameStates ];
-		for ( uint32_t frameIx = 0; frameIx < m_bufferCount; ++frameIx )
-		{
-			images[ 0 ][ frameIx ] = createInfo.color0[ frameIx ];
-			images[ 1 ][ frameIx ] = createInfo.color1[ frameIx ];
-			images[ 2 ][ frameIx ] = createInfo.color2[ frameIx ];
-			images[ 3 ][ frameIx ] = createInfo.depth[ frameIx ];
-			images[ 4 ][ frameIx ] = createInfo.stencil[ frameIx ];
+		if ( ( createInfo.color2[ 0 ] != nullptr ) && ( createInfo.color1[ 0 ] != nullptr ) ) {
+			throw std::runtime_error( "Color attachment 1 has to be used if 2 is." );
 		}
 
 		for ( uint32_t imageIx = 0; imageIx < MaxAttachmentCount; ++imageIx )
@@ -306,6 +322,19 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 				if ( images[ imageIx ][ frameIx - 1 ]->info != images[ imageIx ][ frameIx ]->info ) {
 					throw std::runtime_error( "Framebuffer images have different properties." );
 				}
+			}
+		}
+
+		for ( uint32_t imageIx = firstValidIx + 1; imageIx < MaxAttachmentCount; ++imageIx )
+		{
+			if( images[ imageIx ][ 0 ] == nullptr ) {
+				continue;
+			}
+			if( images[ firstValidIx ][ 0 ]->info.width != images[ imageIx ][ 0 ]->info.width ||
+				images[ firstValidIx ][ 0 ]->info.height != images[ imageIx ][ 0 ]->info.height || 
+				images[ firstValidIx ][ 0 ]->info.layers != images[ imageIx ][ 0 ]->info.layers )
+			{
+				throw std::runtime_error( "Framebuffer images must have the same dimensions." );
 			}
 		}
 	}
@@ -410,9 +439,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			framebufferInfo.renderPass = vk_renderPasses[ permIx ];
 			framebufferInfo.attachmentCount = m_attachmentCount;
 			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = createInfo.width;
-			framebufferInfo.height = createInfo.height;
-			framebufferInfo.layers = 1;
+			framebufferInfo.width = images[ firstValidIx ][ 0 ]->info.width;
+			framebufferInfo.height = images[ firstValidIx ][ 0 ]->info.height;
+			framebufferInfo.layers = images[ firstValidIx ][ 0 ]->info.layers;
 
 			VK_CHECK_RESULT( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &vk_buffers[ frameIx ][ permIx ] ) );
 
@@ -425,8 +454,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			m_stencil[ frameIx ] = createInfo.stencil[ frameIx ];
 		}
 	}
-	m_width = createInfo.width;
-	m_height = createInfo.height;
+	m_width = images[ firstValidIx ][ 0 ]->info.width;
+	m_height = images[ firstValidIx ][ 0 ]->info.height;
 	m_lifetime = createInfo.lifetime;
 	
 	if( m_color0[ 0 ] == nullptr ) {
