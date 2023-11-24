@@ -533,16 +533,20 @@ void Renderer::CommitViews( const Scene* scene )
 		renderViews[ 0 ]->SetCamera( *scene->mainCamera );
 
 		renderViews[ 0 ]->numLights = lightCount;
-		for ( uint32_t i = 0; i < lightCount; ++i ) {
-			renderViews[ 0 ]->lights[ i ] = i;
+		for ( uint32_t lightIx = 0; lightIx < lightCount; ++lightIx ) {
+			renderViews[ 0 ]->lights[ lightIx ] = lightIx;
 		}
 
-		renderViews[ 1 ]->SetViewRect( 0, 0, 256, 256 );
-		renderViews[ 1 ]->SetCamera( scene->cameras[ 1 ] );
+		assert( Max3DViews >= 7 );
+		for ( uint32_t cubeViewIx = 1; cubeViewIx < 7; ++cubeViewIx )
+		{
+			renderViews[ cubeViewIx ]->SetViewRect( 0, 0, 256, 256 );
+			renderViews[ cubeViewIx ]->SetCamera( scene->cameras[ cubeViewIx ] );
 
-		renderViews[ 1 ]->numLights = lightCount;
-		for ( uint32_t i = 0; i < lightCount; ++i ) {
-			renderViews[ 1 ]->lights[ i ] = i;
+			renderViews[ cubeViewIx ]->numLights = lightCount;
+			for ( uint32_t lightIx = 0; lightIx < lightCount; ++lightIx ) {
+				renderViews[ cubeViewIx ]->lights[ lightIx ] = lightIx;
+			}
 		}
 	}
 

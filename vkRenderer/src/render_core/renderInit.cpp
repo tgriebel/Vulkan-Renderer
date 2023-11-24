@@ -88,7 +88,7 @@ void Renderer::Init()
 			info.viewId = viewCount;
 			info.context = &renderContext;
 			info.resources = &resources;
-			info.fb = &cubeMapFrameBuffer[ i ];
+			info.fb = &cubeMapFrameBuffer[ i - 1 ];
 
 			renderViews[ i ] = &views[ viewCount ];
 			renderViews[ i ]->Init( info );
@@ -117,7 +117,13 @@ void Renderer::Init()
 		shadowViews[ i ]->Commit();
 	}
 	renderViews[ 0 ]->Commit();
-	renderViews[ 1 ]->Commit();
+
+	const bool useCubeViews = false;
+	if( useCubeViews ) {
+		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
+			renderViews[ i ]->Commit();
+		}
+	}
 	view2Ds[ 0 ]->Commit();
 
 	{
@@ -185,7 +191,11 @@ void Renderer::Init()
 		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
-	schedule.Queue( new RenderTask( renderViews[ 1 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	if ( useCubeViews ) {
+		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
+			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+		}
+	}
 	schedule.Queue( resolve );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
