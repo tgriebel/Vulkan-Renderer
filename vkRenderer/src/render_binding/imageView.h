@@ -59,8 +59,6 @@ public:
 	void Init( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView )
 	{
 		info = imageInfo;
-		info.mipLevels = subView.mipLevels;
-		info.layers = subView.arrayCount;
 		assert( info.layers >= 1 );
 		assert( info.mipLevels >= 1 );
 

@@ -305,10 +305,14 @@ void Renderer::Resize()
 		Transition( &uploadContext, resources.shadowMapImage[ shadowIx ], GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	}
 	Transition( &uploadContext, resources.mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.gBufferLayerImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
+	Transition( &uploadContext, resources.cubeFbColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.cubeFbDepthImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
@@ -369,6 +373,9 @@ void Renderer::UploadAssets()
 	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+
+	Transition( &uploadContext, resources.cubeFbColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.cubeFbDepthImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
 		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );

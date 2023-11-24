@@ -168,6 +168,11 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 		info.tiling = IMAGE_TILING_LINEAR;
 		info.type = IMAGE_TYPE_2D;
 
+		m_swapChainImages[ i ].subResourceView.baseArray = 0;
+		m_swapChainImages[ i ].subResourceView.arrayCount = 1;	
+		m_swapChainImages[ i ].subResourceView.baseMip = 0;
+		m_swapChainImages[ i ].subResourceView.mipLevels = 1;
+
 		m_swapChainImages[ i ].gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
 	}
 

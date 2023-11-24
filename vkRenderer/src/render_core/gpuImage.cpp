@@ -13,7 +13,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	imageInfo.extent.height = static_cast<uint32_t>( info.height );
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = info.mipLevels;
-	imageInfo.arrayLayers = info.layers;
+	imageInfo.arrayLayers = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : info.layers;
 	imageInfo.format = vk_GetTextureFormat( info.fmt );
 	imageInfo.tiling = ( info.tiling == IMAGE_TILING_LINEAR ) ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -31,17 +31,16 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	m_dbgName = name;
 	m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
 
+	imageInfo.flags = 0;
+	imageInfo.flags |= ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+
 	VkImageStencilUsageCreateInfo stencilUsage{};
 	if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
 	{
 		stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 		stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		imageInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+		imageInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 		imageInfo.pNext = &stencilUsage;
-	}
-	else
-	{
-		imageInfo.flags = ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
 	}
 
 	const uint32_t bufferCount = GetBufferCount();

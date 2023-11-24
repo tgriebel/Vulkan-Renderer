@@ -135,17 +135,17 @@ static inline VkImageAspectFlagBits vk_GetAspectFlags( const imageAspectFlags_t 
 }
 
 
-static inline VkImageViewType vk_GetTextureType( const imageType_t type )
+static inline VkImageViewType vk_GetImageViewType( const imageType_t type )
 {
 	switch ( type ) {
-		default:
+	default:
 		case IMAGE_TYPE_2D:				return VK_IMAGE_VIEW_TYPE_2D;
 		case IMAGE_TYPE_2D_ARRAY:		return VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 		case IMAGE_TYPE_3D:				return VK_IMAGE_VIEW_TYPE_3D;
 		case IMAGE_TYPE_CUBE:			return VK_IMAGE_VIEW_TYPE_CUBE;
 		case IMAGE_TYPE_CUBE_ARRAY:		return VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
 	}
-	assert(0);
+	assert( 0 );
 	return VK_IMAGE_VIEW_TYPE_MAX_ENUM;
 }
 

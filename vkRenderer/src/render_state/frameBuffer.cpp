@@ -441,7 +441,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			framebufferInfo.pAttachments = attachments;
 			framebufferInfo.width = images[ firstValidIx ][ 0 ]->info.width;
 			framebufferInfo.height = images[ firstValidIx ][ 0 ]->info.height;
-			framebufferInfo.layers = images[ firstValidIx ][ 0 ]->info.layers;
+			framebufferInfo.layers = images[ firstValidIx ][ 0 ]->subResourceView.arrayCount;
 
 			VK_CHECK_RESULT( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &vk_buffers[ frameIx ][ permIx ] ) );
 

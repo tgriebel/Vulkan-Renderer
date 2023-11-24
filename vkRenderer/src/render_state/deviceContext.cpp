@@ -162,6 +162,8 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 	imageSubResourceView_t subResourceView;
 	subResourceView.baseMip = 0;
 	subResourceView.mipLevels = info.mipLevels;
+	subResourceView.baseArray = 0;
+	subResourceView.arrayCount = info.layers;
 
 	return vk_CreateImageView( image, info, subResourceView );
 }
@@ -175,17 +177,18 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 	aspectFlags |= ( info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
 
 	assert( subResourceView.mipLevels >= 1 );
+	assert( subResourceView.arrayCount >= 1 );
 
 	VkImageViewCreateInfo viewInfo{ };
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
-	viewInfo.viewType = vk_GetTextureType( info.type );
+	viewInfo.viewType = vk_GetImageViewType( info.type );
 	viewInfo.format = vk_GetTextureFormat( info.fmt );
 	viewInfo.subresourceRange.aspectMask = aspectFlags;
 	viewInfo.subresourceRange.baseMipLevel = subResourceView.baseMip;
 	viewInfo.subresourceRange.levelCount = subResourceView.mipLevels;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : 1;
+	viewInfo.subresourceRange.baseArrayLayer = subResourceView.baseArray;
+	viewInfo.subresourceRange.layerCount = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : subResourceView.arrayCount;
 
 	VkImageView imageView;
 	VK_CHECK_RESULT( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) );
@@ -352,13 +355,13 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount = image->info.layers;
+	barrier.subresourceRange.layerCount = image->subResourceView.arrayCount;
 	barrier.subresourceRange.levelCount = 1;
 
 	int32_t mipWidth = image->info.width;
 	int32_t mipHeight = image->info.height;
 
-	for ( uint32_t i = 1; i < image->info.mipLevels; i++ )
+	for ( uint32_t i = 1; i < image->subResourceView.mipLevels; i++ )
 	{
 		barrier.subresourceRange.baseMipLevel = i - 1;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -380,13 +383,13 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.srcSubresource.mipLevel = i - 1;
 		blit.srcSubresource.baseArrayLayer = 0;
-		blit.srcSubresource.layerCount = image->info.layers;
+		blit.srcSubresource.layerCount = image->subResourceView.arrayCount;
 		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
 		blit.dstOffsets[ 1 ] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.dstSubresource.mipLevel = i;
 		blit.dstSubresource.baseArrayLayer = 0;
-		blit.dstSubresource.layerCount = image->info.layers;
+		blit.dstSubresource.layerCount = image->subResourceView.arrayCount;
 
 		vkCmdBlitImage( cmdBuffer,
 						image->gpuImage->GetVkImage(),
@@ -414,7 +417,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		mipHeight = ( mipHeight > 1 ) ? ( mipHeight /= 2 ) : mipHeight;
 	}
 
-	barrier.subresourceRange.baseMipLevel = image->info.mipLevels - 1;
+	barrier.subresourceRange.baseMipLevel = image->subResourceView.mipLevels - 1;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -680,9 +683,9 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst )
 {
 	copyImageParms_t srcCopy{};
 	srcCopy.subView.baseArray = 0;
-	srcCopy.subView.arrayCount = src.info.layers;
+	srcCopy.subView.arrayCount = src.subResourceView.arrayCount;
 	srcCopy.subView.baseMip = 0;
-	srcCopy.subView.mipLevels = src.info.mipLevels;
+	srcCopy.subView.mipLevels = src.subResourceView.mipLevels;
 	srcCopy.x = 0;
 	srcCopy.y = 0;
 	srcCopy.z = 0;
@@ -693,9 +696,9 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst )
 
 	copyImageParms_t dstCopy{};
 	dstCopy.subView.baseArray = 0;
-	dstCopy.subView.arrayCount = dst.info.layers;
+	dstCopy.subView.arrayCount = dst.subResourceView.arrayCount;
 	dstCopy.subView.baseMip = 0;
-	dstCopy.subView.mipLevels = dst.info.mipLevels;
+	dstCopy.subView.mipLevels = dst.subResourceView.mipLevels;
 	dstCopy.x = 0;
 	dstCopy.y = 0;
 	dstCopy.z = 0;
@@ -736,7 +739,7 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 
 void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
-	const uint32_t layers = texture->info.layers;
+	const uint32_t layers = texture->subResourceView.arrayCount;
 
 	VkBufferImageCopy region{ };
 	memset( &region, 0, sizeof( region ) );

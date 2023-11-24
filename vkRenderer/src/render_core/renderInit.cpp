@@ -580,7 +580,7 @@ void Renderer::CreateFramebuffers()
 		colorInfo.layers = 6;
 		colorInfo.subsamples = IMAGE_SMP_1;
 		colorInfo.fmt = IMAGE_FMT_RGBA_16;
-		colorInfo.type = IMAGE_TYPE_2D;
+		colorInfo.type = IMAGE_TYPE_CUBE;
 		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		colorInfo.tiling = IMAGE_TILING_MORTON;
 
@@ -599,6 +599,9 @@ void Renderer::CreateFramebuffers()
 			subView.baseArray = i;
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
+
+			colorInfo.type = IMAGE_TYPE_2D;
+			depthInfo.type = IMAGE_TYPE_2D;
 
 			resources.cubeImageViews[ i ].Init( resources.cubeFbColorImage, colorInfo, subView );
 			resources.cubeDepthImageViews[ i ].Init( resources.cubeFbDepthImage, depthInfo, subView );
@@ -853,10 +856,13 @@ void RenderContext::RefreshRegisteredBindParms()
 void Renderer::CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
 {
 	outImage.info = info;
+	outImage.info.layers = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : info.layers;
+
 	outImage.subResourceView.baseArray = 0;
-	outImage.subResourceView.arrayCount = info.layers;
+	outImage.subResourceView.arrayCount = outImage.info.layers;
 	outImage.subResourceView.baseMip = 0;
-	outImage.subResourceView.mipLevels = info.mipLevels;
+	outImage.subResourceView.mipLevels = outImage.info.mipLevels;
+
 	outImage.gpuImage = new GpuImage();
 	outImage.gpuImage->Create( name, outImage.info, flags, memory );
 }

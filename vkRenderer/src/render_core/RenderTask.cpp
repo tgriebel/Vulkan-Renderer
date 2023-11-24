@@ -340,6 +340,10 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	{
 		m_tempImage.info = m_image->info;
 		m_tempImage.info.mipLevels = 1;
+		m_tempImage.subResourceView.mipLevels = m_tempImage.info.mipLevels;
+		m_tempImage.subResourceView.baseMip = 0;
+		m_tempImage.subResourceView.arrayCount = m_tempImage.info.layers;
+		m_tempImage.subResourceView.baseArray = 0;
 		MipDimensions( 1, m_image->info.width, m_image->info.height, &m_tempImage.info.width, &m_tempImage.info.height );
 
 		m_tempImage.gpuImage = new GpuImage();
