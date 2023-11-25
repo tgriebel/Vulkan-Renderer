@@ -1,0 +1,72 @@
+{
+  "sceneClass": "default",
+  "type": "scene",
+  "reflink" : "shaders_common.json",
+  "images": [
+	{
+	  "name": "chapel_right.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_left.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_top.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_bottom.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_front.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_back.jpg",
+	  "type": "2D"
+	},
+	{
+	  "name": "chapel_low.jpg",
+	  "type": "CUBE"
+	}
+  ],
+  "materials": [
+	{
+      "name": "SKY",
+      "shaders": {
+          "DRAWPASS_SKYBOX": "Sky"
+      }
+      "textures": {
+          "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
+          "CUBE_LEFT_SLOT" : "chapel_left.jpg",
+          "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
+          "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
+          "CUBE_FRONT_SLOT" : "chapel_front.jpg",
+          "CUBE_BACK_SLOT" : "chapel_back.jpg",
+      }
+    }
+  ],
+  "models": [
+  	{
+      "name" : "cube",
+      "model" : "cube.obj"
+    },
+  ],
+  "entities": [
+    {
+      "name" : "_skybox",
+      "model" : "_skybox",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 0.0,
+	  "rx" : 0.0,
+	  "ry" : 0.0,
+	  "rz" : 0.0,
+	  "sx" : 1.0,
+	  "sy" : 1.0,
+	  "sz" : 1.0
+    },
+  ]
+}
