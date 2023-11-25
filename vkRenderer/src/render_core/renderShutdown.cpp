@@ -101,6 +101,7 @@ void Renderer::DestroyFramebuffers()
 	delete resources.depthStencilImage.gpuImage;
 	delete resources.mainColorResolvedImage.gpuImage;
 	delete resources.depthStencilResolvedImage.gpuImage;
+	delete resources.tempWritebackImage.gpuImage;
 
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{

@@ -676,6 +676,22 @@ void Renderer::CreateFramebuffers()
 		CreateImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.tempColorImage );
 	}
 
+	// Image writeback
+	{
+		imageInfo_t info{};
+		info.width = width;
+		info.height = height;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_8_UNORM;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_LINEAR;
+
+		CreateImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.sharedMemory, resources.tempWritebackImage );
+	}
+
 	// Main Color Resolved Frame buffer
 	{
 		frameBufferCreateInfo_t fbInfo;

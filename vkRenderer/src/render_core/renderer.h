@@ -147,6 +147,7 @@ public:
 	Image				shadowMapImage[ MaxShadowViews ];
 	Image				mainColorResolvedImage;
 	Image				tempColorImage;
+	Image				tempWritebackImage;
 	Image				depthStencilResolvedImage;
 
 	// Data images
