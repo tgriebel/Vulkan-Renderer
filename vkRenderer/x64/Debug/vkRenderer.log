@@ -4,11 +4,9 @@
   renderView.cpp
   descriptorWrites.cpp
   gpuTransfer.cpp
-  imageView.cpp
   pipeline.cpp
   shaderBinding.cpp
   RenderTask.cpp
-  debugMenu.cpp
   gpuImage.cpp
   renderCommand.cpp
   renderInit.cpp
@@ -18,8 +16,6 @@
   cmdContext.cpp
   deviceContext.cpp
   frameBuffer.cpp
-  Generating Code...
-  Compiling...
   vulkinTestApp.cpp
   Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

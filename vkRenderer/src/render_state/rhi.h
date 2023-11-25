@@ -62,55 +62,51 @@ struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
 void vk_ClearRenderPassCache();
 
-static inline VkFormat vk_GetTextureFormat( const imageFmt_t fmt )
+struct vk_formatTableEntry_t
 {
-	switch ( fmt )
-	{
-		case IMAGE_FMT_UNKNOWN:		return VK_FORMAT_UNDEFINED;
-		case IMAGE_FMT_R_8:			return VK_FORMAT_R8_SRGB;
-		case IMAGE_FMT_R_16:		return VK_FORMAT_R16_SFLOAT;
-		case IMAGE_FMT_D_16:		return VK_FORMAT_D16_UNORM;
-		case IMAGE_FMT_D24S8:		return VK_FORMAT_D24_UNORM_S8_UINT;
-		case IMAGE_FMT_D_32:		return VK_FORMAT_D32_SFLOAT;
-		case IMAGE_FMT_D_32_S8:		return VK_FORMAT_D32_SFLOAT_S8_UINT;
-		case IMAGE_FMT_RGB_8:		return VK_FORMAT_R8G8B8_SRGB;
-		case IMAGE_FMT_RGBA_8:		return VK_FORMAT_R8G8B8A8_SRGB;
-		case IMAGE_FMT_RGBA_8_UNORM: return VK_FORMAT_R8G8B8A8_UNORM;
-		case IMAGE_FMT_ABGR_8:		return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
-		case IMAGE_FMT_BGR_8:		return VK_FORMAT_B8G8R8_SRGB;
-		case IMAGE_FMT_BGRA_8:		return VK_FORMAT_B8G8R8A8_SRGB;
-		case IMAGE_FMT_RGB_16:		return VK_FORMAT_R16G16B16_SFLOAT;
-		case IMAGE_FMT_RGBA_16:		return VK_FORMAT_R16G16B16A16_SFLOAT;
-		case IMAGE_FMT_RG_32:		return VK_FORMAT_R32G32_SFLOAT;
-		default: assert( false );	break;
+	imageFmt_t	imgFmt;
+	VkFormat	vk_imgFmt;
+};
+
+static const vk_formatTableEntry_t vk_formatTable[] =
+{
+	{ IMAGE_FMT_UNKNOWN,		VK_DEF(VK_FORMAT_UNDEFINED)		},
+	{ IMAGE_FMT_R_8,			VK_FORMAT_R8_SRGB				},
+	{ IMAGE_FMT_R_16,			VK_FORMAT_R16_SFLOAT			},
+	{ IMAGE_FMT_D_16,			VK_FORMAT_D16_UNORM				},
+	{ IMAGE_FMT_D24S8,			VK_FORMAT_D24_UNORM_S8_UINT		},
+	{ IMAGE_FMT_D_32,			VK_FORMAT_D32_SFLOAT			},
+	{ IMAGE_FMT_D_32_S8,		VK_FORMAT_D32_SFLOAT_S8_UINT	},
+	{ IMAGE_FMT_RGB_8,			VK_FORMAT_R8G8B8_SRGB			},
+	{ IMAGE_FMT_RGBA_8,			VK_FORMAT_R8G8B8A8_SRGB			},
+	{ IMAGE_FMT_RGBA_8_UNORM,	VK_FORMAT_R8G8B8A8_UNORM		},
+	{ IMAGE_FMT_ABGR_8,			VK_FORMAT_A8B8G8R8_SRGB_PACK32	},
+	{ IMAGE_FMT_BGR_8,			VK_FORMAT_B8G8R8_SRGB			},
+	{ IMAGE_FMT_BGRA_8,			VK_FORMAT_B8G8R8A8_SRGB			},
+	{ IMAGE_FMT_RGB_16,			VK_FORMAT_R16G16B16_SFLOAT		},
+	{ IMAGE_FMT_RGBA_16,		VK_FORMAT_R16G16B16A16_SFLOAT	},
+	{ IMAGE_FMT_RG_32,			VK_FORMAT_R32G32_SFLOAT			},
+};
+
+static inline constexpr VkFormat vk_GetTextureFormat( const imageFmt_t fmt )
+{
+	for( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i ) {
+		if( vk_formatTable[i].imgFmt == fmt ) {
+			return vk_formatTable[ i ].vk_imgFmt;
+		}
 	}
-	return VK_FORMAT_R8G8B8A8_SRGB;
+	return VK_FORMAT_UNDEFINED;
 }
 
 
-static inline imageFmt_t vk_GetTextureFormat( const VkFormat fmt )
+static inline constexpr imageFmt_t vk_GetTextureFormat( const VkFormat fmt )
 {
-	switch ( fmt )
-	{
-		case VK_FORMAT_UNDEFINED:				return IMAGE_FMT_UNKNOWN;
-		case VK_FORMAT_R8_SRGB:					return IMAGE_FMT_R_8;
-		case VK_FORMAT_R16_SFLOAT:				return IMAGE_FMT_R_16;
-		case VK_FORMAT_D16_UNORM:				return IMAGE_FMT_D_16;
-		case VK_FORMAT_D24_UNORM_S8_UINT:		return IMAGE_FMT_D24S8;
-		case VK_FORMAT_D32_SFLOAT:				return IMAGE_FMT_D_32;
-		case VK_FORMAT_D32_SFLOAT_S8_UINT:		return IMAGE_FMT_D_32_S8;
-		case VK_FORMAT_R8G8B8_SRGB:				return IMAGE_FMT_RGB_8;
-		case VK_FORMAT_R8G8B8A8_SRGB:			return IMAGE_FMT_RGBA_8;
-		case VK_FORMAT_R8G8B8A8_UNORM:			return IMAGE_FMT_RGBA_8_UNORM;
-		case VK_FORMAT_A8B8G8R8_SRGB_PACK32:	return IMAGE_FMT_ABGR_8;
-		case VK_FORMAT_B8G8R8_SRGB:				return IMAGE_FMT_BGR_8;
-		case VK_FORMAT_B8G8R8A8_SRGB:			return IMAGE_FMT_BGRA_8;
-		case VK_FORMAT_R16G16B16_SFLOAT:		return IMAGE_FMT_RGB_16;
-		case VK_FORMAT_R16G16B16A16_SFLOAT:		return IMAGE_FMT_RGBA_16;
-		case VK_FORMAT_R32G32_SFLOAT:			return IMAGE_FMT_RG_32;
-		default: assert( false );	break;
+	for ( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i ) {
+		if ( vk_formatTable[ i ].vk_imgFmt == fmt ) {
+			return vk_formatTable[ i ].imgFmt;
+		}
 	}
-	return IMAGE_FMT_RGBA_8;
+	return IMAGE_FMT_UNKNOWN;
 }
 
 
