@@ -212,125 +212,81 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 	const bool hasDepthAspect = ( image->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
 	const bool hasStencilAspect = ( image->info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
 
-	VkImageLayout oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	VkImageLayout newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-	if ( ( current & GPU_IMAGE_READ ) != 0 ) {
-		oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-	}
-	else if ( ( current & GPU_IMAGE_PRESENT ) != 0 ) {
-		oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	}
-	else if ( ( current & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
-		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	}
-	else if ( ( current & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
-		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-	}
-	/*
-	else if ( ( current & GPU_IMAGE_WRITE ) != 0 ) {
-		oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-	}
-	*/
+	barrier.srcAccessMask = 0;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-	if ( ( next & GPU_IMAGE_READ ) != 0 ) {
-		newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+	if ( ( current & GPU_IMAGE_READ ) != 0 )
+	{
+		sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+		barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		barrier.oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 	}
-	else if ( ( next & GPU_IMAGE_PRESENT ) != 0 ) {
-		newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	else if ( ( current & GPU_IMAGE_PRESENT ) != 0 )
+	{
+		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	}
-	else if ( ( next & GPU_IMAGE_TRANSFER_SRC ) != 0 ) {
-		newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	else if ( ( current & GPU_IMAGE_TRANSFER_SRC ) != 0 )
+	{
+		sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 	}
-	else if ( ( next & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
-		newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	else if ( ( current & GPU_IMAGE_TRANSFER_DST ) != 0 )
+	{
+		sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
-	else if ( ( next & GPU_IMAGE_WRITE ) != 0 ) {
-		newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	else if ( ( current & GPU_IMAGE_WRITE ) != 0 ) 
+	{
+		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		barrier.oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	barrier.oldLayout = oldLayout;
-	barrier.newLayout = newLayout;
+	barrier.dstAccessMask = 0;
+	barrier.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	if ( ( next & GPU_IMAGE_READ ) != 0 )
+	{
+		destinationStage = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+		barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		barrier.newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_PRESENT ) != 0 )
+	{
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		barrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	}
+	else if ( ( next & GPU_IMAGE_TRANSFER_SRC ) != 0 )
+	{
+		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_TRANSFER_DST ) != 0 )
+	{
+		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	}
+	else if ( ( next & GPU_IMAGE_WRITE ) != 0 )
+	{
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		barrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		barrier.newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	}
 
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_NONE;
 	barrier.subresourceRange.aspectMask |= hasColorAspect ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
 	barrier.subresourceRange.aspectMask |= hasDepthAspect ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
 	barrier.subresourceRange.aspectMask |= hasStencilAspect ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
-
-	VkPipelineStageFlags sourceStage;
-	VkPipelineStageFlags destinationStage;
-
-	if ( (	( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED ) ||
-			( oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL ) ||
-			( oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL ) ) &&
-			( newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL ) )
-	{
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
-	{
-		barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL )
-	{
-		barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-		barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
-		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL )
-	{
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
-	{
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL )
-	{
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR )
-	{
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	}
-	else if ( oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL )
-	{
-		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-		sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	}
-	else
-	{
-		throw std::invalid_argument( "unsupported layout transition!" );
-	}
 
 	vkCmdPipelineBarrier(
 		cmdBuffer,

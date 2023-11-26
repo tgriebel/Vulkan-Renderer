@@ -39,7 +39,7 @@ void DrawPass::InsertResourceBarriers( CommandContext& cmdContext )
 		if ( ( codeImages[ i ]->info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ) {
 			continue;
 		}
-		Transition( &cmdContext, *codeImages[ i ], GPU_IMAGE_WRITE, GPU_IMAGE_READ );
+		Transition( &cmdContext, *codeImages[ i ], GPU_IMAGE_READ, GPU_IMAGE_READ );
 	}
 }
 
