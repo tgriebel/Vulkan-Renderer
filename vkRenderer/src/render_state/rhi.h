@@ -70,7 +70,7 @@ struct vk_formatTableEntry_t
 
 static const vk_formatTableEntry_t vk_formatTable[] =
 {
-	{ IMAGE_FMT_UNKNOWN,		VK_DEF(VK_FORMAT_UNDEFINED)		},
+	{ IMAGE_FMT_UNKNOWN,		VK_FORMAT_UNDEFINED				},
 	{ IMAGE_FMT_R_8,			VK_FORMAT_R8_SRGB				},
 	{ IMAGE_FMT_R_16,			VK_FORMAT_R16_SFLOAT			},
 	{ IMAGE_FMT_D_16,			VK_FORMAT_D16_UNORM				},
