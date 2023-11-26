@@ -197,6 +197,7 @@ void Renderer::Init()
 		}
 	}
 	schedule.Queue( resolve );
+	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
 	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );

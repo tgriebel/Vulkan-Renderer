@@ -227,6 +227,11 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 	else if ( ( current & GPU_IMAGE_TRANSFER_DST ) != 0 ) {
 		oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
+	/*
+	else if ( ( current & GPU_IMAGE_WRITE ) != 0 ) {
+		oldLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	}
+	*/
 
 	if ( ( next & GPU_IMAGE_READ ) != 0 ) {
 		newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
@@ -563,20 +568,43 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 
 static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms )
 {
-	VkFormatProperties formatProperties;
-	vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( dst->info.fmt ), &formatProperties );
+	bool supportsBlit = true;
 
-	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
+	// Check source format properties
 	{
-		throw std::runtime_error( "texture image format does not support linear blitting!" );
+		VkFormatProperties formatProperties;
+		vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( src->info.fmt ), &formatProperties );
+
+		if ( ( src->info.tiling == IMAGE_TILING_MORTON ) && ( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT ) == false ) {
+			supportsBlit = false;
+		}
+		if ( ( src->info.tiling == IMAGE_TILING_LINEAR ) && ( formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT ) == false ) {
+			supportsBlit = false;
+		}
 	}
+
+	// Check destination format properties
+	{
+		VkFormatProperties formatProperties;
+		vkGetPhysicalDeviceFormatProperties( context.physicalDevice, vk_GetTextureFormat( dst->info.fmt ), &formatProperties );
+
+		if ( ( dst->info.tiling == IMAGE_TILING_MORTON ) && ( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT ) == false ) {
+			supportsBlit = false;
+		}
+		if ( ( dst->info.tiling == IMAGE_TILING_LINEAR ) && ( formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_BLIT_DST_BIT ) == false ) {
+			supportsBlit = false;
+		}
+	}
+
+	const VkImageAspectFlagBits srcAspect = vk_GetAspectFlags( src->info.aspect );
+	const VkImageAspectFlagBits dstAspect = vk_GetAspectFlags( dst->info.aspect );
 
 	VkImageMemoryBarrier srcBarrier{ };
 	srcBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	srcBarrier.image = src->gpuImage->GetVkImage();
 	srcBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	srcBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	srcBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	srcBarrier.subresourceRange.aspectMask = srcAspect;
 	srcBarrier.subresourceRange.baseArrayLayer = srcParms.subView.baseArray;
 	srcBarrier.subresourceRange.layerCount = srcParms.subView.arrayCount;
 	srcBarrier.subresourceRange.baseMipLevel = srcParms.mipLevel;
@@ -587,7 +615,7 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 	dstBarrier.image = dst->gpuImage->GetVkImage();
 	dstBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	dstBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	dstBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	dstBarrier.subresourceRange.aspectMask = dstAspect;
 	dstBarrier.subresourceRange.baseArrayLayer = dstParms.subView.baseArray;
 	dstBarrier.subresourceRange.layerCount = dstParms.subView.arrayCount;
 	dstBarrier.subresourceRange.baseMipLevel = dstParms.mipLevel;
@@ -623,17 +651,18 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 	}
 
 	// Perform blit
+	if( supportsBlit )
 	{
 		VkImageBlit blit{ };
 		blit.srcOffsets[ 0 ] = { srcParms.x, srcParms.y, srcParms.z };
 		blit.srcOffsets[ 1 ] = { srcParms.width, srcParms.height, srcParms.depth };
-		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.srcSubresource.aspectMask = srcAspect;
 		blit.srcSubresource.mipLevel = srcParms.mipLevel;
 		blit.srcSubresource.baseArrayLayer = srcParms.subView.baseArray;
 		blit.srcSubresource.layerCount = srcParms.subView.arrayCount;
 		blit.dstOffsets[ 0 ] = { dstParms.x, dstParms.y, dstParms.z };
 		blit.dstOffsets[ 1 ] = { dstParms.width, dstParms.height, dstParms.depth };
-		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.dstSubresource.aspectMask = dstAspect;
 		blit.dstSubresource.baseArrayLayer = dstParms.subView.baseArray;
 		blit.dstSubresource.layerCount = dstParms.subView.arrayCount;
 		blit.dstSubresource.mipLevel = dstParms.mipLevel;
@@ -646,6 +675,27 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 						1,
 						&blit,
 						VK_FILTER_LINEAR );
+	}
+	else
+	{
+		VkImageCopy imageCopyRegion{};
+		imageCopyRegion.srcSubresource.aspectMask = srcAspect;
+		imageCopyRegion.srcSubresource.layerCount = srcParms.subView.arrayCount;
+		imageCopyRegion.dstSubresource.aspectMask = dstAspect;
+		imageCopyRegion.dstSubresource.layerCount = dstParms.subView.arrayCount;
+		imageCopyRegion.extent.width = srcParms.width;
+		imageCopyRegion.extent.height = srcParms.height;
+		imageCopyRegion.extent.depth = srcParms.depth;
+
+		// Issue the copy command
+		vkCmdCopyImage(
+			cmdBuffer,
+			src->gpuImage->GetVkImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			dst->gpuImage->GetVkImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&imageCopyRegion );
 	}
 
 	// Transition source and destination images
