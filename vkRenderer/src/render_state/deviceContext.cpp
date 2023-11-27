@@ -283,10 +283,7 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 		barrier.newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_NONE;
-	barrier.subresourceRange.aspectMask |= hasColorAspect ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
-	barrier.subresourceRange.aspectMask |= hasDepthAspect ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
-	barrier.subresourceRange.aspectMask |= hasStencilAspect ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+	barrier.subresourceRange.aspectMask = vk_GetAspectFlags( image->info.aspect );
 
 	vkCmdPipelineBarrier(
 		cmdBuffer,

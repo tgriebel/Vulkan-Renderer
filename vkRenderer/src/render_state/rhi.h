@@ -112,22 +112,20 @@ static inline constexpr imageFmt_t vk_GetTextureFormat( const VkFormat fmt )
 
 static inline VkImageAspectFlagBits vk_GetAspectFlags( const imageAspectFlags_t flags )
 {
-	uint32_t count = 0;
-	uint32_t bits = flags;
+	uint32_t bitMask = 0x01;
 
 	uint32_t vkFlags = 0;
 
-	while ( bits )
+	while ( bitMask < IMAGE_ASPECT_ALL )
 	{
-		uint32_t bitFlag = bits & 0x1;
+		uint32_t bitFlag = flags & bitMask;
 		switch ( bitFlag )
 		{
 			case IMAGE_ASPECT_COLOR_FLAG:		vkFlags |= VK_IMAGE_ASPECT_COLOR_BIT;	break;
 			case IMAGE_ASPECT_DEPTH_FLAG:		vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;	break;
 			case IMAGE_ASPECT_STENCIL_FLAG:		vkFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;	break;
 		}
-		bits &= ( bits - 1 );
-		count++;
+		bitMask <<= 1;
 	}
 	return VkImageAspectFlagBits( vkFlags );
 }
@@ -188,24 +186,22 @@ static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
 
 static VkShaderStageFlagBits vk_GetStageFlags( const bindStateFlag_t flags )
 {
-	uint32_t count = 0;
-	uint32_t bits = flags;
+	uint32_t bitMask = 0x01;
 
 	uint32_t vkFlags = 0;
 
-	while ( bits )
+	while ( bitMask < IMAGE_ASPECT_ALL )
 	{
-		uint32_t bitFlag = bits & 0x1;
+		uint32_t bitFlag = flags & bitMask;
 		switch ( bitFlag )
 		{
-		case BIND_STATE_VS:		vkFlags |= VK_SHADER_STAGE_VERTEX_BIT;		break;
-		case BIND_STATE_PS:		vkFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;	break;
-		case BIND_STATE_CS:		vkFlags |= VK_SHADER_STAGE_COMPUTE_BIT;		break;
-		default:
-		case BIND_STATE_ALL:	vkFlags |= VK_SHADER_STAGE_ALL;				break;
+			case BIND_STATE_VS:		vkFlags |= VK_SHADER_STAGE_VERTEX_BIT;		break;
+			case BIND_STATE_PS:		vkFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;	break;
+			case BIND_STATE_CS:		vkFlags |= VK_SHADER_STAGE_COMPUTE_BIT;		break;
+			default:
+			case BIND_STATE_ALL:	vkFlags |= VK_SHADER_STAGE_ALL;				break;
 		}
-		bits &= ( bits - 1 );
-		count++;
+		bitMask <<= 1;
 	}
 	return VkShaderStageFlagBits( vkFlags );
 }
