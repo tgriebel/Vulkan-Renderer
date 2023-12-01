@@ -159,6 +159,42 @@ public:
 };
 
 
+class ImageWritebackTask : public GpuTask
+{
+private:
+	Image*				m_image;
+	RenderContext*		m_context;
+	ResourceContext*	m_resources;
+	GpuBuffer			m_writebackBuffer;
+	GpuBuffer			m_resourceBuffer;
+	ShaderBindParms*	m_parms;
+
+	void Init();
+	void Shutdown();
+
+public:
+
+	ImageWritebackTask( Image* img, RenderContext* context, ResourceContext* resources )
+	{
+		m_image = img;
+		m_context = context;
+		m_resources = resources;
+		Init();
+	}
+
+	void Resize() {}
+
+	void FrameBegin();
+	void FrameEnd();
+
+	void Execute( CommandContext& context ) override;
+	~ImageWritebackTask()
+	{
+		Shutdown();
+	}
+};
+
+
 class MipImageTask : public GpuTask
 {
 private:

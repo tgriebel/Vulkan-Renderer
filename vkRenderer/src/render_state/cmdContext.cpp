@@ -206,21 +206,7 @@ void CommandContext::Submit( const GpuFence* fence )
 }
 
 
-/////////////////////////////////////////////
-// Compute Context
-/////////////////////////////////////////////
-void ComputeContext::Submit()
-{
-	VkSubmitInfo submitInfo{ };
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &CommandBuffer();
-
-	VK_CHECK_RESULT( vkQueueSubmit( context.computeContext, 1, &submitInfo, VK_NULL_HANDLE ) );
-}
-
-
-void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
+void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	assert( isOpen );
 
@@ -236,12 +222,16 @@ void ComputeContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 	if ( pipelineObject != nullptr )
 	{
+		MarkerBeginRegion( "Dispatch", ColorToVector( ColorWhite ) );
+
 		VkDescriptorSet set[1] = { bindParms.GetVkObject() };
 
 		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
 		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
 
 		vkCmdDispatch( cmdBuffer, x, y, z );
+
+		MarkerEndRegion();
 	}
 }
 
@@ -290,13 +280,37 @@ void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 }
 
 
-void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset )
+void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
 	cmdCommand->MarkerBeginRegion( "CopyBufferToImage", ColorToVector( ColorWhite ) );
 
-	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), &texture, buffer, bufferOffset );
+	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), &image, buffer, bufferOffset );
 
 	cmdCommand->MarkerEndRegion();
+}
+
+
+void WritebackImage( CommandContext* cmdCommand, Image& image )
+{
+	//Image tempFormatConversion;
+
+	Image tempWritebackImage;
+	{
+		imageInfo_t info{};
+		info.width = image.info.width;
+		info.height = image.info.height;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_8_UNORM;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_LINEAR;
+
+		CreateImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, cmdCommand->GetRenderContext()->sharedMemory, tempWritebackImage );
+	}
+
+//	cmdCommand->Dispatch( )
 }
 
 
@@ -307,4 +321,10 @@ void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>&
 	vk_GenerateDownsampleMips( *cmdCommand, views, passes, mode );
 
 	cmdCommand->MarkerEndRegion();
+}
+
+
+void FlushGPU()
+{
+	vkDeviceWaitIdle( context.device );
 }

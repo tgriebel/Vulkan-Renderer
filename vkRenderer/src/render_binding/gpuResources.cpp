@@ -139,7 +139,7 @@ void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, con
 	m_elementSize = elementSizeBytes;
 	m_elementPadding = GpuBuffer::GetAlignedSize( elementSizeBytes, alignment );
 
-	VkDeviceSize stride = elementSizeBytes + m_elementPadding;
+	VkDeviceSize stride = m_elementPadding;
 	bufferSize = stride * elements;
 
 	VkBufferCreateInfo bufferInfo{ };
@@ -216,6 +216,23 @@ void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
 		memcpy( (uint8_t*)mappedData + m_buffer[ id ].offset, data, sizeInBytes );
 		m_buffer[ id ].offset += GetAlignedSize( sizeInBytes, m_buffer[ id ].alloc.GetAlignment() );
 	} else {
+		assert( 0 );
+	}
+}
+
+
+void GpuBuffer::CopyFrom( void* data, const size_t sizeInBytes ) const
+{
+	const uint32_t id = ClampId( context.bufferId );
+
+	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
+	void* mappedData = m_buffer[ id ].alloc.GetPtr();
+
+	if ( mappedData != nullptr )
+	{
+		memcpy( data, reinterpret_cast<uint8_t*>( mappedData ), sizeInBytes );
+	}
+	else {
 		assert( 0 );
 	}
 }

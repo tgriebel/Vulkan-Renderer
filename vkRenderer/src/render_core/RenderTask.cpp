@@ -320,6 +320,75 @@ void CopyImageTask::Execute( CommandContext& context )
 }
 
 
+void ImageWritebackTask::Init()
+{
+	struct writeBackParms_t
+	{
+		vec4f dimensions;
+	};
+
+	writeBackParms_t writeBackParms{};
+
+	const uint32_t maxBpp = sizeof( vec4f );
+	const uint32_t elementsCount = m_image->info.width * m_image->info.height * m_image->info.layers;
+	m_writebackBuffer.Create( "Writeback Buffer", LIFETIME_PERSISTENT, elementsCount, maxBpp, bufferType_t::STORAGE, m_context->sharedMemory );
+	m_resourceBuffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( writeBackParms ), bufferType_t::UNIFORM, m_context->sharedMemory );
+
+	writeBackParms.dimensions = vec4f( (float)m_image->info.width, (float)m_image->info.height, 1.0f / m_image->info.width, 1.0f / m_image->info.height );
+
+	m_resourceBuffer.SetPos( 0 );
+	m_resourceBuffer.CopyData( &writeBackParms, sizeof( writeBackParms ) );
+
+	m_parms = m_context->RegisterBindParm( m_context->LookupBindSet( bindset_compute ) );
+}
+
+
+void ImageWritebackTask::FrameBegin()
+{
+	m_parms->Bind( bind_globalsBuffer, &m_resources->globalConstants );
+	m_parms->Bind( bind_computeImage, m_image );
+	m_parms->Bind( bind_computeParms, &m_resourceBuffer );
+	m_parms->Bind( bind_computeWrite, &m_writebackBuffer );
+}
+
+
+void ImageWritebackTask::FrameEnd()
+{
+	FlushGPU();
+
+	assert( m_writebackBuffer.VisibleToCpu() );
+
+	ImageBuffer<Color> buffer;
+	buffer.Init( m_image->info.width, m_image->info.height, m_image->info.layers );
+
+	m_writebackBuffer.CopyFrom( buffer.Ptr(), buffer.GetByteCount() );
+
+//	Bitmap bitmap = Bitmap( buffer.GetWidth(), buffer.GetHeight() );
+//	ImageToBitmap( buffer, bitmap );
+//	bitmap.Write( "outputWriteback.bmp" );
+}
+
+
+
+void ImageWritebackTask::Execute( CommandContext& context )
+{
+	// vkCmdCopyImageToBuffer
+	// FIXME: barrier
+
+	const uint32_t blockSize = 8;
+
+	const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
+	context.Dispatch( progHdl, *m_parms, m_image->info.width / blockSize + 1, m_image->info.height / blockSize + 1, 1 );
+}
+
+
+void ImageWritebackTask::Shutdown()
+{
+	m_writebackBuffer.Destroy();
+	m_resourceBuffer.Destroy();
+}
+
+
 void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 {
 	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );

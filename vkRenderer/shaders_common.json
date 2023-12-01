@@ -81,6 +81,11 @@
 	  "bindset": "bindset_particle",
     },
 	{
+      "name": "ImageWriteback",
+      "cs": "imageWriteCS.spv",
+	  "bindset": "bindset_compute",
+    },
+	{
       "name": "DownSample",
       "vs": "fullscreenVS.spv",
       "ps": "downsamplePS.spv",

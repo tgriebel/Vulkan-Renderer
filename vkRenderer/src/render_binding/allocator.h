@@ -62,11 +62,12 @@ public:
 		allocator = nullptr;
 	}
 
-	uint64_t	GetOffset() const;
-	uint64_t	GetSize() const;
-	uint64_t	GetAlignment() const;
-	void*		GetPtr() const;
-	void		Free();
+	const AllocatorMemory*	GetMemory() const;
+	uint64_t				GetOffset() const;
+	uint64_t				GetSize() const;
+	uint64_t				GetAlignment() const;
+	void*					GetPtr() const;
+	void					Free();
 };
 
 
@@ -123,7 +124,7 @@ public:
 	memoryRegion_t			GetMemoryRegion() const;
 
 #ifdef USE_VULKAN
-	VkDeviceMemory&			GetVkObject();
+	VkDeviceMemory			GetVkObject() const;
 	uint32_t				GetVkMemoryType() const;
 #endif
 

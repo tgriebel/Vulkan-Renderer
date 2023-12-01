@@ -603,7 +603,7 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 			1, &dstBarrier );
 	}
 
-	// Perform blit
+	// Perform blit/copy
 	if( supportsBlit )
 	{
 		VkImageBlit blit{ };

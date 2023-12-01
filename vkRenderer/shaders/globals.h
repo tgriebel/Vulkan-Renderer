@@ -87,6 +87,11 @@ struct view_t
 												vec4	generic2;													\
 											} imageProcess;
 
+#define CONSTANT_LAYOUT( S, N, TYPE, NAME )	layout( set = S, binding = N ) uniform ShaderConstants					\
+											{																		\
+												TYPE	NAME;														\
+											};
+
 #define MODEL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer UniformBufferObject				\
 											{																		\
 												mat4        model[MaxSurfaces];										\

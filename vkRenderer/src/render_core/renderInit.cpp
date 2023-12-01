@@ -41,6 +41,20 @@
 
 #include "debugMenu.h"
 
+void CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
+{
+	outImage.info = info;
+	outImage.info.layers = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : info.layers;
+
+	outImage.subResourceView.baseArray = 0;
+	outImage.subResourceView.arrayCount = outImage.info.layers;
+	outImage.subResourceView.baseMip = 0;
+	outImage.subResourceView.mipLevels = outImage.info.mipLevels;
+
+	outImage.gpuImage = new GpuImage();
+	outImage.gpuImage->Create( name, outImage.info, flags, memory );
+}
+
 void Renderer::Init()
 {
 	InitApi();
@@ -197,6 +211,7 @@ void Renderer::Init()
 		}
 	}
 	schedule.Queue( resolve );
+	schedule.Queue( new ImageWritebackTask( &resources.mainColorResolvedImage, &renderContext, &resources ) );
 	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
@@ -258,6 +273,9 @@ void Renderer::InitApi()
 
 		bindset = &renderContext.bindSets[ bindset_particle ];
 		bindset->Create( "ParticleBindings", g_particleBindings, COUNTARRAY( g_particleBindings ) );
+
+		bindset = &renderContext.bindSets[ bindset_compute ];
+		bindset->Create( "ComputeBindings", g_computeBindings, COUNTARRAY( g_computeBindings ) );
 
 		bindset = &renderContext.bindSets[ bindset_imageProcess ];
 		bindset->Create( "ImageProcessBindings", g_imageProcessBindings, COUNTARRAY( g_imageProcessBindings ) );
@@ -352,7 +370,7 @@ void Renderer::InitShaderResources()
 		geometry.ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
 
 		geometry.stagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
-		textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 128 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 192 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
 	}
 }
 
@@ -867,21 +885,6 @@ void RenderContext::RefreshRegisteredBindParms()
 	for ( uint32_t i = 0; i < bindParmsList.Count(); ++i ) {
 		bindParmsList[ i ].Clear();
 	}	
-}
-
-
-void Renderer::CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage )
-{
-	outImage.info = info;
-	outImage.info.layers = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : info.layers;
-
-	outImage.subResourceView.baseArray = 0;
-	outImage.subResourceView.arrayCount = outImage.info.layers;
-	outImage.subResourceView.baseMip = 0;
-	outImage.subResourceView.mipLevels = outImage.info.mipLevels;
-
-	outImage.gpuImage = new GpuImage();
-	outImage.gpuImage->Create( name, outImage.info, flags, memory );
 }
 
 

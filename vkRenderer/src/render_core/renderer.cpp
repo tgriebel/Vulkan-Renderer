@@ -443,27 +443,19 @@ void Renderer::WaitForEndFrame()
 }
 
 
-void Renderer::FlushGPU()
-{
-	vkDeviceWaitIdle( context.device );
-}
-
-
 void Renderer::SubmitFrame()
 {
+	schedule.FrameBegin();
+
 	{
 		computeContext.Begin();
 		gfxContext.Begin();
-
-		schedule.FrameBegin();
 
 		renderContext.UpdateBindParms();
 
 		while( schedule.PendingTasks() > 0 ) {
 			schedule.IssueNext( gfxContext );
 		}
-
-		schedule.FrameEnd();
 
 		gfxContext.End();
 		computeContext.End();
@@ -481,6 +473,8 @@ void Renderer::SubmitFrame()
 	if ( g_swapChain.Present( gfxContext ) == false ) {
 		g_window.RequestImageResize();
 	}
+
+	schedule.FrameEnd();
 }
 
 

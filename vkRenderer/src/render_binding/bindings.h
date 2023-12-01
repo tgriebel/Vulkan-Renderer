@@ -7,21 +7,24 @@
 BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 
 // Compute Resources
-BINDING( particleWriteBuffer, WRITE_BUFFER, 1, BIND_STATE_CS );
+BINDING( particleWriteBuffer,	WRITE_BUFFER,		1, BIND_STATE_CS );
+BINDING( computeParms,			CONSTANT_BUFFER,	1, BIND_STATE_CS );
+BINDING( computeWrite,			WRITE_BUFFER,		1, BIND_STATE_CS );
+BINDING( computeImage,			IMAGE_2D,			1, BIND_STATE_CS );
 
 // Post Effect Resources
-BINDING( imageProcess,		CONSTANT_BUFFER,	1,						BIND_STATE_PS );
-BINDING( sourceImages,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
+BINDING( imageProcess,			CONSTANT_BUFFER,	1,						BIND_STATE_PS );
+BINDING( sourceImages,			IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
 
 // Raster Resources
-BINDING( viewBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
-BINDING( modelBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
-BINDING( image2DArray,		IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_ALL );
-BINDING( imageCubeArray,	IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL );
-BINDING( materialBuffer,	READ_BUFFER,		1,						BIND_STATE_ALL );
-BINDING( lightBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
-BINDING( imageCodeArray,	IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL );
-BINDING( imageStencil,		IMAGE_2D,			1,						BIND_STATE_ALL );
+BINDING( viewBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( modelBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( image2DArray,			IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_ALL );
+BINDING( imageCubeArray,		IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL );
+BINDING( materialBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( lightBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL );
+BINDING( imageCodeArray,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL );
+BINDING( imageStencil,			IMAGE_2D,			1,						BIND_STATE_ALL );
 
 
 static const ShaderBinding g_globalBindings[] =
@@ -57,6 +60,16 @@ static const ShaderBinding g_particleBindings[] =
 	bind_particleWriteBuffer
 };
 const uint64_t bindset_particle = Hash( "bindset_particle" );
+
+
+static const ShaderBinding g_computeBindings[] =
+{
+	bind_globalsBuffer,
+	bind_computeImage,
+	bind_computeParms,
+	bind_computeWrite,
+};
+const uint64_t bindset_compute = Hash( "bindset_compute" );
 
 
 static const ShaderBinding g_imageProcessBindings[] =

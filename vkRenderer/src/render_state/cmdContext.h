@@ -131,8 +131,14 @@ public:
 	void						Wait( GpuSemaphore* semaphore );
 	void						Signal( GpuSemaphore* semaphore );
 	void						Submit( const GpuFence* fence = nullptr );
+	void						Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z );
 
-	inline const RenderContext*	GetRenderContext()
+	inline RenderContext*	GetRenderContext()
+	{
+		return m_renderContext;
+	}
+
+	inline const RenderContext* GetRenderContext() const
 	{
 		return m_renderContext;
 	}
@@ -150,9 +156,6 @@ public:
 	{
 		queueType = QUEUE_GRAPHICS;
 	}
-
-	//void Submit( ); // TODO
-	//void Dispatch( ); // TODO: Compute jobs can still be dispatched from gfx
 };
 
 
@@ -165,14 +168,14 @@ public:
 	{
 		queueType = QUEUE_COMPUTE;
 	}
-
-	void Submit();
-	void Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y = 1, const uint32_t z = 1 );
 };
 
 
 class UploadContext : public CommandContext
 {
+private:
+	using CommandContext::Dispatch;
+
 public:
 	UploadContext()
 	{
@@ -184,5 +187,7 @@ public:
 void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
-void CopyBufferToImage( CommandContext* cmdCommand, Image& texture, GpuBuffer& buffer, const uint64_t bufferOffset );
+void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buffer, const uint64_t bufferOffset );
+void WritebackImage( CommandContext* cmdCommand, Image& image );
 void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode );
+void FlushGPU();

@@ -1,6 +1,12 @@
 #include "allocator.h"
 #include "../render_state/deviceContext.h"
 
+const AllocatorMemory* Allocation::GetMemory() const
+{
+	return allocator;
+}
+
+
 uint64_t Allocation::GetOffset() const
 {
 	if ( IsValid() )
@@ -126,7 +132,7 @@ void AllocatorMemory::Unbind()
 }
 
 #ifdef USE_VULKAN
-VkDeviceMemory& AllocatorMemory::GetVkObject()
+VkDeviceMemory AllocatorMemory::GetVkObject() const
 {
 	return vk_deviceMemory;
 }

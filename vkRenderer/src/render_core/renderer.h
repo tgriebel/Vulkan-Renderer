@@ -51,6 +51,9 @@ extern SwapChain					g_swapChain;
 
 extern renderConstants_t	rc;
 
+// TODO: Figure out where to put this
+void CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
+
 struct renderConfig_t
 {
 	imageSamples_t	mainColorSubSamples;
@@ -236,14 +239,12 @@ private:
 	void								RecreateSwapChain();
 
 	// API Resource Functions
-	void								CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
 	void								CreateSyncObjects();
 	void								CreateFramebuffers();
 	void								DestroyFramebuffers();
 
 	// Draw Frame
 	void								CommitModel( RenderView& view, const Entity& ent );
-	void								FlushGPU();
 	void								WaitForEndFrame();
 	void								SubmitFrame();
 

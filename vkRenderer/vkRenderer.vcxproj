@@ -274,6 +274,7 @@
     <None Include="shaders\emissive.frag" />
     <None Include="shaders\fullscreen.vert" />
     <None Include="shaders\gaussian.frag" />
+    <None Include="shaders\imagewriteback.comp" />
     <None Include="shaders\lit.frag" />
     <None Include="shaders\pixelDefault.frag" />
     <None Include="shaders\pixelSimple.frag" />
