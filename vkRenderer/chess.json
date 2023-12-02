@@ -46,6 +46,10 @@
 	{
 	  "name": "chapel_low.jpg",
 	  "type": "CUBE"
+	},
+	{
+	  "name": "anticChapel_4k.hdr",
+	  "type": "2D"
 	}
   ],
   "materials": [
