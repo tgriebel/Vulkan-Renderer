@@ -272,6 +272,7 @@
     <None Include="shaders\depth.frag" />
     <None Include="shaders\downsample.frag" />
     <None Include="shaders\emissive.frag" />
+    <None Include="shaders\equirectangularSky.frag" />
     <None Include="shaders\fullscreen.vert" />
     <None Include="shaders\gaussian.frag" />
     <None Include="shaders\imagewriteback.comp" />

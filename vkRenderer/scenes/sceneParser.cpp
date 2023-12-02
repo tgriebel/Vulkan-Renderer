@@ -269,7 +269,7 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 
 	Material* material = reinterpret_cast<Material*>( object );
 
-	const uint32_t objectCount = 12;
+	const uint32_t objectCount = 20;
 	char s[ objectCount ][TOKEN_LEN] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
@@ -280,6 +280,14 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT0 ),
 		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT1 ),
 		MAKE_ENUM_STRING( HGT_HEIGHT_MAP_SLOT ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_0 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_1 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_2 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_3 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_4 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_5 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_6 ),
+		MAKE_ENUM_STRING( TEXTURE_SLOT_7 ),
 		MAKE_ENUM_STRING( CUBE_RIGHT_SLOT ),
 		MAKE_ENUM_STRING( CUBE_LEFT_SLOT ),
 		MAKE_ENUM_STRING( CUBE_TOP_SLOT ),
@@ -302,6 +310,14 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 		{ enumMap[ 9 ].name, &s[ 9 ], &ParseStringObject },
 		{ enumMap[ 10 ].name, &s[ 10 ], &ParseStringObject },
 		{ enumMap[ 11 ].name, &s[ 11 ] ,&ParseStringObject },
+		{ enumMap[ 12 ].name, &s[ 12 ] ,&ParseStringObject },
+		{ enumMap[ 13 ].name, &s[ 13 ] ,&ParseStringObject },
+		{ enumMap[ 14 ].name, &s[ 14 ] ,&ParseStringObject },
+		{ enumMap[ 15 ].name, &s[ 15 ] ,&ParseStringObject },
+		{ enumMap[ 16 ].name, &s[ 16 ] ,&ParseStringObject },
+		{ enumMap[ 17 ].name, &s[ 17 ] ,&ParseStringObject },
+		{ enumMap[ 18 ].name, &s[ 18 ] ,&ParseStringObject },
+		{ enumMap[ 19 ].name, &s[ 19 ] ,&ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );

@@ -2,6 +2,13 @@
   "sceneClass": "default",
   "type": "scene",
   "reflink" : "shaders_common.json",
+  "shaders": [
+    {
+	  "name": "EquirectangularSampler",
+	  "vs": "simpleVS.spv",
+	  "ps": "equirectangularSkyPS.spv",
+    }
+  ],
   "images": [
 	{
 	  "name": "chapel_right.jpg",
@@ -49,6 +56,15 @@
           "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
           "CUBE_FRONT_SLOT" : "chapel_front.jpg",
           "CUBE_BACK_SLOT" : "chapel_back.jpg",
+      }
+    },
+	{
+      "name": "EequirectangularSky",
+      "shaders": {
+          "DRAWPASS_SKYBOX": "EquirectangularSampler"
+      }
+      "textures": {
+          "TEXTURE_SLOT_0" : "anticChapel_4k.hdr",
       }
     }
   ],

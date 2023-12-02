@@ -27,35 +27,26 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "globals.h"
+#include "color.h"
 
-PS_LAYOUT_BASIC_IO
+PS_LAYOUT_STANDARD( sampler2D )
 
-PS_LAYOUT_IMAGE_PROCESS( sampler2D )
-
-const uint weightCount = 5;
-const float weights[ weightCount ] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
+const vec2 invAtan = vec2( 0.1591f, 0.3183f );
+vec2 SampleSphericalMap( vec3 v )
+{
+	vec2 uv = vec2( atan( v.z, v.x ), asin( v.y ) );
+	uv *= invAtan;
+	uv += 0.5;
+	return uv;
+}
 
 void main()
 {
-    const bool horizontal = ( imageProcess.generic0.x != 0.0f ) ? true : false;
+	const uint materialId = pushConstants.materialId;
+	const material_t material = materialUbo.materials[ materialId ];
 
-    vec2 offset = imageProcess.dimensions.zw;
-    outColor = vec4( texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb * weights[ 0 ], 1.0f );
+	const vec2 uv = SampleSphericalMap( normalize( objectPosition ) );
+	const vec3 color = texture( texSampler[ material.textureId0 ], uv ).rgb;
 
-    if ( horizontal )
-    {
-        for ( uint i = 1; i < weightCount; ++i )
-        {
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( offset.x * i, 0.0 ) ).rgb * weights[ i ];
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy - vec2( offset.x * i, 0.0 ) ).rgb * weights[ i ];
-        }
-    }
-    else
-    {
-        for ( uint i = 1; i < weightCount; ++i )
-        {
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy - vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
-        }
-    }
+	outColor = vec4( color, 1.0f );
 }

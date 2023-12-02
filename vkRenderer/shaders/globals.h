@@ -167,9 +167,10 @@ struct view_t
 											layout( location = 1 ) out vec3 fragNormal;								\
 											layout( location = 2 ) out mat3 fragTangentBasis;						\
 											layout( location = 5 ) out vec4 fragTexCoord;							\
-											layout( location = 6 ) out vec4 clipPosition;							\
-											layout( location = 7 ) out vec4 worldPosition;							\
-											layout( location = 8 ) out flat uint objectId;
+											layout( location = 6 ) out vec3 objectPosition;							\
+											layout( location = 7 ) out vec4 clipPosition;							\
+											layout( location = 8 ) out vec4 worldPosition;							\
+											layout( location = 9 ) out flat uint objectId;
 
 #define VS_LAYOUT_BASIC_IO					VS_IN																	\
 											VS_OUT
@@ -191,9 +192,10 @@ struct view_t
 											layout( location = 1 ) in vec3 fragNormal;								\
 											layout( location = 2 ) in mat3 fragTangentBasis;						\
 											layout( location = 5 ) in vec4 fragTexCoord;							\
-											layout( location = 6 ) in vec4 clipPosition;							\
-											layout( location = 7 ) in vec4 worldPosition;							\
-											layout( location = 8 ) in flat uint objectId;
+											layout( location = 6 ) in vec3 objectPosition;							\
+											layout( location = 7 ) in vec4 clipPosition;							\
+											layout( location = 8 ) in vec4 worldPosition;							\
+											layout( location = 9 ) in flat uint objectId;
 
 #define PS_OUT								layout( location = 0 ) out vec4 outColor;
 #define PS_LAYOUT_MRT_1_OUT					layout( location = 1 ) out vec4 outColor1;
