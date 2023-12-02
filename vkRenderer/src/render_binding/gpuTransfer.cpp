@@ -45,7 +45,7 @@ void Renderer::UpdateTextureData()
 		Image& image = imageAsset->Get();
 
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
-		textureStagingBuffer.CopyData( image.cpuImage.Ptr(), image.cpuImage.GetByteCount() );
+		textureStagingBuffer.CopyData( image.cpuImage->Ptr(), image.cpuImage->GetByteCount() );
 
 		Transition( &uploadContext, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
@@ -83,7 +83,7 @@ void Renderer::UploadTextures()
 		Transition( &uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
-		textureStagingBuffer.CopyData( texture.cpuImage.Ptr(), texture.cpuImage.GetByteCount() );
+		textureStagingBuffer.CopyData( texture.cpuImage->Ptr(), texture.cpuImage->GetByteCount() );
 
 		CopyBufferToImage( &uploadContext, texture, textureStagingBuffer, currentOffset );
 		

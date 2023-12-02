@@ -50,14 +50,18 @@ void CreateCodeAssets()
 			texture.info.channels = 4;
 			texture.info.fmt = IMAGE_FMT_RGBA_8;
 			texture.info.tiling = IMAGE_TILING_MORTON;
-			
-			texture.cpuImage.Init( texture.info.width, texture.info.height );
+
+			assert( texture.cpuImage == nullptr );
+
+			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();	
+			imageBuffer->Init( texture.info.width, texture.info.height );
 
 			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
 				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
-					texture.cpuImage.SetPixel( x, y, rgba );
+					imageBuffer->SetPixel( x, y, rgba );
 				}
-			}			
+			}		
+			texture.cpuImage = imageBuffer;
 		}
 
 		const uint32_t debugColorCount = 18;
@@ -130,7 +134,12 @@ void CreateCodeAssets()
 			texture.info = info;
 			
 			RGBA pixel = Swizzle( colors[ t ]->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
-			texture.cpuImage.Init( texture.info.width, texture.info.height, pixel );
+
+			assert( texture.cpuImage == nullptr );
+
+			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
+			imageBuffer->Init( texture.info.width, texture.info.height, pixel );
+			texture.cpuImage = imageBuffer;
 		}
 
 		// Checkerboard
@@ -143,15 +152,19 @@ void CreateCodeAssets()
 			texture.info.height = 32;
 			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
 
-			texture.cpuImage.Init( texture.info.width, texture.info.height );
+			assert( texture.cpuImage == nullptr );
+
+			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
+			imageBuffer->Init( texture.info.width, texture.info.height );
 
 			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
 				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
 					const Color color = ( ( x % 2 ) == ( y % 2 ) ) ? ColorBlack : ColorWhite;
 					const RGBA pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
-					texture.cpuImage.SetPixel( x, y, ColorWhite.AsRGBA() );
+					imageBuffer->SetPixel( x, y, ColorWhite.AsRGBA() );
 				}
-			}		
+			}
+			texture.cpuImage = imageBuffer;
 		}
 		g_assets.textureLib.SetDefault( "_checkerboard" );
 	}
@@ -340,13 +353,18 @@ void UpdateScene( Scene* scene )
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( "CODE_COLOR_0" );
 		Image& texture = imageAsset->Get();
 
-		texture.cpuImage.Init( texture.info.width, texture.info.height );
+		assert( texture.cpuImage == nullptr );
+
+		ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
+
+		imageBuffer->Init( texture.info.width, texture.info.height );
 
 		for ( uint32_t y = 0; y < texture.info.height; ++y ) {
 			for ( uint32_t x = 0; x < texture.info.width; ++x ) {
-				texture.cpuImage.SetPixel( x, y, rgba );
+				imageBuffer->SetPixel( x, y, rgba );
 			}
 		}
+		texture.cpuImage = imageBuffer;
 
 		imageAsset->QueueUpload();
 	}

@@ -64,8 +64,10 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 	const uint32_t width = fr.frameBuffer->GetWidth();
 	const uint32_t height = fr.frameBuffer->GetHeight();
 
-	texture.cpuImage.Destroy();
-	texture.cpuImage.Init( width, height );
+	ImageBuffer<RGBA>* imageBuffer =reinterpret_cast<ImageBuffer<RGBA>*>( texture.cpuImage );
+
+	imageBuffer->Destroy();
+	imageBuffer->Init( width, height );
 
 	for ( uint32_t y = 0; y < height; ++y )
 	{
@@ -76,7 +78,7 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 
 			Pixel px;
 			px.r8g8b8a8 = pixel.rawABGR;
-			texture.cpuImage.SetPixel( x, y, px.rgba );
+			imageBuffer->SetPixel( x, y, px.rgba );
 		}
 	}
 	imageAsset->QueueUpload();
