@@ -83,7 +83,6 @@ void MatrixToEulerZYX( const mat4x4f& m, float& xDegrees, float& yDegrees, float
 
 static void CopyGeoBuilderResult( const GeoBuilder& gb, Surface& surf, AABB& bounds )
 {
-
 	surf.vertices.reserve( gb.vb.size() );
 	for ( const GeoBuilder::vertex_t& v : gb.vb )
 	{
@@ -112,70 +111,80 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 {
 	Model& model = modelAsset.Get();
 
-	const float gridSize = 1.0f;
+	const float cellSize = 2.0f;
 	const uint32_t width = 1;
 	const uint32_t height = 1;
 
+	// Winding is reversed because you are viewing inside the box
+	// but the normal points outwards
+	const GeoBuilder::winding_t winding = GeoBuilder::WINDING_CLOCKWISE;
+
 	GeoBuilder::planeInfo_t info[ 6 ];
-	info[ 0 ].gridSize = vec2f( gridSize );
+	info[ 0 ].cellSize = vec2f( cellSize );
 	info[ 0 ].widthInQuads = width;
 	info[ 0 ].heightInQuads = height;
 	info[ 0 ].uvScale = 1.0f;
-	info[ 0 ].uv[ 0 ] = vec2f( 1.0f, 1.0f );
-	info[ 0 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
-	info[ 0 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 0 ].uvAtTopLeftCorner = vec2f( 1.0f, 1.0f );
+	info[ 0 ].uvDir = vec2f( -1.0f, -1.0f );
+	info[ 0 ].origin = vec3f( 1.0f, 0.0f, 0.0f );
 	info[ 0 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 0 ].normalDirection = GeoBuilder::NORMAL_Z_NEG;
+	info[ 0 ].normalDirection = GeoBuilder::NORMAL_X_POS;
+	info[ 0 ].winding = winding;
 
-	info[ 1 ].gridSize = vec2f( gridSize );
+	info[ 1 ].cellSize = vec2f( cellSize );
 	info[ 1 ].widthInQuads = width;
 	info[ 1 ].heightInQuads = height;
 	info[ 1 ].uvScale = 1.0f;
-	info[ 1 ].uv[ 0 ] = vec2f( 1.0f, 1.0f );
-	info[ 1 ].uv[ 1 ] = vec2f( -1.0f, -1.0f );
-	info[ 1 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, -gridSize );
+	info[ 1 ].uvAtTopLeftCorner = vec2f( 0.0f, 1.0f );
+	info[ 1 ].uvDir = vec2f( 1.0f, -1.0f );
+	info[ 1 ].origin = vec3f( 0.0f, -1.0f, 0.0f );
 	info[ 1 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 1 ].normalDirection = GeoBuilder::NORMAL_Z_POS;
+	info[ 1 ].normalDirection = GeoBuilder::NORMAL_Y_NEG;
+	info[ 1 ].winding = winding;
 
-	info[ 2 ].gridSize = vec2f( gridSize );
+	info[ 2 ].cellSize = vec2f( cellSize );
 	info[ 2 ].widthInQuads = width;
 	info[ 2 ].heightInQuads = height;
 	info[ 2 ].uvScale = 1.0f;
-	info[ 2 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
-	info[ 2 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
-	info[ 2 ].origin = vec3f( -0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 2 ].uvAtTopLeftCorner = vec2f( 0.0f, 1.0f );
+	info[ 2 ].uvDir = vec2f( 1.0f, -1.0f );
+	info[ 2 ].origin = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 2 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 2 ].normalDirection = GeoBuilder::NORMAL_X_POS;
+	info[ 2 ].normalDirection = GeoBuilder::NORMAL_X_NEG;
+	info[ 1 ].winding = winding;
 
-	info[ 3 ].gridSize = vec2f( gridSize );
+	info[ 3 ].cellSize = vec2f( cellSize );
 	info[ 3 ].widthInQuads = width;
 	info[ 3 ].heightInQuads = height;
 	info[ 3 ].uvScale = 1.0f;
-	info[ 3 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
-	info[ 3 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
-	info[ 3 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 3 ].uvAtTopLeftCorner = vec2f( 1.0f, 1.0f );
+	info[ 3 ].uvDir = vec2f( -1.0f, -1.0f );
+	info[ 3 ].origin = vec3f( 0.0f, 1.0f, 0.0f );
 	info[ 3 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 3 ].normalDirection = GeoBuilder::NORMAL_X_NEG;
+	info[ 3 ].normalDirection = GeoBuilder::NORMAL_Y_POS;
+	info[ 3 ].winding = winding;
 
-	info[ 4 ].gridSize = vec2f( gridSize );
+	info[ 4 ].cellSize = vec2f( cellSize );
 	info[ 4 ].widthInQuads = width;
 	info[ 4 ].heightInQuads = height;
 	info[ 4 ].uvScale = 1.0f;
-	info[ 4 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
-	info[ 4 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
-	info[ 4 ].origin = vec3f( 0.5f * gridSize * width, -0.5f * gridSize * height, 0.0f );
+	info[ 4 ].uvAtTopLeftCorner = vec2f( 1.0f, 1.0f );
+	info[ 4 ].uvDir = vec2f( -1.0f, -1.0f );
+	info[ 4 ].origin = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 4 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 4 ].normalDirection = GeoBuilder::NORMAL_Y_NEG;
+	info[ 4 ].normalDirection = GeoBuilder::NORMAL_Z_POS;
+	info[ 4 ].winding = winding;
 
-	info[ 5 ].gridSize = vec2f( gridSize );
+	info[ 5 ].cellSize = vec2f( cellSize );
 	info[ 5 ].widthInQuads = width;
 	info[ 5 ].heightInQuads = height;
 	info[ 5 ].uvScale = 1.0f;
-	info[ 5 ].uv[ 0 ] = vec2f( 0.0f, 0.0f );
-	info[ 5 ].uv[ 1 ] = vec2f( 1.0f, 1.0f );
-	info[ 5 ].origin = vec3f( 0.5f * gridSize * width, 0.5f * gridSize * height, 0.0f );
+	info[ 5 ].uvAtTopLeftCorner = vec2f( 1.0f, 0.0f );
+	info[ 5 ].uvDir = vec2f( -1.0f, 1.0f );
+	info[ 5 ].origin = vec3f( 0.0f, 0.0f, -1.0f );
 	info[ 5 ].color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	info[ 5 ].normalDirection = GeoBuilder::NORMAL_Y_POS;
+	info[ 5 ].normalDirection = GeoBuilder::NORMAL_Z_NEG;
+	info[ 5 ].winding = winding;
 
 	GeoBuilder gb;
 	for ( int i = 0; i < 6; ++i ) {
@@ -197,13 +206,13 @@ bool TerrainLoader::Load( Asset<Model>& modelAsset )
 	Model& model = modelAsset.Get();
 
 	GeoBuilder::planeInfo_t info;
-	info.gridSize = vec2f( cellSize );
+	info.cellSize = vec2f( cellSize );
 	info.widthInQuads = width;
 	info.heightInQuads = height;
 	info.uvScale = uvScale;
-	info.uv[ 0 ] = vec2f( 0.0f, 0.0f );
-	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
-	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, 0.0f );
+	info.uvAtTopLeftCorner = vec2f( 0.0f, 0.0f );
+	info.uvDir = vec2f( 1.0f, 1.0f );
+	info.origin = vec3f( 0.5f * info.cellSize[ 0 ] * info.widthInQuads, 0.5f * info.cellSize[ 1 ] * info.heightInQuads, 0.0f );
 	info.color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
@@ -230,13 +239,13 @@ bool WaterLoader::Load( Asset<Model>& modelAsset )
 	const vec2f uvs[] = { vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) };
 
 	GeoBuilder::planeInfo_t info;
-	info.gridSize = vec2f( 10.0f );
+	info.cellSize = vec2f( 10.0f );
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
 	info.uvScale = 1.0f;
-	info.uv[ 0 ] = vec2f( 0.0f, 0.0f );
-	info.uv[ 1 ] = vec2f( 1.0f, 1.0f );
-	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.widthInQuads, 0.5f * info.gridSize[ 1 ] * info.heightInQuads, -0.15f );
+	info.uvAtTopLeftCorner = vec2f( 0.0f, 0.0f );
+	info.uvDir = vec2f( 1.0f, 1.0f );
+	info.origin = vec3f( 0.5f * info.cellSize[ 0 ] * info.widthInQuads, 0.5f * info.cellSize[ 1 ] * info.heightInQuads, -0.15f );
 	info.color = vec4f( 0.0f, 0.0f, 1.0f, 0.2f );
 	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
@@ -256,14 +265,15 @@ bool WaterLoader::Load( Asset<Model>& modelAsset )
 void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size )
 {
 	GeoBuilder::planeInfo_t info;
-	info.gridSize = size;
+	info.cellSize = size;
 	info.widthInQuads = 1;
 	info.heightInQuads = 1;
 	info.uvScale = 1.0f;
-	info.uv[ 0 ] = vec2f( 1.0f, 0.0f );
-	info.uv[ 1 ] = vec2f( -1.0f, 1.0f );
+	info.uvAtTopLeftCorner = vec2f( 0.0f, 0.0f );
+	info.uvDir = vec2f( 0.0f, 0.0f );
 	info.origin = vec3f( origin[ 0 ], origin[ 1 ], 0.0f );
 	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
+	info.winding = GeoBuilder::WINDING_COUNTER_CLOCKWISE;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
@@ -272,13 +282,13 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	outModel.surfs.resize( outModel.surfCount );
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
 
-	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 1.0f, 0.0f );
 	outModel.surfs[ 0 ].vertices[ 0 ].uv2 = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 1.0f );
 	outModel.surfs[ 0 ].vertices[ 1 ].uv2 = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 0.0f );
 	outModel.surfs[ 0 ].vertices[ 2 ].uv2 = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 0.0f, 1.0f );
 	outModel.surfs[ 0 ].vertices[ 3 ].uv2 = vec2f( 0.0f, 0.0f );
 
 	outModel.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( materialName.c_str() );

@@ -59,7 +59,7 @@
       }
     },
 	{
-      "name": "EequirectangularSky",
+      "name": "EquirectangularSky",
       "shaders": {
           "DRAWPASS_SKYBOX": "EquirectangularSampler"
       }
@@ -78,6 +78,7 @@
     {
       "name" : "_skybox",
       "model" : "_skybox",
+      "material" : "EquirectangularSky",
 	  "x" : 0.0,
 	  "y" : 0.0,
 	  "z" : 0.0,

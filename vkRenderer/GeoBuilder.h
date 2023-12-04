@@ -42,6 +42,12 @@ public:
 		NORMAL_Z_NEG = 5,
 	};
 
+	enum winding_t
+	{
+		WINDING_CLOCKWISE = 0,
+		WINDING_COUNTER_CLOCKWISE = 0,
+	};
+
 	struct vertex_t
 	{
 		vec3f	pos;
@@ -58,9 +64,11 @@ public:
 		vec4f				color;
 		uint32_t			widthInQuads;
 		uint32_t			heightInQuads;
-		vec2f				gridSize;
+		vec2f				cellSize;
 		normalDirection_t	normalDirection;
-		vec2f				uv[ 2 ];
+		winding_t			winding;
+		vec2f				uvAtTopLeftCorner;
+		vec2f				uvDir;
 		float				uvScale;
 	};
 
@@ -91,22 +99,24 @@ public:
 
 	void AddPlaneSurf( const planeInfo_t& info )
 	{
-		std::pair<size_t, size_t> vertexDim = std::pair<size_t, size_t>( info.widthInQuads + 1, info.heightInQuads + 1 );
+		std::pair<size_t, size_t> sizeInVertices = std::pair<size_t, size_t>( info.widthInQuads + 1, info.heightInQuads + 1 );
 
 		const size_t verticesPerQuad = 6;
 
 		const size_t firstIndex = vb.size();
 		size_t indicesCnt = ib.size();
 		size_t vbIx = firstIndex;
-		vb.resize( vbIx + vertexDim.first * vertexDim.second );
+		vb.resize( vbIx + sizeInVertices.first * sizeInVertices.second );
 		ib.resize( indicesCnt + verticesPerQuad * info.widthInQuads * info.heightInQuads );
 
-		const vec2f uv0 = info.uv[ 0 ];
-		const vec2f uv1 = info.uv[ 1 ];
+		const vec2f uvCorner = info.uvAtTopLeftCorner[ 0 ];
+		const vec2f uvDir = info.uvDir;
 
-		for ( size_t j = 0; j < vertexDim.second; ++j )
+		const vec2f gridSizeWs = vec3f( info.widthInQuads * info.cellSize[ 0 ], info.heightInQuads * info.cellSize[ 1 ] );
+
+		for ( size_t j = 0; j < sizeInVertices.second; ++j )
 		{
-			for ( size_t i = 0; i < vertexDim.first; ++i )
+			for ( size_t i = 0; i < sizeInVertices.first; ++i )
 			{
 				const float u = info.uvScale * ( i / static_cast<float>( info.widthInQuads ) );
 				const float v = info.uvScale * ( j / static_cast<float>( info.heightInQuads ) );
@@ -115,61 +125,122 @@ public:
 				switch ( info.normalDirection )
 				{
 				default:
-				case NORMAL_X_POS:	vert.pos			= { 0.0f, i * info.gridSize[ 0 ], j * info.gridSize[ 1 ] };
-									vert.color			= info.color;
-									vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
-									vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
-									vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );
-									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
-									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
-								 break;
+				case NORMAL_X_POS:
+				{					
+					if( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
+						vert.pos[ 2 ]	= ( sizeInVertices.second - j ) * info.cellSize[ 1 ];
+					} else {
+						vert.pos[ 2 ]	= j * info.cellSize[ 1 ];
+					}
+					vert.pos[ 0 ]		= 0.0f;
+					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
+					vert.color			= info.color;
+					vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
+					vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
+					vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );
+					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
 
-				case NORMAL_X_NEG:	vert.pos			= { 0.0f, i * info.gridSize[ 0 ], j * info.gridSize[ 1 ] };
-									vert.color			= info.color;
-									vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
-									vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
-									vert.normal			= vec3f( -1.0f, 0.0f, 0.0f );
-									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + u * uv1[ 0 ] );
-									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
-								 break;
-
-				case NORMAL_Y_POS:	vert.pos			= { i * info.gridSize[ 0 ], 0.0f, j * info.gridSize[ 1 ] };
-									vert.color			= info.color;
-									vert.tangent		= vec3f( -1.0f, 0.0f, 0.0f );
-									vert.bitangent		= vec3f( 0.0f, 0.0f,1.0f );
-									vert.normal			= vec3f( 0.0f, 1.0f, 0.0f );
-									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
-									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
-								 break;
-
-				case NORMAL_Y_NEG:	vert.pos			= { i * info.gridSize[ 0 ], 0.0f, j * info.gridSize[ 1 ] };
-									vert.color			= info.color;
-									vert.tangent		= vec3f( 0.0f, 0.0f, 1.0f );
-									vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
-									vert.normal			= vec3f( 0.0f, -1.0f, 0.0f );
-									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + u * uv1[ 0 ] );
-									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
-								 break;
-
-				case NORMAL_Z_POS:	vert.pos			= { i * info.gridSize[ 0 ], j * info.gridSize[ 1 ], 0.0f };
-									vert.color			= info.color;
-									vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
-									vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
-									vert.normal			= vec3f( 0.0f, 0.0f, 1.0f );
-									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
-									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + ( 1.0f - v ) * uv1[ 1 ] );
-								 break;
-
-				case NORMAL_Z_NEG:	vert.pos			= { i * info.gridSize[ 0 ],	j * info.gridSize[ 1 ],	0.0f };
-									vert.color			= info.color;
-									vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
-									vert.bitangent		= vec3f( 1.0f, 0.0f, 0.0f );
-									vert.normal			= vec3f( 0.0f, 0.0f, -1.0f );
-									vert.texCoord[ 0 ]	= ( uv0[ 0 ] + ( 1.0f - u ) * uv1[ 0 ] );
-									vert.texCoord[ 1 ]	= ( uv0[ 1 ] + v * uv1[ 1 ] );
-								 break;
+					vert.pos -= 0.5f * vec3f( 0.0f, gridSizeWs[ 0 ], gridSizeWs[ 1 ] );
 				}
-				vert.pos -= info.origin;
+				break;
+
+				case NORMAL_X_NEG:
+				{
+					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
+						vert.pos[ 2 ]	= ( sizeInVertices.second - j - 1 )* info.cellSize[ 1 ];
+					} else {
+						vert.pos[ 2 ]	= j * info.cellSize[ 1 ];
+					}
+					vert.pos[ 0 ]		= 0.0f;
+					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
+					vert.color			= info.color;
+					vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
+					vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
+					vert.normal			= vec3f( -1.0f, 0.0f, 0.0f );
+					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+
+					vert.pos -= 0.5f * vec3f( 0.0f, gridSizeWs[ 0 ], gridSizeWs[ 1 ] );
+				} break;
+
+				case NORMAL_Y_POS:
+				{
+					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
+						vert.pos[ 0 ] = i * info.cellSize[ 0 ];
+					} else {
+						vert.pos[ 0 ] = ( sizeInVertices.first - i - 1 ) * info.cellSize[ 0 ];
+					}
+					vert.pos[ 1 ]		= 0.0f;
+					vert.pos[ 2 ]		= j * info.cellSize[ 1 ];
+					vert.color			= info.color;
+					vert.tangent		= vec3f( -1.0f, 0.0f, 0.0f );
+					vert.bitangent		= vec3f( 0.0f, 0.0f,1.0f );
+					vert.normal			= vec3f( 0.0f, 1.0f, 0.0f );
+					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+
+					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], 0.0f, gridSizeWs[ 1 ] );
+				} break;
+
+				case NORMAL_Y_NEG:
+				{
+					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
+						vert.pos[ 0 ] = i * info.cellSize[ 0 ];
+					} else {
+						vert.pos[ 0 ] = ( sizeInVertices.first - i - 1 ) * info.cellSize[ 0 ];
+					}
+					vert.pos[ 1 ]		= 0.0f;
+					vert.pos[ 2 ]		= j * info.cellSize[ 1 ];
+					vert.color			= info.color;
+					vert.tangent		= vec3f( 0.0f, 0.0f, 1.0f );
+					vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
+					vert.normal			= vec3f( 0.0f, -1.0f, 0.0f );
+					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+
+					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], 0.0f, gridSizeWs[ 1 ] );
+				} break;
+
+				case NORMAL_Z_POS:
+				{
+					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
+						vert.pos[ 0 ]	= j * info.cellSize[ 1 ];
+					} else {
+						vert.pos[ 0 ]	= ( sizeInVertices.second - j - 1 )* info.cellSize[ 1 ];
+					}
+					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
+					vert.pos[ 2 ]		= 0.0f;
+					vert.color			= info.color;
+					vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
+					vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
+					vert.normal			= vec3f( 0.0f, 0.0f, 1.0f );
+					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+
+					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], gridSizeWs[ 1 ], 0.0f );
+				} break;
+
+				case NORMAL_Z_NEG:
+				{
+					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
+						vert.pos[ 0 ] = j * info.cellSize[ 1 ];
+					} else {
+						vert.pos[ 0 ] = ( sizeInVertices.second - j - 1 ) * info.cellSize[ 1 ];
+					}
+					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
+					vert.pos[ 2 ]		= 0.0f;
+					vert.color			= info.color;
+					vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
+					vert.bitangent		= vec3f( 1.0f, 0.0f, 0.0f );
+					vert.normal			= vec3f( 0.0f, 0.0f, -1.0f );
+					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+
+					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], gridSizeWs[ 1 ], 0.0f );
+				} break;
+				}
+				vert.pos += info.origin;
 
 				++vbIx;
 			}

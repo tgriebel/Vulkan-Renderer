@@ -206,12 +206,12 @@ void CreateCodeAssets()
 	{
 		{
 			Model model;
-			CreateQuadSurface2D( "TONEMAP", model, vec2f( 1.0f, 1.0f ), vec2f( 2.0f ) );
+			CreateQuadSurface2D( "TONEMAP", model, vec2f( 0.0f, 0.0f ), vec2f( 2.0f ) );
 			g_assets.modelLib.Add( "_postProcessQuad", model );
 		}
 		{
 			Model model;
-			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 1.0f, 1.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
+			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 0.0f, 0.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
 			g_assets.modelLib.Add( "_quadTexDebug", model );
 		}
 		g_assets.modelLib.SetDefault( "_quadTexDebug" );
@@ -342,7 +342,7 @@ void UpdateScene( Scene* scene )
 	vec3f skyBoxOrigin;
 	skyBoxOrigin[ 0 ] = scene->mainCamera->GetOrigin()[ 0 ];
 	skyBoxOrigin[ 1 ] = scene->mainCamera->GetOrigin()[ 1 ];
-	skyBoxOrigin[ 2 ] = scene->mainCamera->GetOrigin()[ 2 ] - 0.5f;
+	skyBoxOrigin[ 2 ] = scene->mainCamera->GetOrigin()[ 2 ];
 	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
 
 	
