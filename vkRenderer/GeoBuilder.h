@@ -45,7 +45,7 @@ public:
 	enum winding_t
 	{
 		WINDING_CLOCKWISE = 0,
-		WINDING_COUNTER_CLOCKWISE = 0,
+		WINDING_COUNTER_CLOCKWISE = 1,
 	};
 
 	struct vertex_t
@@ -62,14 +62,28 @@ public:
 	{
 		vec3f				origin;
 		vec4f				color;
-		uint32_t			widthInQuads;
-		uint32_t			heightInQuads;
-		vec2f				cellSize;
+		uint32_t			subDivisionsX;
+		uint32_t			subDivisionsY;
+		vec2f				gridSize;
 		normalDirection_t	normalDirection;
 		winding_t			winding;
-		vec2f				uvAtTopLeftCorner;
-		vec2f				uvDir;
-		float				uvScale;
+		vec2f				uvOffset;
+		vec2f				uvScale;
+		bool				flipUv;
+
+		planeInfo_t()
+		{
+			gridSize = vec2f( 1.0f, 1.0f );
+			subDivisionsX = 1;
+			subDivisionsY = 1;
+			uvOffset = vec2f( 0.0f, 0.0f );
+			uvScale = vec2f( 1.0f, 1.0f );
+			origin = vec3f( 0.0f, 0.0f, 0.0f );
+			color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+			normalDirection = NORMAL_Z_POS;
+			winding = WINDING_COUNTER_CLOCKWISE;
+			flipUv = false;
+		}
 	};
 
 	std::vector<vertex_t>	vb;
@@ -99,188 +113,169 @@ public:
 
 	void AddPlaneSurf( const planeInfo_t& info )
 	{
-		std::pair<size_t, size_t> sizeInVertices = std::pair<size_t, size_t>( info.widthInQuads + 1, info.heightInQuads + 1 );
+		const std::pair<size_t, size_t> sizeInVertices = std::pair<size_t, size_t>( info.subDivisionsX + 1, info.subDivisionsY + 1 );
 
-		const size_t verticesPerQuad = 6;
+		const size_t indicesPerQuad = 6;
 
 		const size_t firstIndex = vb.size();
 		size_t indicesCnt = ib.size();
 		size_t vbIx = firstIndex;
 		vb.resize( vbIx + sizeInVertices.first * sizeInVertices.second );
-		ib.resize( indicesCnt + verticesPerQuad * info.widthInQuads * info.heightInQuads );
+		ib.resize( indicesCnt + indicesPerQuad * info.subDivisionsX * info.subDivisionsY );
 
-		const vec2f uvCorner = info.uvAtTopLeftCorner[ 0 ];
-		const vec2f uvDir = info.uvDir;
+		const vec2f uvCorner = info.uvOffset;
+		const vec2f uvDir = info.uvScale;
 
-		const vec2f gridSizeWs = vec3f( info.widthInQuads * info.cellSize[ 0 ], info.heightInQuads * info.cellSize[ 1 ] );
+		const vec2f gridSizeWs = vec2f( info.gridSize[ 0 ], info.gridSize[ 1 ] );
+		const vec2f cellSizeWs = vec2f( gridSizeWs[ 0 ] / info.subDivisionsX, gridSizeWs[ 1 ] / info.subDivisionsY );
 
+		// Create vertices
 		for ( size_t j = 0; j < sizeInVertices.second; ++j )
 		{
 			for ( size_t i = 0; i < sizeInVertices.first; ++i )
 			{
-				const float u = info.uvScale * ( i / static_cast<float>( info.widthInQuads ) );
-				const float v = info.uvScale * ( j / static_cast<float>( info.heightInQuads ) );
+				const float u = ( i / static_cast<float>( info.subDivisionsX ) );
+				const float v = ( j / static_cast<float>( info.subDivisionsY ) );
 
 				vertex_t& vert = vb[ vbIx ];
+
 				switch ( info.normalDirection )
 				{
 				default:
 				case NORMAL_X_POS:
-				{					
-					if( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
-						vert.pos[ 2 ]	= ( sizeInVertices.second - j ) * info.cellSize[ 1 ];
-					} else {
-						vert.pos[ 2 ]	= j * info.cellSize[ 1 ];
-					}
+				{										
 					vert.pos[ 0 ]		= 0.0f;
-					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
-					vert.color			= info.color;
+					vert.pos[ 1 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
+					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
+				
 					vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
 					vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
-					vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );
-					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
-
-					vert.pos -= 0.5f * vec3f( 0.0f, gridSizeWs[ 0 ], gridSizeWs[ 1 ] );
+					vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );			
 				}
 				break;
 
 				case NORMAL_X_NEG:
-				{
-					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
-						vert.pos[ 2 ]	= ( sizeInVertices.second - j - 1 )* info.cellSize[ 1 ];
-					} else {
-						vert.pos[ 2 ]	= j * info.cellSize[ 1 ];
-					}
+				{					
 					vert.pos[ 0 ]		= 0.0f;
-					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
-					vert.color			= info.color;
+					vert.pos[ 1 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
+					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
+
 					vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
 					vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
 					vert.normal			= vec3f( -1.0f, 0.0f, 0.0f );
-					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
-
-					vert.pos -= 0.5f * vec3f( 0.0f, gridSizeWs[ 0 ], gridSizeWs[ 1 ] );
+				
 				} break;
 
 				case NORMAL_Y_POS:
 				{
-					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
-						vert.pos[ 0 ] = i * info.cellSize[ 0 ];
-					} else {
-						vert.pos[ 0 ] = ( sizeInVertices.first - i - 1 ) * info.cellSize[ 0 ];
-					}
+					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
 					vert.pos[ 1 ]		= 0.0f;
-					vert.pos[ 2 ]		= j * info.cellSize[ 1 ];
-					vert.color			= info.color;
+					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
+
 					vert.tangent		= vec3f( -1.0f, 0.0f, 0.0f );
 					vert.bitangent		= vec3f( 0.0f, 0.0f,1.0f );
 					vert.normal			= vec3f( 0.0f, 1.0f, 0.0f );
-					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
-
-					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], 0.0f, gridSizeWs[ 1 ] );
 				} break;
 
 				case NORMAL_Y_NEG:
 				{
-					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
-						vert.pos[ 0 ] = i * info.cellSize[ 0 ];
-					} else {
-						vert.pos[ 0 ] = ( sizeInVertices.first - i - 1 ) * info.cellSize[ 0 ];
-					}
+					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
 					vert.pos[ 1 ]		= 0.0f;
-					vert.pos[ 2 ]		= j * info.cellSize[ 1 ];
-					vert.color			= info.color;
+					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
+
 					vert.tangent		= vec3f( 0.0f, 0.0f, 1.0f );
 					vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
 					vert.normal			= vec3f( 0.0f, -1.0f, 0.0f );
-					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
-
-					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], 0.0f, gridSizeWs[ 1 ] );
 				} break;
 
 				case NORMAL_Z_POS:
 				{
-					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
-						vert.pos[ 0 ]	= j * info.cellSize[ 1 ];
-					} else {
-						vert.pos[ 0 ]	= ( sizeInVertices.second - j - 1 )* info.cellSize[ 1 ];
-					}
-					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
+					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
+					vert.pos[ 1 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
 					vert.pos[ 2 ]		= 0.0f;
-					vert.color			= info.color;
+
 					vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
 					vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
 					vert.normal			= vec3f( 0.0f, 0.0f, 1.0f );
-					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
-
-					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], gridSizeWs[ 1 ], 0.0f );
 				} break;
 
 				case NORMAL_Z_NEG:
 				{
-					if ( GeoBuilder::WINDING_COUNTER_CLOCKWISE ) {
-						vert.pos[ 0 ] = j * info.cellSize[ 1 ];
-					} else {
-						vert.pos[ 0 ] = ( sizeInVertices.second - j - 1 ) * info.cellSize[ 1 ];
-					}
-					vert.pos[ 1 ]		= i * info.cellSize[ 0 ];
+					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
+					vert.pos[ 1 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
 					vert.pos[ 2 ]		= 0.0f;
-					vert.color			= info.color;
+
 					vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
 					vert.bitangent		= vec3f( 1.0f, 0.0f, 0.0f );
 					vert.normal			= vec3f( 0.0f, 0.0f, -1.0f );
-					vert.texCoord[ 0 ]	= ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ]	= ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
-
-					vert.pos -= 0.5f * vec3f( gridSizeWs[ 0 ], gridSizeWs[ 1 ], 0.0f );
 				} break;
 				}
+
+				vert.color = info.color;
+				if( info.flipUv )
+				{
+					vert.texCoord[ 0 ] = ( uvCorner[0] + v * uvDir[1] );
+					vert.texCoord[ 1 ] = ( uvCorner[1] + u * uvDir[0] );
+				}
+				else 
+				{
+					vert.texCoord[ 0 ] = ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ] = ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+				}
+
 				vert.pos += info.origin;
 
 				++vbIx;
 			}
 		}
 
-		for ( uint32_t j = 0; j < info.heightInQuads; ++j )
+		// Create indices
+		for ( uint32_t j = 0; j < info.subDivisionsY; ++j )
 		{
-			for ( uint32_t i = 0; i < info.widthInQuads; ++i )
+			for ( uint32_t i = 0; i < info.subDivisionsX; ++i )
 			{
+				// Generate two triangles per quad
 				uint32_t vIx[ 4 ];
-				vIx[ 0 ] = static_cast<uint32_t>( firstIndex + ( i + 0 ) + ( j + 0 ) * ( info.heightInQuads + 1 ) );
-				vIx[ 1 ] = static_cast<uint32_t>( firstIndex + ( i + 1 ) + ( j + 0 ) * ( info.heightInQuads + 1 ) );
-				vIx[ 2 ] = static_cast<uint32_t>( firstIndex + ( i + 0 ) + ( j + 1 ) * ( info.heightInQuads + 1 ) );
-				vIx[ 3 ] = static_cast<uint32_t>( firstIndex + ( i + 1 ) + ( j + 1 ) * ( info.heightInQuads + 1 ) );
+				vIx[ 0 ] = static_cast<uint32_t>( firstIndex + ( i + 0 ) + ( j + 0 ) * sizeInVertices.second );
+				vIx[ 1 ] = static_cast<uint32_t>( firstIndex + ( i + 1 ) + ( j + 0 ) * sizeInVertices.second );
+				vIx[ 2 ] = static_cast<uint32_t>( firstIndex + ( i + 0 ) + ( j + 1 ) * sizeInVertices.second );
+				vIx[ 3 ] = static_cast<uint32_t>( firstIndex + ( i + 1 ) + ( j + 1 ) * sizeInVertices.second );
+
+				winding_t winding;
 
 				switch ( info.normalDirection )
 				{
-				case NORMAL_X_POS:
-				case NORMAL_Y_POS:
-				case NORMAL_Z_POS:
+					case NORMAL_X_POS:
+					case NORMAL_Y_NEG:	
+					case NORMAL_Z_POS:
+						winding = info.winding == WINDING_COUNTER_CLOCKWISE ? WINDING_COUNTER_CLOCKWISE : WINDING_CLOCKWISE;
+						break;
+					case NORMAL_X_NEG:
+					case NORMAL_Y_POS:
+					case NORMAL_Z_NEG:
+						winding = info.winding == WINDING_COUNTER_CLOCKWISE ? WINDING_CLOCKWISE : WINDING_COUNTER_CLOCKWISE;
+						break;
+				}
+
+				if( winding == WINDING_CLOCKWISE )
+				{
+					ib[ indicesCnt++ ] = vIx[ 0 ];
 					ib[ indicesCnt++ ] = vIx[ 2 ];
 					ib[ indicesCnt++ ] = vIx[ 1 ];
-					ib[ indicesCnt++ ] = vIx[ 0 ];
 
+					ib[ indicesCnt++ ] = vIx[ 1 ];
 					ib[ indicesCnt++ ] = vIx[ 2 ];
 					ib[ indicesCnt++ ] = vIx[ 3 ];
-					ib[ indicesCnt++ ] = vIx[ 1 ];
-					break;
-
-				case NORMAL_X_NEG:
-				case NORMAL_Y_NEG:
-				case NORMAL_Z_NEG:
-					ib[ indicesCnt++ ] = vIx[ 2 ];
+				}
+				else
+				{
 					ib[ indicesCnt++ ] = vIx[ 0 ];
 					ib[ indicesCnt++ ] = vIx[ 1 ];
+					ib[ indicesCnt++ ] = vIx[ 2 ];
 
 					ib[ indicesCnt++ ] = vIx[ 2 ];
 					ib[ indicesCnt++ ] = vIx[ 1 ];
 					ib[ indicesCnt++ ] = vIx[ 3 ];
-					break;
 				}
 			}
 		}

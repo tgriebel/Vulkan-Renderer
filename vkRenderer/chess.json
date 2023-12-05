@@ -79,7 +79,8 @@
 	{
       "name": "SKY",
       "shaders": {
-          "DRAWPASS_SKYBOX": "Sky"
+          "DRAWPASS_SKYBOX": "Sky",
+		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
       }
       "textures": {
           "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
