@@ -97,7 +97,7 @@ public:
 	static float WrapU( const float u )
 	{
 		float s = u;
-		s = ( s > 1.0 ) ? ( s - floor( s ) ) : s;
+		s = ( s > 1.0f ) ? ( s - floor( s ) ) : s;
 		s = Saturate( s );
 
 		return s;
@@ -123,8 +123,8 @@ public:
 		vb.resize( vbIx + sizeInVertices.first * sizeInVertices.second );
 		ib.resize( indicesCnt + indicesPerQuad * info.subDivisionsX * info.subDivisionsY );
 
-		const vec2f uvCorner = info.uvOffset;
 		const vec2f uvDir = info.uvScale;
+		const vec2f uvOffset = info.uvOffset;
 
 		const vec2f gridSizeWs = vec2f( info.gridSize[ 0 ], info.gridSize[ 1 ] );
 		const vec2f cellSizeWs = vec2f( gridSizeWs[ 0 ] / info.subDivisionsX, gridSizeWs[ 1 ] / info.subDivisionsY );
@@ -214,14 +214,16 @@ public:
 				vert.color = info.color;
 				if( info.flipUv )
 				{
-					vert.texCoord[ 0 ] = ( uvCorner[0] + v * uvDir[1] );
-					vert.texCoord[ 1 ] = ( uvCorner[1] + u * uvDir[0] );
+					vert.texCoord[ 0 ] = ( uvOffset[ 0 ] + v * uvDir[ 1 ] );
+					vert.texCoord[ 1 ] = ( uvOffset[ 1 ] + u * uvDir[ 0 ] );
 				}
 				else 
 				{
-					vert.texCoord[ 0 ] = ( uvCorner[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ] = ( uvCorner[ 1 ] + v * uvDir[ 1 ] );
+					vert.texCoord[ 0 ] = ( uvOffset[ 0 ] + u * uvDir[ 0 ] );
+					vert.texCoord[ 1 ] = ( uvOffset[ 1 ] + v * uvDir[ 1 ] );
 				}
+
+				vert.texCoord = WrapUV( vert.texCoord );
 
 				vert.pos += info.origin;
 

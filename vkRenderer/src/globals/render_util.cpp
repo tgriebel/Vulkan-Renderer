@@ -124,6 +124,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 0 ].subDivisionsX = width;
 	info[ 0 ].subDivisionsY = height;
 	info[ 0 ].uvScale = vec2f( -1.0f, -1.0f );
+	info[ 0 ].uvOffset = vec2f( 1.0f, 1.0f );
 	info[ 0 ].origin = vec3f( 1.0f, 0.0f, 0.0f );
 	info[ 0 ].normalDirection = GeoBuilder::NORMAL_X_POS;
 	info[ 0 ].winding = winding;
@@ -132,6 +133,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 1 ].subDivisionsX = width;
 	info[ 1 ].subDivisionsY = height;
 	info[ 1 ].uvScale = vec2f( -1.0f, -1.0f );
+	info[ 1 ].uvOffset = vec2f( 1.0f, 1.0f );
 	info[ 1 ].origin = vec3f( 0.0f, -1.0f, 0.0f );
 	info[ 1 ].normalDirection = GeoBuilder::NORMAL_Y_NEG;
 	info[ 1 ].winding = winding;
@@ -140,6 +142,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 2 ].subDivisionsX = width;
 	info[ 2 ].subDivisionsY = height;
 	info[ 2 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 2 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 2 ].origin = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 2 ].normalDirection = GeoBuilder::NORMAL_X_NEG;
 	info[ 2 ].winding = winding;
@@ -148,6 +151,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 3 ].subDivisionsX = width;
 	info[ 3 ].subDivisionsY = height;
 	info[ 3 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 3 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 3 ].origin = vec3f( 0.0f, 1.0f, 0.0f );
 	info[ 3 ].normalDirection = GeoBuilder::NORMAL_Y_POS;
 	info[ 3 ].winding = winding;
@@ -156,6 +160,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 4 ].subDivisionsX = width;
 	info[ 4 ].subDivisionsY = height;
 	info[ 4 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 4 ].uvOffset = vec2f( 1.0f, 0.0f );
 	info[ 4 ].origin = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 4 ].normalDirection = GeoBuilder::NORMAL_Z_POS;
 	info[ 4 ].winding = winding;
@@ -165,6 +170,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 5 ].subDivisionsX = width;
 	info[ 5 ].subDivisionsY = height;
 	info[ 5 ].uvScale = vec2f( -1.0f, -1.0f );
+	info[ 5 ].uvOffset = vec2f( 1.0f, 1.0f );
 	info[ 5 ].origin = vec3f( 0.0f, 0.0f, -1.0f );
 	info[ 5 ].normalDirection = GeoBuilder::NORMAL_Z_NEG;
 	info[ 5 ].winding = winding;
