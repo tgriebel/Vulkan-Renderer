@@ -117,25 +117,27 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 
 	// Winding is reversed because you are viewing inside the box
 	// but the normal points outwards
-	const GeoBuilder::winding_t winding = GeoBuilder::WINDING_CLOCKWISE;
+	const GeoBuilder::winding_t winding = GeoBuilder::WINDING_COUNTER_CLOCKWISE;
 
 	GeoBuilder::planeInfo_t info[ 6 ];
 	info[ 0 ].gridSize = vec2f( cellSize );
 	info[ 0 ].subDivisionsX = width;
 	info[ 0 ].subDivisionsY = height;
-	info[ 0 ].uvScale = vec2f( -1.0f, -1.0f );
-	info[ 0 ].uvOffset = vec2f( 1.0f, 1.0f );
+	info[ 0 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 0 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 0 ].origin = vec3f( 1.0f, 0.0f, 0.0f );
-	info[ 0 ].normalDirection = GeoBuilder::NORMAL_X_POS;
+	info[ 0 ].up = vec3f( 0.0f, 0.0f, 1.0f );
+	info[ 0 ].normal = vec3f( 1.0f, 0.0f, 0.0f );
 	info[ 0 ].winding = winding;
 
 	info[ 1 ].gridSize = vec2f( cellSize );
 	info[ 1 ].subDivisionsX = width;
 	info[ 1 ].subDivisionsY = height;
-	info[ 1 ].uvScale = vec2f( -1.0f, -1.0f );
-	info[ 1 ].uvOffset = vec2f( 1.0f, 1.0f );
+	info[ 1 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 1 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 1 ].origin = vec3f( 0.0f, -1.0f, 0.0f );
-	info[ 1 ].normalDirection = GeoBuilder::NORMAL_Y_NEG;
+	info[ 1 ].up = vec3f( 0.0f, 0.0f, 1.0f );
+	info[ 1 ].normal = vec3f( 0.0f, -1.0f, 0.0f );
 	info[ 1 ].winding = winding;
 
 	info[ 2 ].gridSize = vec2f( cellSize );
@@ -144,7 +146,8 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 2 ].uvScale = vec2f( 1.0f, -1.0f );
 	info[ 2 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 2 ].origin = vec3f( -1.0f, 0.0f, 0.0f );
-	info[ 2 ].normalDirection = GeoBuilder::NORMAL_X_NEG;
+	info[ 2 ].up = vec3f( 0.0f, 0.0f, 1.0f );
+	info[ 2 ].normal = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 2 ].winding = winding;
 
 	info[ 3 ].gridSize = vec2f( cellSize );
@@ -153,28 +156,29 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 3 ].uvScale = vec2f( 1.0f, -1.0f );
 	info[ 3 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 3 ].origin = vec3f( 0.0f, 1.0f, 0.0f );
-	info[ 3 ].normalDirection = GeoBuilder::NORMAL_Y_POS;
+	info[ 3 ].up = vec3f( 0.0f, 0.0f, 1.0f );
+	info[ 3 ].normal = vec3f( 0.0f, 1.0f, 0.0f );
 	info[ 3 ].winding = winding;
 
 	info[ 4 ].gridSize = vec2f( cellSize );
 	info[ 4 ].subDivisionsX = width;
 	info[ 4 ].subDivisionsY = height;
 	info[ 4 ].uvScale = vec2f( 1.0f, -1.0f );
-	info[ 4 ].uvOffset = vec2f( 1.0f, 0.0f );
+	info[ 4 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 4 ].origin = vec3f( 0.0f, 0.0f, 1.0f );
-	info[ 4 ].normalDirection = GeoBuilder::NORMAL_Z_POS;
+	info[ 4 ].up = vec3f( -1.0f, 0.0f, 0.0f );
+	info[ 4 ].normal = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 4 ].winding = winding;
-	info[ 4 ].flipUv = true;
 
 	info[ 5 ].gridSize = vec2f( cellSize );
 	info[ 5 ].subDivisionsX = width;
 	info[ 5 ].subDivisionsY = height;
-	info[ 5 ].uvScale = vec2f( -1.0f, -1.0f );
-	info[ 5 ].uvOffset = vec2f( 1.0f, 1.0f );
+	info[ 5 ].uvScale = vec2f( -1.0f, 1.0f );
+	info[ 5 ].uvOffset = vec2f( 1.0f, 0.0f );
 	info[ 5 ].origin = vec3f( 0.0f, 0.0f, -1.0f );
-	info[ 5 ].normalDirection = GeoBuilder::NORMAL_Z_NEG;
+	info[ 5 ].up = vec3f( -1.0f, 0.0f, 0.0f );
+	info[ 5 ].normal = vec3f( 0.0f, 0.0f, -1.0f );
 	info[ 5 ].winding = winding;
-	info[ 5 ].flipUv = true;
 
 	GeoBuilder gb;
 	for ( int i = 0; i < 6; ++i ) {
@@ -200,7 +204,6 @@ bool TerrainLoader::Load( Asset<Model>& modelAsset )
 	info.subDivisionsX = width;
 	info.subDivisionsY = height;
 	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.subDivisionsX, 0.5f * info.gridSize[ 1 ] * info.subDivisionsY, 0.0f );
-	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
@@ -229,7 +232,6 @@ bool WaterLoader::Load( Asset<Model>& modelAsset )
 	info.subDivisionsX = 1;
 	info.subDivisionsY = 1;
 	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.subDivisionsX, 0.5f * info.gridSize[ 1 ] * info.subDivisionsY, -0.15f );
-	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
@@ -251,7 +253,8 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	info.subDivisionsX = 1;
 	info.subDivisionsY = 1;
 	info.origin = vec3f( origin[ 0 ], origin[ 1 ], 0.0f );
-	info.normalDirection = GeoBuilder::NORMAL_Z_NEG;
+	info.normal = vec3f( 0.0f, 0.0f, -1.0f );
+	info.up = vec3f( 0.0f, 1.0f, 0.0f );
 	info.winding = GeoBuilder::WINDING_COUNTER_CLOCKWISE;
 
 	GeoBuilder gb;

@@ -32,16 +32,6 @@ class GeoBuilder
 {
 public:
 
-	enum normalDirection_t
-	{
-		NORMAL_X_POS = 0,
-		NORMAL_X_NEG = 1,
-		NORMAL_Y_POS = 2,
-		NORMAL_Y_NEG = 3,
-		NORMAL_Z_POS = 4,
-		NORMAL_Z_NEG = 5,
-	};
-
 	enum winding_t
 	{
 		WINDING_CLOCKWISE = 0,
@@ -65,11 +55,13 @@ public:
 		uint32_t			subDivisionsX;
 		uint32_t			subDivisionsY;
 		vec2f				gridSize;
-		normalDirection_t	normalDirection;
 		winding_t			winding;
+		vec3f				up;
+		vec3f				normal;
 		vec2f				uvOffset;
 		vec2f				uvScale;
 		bool				flipUv;
+		bool				centerAtOrigin;
 
 		planeInfo_t()
 		{
@@ -80,9 +72,11 @@ public:
 			uvScale = vec2f( 1.0f, 1.0f );
 			origin = vec3f( 0.0f, 0.0f, 0.0f );
 			color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-			normalDirection = NORMAL_Z_POS;
+			up = vec3f( 0.0f, 0.0f, 1.0f );
+			normal = vec3f( 1.0f, 0.0f, 0.0f );
 			winding = WINDING_COUNTER_CLOCKWISE;
 			flipUv = false;
+			centerAtOrigin = true;
 		}
 	};
 
@@ -129,6 +123,10 @@ public:
 		const vec2f gridSizeWs = vec2f( info.gridSize[ 0 ], info.gridSize[ 1 ] );
 		const vec2f cellSizeWs = vec2f( gridSizeWs[ 0 ] / info.subDivisionsX, gridSizeWs[ 1 ] / info.subDivisionsY );
 
+		const vec3f up = info.up.Normalize();
+		const vec3f normal = info.normal.Normalize();
+		const vec3f side = Cross( normal, up ).Normalize();
+
 		// Create vertices
 		for ( size_t j = 0; j < sizeInVertices.second; ++j )
 		{
@@ -139,77 +137,9 @@ public:
 
 				vertex_t& vert = vb[ vbIx ];
 
-				switch ( info.normalDirection )
-				{
-				default:
-				case NORMAL_X_POS:
-				{										
-					vert.pos[ 0 ]		= 0.0f;
-					vert.pos[ 1 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
-					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
-				
-					vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
-					vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
-					vert.normal			= vec3f( 1.0f, 0.0f, 0.0f );			
-				}
-				break;
-
-				case NORMAL_X_NEG:
-				{					
-					vert.pos[ 0 ]		= 0.0f;
-					vert.pos[ 1 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
-					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
-
-					vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
-					vert.bitangent		= vec3f( 0.0f, 0.0f, 1.0f );
-					vert.normal			= vec3f( -1.0f, 0.0f, 0.0f );
-				
-				} break;
-
-				case NORMAL_Y_POS:
-				{
-					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
-					vert.pos[ 1 ]		= 0.0f;
-					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
-
-					vert.tangent		= vec3f( -1.0f, 0.0f, 0.0f );
-					vert.bitangent		= vec3f( 0.0f, 0.0f,1.0f );
-					vert.normal			= vec3f( 0.0f, 1.0f, 0.0f );
-				} break;
-
-				case NORMAL_Y_NEG:
-				{
-					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
-					vert.pos[ 1 ]		= 0.0f;
-					vert.pos[ 2 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
-
-					vert.tangent		= vec3f( 0.0f, 0.0f, 1.0f );
-					vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
-					vert.normal			= vec3f( 0.0f, -1.0f, 0.0f );
-				} break;
-
-				case NORMAL_Z_POS:
-				{
-					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
-					vert.pos[ 1 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
-					vert.pos[ 2 ]		= 0.0f;
-
-					vert.tangent		= vec3f( 0.0f, 1.0f, 0.0f );
-					vert.bitangent		= vec3f( -1.0f, 0.0f, 0.0f );
-					vert.normal			= vec3f( 0.0f, 0.0f, 1.0f );
-				} break;
-
-				case NORMAL_Z_NEG:
-				{
-					vert.pos[ 0 ]		= i * cellSizeWs[ 0 ] - 0.5f * gridSizeWs[ 0 ];
-					vert.pos[ 1 ]		= j * cellSizeWs[ 1 ] - 0.5f * gridSizeWs[ 1 ];
-					vert.pos[ 2 ]		= 0.0f;
-
-					vert.tangent		= vec3f( 0.0f, -1.0f, 0.0f );
-					vert.bitangent		= vec3f( 1.0f, 0.0f, 0.0f );
-					vert.normal			= vec3f( 0.0f, 0.0f, -1.0f );
-				} break;
-				}
+				vert.tangent = side;
+				vert.bitangent = up;
+				vert.normal = normal;			
 
 				vert.color = info.color;
 				if( info.flipUv )
@@ -225,6 +155,12 @@ public:
 
 				vert.texCoord = WrapUV( vert.texCoord );
 
+				vert.pos = i * cellSizeWs[ 0 ] * side + j * cellSizeWs[ 1 ] * up;
+				if( info.centerAtOrigin )
+				{
+					vert.pos -= 0.5f * gridSizeWs[ 0 ] * side;
+					vert.pos -= 0.5f * gridSizeWs[ 1 ] * up;
+				}
 				vert.pos += info.origin;
 
 				++vbIx;
@@ -243,23 +179,7 @@ public:
 				vIx[ 2 ] = static_cast<uint32_t>( firstIndex + ( i + 0 ) + ( j + 1 ) * sizeInVertices.second );
 				vIx[ 3 ] = static_cast<uint32_t>( firstIndex + ( i + 1 ) + ( j + 1 ) * sizeInVertices.second );
 
-				winding_t winding;
-
-				switch ( info.normalDirection )
-				{
-					case NORMAL_X_POS:
-					case NORMAL_Y_NEG:	
-					case NORMAL_Z_POS:
-						winding = info.winding == WINDING_COUNTER_CLOCKWISE ? WINDING_COUNTER_CLOCKWISE : WINDING_CLOCKWISE;
-						break;
-					case NORMAL_X_NEG:
-					case NORMAL_Y_POS:
-					case NORMAL_Z_NEG:
-						winding = info.winding == WINDING_COUNTER_CLOCKWISE ? WINDING_CLOCKWISE : WINDING_COUNTER_CLOCKWISE;
-						break;
-				}
-
-				if( winding == WINDING_CLOCKWISE )
+				if( info.winding == WINDING_CLOCKWISE )
 				{
 					ib[ indicesCnt++ ] = vIx[ 0 ];
 					ib[ indicesCnt++ ] = vIx[ 2 ];
