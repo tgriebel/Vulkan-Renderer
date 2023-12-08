@@ -115,15 +115,13 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	const uint32_t width = 1;
 	const uint32_t height = 1;
 
-	// Winding is reversed because you are viewing inside the box
-	// but the normal points outwards
 	const GeoBuilder::winding_t winding = GeoBuilder::WINDING_COUNTER_CLOCKWISE;
 
 	GeoBuilder::planeInfo_t info[ 6 ];
 	info[ 0 ].gridSize = vec2f( cellSize );
 	info[ 0 ].subDivisionsX = width;
 	info[ 0 ].subDivisionsY = height;
-	info[ 0 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 0 ].uvDy = vec2f( 0.0f, -1.0f );
 	info[ 0 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 0 ].origin = vec3f( 1.0f, 0.0f, 0.0f );
 	info[ 0 ].up = vec3f( 0.0f, 0.0f, 1.0f );
@@ -133,7 +131,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 1 ].gridSize = vec2f( cellSize );
 	info[ 1 ].subDivisionsX = width;
 	info[ 1 ].subDivisionsY = height;
-	info[ 1 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 1 ].uvDy = vec2f( 0.0f, -1.0f );
 	info[ 1 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 1 ].origin = vec3f( 0.0f, -1.0f, 0.0f );
 	info[ 1 ].up = vec3f( 0.0f, 0.0f, 1.0f );
@@ -143,7 +141,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 2 ].gridSize = vec2f( cellSize );
 	info[ 2 ].subDivisionsX = width;
 	info[ 2 ].subDivisionsY = height;
-	info[ 2 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 2 ].uvDy = vec2f( 0.0f, -1.0f );
 	info[ 2 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 2 ].origin = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 2 ].up = vec3f( 0.0f, 0.0f, 1.0f );
@@ -153,7 +151,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 3 ].gridSize = vec2f( cellSize );
 	info[ 3 ].subDivisionsX = width;
 	info[ 3 ].subDivisionsY = height;
-	info[ 3 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 3 ].uvDy = vec2f( 0.0f, -1.0f );
 	info[ 3 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 3 ].origin = vec3f( 0.0f, 1.0f, 0.0f );
 	info[ 3 ].up = vec3f( 0.0f, 0.0f, 1.0f );
@@ -163,7 +161,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 4 ].gridSize = vec2f( cellSize );
 	info[ 4 ].subDivisionsX = width;
 	info[ 4 ].subDivisionsY = height;
-	info[ 4 ].uvScale = vec2f( 1.0f, -1.0f );
+	info[ 4 ].uvDy = vec2f( 0.0f, -1.0f );
 	info[ 4 ].uvOffset = vec2f( 0.0f, 1.0f );
 	info[ 4 ].origin = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 4 ].up = vec3f( -1.0f, 0.0f, 0.0f );
@@ -173,7 +171,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 5 ].gridSize = vec2f( cellSize );
 	info[ 5 ].subDivisionsX = width;
 	info[ 5 ].subDivisionsY = height;
-	info[ 5 ].uvScale = vec2f( -1.0f, 1.0f );
+	info[ 5 ].uvDx = vec2f( -1.0f, 0.0f );
 	info[ 5 ].uvOffset = vec2f( 1.0f, 0.0f );
 	info[ 5 ].origin = vec3f( 0.0f, 0.0f, -1.0f );
 	info[ 5 ].up = vec3f( -1.0f, 0.0f, 0.0f );

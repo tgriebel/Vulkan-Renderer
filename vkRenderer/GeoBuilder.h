@@ -59,7 +59,8 @@ public:
 		vec3f				up;
 		vec3f				normal;
 		vec2f				uvOffset;
-		vec2f				uvScale;
+		vec2f				uvDx;
+		vec2f				uvDy;
 		bool				flipUv;
 		bool				centerAtOrigin;
 
@@ -69,7 +70,8 @@ public:
 			subDivisionsX = 1;
 			subDivisionsY = 1;
 			uvOffset = vec2f( 0.0f, 0.0f );
-			uvScale = vec2f( 1.0f, 1.0f );
+			uvDx = vec2f( 1.0f, 0.0f );
+			uvDy = vec2f( 0.0f, 1.0f );
 			origin = vec3f( 0.0f, 0.0f, 0.0f );
 			color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 			up = vec3f( 0.0f, 0.0f, 1.0f );
@@ -88,23 +90,6 @@ public:
 	
 	}
 
-	static float WrapU( const float u )
-	{
-		float s = u;
-		s = ( s > 1.0f ) ? ( s - floor( s ) ) : s;
-		s = Saturate( s );
-
-		return s;
-	}
-
-	static vec2f WrapUV( const vec2f& uv )
-	{
-		vec2f st = uv;
-		st[0] = WrapU( st[0] );
-		st[1] = WrapU( st[1] );
-		return st;
-	}
-
 	void AddPlaneSurf( const planeInfo_t& info )
 	{
 		const std::pair<size_t, size_t> sizeInVertices = std::pair<size_t, size_t>( info.subDivisionsX + 1, info.subDivisionsY + 1 );
@@ -116,9 +101,6 @@ public:
 		size_t vbIx = firstIndex;
 		vb.resize( vbIx + sizeInVertices.first * sizeInVertices.second );
 		ib.resize( indicesCnt + indicesPerQuad * info.subDivisionsX * info.subDivisionsY );
-
-		const vec2f uvDir = info.uvScale;
-		const vec2f uvOffset = info.uvOffset;
 
 		const vec2f gridSizeWs = vec2f( info.gridSize[ 0 ], info.gridSize[ 1 ] );
 		const vec2f cellSizeWs = vec2f( gridSizeWs[ 0 ] / info.subDivisionsX, gridSizeWs[ 1 ] / info.subDivisionsY );
@@ -139,21 +121,11 @@ public:
 
 				vert.tangent = side;
 				vert.bitangent = up;
-				vert.normal = normal;			
+				vert.normal = normal;
 
 				vert.color = info.color;
-				if( info.flipUv )
-				{
-					vert.texCoord[ 0 ] = ( uvOffset[ 0 ] + v * uvDir[ 1 ] );
-					vert.texCoord[ 1 ] = ( uvOffset[ 1 ] + u * uvDir[ 0 ] );
-				}
-				else 
-				{
-					vert.texCoord[ 0 ] = ( uvOffset[ 0 ] + u * uvDir[ 0 ] );
-					vert.texCoord[ 1 ] = ( uvOffset[ 1 ] + v * uvDir[ 1 ] );
-				}
-
-				vert.texCoord = WrapUV( vert.texCoord );
+				vert.texCoord = info.uvOffset;
+				vert.texCoord += u * info.uvDx + v * info.uvDy;
 
 				vert.pos = i * cellSizeWs[ 0 ] * side + j * cellSizeWs[ 1 ] * up;
 				if( info.centerAtOrigin )
