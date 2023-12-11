@@ -138,7 +138,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 			}
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
-			info.sampler = context.bilinearSampler;
+			info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView();
 			assert( info.imageView != nullptr );
 
@@ -183,7 +183,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 				}
 				else
 				{
-					info.sampler = context.bilinearSampler;
+					info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
 					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				}
 			}

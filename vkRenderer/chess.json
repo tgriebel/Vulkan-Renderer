@@ -25,23 +25,28 @@
 	},
 	{
 	  "name": "chapel_left.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_top.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_bottom.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_front.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_back.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_low.jpg",

@@ -28,6 +28,7 @@
 
 #include "../src/globals/common.h"
 #include "../src/globals/render_util.h"
+#include "../src/render_core/gpuImage.h"
 #include <gfxcore/scene/entity.h>
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/asset_types/gpuProgram.h>
@@ -185,19 +186,62 @@ int ParseImageObject( parseState_t& st, void* object )
 
 	char name[TOKEN_LEN] = "";
 	char type[TOKEN_LEN] = "";
+	char uvAddress[TOKEN_LEN] = "";
+	char uvFilter[TOKEN_LEN] = "";
 
-	const uint32_t objectCount = 2;
+	const uint32_t uvAddressEnumCount = 3;
+	static const enumString_t enumUvAddressMap[ uvAddressEnumCount ] =
+	{
+		MAKE_ENUM_STRING( SAMPLER_ADDRESS_WRAP ),
+		MAKE_ENUM_STRING( SAMPLER_ADDRESS_CLAMP_EDGE ),
+		MAKE_ENUM_STRING( SAMPLER_ADDRESS_CLAMP_BORDER ),
+	};
+
+	const uint32_t uvFilterEnumCount = 3;
+	static const enumString_t enumUvFilterMap[ uvFilterEnumCount ] =
+	{
+		MAKE_ENUM_STRING( SAMPLER_FILTER_NEAREST ),
+		MAKE_ENUM_STRING( SAMPLER_FILTER_BILINEAR ),
+		MAKE_ENUM_STRING( SAMPLER_FILTER_TRILINEAR ),
+	};
+
+	const uint32_t objectCount = 4;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
 		{ "type", &type, &ParseStringObject },
+		{ "uvAddress", &uvAddress, &ParseStringObject },
+		{ "uvFilter", &uvFilter, &ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
 
+	samplerState_t samplerState;
+	samplerState.addrMode = SAMPLER_ADDRESS_WRAP;
+	samplerState.filter = SAMPLER_FILTER_BILINEAR;
+
+	for( uint32_t i = 0; i < uvAddressEnumCount; ++i )
+	{
+		if( strcmp( uvAddress, enumUvAddressMap[ i ].name ) == 0 )
+		{
+			samplerState.addrMode = (samplerAddress_t)enumUvAddressMap[ i ].value;
+			break;
+		}
+	}
+
+	for ( uint32_t i = 0; i < uvFilterEnumCount; ++i )
+	{
+		if ( strcmp( uvFilter, enumUvFilterMap[ i ].name ) == 0 )
+		{
+			samplerState.filter = (samplerFilter_t)enumUvFilterMap[ i ].value;
+			break;
+		}
+	}
+
 	ImageLoader* loader = new ImageLoader();
 	loader->SetBasePath( TexturePath );
 	loader->SetTextureFile( name );
+	loader->SetSampler( samplerState );
 	loader->LoadAsCubemap( strcmp( type, "CUBE" ) == 0 ? true : false );
 
 	textureLib.AddDeferred( name, Asset<Image>::loadHandlerPtr_t( loader ) );

@@ -68,6 +68,7 @@ struct vk_formatTableEntry_t
 	VkFormat	vk_imgFmt;
 };
 
+
 static const vk_formatTableEntry_t vk_formatTable[] =
 {
 	{ IMAGE_FMT_UNKNOWN,		VK_FORMAT_UNDEFINED				},
@@ -88,6 +89,22 @@ static const vk_formatTableEntry_t vk_formatTable[] =
 	{ IMAGE_FMT_RG_32,			VK_FORMAT_R32G32_SFLOAT			},
 };
 
+
+struct vk_samplerAddressTableEntry_t
+{
+	samplerAddress_t		samplerAddr;
+	VkSamplerAddressMode	vk_samplerAddr;
+};
+
+
+static const vk_samplerAddressTableEntry_t vk_samplerAddressTable[] =
+{
+	{ SAMPLER_ADDRESS_WRAP,			VK_SAMPLER_ADDRESS_MODE_REPEAT },
+	{ SAMPLER_ADDRESS_CLAMP_EDGE,	VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE },
+	{ SAMPLER_ADDRESS_CLAMP_BORDER,	VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER },
+};
+
+
 static inline constexpr VkFormat vk_GetTextureFormat( const imageFmt_t fmt )
 {
 	for( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i ) {
@@ -107,6 +124,28 @@ static inline constexpr imageFmt_t vk_GetTextureFormat( const VkFormat fmt )
 		}
 	}
 	return IMAGE_FMT_UNKNOWN;
+}
+
+
+static inline constexpr VkSamplerAddressMode vk_GetSamplerAddress( const samplerAddress_t addr )
+{
+	for ( uint32_t i = 0; i < COUNTARRAY( vk_samplerAddressTable ); ++i ) {
+		if ( vk_samplerAddressTable[ i ].samplerAddr == addr ) {
+			return vk_samplerAddressTable[ i ].vk_samplerAddr;
+		}
+	}
+	return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+}
+
+
+static inline constexpr samplerAddress_t vk_GetSamplerAddress( const VkSamplerAddressMode addr )
+{
+	for ( uint32_t i = 0; i < COUNTARRAY( vk_samplerAddressTable ); ++i ) {
+		if ( vk_samplerAddressTable[ i ].vk_samplerAddr == addr ) {
+			return vk_samplerAddressTable[ i ].samplerAddr;
+		}
+	}
+	return SAMPLER_ADDRESS_WRAP;
 }
 
 

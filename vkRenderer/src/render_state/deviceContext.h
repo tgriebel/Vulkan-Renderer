@@ -63,7 +63,7 @@ public:
 	VkQueue								gfxContext;
 	VkQueue								presentQueue;
 	VkQueue								computeContext;
-	VkSampler							bilinearSampler;
+	VkSampler							bilinearSampler[ 3 ];
 	VkSampler							depthShadowSampler;
 	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
 	uint32_t							bufferId;
