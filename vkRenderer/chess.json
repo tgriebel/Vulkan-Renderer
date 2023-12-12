@@ -21,7 +21,8 @@
 	},
 	{
 	  "name": "chapel_right.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_left.jpg",
