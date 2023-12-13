@@ -32,6 +32,7 @@ VS_LAYOUT_BASIC_IO
 
 void main()
 {
+	objectPosition	= inPosition;
 	worldPosition	= vec4( inPosition, 1.0f );
     gl_Position		= worldPosition;
     fragColor		= inColor;

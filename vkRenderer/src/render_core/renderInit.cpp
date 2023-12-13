@@ -132,7 +132,7 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = false;
+	const bool useCubeViews = true;
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();

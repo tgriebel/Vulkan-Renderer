@@ -69,6 +69,7 @@ void main()
 	const float maxHeight = globals.generic.x;
 	vec3 position = inPosition;
 	position.z += maxHeight * heightMapValue;
+	objectPosition = position;
 	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
     gl_Position = view.projMat * view.viewMat * worldPosition;
     fragColor = inColor;

@@ -12,35 +12,43 @@
   "images": [
 	{
 	  "name": "chapel_right.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_left.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_top.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_bottom.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_front.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_back.jpg",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "chapel_low.jpg",
-	  "type": "CUBE"
+	  "type": "CUBE",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
 	  "name": "anticChapel_4k.hdr",
-	  "type": "2D"
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_WRAP"
 	}
   ],
   "materials": [

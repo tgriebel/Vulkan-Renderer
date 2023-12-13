@@ -39,6 +39,7 @@ void main()
 	const view_t view = viewUbo.views[ viewlId ];
 
 	vec3 position = inPosition;
+	objectPosition = position;
 	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
     gl_Position = view.projMat * view.viewMat * worldPosition;
     fragColor = inColor;

@@ -43,6 +43,7 @@ vec2 uvs[ 3 ] = vec2[](
 );
 
 void main() {
+	objectPosition = vec3( positions[ gl_VertexIndex ].xy, 0.0f );
 	worldPosition = vec4( positions[ gl_VertexIndex ].xy, 0.0, 1.0 );
 	gl_Position = worldPosition;
 	fragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f );

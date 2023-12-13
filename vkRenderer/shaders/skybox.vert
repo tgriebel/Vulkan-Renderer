@@ -39,6 +39,7 @@ void main()
 
 	const float maxHeight = 1.0f;
 	vec3 position = inPosition;
+	objectPosition = position;
 	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
     gl_Position = view.projMat * view.viewMat * worldPosition;
 	gl_Position.z = 0.0f;
