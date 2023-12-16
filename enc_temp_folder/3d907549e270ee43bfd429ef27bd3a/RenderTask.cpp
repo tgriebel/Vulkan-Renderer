@@ -140,7 +140,6 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			continue;
 		}
 
-		// FIXME: Make this it's own task
 		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
 		{
 #ifdef USE_IMGUI
