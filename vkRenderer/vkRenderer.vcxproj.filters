@@ -325,6 +325,9 @@
     <None Include="shaders\equirectangularSky.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\preCalculatedDiffuseIBL.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

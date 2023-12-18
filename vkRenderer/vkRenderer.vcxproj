@@ -280,6 +280,7 @@
     <None Include="shaders\pixelDefault.frag" />
     <None Include="shaders\pixelSimple.frag" />
     <None Include="shaders\postProcess.frag" />
+    <None Include="shaders\preCalculatedDiffuseIBL.frag" />
     <None Include="shaders\resolve.frag" />
     <None Include="shaders\shadow.frag" />
     <None Include="shaders\skybox.frag" />
