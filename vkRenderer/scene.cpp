@@ -291,28 +291,28 @@ void UpdateScene( Scene* scene )
 		// FIXME: race conditions
 		// Need to do a ping-pong update
 		if ( g_window.input.IsKeyPressed( 'D' ) ) {
-			scene->mainCamera->MoveRight( cameraSpeed * dt );
+			scene->mainCamera->Truck( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( 'A' ) ) {
-			scene->mainCamera->MoveRight( -cameraSpeed * dt );
+			scene->mainCamera->Truck( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( 'W' ) ) {
-			scene->mainCamera->MoveForward( cameraSpeed * dt );
+			scene->mainCamera->Dolly( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( 'S' ) ) {
-			scene->mainCamera->MoveForward( -cameraSpeed * dt );
+			scene->mainCamera->Dolly( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '8' ) ) {
-			scene->mainCamera->AdjustPitch( -cameraSpeed * dt );
+			scene->mainCamera->Tilt( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '2' ) ) {
-			scene->mainCamera->AdjustPitch( cameraSpeed * dt );
+			scene->mainCamera->Tilt( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '4' ) ) {
-			scene->mainCamera->AdjustYaw( cameraSpeed * dt );
+			scene->mainCamera->Pan( cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '6' ) ) {
-			scene->mainCamera->AdjustYaw( -cameraSpeed * dt );
+			scene->mainCamera->Pan( -cameraSpeed * dt );
 		}
 		if ( g_window.input.IsKeyPressed( '+' ) ) {
 			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ) );
@@ -329,8 +329,8 @@ void UpdateScene( Scene* scene )
 		const float maxSpeed = mouse.speed;
 		const float yawDelta = maxSpeed * mouse.dx;
 		const float pitchDelta = -maxSpeed * mouse.dy;
-		scene->mainCamera->AdjustYaw( yawDelta );
-		scene->mainCamera->AdjustPitch( pitchDelta );
+		scene->mainCamera->Pan( yawDelta );
+		scene->mainCamera->Tilt( pitchDelta );
 	}
 	else if ( mouse.leftDown )
 	{
