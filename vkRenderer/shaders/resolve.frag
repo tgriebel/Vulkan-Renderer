@@ -32,10 +32,18 @@
 PS_LAYOUT_BASIC_IO
 PS_LAYOUT_MRT_1_OUT
 
+struct ImageProcess
+{
+	vec4 dimensions;
+	vec4 generic0;
+	vec4 generic1;
+	vec4 generic2;
+};
+
 #ifdef USE_MSAA
-PS_LAYOUT_IMAGE_PROCESS( sampler2DMS )
+PS_LAYOUT_IMAGE_PROCESS( sampler2DMS, ImageProcess )
 #else
-PS_LAYOUT_IMAGE_PROCESS( sampler2D )
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
 #endif
 
 void main()

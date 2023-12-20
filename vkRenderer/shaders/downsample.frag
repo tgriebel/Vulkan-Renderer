@@ -30,7 +30,15 @@
 
 PS_LAYOUT_BASIC_IO
 
-PS_LAYOUT_IMAGE_PROCESS( sampler2D )
+struct ImageProcess
+{
+    vec4 dimensions;
+    vec4 generic0;
+    vec4 generic1;
+    vec4 generic2;
+};
+
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
 
 void main()
 {

@@ -30,7 +30,15 @@
 
 PS_LAYOUT_BASIC_IO
 
-PS_LAYOUT_IMAGE_PROCESS( sampler2D )
+struct ImageProcess
+{
+    vec4 dimensions;
+    vec4 generic0;
+    vec4 generic1;
+    vec4 generic2;
+};
+
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
 
 const uint weightCount = 5;
 const float weights[ weightCount ] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };

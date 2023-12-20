@@ -79,14 +79,6 @@ struct view_t
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
-#define IMAGE_PROCESS_LAYOUT( S, N )		layout( set = S, binding = N ) uniform ImageProcess						\
-											{																		\
-												vec4	dimensions;													\
-												vec4	generic0;													\
-												vec4	generic1;													\
-												vec4	generic2;													\
-											} imageProcess;
-
 #define CONSTANT_LAYOUT( S, N, TYPE, NAME )	layout( set = S, binding = N ) uniform ShaderConstants					\
 											{																		\
 												TYPE	NAME;														\
@@ -216,11 +208,11 @@ struct view_t
 											PS_IN																	\
 											PS_OUT
 
-#define PS_LAYOUT_IMAGE_PROCESS( SAMPLER )	GLOBALS_LAYOUT( 0, 0 )													\
-											VIEW_LAYOUT( 0, 1)														\
-											SAMPLER_2D_LAYOUT( 0, 2 )												\
-											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-											MATERIAL_LAYOUT( 0, 4 )													\
-											CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
-											STENCIL_LAYOUT( 1, 1, SAMPLER )											\
-											IMAGE_PROCESS_LAYOUT( 1, 2 )
+#define PS_LAYOUT_IMAGE_PROCESS( SAMPLER, TYPE )	GLOBALS_LAYOUT( 0, 0 )													\
+													VIEW_LAYOUT( 0, 1)														\
+													SAMPLER_2D_LAYOUT( 0, 2 )												\
+													SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+													MATERIAL_LAYOUT( 0, 4 )													\
+													CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
+													STENCIL_LAYOUT( 1, 1, SAMPLER )											\
+													CONSTANT_LAYOUT( 1, 2, TYPE, imageProcess )
