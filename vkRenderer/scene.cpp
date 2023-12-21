@@ -229,6 +229,8 @@ void InitScene( Scene* scene )
 
 	scene->Init();
 
+	scene->mainCamera->Translate( vec4f( 0.0f, 1.66f, 1.0f, 0.0f ) );
+
 	{
 		Entity* ent = new Entity();
 		scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
@@ -339,12 +341,7 @@ void UpdateScene( Scene* scene )
 	}
 
 	// Skybox
-	vec3f skyBoxOrigin;
-	skyBoxOrigin[ 0 ] = scene->mainCamera->GetOrigin()[ 0 ];
-	skyBoxOrigin[ 1 ] = scene->mainCamera->GetOrigin()[ 1 ];
-	skyBoxOrigin[ 2 ] = scene->mainCamera->GetOrigin()[ 2 ];
-	( scene->FindEntity( "_skybox" ) )->SetOrigin( skyBoxOrigin );
-
+	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );
 	
 	if(0)
 	{
