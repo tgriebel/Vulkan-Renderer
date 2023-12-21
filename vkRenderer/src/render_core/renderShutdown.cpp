@@ -52,6 +52,12 @@ void Renderer::Destroy()
 		resolve->Shutdown();
 	}
 
+	for ( uint32_t i = 0; i < 6; ++i ) {
+		if ( diffuseIBL[ i ] != nullptr ) {
+			diffuseIBL[ i ]->Shutdown();
+		}
+	}
+
 	for( uint32_t i = 0; i < 2; ++i ) {
 		if( pingPongQueue[ i ] != nullptr ) {
 			pingPongQueue[ i ]->Shutdown();
@@ -114,12 +120,16 @@ void Renderer::DestroyFramebuffers()
 
 	delete resources.cubeFbColorImage.gpuImage;
 	delete resources.cubeFbDepthImage.gpuImage;
+	delete resources.diffuseIblImage.gpuImage;
 
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
 		resources.cubeImageViews[ i ].Destroy();
 		resources.cubeDepthImageViews[ i ].Destroy();
 		cubeMapFrameBuffer[ i ].Destroy();
+
+		resources.diffuseIblImageViews[ i ].Destroy();
+		diffuseIblFrameBuffer[ i ].Destroy();
 	}
 
 	renderContext.frameBufferMemory.Destroy();

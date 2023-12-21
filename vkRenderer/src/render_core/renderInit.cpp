@@ -132,13 +132,29 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = true;
+	const bool useCubeViews = false;
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();
 		}
 	}
 	view2Ds[ 0 ]->Commit();
+
+	for ( uint32_t i = 0; i < 6; ++i )
+	{
+		imageProcessCreateInfo_t info = {};
+		info.name = "DiffuseIBL";
+		info.clear = false;
+		info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
+		info.fb = &diffuseIblFrameBuffer[ i ];
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.inputImages = 1;
+
+		diffuseIBL[ i ] = new ImageProcess( info );
+
+		diffuseIBL[ i ]->SetSourceImage( 0, &resources.diffuseIblImageViews[ i ] );
+	}
 
 	{
 		imageProcessCreateInfo_t info = {};
@@ -208,6 +224,9 @@ void Renderer::Init()
 	if ( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+		}
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			schedule.Queue( diffuseIBL[ i ] );
 		}
 	}
 	schedule.Queue( resolve );
@@ -627,6 +646,35 @@ void Renderer::CreateFramebuffers()
 		}
 	}
 
+	// Diffuse IBL images
+	{
+		imageInfo_t colorInfo{};
+		colorInfo.width = 256;
+		colorInfo.height = 256;
+		colorInfo.mipLevels = 1;
+		colorInfo.layers = 6;
+		colorInfo.subsamples = IMAGE_SMP_1;
+		colorInfo.fmt = IMAGE_FMT_RGBA_16;
+		colorInfo.type = IMAGE_TYPE_CUBE;
+		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		colorInfo.tiling = IMAGE_TILING_MORTON;
+
+		CreateImage( "diffuseIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.diffuseIblImage );
+
+		for ( uint32_t i = 0; i < 6; ++i )
+		{
+			imageSubResourceView_t subView;
+			subView.arrayCount = 1;
+			subView.baseArray = i;
+			subView.baseMip = 0;
+			subView.mipLevels = 1;
+
+			colorInfo.type = IMAGE_TYPE_2D;
+
+			resources.diffuseIblImageViews[ i ].Init( resources.diffuseIblImage, colorInfo, subView );
+		}
+	}
+
 	// Resolve image
 	{
 		imageInfo_t info{};
@@ -771,6 +819,20 @@ void Renderer::CreateFramebuffers()
 			fbInfo.lifetime = LIFETIME_TEMP;
 
 			cubeMapFrameBuffer[ i ].Create( fbInfo );
+		}
+	}
+
+	// Diffuse IBL Render
+	{
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			frameBufferCreateInfo_t fbInfo;
+			fbInfo.name = "DiffuseIblFB";
+			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
+				fbInfo.color0[ frameIx ] = &resources.diffuseIblImageViews[ i ];
+			}
+			fbInfo.lifetime = LIFETIME_TEMP;
+
+			diffuseIblFrameBuffer[ i ].Create( fbInfo );
 		}
 	}
 }

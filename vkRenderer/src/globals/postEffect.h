@@ -41,6 +41,13 @@ private:
 public:
 	ImageProcess() {}
 
+	/*
+	~ImageProcess()
+	{
+		Shutdown();
+	}
+	*/
+
 	ImageProcess( const imageProcessCreateInfo_t& info )
 	{
 		Init( info );

@@ -29,10 +29,27 @@
 #include "globals.h"
 #include "color.h"
 
-PS_LAYOUT_STANDARD( sampler2D )
+PS_LAYOUT_BASIC_IO
+
+struct DiffuseIblConstants
+{
+    mat4 viewMat;
+};
+
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, DiffuseIblConstants )
 
 void main()
 {
+    const mat4 viewMat = imageProcess.viewMat;
+    const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
+    const vec3 up = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 1 ][ 0 ], viewMat[ 2 ][ 0 ] ) );
+    const vec3 right = normalize( vec3( viewMat[ 0 ][ 1 ], viewMat[ 1 ][ 1 ], viewMat[ 2 ][ 1 ] ) );
+    const vec3 viewVector = normalize( forward + ( 2.0f * fragTexCoord.x - 1.0f ) * up + ( 2.0f * fragTexCoord.y - 1.0f ) * right );
+
+    outColor = vec4( texture( cubeSamplers[ 0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
+    outColor = LinearToSrgb( outColor );
+
+    /*
     vec3 normal = normalize( objectPosition );
 
     vec3 irradiance = vec3( 0.0f );
@@ -60,4 +77,5 @@ void main()
     irradiance = PI * irradiance * ( 1.0f / float( nrSamples ) );
 
 	outColor = vec4( irradiance, 1.0f );
+    */
 }

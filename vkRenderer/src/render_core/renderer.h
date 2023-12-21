@@ -135,8 +135,10 @@ public:
 	Image				mainColorImage;
 	Image				cubeFbColorImage;
 	Image				cubeFbDepthImage;
+	Image				diffuseIblImage;
 	ImageView			cubeImageViews[ 6 ];
 	ImageView			cubeDepthImageViews[ 6 ];
+	ImageView			diffuseIblImageViews[ 6 ];
 	Image				gBufferLayerImage;
 	Image				depthStencilImage;
 	ImageView			depthImageView;
@@ -188,6 +190,7 @@ private:
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
 	ImageProcess*						resolve = nullptr;
+	ImageProcess*						diffuseIBL[ 6 ] = {};
 	ImageProcess*						pingPongQueue[2] = {};
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
@@ -223,6 +226,7 @@ private:
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
 	FrameBuffer							cubeMapFrameBuffer[ 6 ];
+	FrameBuffer							diffuseIblFrameBuffer[ 6 ];
 	FrameBuffer							mainColorResolved;
 	FrameBuffer							tempColor;
 

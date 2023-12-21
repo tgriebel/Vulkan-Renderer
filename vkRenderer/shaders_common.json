@@ -113,5 +113,12 @@
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true,
     },
+	{
+      "name": "DiffuseIBL",
+      "vs": "fullscreenVS.spv",
+      "ps": "preCalculatedDiffuseIblPS.spv",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true,
+    },
   ]
 }
