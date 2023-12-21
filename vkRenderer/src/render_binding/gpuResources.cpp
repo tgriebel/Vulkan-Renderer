@@ -205,7 +205,7 @@ bool GpuBuffer::VisibleToCpu() const
 }
 
 
-void GpuBuffer::CopyData( void* data, const size_t sizeInBytes )
+void GpuBuffer::CopyData( const void* data, const size_t sizeInBytes )
 {
 	const uint32_t id = ClampId( context.bufferId );
 

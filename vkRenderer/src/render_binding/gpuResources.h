@@ -69,7 +69,7 @@ public:
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			Allocate( const uint64_t size );
-	void			CopyData( void* data, const size_t sizeInBytes );
+	void			CopyData( const void* data, const size_t sizeInBytes );
 	void			CopyFrom( void* data, const size_t sizeInBytes ) const;
 
 	const char*		GetName() const;

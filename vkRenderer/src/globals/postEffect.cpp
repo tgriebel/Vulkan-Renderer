@@ -25,17 +25,15 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_transitionState.flags.readAfter = !info.present;
 	m_transitionState.flags.readOnly = true;
 
-	m_constants[ 0 ] = info.constants[ 0 ];
-	m_constants[ 1 ] = info.constants[ 1 ];
-	m_constants[ 2 ] = info.constants[ 2 ];
-
 	m_resources = info.resources;
 	m_context = info.context;
+
+	m_callback = info.callback;
 
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
-	m_buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	m_pass->parms = m_context->RegisterBindParm( bindset_imageProcess );
 }
@@ -47,6 +45,14 @@ void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 	if( slot < m_pass->codeImages.Count() ) {
 		m_pass->codeImages[ slot ] = image;
 	}
+}
+
+
+void ImageProcess::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
+{
+	assert( sizeInBytes <= MaxConstantBlockSizeInBytes );
+	m_buffer.SetPos( ReservedConstantSizeInBytes );
+	m_buffer.CopyData( dataBlock, Min( sizeInBytes, MaxConstantBlockSizeInBytes ) );
 }
 
 
@@ -66,24 +72,29 @@ void ImageProcess::Shutdown()
 
 void ImageProcess::FrameBegin()
 {
+	// Set standard constants
 	{
 		const viewport_t& viewport = m_pass->GetViewport();
 		const float w = float( viewport.width );
 		const float h = float( viewport.height );
 
-		imageProcessObject_t process = {};
-		process.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
-		process.generic0 = m_constants[ 0 ];
-		process.generic1 = m_constants[ 1 ];
-		process.generic2 = m_constants[ 2 ];
+		vec4f dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 
 		m_buffer.SetPos( 0 );
-		m_buffer.CopyData( &process, sizeof( imageProcessObject_t ) );
+		m_buffer.CopyData( &dimensions, sizeof( vec4f ) );
 	}
 
-	m_pass->parms->Bind( bind_sourceImages, &m_pass->codeImages );
-	m_pass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
-	m_pass->parms->Bind( bind_imageProcess, &m_buffer );
+	// Set standard binds
+	{
+		m_pass->parms->Bind( bind_sourceImages, &m_pass->codeImages );
+		m_pass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
+		m_pass->parms->Bind( bind_imageProcess, &m_buffer );
+	}
+
+	// Allow custom constants/binds
+	if ( m_callback != nullptr ) {
+		( *m_callback )( this );
+	}
 }
 
 

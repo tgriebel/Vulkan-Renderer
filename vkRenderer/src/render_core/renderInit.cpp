@@ -132,7 +132,7 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = false;
+	const bool useCubeViews = true;
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();
@@ -151,9 +151,24 @@ void Renderer::Init()
 		info.resources = &resources;
 		info.inputImages = 1;
 
+		Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+		camera.SetFov( Radians( 90.0f ) );
+		camera.SetAspectRatio( 1.0f );
+
+		switch( i )
+		{
+			case 0:	camera.Pan( 0.0f * PI );	break;
+			case 1:	camera.Pan( 0.5f * PI );	break;
+			case 2:	camera.Pan( 1.0f * PI );	break;
+			case 3:	camera.Pan( 1.5f * PI );	break;
+			case 4:	camera.Tilt( -0.5f * PI );	break;
+			case 5:	camera.Tilt( 0.5f * PI );	break;
+		}
+
 		diffuseIBL[ i ] = new ImageProcess( info );
 
 		diffuseIBL[ i ]->SetSourceImage( 0, &resources.diffuseIblImageViews[ i ] );
+		diffuseIBL[ i ]->SetConstants( &camera.GetViewMatrix(), sizeof( mat4x4f ) );
 	}
 
 	{
@@ -186,15 +201,19 @@ void Renderer::Init()
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.inputImages = 1;
-		info.constants[ 0 ][ 0 ] = 1.0f;
+
+		uint32_t verticalPass = 0;
 
 		pingPongQueue[ 0 ] = new ImageProcess( info );
 		pingPongQueue[ 0 ]->SetSourceImage( 0, &resources.mainColorResolvedImage );
+		pingPongQueue[ 0 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+
+		verticalPass = 1;
 
 		info.fb = &mainColorResolved;
-		info.constants[ 0 ][ 0 ] = 0.0f;
 		pingPongQueue[ 1 ] = new ImageProcess( info );
 		pingPongQueue[ 1 ]->SetSourceImage( 0, &resources.tempColorImage );
+		pingPongQueue[ 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
 	}
 
 	/*

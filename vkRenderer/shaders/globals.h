@@ -81,6 +81,7 @@ struct view_t
 
 #define CONSTANT_LAYOUT( S, N, TYPE, NAME )	layout( set = S, binding = N ) uniform ShaderConstants					\
 											{																		\
+												vec4	dimensions;													\
 												TYPE	NAME;														\
 											};
 

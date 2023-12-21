@@ -32,7 +32,6 @@ PS_LAYOUT_BASIC_IO
 
 struct ImageProcess
 {
-    vec4 dimensions;
     vec4 generic0;
     vec4 generic1;
     vec4 generic2;
@@ -47,7 +46,7 @@ void main()
 {
     const bool horizontal = ( imageProcess.generic0.x != 0.0f ) ? true : false;
 
-    vec2 offset = imageProcess.dimensions.zw;
+    vec2 offset = dimensions.zw;
     outColor = vec4( texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb * weights[ 0 ], 1.0f );
 
     if ( horizontal )

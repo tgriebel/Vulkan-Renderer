@@ -34,7 +34,6 @@ PS_LAYOUT_MRT_1_OUT
 
 struct ImageProcess
 {
-	vec4 dimensions;
 	vec4 generic0;
 	vec4 generic1;
 	vec4 generic2;
@@ -48,7 +47,7 @@ PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
 
 void main()
 {
-    const ivec2 pixelLocation = ivec2( imageProcess.dimensions.xy * fragTexCoord.xy );
+    const ivec2 pixelLocation = ivec2( dimensions.xy * fragTexCoord.xy );
 
 	outColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	for ( int i = 0; i < int( globals.numSamples ); ++i ) {
