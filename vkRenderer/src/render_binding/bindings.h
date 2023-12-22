@@ -15,6 +15,7 @@ BINDING( computeImage,			IMAGE_2D,			1, BIND_STATE_CS );
 // Post Effect Resources
 BINDING( imageProcess,			CONSTANT_BUFFER,	1,						BIND_STATE_PS );
 BINDING( sourceImages,			IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
+BINDING( sourceCubeImages,		IMAGE_CUBE,			1,						BIND_STATE_PS );
 
 // Raster Resources
 BINDING( viewBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL );
@@ -75,6 +76,7 @@ const uint64_t bindset_compute = Hash( "bindset_compute" );
 static const ShaderBinding g_imageProcessBindings[] =
 {
 	bind_sourceImages,
+	bind_sourceCubeImages,
 	bind_imageStencil,
 	bind_imageProcess,
 };

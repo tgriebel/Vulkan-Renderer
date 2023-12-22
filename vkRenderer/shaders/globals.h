@@ -130,6 +130,8 @@ struct view_t
 
 #define CODE_IMAGE_LAYOUT( S, N, SAMPLER )	layout( set = S, binding = N ) uniform SAMPLER codeSamplers[];
 
+#define CODE_IMAGE_CUBE_LAYOUT( S, N )		layout( set = S, binding = N ) uniform samplerCube codeCubeSamplers[];
+
 #define STENCIL_LAYOUT( S, N, SAMPLER )		layout( set = S, binding = N ) uniform SAMPLER stencilImage;
 
 #define MATERIAL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer MaterialBuffer					\
@@ -209,11 +211,13 @@ struct view_t
 											PS_IN																	\
 											PS_OUT
 
-#define PS_LAYOUT_IMAGE_PROCESS( SAMPLER, TYPE )	GLOBALS_LAYOUT( 0, 0 )													\
-													VIEW_LAYOUT( 0, 1)														\
-													SAMPLER_2D_LAYOUT( 0, 2 )												\
-													SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-													MATERIAL_LAYOUT( 0, 4 )													\
-													CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
-													STENCIL_LAYOUT( 1, 1, SAMPLER )											\
-													CONSTANT_LAYOUT( 1, 2, TYPE, imageProcess )
+#define PS_LAYOUT_IMAGE_PROCESS( SAMPLER, TYPE )																	\
+											GLOBALS_LAYOUT( 0, 0 )													\
+											VIEW_LAYOUT( 0, 1)														\
+											SAMPLER_2D_LAYOUT( 0, 2 )												\
+											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
+											MATERIAL_LAYOUT( 0, 4 )													\
+											CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
+											CODE_IMAGE_CUBE_LAYOUT( 1, 1 )											\
+											STENCIL_LAYOUT( 1, 2, SAMPLER )											\
+											CONSTANT_LAYOUT( 1, 3, TYPE, imageProcess )

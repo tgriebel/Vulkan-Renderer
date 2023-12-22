@@ -86,9 +86,10 @@ void ImageProcess::FrameBegin()
 
 	// Set standard binds
 	{
-		m_pass->parms->Bind( bind_sourceImages, &m_pass->codeImages );
-		m_pass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
-		m_pass->parms->Bind( bind_imageProcess, &m_buffer );
+		m_pass->parms->Bind( bind_sourceImages,		&m_pass->codeImages );
+		m_pass->parms->Bind( bind_sourceCubeImages, &m_resources->cubeFbImageView );
+		m_pass->parms->Bind( bind_imageStencil,		&m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
+		m_pass->parms->Bind( bind_imageProcess,		&m_buffer );
 	}
 
 	// Allow custom constants/binds

@@ -46,17 +46,9 @@ void main()
     const vec3 right = normalize( vec3( viewMat[ 0 ][ 1 ], viewMat[ 1 ][ 1 ], viewMat[ 2 ][ 1 ] ) );
     const vec3 viewVector = normalize( forward + ( 2.0f * fragTexCoord.x - 1.0f ) * up + ( 2.0f * fragTexCoord.y - 1.0f ) * right );
 
-    outColor = vec4( texture( cubeSamplers[ 0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
-    outColor = LinearToSrgb( outColor );
-
-    /*
-    vec3 normal = normalize( objectPosition );
+    // outColor = vec4( texture( cubeSamplers[ 0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
     vec3 irradiance = vec3( 0.0f );
-
-    vec3 up = vec3( 0.0f, 1.0f, 0.0f );
-    vec3 right = normalize( cross( up, normal ) );
-    up = normalize( cross( normal, right ) );
 
     // https://learnopengl.com/PBR/IBL/Diffuse-irradiance
     float sampleDelta = 0.025f;
@@ -68,14 +60,13 @@ void main()
             // spherical to cartesian (in tangent space)
             vec3 tangentSample = vec3( sin( theta ) * cos( phi ), sin( theta ) * sin( phi ), cos( theta ) );
             // tangent space to world
-            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
+            vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
 
-            irradiance += texture( cubeSamplers[ 0 ], sampleVec ).rgb * cos( theta ) * sin( theta );
+            irradiance += texture( codeCubeSamplers[ 0 ], sampleVec ).rgb * cos( theta ) * sin( theta );
             nrSamples++;
         }
     }
     irradiance = PI * irradiance * ( 1.0f / float( nrSamples ) );
 
 	outColor = vec4( irradiance, 1.0f );
-    */
 }

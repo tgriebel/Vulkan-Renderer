@@ -170,7 +170,7 @@ void Renderer::Init()
 		mat4x4f viewMatrix = camera.GetViewMatrix();
 		viewMatrix[ 3 ][ 3 ] = 0.0f;
 
-		diffuseIBL[ i ]->SetSourceImage( 0, &resources.diffuseIblImageViews[ i ] );
+		diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
 		diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 	}
 
@@ -651,6 +651,8 @@ void Renderer::CreateFramebuffers()
 		depthInfo.fmt = IMAGE_FMT_D_16;
 
 		CreateImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbDepthImage );
+
+		resources.cubeFbImageView.Init( resources.cubeFbColorImage, colorInfo );
 
 		for ( uint32_t i = 0; i < 6; ++i )
 		{

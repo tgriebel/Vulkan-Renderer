@@ -100,6 +100,7 @@ void Renderer::DestroyFramebuffers()
 	resources.mainColorResolvedImageView.Destroy();
 	resources.depthResolvedImageView.Destroy();
 	resources.stencilResolvedImageView.Destroy();
+	resources.cubeFbImageView.Destroy();
 
 	delete resources.tempColorImage.gpuImage;
 	delete resources.mainColorImage.gpuImage;

@@ -136,6 +136,7 @@ public:
 	Image				cubeFbColorImage;
 	Image				cubeFbDepthImage;
 	Image				diffuseIblImage;
+	ImageView			cubeFbImageView;
 	ImageView			cubeImageViews[ 6 ];
 	ImageView			cubeDepthImageViews[ 6 ];
 	ImageView			diffuseIblImageViews[ 6 ];
