@@ -1,25 +1,2 @@
-﻿  scene.cpp
-  chessScene.cpp
-  nesScene.cpp
-  sceneParser.cpp
-  drawpass.cpp
-  drawGroup.cpp
-  postEffect.cpp
-  renderView.cpp
-  io.cpp
-  descriptorWrites.cpp
-  gpuTransfer.cpp
-  pipeline.cpp
-  RenderTask.cpp
-  debugMenu.cpp
-  renderCommand.cpp
-  renderInit.cpp
-  renderShutdown.cpp
-  renderer.cpp
-  cmdContext.cpp
-  deviceContext.cpp
-  Generating Code...
-  Compiling...
-  vulkinTestApp.cpp
-  Generating Code...
+﻿  renderInit.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

@@ -157,18 +157,21 @@ void Renderer::Init()
 
 		switch( i )
 		{
-			case 0:	camera.Pan( 0.0f * PI );	break;
-			case 1:	camera.Pan( 0.5f * PI );	break;
-			case 2:	camera.Pan( 1.0f * PI );	break;
-			case 3:	camera.Pan( 1.5f * PI );	break;
-			case 4:	camera.Tilt( -0.5f * PI );	break;
-			case 5:	camera.Tilt( 0.5f * PI );	break;
+			case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
+			case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
+			case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
+			case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
+			case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
+			case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
 		}
 
 		diffuseIBL[ i ] = new ImageProcess( info );
 
+		mat4x4f viewMatrix = camera.GetViewMatrix();
+		viewMatrix[ 3 ][ 3 ] = 0.0f;
+
 		diffuseIBL[ i ]->SetSourceImage( 0, &resources.diffuseIblImageViews[ i ] );
-		diffuseIBL[ i ]->SetConstants( &camera.GetViewMatrix(), sizeof( mat4x4f ) );
+		diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 	}
 
 	{
