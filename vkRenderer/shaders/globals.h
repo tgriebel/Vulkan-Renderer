@@ -79,9 +79,16 @@ struct view_t
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
-#define CONSTANT_LAYOUT( S, N, TYPE, NAME )	layout( set = S, binding = N ) uniform ShaderConstants					\
+#define IMAGE_CONSTANT_LAYOUT( S, N, TYPE, NAME )																	\
+											layout( set = S, binding = N ) uniform ShaderConstants					\
 											{																		\
 												vec4	dimensions;													\
+												TYPE	NAME;														\
+											};
+
+#define CONSTANT_LAYOUT( S, N, TYPE, NAME )																			\
+											layout( set = S, binding = N ) uniform ShaderConstants					\
+											{																		\
 												TYPE	NAME;														\
 											};
 
@@ -220,4 +227,4 @@ struct view_t
 											CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
 											CODE_IMAGE_CUBE_LAYOUT( 1, 1 )											\
 											STENCIL_LAYOUT( 1, 2, SAMPLER )											\
-											CONSTANT_LAYOUT( 1, 3, TYPE, imageProcess )
+											IMAGE_CONSTANT_LAYOUT( 1, 3, TYPE, imageProcess )
