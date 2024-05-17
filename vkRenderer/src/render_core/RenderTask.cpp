@@ -33,6 +33,9 @@
 #include "../../external/imgui/backends/imgui_impl_glfw.h"
 #include "../../external/imgui/backends/imgui_impl_vulkan.h"
 
+#include <SysCore/serializer.h>
+#include <GfxCore/io/serializeClasses.h>
+
 extern imguiControls_t			g_imguiControls;
 #endif
 
@@ -362,14 +365,15 @@ void ImageWritebackTask::FrameEnd()
 
 	assert( m_writebackBuffer.VisibleToCpu() );
 
-	ImageBuffer<Color> buffer;
-	buffer.Init( m_image->info.width, m_image->info.height, m_image->info.layers );
+	ImageBuffer<Color> imageBuffer;
+	imageBuffer.Init( m_image->info.width, m_image->info.height, m_image->info.layers );
 
-	m_writebackBuffer.CopyFrom( buffer.Ptr(), buffer.GetByteCount() );
+	Serializer* s = new Serializer( imageBuffer.GetByteCount() + 1024, serializeMode_t::STORE );
+	m_writebackBuffer.CopyFrom( imageBuffer.Ptr(), imageBuffer.GetByteCount() );
 
-//	Bitmap bitmap = Bitmap( buffer.GetWidth(), buffer.GetHeight() );
-//	ImageToBitmap( buffer, bitmap );
-//	bitmap.Write( "outputWriteback.bmp" );
+	imageBuffer.Serialize( s );
+
+	s->WriteFile( "hdrEnvmap.bin" );
 }
 
 
