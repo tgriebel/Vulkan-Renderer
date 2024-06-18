@@ -104,6 +104,8 @@ const bool		ForceDisableMSAA				= false;
 
 const std::string ModelPath = ".\\models\\";
 const std::string TexturePath = ".\\textures\\";
+const std::string CodeAssetPath = ".\\code_assets\\";
+const std::string ScreenshotPath = "..\\screenshots\\";
 const std::string MaterialPath = ".\\materials\\";
 const std::string BakePath = ".\\baked\\";
 const std::string BakedModelExtension = ".mdl.bin";

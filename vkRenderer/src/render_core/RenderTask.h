@@ -25,6 +25,17 @@ struct mipProcessCreateInfo_t
 	ResourceContext*	resources;
 };
 
+struct imageWriteBackCreateInfo_t
+{
+	const char*			name;
+	const char*			fileName;
+	Image*				img;
+	RenderContext*		context;
+	ResourceContext*	resources;
+	bool				writeToDiskOnFrameEnd;
+	bool				screenshot;
+};
+
 union mipProcessParms_t
 {
 	struct downsample
@@ -168,17 +179,25 @@ private:
 	GpuBuffer			m_writebackBuffer;
 	GpuBuffer			m_resourceBuffer;
 	ShaderBindParms*	m_parms;
+	std::string			m_fileName;
+	std::string			m_name;
+	bool				m_writeToDiskOnFrameEnd;
+	bool				m_screenshot;
 
 	void Init();
 	void Shutdown();
 
 public:
 
-	ImageWritebackTask( Image* img, RenderContext* context, ResourceContext* resources )
+	ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
 	{
-		m_image = img;
-		m_context = context;
-		m_resources = resources;
+		m_image = info.img;
+		m_context = info.context;
+		m_resources = info.resources;
+		m_fileName = info.fileName;
+		m_name = info.name;
+		m_writeToDiskOnFrameEnd = info.writeToDiskOnFrameEnd;
+		m_screenshot = info.screenshot;
 		Init();
 	}
 

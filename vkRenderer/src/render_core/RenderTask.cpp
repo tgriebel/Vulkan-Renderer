@@ -363,17 +363,24 @@ void ImageWritebackTask::FrameEnd()
 {
 	FlushGPU();
 
+	assert( m_screenshot == false ); // TODO: not implemented
+	assert( m_writeToDiskOnFrameEnd ); // TODO: only functionality currently
+
 	assert( m_writebackBuffer.VisibleToCpu() );
 
-	ImageBuffer<Color> imageBuffer;
-	imageBuffer.Init( m_image->info.width, m_image->info.height, m_image->info.layers );
+	Image img;
+	img.cpuImage = new ImageBuffer<Color>();
 
-	Serializer* s = new Serializer( imageBuffer.GetByteCount() + 1024, serializeMode_t::STORE );
-	m_writebackBuffer.CopyFrom( imageBuffer.Ptr(), imageBuffer.GetByteCount() );
+	img.cpuImage->Init( m_image->info.width, m_image->info.height, m_image->info.layers, 4 );
 
-	imageBuffer.Serialize( s );
+	Serializer* s = new Serializer( img.cpuImage->GetByteCount() + 1024, serializeMode_t::STORE );
+	m_writebackBuffer.CopyFrom( img.cpuImage->Ptr(), img.cpuImage->GetByteCount() );
 
-	s->WriteFile( "hdrEnvmap.bin" );
+	img.Serialize( s );
+
+	s->WriteFile( TexturePath + CodeAssetPath + m_fileName );
+
+	delete s;
 }
 
 

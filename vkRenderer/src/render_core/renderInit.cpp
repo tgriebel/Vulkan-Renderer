@@ -233,6 +233,19 @@ void Renderer::Init()
 	}
 	*/
 
+	ImageWritebackTask* imageWriteBackTask;
+	{
+		imageWriteBackCreateInfo_t info{};
+		info.name = "EnvironmentMapWriteback";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.img = &resources.diffuseIblImage;
+		info.fileName = "hdrEnvmap.img";
+		info.writeToDiskOnFrameEnd = true;
+
+		imageWriteBackTask = new ImageWritebackTask( info );
+	}
+
 	InitShaderResources();
 
 	InitImGui( *view2Ds[ 0 ] );
@@ -252,7 +265,7 @@ void Renderer::Init()
 		}
 	}
 	schedule.Queue( resolve );
-	//schedule.Queue( new ImageWritebackTask( &resources.mainColorResolvedImage, &renderContext, &resources ) );
+	schedule.Queue( imageWriteBackTask );
 	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
@@ -634,8 +647,8 @@ void Renderer::CreateFramebuffers()
 	// Cube images
 	{
 		imageInfo_t colorInfo{};
-		colorInfo.width = 256;
-		colorInfo.height = 256;
+		colorInfo.width = 512;
+		colorInfo.height = 512;
 		colorInfo.mipLevels = 1;
 		colorInfo.layers = 6;
 		colorInfo.subsamples = IMAGE_SMP_1;
@@ -673,8 +686,8 @@ void Renderer::CreateFramebuffers()
 	// Diffuse IBL images
 	{
 		imageInfo_t colorInfo{};
-		colorInfo.width = 256;
-		colorInfo.height = 256;
+		colorInfo.width = 32;
+		colorInfo.height = 32;
 		colorInfo.mipLevels = 1;
 		colorInfo.layers = 6;
 		colorInfo.subsamples = IMAGE_SMP_1;
