@@ -30,21 +30,7 @@
 
 DeviceContext context;
 
-
-struct copyImageParms_t
-{
-	imageSubResourceView_t	subView;
-	int32_t					x;
-	int32_t					y;
-	int32_t					z;
-	int32_t					width;
-	int32_t					height;
-	int32_t					depth;
-	int32_t					mipLevel;
-};
-
 static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms );
-
 
 bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
@@ -436,7 +422,10 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 		srcCopy.mipLevel = 0;
 
 		copyImageParms_t dstCopy{};
-		dstCopy.subView = writeView->subResourceView;
+		dstCopy.subView.baseArray = writeView->subResourceView.baseArray;
+		dstCopy.subView.arrayCount = writeView->subResourceView.arrayCount;
+		dstCopy.subView.baseMip = writeView->subResourceView.baseMip;
+		dstCopy.subView.mipLevels = writeView->subResourceView.mipLevels;
 		dstCopy.x = 0;
 		dstCopy.y = 0;
 		dstCopy.z = 0;
@@ -717,7 +706,10 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst )
 void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst )
 {
 	copyImageParms_t srcCopy{};
-	srcCopy.subView = src.subResourceView;
+	srcCopy.subView.baseArray = src.subResourceView.baseArray;
+	srcCopy.subView.arrayCount = src.subResourceView.arrayCount;
+	srcCopy.subView.baseMip = src.subResourceView.baseMip;
+	srcCopy.subView.mipLevels = src.subResourceView.mipLevels;
 	srcCopy.x = 0;
 	srcCopy.y = 0;
 	srcCopy.z = 0;
@@ -727,7 +719,10 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 	srcCopy.mipLevel = src.subResourceView.baseMip;
 
 	copyImageParms_t dstCopy{};
-	dstCopy.subView = dst.subResourceView;
+	dstCopy.subView.baseArray = dst.subResourceView.baseArray;
+	dstCopy.subView.arrayCount = dst.subResourceView.arrayCount;
+	dstCopy.subView.baseMip = dst.subResourceView.baseMip;
+	dstCopy.subView.mipLevels = dst.subResourceView.mipLevels;
 	dstCopy.x = 0;
 	dstCopy.y = 0;
 	dstCopy.z = 0;
@@ -740,24 +735,22 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 }
 
 
-void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset )
+void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, const copyImageParms_t& copyParms, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
-	const uint32_t layers = texture->subResourceView.arrayCount;
-
 	VkBufferImageCopy region{ };
 	memset( &region, 0, sizeof( region ) );
 	region.bufferOffset = bufferOffset;
 
-	region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-	region.imageSubresource.mipLevel = 0;
-	region.imageSubresource.baseArrayLayer = 0;
-	region.imageSubresource.layerCount = layers;
+	region.imageSubresource.aspectMask = vk_GetAspectFlags( texture->info.aspect );
+	region.imageSubresource.mipLevel = copyParms.subView.baseMip;
+	region.imageSubresource.baseArrayLayer = copyParms.subView.baseArray;
+	region.imageSubresource.layerCount = copyParms.subView.arrayCount;
 
-	region.imageOffset = { 0, 0, 0 };
+	region.imageOffset = { copyParms.x, copyParms.y, copyParms.z };
 	region.imageExtent = {
-		texture->info.width,
-		texture->info.height,
-		1
+		static_cast<uint32_t>( copyParms.width ),
+		static_cast<uint32_t>( copyParms.height ),
+		static_cast<uint32_t>( copyParms.depth ),
 	};
 
 	vkCmdCopyBufferToImage( cmdBuffer,

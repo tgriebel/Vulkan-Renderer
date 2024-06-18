@@ -35,11 +35,33 @@ enum downSampleMode_t : uint32_t
 	DOWNSAMPLE_GAUSSIAN,
 };
 
+
 struct swapChainInfo_t
 {
 	VkSurfaceCapabilitiesKHR		capabilities;
 	std::vector<VkSurfaceFormatKHR>	formats;
 	std::vector<VkPresentModeKHR>	presentModes;
+};
+
+struct copyImageSubViewParms_t
+{
+	uint32_t baseMip;
+	uint32_t mipLevels;
+	uint32_t baseArray;
+	uint32_t arrayCount;
+};
+
+
+struct copyImageParms_t
+{
+	copyImageSubViewParms_t	subView;
+	int32_t					x;
+	int32_t					y;
+	int32_t					z;
+	int32_t					width;
+	int32_t					height;
+	int32_t					depth;
+	int32_t					mipLevel;
 };
 
 
@@ -115,7 +137,7 @@ void				vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<Image
 void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass, const renderPassTransition_t& transitionState );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst );
-void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, GpuBuffer& buffer, const uint64_t bufferOffset );
+void				vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, const copyImageParms_t& copyParms, GpuBuffer& buffer, const uint64_t bufferOffset );
 imageSamples_t		vk_MaxImageSamples();
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
 VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );

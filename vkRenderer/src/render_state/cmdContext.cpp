@@ -284,7 +284,21 @@ void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buf
 {
 	cmdCommand->MarkerBeginRegion( "CopyBufferToImage", ColorToVector( ColorWhite ) );
 
-	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), &image, buffer, bufferOffset );
+	copyImageParms_t copyParms{};
+
+	copyParms.x = 0;
+	copyParms.y = 0;
+	copyParms.z = 0;
+	copyParms.width = image.info.width;
+	copyParms.height = image.info.height;
+	copyParms.depth = 1;
+	copyParms.mipLevel = image.info.mipLevels;
+	copyParms.subView.baseArray = image.subResourceView.baseArray;
+	copyParms.subView.arrayCount = image.subResourceView.arrayCount;
+	copyParms.subView.baseMip = image.subResourceView.baseMip;
+	copyParms.subView.mipLevels = image.subResourceView.mipLevels;
+
+	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), &image, copyParms, buffer, bufferOffset );
 
 	cmdCommand->MarkerEndRegion();
 }
