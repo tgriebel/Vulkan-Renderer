@@ -292,7 +292,7 @@ void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buf
 	copyParms.width = image.info.width;
 	copyParms.height = image.info.height;
 	copyParms.depth = 1;
-	copyParms.mipLevel = image.info.mipLevels;
+	copyParms.mipLevel = 0;
 	copyParms.subView.baseArray = image.subResourceView.baseArray;
 	copyParms.subView.arrayCount = image.subResourceView.arrayCount;
 	copyParms.subView.baseMip = image.subResourceView.baseMip;
