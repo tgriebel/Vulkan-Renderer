@@ -507,6 +507,8 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	pipelineInfo.stage = computeShaderStageInfo;
 	pipelineInfo.pNext = nullptr;
 
+	pipelineObject.csName = prog.shaders->name.c_str();
+
 	VK_CHECK_RESULT( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;

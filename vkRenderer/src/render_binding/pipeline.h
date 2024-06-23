@@ -71,6 +71,9 @@ struct pipelineObject_t
 	pipelineState_t		state;
 	VkPipeline			pipeline;
 	VkPipelineLayout	pipelineLayout;
+	const char*			vsName;
+	const char*			psName;
+	const char*			csName;
 };
 
 
