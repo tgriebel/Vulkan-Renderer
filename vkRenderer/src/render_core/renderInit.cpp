@@ -239,9 +239,14 @@ void Renderer::Init()
 		info.name = "EnvironmentMapWriteback";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.img = &resources.diffuseIblImage;
+		info.img = &resources.diffuseIblImageViews[ 0 ];
 		info.fileName = "hdrEnvmap.img";
 		info.writeToDiskOnFrameEnd = true;
+		info.cubemap = true;
+
+		for( uint32_t i = 0; i < 6; ++i ) {
+		//	info.imgCube[ i ] = &resources.diffuseIblImageViews[ i ];
+		}
 
 		imageWriteBackTask = new ImageWritebackTask( info );
 	}
@@ -265,7 +270,7 @@ void Renderer::Init()
 		}
 	}
 	schedule.Queue( resolve );
-	//schedule.Queue( imageWriteBackTask );
+	schedule.Queue( imageWriteBackTask );
 	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
@@ -690,6 +695,7 @@ void Renderer::CreateFramebuffers()
 		colorInfo.height = 32;
 		colorInfo.mipLevels = 1;
 		colorInfo.layers = 6;
+		colorInfo.channels = 4;
 		colorInfo.subsamples = IMAGE_SMP_1;
 		colorInfo.fmt = IMAGE_FMT_RGBA_16;
 		colorInfo.type = IMAGE_TYPE_CUBE;

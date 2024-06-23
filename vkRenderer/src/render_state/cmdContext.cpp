@@ -222,7 +222,9 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 	if ( pipelineObject != nullptr )
 	{
-		MarkerBeginRegion( "Dispatch", ColorToVector( ColorWhite ) );
+		std::string dbgName = "Dispatch( " + std::string( pipelineObject->csName ) + " )";
+
+		MarkerBeginRegion( dbgName.c_str(), ColorToVector( ColorWhite ) );
 
 		VkDescriptorSet set[1] = { bindParms.GetVkObject() };
 

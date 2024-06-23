@@ -40,22 +40,30 @@ SAMPLER_2D_LAYOUT( 0, 1 )
 CONSTANT_LAYOUT( 0, 2, WriteBackParms, writebackParms)
 WRITE_BUFFER_LAYOUT( 0, 3, vec4, imageWriteback)
 
-layout (local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
 void main()
 {
     const uint x = gl_GlobalInvocationID.x;
     const uint y = gl_GlobalInvocationID.y;
+	const uint z = gl_GlobalInvocationID.z;
+
+	//const ivec2 dims = textureSize( texSampler[ writebackParms.imageId + z ], 0 );
+
 	const uint width = uint( writebackParms.dimensions.x );
 	const uint height = uint( writebackParms.dimensions.y );
+	const uint layers = uint( writebackParms.dimensions.z );
 	
-	if( x >= width || y >= height ) {
+	if( x >= width || y >= height || z >= layers ) {
 		return;
 	}
 
-	const vec4 pixel = texelFetch( texSampler[ writebackParms.imageId ], ivec2( x, y ), 0 );
+	// textureSize
+	// textureQueryLevels
+
+	const vec4 pixel = texelFetch( texSampler[ writebackParms.imageId + z ], ivec2( x, y ), 0 );
 	
-	const uint offset = x + y * width;
+	const uint offset = x + ( y * width ) + z * ( width * height );
 
 	const vec4 sRgb = LinearToSrgb( pixel.rgba );
 	imageWriteback[ offset ].xyzw = sRgb.abgr;

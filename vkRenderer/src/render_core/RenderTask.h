@@ -30,10 +30,12 @@ struct imageWriteBackCreateInfo_t
 	const char*			name;
 	const char*			fileName;
 	Image*				img;
+	ImageView*			imgCube[6];
 	RenderContext*		context;
 	ResourceContext*	resources;
 	bool				writeToDiskOnFrameEnd;
 	bool				screenshot;
+	bool				cubemap;
 };
 
 union mipProcessParms_t
@@ -173,7 +175,7 @@ public:
 class ImageWritebackTask : public GpuTask
 {
 private:
-	Image*				m_image;
+	ImageArray			m_imageArray;
 	RenderContext*		m_context;
 	ResourceContext*	m_resources;
 	GpuBuffer			m_writebackBuffer;
@@ -190,8 +192,19 @@ private:
 public:
 
 	ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
-	{
-		m_image = info.img;
+	{	
+		if( info.img != nullptr )
+		{
+			m_imageArray.Resize( 1 );
+			m_imageArray[ 0 ] = info.img;
+		}
+		else
+		{
+			m_imageArray.Resize( 6 );
+			for( uint32_t i = 0; i < 6; ++i ) {
+				m_imageArray[ i ] = info.imgCube[ i ];
+			}
+		}
 		m_context = info.context;
 		m_resources = info.resources;
 		m_fileName = info.fileName;
