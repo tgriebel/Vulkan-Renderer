@@ -74,6 +74,11 @@ public:
 		m_id = id;
 	}
 
+	inline uint64_t GetAlignment()
+	{
+		return m_allocation.GetAlignment();
+	}
+
 #ifdef USE_VULKAN
 	GpuImage( const char* name, const VkImage image, const VkImageView view )
 	{

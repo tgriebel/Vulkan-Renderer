@@ -59,9 +59,8 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = memory.GetVkMemoryType();
 
-		Allocation alloc;
-		if ( memory.Allocate( memRequirements.alignment, memRequirements.size, alloc ) ) {
-			vkBindImageMemory( context.device, vk_image[ i ], memory.GetVkObject(), alloc.GetOffset() );
+		if ( memory.Allocate( memRequirements.alignment, memRequirements.size, m_allocation ) ) {
+			vkBindImageMemory( context.device, vk_image[ i ], memory.GetVkObject(), m_allocation.GetOffset() );
 		} else {
 			throw std::runtime_error( "Buffer could not be allocated!" );
 		}

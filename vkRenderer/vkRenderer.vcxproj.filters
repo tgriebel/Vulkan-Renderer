@@ -254,6 +254,9 @@
     <ClInclude Include="src\draw_passes\drawpass.h">
       <Filter>Draw Passes</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\util.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

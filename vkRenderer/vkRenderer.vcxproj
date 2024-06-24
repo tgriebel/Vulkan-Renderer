@@ -184,6 +184,7 @@
     <ClInclude Include="scenes\sceneParser.h" />
     <ClInclude Include="shaders\color.h" />
     <ClInclude Include="shaders\light.h" />
+    <ClInclude Include="shaders\util.h" />
     <ClInclude Include="src\draw_passes\drawpass.h" />
     <ClInclude Include="src\globals\common.h" />
     <ClInclude Include="src\globals\drawGroup.h" />

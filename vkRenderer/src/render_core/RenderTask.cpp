@@ -371,13 +371,29 @@ void ImageWritebackTask::FrameEnd()
 	Image img;
 	img.info = m_imageArray[ 0 ]->info;
 	img.info.type = IMAGE_TYPE_2D;
+	img.info.fmt = IMAGE_FMT_RGBA_16;
 	img.info.layers = 1;
-	img.cpuImage = new ImageBuffer<Color>();
+	img.cpuImage = new ImageBuffer<rgbaTupleh_t>();
 
-	img.cpuImage->Init( m_imageArray[ 0 ]->info.width, m_imageArray[ 0 ]->info.height, m_imageArray.Count(), 16 );
+	img.cpuImage->Init( m_imageArray[ 0 ]->info.width, m_imageArray[ 0 ]->info.height, m_imageArray.Count(), sizeof( rgbaTupleh_t ) );
 
 	Serializer* s = new Serializer( img.cpuImage->GetByteCount() + 1024, serializeMode_t::STORE );
-	m_writebackBuffer.CopyFrom( img.cpuImage->Ptr(), img.cpuImage->GetByteCount() );
+
+	float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
+	rgbaTupleh_t* convertedData = reinterpret_cast<rgbaTupleh_t*>( img.cpuImage->Ptr() );
+
+	const uint32_t bufferLength = img.cpuImage->GetPixelCount();
+	for( uint32_t i = 0; i < bufferLength; ++i )
+	{
+		rgbaTupleh_t rgba16;
+		rgba16.r = PackFloat32( floatData[ 3 ] );
+		rgba16.g = PackFloat32( floatData[ 2 ] );
+		rgba16.b = PackFloat32( floatData[ 1 ] );
+		rgba16.a = PackFloat32( floatData[ 0 ] );
+
+		convertedData[ i ] = rgba16;
+		floatData += 4;
+	}
 
 	img.Serialize( s );
 

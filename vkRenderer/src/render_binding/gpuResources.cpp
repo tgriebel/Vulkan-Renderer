@@ -238,6 +238,16 @@ void GpuBuffer::CopyFrom( void* data, const size_t sizeInBytes ) const
 }
 
 
+void* GpuBuffer::Get() const
+{
+	const uint32_t id = ClampId( context.bufferId );
+
+	void* mappedData = m_buffer[ id ].alloc.GetPtr();
+	assert( mappedData != nullptr );
+	return mappedData;
+}
+
+
 const char* GpuBuffer::GetName() const
 {
 	return m_name;

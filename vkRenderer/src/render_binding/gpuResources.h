@@ -71,6 +71,7 @@ public:
 	void			Allocate( const uint64_t size );
 	void			CopyData( const void* data, const size_t sizeInBytes );
 	void			CopyFrom( void* data, const size_t sizeInBytes ) const;
+	void*			Get() const;
 
 	const char*		GetName() const;
 	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount );

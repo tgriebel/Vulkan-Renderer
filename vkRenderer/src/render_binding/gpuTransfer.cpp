@@ -82,6 +82,9 @@ void Renderer::UploadTextures()
 
 		Transition( &uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
+		//const uint64_t alignmentOffset = textureStagingBuffer.GetAlignedSize( textureStagingBuffer.GetSize(), texture.gpuImage->GetAlignment() );
+		//textureStagingBuffer.SetPos( alignmentOffset );
+
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
 		textureStagingBuffer.CopyData( texture.cpuImage->Ptr(), texture.cpuImage->GetByteCount() );
 

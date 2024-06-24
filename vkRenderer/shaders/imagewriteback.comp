@@ -42,6 +42,36 @@ WRITE_BUFFER_LAYOUT( 0, 3, vec4, imageWriteback)
 
 layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 
+uint PackF16( const float unpacked )
+{
+	const uint element = floatBitsToUint( unpacked );
+
+	const uint signBit = ( element >> 16 ) & 0x8000;
+	uint exp = ( element >> 23 ) & 0xFF;
+	uint mantissa = element & 0x7FFFFF;
+
+	if ( exp > 0x70 ) {
+		exp = ( exp - 0x70 ); // Implicitly clamps to INF
+	} else {
+		exp = 0; // Flush denormals
+	}
+	mantissa >>= 13; // Don't round up
+
+	const uint packed = signBit | exp | mantissa;
+	
+	return packed;
+}
+
+vec2 PackVectorF16( const vec4 unpacked )
+{
+	const uint x0 = PackF16( unpacked.x );
+	const uint x1 = PackF16( unpacked.y );
+	const uint x2 = PackF16( unpacked.z );
+	const uint x3 = PackF16( unpacked.w );
+
+	return vec2( uintBitsToFloat( x0 << 16 | x1 ), uintBitsToFloat( x2 << 16 | x3 ) );
+}
+
 void main()
 {
     const uint x = gl_GlobalInvocationID.x;
@@ -65,6 +95,6 @@ void main()
 	
 	const uint offset = x + ( y * width ) + z * ( width * height );
 
-	const vec4 sRgb = LinearToSrgb( pixel.rgba );
-	imageWriteback[ offset ].xyzw = sRgb.abgr;
+	//const vec4 sRgb = LinearToSrgb( pixel.rgba );
+	imageWriteback[ offset ].xyzw = pixel.rgba;
 }
