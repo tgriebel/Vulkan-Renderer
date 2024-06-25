@@ -370,9 +370,9 @@ void ImageWritebackTask::FrameEnd()
 
 	Image img;
 	img.info = m_imageArray[ 0 ]->info;
-	img.info.type = IMAGE_TYPE_2D;
+	img.info.type = IMAGE_TYPE_CUBE;
 	img.info.fmt = IMAGE_FMT_RGBA_16;
-	img.info.layers = 1;
+	img.info.layers = 6;
 	img.cpuImage = new ImageBuffer<rgbaTupleh_t>();
 
 	img.cpuImage->Init( m_imageArray[ 0 ]->info.width, m_imageArray[ 0 ]->info.height, m_imageArray.Count(), sizeof( rgbaTupleh_t ) );

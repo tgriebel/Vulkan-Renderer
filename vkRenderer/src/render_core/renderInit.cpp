@@ -239,13 +239,13 @@ void Renderer::Init()
 		info.name = "EnvironmentMapWriteback";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.img = &resources.diffuseIblImageViews[ 0 ];
+		//info.img = &resources.diffuseIblImageViews[ 0 ];
 		info.fileName = "hdrEnvmap.img";
 		info.writeToDiskOnFrameEnd = true;
 		info.cubemap = true;
 
 		for( uint32_t i = 0; i < 6; ++i ) {
-		//	info.imgCube[ i ] = &resources.diffuseIblImageViews[ i ];
+			info.imgCube[ i ] = &resources.diffuseIblImageViews[ i ];
 		}
 
 		imageWriteBackTask = new ImageWritebackTask( info );

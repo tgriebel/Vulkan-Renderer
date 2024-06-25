@@ -7,10 +7,10 @@
 BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 
 // Compute Resources
-BINDING( particleWriteBuffer,	WRITE_BUFFER,		1, BIND_STATE_CS );
-BINDING( computeParms,			CONSTANT_BUFFER,	1, BIND_STATE_CS );
-BINDING( computeWrite,			WRITE_BUFFER,		1, BIND_STATE_CS );
-BINDING( computeImage,			IMAGE_2D_ARRAY,		1, BIND_STATE_CS );
+BINDING( particleWriteBuffer,	WRITE_BUFFER,		1,						BIND_STATE_CS );
+BINDING( computeParms,			CONSTANT_BUFFER,	1,						BIND_STATE_CS );
+BINDING( computeWrite,			WRITE_BUFFER,		1,						BIND_STATE_CS );
+BINDING( computeImage,			IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_CS );
 
 // Post Effect Resources
 BINDING( imageProcess,			CONSTANT_BUFFER,	1,						BIND_STATE_PS );
