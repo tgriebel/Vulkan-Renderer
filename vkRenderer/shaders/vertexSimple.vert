@@ -37,10 +37,11 @@ void main()
 	const uint viewlId = pushConstants.viewId;
 
 	const view_t view = viewUbo.views[ viewlId ];
+	const mat4 modelMatrix = ubo.surface[ objectId ].model;
 
 	vec3 position = inPosition;
 	objectPosition = position;
-	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
+	worldPosition = modelMatrix * vec4( position, 1.0f );
     gl_Position = view.projMat * view.viewMat * worldPosition;
 
 	// Tangent-space matrix
@@ -49,9 +50,9 @@ void main()
 		vec3 T = normalize( vec3( uintBitsToFloat( floatBitsToUint( inTangent.x ) & ~0x1 ), inTangent.yz ) );
 		vec3 N = normalize( normalSign * cross( inTangent, inBitangent ) );
 		vec3 B = normalize( inBitangent );
-		T = ( ubo.model[ objectId ] * vec4( T, 0.0f ) ).xyz;
-		N = ( ubo.model[ objectId ] * vec4( N, 0.0f ) ).xyz;
-		B = ( ubo.model[ objectId ] * vec4( B, 0.0f ) ).xyz;
+		T = ( modelMatrix * vec4( T, 0.0f ) ).xyz;
+		N = ( modelMatrix * vec4( N, 0.0f ) ).xyz;
+		B = ( modelMatrix * vec4( B, 0.0f ) ).xyz;
 		fragTangentBasis = mat3( T, B, N );
 	}
 

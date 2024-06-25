@@ -38,7 +38,10 @@ struct vsInput_t
 
 struct surfaceBufferObject_t
 {
-	mat4x4f model;
+	mat4x4f		model;
+	uint32_t	diffuseIblCubeId;
+	uint32_t	envCubeId;
+	uint32_t	pad[ 14 ];
 };
 
 

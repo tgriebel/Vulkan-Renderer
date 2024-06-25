@@ -51,7 +51,7 @@ void main()
     const vec3 specularColor = material.Ks.rgb;
     const float specularPower = material.Ns;
 
-    const mat4 modelMat = ubo.model[ objectId ];
+    const mat4 modelMat = ubo.surface[ objectId ].model;
     const mat4 viewMat = view.viewMat;
     const mat3 invViewMat = mat3( transpose( viewMat ) );
     const vec3 cameraOrigin = -invViewMat * vec3( viewMat[ 3 ][ 0 ], viewMat[ 3 ][ 1 ], viewMat[ 3 ][ 2 ] );
@@ -71,19 +71,22 @@ void main()
     const vec3 n = normalize( normal ); // normalize( worldPosition.xyz - modelOrigin );
     const vec3 viewDiffuse = dot( v, n ).xxx;
 
+    const uint diffuseIBL = ubo.surface[ objectId ].diffuseIblCubeId;
+
     const vec3 r = reflect( -v, n );
-    const int MipLevels = textureQueryLevels( cubeSamplers[ 0 ] );
-    const vec4 envMap = vec4( SrgbToLinear( textureLod( cubeSamplers[0], vec3( r.x, r.z, r.y ), perceptualRoughness * MipLevels ).rgb ), 1.0f ); // FIXME: HACK
+    const int MipLevels = textureQueryLevels( cubeSamplers[ diffuseIBL ] );
+    //const vec4 envMap = vec4( SrgbToLinear( textureLod( cubeSamplers[ diffuseIBL ], vec3( r.x, r.z, r.y ), perceptualRoughness * MipLevels ).rgb ), 1.0f ); // FIXME: HACK
+    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], vec3( r.x, r.z, r.y ) ).rgb;
 
     float NoV = abs( dot( n, v ) );
 
     float metallic = 0.0f;//metalnessTex.r;
 	
-	const float AMBIENT_LIGHT_FACTOR = 0.03f;
+	//const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;
 
 	const vec3 albedoColor = albedoTex.rgb * diffuseColor;
-    const vec3 ambient = ao * albedoColor * AMBIENT_LIGHT_FACTOR * material.Ka.rgb;
+    const vec3 ambient = ao * albedoColor * irradiance * material.Ka.rgb;
 	
     vec3 F0 = vec3( 0.04f ); 
     F0 = mix( F0, albedoColor.rgb, metallic );

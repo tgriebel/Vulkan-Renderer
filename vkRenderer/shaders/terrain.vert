@@ -70,11 +70,11 @@ void main()
 	vec3 position = inPosition;
 	position.z += maxHeight * heightMapValue;
 	objectPosition = position;
-	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
+	worldPosition = ubo.surface[ objectId ].model * vec4( position, 1.0f );
     gl_Position = view.projMat * view.viewMat * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
-	mat3 worldTangent = ( mat3( ubo.model[ objectId ] ) * GetTerrainTangent( inTexCoord.xy ) );
+	mat3 worldTangent = ( mat3( ubo.surface[ objectId ].model ) * GetTerrainTangent( inTexCoord.xy ) );
 	fragNormal = normalize( cross( worldTangent[0], worldTangent[1] ) );
 	clipPosition = gl_Position;
 }

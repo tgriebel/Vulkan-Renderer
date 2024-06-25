@@ -102,7 +102,7 @@ struct surface_t
 
 #define MODEL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer UniformBufferObject				\
 											{																		\
-												mat4        model[MaxSurfaces];										\
+												surface_t	surface[MaxSurfaces];										\
 											} ubo;
 
 #define GLOBALS_LAYOUT( S, N )				layout( set = S, binding = N ) uniform GlobalConstants					\

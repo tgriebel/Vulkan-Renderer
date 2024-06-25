@@ -40,7 +40,7 @@ void main()
 
 	vec3 position = inPosition;
 	objectPosition = position;
-	worldPosition = ubo.model[ objectId ] * vec4( position, 1.0f );
+	worldPosition = ubo.surface[ objectId ].model * vec4( position, 1.0f );
     gl_Position = view.projMat * view.viewMat * worldPosition;
     fragColor = inColor;
     fragTexCoord = inTexCoord;

@@ -57,6 +57,10 @@
 	  "name": "anticChapel_4k.hdr",
 	  "type": "2D"
 	},
+	{
+	  "name": "code_assets/hdrEnvmap.img",
+	  "type": "CUBE"
+	},
   ],
   "materials": [
     {
