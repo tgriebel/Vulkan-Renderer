@@ -72,22 +72,23 @@ void main()
     const vec3 viewDiffuse = dot( v, n ).xxx;
 
     const uint diffuseIBL = ubo.surface[ objectId ].diffuseIblCubeId;
+    const uint envIBL = ubo.surface[ objectId ].envCubeId;
+
+    const int MaxRreflectionLod = 4;
 
     const vec3 r = reflect( -v, n );
-    const int MipLevels = textureQueryLevels( cubeSamplers[ diffuseIBL ] );
-    //const vec4 envMap = vec4( SrgbToLinear( textureLod( cubeSamplers[ diffuseIBL ], vec3( r.x, r.z, r.y ), perceptualRoughness * MipLevels ).rgb ), 1.0f ); // FIXME: HACK
-    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], vec3( r.x, r.z, r.y ) ).rgb;
+    const int MipLevels = min( textureQueryLevels( cubeSamplers[ diffuseIBL ] ), MaxRreflectionLod );
+    //const vec3 envMap = SrgbToLinear( textureLod( cubeSamplers[ envIBL ], r, perceptualRoughness * MipLevels ) ).rgb; // FIXME: HACK
 
-    float NoV = abs( dot( n, v ) );
+    float NoV = max( dot( n, v ), 0.0f );
 
     float metallic = 0.0f;//metalnessTex.r;
 	
 	//const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;
 
-	const vec3 albedoColor = albedoTex.rgb * diffuseColor;
-    const vec3 ambient = ao * albedoColor * irradiance * material.Ka.rgb;
-	
+    const vec3 albedoColor = albedoTex.rgb * diffuseColor;
+
     vec3 F0 = vec3( 0.04f ); 
     F0 = mix( F0, albedoColor.rgb, metallic );
 	
@@ -105,18 +106,18 @@ void main()
 
         const float D   = D_GGX( NoH, perceptualRoughness );
         const float G   = G_Smith( NoV, NoL, perceptualRoughness );      
-        const vec3 F    = F_Schlick( NoH, F0 ); 
+        const vec3 F    = F_SchlickRoughness( NoH, F0, perceptualRoughness );
 
         const vec3 kS = F;
         vec3 kD = vec3( 1.0f ) - kS;
         kD *= 1.0f - metallic;
 
-        const float spotAngle = dot( l, light.lightDir.xyz );
-        const float spotFov = 0.5f;
-
         vec3 numerator      = D * G * F;
         float denominator   = 4.0f * NoV * NoL + 0.0001;
         vec3 Fr             = numerator / denominator;
+
+        const float spotAngle = dot( l, light.lightDir.xyz );
+        const float spotFov = 0.5f;
                
         const float distance    = length( l );
         const float attenuation = 1.0f / ( distance * distance );
@@ -153,7 +154,16 @@ void main()
 
         Lo += shadowing * diffuse;
     }
-    outColor.rgb = Lo.rgb + ambient;
+
+    vec3 kS = F_Schlick( NoV, F0 );
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+
+    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], n ).rgb * material.Ka.rgb;
+    const vec3 diffuse = irradiance * albedoColor;
+    const vec3 ambient = ( kD * diffuse ) * ao;
+
+    outColor.rgb = Lo + ambient;
     outColor.a = 1.0f;
 
     outColor1.rgb = 0.5f * ( n + vec3( 1.0f, 1.0f, 1.0f ) );
