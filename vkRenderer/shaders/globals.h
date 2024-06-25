@@ -76,6 +76,14 @@ struct view_t
 	uint	pad2;
 };
 
+struct surface_t
+{
+	mat4	model;
+	uint	diffuseIblCubeId;
+	uint	envCubeId;
+	uint	pad[14];
+};
+
 
 #define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
 
