@@ -304,17 +304,35 @@ void UpdateScene( Scene* scene )
 		if ( g_window.input.IsKeyPressed( 'S' ) ) {
 			scene->mainCamera->Dolly( -cameraSpeed * dt );
 		}
-		if ( g_window.input.IsKeyPressed( '8' ) ) {
-			scene->mainCamera->Tilt( -cameraSpeed * dt );
+		if ( g_window.input.IsKeyPressed( '1' ) )
+		{
+			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+			scene->mainCamera->Pan( 0.0f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '2' ) ) {
-			scene->mainCamera->Tilt( cameraSpeed * dt );
+		if ( g_window.input.IsKeyPressed( '2' ) )
+		{
+			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+			scene->mainCamera->Pan( 0.5f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '4' ) ) {
-			scene->mainCamera->Pan( cameraSpeed * dt );
+		if ( g_window.input.IsKeyPressed( '3' ) )
+		{
+			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+			scene->mainCamera->Pan( 1.0f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '6' ) ) {
-			scene->mainCamera->Pan( -cameraSpeed * dt );
+		if ( g_window.input.IsKeyPressed( '4' ) )
+		{
+			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+			scene->mainCamera->Pan( 1.5f * PI );
+		}
+		if ( g_window.input.IsKeyPressed( '5' ) )
+		{
+			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+			scene->mainCamera->Tilt( -0.5f * PI );
+		}
+		if ( g_window.input.IsKeyPressed( '6' ) )
+		{
+			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+			scene->mainCamera->Tilt( 0.5f * PI );
 		}
 		if ( g_window.input.IsKeyPressed( '+' ) ) {
 			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ) );
