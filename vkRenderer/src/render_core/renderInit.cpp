@@ -678,7 +678,7 @@ void Renderer::CreateFramebuffers()
 		{
 			imageSubResourceView_t subView;
 			subView.arrayCount = 1;
-			subView.baseArray = i;
+			subView.baseArray = glslCubeMapping[ i ];
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
 
