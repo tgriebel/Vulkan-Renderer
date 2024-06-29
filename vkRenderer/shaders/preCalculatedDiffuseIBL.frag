@@ -49,11 +49,15 @@ void main()
     const vec3 forward = -normalize( vec3( viewMat[ 2 ][ 0 ], viewMat[ 2 ][ 1 ], viewMat[ 2 ][ 2 ] ) );
     const vec3 right = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 0 ][ 1 ], viewMat[ 0 ][ 2 ] ) );
     const vec3 up = normalize( vec3( viewMat[ 1 ][ 0 ], viewMat[ 1 ][ 1 ], viewMat[ 1 ][ 2 ] ) );
-    vec3 viewVector = normalize( forward + ( 2.0f * fragTexCoord.x - 1.0f ) * right + ( 2.0f * fragTexCoord.y - 1.0f ) * up );
+    const vec3 viewVector = normalize( forward + ( 2.0f * fragTexCoord.x - 1.0f ) * right + ( 2.0f * fragTexCoord.y - 1.0f ) * up );
 
-    /*
     vec3 irradiance = vec3( 0.0f );
 
+#if 1
+    vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
+    vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
+    outColor = texture( codeCubeSamplers[ 0 ], sampleVec );
+#else
     // https://learnopengl.com/PBR/IBL/Diffuse-irradiance
     float sampleDelta = 0.025f;
     float nrSamples = 0.0f;
@@ -73,10 +77,5 @@ void main()
     irradiance = PI * irradiance * ( 1.0f / float( nrSamples ) );
 
 	outColor = vec4( irradiance, 1.0f );
-    */
-    outColor = vec4( texture( cubeSamplers[ 0 ], viewVector ).rgb, 1.0f );
-
-    //vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
-    //vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
-    //outColor = texture( codeCubeSamplers[ 0 ], sampleVec ).rgb;
+#endif
 }

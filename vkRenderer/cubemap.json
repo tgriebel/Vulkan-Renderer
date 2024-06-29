@@ -41,6 +41,36 @@
 	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
 	{
+	  "name": "debug_right.jpg",
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	},
+	{
+	  "name": "debug_left.jpg",
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	},
+	{
+	  "name": "debug_top.jpg",
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	},
+	{
+	  "name": "debug_bottom.jpg",
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	},
+	{
+	  "name": "debug_front.jpg",
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	},
+	{
+	  "name": "debug_back.jpg",
+	  "type": "2D",
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	},
+	{
 	  "name": "chapel_low.jpg",
 	  "type": "CUBE",
 	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
@@ -67,6 +97,20 @@
       }
     },
 	{
+      "name": "DEBUG_CUBE",
+      "shaders": {
+          "DRAWPASS_SKYBOX": "Sky"
+      }
+      "textures": {
+          "CUBE_RIGHT_SLOT" : "debug_right.jpg",
+          "CUBE_LEFT_SLOT" : "debug_left.jpg",
+          "CUBE_TOP_SLOT" : "debug_top.jpg",	  
+          "CUBE_BOTTOM_SLOT" : "debug_bottom.jpg",
+          "CUBE_FRONT_SLOT" : "debug_front.jpg",
+          "CUBE_BACK_SLOT" : "debug_back.jpg",
+      }
+    },
+	{
       "name": "EquirectangularSky",
       "shaders": {
           "DRAWPASS_SKYBOX": "EquirectangularSampler"
@@ -86,7 +130,7 @@
     {
       "name" : "_skybox",
       "model" : "_skybox",
-      "material" : "EquirectangularSky",
+      "material" : "SKY",
 	  "x" : 0.0,
 	  "y" : 0.0,
 	  "z" : 0.0,
