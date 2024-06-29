@@ -132,7 +132,7 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = false;
+	const bool useCubeViews = true;
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();
@@ -167,7 +167,7 @@ void Renderer::Init()
 
 		diffuseIBL[ i ] = new ImageProcess( info );
 
-		mat4x4f viewMatrix = camera.GetViewMatrix();
+		mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
 		viewMatrix[ 3 ][ 3 ] = 0.0f;
 
 		diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
@@ -649,6 +649,8 @@ void Renderer::CreateFramebuffers()
 		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.depthStencilImage );
 	}
 
+	const int glslCubeMapping[ 6 ] = { 4, 5, 1, 0, 2, 3 };
+
 	// Cube images
 	{
 		imageInfo_t colorInfo{};
@@ -691,8 +693,8 @@ void Renderer::CreateFramebuffers()
 	// Diffuse IBL images
 	{
 		imageInfo_t colorInfo{};
-		colorInfo.width = 32;
-		colorInfo.height = 32;
+		colorInfo.width = 128;
+		colorInfo.height = 128;
 		colorInfo.mipLevels = 1;
 		colorInfo.layers = 6;
 		colorInfo.channels = 4;
@@ -708,7 +710,7 @@ void Renderer::CreateFramebuffers()
 		{
 			imageSubResourceView_t subView;
 			subView.arrayCount = 1;
-			subView.baseArray = i;
+			subView.baseArray = glslCubeMapping[ i ];
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
 
