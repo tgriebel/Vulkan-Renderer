@@ -133,6 +133,9 @@ void Renderer::Init()
 	renderViews[ 0 ]->Commit();
 
 	const bool useCubeViews = true;
+	const bool writeCubeViews = true;
+	const bool computeDiffuseIbl = false;
+
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();
@@ -140,38 +143,41 @@ void Renderer::Init()
 	}
 	view2Ds[ 0 ]->Commit();
 
-	for ( uint32_t i = 0; i < 6; ++i )
+	//if( computeDiffuseIbl )
 	{
-		imageProcessCreateInfo_t info = {};
-		info.name = "DiffuseIBL";
-		info.clear = false;
-		info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
-		info.fb = &diffuseIblFrameBuffer[ i ];
-		info.context = &renderContext;
-		info.resources = &resources;
-		info.inputImages = 1;
-
-		Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-		camera.SetFov( Radians( 90.0f ) );
-		camera.SetAspectRatio( 1.0f );
-
-		switch( i )
+		for ( uint32_t i = 0; i < 6; ++i )
 		{
-			case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
-			case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
-			case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
-			case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
-			case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
-			case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
+			imageProcessCreateInfo_t info = {};
+			info.name = "DiffuseIBL";
+			info.clear = false;
+			info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
+			info.fb = &diffuseIblFrameBuffer[ i ];
+			info.context = &renderContext;
+			info.resources = &resources;
+			info.inputImages = 1;
+
+			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+			camera.SetFov( Radians( 90.0f ) );
+			camera.SetAspectRatio( 1.0f );
+
+			switch( i )
+			{
+				case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
+				case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
+				case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
+				case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
+				case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
+				case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
+			}
+
+			diffuseIBL[ i ] = new ImageProcess( info );
+
+			mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
+			viewMatrix[ 3 ][ 3 ] = 0.0f;
+
+			diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
+			diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 		}
-
-		diffuseIBL[ i ] = new ImageProcess( info );
-
-		mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
-		viewMatrix[ 3 ][ 3 ] = 0.0f;
-
-		diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
-		diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 	}
 
 	{
@@ -233,14 +239,31 @@ void Renderer::Init()
 	}
 	*/
 
-	ImageWritebackTask* imageWriteBackTask;
+	ImageWritebackTask* imageCubemapWriteBackTask;
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "EnvironmentMapWriteback";
 		info.context = &renderContext;
 		info.resources = &resources;
-		//info.img = &resources.diffuseIblImageViews[ 0 ];
 		info.fileName = "hdrEnvmap.img";
+		info.writeToDiskOnFrameEnd = true;
+		info.cubemap = true;
+
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			info.imgCube[ i ] = &resources.cubeImageViews[ i ];
+		}
+
+		imageCubemapWriteBackTask = new ImageWritebackTask( info );
+	}
+
+	ImageWritebackTask* imageDiffuseIblWriteBackTask = nullptr;
+	if ( computeDiffuseIbl )
+	{
+		imageWriteBackCreateInfo_t info{};
+		info.name = "DiffuseIblWriteback";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fileName = "hdrDiffuse.img";
 		info.writeToDiskOnFrameEnd = true;
 		info.cubemap = true;
 
@@ -248,7 +271,7 @@ void Renderer::Init()
 			info.imgCube[ i ] = &resources.diffuseIblImageViews[ i ];
 		}
 
-		imageWriteBackTask = new ImageWritebackTask( info );
+		imageDiffuseIblWriteBackTask = new ImageWritebackTask( info );
 	}
 
 	InitShaderResources();
@@ -270,7 +293,12 @@ void Renderer::Init()
 		}
 	}
 	schedule.Queue( resolve );
-	//schedule.Queue( imageWriteBackTask );
+	if ( writeCubeViews ) {
+		schedule.Queue( imageCubemapWriteBackTask );
+	}
+	if ( computeDiffuseIbl ) {
+		schedule.Queue( imageDiffuseIblWriteBackTask );
+	}
 	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
