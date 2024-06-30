@@ -201,8 +201,11 @@ public:
 		else
 		{
 			m_imageArray.Resize( 6 );
-			for( uint32_t i = 0; i < 6; ++i ) {
-				m_imageArray[ i ] = info.imgCube[ i ];
+			for( uint32_t i = 0; i < 6; ++i )
+			{
+				// Sort the slices so serialization is ordered 
+				const uint32_t reorderIx = info.imgCube[ i ]->subResourceView.baseArray;
+				m_imageArray[ reorderIx ] = info.imgCube[ i ];
 			}
 		}
 		m_context = info.context;
