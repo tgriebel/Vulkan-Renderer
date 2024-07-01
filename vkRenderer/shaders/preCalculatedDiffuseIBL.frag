@@ -53,7 +53,7 @@ void main()
 
     vec3 irradiance = vec3( 0.0f );
 
-#if 1
+#if 0
     vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
     vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
     outColor = texture( codeCubeSamplers[ 0 ], sampleVec );

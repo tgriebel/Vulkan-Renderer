@@ -2,6 +2,13 @@
   "sceneClass": "chess",
   "type": "scene",
   "reflink" : "shaders_common.json",
+  "shaders": [
+    {
+	  "name": "EquirectangularSampler",
+	  "vs": "simpleVS.spv",
+	  "ps": "equirectangularSkyPS.spv",
+    }
+  ],
   "images": [
     {
 	  "name": "checker.png",
@@ -61,6 +68,10 @@
 	  "name": "code_assets/hdrEnvmap.img",
 	  "type": "CUBE"
 	},
+	{
+	  "name": "code_assets/hdrDiffuse.img",
+	  "type": "CUBE"
+	},
   ],
   "materials": [
     {
@@ -99,6 +110,15 @@
           "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
           "CUBE_FRONT_SLOT" : "chapel_front.jpg",
           "CUBE_BACK_SLOT" : "chapel_back.jpg",
+      }
+    },
+	{
+      "name": "EquirectangularSky",
+      "shaders": {
+          "DRAWPASS_SKYBOX": "EquirectangularSampler"
+      }
+      "textures": {
+          "TEXTURE_SLOT_0" : "anticChapel_4k.hdr",
       }
     }
   ],
@@ -148,6 +168,7 @@
     {
       "name" : "_skybox",
       "model" : "_skybox",
+      "material" : "EquirectangularSky",
 	  "x" : 0.0,
 	  "y" : 0.0,
 	  "z" : 0.0,
@@ -167,7 +188,10 @@
 	{
       "name" : "sphere",
       "model" : "sphere.obj",
-	  "hidden" : "true"
+	  "hidden" : "false",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 1.0,
     }
   ]
 }

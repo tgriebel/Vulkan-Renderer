@@ -130,7 +130,7 @@
     {
       "name" : "_skybox",
       "model" : "_skybox",
-      "material" : "SKY",
+      "material" : "EquirectangularSky",
 	  "x" : 0.0,
 	  "y" : 0.0,
 	  "z" : 0.0,

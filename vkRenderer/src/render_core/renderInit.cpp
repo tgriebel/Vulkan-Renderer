@@ -132,8 +132,8 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = true;
-	const bool writeCubeViews = true;
+	const bool useCubeViews = false;
+	const bool writeCubeViews = false;
 	const bool computeDiffuseIbl = false;
 
 	if( useCubeViews ) {

@@ -666,11 +666,11 @@ void Renderer::UpdateBuffers()
 				const uint32_t instanceId = view.drawGroupOffset[ passIx ] + view.drawGroup[ passIx ].InstanceId( surfIx );
 				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();
 				
-				Asset<Image>* diffuseIblAsset = g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" );
+				Asset<Image>* diffuseIblAsset = g_assets.textureLib.Find( "code_assets/hdrDiffuse.img" );
 				if( diffuseIblAsset->IsDefault() == false ) {
 					surfBuffer[ instanceId ].diffuseIblCubeId = diffuseIblAsset->Get().gpuImage->GetId();
 				}
-				Asset<Image>*envCubeAsset = g_assets.textureLib.Find( "chapel_low.jpg" );
+				Asset<Image>*envCubeAsset = g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" );
 				if ( envCubeAsset->IsDefault() == false ) {
 					surfBuffer[ instanceId ].envCubeId = envCubeAsset->Get().gpuImage->GetId();
 				}

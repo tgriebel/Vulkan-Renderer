@@ -159,7 +159,12 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], n ).rgb * material.Ka.rgb;
+    mat4 glslSpace = mat4(  0.0f, 0.0f, 1.0f, 0.0f,
+                            -1.0f, 0.0f, 0.0f, 0.0f,
+                            0.0f, 1.0f, 0.0f, 0.0f,
+                            0.0f, 0.0f, 0.0f, 0.0f );
+
+    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], (glslSpace * vec4( n, 0.0f )).xyz ).rgb * material.Ka.rgb;
     const vec3 diffuse = irradiance * albedoColor;
     const vec3 ambient = ( kD * diffuse ) * ao;
 
@@ -167,6 +172,8 @@ void main()
     outColor.a = 1.0f;
 
     outColor1.rgb = 0.5f * ( n + vec3( 1.0f, 1.0f, 1.0f ) );
+    //outColor1.rgb = vec3( fragTexCoord.xy, 0.0f );
+    outColor1.a = 1.0f;
 
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
 	outColor.a = material.Tr;
