@@ -694,6 +694,9 @@ void Renderer::CreateFramebuffers()
 
 		CreateImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbColorImage );
 
+		resources.cubeFbColorImage.sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+		resources.cubeFbColorImage.sampler.filter = SAMPLER_FILTER_BILINEAR;
+
 		imageInfo_t depthInfo = colorInfo;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		depthInfo.fmt = IMAGE_FMT_D_16;
@@ -701,6 +704,9 @@ void Renderer::CreateFramebuffers()
 		CreateImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbDepthImage );
 
 		resources.cubeFbImageView.Init( resources.cubeFbColorImage, colorInfo );
+
+		resources.cubeFbImageView.sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+		resources.cubeFbImageView.sampler.filter = SAMPLER_FILTER_BILINEAR;
 
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
@@ -715,14 +721,17 @@ void Renderer::CreateFramebuffers()
 
 			resources.cubeImageViews[ i ].Init( resources.cubeFbColorImage, colorInfo, subView );
 			resources.cubeDepthImageViews[ i ].Init( resources.cubeFbDepthImage, depthInfo, subView );
+
+			resources.cubeImageViews[ i ].sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+			resources.cubeImageViews[ i ].sampler.filter = SAMPLER_FILTER_BILINEAR;
 		}
 	}
 
 	// Diffuse IBL images
 	{
 		imageInfo_t colorInfo{};
-		colorInfo.width = 128;
-		colorInfo.height = 128;
+		colorInfo.width = 32;
+		colorInfo.height = 32;
 		colorInfo.mipLevels = 1;
 		colorInfo.layers = 6;
 		colorInfo.channels = 4;

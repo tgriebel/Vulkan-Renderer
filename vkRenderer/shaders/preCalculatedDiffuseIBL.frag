@@ -46,17 +46,23 @@ void main()
                             0.0f, 0.0f, 0.0f, 0.0f );
 
     const mat4 viewMat = glslSpace * imageProcess.viewMat;
-    const vec3 forward = -normalize( vec3( viewMat[ 2 ][ 0 ], viewMat[ 2 ][ 1 ], viewMat[ 2 ][ 2 ] ) );
-    const vec3 right = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 0 ][ 1 ], viewMat[ 0 ][ 2 ] ) );
-    const vec3 up = normalize( vec3( viewMat[ 1 ][ 0 ], viewMat[ 1 ][ 1 ], viewMat[ 1 ][ 2 ] ) );
-    const vec3 viewVector = normalize( forward + ( 2.0f * fragTexCoord.x - 1.0f ) * right + ( 2.0f * fragTexCoord.y - 1.0f ) * up );
+    const vec3 viewForward = -normalize( vec3( viewMat[ 2 ][ 0 ], viewMat[ 2 ][ 1 ], viewMat[ 2 ][ 2 ] ) );
+    const vec3 viewRight = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 0 ][ 1 ], viewMat[ 0 ][ 2 ] ) );
+    const vec3 viewUp = normalize( vec3( viewMat[ 1 ][ 0 ], viewMat[ 1 ][ 1 ], viewMat[ 1 ][ 2 ] ) );
+    const vec3 viewVector = normalize( viewForward + ( 2.0f * fragTexCoord.x - 1.0f ) * viewRight + ( 2.0f * fragTexCoord.y - 1.0f ) * viewUp );
+
+    vec3 up = vec3( 0.0, 1.0, 0.0 );
+    vec3 right = normalize( cross( up, viewVector ) );
+    up = normalize( cross( viewVector, right ) );
 
     vec3 irradiance = vec3( 0.0f );
 
 #if 0
     vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
-    vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
+    vec3 sampleVec = normalize( tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector );
     outColor = texture( codeCubeSamplers[ 0 ], sampleVec );
+    //outColor.rgb = 0.5f * ( sampleVec + vec3( 1.0f, 1.0f, 1.0f ) );
+    outColor.a = 1.0f;
 #else
     // https://learnopengl.com/PBR/IBL/Diffuse-irradiance
     float sampleDelta = 0.025f;
@@ -69,6 +75,7 @@ void main()
             vec3 tangentSample = vec3( sin( theta ) * cos( phi ), sin( theta ) * sin( phi ), cos( theta ) );
             // tangent space to world
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
+            sampleVec = normalize( sampleVec );
 
             irradiance += texture( codeCubeSamplers[ 0 ], sampleVec ).rgb * cos( theta ) * sin( theta );
             nrSamples++;
