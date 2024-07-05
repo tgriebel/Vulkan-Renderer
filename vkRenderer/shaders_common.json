@@ -35,6 +35,11 @@
       "vs": "skyboxVS.spv",
       "ps": "skyboxPS.spv"
     },
+	{
+      "name": "SkyCube",
+      "vs": "skyboxVS.spv",
+      "ps": "skyboxCubePS.spv"
+    },
     {
       "name": "LitDepth",
       "vs": "simpleVS.spv",

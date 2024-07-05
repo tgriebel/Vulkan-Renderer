@@ -34,15 +34,26 @@ PS_LAYOUT_STANDARD( sampler2D )
 void main()
 {
     const uint materialId = pushConstants.materialId;
+    const uint viewlId = pushConstants.viewId;
 
     const material_t material = materialUbo.materials[ materialId ];
-    
-    uint textureId = 0;
+    const view_t view = viewUbo.views[ viewlId ];
 
+#ifdef USE_CUBE_SAMPLER
+    mat3 glslSpace = mat3( 0.0f, 0.0f, 1.0f,
+        -1.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f );
+
+    const vec3 viewVector = normalize( objectPosition );
+    const vec3 skyColor = texture( cubeSamplers[ material.textureId0 ], glslSpace * viewVector ).rgb;
+    outColor.rgb = SrgbToLinear( skyColor );
+#else
     const float xm = abs( fragNormal.x );
     const float ym = abs( fragNormal.y );
     const float zm = abs( fragNormal.z );
     const float majorAxis = max( max( xm, ym ), zm );
+
+    uint textureId = 0;
 
     if( majorAxis == xm ) {
         textureId = ( sign( fragNormal.x ) > 0.0f ) ? material.textureId0 : material.textureId1;
@@ -52,4 +63,6 @@ void main()
         textureId = ( sign( fragNormal.z ) > 0.0f ) ? material.textureId2 : material.textureId3;
     }
 	outColor = SrgbToLinear( texture( texSampler[textureId], fragTexCoord.xy ) );
+#endif
+    outColor.a = 1.0f;
 }

@@ -115,10 +115,10 @@
 	{
       "name": "EquirectangularSky",
       "shaders": {
-          "DRAWPASS_SKYBOX": "EquirectangularSampler"
+          "DRAWPASS_SKYBOX": "SkyCube"
       }
       "textures": {
-          "TEXTURE_SLOT_0" : "anticChapel_4k.hdr",
+          "TEXTURE_SLOT_0" : "code_assets/hdrEnvmap.img",
       }
     }
   ],

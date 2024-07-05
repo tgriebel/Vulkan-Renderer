@@ -1,5 +1,6 @@
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\skybox.vert -o shaders_bin\skyboxVS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\skybox.frag -o shaders_bin\skyboxPS.spv -g
+C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\skybox.frag -o shaders_bin\skyboxCubePS.spv -g --define-macro USE_CUBE_SAMPLER
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\terrain.vert -o shaders_bin\terrainVS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -I\shaders\globals.h -V shaders\terrain.frag -o shaders_bin\terrainPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\vertexSimple.vert -o shaders_bin\simpleVS.spv -g
