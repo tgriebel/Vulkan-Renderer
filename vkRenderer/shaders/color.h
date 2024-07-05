@@ -21,3 +21,7 @@ vec3 LinearToSrgb( vec3 inLinear ) {
 vec4 LinearToSrgb( vec4 inLinear ) {
 	return vec4( LinearToSrgb( inLinear.rgb ), inLinear.a );
 }
+
+vec3 VectorDebugColor( const vec3 vector ) {
+	return 0.5f * ( vector + vec3( 1.0f, 1.0f, 1.0f ) );
+}

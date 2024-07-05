@@ -1,3 +1,4 @@
+/*
 vec2f PackFloat32( const float unpacked )
 {
 	packFp32_t full;
@@ -15,4 +16,10 @@ vec2f PackFloat32( const float unpacked )
 	half.fp.mantissa = full.fp.mantissa >> 13; // Don't round up
 
 	return half.u;
+}
+*/
+
+vec3 CubeVector( const vec3 v )
+{
+	return vec3( -v.y, v.z, v.x ); // to glsl coordinate space
 }

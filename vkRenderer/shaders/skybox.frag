@@ -28,6 +28,7 @@
 
 #include "globals.h"
 #include "color.h"
+#include "util.h"
 
 PS_LAYOUT_STANDARD( sampler2D )
 
@@ -40,12 +41,8 @@ void main()
     const view_t view = viewUbo.views[ viewlId ];
 
 #ifdef USE_CUBE_SAMPLER
-    mat3 glslSpace = mat3( 0.0f, 0.0f, 1.0f,
-        -1.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f );
-
     const vec3 viewVector = normalize( objectPosition );
-    const vec3 skyColor = texture( cubeSamplers[ material.textureId0 ], glslSpace * viewVector ).rgb;
+    const vec3 skyColor = texture( cubeSamplers[ material.textureId0 ], CubeVector( viewVector ) ).rgb;
     outColor.rgb = SrgbToLinear( skyColor );
 #else
     const float xm = abs( fragNormal.x );
