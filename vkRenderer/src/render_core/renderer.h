@@ -236,6 +236,7 @@ private:
 	// Init/Shutdown
 	void								InitApi();
 	void								InitShaderResources();
+	void								AssignBindSetsToGpuProgs();
 	void								InitConfig();
 	void								InitImGui( RenderView& view );
 	void								ShutdownImGui();

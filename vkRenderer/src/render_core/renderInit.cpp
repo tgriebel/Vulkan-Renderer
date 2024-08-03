@@ -370,29 +370,28 @@ void Renderer::InitApi()
 }
 
 
-void Renderer::InitShaderResources()
+void Renderer::AssignBindSetsToGpuProgs()
 {
 	const ShaderBindSet& globalBindSet = renderContext.bindSets[ bindset_global ];
 	const ShaderBindSet& viewBindSet = renderContext.bindSets[ bindset_view ];
 	const ShaderBindSet& passBindSet = renderContext.bindSets[ bindset_pass ];
 	const ShaderBindSet& imageProcessBindSet = renderContext.bindSets[ bindset_imageProcess ];
-	const ShaderBindSet& particleBindSet = renderContext.bindSets[ bindset_particle ];
 
 	{
 		const uint32_t programCount = g_assets.gpuPrograms.Count();
 		for ( uint32_t i = 0; i < programCount; ++i )
 		{
 			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
-			
+
 			prog.bindsetCount = 0;
 
-			if( prog.type == pipelineType_t::RASTER )
+			if ( prog.type == pipelineType_t::RASTER )
 			{
 				prog.bindsets[ prog.bindsetCount ] = &globalBindSet;
 				prog.bindsetCount += 1;
 
 				if ( ( prog.flags & SHADER_FLAG_IMAGE_SHADER ) == 0 )
-				{			
+				{
 					prog.bindsets[ prog.bindsetCount ] = &viewBindSet;
 					prog.bindsetCount += 1;
 				}
@@ -400,15 +399,23 @@ void Renderer::InitShaderResources()
 
 			{
 				auto it = renderContext.bindSets.find( prog.bindHash );
-				if( it != renderContext.bindSets.end() ) {
+				if ( it != renderContext.bindSets.end() ) {
 					prog.bindsets[ prog.bindsetCount ] = &it->second;
-				} else {
+				}
+				else {
 					prog.bindsets[ prog.bindsetCount ] = &passBindSet;
 				}
 				prog.bindsetCount += 1;
 			}
 		}
 	}
+}
+
+
+void Renderer::InitShaderResources()
+{
+	const ShaderBindSet& globalBindSet = renderContext.bindSets[ bindset_global ];
+	const ShaderBindSet& particleBindSet = renderContext.bindSets[ bindset_particle ];
 
 	renderContext.globalParms = renderContext.RegisterBindParm( &globalBindSet );
 
@@ -545,6 +552,8 @@ void Renderer::BuildPipelines()
 	if( invalidAssets.size() == 0 ) {
 		return;
 	}
+
+	AssignBindSetsToGpuProgs();
 
 	FlushGPU();
 
