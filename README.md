@@ -16,13 +16,14 @@ Features:
 * Model instancing
 * Runtime Object manipulation
 * Shader hotswap
-
-Partial Support:
-* Raytracer and software rasterizer
 * MSAA
 * Env-maps
 
+Partial Support:
+* Raytracer and software rasterizer
+
+
+
 To-Do:
 * Depth-of-Field
-* Bin files for models
 * Individual shader reload
