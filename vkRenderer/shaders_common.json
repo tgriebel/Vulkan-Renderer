@@ -2,126 +2,128 @@
   "shaders": [
     {
       "name": "Basic",
-      "vs": "simpleVS.spv",
-      "ps": "simplePS.spv",
+      "vs": "simple",
+      "ps": "simple",
     },
     {
       "name": "Shadow",
-      "vs": "simpleVS.spv",
-      "ps": "shadowPS.spv"
+      "vs": "simple",
+      "ps": "shadow"
     },
     {
       "name": "Prepass",
-      "vs": "simpleVS.spv",
-      "ps": "depthPS.spv"
+      "vs": "simple",
+      "ps": "depth"
     },
     {
       "name": "Terrain",
-      "vs": "terrainVS.spv",
-      "ps": "terrainPS.spv"
+      "vs": "terrain",
+      "ps": "terrain"
     },
     {
       "name": "TerrainDepth",
-      "vs": "terrainVS.spv",
-      "ps": "depthPS.spv"
+      "vs": "terrain",
+      "ps": "depth"
     },
     {
       "name": "TerrainShadow",
-      "vs": "terrainVS.spv",
-      "ps": "shadowPS.spv"
+      "vs": "terrain",
+      "ps": "shadow"
     },
     {
       "name": "Sky",
-      "vs": "skyboxVS.spv",
-      "ps": "skyboxPS.spv"
+      "vs": "skybox",
+      "ps": "skybox"
     },
 	{
       "name": "SkyCube",
-      "vs": "skyboxVS.spv",
-      "ps": "skyboxCubePS.spv"
+      "vs": "skybox",
+      "ps": "skybox",
+	  "perm": "skycube"
     },
     {
       "name": "LitDepth",
-      "vs": "simpleVS.spv",
-      "ps": "depthPS.spv"
+      "vs": "simple",
+      "ps": "depth"
     },
     {
       "name": "LitOpaque",
-      "vs": "simpleVS.spv",
-      "ps": "litPS.spv"
+      "vs": "simple",
+      "ps": "lit"
     },
     {
       "name": "LitTree",
-      "vs": "treeVS.spv",
-      "ps": "litPS.spv"
+      "vs": "tree",
+      "ps": "lit"
     },
     {
       "name": "LitTrans",
-      "vs": "simpleVS.spv",
-      "ps": "litPS.spv"
+      "vs": "simple",
+      "ps": "lit"
     },
     {
       "name": "Debug",
-      "vs": "simpleVS.spv",
-      "ps": "depthPS.spv"
+      "vs": "simple",
+      "ps": "depth"
     },
     {
       "name": "DebugSolid",
-      "vs": "simpleVS.spv",
-      "ps": "emissivePS.spv"
+      "vs": "simple",
+      "ps": "emissive"
     },
     {
       "name": "PostProcess",
-      "vs": "defaultVS.spv",
-      "ps": "postProcessPS.spv"
+      "vs": "default",
+      "ps": "postProcess"
     },
     {
       "name": "Image2D",
-      "vs": "defaultVS.spv",
-      "ps": "simplePS.spv"
+      "vs": "default",
+      "ps": "simple"
     },
 	{
       "name": "ClearParticles",
-      "cs": "clearCS.spv",
+      "cs": "clear",
 	  "bindset": "bindset_particle"
     },
 	{
       "name": "ImageWriteback",
-      "cs": "imageWriteCS.spv",
+      "cs": "imagewriteback",
 	  "bindset": "bindset_compute"
     },
 	{
       "name": "DownSample",
-      "vs": "fullscreenVS.spv",
-      "ps": "downsamplePS.spv",
+      "vs": "fullscreen",
+      "ps": "downsample",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },
 	{
       "name": "Resolve",
-      "vs": "fullscreenVS.spv",
-      "ps": "resolvePS.spv",
+      "vs": "fullscreen",
+      "ps": "resolve",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },
 	{
       "name": "ResolveMSAA",
-      "vs": "fullscreenVS.spv",
-      "ps": "resolvePS_msaa.spv",
+      "vs": "fullscreen",
+      "ps": "resolve",
+	  "perm": "msaa",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },
 	{
       "name": "SeparableGaussianBlur",
-      "vs": "fullscreenVS.spv",
-      "ps": "gaussianPS.spv",
+      "vs": "fullscreen",
+      "ps": "gaussian",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },
 	{
       "name": "DiffuseIBL",
-      "vs": "fullscreenVS.spv",
-      "ps": "preCalculatedDiffuseIblPS.spv",
+      "vs": "fullscreen",
+      "ps": "preCalculatedDiffuseIbl",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     }

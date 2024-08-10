@@ -602,7 +602,8 @@ int ParseShaderObject( parseState_t& st, void* object )
 	ParseObject( st, objectMap, objectCount );
 
 	GpuProgramLoader* loader = new GpuProgramLoader();
-	loader->SetBasePath( "shaders_bin/" );
+	loader->SetSourcePath( "shaders/" );
+	loader->SetBinPath( "shaders_bin/" );
 	loader->AddFilePaths( vsShader, psShader, csShader );
 	loader->SetBindSet( bindSet );
 	loader->SetPerm( perm );
@@ -687,7 +688,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	assert( assets != nullptr );
 	assert( scene != nullptr );
 
-	std::vector<char> file = ReadFile( fileName );
+	std::vector<char> file = ReadTextFile( fileName );
 
 	const int maxTokens = 1024;
 

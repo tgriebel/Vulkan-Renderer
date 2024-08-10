@@ -5,8 +5,8 @@
   "shaders": [
     {
 	  "name": "EquirectangularSampler",
-	  "vs": "simpleVS.spv",
-	  "ps": "equirectangularSkyPS.spv",
+	  "vs": "simple",
+	  "ps": "equirectangularSky",
     }
   ],
   "images": [

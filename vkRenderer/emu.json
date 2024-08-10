@@ -5,8 +5,8 @@
   "shaders": [
 	{
       "name": "LitCRT",
-      "vs": "simpleVS.spv",
-      "ps": "crtPS.spv"
+      "vs": "simple",
+      "ps": "crt"
     },
   ],
   "images": [
