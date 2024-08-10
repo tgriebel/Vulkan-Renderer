@@ -83,47 +83,47 @@
 	{
       "name": "ClearParticles",
       "cs": "clearCS.spv",
-	  "bindset": "bindset_particle",
+	  "bindset": "bindset_particle"
     },
 	{
       "name": "ImageWriteback",
       "cs": "imageWriteCS.spv",
-	  "bindset": "bindset_compute",
+	  "bindset": "bindset_compute"
     },
 	{
       "name": "DownSample",
       "vs": "fullscreenVS.spv",
       "ps": "downsamplePS.spv",
 	  "bindset": "bindset_imageProcess",
-	  "image_shader": true,
+	  "image_shader": true
     },
 	{
       "name": "Resolve",
       "vs": "fullscreenVS.spv",
       "ps": "resolvePS.spv",
 	  "bindset": "bindset_imageProcess",
-	  "image_shader": true,
+	  "image_shader": true
     },
 	{
       "name": "ResolveMSAA",
       "vs": "fullscreenVS.spv",
       "ps": "resolvePS_msaa.spv",
 	  "bindset": "bindset_imageProcess",
-	  "image_shader": true,
+	  "image_shader": true
     },
 	{
       "name": "SeparableGaussianBlur",
       "vs": "fullscreenVS.spv",
       "ps": "gaussianPS.spv",
 	  "bindset": "bindset_imageProcess",
-	  "image_shader": true,
+	  "image_shader": true
     },
 	{
       "name": "DiffuseIBL",
       "vs": "fullscreenVS.spv",
       "ps": "preCalculatedDiffuseIblPS.spv",
 	  "bindset": "bindset_imageProcess",
-	  "image_shader": true,
-    },
+	  "image_shader": true
+    }
   ]
 }

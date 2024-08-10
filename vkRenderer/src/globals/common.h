@@ -151,6 +151,7 @@ struct imguiControls_t
 	int			dbgImageId;
 	int			selectedEntityId;
 	bool		rebuildShaders;
+	hdl_t		shaderHdl;
 	bool		raytraceScene;
 	bool		rasterizeScene;
 	bool		rebuildRaytraceScene;

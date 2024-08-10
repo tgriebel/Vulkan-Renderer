@@ -1,0 +1,20 @@
+{
+	"shaders": [
+		{
+		  "name": "Basic",
+		  "vs": "simple.vert",
+		  "ps": "simple.frag",
+		  "perm": "msaa"
+		},
+		{
+		  "name": "Shadow",
+		  "vs": "simple.vert",
+		  "ps": "shadow.frag"
+		},
+		{
+		  "name": "Prepass",
+		  "vs": "simple.vert",
+		  "ps": "depth.frag"
+		}
+	]
+}

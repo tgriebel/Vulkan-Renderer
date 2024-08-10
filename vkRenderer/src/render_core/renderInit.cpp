@@ -390,7 +390,7 @@ void Renderer::AssignBindSetsToGpuProgs()
 				prog.bindsets[ prog.bindsetCount ] = &globalBindSet;
 				prog.bindsetCount += 1;
 
-				if ( ( prog.flags & SHADER_FLAG_IMAGE_SHADER ) == 0 )
+				if ( ( prog.flags & shaderFlags_t::IMAGE_SHADER ) == shaderFlags_t::NONE )
 				{
 					prog.bindsets[ prog.bindsetCount ] = &viewBindSet;
 					prog.bindsetCount += 1;
@@ -513,6 +513,7 @@ void Renderer::InitImGui( RenderView& view )
 	g_imguiControls.rasterizeScene = false;
 	g_imguiControls.rebuildRaytraceScene = false;
 	g_imguiControls.rebuildShaders = false;
+	g_imguiControls.shaderHdl = INVALID_HDL;
 	g_imguiControls.heightMapHeight = 1.0f;
 	g_imguiControls.roughness = 0.9f;
 	g_imguiControls.shadowStrength = 0.99f;
