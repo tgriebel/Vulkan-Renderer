@@ -64,9 +64,8 @@ void CheckReloadAssets()
 {
 #if defined( USE_IMGUI )
 	if ( g_imguiControls.rebuildShaders ) {
-		system( "glsl_compile.bat" );
 		g_assets.gpuPrograms.UnloadAll();
-		g_assets.gpuPrograms.LoadAll();
+		g_assets.gpuPrograms.LoadAll( true );
 
 		g_imguiControls.rebuildShaders = false;
 	}
