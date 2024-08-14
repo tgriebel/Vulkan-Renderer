@@ -368,7 +368,9 @@ void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset )
 				ImGui::TableSetColumnIndex( 2 );
 				ImGui::Text( "%u", shader.shaders[ i ].blob.size() );
 			}
-
+			if( ImGui::Button( "Reload" ) ) {
+				g_imguiControls.shaderHdl = shaderAsset->Handle();
+			}
 			ImGui::EndTable();
 		}
 		ImGui::TreePop();

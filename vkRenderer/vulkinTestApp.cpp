@@ -63,11 +63,19 @@ void RenderThread()
 void CheckReloadAssets()
 {
 #if defined( USE_IMGUI )
-	if ( g_imguiControls.rebuildShaders ) {
+	if ( g_imguiControls.rebuildShaders )
+	{
 		g_assets.gpuPrograms.UnloadAll();
 		g_assets.gpuPrograms.LoadAll( true );
 
 		g_imguiControls.rebuildShaders = false;
+	}
+
+	if( g_imguiControls.shaderHdl != INVALID_HDL )
+	{
+		Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( g_imguiControls.shaderHdl );
+		prog->Reload( true );
+		g_imguiControls.shaderHdl = INVALID_HDL;
 	}
 #endif
 }
