@@ -141,7 +141,7 @@ void main()
             if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f )
             {
                 const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
-                const float shadowValue = texelFetch( codeSamplers[ shadowMapTexId ], shadowPixelLocation, 0 ).r;
+                const float shadowValue = texture( codeSamplers[ shadowMapTexId ], ndc.xy ).r;
                 if ( shadowValue < ( depth - bias ) ) {
                     shadowing = 1.0f - min( 1.0f, globals.shadowParms.w );
                 }
