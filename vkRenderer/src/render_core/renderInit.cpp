@@ -135,6 +135,8 @@ void Renderer::Init()
 	const bool useCubeViews = false;
 	const bool writeCubeViews = false;
 	const bool computeDiffuseIbl = false;
+	const bool downsampleScene = true;
+	const bool gaussianBlur = true;
 
 	if( useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
@@ -225,7 +227,6 @@ void Renderer::Init()
 		pingPongQueue[ 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
 	}
 
-	/*
 	MipImageTask* mipTask;
 	{
 		mipProcessCreateInfo_t info{};
@@ -237,7 +238,6 @@ void Renderer::Init()
 
 		mipTask = new MipImageTask( info );
 	}
-	*/
 
 	ImageWritebackTask* imageCubemapWriteBackTask;
 	{
@@ -299,12 +299,18 @@ void Renderer::Init()
 	if ( computeDiffuseIbl ) {
 		schedule.Queue( imageDiffuseIblWriteBackTask );
 	}
+	if ( downsampleScene ) {
+		schedule.Queue( mipTask );
+	}
+	if ( gaussianBlur ) {
+		schedule.Queue( pingPongQueue[0] );
+		schedule.Queue( pingPongQueue[1] );
+	}
 	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
 	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
-	//schedule.Queue( new MipImageTask( &mainColorDownsampled ) );
-	//schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ ) );
 	//schedule.Queue( mipTask );
+	//schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ ) );	
 	//schedule.Queue( pingPongQueue[ 0 ] );
 	//schedule.Queue( pingPongQueue[ 1 ] );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
