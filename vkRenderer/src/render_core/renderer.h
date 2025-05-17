@@ -124,41 +124,43 @@ public:
 class ResourceContext
 {
 public:
-	GpuBuffer			globalConstants;
-	GpuBuffer			surfParms;
-	GpuBuffer			materialBuffers;
-	GpuBuffer			lightParms;
-	GpuBuffer			particleBuffer;
+	GpuBuffer				globalConstants;
+	GpuBuffer				surfParms;
+	GpuBuffer				materialBuffers;
+	GpuBuffer				lightParms;
+	GpuBuffer				particleBuffer;
 
 	// TODO: move view-specific data
-	GpuBuffer			viewParms;
-	Image				mainColorImage;
-	Image				cubeFbColorImage;
-	Image				cubeFbDepthImage;
-	Image				diffuseIblImage;
-	ImageView			cubeFbImageView;
-	ImageView			cubeImageViews[ 6 ];
-	ImageView			cubeDepthImageViews[ 6 ];
-	ImageView			diffuseIblImageViews[ 6 ];
-	Image				gBufferLayerImage;
-	Image				depthStencilImage;
-	ImageView			depthImageView;
-	ImageView			stencilImageView;
-	GpuBufferView		surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
+	GpuBuffer				viewParms;
+	Image					mainColorImage;
+	Image					cubeFbColorImage;
+	Image					cubeFbDepthImage;
+	Image					diffuseIblImage;
+	ImageView				cubeFbImageView;
+	ImageView				cubeImageViews[ 6 ];
+	ImageView				cubeDepthImageViews[ 6 ];
+	ImageView				diffuseIblImageViews[ 6 ];
+	Image					gBufferLayerImage;
+	Image					depthStencilImage;
+	ImageView				depthImageView;
+	ImageView				stencilImageView;
+	GpuBufferView			surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 
 	// Code images
-	ImageView			mainColorResolvedImageView;
-	ImageView			depthResolvedImageView;
-	ImageView			stencilResolvedImageView;
-	Image				shadowMapImage[ MaxShadowViews ];
-	Image				mainColorResolvedImage;
-	Image				tempColorImage;
-	Image				tempWritebackImage;
-	Image				depthStencilResolvedImage;
+	std::vector<ImageView>	mainColorResolvedImageViews;
+	std::vector<ImageView>	blurredImageViews;
+	ImageView				depthResolvedImageView;
+	ImageView				stencilResolvedImageView;
+	Image					shadowMapImage[ MaxShadowViews ];
+	Image					mainColorResolvedImage;
+	Image					blurredImage;
+	Image					tempColorImage;
+	Image					tempWritebackImage;
+	Image					depthStencilResolvedImage;
 
 	// Data images
-	ImageArray			gpuImages2D;
-	ImageArray			gpuImagesCube;
+	ImageArray				gpuImages2D;
+	ImageArray				gpuImagesCube;
 };
 
 
@@ -192,7 +194,7 @@ private:
 	RenderView*							view2Ds[ Max2DViews ];
 	ImageProcess*						resolve = nullptr;
 	ImageProcess*						diffuseIBL[ 6 ] = {};
-	ImageProcess*						pingPongQueue[2] = {};
+	std::vector<ImageProcess*>			pingPongQueue;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
@@ -229,6 +231,7 @@ private:
 	FrameBuffer							cubeMapFrameBuffer[ 6 ];
 	FrameBuffer							diffuseIblFrameBuffer[ 6 ];
 	FrameBuffer							mainColorResolved;
+	std::vector<FrameBuffer>			blurredImageFrameBuffers;
 	FrameBuffer							tempColor;
 
 	uint32_t							shadowCount = 0;

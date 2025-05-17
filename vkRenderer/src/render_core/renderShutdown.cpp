@@ -58,7 +58,7 @@ void Renderer::Destroy()
 		}
 	}
 
-	for( uint32_t i = 0; i < 2; ++i ) {
+	for( uint32_t i = 0; i < pingPongQueue.size(); ++i ) {
 		if( pingPongQueue[ i ] != nullptr ) {
 			pingPongQueue[ i ]->Shutdown();
 		}
@@ -97,13 +97,19 @@ void Renderer::DestroyFramebuffers()
 	resources.depthImageView.Destroy();
 	resources.stencilImageView.Destroy();
 
-	resources.mainColorResolvedImageView.Destroy();
+	for ( uint32_t i = 0; i < resources.mainColorResolvedImage.info.mipLevels; ++i ) {
+		resources.mainColorResolvedImageViews[ i ].Destroy();
+	}
+	for ( uint32_t i = 0; i < resources.blurredImage.info.mipLevels; ++i ) {
+		resources.blurredImageViews[ i ].Destroy();
+	}
 	resources.depthResolvedImageView.Destroy();
 	resources.stencilResolvedImageView.Destroy();
 	resources.cubeFbImageView.Destroy();
 
 	delete resources.tempColorImage.gpuImage;
 	delete resources.mainColorImage.gpuImage;
+	delete resources.blurredImage.gpuImage;
 	delete resources.gBufferLayerImage.gpuImage;
 	delete resources.depthStencilImage.gpuImage;
 	delete resources.mainColorResolvedImage.gpuImage;
@@ -118,6 +124,11 @@ void Renderer::DestroyFramebuffers()
 	tempColor.Destroy();
 	mainColor.Destroy();
 	mainColorResolved.Destroy();
+
+	for ( uint32_t i = 0; i < blurredImageFrameBuffers.size(); ++i )
+	{
+		blurredImageFrameBuffers[ i ].Destroy();
+	}
 
 	delete resources.cubeFbColorImage.gpuImage;
 	delete resources.cubeFbDepthImage.gpuImage;

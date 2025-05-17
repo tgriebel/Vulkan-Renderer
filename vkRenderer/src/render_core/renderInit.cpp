@@ -208,23 +208,32 @@ void Renderer::Init()
 		imageProcessCreateInfo_t info = {};
 		info.name = "Separable Gaussian";
 		info.progHdl = AssetLibGpuProgram::Handle( "SeparableGaussianBlur" );
-		info.fb = &tempColor;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.inputImages = 1;
 
 		uint32_t verticalPass = 0;
 
-		pingPongQueue[ 0 ] = new ImageProcess( info );
-		pingPongQueue[ 0 ]->SetSourceImage( 0, &resources.mainColorResolvedImage );
-		pingPongQueue[ 0 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+		const uint32_t mipCount = resources.blurredImage.info.mipLevels;
+		const uint32_t imagePassCount = 2 * mipCount;
 
-		verticalPass = 1;
+		pingPongQueue.resize( imagePassCount );
 
-		info.fb = &mainColorResolved;
-		pingPongQueue[ 1 ] = new ImageProcess( info );
-		pingPongQueue[ 1 ]->SetSourceImage( 0, &resources.tempColorImage );
-		pingPongQueue[ 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+		// Foreach Mip-Level: Downscale Image -> Blur Horizontal -> Temp -> Blur Vertical -> Blurred Image
+		for ( uint32_t passNum = 0; passNum < mipCount; ++passNum )
+		{
+			info.fb = &tempColor;
+			pingPongQueue[ 2 * passNum + 0 ] = new ImageProcess( info );
+			pingPongQueue[ 2 * passNum + 0 ]->SetSourceImage( 0, &resources.mainColorResolvedImageViews[ passNum ] );
+			pingPongQueue[ 2 * passNum + 0 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+
+			verticalPass = 1;
+
+			info.fb = &blurredImageFrameBuffers[ passNum ];
+			pingPongQueue[ 2 * passNum + 1 ] = new ImageProcess( info );
+			pingPongQueue[ 2 * passNum + 1 ]->SetSourceImage( 0, &resources.tempColorImage );
+			pingPongQueue[ 2 * passNum + 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+		}
 	}
 
 	MipImageTask* mipTask;
@@ -302,9 +311,12 @@ void Renderer::Init()
 	if ( downsampleScene ) {
 		schedule.Queue( mipTask );
 	}
-	if ( gaussianBlur ) {
-		schedule.Queue( pingPongQueue[0] );
-		schedule.Queue( pingPongQueue[1] );
+	if ( gaussianBlur )
+	{
+		for ( uint32_t i = 0; i < pingPongQueue.size(); ++i )
+		{
+			schedule.Queue( pingPongQueue[i] );
+		}
 	}
 	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
 	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
@@ -787,9 +799,33 @@ void Renderer::CreateFramebuffers()
 		info.tiling = resources.mainColorImage.info.tiling;
 
 		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resources.mainColorResolvedImage );
+		CreateImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resources.blurredImage );
 
 		info.mipLevels = 1;
-		resources.mainColorResolvedImageView.Init( resources.mainColorResolvedImage, info );
+
+		const uint32_t mipLevelCount = resources.mainColorResolvedImage.info.mipLevels;
+		resources.mainColorResolvedImageViews.resize( mipLevelCount );
+		for ( uint32_t i = 0; i < mipLevelCount; ++i )
+		{
+			imageSubResourceView_t subView = {};
+			subView.baseMip = i;
+			subView.mipLevels = 1;
+			subView.baseArray = 0;
+			subView.arrayCount = 1;
+
+			resources.mainColorResolvedImageViews[ i ].Init( resources.mainColorResolvedImage, info, subView );
+		}
+		resources.blurredImageViews.resize( mipLevelCount );
+		for ( uint32_t i = 0; i < mipLevelCount; ++i )
+		{
+			imageSubResourceView_t subView = {};
+			subView.baseMip = i;
+			subView.mipLevels = 1;
+			subView.baseArray = 0;
+			subView.arrayCount = 1;
+
+			resources.blurredImageViews[ i ].Init( resources.blurredImage, info, subView );
+		}
 	}
 
 	// Depth-stencil views
@@ -861,11 +897,23 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "MainColorResolveFB";
-		fbInfo.color0[ 0 ] = &resources.mainColorResolvedImageView;
+		fbInfo.color0[ 0 ] = &resources.mainColorResolvedImageViews[0];
 		fbInfo.color1[ 0 ] = &resources.depthStencilResolvedImage;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColorResolved.Create( fbInfo );
+	}
+
+	// Blurred Image Frame buffer
+	blurredImageFrameBuffers.resize( resources.blurredImageViews.size() );
+	for ( uint32_t i = 0; i < blurredImageFrameBuffers.size(); ++i )
+	{
+		frameBufferCreateInfo_t fbInfo;
+		fbInfo.name = "blurredImageFB";
+		fbInfo.color0[ 0 ] = &resources.blurredImageViews[ i ];
+		fbInfo.lifetime = LIFETIME_TEMP;
+
+		blurredImageFrameBuffers[ i ].Create( fbInfo );
 	}
 
 	// Temp Frame buffer

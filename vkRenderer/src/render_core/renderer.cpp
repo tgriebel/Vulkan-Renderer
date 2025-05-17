@@ -287,7 +287,7 @@ void Renderer::RecreateSwapChain()
 		resolve->Resize();
 	}
 
-	for ( uint32_t i = 0; i < 2; ++i ) {
+	for ( uint32_t i = 0; i < pingPongQueue.size(); ++i ) {
 		if ( pingPongQueue[ i ] != nullptr ) {
 			pingPongQueue[ i ]->Resize();
 		}
@@ -307,6 +307,7 @@ void Renderer::Resize()
 	Transition( &uploadContext, resources.mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.gBufferLayerImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.blurredImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
@@ -372,6 +373,7 @@ void Renderer::UploadAssets()
 	Transition( &uploadContext, resources.mainColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.gBufferLayerImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.blurredImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.tempColorImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 	Transition( &uploadContext, resources.depthStencilImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
