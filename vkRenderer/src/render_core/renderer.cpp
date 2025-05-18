@@ -317,9 +317,7 @@ void Renderer::Resize()
 
 	Transition( &uploadContext, resources.diffuseIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
-	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
-		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
-	}
+	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
 	uploadContext.End();
 	uploadContext.Submit();
@@ -383,9 +381,7 @@ void Renderer::UploadAssets()
 
 	Transition( &uploadContext, resources.diffuseIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
-	for ( uint32_t i = 0; i < g_swapChain.GetBufferCount(); ++i ) {
-		Transition( &uploadContext, *g_swapChain.GetBackBuffer( i ), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
-	}
+	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
 	uploadContext.End();
 	uploadContext.Submit();
@@ -432,14 +428,12 @@ void Renderer::Render()
 
 void Renderer::WaitForEndFrame()
 {
-	context.bufferId = ( context.bufferId + 1 ) % MaxFrameStates;
-
 	{
-		//SCOPED_TIMER_PRINT( WaitForFrame );
+	//	SCOPED_TIMER_PRINT( WaitForFrame );
 		gfxContext.frameFence[ context.bufferId ].Wait();
 	}
 
-	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.swapChainIndex ) );
+	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId ) );
 
 #ifdef USE_IMGUI
 	ImGui_ImplVulkan_NewFrame();

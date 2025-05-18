@@ -261,29 +261,26 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	}
 
 	m_bufferCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
-	const bool canPresent = ( createInfo.color0[ 0 ] != nullptr ) && ( createInfo.color0[ 0 ]->info.fmt == g_swapChain.GetBackBufferFormat() );
+	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
 
-	m_colorCount += ( createInfo.color0[ 0 ] != nullptr ) ? 1 : 0;
-	m_colorCount += ( createInfo.color1[ 0 ] != nullptr ) ? 1 : 0;
-	m_colorCount += ( createInfo.color2[ 0 ] != nullptr ) ? 1 : 0;
-	m_dsCount += ( createInfo.depth[ 0 ] != nullptr ) ? 1 : 0;
-	m_dsCount += ( createInfo.stencil[ 0 ] != nullptr ) ? 1 : 0;
+	m_colorCount += ( createInfo.color0 != nullptr ) ? 1 : 0;
+	m_colorCount += ( createInfo.color1 != nullptr ) ? 1 : 0;
+	m_colorCount += ( createInfo.color2 != nullptr ) ? 1 : 0;
+	m_dsCount += ( createInfo.depth != nullptr ) ? 1 : 0;
+	m_dsCount += ( createInfo.stencil != nullptr ) ? 1 : 0;
 
 	m_attachmentCount = m_colorCount + m_dsCount;
 
-	Image* images[ MaxAttachmentCount ][ MaxFrameStates ];
-	for ( uint32_t frameIx = 0; frameIx < m_bufferCount; ++frameIx )
-	{
-		images[ 0 ][ frameIx ] = createInfo.color0[ frameIx ];
-		images[ 1 ][ frameIx ] = createInfo.color1[ frameIx ];
-		images[ 2 ][ frameIx ] = createInfo.color2[ frameIx ];
-		images[ 3 ][ frameIx ] = createInfo.depth[ frameIx ];
-		images[ 4 ][ frameIx ] = createInfo.stencil[ frameIx ];
-	}
+	Image* images[ MaxAttachmentCount ];
+	images[ 0 ] = createInfo.color0;
+	images[ 1 ] = createInfo.color1;
+	images[ 2 ] = createInfo.color2;
+	images[ 3 ] = createInfo.depth;
+	images[ 4 ] = createInfo.stencil;
 
 	uint32_t firstValidIx = MaxAttachmentCount;
 	for ( uint32_t imageIx = 0; imageIx < MaxAttachmentCount; ++imageIx ) {
-		if ( images[ imageIx ][ 0 ] != nullptr ) {
+		if ( images[ imageIx ] != nullptr ) {
 			firstValidIx = imageIx;
 			break;
 		}
@@ -295,44 +292,23 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			throw std::runtime_error( "No images provided." );
 		}
 
-		if ( ( createInfo.color0[ 0 ] == nullptr ) &&
-			( ( createInfo.color1[ 0 ] != nullptr ) || ( createInfo.color2[ 0 ] != nullptr ) ) ) {
+		if ( ( createInfo.color0 == nullptr ) &&
+			( ( createInfo.color1 != nullptr ) || ( createInfo.color2 != nullptr ) ) ) {
 			throw std::runtime_error( "Color attachment 0 has to be used if 1 and 2 are." );
 		}
 
-		if ( ( createInfo.color2[ 0 ] != nullptr ) && ( createInfo.color1[ 0 ] != nullptr ) ) {
+		if ( ( createInfo.color2 != nullptr ) && ( createInfo.color1 != nullptr ) ) {
 			throw std::runtime_error( "Color attachment 1 has to be used if 2 is." );
-		}
-
-		for ( uint32_t imageIx = 0; imageIx < MaxAttachmentCount; ++imageIx )
-		{
-			if ( images[ imageIx ][ 0 ] == nullptr ) {
-				for ( uint32_t frameIx = 1; frameIx < m_bufferCount; ++frameIx ) {
-					if( images[ imageIx ][ frameIx ] != nullptr ) {
-						throw std::runtime_error( "Framebuffer image missing." );
-					}
-				}
-				continue;
-			}
-		
-			for ( uint32_t frameIx = 1; frameIx < m_bufferCount; ++frameIx ) {
-				if( images[ imageIx ][ frameIx - 1 ] == images[ imageIx ][ frameIx ] ) {
-					throw std::runtime_error( "Framebuffer images are the same across multiple buffers." );
-				}
-				if ( images[ imageIx ][ frameIx - 1 ]->info != images[ imageIx ][ frameIx ]->info ) {
-					throw std::runtime_error( "Framebuffer images have different properties." );
-				}
-			}
 		}
 
 		for ( uint32_t imageIx = firstValidIx + 1; imageIx < MaxAttachmentCount; ++imageIx )
 		{
-			if( images[ imageIx ][ 0 ] == nullptr ) {
+			if( images[ imageIx ] == nullptr ) {
 				continue;
 			}
-			if( images[ firstValidIx ][ 0 ]->info.width != images[ imageIx ][ 0 ]->info.width ||
-				images[ firstValidIx ][ 0 ]->info.height != images[ imageIx ][ 0 ]->info.height || 
-				images[ firstValidIx ][ 0 ]->info.layers != images[ imageIx ][ 0 ]->info.layers )
+			if( images[ firstValidIx ]->info.width != images[ imageIx ]->info.width ||
+				images[ firstValidIx ]->info.height != images[ imageIx ]->info.height || 
+				images[ firstValidIx ]->info.layers != images[ imageIx ]->info.layers )
 			{
 				throw std::runtime_error( "Framebuffer images must have the same dimensions." );
 			}
@@ -353,36 +329,36 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	m_attachmentBits = {};
 	renderPassAttachmentMask_t mask = RENDER_PASS_MASK_NONE;
 	{
-		if ( createInfo.color0[ 0 ] != nullptr )
+		if ( createInfo.color0 != nullptr )
 		{
-			m_attachmentBits.color0.samples = createInfo.color0[ 0 ]->info.subsamples;
-			m_attachmentBits.color0.fmt = createInfo.color0[ 0 ]->info.fmt;
+			m_attachmentBits.color0.samples = createInfo.color0->info.subsamples;
+			m_attachmentBits.color0.fmt = createInfo.color0->info.fmt;
 			mask |= RENDER_PASS_MASK_COLOR0;
 		}
-		if ( createInfo.color1[ 0 ] != nullptr )
+		if ( createInfo.color1 != nullptr )
 		{
-			m_attachmentBits.color1.samples = createInfo.color1[ 0 ]->info.subsamples;
-			m_attachmentBits.color1.fmt = createInfo.color1[ 0 ]->info.fmt;
+			m_attachmentBits.color1.samples = createInfo.color1->info.subsamples;
+			m_attachmentBits.color1.fmt = createInfo.color1->info.fmt;
 			mask |= RENDER_PASS_MASK_COLOR1;
 		}
-		if ( createInfo.color2[ 0 ] != nullptr )
+		if ( createInfo.color2 != nullptr )
 		{
-			m_attachmentBits.color2.samples = createInfo.color2[ 0 ]->info.subsamples;
-			m_attachmentBits.color2.fmt = createInfo.color2[ 0 ]->info.fmt;
+			m_attachmentBits.color2.samples = createInfo.color2->info.subsamples;
+			m_attachmentBits.color2.fmt = createInfo.color2->info.fmt;
 			mask |= RENDER_PASS_MASK_COLOR2;
 		}
 
-		if ( createInfo.depth[ 0 ] != nullptr )
+		if ( createInfo.depth != nullptr )
 		{
-			m_attachmentBits.depth.samples = createInfo.depth[ 0 ]->info.subsamples;
-			m_attachmentBits.depth.fmt = createInfo.depth[ 0 ]->info.fmt;
+			m_attachmentBits.depth.samples = createInfo.depth->info.subsamples;
+			m_attachmentBits.depth.fmt = createInfo.depth->info.fmt;
 			mask |= RENDER_PASS_MASK_DEPTH;
 		}
 
-		if ( createInfo.stencil[ 0 ] != nullptr )
+		if ( createInfo.stencil != nullptr )
 		{
-			m_attachmentBits.stencil.samples = createInfo.stencil[ 0 ]->info.subsamples;
-			m_attachmentBits.stencil.fmt = createInfo.stencil[ 0 ]->info.fmt;
+			m_attachmentBits.stencil.samples = createInfo.stencil->info.subsamples;
+			m_attachmentBits.stencil.fmt = createInfo.stencil->info.fmt;
 			mask |= RENDER_PASS_MASK_STENCIL;
 		}
 	}
@@ -417,20 +393,20 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			VkImageView attachments[ MaxAttachmentCount ] = {};
 			
 			uint32_t currentAttachment = 0;
-			if ( createInfo.color0[ frameIx ] != nullptr ) {
-				attachments[ currentAttachment++ ] = createInfo.color0[ frameIx ]->gpuImage->GetVkImageView();
+			if ( createInfo.color0 != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.color0->gpuImage->GetVkImageView( frameIx );
 			}
-			if ( createInfo.color1[ frameIx ] != nullptr ) {
-				attachments[ currentAttachment++ ] = createInfo.color1[ frameIx ]->gpuImage->GetVkImageView();
+			if ( createInfo.color1 != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.color1->gpuImage->GetVkImageView( frameIx );
 			}
-			if ( createInfo.color2[ frameIx ] != nullptr ) {
-				attachments[ currentAttachment++ ] = createInfo.color2[ frameIx ]->gpuImage->GetVkImageView();
+			if ( createInfo.color2 != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.color2->gpuImage->GetVkImageView( frameIx );
 			}
-			if ( createInfo.depth[ frameIx ] != nullptr ) {
-				attachments[ currentAttachment++ ] = createInfo.depth[ frameIx ]->gpuImage->GetVkImageView();
+			if ( createInfo.depth != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.depth->gpuImage->GetVkImageView( frameIx );
 			}
-			if ( createInfo.stencil[ frameIx ] != nullptr ) {
-				attachments[ currentAttachment++ ] = createInfo.stencil[ frameIx ]->gpuImage->GetVkImageView();
+			if ( createInfo.stencil != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.stencil->gpuImage->GetVkImageView( frameIx );
 			}
 			assert( currentAttachment == m_attachmentCount );
 
@@ -439,27 +415,26 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			framebufferInfo.renderPass = vk_renderPasses[ permIx ];
 			framebufferInfo.attachmentCount = m_attachmentCount;
 			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = images[ firstValidIx ][ 0 ]->info.width;
-			framebufferInfo.height = images[ firstValidIx ][ 0 ]->info.height;
-			framebufferInfo.layers = images[ firstValidIx ][ 0 ]->subResourceView.arrayCount;
+			framebufferInfo.width = images[ firstValidIx ]->info.width;
+			framebufferInfo.height = images[ firstValidIx ]->info.height;
+			framebufferInfo.layers = images[ firstValidIx ]->subResourceView.arrayCount;
 
 			VK_CHECK_RESULT( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &vk_buffers[ frameIx ][ permIx ] ) );
 
 			vk_MarkerSetObjectName( (uint64_t)vk_buffers[ frameIx ][ permIx ], VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, createInfo.name );
-
-			m_color0[ frameIx ] = createInfo.color0[ frameIx ];
-			m_color1[ frameIx ] = createInfo.color1[ frameIx ];
-			m_color2[ frameIx ] = createInfo.color2[ frameIx ];
-			m_depth[ frameIx ] = createInfo.depth[ frameIx ];
-			m_stencil[ frameIx ] = createInfo.stencil[ frameIx ];
 		}
+		m_color0 = createInfo.color0;
+		m_color1 = createInfo.color1;
+		m_color2 = createInfo.color2;
+		m_depth = createInfo.depth;
+		m_stencil = createInfo.stencil;
 	}
-	m_width = images[ firstValidIx ][ 0 ]->info.width;
-	m_height = images[ firstValidIx ][ 0 ]->info.height;
+	m_width = images[ firstValidIx ]->info.width;
+	m_height = images[ firstValidIx ]->info.height;
 	m_lifetime = createInfo.lifetime;
 	
-	if( m_color0[ 0 ] == nullptr ) {
-		assert( ( m_color1[ 0 ] == nullptr ) && ( m_color2[ 0 ] == nullptr ) );
+	if( m_color0 == nullptr ) {
+		assert( ( m_color1 == nullptr ) && ( m_color2 == nullptr ) );
 	}
 }
 

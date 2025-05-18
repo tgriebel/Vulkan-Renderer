@@ -89,7 +89,7 @@ bool SwapChain::Present( GfxContext& gfxContext )
 	VkSwapchainKHR swapChains[] = { GetVkObject() };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &context.swapChainIndex;
+	presentInfo.pImageIndices = &context.bufferId;
 	presentInfo.pResults = nullptr; // Optional
 
 	VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
@@ -154,33 +154,35 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 
 	m_swapChainImageFormat = vk_GetTextureFormat( surfaceFormat.format );
 
-	for ( uint32_t i = 0; i < m_imageCount; ++i )
-	{
-		imageInfo_t& info = m_swapChainImages[ i ].info;
+	imageInfo_t& info = m_swapChainImage.info;
 
-		info.fmt = m_swapChainImageFormat;
-		info.width = extent.width;
-		info.height = extent.height;
-		info.layers = 1;
-		info.mipLevels = 1;
-		info.channels = 4;
-		info.subsamples = IMAGE_SMP_1;
-		info.tiling = IMAGE_TILING_LINEAR;
-		info.type = IMAGE_TYPE_2D;
+	info.fmt = m_swapChainImageFormat;
+	info.width = extent.width;
+	info.height = extent.height;
+	info.layers = 1;
+	info.mipLevels = 1;
+	info.channels = 4;
+	info.subsamples = IMAGE_SMP_1;
+	info.tiling = IMAGE_TILING_LINEAR;
+	info.type = IMAGE_TYPE_2D;
 
-		m_swapChainImages[ i ].subResourceView.baseArray = 0;
-		m_swapChainImages[ i ].subResourceView.arrayCount = 1;	
-		m_swapChainImages[ i ].subResourceView.baseMip = 0;
-		m_swapChainImages[ i ].subResourceView.mipLevels = 1;
+	m_swapChainImage.subResourceView.baseArray = 0;
+	m_swapChainImage.subResourceView.arrayCount = 1;	
+	m_swapChainImage.subResourceView.baseMip = 0;
+	m_swapChainImage.subResourceView.mipLevels = 1;
 
-		m_swapChainImages[ i ].gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages[ i ], vk_CreateImageView( vk_swapChainImages[ i ], info ) );
+	VkImageView vk_swapChainImageViews[ MaxSwapChainBuffers ];
+
+	for ( uint32_t i = 0; i < m_imageCount; ++i ) {
+		vk_swapChainImageViews[ i ] = vk_CreateImageView( vk_swapChainImages[ i ], info );
 	}
+
+	gpuImageStateFlags_t flags = GPU_IMAGE_PRESENT | GPU_IMAGE_PERSISTENT;
+	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages, vk_swapChainImageViews, flags );
 
 	frameBufferCreateInfo_t fbInfo = {};
 	fbInfo.name = "SwapChainFB";
-	for ( uint32_t i = 0; i < m_imageCount; ++i ) {
-		fbInfo.color0[ i ] = &m_swapChainImages[ i ];
-	}
+	fbInfo.color0 = &m_swapChainImage;
 	fbInfo.lifetime = LIFETIME_PERSISTENT;
 
 	m_framebuffer.Create( fbInfo );
@@ -191,11 +193,9 @@ void SwapChain::Destroy()
 {
 	m_framebuffer.Destroy();
 
-	for ( size_t i = 0; i < m_imageCount; i++ )
-	{
-		// Vulkan swapchain images are a bit special since they need to be destroyed with the swapchain
-		m_swapChainImages[ i ].gpuImage->DetachVkImage();
-		delete m_swapChainImages[ i ].gpuImage;
-	}
+	// Vulkan swapchain images are a bit special since they need to be destroyed with the swapchain
+	m_swapChainImage.gpuImage->DetachVkImage();
+	delete m_swapChainImage.gpuImage;
+
 	vkDestroySwapchainKHR( context.device, vk_swapChain, nullptr );
 }

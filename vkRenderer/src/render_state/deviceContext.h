@@ -89,7 +89,6 @@ public:
 	VkSampler							depthShadowSampler;
 	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
 	uint32_t							bufferId;
-	uint32_t							swapChainIndex;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;

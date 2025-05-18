@@ -35,22 +35,22 @@ struct frameBufferCreateInfo_t
 {
 	resourceLifetime_t	lifetime;
 	const char*			name;
-	Image*				color0[ MaxFrameStates ];
-	Image*				color1[ MaxFrameStates ];
-	Image*				color2[ MaxFrameStates ];
-	Image*				depth[ MaxFrameStates ];
-	Image*				stencil[ MaxFrameStates ];
+	Image*				color0;
+	Image*				color1;
+	Image*				color2;
+	Image*				depth;
+	Image*				stencil;
 
 	frameBufferCreateInfo_t() :
 		lifetime( LIFETIME_TEMP )
 	{
 		name = "";
 
-		memset( color0, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( color1, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( color2, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( depth, 0, sizeof( Image* ) * MaxFrameStates );
-		memset( stencil, 0, sizeof( Image* ) * MaxFrameStates );
+		color0 = nullptr;
+		color1 = nullptr;
+		color2 = nullptr;
+		depth = nullptr;
+		stencil = nullptr;
 	}
 };
 
@@ -60,11 +60,11 @@ class FrameBuffer
 private:
 	static const uint32_t MaxAttachmentCount = 5;
 
-	Image*						m_color0[ MaxFrameStates ];
-	Image*						m_color1[ MaxFrameStates ];
-	Image*						m_color2[ MaxFrameStates ];
-	Image*						m_depth[ MaxFrameStates ];
-	Image*						m_stencil[ MaxFrameStates ];
+	Image*						m_color0;
+	Image*						m_color1;
+	Image*						m_color2;
+	Image*						m_depth;
+	Image*						m_stencil;
 
 	uint32_t					m_width;
 	uint32_t					m_height;
@@ -98,14 +98,11 @@ public:
 		m_width( 0 ),
 		m_height( 0 )
 	{
-		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
-		{
-			m_color0[ frameIx ] = nullptr;
-			m_color1[ frameIx ] = nullptr;
-			m_color2[ frameIx ] = nullptr;
-			m_depth[ frameIx ] = nullptr;
-			m_stencil[ frameIx ] = nullptr;
-		}
+		m_color0 = nullptr;
+		m_color1 = nullptr;
+		m_color2 = nullptr;
+		m_depth = nullptr;
+		m_stencil = nullptr;
 	}
 
 	inline bool IsValid() const
@@ -143,29 +140,29 @@ public:
 		return ( ColorLayerCount() > 0 ) ? GetColor()->info.subsamples : GetDepth()->info.subsamples;
 	}
 
-	inline const Image* GetColor( const uint32_t bufferId = 0 ) const
+	inline const Image* GetColor() const
 	{
-		return ( m_colorCount > 0 ) ? m_color0[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_colorCount > 0 ) ? m_color0 : nullptr;
 	}
 
-	inline const Image* GetColor1( const uint32_t bufferId = 0 ) const
+	inline const Image* GetColor1() const
 	{
-		return ( m_colorCount > 1 ) ? m_color1[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_colorCount > 1 ) ? m_color1 : nullptr;
 	}
 
-	inline const Image* GetColor2( const uint32_t bufferId = 0 ) const
+	inline const Image* GetColor2() const
 	{
-		return ( m_colorCount > 2 ) ? m_color2[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_colorCount > 2 ) ? m_color2 : nullptr;
 	}
 
-	inline const Image* GetDepth( const uint32_t bufferId = 0 ) const
+	inline const Image* GetDepth() const
 	{
-		return ( m_dsCount >= 1 ) ? m_depth[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_dsCount >= 1 ) ? m_depth : nullptr;
 	}
 
-	inline const Image* GetStencil( const uint32_t bufferId = 0 ) const
+	inline const Image* GetStencil() const
 	{
-		return ( m_dsCount >= 1 ) ? m_stencil[ GetBufferId( bufferId ) ] : nullptr;
+		return ( m_dsCount >= 1 ) ? m_stencil : nullptr;
 	}
 
 	inline renderAttachmentBits_t GetAttachmentBits() const

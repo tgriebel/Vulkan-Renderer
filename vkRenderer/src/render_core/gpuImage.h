@@ -38,11 +38,6 @@ protected:
 		return Min( bufferId, bufferCount - 1 );
 	}
 
-	inline uint32_t GetBufferCount() const
-	{
-		return ( m_lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
-	}
-
 public:
 
 	GpuImage()
@@ -79,12 +74,31 @@ public:
 		return m_allocation.GetAlignment();
 	}
 
+	inline uint32_t GetBufferCount() const
+	{
+		return ( m_lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
+	}
+
 #ifdef USE_VULKAN
 	GpuImage( const char* name, const VkImage image, const VkImageView view )
 	{
 		vk_image[ 0 ] = image;
 		vk_view[ 0 ] = view;
 		m_dbgName = name;
+	}
+
+	// TODO: take in swapchain
+	GpuImage( const char* name, const VkImage* image, const VkImageView* view, const gpuImageStateFlags_t flags )
+	{
+		m_dbgName = name;
+		m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
+
+		const uint32_t bufferCount = GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			vk_image[ i ] = image[ i ];
+			vk_view[ i ] = view[ i ];
+		}
 	}
 
 

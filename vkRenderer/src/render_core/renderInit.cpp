@@ -897,8 +897,8 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "MainColorResolveFB";
-		fbInfo.color0[ 0 ] = &resources.mainColorResolvedImageViews[0];
-		fbInfo.color1[ 0 ] = &resources.depthStencilResolvedImage;
+		fbInfo.color0 = &resources.mainColorResolvedImageViews[0];
+		fbInfo.color1 = &resources.depthStencilResolvedImage;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		mainColorResolved.Create( fbInfo );
@@ -910,7 +910,7 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "blurredImageFB";
-		fbInfo.color0[ 0 ] = &resources.blurredImageViews[ i ];
+		fbInfo.color0 = &resources.blurredImageViews[ i ];
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		blurredImageFrameBuffers[ i ].Create( fbInfo );
@@ -920,7 +920,7 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "TempColorFB";
-		fbInfo.color0[ 0 ] = &resources.tempColorImage;
+		fbInfo.color0 = &resources.tempColorImage;
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		tempColor.Create( fbInfo );
@@ -931,7 +931,7 @@ void Renderer::CreateFramebuffers()
 	{	
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "ShadowMapFB";
-		fbInfo.depth[ 0 ] = &resources.shadowMapImage[ shadowIx ];
+		fbInfo.depth = &resources.shadowMapImage[ shadowIx ];
 		fbInfo.lifetime = LIFETIME_TEMP;
 
 		shadowMap[ shadowIx ].Create( fbInfo );
@@ -943,10 +943,10 @@ void Renderer::CreateFramebuffers()
 		fbInfo.name = "MainColorFB";
 		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
 		{
-			fbInfo.color0[ frameIx ] = &resources.mainColorImage;
-			fbInfo.color1[ frameIx ] = &resources.gBufferLayerImage;
-			fbInfo.depth[ frameIx ] = &resources.depthImageView;
-			fbInfo.stencil[ frameIx ] = &resources.stencilImageView;
+			fbInfo.color0 = &resources.mainColorImage;
+			fbInfo.color1 = &resources.gBufferLayerImage;
+			fbInfo.depth = &resources.depthImageView;
+			fbInfo.stencil = &resources.stencilImageView;
 		}
 		fbInfo.lifetime = LIFETIME_TEMP;
 
@@ -959,8 +959,8 @@ void Renderer::CreateFramebuffers()
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "CubeColorFB";
 			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
-				fbInfo.color0[ frameIx ] = &resources.cubeImageViews[ i ];
-				fbInfo.depth[ frameIx ] = &resources.cubeDepthImageViews[ i ];
+				fbInfo.color0 = &resources.cubeImageViews[ i ];
+				fbInfo.depth = &resources.cubeDepthImageViews[ i ];
 			}
 			fbInfo.lifetime = LIFETIME_TEMP;
 
@@ -974,7 +974,7 @@ void Renderer::CreateFramebuffers()
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "DiffuseIblFB";
 			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
-				fbInfo.color0[ frameIx ] = &resources.diffuseIblImageViews[ i ];
+				fbInfo.color0 = &resources.diffuseIblImageViews[ i ];
 			}
 			fbInfo.lifetime = LIFETIME_TEMP;
 

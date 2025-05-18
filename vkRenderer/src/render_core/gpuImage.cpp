@@ -4,7 +4,9 @@
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 
-void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
+// TODO: move
+#ifdef USE_VULKAN	
+static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const gpuImageStateFlags_t flags )
 {
 	VkImageCreateInfo imageInfo{ };
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -31,11 +33,16 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0;
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_DST ) != 0 ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0;
 
-	m_dbgName = name;
-	m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
-
 	imageInfo.flags = 0;
 	imageInfo.flags |= ( info.type == IMAGE_TYPE_CUBE ) ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
+
+	return imageInfo;
+}
+#endif
+
+void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
+{
+	VkImageCreateInfo imageInfo = vk_GetImageCreateInfo( info, flags );
 
 	VkImageStencilUsageCreateInfo stencilUsage{};
 	if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
@@ -45,6 +52,9 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 		imageInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 		imageInfo.pNext = &stencilUsage;
 	}
+
+	m_dbgName = name;
+	m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
 
 	const uint32_t bufferCount = GetBufferCount();
 	for ( uint32_t i = 0; i < bufferCount; ++i )

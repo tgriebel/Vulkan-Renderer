@@ -86,7 +86,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	passInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->GetFrameBuffer()->GetVkBuffer( transitionState, transitionState.flags.presentAfter ? context.swapChainIndex : context.bufferId );
+	passInfo.framebuffer = pass->GetFrameBuffer()->GetVkBuffer( transitionState, context.bufferId );
 	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
 	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
@@ -473,7 +473,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	{
 		frameBufferCreateInfo_t info{};
 		info.name = "MipDownsample";
-		info.color0[ 0 ] = &m_tempImage;
+		info.color0 = &m_tempImage;
 		info.lifetime = resourceLifetime_t::LIFETIME_TEMP;
 
 		m_frameBuffers[ i ].Create( info );

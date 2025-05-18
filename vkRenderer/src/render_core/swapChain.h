@@ -41,16 +41,11 @@ private:
 	const Window*				m_window;
 	uint32_t					m_imageCount;
 	imageFmt_t					m_swapChainImageFormat;
-	Image						m_swapChainImages[ MaxSwapChainBuffers ];
+	Image						m_swapChainImage;
 #ifdef USE_VULKAN
 	VkSwapchainKHR				vk_swapChain;
 #endif
 	FrameBuffer					m_framebuffer;
-
-	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
-	{
-		return Min( bufferId, MaxSwapChainBuffers - 1 );
-	}
 
 public:
 
@@ -74,15 +69,15 @@ public:
 	}
 
 
-	inline Image* GetBackBuffer( const uint32_t bufferId )
+	inline Image* GetBackBuffer()
 	{
-		return &m_swapChainImages[ GetBufferId( bufferId ) ];
+		return &m_swapChainImage;
 	}
 
 
-	inline const Image* GetBackBuffer( const uint32_t bufferId ) const
+	inline const Image* GetBackBuffer() const
 	{
-		return &m_swapChainImages[ GetBufferId( bufferId ) ];
+		return &m_swapChainImage;
 	}
 	
 
@@ -100,13 +95,13 @@ public:
 
 	inline uint32_t GetWidth() const
 	{
-		return m_swapChainImages[ 0 ].info.width;
+		return m_swapChainImage.info.width;
 	}
 
 
 	inline uint32_t GetHeight() const
 	{
-		return m_swapChainImages[ 0 ].info.height;
+		return m_swapChainImage.info.height;
 	}
 
 	bool Present( GfxContext& context );
