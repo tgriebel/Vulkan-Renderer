@@ -428,9 +428,12 @@ void Renderer::Render()
 
 void Renderer::WaitForEndFrame()
 {
+	// Wait for the *oldest* frame to finish, reuse its fence
 	{
 	//	SCOPED_TIMER_PRINT( WaitForFrame );
-		gfxContext.frameFence[ context.bufferId ].Wait();
+		const uint64_t nextFrame = context.currentFrame + 1;
+		gfxContext.frameFence[ nextFrame % g_swapChain.GetBufferCount() ].Wait();
+		context.currentFrame = nextFrame;
 	}
 
 	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId ) );
@@ -467,7 +470,7 @@ void Renderer::SubmitFrame()
 		gfxContext.Wait( &gfxContext.presentSemaphore );
 		gfxContext.Wait( &uploadFinishedSemaphore );
 		gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
-		gfxContext.Submit( &gfxContext.frameFence[ context.bufferId ] );
+		gfxContext.Submit( &gfxContext.frameFence[ context.currentFrame % g_swapChain.GetBufferCount() ] );
 	}
 
 	if ( g_swapChain.Present( gfxContext ) == false ) {

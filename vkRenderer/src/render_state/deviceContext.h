@@ -68,10 +68,12 @@ struct copyImageParms_t
 class DeviceContext
 {
 public:
+#ifdef USE_VULKAN
 	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
 	const std::vector<const char*>		deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-
+#endif
 public:
+#ifdef USE_VULKAN
 	VkDevice							device;
 	VkPhysicalDevice					physicalDevice;
 	VkInstance							instance;
@@ -88,7 +90,6 @@ public:
 	VkSampler							bilinearSampler[ 3 ];
 	VkSampler							depthShadowSampler;
 	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
-	uint32_t							bufferId;
 
 	bool								debugMarkersEnabled = false;
 	PFN_vkDebugMarkerSetObjectTagEXT	fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
@@ -96,6 +97,12 @@ public:
 	PFN_vkCmdDebugMarkerBeginEXT		fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerEndEXT			fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
+#endif
+	// "bufferId" flips between double/triple buffers - 0, 1, 2
+	// "currentFrame" is monotonic, the first frame is 1 since we wait for a non-existent frame 0
+	// Both aid in synchronization 
+	uint32_t							bufferId;
+	uint64_t							currentFrame;
 
 	void	Create( Window& window );
 	void	Destroy( Window& window );
