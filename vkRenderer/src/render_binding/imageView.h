@@ -66,10 +66,12 @@ public:
 
 		subResourceView = subView;
 #ifdef USE_VULKAN
-		const VkImage img = image.gpuImage->GetVkImage();
-		const VkImageView view = vk_CreateImageView( image.gpuImage->GetVkImage(), info, subResourceView );
+		const VkImage img = image.gpuImage->GetVkImage( 0 );
+		const VkImageView view = vk_CreateImageView( image.gpuImage->GetVkImage( 0 ), info, subResourceView );
 
 		gpuImage = new GpuImage( image.gpuImage->GetDebugName(), img, view );
+
+		assert( gpuImage->GetBufferCount() == 1 );
 #endif
 	}
 

@@ -103,13 +103,13 @@ public:
 	}
 
 
-	inline VkImage GetVkImage( const uint32_t bufferId = 0 ) const
+	inline VkImage GetVkImage( const uint32_t bufferId ) const
 	{
 		return vk_image[ GetBufferId( bufferId ) ];
 	}
 
 
-	inline VkImageView GetVkImageView( const uint32_t bufferId = 0 ) const
+	inline VkImageView GetVkImageView( const uint32_t bufferId ) const
 	{
 		return vk_view[ GetBufferId( bufferId ) ];
 	}

@@ -188,7 +188,7 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = image->gpuImage->GetVkImage();
+	barrier.image = image->gpuImage->GetVkImage( context.bufferId );
 	barrier.subresourceRange.baseMipLevel = 0;//subView.baseMip;
 	barrier.subresourceRange.levelCount = image->info.mipLevels;//subView.mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;//subView.baseArray;
@@ -294,7 +294,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	barrier.image = image->gpuImage->GetVkImage();
+	barrier.image = image->gpuImage->GetVkImage( context.bufferId );
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -336,9 +336,9 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		blit.dstSubresource.layerCount = image->subResourceView.arrayCount;
 
 		vkCmdBlitImage( cmdBuffer,
-						image->gpuImage->GetVkImage(),
+						image->gpuImage->GetVkImage( context.bufferId ),
 						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-						image->gpuImage->GetVkImage(),
+						image->gpuImage->GetVkImage( context.bufferId ),
 						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 						1,
 						&blit,
@@ -543,7 +543,7 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 
 	VkImageMemoryBarrier srcBarrier{ };
 	srcBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	srcBarrier.image = src->gpuImage->GetVkImage();
+	srcBarrier.image = src->gpuImage->GetVkImage( context.bufferId );
 	srcBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	srcBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	srcBarrier.subresourceRange.aspectMask = srcAspect;
@@ -554,7 +554,7 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 
 	VkImageMemoryBarrier dstBarrier{ };
 	dstBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	dstBarrier.image = dst->gpuImage->GetVkImage();
+	dstBarrier.image = dst->gpuImage->GetVkImage( context.bufferId );
 	dstBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	dstBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	dstBarrier.subresourceRange.aspectMask = dstAspect;
@@ -610,9 +610,9 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 		blit.dstSubresource.mipLevel = dstParms.mipLevel;
 
 		vkCmdBlitImage( cmdBuffer,
-						src->gpuImage->GetVkImage(),
+						src->gpuImage->GetVkImage( context.bufferId ),
 						VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-						dst->gpuImage->GetVkImage(),
+						dst->gpuImage->GetVkImage( context.bufferId ),
 						VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 						1,
 						&blit,
@@ -632,9 +632,9 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 		// Issue the copy command
 		vkCmdCopyImage(
 			cmdBuffer,
-			src->gpuImage->GetVkImage(),
+			src->gpuImage->GetVkImage( context.bufferId ),
 			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			dst->gpuImage->GetVkImage(),
+			dst->gpuImage->GetVkImage( context.bufferId ),
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&imageCopyRegion );
@@ -755,7 +755,7 @@ void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, const copy
 
 	vkCmdCopyBufferToImage( cmdBuffer,
 							buffer.GetVkObject(),
-							texture->gpuImage->GetVkImage(),
+							texture->gpuImage->GetVkImage( context.bufferId ),
 							VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 							1,
 							&region
