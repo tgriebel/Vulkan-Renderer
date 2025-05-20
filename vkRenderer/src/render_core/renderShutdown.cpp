@@ -100,9 +100,13 @@ void Renderer::DestroyFramebuffers()
 	for ( uint32_t i = 0; i < resources.mainColorResolvedImageViews.size(); ++i ) {
 		resources.mainColorResolvedImageViews[ i ].Destroy();
 	}
+	resources.mainColorResolvedImageViews.clear();
+
 	for ( uint32_t i = 0; i < resources.blurredImageViews.size(); ++i ) {
 		resources.blurredImageViews[ i ].Destroy();
 	}
+	resources.blurredImageViews.clear();
+
 	resources.depthResolvedImageView.Destroy();
 	resources.stencilResolvedImageView.Destroy();
 	resources.cubeFbImageView.Destroy();
@@ -129,6 +133,7 @@ void Renderer::DestroyFramebuffers()
 	{
 		blurredImageFrameBuffers[ i ].Destroy();
 	}
+	blurredImageFrameBuffers.clear();
 
 	delete resources.cubeFbColorImage.gpuImage;
 	delete resources.cubeFbDepthImage.gpuImage;
