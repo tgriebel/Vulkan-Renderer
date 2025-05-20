@@ -85,6 +85,7 @@ public:
 		vk_image[ 0 ] = image;
 		vk_view[ 0 ] = view;
 		m_dbgName = name;
+		m_lifetime = LIFETIME_TEMP;
 	}
 
 	// TODO: take in swapchain
@@ -114,15 +115,23 @@ public:
 	}
 
 
-	inline void DetachVkImage( const uint32_t bufferId = 0 )
+	inline void DetachVkImage()
 	{
-		vk_image[ GetBufferId( bufferId ) ] = VK_NULL_HANDLE;
+		const uint32_t bufferCount = GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			vk_image[ i ] = VK_NULL_HANDLE;
+		}
 	}
 
 
-	inline void DetachVkImageView( const uint32_t bufferId = 0 )
+	inline void DetachVkImageView()
 	{
-		vk_view[ GetBufferId( bufferId ) ] = VK_NULL_HANDLE;
+		const uint32_t bufferCount = GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			vk_view[ i ] = VK_NULL_HANDLE;
+		}
 	}
 #endif
 	inline const char* GetDebugName() const

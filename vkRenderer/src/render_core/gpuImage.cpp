@@ -87,13 +87,17 @@ void GpuImage::Destroy()
 	assert( context.device != VK_NULL_HANDLE );
 	if ( context.device != VK_NULL_HANDLE )
 	{
-		if( vk_view[ 0 ] != VK_NULL_HANDLE ) {
-			vkDestroyImageView( context.device, vk_view[ 0 ], nullptr );
-			vk_view[ 0 ] = VK_NULL_HANDLE;
-		}
-		if ( vk_image[ 0 ] != VK_NULL_HANDLE ) {
-			vkDestroyImage( context.device, vk_image[ 0 ], nullptr );
-			vk_image[ 0 ] = VK_NULL_HANDLE;
+		const uint32_t bufferCount = GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			if( vk_view[ i ] != VK_NULL_HANDLE ) {
+				vkDestroyImageView( context.device, vk_view[ i ], nullptr );
+				vk_view[ i ] = VK_NULL_HANDLE;
+			}
+			if ( vk_image[ i ] != VK_NULL_HANDLE ) {
+				vkDestroyImage( context.device, vk_image[ i ], nullptr );
+				vk_image[ i ] = VK_NULL_HANDLE;
+			}
 		}
 		m_allocation.Free();
 	}

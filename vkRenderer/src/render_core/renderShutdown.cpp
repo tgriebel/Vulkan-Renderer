@@ -97,10 +97,10 @@ void Renderer::DestroyFramebuffers()
 	resources.depthImageView.Destroy();
 	resources.stencilImageView.Destroy();
 
-	for ( uint32_t i = 0; i < resources.mainColorResolvedImage.info.mipLevels; ++i ) {
+	for ( uint32_t i = 0; i < resources.mainColorResolvedImageViews.size(); ++i ) {
 		resources.mainColorResolvedImageViews[ i ].Destroy();
 	}
-	for ( uint32_t i = 0; i < resources.blurredImage.info.mipLevels; ++i ) {
+	for ( uint32_t i = 0; i < resources.blurredImageViews.size(); ++i ) {
 		resources.blurredImageViews[ i ].Destroy();
 	}
 	resources.depthResolvedImageView.Destroy();
