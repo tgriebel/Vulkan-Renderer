@@ -204,6 +204,7 @@ void Renderer::Init()
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
+	if ( gaussianBlur )
 	{
 		imageProcessCreateInfo_t info = {};
 		info.name = "Separable Gaussian";
@@ -236,7 +237,8 @@ void Renderer::Init()
 		}
 	}
 
-	MipImageTask* mipTask;
+	MipImageTask* mipTask = nullptr;
+	if ( downsampleScene )
 	{
 		mipProcessCreateInfo_t info{};
 		info.name = "MainColorDownsample";
@@ -248,7 +250,8 @@ void Renderer::Init()
 		mipTask = new MipImageTask( info );
 	}
 
-	ImageWritebackTask* imageCubemapWriteBackTask;
+	ImageWritebackTask* imageCubemapWriteBackTask = nullptr;
+	if ( writeCubeViews )
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "EnvironmentMapWriteback";
@@ -318,13 +321,6 @@ void Renderer::Init()
 			schedule.Queue( pingPongQueue[i] );
 		}
 	}
-	//schedule.Queue( new CopyImageTask( &resources.mainColorResolvedImage, &resources.tempWritebackImage ) );
-	//schedule.Queue( new TransitionImageTask( &mainColorDownsampled, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST ) );
-	//schedule.Queue( new CopyImageTask( &mainColorResolvedImage, &mainColorDownsampled ) );
-	//schedule.Queue( mipTask );
-	//schedule.Queue( new TransitionImageTask( &resources.mainColorResolvedImage, GPU_IMAGE_NONE, GPU_IMAGE_READ ) );	
-	//schedule.Queue( pingPongQueue[ 0 ] );
-	//schedule.Queue( pingPongQueue[ 1 ] );
 	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
 }
