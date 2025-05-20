@@ -99,10 +99,7 @@ public:
 	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
 #endif
 	// "bufferId" flips between double/triple buffers - 0, 1, 2
-	// "currentFrame" is monotonic, the first frame is 1 since we wait for a non-existent frame 0
-	// Both aid in synchronization 
 	uint32_t							bufferId;
-	uint64_t							currentFrame;
 
 	void	Create( Window& window );
 	void	Destroy( Window& window );

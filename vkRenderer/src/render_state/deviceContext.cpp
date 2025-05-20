@@ -1256,7 +1256,6 @@ void DeviceContext::Create( Window& window )
 	}
 
 	bufferId = 0;
-	currentFrame = 0;
 }
 
 

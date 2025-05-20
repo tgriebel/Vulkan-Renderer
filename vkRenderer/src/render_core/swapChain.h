@@ -46,6 +46,7 @@ private:
 	VkSwapchainKHR				vk_swapChain;
 #endif
 	FrameBuffer					m_framebuffer;
+	uint32_t					m_imageIndex;
 
 public:
 
@@ -103,6 +104,8 @@ public:
 	{
 		return m_swapChainImage.info.height;
 	}
+
+	void WaitOnFlip( GpuSemaphore& signalSemaphore );
 
 	bool Present( GfxContext& context );
 

@@ -73,6 +73,12 @@ swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const
 }
 
 
+void SwapChain::WaitOnFlip( GpuSemaphore& signalSemaphore )
+{
+	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, GetVkObject(), UINT64_MAX, signalSemaphore.GetVkObject(), VK_NULL_HANDLE, &m_imageIndex ) );
+}
+
+
 bool SwapChain::Present( GfxContext& gfxContext )
 {
 	VkSubmitInfo submitInfo{ };
@@ -89,7 +95,7 @@ bool SwapChain::Present( GfxContext& gfxContext )
 	VkSwapchainKHR swapChains[] = { GetVkObject() };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &context.bufferId;
+	presentInfo.pImageIndices = &m_imageIndex;
 	presentInfo.pResults = nullptr; // Optional
 
 	VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
@@ -114,6 +120,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	if ( swapChainSupport.capabilities.maxImageCount > 0 && m_imageCount > swapChainSupport.capabilities.maxImageCount ) {
 		m_imageCount = swapChainSupport.capabilities.maxImageCount;
 	}
+	m_imageIndex = 0;
 
 	VkSwapchainCreateInfoKHR createInfo{ };
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;

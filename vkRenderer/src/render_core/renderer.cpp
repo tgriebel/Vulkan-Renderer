@@ -429,14 +429,13 @@ void Renderer::Render()
 void Renderer::WaitForEndFrame()
 {
 	// Wait for the *oldest* frame to finish, reuse its fence
+	// Fences are inserted at the end of the graphics queue
 	{
 	//	SCOPED_TIMER_PRINT( WaitForFrame );
-		const uint64_t nextFrame = context.currentFrame + 1;
-		gfxContext.frameFence[ nextFrame % g_swapChain.GetBufferCount() ].Wait();
-		context.currentFrame = nextFrame;
+		gfxContext.frameFence[ context.bufferId ].Wait();
 	}
 
-	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, g_swapChain.GetVkObject(), UINT64_MAX, gfxContext.presentSemaphore.GetVkObject(), VK_NULL_HANDLE, &context.bufferId ) );
+	g_swapChain.WaitOnFlip( gfxContext.presentSemaphore );
 
 #ifdef USE_IMGUI
 	ImGui_ImplVulkan_NewFrame();
@@ -470,7 +469,7 @@ void Renderer::SubmitFrame()
 		gfxContext.Wait( &gfxContext.presentSemaphore );
 		gfxContext.Wait( &uploadFinishedSemaphore );
 		gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
-		gfxContext.Submit( &gfxContext.frameFence[ context.currentFrame % g_swapChain.GetBufferCount() ] );
+		gfxContext.Submit( &gfxContext.frameFence[ context.bufferId ] );
 	}
 
 	if ( g_swapChain.Present( gfxContext ) == false ) {
@@ -478,6 +477,8 @@ void Renderer::SubmitFrame()
 	}
 
 	schedule.FrameEnd();
+
+	context.bufferId = ( context.bufferId + 1 ) % g_swapChain.GetBufferCount();
 }
 
 
