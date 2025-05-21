@@ -145,7 +145,7 @@ void Renderer::Init()
 	}
 	view2Ds[ 0 ]->Commit();
 
-	//if( computeDiffuseIbl )
+	if ( useCubeViews )
 	{
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
@@ -296,7 +296,8 @@ void Renderer::Init()
 		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
-	if ( useCubeViews ) {
+	if ( useCubeViews )
+	{
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 		}

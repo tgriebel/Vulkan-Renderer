@@ -48,22 +48,6 @@ void Renderer::Destroy()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
-	if( resolve != nullptr ) {
-		resolve->Shutdown();
-	}
-
-	for ( uint32_t i = 0; i < 6; ++i ) {
-		if ( diffuseIBL[ i ] != nullptr ) {
-			diffuseIBL[ i ]->Shutdown();
-		}
-	}
-
-	for( uint32_t i = 0; i < pingPongQueue.size(); ++i ) {
-		if( pingPongQueue[ i ] != nullptr ) {
-			pingPongQueue[ i ]->Shutdown();
-		}
-	}
-
 	ShutdownImGui();
 
 	// Buffers
