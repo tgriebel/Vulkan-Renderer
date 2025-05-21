@@ -139,7 +139,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
-			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView( context.bufferId );
+			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView( currentBuffer );
 			assert( info.imageView != nullptr );
 
 			if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 ) {
@@ -173,7 +173,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 				VkDescriptorImageInfo& info = infos[ descIx ];
 
 				info = {};
-				info.imageView = image->gpuImage->GetVkImageView( context.bufferId );
+				info.imageView = image->gpuImage->GetVkImageView( currentBuffer );
 				assert( info.imageView != nullptr );
 
 				if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
