@@ -211,7 +211,7 @@ void PostPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
 
-	codeImages.Resize( 2 );
+	codeImages.Resize( 3 );
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -221,6 +221,7 @@ void PostPass::FrameBegin( const ResourceContext* resources )
 {
 	codeImages[ 0 ] = &resources->mainColorResolvedImage;
 	codeImages[ 1 ] = &resources->depthStencilResolvedImage;
+	codeImages[ 2 ] = &resources->blurredImage;
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );

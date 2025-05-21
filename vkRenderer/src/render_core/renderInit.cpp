@@ -536,6 +536,8 @@ void Renderer::InitImGui( RenderView& view )
 	g_imguiControls.toneMapColor[ 1 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 2 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 3 ] = 1.0f;
+	g_imguiControls.dofFocalDepth = 0.01f;
+	g_imguiControls.dofFocalRange = 0.25f;
 	g_imguiControls.dbgImageId = -1;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );

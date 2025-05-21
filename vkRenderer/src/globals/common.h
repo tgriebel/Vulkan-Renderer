@@ -148,6 +148,9 @@ struct imguiControls_t
 	float		roughness;
 	float		shadowStrength;
 	float		toneMapColor[ 4 ];
+	float		dofFocalDepth;
+	float		dofFocalRange;
+	bool		dofEnable;
 	int			dbgImageId;
 	int			selectedEntityId;
 	bool		rebuildShaders;

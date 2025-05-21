@@ -111,6 +111,7 @@ struct surface_t
 												vec4        generic;												\
 												vec4        shadowParms;											\
 												vec4        toneMap;												\
+												vec4        dof;													\
 												uint		numSamples;												\
 												uint		whiteId;												\
 												uint		blackId;												\

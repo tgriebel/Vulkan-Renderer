@@ -500,6 +500,9 @@ void DrawSceneDebugMenu()
 		ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map B", &g_imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map A", &g_imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+		ImGui::Checkbox( "DoF Enabled", &g_imguiControls.dofEnable );
+		ImGui::SliderFloat( "DoF Focal Depth", &g_imguiControls.dofFocalDepth, 0.0f, 1.0f );
+		ImGui::SliderFloat( "DoF Focal Range", &g_imguiControls.dofFocalRange, 0.0f, 1.0f );
 		ImGui::EndTabItem();
 	}
 #endif

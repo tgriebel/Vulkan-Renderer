@@ -42,6 +42,7 @@ void main()
 	const uint textureId0 = material.textureId0;
     const uint textureId1 = material.textureId1;
     const uint textureId2 = material.textureId2;
+    const uint textureId3 = material.textureId3;
 
 	const mat4 viewMat = view.viewMat;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
@@ -68,13 +69,14 @@ void main()
 	const vec4 skyColor = vec4( texture( cubeSamplers[ textureId0 ], vec3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
 	outColor.rgb = vec3( 0.0f );
-	const float focalDepth = 0.01f;
-	const float focalRange = 0.25f;
+	const bool enabled = globals.dof.x != 0.0f;
+	const float focalDepth = globals.dof.y;
+	const float focalRange = globals.dof.z;
 	float coc = ( sceneDepth - focalDepth ) / focalRange;
 	const int MAX_MIP_LEVELS = 3;
 	coc = clamp( coc, -1.0, 1.0f );
-	if ( coc < 0.0f ) {
-	//	sceneColor.rgb = LinearToSrgb( textureLod( codeSamplers[ textureId0 ], fragTexCoord.xy, int( coc * MAX_MIP_LEVELS ) ).rgb );
+	if ( enabled && ( coc < 0.0f ) ) {
+		sceneColor.rgb = LinearToSrgb( textureLod( codeSamplers[ textureId2 ], fragTexCoord.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb );
 	}
 
 	outColor.a = 1.0f;

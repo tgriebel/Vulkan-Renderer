@@ -606,10 +606,12 @@ void Renderer::UpdateBuffers()
 		globals.generic = vec4f( g_imguiControls.heightMapHeight, g_imguiControls.roughness, 0.0f, 0.0f );
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
+		globals.dof = vec4f( g_imguiControls.dofEnable ? 1.0f : 0.0f, g_imguiControls.dofFocalDepth, g_imguiControls.dofFocalRange, 0.0f );
 #else
 		globals.generic = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
 		globals.tonemap = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
+		globals.dof = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.whiteId = rc.whiteImage->gpuImage->GetId();
