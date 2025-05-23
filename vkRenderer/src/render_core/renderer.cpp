@@ -703,6 +703,11 @@ void Renderer::InitConfig()
 #endif
 
 	config.mainColorSubSamples = samples;
+	config.useCubeViews = false;
+	config.writeCubeViews = false;
+	config.computeDiffuseIbl = false;
+	config.downsampleScene = true;
+	config.gaussianBlur = true;
 }
 
 

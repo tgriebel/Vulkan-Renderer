@@ -58,6 +58,13 @@ struct renderConfig_t
 {
 	imageSamples_t	mainColorSubSamples;
 	bool			present;
+	bool			useCubeViews;
+	bool			writeCubeViews;
+	bool			computeDiffuseIbl;
+	bool			computeSpecularIBL;
+	bool			downsampleScene;
+	bool			computeGaussianBlur;
+	bool			gaussianBlur;
 };
 
 

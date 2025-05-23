@@ -132,20 +132,14 @@ void Renderer::Init()
 	}
 	renderViews[ 0 ]->Commit();
 
-	const bool useCubeViews = false;
-	const bool writeCubeViews = false;
-	const bool computeDiffuseIbl = false;
-	const bool downsampleScene = true;
-	const bool gaussianBlur = true;
-
-	if( useCubeViews ) {
+	if( config.useCubeViews ) {
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			renderViews[ i ]->Commit();
 		}
 	}
 	view2Ds[ 0 ]->Commit();
 
-	if ( useCubeViews )
+	if ( config.useCubeViews )
 	{
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
@@ -204,7 +198,7 @@ void Renderer::Init()
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
-	if ( gaussianBlur )
+	if ( config.gaussianBlur )
 	{
 		imageProcessCreateInfo_t info = {};
 		info.name = "Separable Gaussian";
@@ -238,7 +232,7 @@ void Renderer::Init()
 	}
 
 	MipImageTask* mipTask = nullptr;
-	if ( downsampleScene )
+	if ( config.downsampleScene )
 	{
 		mipProcessCreateInfo_t info{};
 		info.name = "MainColorDownsample";
@@ -251,7 +245,7 @@ void Renderer::Init()
 	}
 
 	ImageWritebackTask* imageCubemapWriteBackTask = nullptr;
-	if ( writeCubeViews )
+	if ( config.writeCubeViews )
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "EnvironmentMapWriteback";
@@ -269,7 +263,7 @@ void Renderer::Init()
 	}
 
 	ImageWritebackTask* imageDiffuseIblWriteBackTask = nullptr;
-	if ( computeDiffuseIbl )
+	if ( config.computeDiffuseIbl )
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "DiffuseIblWriteback";
@@ -296,7 +290,7 @@ void Renderer::Init()
 		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
 	}
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
-	if ( useCubeViews )
+	if ( config.useCubeViews )
 	{
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
@@ -306,16 +300,16 @@ void Renderer::Init()
 		}
 	}
 	schedule.Queue( resolve );
-	if ( writeCubeViews ) {
+	if ( config.writeCubeViews ) {
 		schedule.Queue( imageCubemapWriteBackTask );
 	}
-	if ( computeDiffuseIbl ) {
+	if ( config.computeDiffuseIbl ) {
 		schedule.Queue( imageDiffuseIblWriteBackTask );
 	}
-	if ( downsampleScene ) {
+	if ( config.downsampleScene ) {
 		schedule.Queue( mipTask );
 	}
-	if ( gaussianBlur )
+	if ( config.gaussianBlur )
 	{
 		for ( uint32_t i = 0; i < pingPongQueue.size(); ++i )
 		{
