@@ -40,45 +40,53 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 }
 #endif
 
-void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
+void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime )
 {
-	VkImageCreateInfo imageInfo = vk_GetImageCreateInfo( info, flags );
-
-	VkImageStencilUsageCreateInfo stencilUsage{};
-	if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
+	// Managed Resource
 	{
-		stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
-		stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		imageInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
-		imageInfo.pNext = &stencilUsage;
+		RenderResource::Create( lifetime );
 	}
-
-	m_dbgName = name;
-	m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
-
-	const uint32_t bufferCount = GetBufferCount();
-	for ( uint32_t i = 0; i < bufferCount; ++i )
+#ifdef USE_VULKAN
 	{
-		VK_CHECK_RESULT( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ i ] ) );
+		VkImageCreateInfo imageInfo = vk_GetImageCreateInfo( info, flags );
 
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements( context.device, vk_image[ i ], &memRequirements );
-
-		VkMemoryAllocateInfo allocInfo{ };
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = memory.GetVkMemoryType();
-
-		if ( memory.Allocate( memRequirements.alignment, memRequirements.size, m_allocation ) ) {
-			vkBindImageMemory( context.device, vk_image[ i ], memory.GetVkObject(), m_allocation.GetOffset() );
-		} else {
-			throw std::runtime_error( "Buffer could not be allocated!" );
+		VkImageStencilUsageCreateInfo stencilUsage{};
+		if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
+		{
+			stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
+			stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			imageInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+			imageInfo.pNext = &stencilUsage;
 		}
 
-		vk_MarkerSetObjectName( (uint64_t)vk_image[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
+		m_dbgName = name;
+		m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
 
-		vk_view[ i ] = vk_CreateImageView( vk_image[ i ], info );
+		const uint32_t bufferCount = GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			VK_CHECK_RESULT( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ i ] ) );
+
+			VkMemoryRequirements memRequirements;
+			vkGetImageMemoryRequirements( context.device, vk_image[ i ], &memRequirements );
+
+			VkMemoryAllocateInfo allocInfo{ };
+			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+			allocInfo.allocationSize = memRequirements.size;
+			allocInfo.memoryTypeIndex = memory.GetVkMemoryType();
+
+			if ( memory.Allocate( memRequirements.alignment, memRequirements.size, m_allocation ) ) {
+				vkBindImageMemory( context.device, vk_image[ i ], memory.GetVkObject(), m_allocation.GetOffset() );
+			} else {
+				throw std::runtime_error( "Buffer could not be allocated!" );
+			}
+
+			vk_MarkerSetObjectName( (uint64_t)vk_image[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
+
+			vk_view[ i ] = vk_CreateImageView( vk_image[ i ], info );
+		}
 	}
+#endif
 }
 
 

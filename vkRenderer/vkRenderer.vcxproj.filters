@@ -122,6 +122,9 @@
     <ClCompile Include="src\draw_passes\drawpass.cpp">
       <Filter>Draw Passes</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\renderResource.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -256,6 +259,9 @@
     </ClInclude>
     <ClInclude Include="shaders\util.h">
       <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\renderResource.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

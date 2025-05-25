@@ -45,7 +45,7 @@ void Renderer::Destroy()
 {
 	vk_ClearRenderPassCache();
 
-	DestroyFramebuffers();
+	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
 	g_swapChain.Destroy();
 
 	ShutdownImGui();
@@ -73,55 +73,6 @@ void Renderer::Destroy()
 	context.Destroy( g_window );
 	
 	g_window.~Window();
-}
-
-
-void Renderer::DestroyFramebuffers()
-{
-	resources.depthImageView.Destroy();
-	resources.stencilImageView.Destroy();
-
-	for ( uint32_t i = 0; i < resources.mainColorResolvedImageViews.size(); ++i ) {
-		resources.mainColorResolvedImageViews[ i ].Destroy();
-	}
-	resources.mainColorResolvedImageViews.clear();
-
-	for ( uint32_t i = 0; i < resources.blurredImageViews.size(); ++i ) {
-		resources.blurredImageViews[ i ].Destroy();
-	}
-	resources.blurredImageViews.clear();
-
-	resources.depthResolvedImageView.Destroy();
-	resources.stencilResolvedImageView.Destroy();
-	resources.cubeFbImageView.Destroy();
-
-	delete resources.tempColorImage.gpuImage;
-	delete resources.mainColorImage.gpuImage;
-	delete resources.blurredImage.gpuImage;
-	delete resources.gBufferLayerImage.gpuImage;
-	delete resources.depthStencilImage.gpuImage;
-	delete resources.mainColorResolvedImage.gpuImage;
-	delete resources.depthStencilResolvedImage.gpuImage;
-	delete resources.tempWritebackImage.gpuImage;
-
-	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
-	{
-		delete resources.shadowMapImage[ shadowIx ].gpuImage;
-	}
-	blurredImageFrameBuffers.clear();
-
-	delete resources.cubeFbColorImage.gpuImage;
-	delete resources.cubeFbDepthImage.gpuImage;
-	delete resources.diffuseIblImage.gpuImage;
-
-	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		resources.cubeImageViews[ i ].Destroy();
-		resources.cubeDepthImageViews[ i ].Destroy();
-		resources.diffuseIblImageViews[ i ].Destroy();
-	}
-
-	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
 }
 
 

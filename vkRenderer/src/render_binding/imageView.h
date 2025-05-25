@@ -3,7 +3,7 @@
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
 
-class ImageView : public Image
+class ImageView : public Image, public RenderResource
 {
 public:
 	ImageView() : Image()
@@ -13,19 +13,19 @@ public:
 
 	ImageView( const ImageView& image ) : Image()
 	{
-		Init( image, image.info );
+		Init( image, image.info, image.m_lifetime );
 	}
 
 
-	ImageView( const Image& image, const imageInfo_t& imageInfo ) : Image()
+	ImageView( const Image& image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime ) : Image()
 	{
-		Init( image, imageInfo );
+		Init( image, imageInfo, lifetime );
 	}
 
 
-	ImageView( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subResourceView ) : Image()
+	ImageView( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subResourceView, const resourceLifeTime_t lifetime ) : Image()
 	{
-		Init( image, imageInfo, subResourceView );
+		Init( image, imageInfo, subResourceView, lifetime );
 	}
 
 	
@@ -37,12 +37,12 @@ public:
 
 	ImageView& operator=( const ImageView& image )
 	{
-		Init( image, image.info );
+		Init( image, image.info, image.m_lifetime );
 		return *this;
 	}
 
 
-	void Init( const Image& image, const imageInfo_t& imageInfo )
+	void Init( const Image& image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime )
 	{
 		imageSubResourceView_t subView;
 		subView.baseMip = 0;
@@ -52,12 +52,18 @@ public:
 		assert( subView.mipLevels >= 1 );
 		assert( subView.arrayCount >= 1 );
 
-		Init( image, imageInfo, subView );
+		Init( image, imageInfo, subView, lifetime );
 	}
 
 
-	void Init( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView )
+	void Init( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView, const resourceLifeTime_t lifetime )
 	{
+		// Manage Resources
+		{
+			m_lifetime = lifetime;
+			RenderResource::Create( m_lifetime );
+		}
+
 		info = imageInfo;
 		assert( info.layers >= 1 );
 		assert( info.mipLevels >= 1 );

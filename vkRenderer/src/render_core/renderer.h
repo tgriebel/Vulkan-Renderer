@@ -33,6 +33,7 @@
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
 #include "../render_core/RenderTask.h"
+#include "../render_core/renderResource.h"
 
 class Window;
 class SwapChain;
@@ -52,7 +53,7 @@ extern SwapChain					g_swapChain;
 extern renderConstants_t	rc;
 
 // TODO: Figure out where to put this
-void CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage );
+void CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage, const resourceLifeTime_t lifetime );
 
 struct renderConfig_t
 {
@@ -257,7 +258,6 @@ private:
 	// API Resource Functions
 	void								CreateSyncObjects();
 	void								CreateFramebuffers();
-	void								DestroyFramebuffers();
 
 	// Draw Frame
 	void								CommitModel( RenderView& view, const Entity& ent );

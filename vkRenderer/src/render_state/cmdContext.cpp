@@ -323,7 +323,7 @@ void WritebackImage( CommandContext* cmdCommand, Image& image )
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_LINEAR;
 
-		CreateImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, cmdCommand->GetRenderContext()->sharedMemory, tempWritebackImage );
+		CreateImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, cmdCommand->GetRenderContext()->sharedMemory, tempWritebackImage, resourceLifeTime_t::TASK );
 	}
 
 //	cmdCommand->Dispatch( )

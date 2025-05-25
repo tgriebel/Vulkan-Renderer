@@ -449,7 +449,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_tempImage.subResourceView.baseArray = 0;
 		MipDimensions( 1, m_image->info.width, m_image->info.height, &m_tempImage.info.width, &m_tempImage.info.height );
 
-		m_tempImage.gpuImage = new GpuImage( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory );
+		m_tempImage.gpuImage = new GpuImage( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory, resourceLifeTime_t::TASK );
 	}
 
 	// Create buffer
@@ -464,7 +464,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		subView.baseArray = 0;
 		subView.arrayCount = 1;
 
-		m_views[ i ].Init( *m_image, m_image->info, subView );
+		m_views[ i ].Init( *m_image, m_image->info, subView, resourceLifeTime_t::RESIZE );
 	}
 	
 	// All but the first image need a framebuffer since they are being written to

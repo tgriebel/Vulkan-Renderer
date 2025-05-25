@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../render_binding/allocator.h"
+#include "../render_core/renderResource.h"
 
 struct imageInfo_t;
 class AllocatorMemory;
@@ -20,7 +21,7 @@ enum gpuImageStateFlags_t : uint8_t
 };
 DEFINE_ENUM_OPERATORS( gpuImageStateFlags_t, uint8_t )
 
-class GpuImage
+class GpuImage : public RenderResource
 {
 protected:
 #ifdef USE_VULKAN
@@ -39,9 +40,9 @@ protected:
 	}
 
 public:
-	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
+	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime )
 	{
-		Create( name, info, flags, memory );
+		Create( name, info, flags, memory, lifetime );
 	}
 
 	virtual GpuImage::~GpuImage()
@@ -129,6 +130,6 @@ public:
 		return m_dbgName;
 	}
 
-	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory );
+	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime );
 	virtual void Destroy();
 };

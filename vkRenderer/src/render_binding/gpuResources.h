@@ -23,6 +23,7 @@
 
 #pragma once
 #include "../globals/common.h"
+#include "../render_core/renderResource.h"
 #include "allocator.h"
 
 enum class bufferType_t
