@@ -260,7 +260,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		perms[ i ].bits = i;
 	}
 
-	m_bufferCount = ( createInfo.lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
+	m_bufferCount = ( createInfo.lifetime == swapBuffering_t::MULTI_FRAME ) ? MaxFrameStates : 1;
 	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
 
 	m_colorCount += ( createInfo.color0 != nullptr ) ? 1 : 0;

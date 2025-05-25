@@ -67,39 +67,48 @@ void Allocation::Free()
 }
 
 
-void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t region )
+void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t region, const renderResourceLifeTime_t lifetime )
 {
-	VkMemoryPropertyFlags flags = 0;
-	if ( region == SHARED ) {
-		flags = VkMemoryPropertyFlagBits( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
-	} else if ( region == LOCAL ) {
-		flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-	} else {
-		assert(0);
-	}
-	m_memoryRegion = region;
-
-	uint32_t typeIndex = vk_FindMemoryType( ~0x00, flags );
-
-	VkMemoryAllocateInfo allocInfo{ };
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = sizeBytes;
-	allocInfo.memoryTypeIndex = typeIndex;
-
-	VkDeviceMemory memory;
-	VK_CHECK_RESULT( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) );
-
-	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
-	VkMemoryType type = memProperties.memoryTypes[ typeIndex ];
-
-	void* memPtr = nullptr;
-	if ( ( type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) == 0 ) {
-		VK_CHECK_RESULT( vkMapMemory( context.device, memory, 0, VK_WHOLE_SIZE, 0, &memPtr ) );
+	// Resource Management
+	{
+		RenderResource::Create( lifetime );
 	}
 
-	Bind( memory, memPtr, sizeBytes, typeIndex );
-	vk_memoryTypeIndex = typeIndex;
+#ifdef USE_VULKAN
+	{
+		VkMemoryPropertyFlags flags = 0;
+		if ( region == SHARED ) {
+			flags = VkMemoryPropertyFlagBits( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
+		} else if ( region == LOCAL ) {
+			flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+		} else {
+			assert(0);
+		}
+		m_memoryRegion = region;
+
+		uint32_t typeIndex = vk_FindMemoryType( ~0x00, flags );
+
+		VkMemoryAllocateInfo allocInfo{ };
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = sizeBytes;
+		allocInfo.memoryTypeIndex = typeIndex;
+
+		VkDeviceMemory memory;
+		VK_CHECK_RESULT( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) );
+
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
+		VkMemoryType type = memProperties.memoryTypes[ typeIndex ];
+
+		void* memPtr = nullptr;
+		if ( ( type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT ) == 0 ) {
+			VK_CHECK_RESULT( vkMapMemory( context.device, memory, 0, VK_WHOLE_SIZE, 0, &memPtr ) );
+		}
+
+		Bind( memory, memPtr, sizeBytes, typeIndex );
+		vk_memoryTypeIndex = typeIndex;
+	}
+#endif
 
 	Reset();
 }

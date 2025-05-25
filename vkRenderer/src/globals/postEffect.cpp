@@ -33,7 +33,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
-	m_buffer.Create( "Resource buffer", LIFETIME_TEMP, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_buffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	m_pass->parms = m_context->RegisterBindParm( bindset_imageProcess );
 }

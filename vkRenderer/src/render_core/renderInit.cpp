@@ -333,9 +333,9 @@ void Renderer::InitApi()
 
 	{
 		// Memory Allocations
-		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
-		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
-		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL );
+		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED, renderResourceLifeTime_t::REBOOT );
+		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::REBOOT );
+		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::REBOOT );
 	}
 
 	InitConfig();
@@ -345,7 +345,7 @@ void Renderer::InitApi()
 
 	{
 		// Create Frame Resources
-		renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
+		renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::RESIZE );
 
 		CreateSyncObjects();
 		CreateFramebuffers();
@@ -458,22 +458,22 @@ void Renderer::InitShaderResources()
 	}
 
 	{
-		resources.globalConstants.Create( "Globals", LIFETIME_PERSISTENT, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, renderContext.sharedMemory );
-		resources.viewParms.Create( "View", LIFETIME_PERSISTENT, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.surfParms.Create( "Surf", LIFETIME_PERSISTENT, MaxViews * MaxSurfaces, sizeof( surfaceBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.materialBuffers.Create( "Material", LIFETIME_PERSISTENT, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.lightParms.Create( "Light", LIFETIME_PERSISTENT, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.particleBuffer.Create( "Particle", LIFETIME_PERSISTENT, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.globalConstants.Create( "Globals", swapBuffering_t::MULTI_FRAME, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, renderContext.sharedMemory );
+		resources.viewParms.Create( "View", swapBuffering_t::MULTI_FRAME, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.surfParms.Create( "Surf", swapBuffering_t::MULTI_FRAME, MaxViews * MaxSurfaces, sizeof( surfaceBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.materialBuffers.Create( "Material", swapBuffering_t::MULTI_FRAME, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.lightParms.Create( "Light", swapBuffering_t::MULTI_FRAME, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.particleBuffer.Create( "Particle", swapBuffering_t::MULTI_FRAME, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
 
 		for ( size_t v = 0; v < MaxViews; ++v ) {
 			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 
-		geometry.vb.Create( "VB", LIFETIME_TEMP, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
-		geometry.ib.Create( "IB", LIFETIME_TEMP, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
+		geometry.vb.Create( "VB", swapBuffering_t::SINGLE_FRAME, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
+		geometry.ib.Create( "IB", swapBuffering_t::SINGLE_FRAME, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
 
-		geometry.stagingBuffer.Create( "Geo Staging", LIFETIME_TEMP, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
-		textureStagingBuffer.Create( "Texture Staging", LIFETIME_TEMP, 1, 192 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		geometry.stagingBuffer.Create( "Geo Staging", swapBuffering_t::SINGLE_FRAME, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		textureStagingBuffer.Create( "Texture Staging", swapBuffering_t::SINGLE_FRAME, 1, 192 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
 	}
 }
 
@@ -892,7 +892,7 @@ void Renderer::CreateFramebuffers()
 		fbInfo.name = "MainColorResolveFB";
 		fbInfo.color0 = &resources.mainColorResolvedImageViews[0];
 		fbInfo.color1 = &resources.depthStencilResolvedImage;
-		fbInfo.lifetime = LIFETIME_TEMP;
+		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 		mainColorResolved.Create( fbInfo );
 	}
@@ -904,7 +904,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "blurredImageFB";
 		fbInfo.color0 = &resources.blurredImageViews[ i ];
-		fbInfo.lifetime = LIFETIME_TEMP;
+		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 		blurredImageFrameBuffers[ i ].Create( fbInfo );
 	}
@@ -914,7 +914,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "TempColorFB";
 		fbInfo.color0 = &resources.tempColorImage;
-		fbInfo.lifetime = LIFETIME_TEMP;
+		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 		tempColor.Create( fbInfo );
 	}
@@ -925,7 +925,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "ShadowMapFB";
 		fbInfo.depth = &resources.shadowMapImage[ shadowIx ];
-		fbInfo.lifetime = LIFETIME_TEMP;
+		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 		shadowMap[ shadowIx ].Create( fbInfo );
 	}
@@ -941,7 +941,7 @@ void Renderer::CreateFramebuffers()
 			fbInfo.depth = &resources.depthImageView;
 			fbInfo.stencil = &resources.stencilImageView;
 		}
-		fbInfo.lifetime = LIFETIME_TEMP;
+		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 		mainColor.Create( fbInfo );
 	}
@@ -955,7 +955,7 @@ void Renderer::CreateFramebuffers()
 				fbInfo.color0 = &resources.cubeImageViews[ i ];
 				fbInfo.depth = &resources.cubeDepthImageViews[ i ];
 			}
-			fbInfo.lifetime = LIFETIME_TEMP;
+			fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 			cubeMapFrameBuffer[ i ].Create( fbInfo );
 		}
@@ -969,7 +969,7 @@ void Renderer::CreateFramebuffers()
 			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
 				fbInfo.color0 = &resources.diffuseIblImageViews[ i ];
 			}
-			fbInfo.lifetime = LIFETIME_TEMP;
+			fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 			diffuseIblFrameBuffer[ i ].Create( fbInfo );
 		}

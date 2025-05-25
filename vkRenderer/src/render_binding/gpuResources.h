@@ -38,7 +38,7 @@ enum class bufferType_t
 struct bufferCreateInfo_t
 {
 	const char*			name;
-	resourceLifetime_t	lifetime;
+	swapBuffering_t		lifetime;
 	uint32_t			elements;
 	uint32_t			elementSizeBytes;
 	bufferType_t		type;
@@ -65,7 +65,7 @@ public:
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
 	void			Create( const bufferCreateInfo_t info );
-	void			Create( const char* name, const resourceLifetime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
+	void			Create( const char* name, const swapBuffering_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			Allocate( const uint64_t size );
@@ -91,7 +91,7 @@ protected:
 	uint64_t			m_elementSize;
 	uint64_t			m_elementPadding;
 	bufferType_t		m_type;
-	resourceLifetime_t	m_lifetime;
+	swapBuffering_t		m_lifetime;
 	const char*			m_name;
 
 	friend class GpuBufferView;

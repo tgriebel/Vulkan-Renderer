@@ -29,7 +29,7 @@ extern DeviceContext context;
 
 uint32_t GpuBuffer::ClampId( const uint32_t bufferId ) const
 {
-	if( m_lifetime == LIFETIME_TEMP ) {
+	if( m_lifetime == swapBuffering_t::SINGLE_FRAME ) {
 		return 0;
 	}
 	if ( bufferId >= m_bufferCount )
@@ -107,14 +107,14 @@ void GpuBuffer::Create( const bufferCreateInfo_t info )
 }
 
 
-void GpuBuffer::Create( const char* name, const resourceLifetime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
+void GpuBuffer::Create( const char* name, const swapBuffering_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
 {
 	VkBufferUsageFlags usage = 0;
 	VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
 	VkDeviceSize alignment = elementSizeBytes;
 
 	m_lifetime = lifetime;
-	if( m_lifetime == LIFETIME_PERSISTENT ) {
+	if( m_lifetime == swapBuffering_t::MULTI_FRAME ) {
 		m_bufferCount = MaxFrameStates;
 	} else {
 		m_bufferCount = 1;

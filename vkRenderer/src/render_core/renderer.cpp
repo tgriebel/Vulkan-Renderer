@@ -71,6 +71,67 @@ renderConstants_t rc;
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
 #endif
 
+static std::vector<RenderResource*> m_taskDependentResources;
+static std::vector<RenderResource*> m_frameDependentResources;
+static std::vector<RenderResource*> m_viewDependentResources;
+static std::vector<RenderResource*> m_appDependentResources;
+
+std::vector<RenderResource*> RenderResource::GetResourceList( const renderResourceLifeTime_t lifetime )
+{
+	switch( lifetime )
+	{
+		case renderResourceLifeTime_t::TASK:	return m_taskDependentResources;
+		case renderResourceLifeTime_t::FRAME:	return m_frameDependentResources;
+		case renderResourceLifeTime_t::RESIZE:	return m_viewDependentResources;
+		case renderResourceLifeTime_t::REBOOT:	return m_appDependentResources;
+	}
+	return std::vector<RenderResource*>();
+}
+
+void RenderResource::Cleanup( const renderResourceLifeTime_t lifetime )
+{
+	if ( lifetime == renderResourceLifeTime_t::TASK )
+	{
+		const uint32_t resourceCount = static_cast<uint32_t>( m_taskDependentResources.size() );
+		for ( uint32_t i = 0; i < resourceCount; ++i ) {
+			m_taskDependentResources[ i ]->Destroy();
+		}
+	}
+	else if ( lifetime == renderResourceLifeTime_t::FRAME )
+	{
+		const uint32_t resourceCount = static_cast<uint32_t>( m_frameDependentResources.size() );
+		for ( uint32_t i = 0; i < resourceCount; ++i ) {
+			m_frameDependentResources[ i ]->Destroy();
+		}
+	}
+	else if ( lifetime == renderResourceLifeTime_t::RESIZE )
+	{
+		const uint32_t resourceCount = static_cast<uint32_t>( m_viewDependentResources.size() );
+		for ( uint32_t i = 0; i < resourceCount; ++i ) {
+			m_viewDependentResources[ i ]->Destroy();
+		}
+	}
+	else if ( lifetime == renderResourceLifeTime_t::REBOOT )
+	{
+		const uint32_t resourceCount = static_cast<uint32_t>( m_appDependentResources.size() );
+		for ( uint32_t i = 0; i < resourceCount; ++i ) {
+			m_appDependentResources[ i ]->Destroy();
+		}
+	}
+}
+
+void RenderResource::Create( const renderResourceLifeTime_t lifetime )
+{
+	m_lifetime = lifetime;
+	switch ( m_lifetime )
+	{
+		case renderResourceLifeTime_t::TASK:	m_taskDependentResources.push_back( this );		break;
+		case renderResourceLifeTime_t::FRAME:	m_frameDependentResources.push_back( this );	break;
+		case renderResourceLifeTime_t::RESIZE:	m_viewDependentResources.push_back( this );		break;
+		case renderResourceLifeTime_t::REBOOT:	m_appDependentResources.push_back( this );		break;
+	}
+}
+
 void Renderer::Commit( const Scene* scene )
 {
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
@@ -241,8 +302,8 @@ void Renderer::InitGPU()
 {
 	{
 		// Memory Allocations
-		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
-		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
+		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED, renderResourceLifeTime_t::REBOOT );
+		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::REBOOT );
 	}
 
 	InitShaderResources();
@@ -272,7 +333,7 @@ void Renderer::RecreateSwapChain()
 	DestroyFramebuffers();
 	g_swapChain.Destroy();
 
-	renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL );
+	renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::RESIZE );
 
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();

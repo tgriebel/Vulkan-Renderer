@@ -338,8 +338,8 @@ void ImageWritebackTask::Init()
 
 	const uint32_t maxBpp = sizeof( vec4f );
 	const uint32_t elementsCount = m_imageArray[0]->info.width * m_imageArray[ 0 ]->info.height * m_imageArray.Count();
-	m_writebackBuffer.Create( "Writeback Buffer", LIFETIME_PERSISTENT, elementsCount, maxBpp, bufferType_t::STORAGE, m_context->sharedMemory );
-	m_resourceBuffer.Create( "Resource buffer", LIFETIME_TEMP, 1, sizeof( writeBackParms ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_writebackBuffer.Create( "Writeback Buffer", swapBuffering_t::MULTI_FRAME, elementsCount, maxBpp, bufferType_t::STORAGE, m_context->sharedMemory );
+	m_resourceBuffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, 1, sizeof( writeBackParms ), bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	writeBackParms.dimensions = vec4f( (float)m_imageArray[ 0 ]->info.width, (float)m_imageArray[ 0 ]->info.height, (float)m_imageArray.Count(), 0.0f );
 
@@ -455,7 +455,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	}
 
 	// Create buffer
-	m_buffer.Create( "Resource buffer", LIFETIME_TEMP, mipLevels, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_buffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, mipLevels, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	// The last view is only needed to create a frame buffer 
 	for ( uint32_t i = 0; i < m_image->info.mipLevels; ++i )
@@ -475,7 +475,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		frameBufferCreateInfo_t info{};
 		info.name = "MipDownsample";
 		info.color0 = &m_tempImage;
-		info.lifetime = resourceLifetime_t::LIFETIME_TEMP;
+		info.lifetime = swapBuffering_t::SINGLE_FRAME;
 
 		m_frameBuffers[ i ].Create( info );
 

@@ -28,7 +28,7 @@ protected:
 	VkImageView			vk_view[ MaxFrameStates ];
 	Allocation			m_allocation;
 #endif
-	resourceLifetime_t	m_lifetime;
+	swapBuffering_t		m_lifetime;
 	const char*			m_dbgName;
 	int					m_id;
 
@@ -66,7 +66,7 @@ public:
 
 	inline uint32_t GetBufferCount() const
 	{
-		return ( m_lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
+		return ( m_lifetime == swapBuffering_t::MULTI_FRAME ) ? MaxFrameStates : 1;
 	}
 
 #ifdef USE_VULKAN
@@ -75,14 +75,14 @@ public:
 		vk_image[ 0 ] = image;
 		vk_view[ 0 ] = view;
 		m_dbgName = name;
-		m_lifetime = LIFETIME_TEMP;
+		m_lifetime = swapBuffering_t::SINGLE_FRAME;
 	}
 
 	// TODO: take in swapchain
 	GpuImage( const char* name, const VkImage* image, const VkImageView* view, const gpuImageStateFlags_t flags )
 	{
 		m_dbgName = name;
-		m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? LIFETIME_PERSISTENT : LIFETIME_TEMP;
+		m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
 
 		const uint32_t bufferCount = GetBufferCount();
 		for ( uint32_t i = 0; i < bufferCount; ++i )

@@ -76,7 +76,6 @@ struct ComputeState
 	int32_t				z;
 };
 
-
 // Renderer system and resources accessible to sub-systems
 class RenderContext
 {

@@ -190,7 +190,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	frameBufferCreateInfo_t fbInfo = {};
 	fbInfo.name = "SwapChainFB";
 	fbInfo.color0 = &m_swapChainImage;
-	fbInfo.lifetime = LIFETIME_PERSISTENT;
+	fbInfo.lifetime = swapBuffering_t::MULTI_FRAME;
 
 	m_framebuffer.Create( fbInfo );
 }

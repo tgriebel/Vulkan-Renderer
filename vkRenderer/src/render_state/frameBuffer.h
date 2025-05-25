@@ -33,7 +33,7 @@
 
 struct frameBufferCreateInfo_t
 {
-	resourceLifetime_t	lifetime;
+	swapBuffering_t		lifetime;
 	const char*			name;
 	Image*				color0;
 	Image*				color1;
@@ -42,7 +42,7 @@ struct frameBufferCreateInfo_t
 	Image*				stencil;
 
 	frameBufferCreateInfo_t() :
-		lifetime( LIFETIME_TEMP )
+		lifetime( swapBuffering_t::SINGLE_FRAME )
 	{
 		name = "";
 
@@ -73,7 +73,7 @@ private:
 	uint32_t					m_attachmentCount;
 	uint32_t					m_bufferCount;
 
-	resourceLifetime_t			m_lifetime;
+	swapBuffering_t				m_lifetime;
 	renderPassAttachmentMask_t	m_attachmentMask;
 	renderAttachmentBits_t		m_attachmentBits;
 
@@ -84,7 +84,7 @@ private:
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
 	{
-		const uint32_t bufferCount = ( m_lifetime == LIFETIME_PERSISTENT ) ? MaxFrameStates : 1;
+		const uint32_t bufferCount = ( m_lifetime == swapBuffering_t::MULTI_FRAME ) ? MaxFrameStates : 1;
 		return Min( bufferId, bufferCount - 1 );
 	}
 

@@ -133,7 +133,7 @@ void Renderer::DestroyFramebuffers()
 		diffuseIblFrameBuffer[ i ].Destroy();
 	}
 
-	renderContext.frameBufferMemory.Destroy();
+	RenderResource::Cleanup( renderResourceLifeTime_t::RESIZE );
 }
 
 
@@ -151,10 +151,8 @@ void Renderer::ShutdownShaderResources()
 	geometry.ib.Destroy();
 	geometry.vb.Destroy();
 
-	// Memory
-	renderContext.localMemory.Destroy();
-	renderContext.sharedMemory.Destroy();
-	renderContext.scratchMemory.Destroy();
+	// Managed Cleanup
+	RenderResource::Cleanup( renderResourceLifeTime_t::REBOOT );
 
 	// Staging
 	geometry.stagingBuffer.Destroy();

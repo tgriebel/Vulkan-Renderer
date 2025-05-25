@@ -71,7 +71,7 @@ public:
 };
 
 
-class AllocatorMemory
+class AllocatorMemory : public RenderResource
 {
 private:
 	uint32_t						m_type;
@@ -108,7 +108,7 @@ public:
 		m_memoryRegion = memoryRegion_t::UNKNOWN;
 	}
 
-	void					Create( const uint32_t sizeBytes, const memoryRegion_t region );
+	void					Create( const uint32_t sizeBytes, const memoryRegion_t region, const renderResourceLifeTime_t lifetime );
 	void					Destroy();
 
 	void					Bind( VkDeviceMemory& _memory, void* memMap, const uint64_t _size, const uint32_t _type );

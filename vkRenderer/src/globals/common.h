@@ -135,10 +135,35 @@ enum renderFlags_t : uint32_t
 };
 
 
-enum resourceLifetime_t
+enum class swapBuffering_t : uint8_t
 {
-	LIFETIME_TEMP,
-	LIFETIME_PERSISTENT,
+	SINGLE_FRAME,
+	MULTI_FRAME,
+};
+
+
+enum class renderResourceLifeTime_t : uint8_t
+{
+	TASK,
+	FRAME,
+	RESIZE,
+	REBOOT
+};
+
+
+class RenderResource
+{
+private:
+
+public:
+	renderResourceLifeTime_t m_lifetime;
+
+	void Create( const renderResourceLifeTime_t lifetime );
+
+	static std::vector<RenderResource*> GetResourceList( const renderResourceLifeTime_t lifetime );
+	static void Cleanup( const renderResourceLifeTime_t lifetime );
+
+	virtual void Destroy() = 0;
 };
 
 
