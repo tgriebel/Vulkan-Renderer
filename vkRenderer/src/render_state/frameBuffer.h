@@ -34,6 +34,7 @@
 struct frameBufferCreateInfo_t
 {
 	swapBuffering_t		swapBuffering;
+	resourceLifeTime_t	lifetime;
 	const char*			name;
 	Image*				color0;
 	Image*				color1;
@@ -42,7 +43,8 @@ struct frameBufferCreateInfo_t
 	Image*				stencil;
 
 	frameBufferCreateInfo_t() :
-		swapBuffering( swapBuffering_t::SINGLE_FRAME )
+		swapBuffering( swapBuffering_t::SINGLE_FRAME ),
+		lifetime( resourceLifeTime_t::RESIZE )
 	{
 		name = "";
 
@@ -55,7 +57,7 @@ struct frameBufferCreateInfo_t
 };
 
 
-class FrameBuffer
+class FrameBuffer : public RenderResource
 {
 private:
 	static const uint32_t MaxAttachmentCount = 5;

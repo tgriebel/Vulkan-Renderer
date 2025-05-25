@@ -251,6 +251,11 @@ void vk_ClearRenderPassCache()
 
 void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
+	// Managed Resource
+	{
+		RenderResource::Create( createInfo.lifetime );
+	}
+
 	if ( m_bufferCount > 0 ) {
 		throw std::runtime_error( "Framebuffer already initialized." );
 	}

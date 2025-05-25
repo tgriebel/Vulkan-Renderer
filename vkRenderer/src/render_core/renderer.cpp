@@ -129,8 +129,8 @@ void RenderResource::Create( const resourceLifeTime_t lifetime )
 	m_lifetime = lifetime;
 	switch ( m_lifetime )
 	{
-		case resourceLifeTime_t::TASK:	m_taskDependentResources.push_back( this );		break;
-		case resourceLifeTime_t::FRAME:	m_frameDependentResources.push_back( this );	break;
+		case resourceLifeTime_t::TASK:		m_taskDependentResources.push_back( this );		break;
+		case resourceLifeTime_t::FRAME:		m_frameDependentResources.push_back( this );	break;
 		case resourceLifeTime_t::RESIZE:	m_viewDependentResources.push_back( this );		break;
 		case resourceLifeTime_t::REBOOT:	m_appDependentResources.push_back( this );		break;
 	}

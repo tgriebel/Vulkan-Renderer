@@ -107,15 +107,6 @@ void Renderer::DestroyFramebuffers()
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
 		delete resources.shadowMapImage[ shadowIx ].gpuImage;
-		shadowMap[ shadowIx ].Destroy();
-	}
-	tempColor.Destroy();
-	mainColor.Destroy();
-	mainColorResolved.Destroy();
-
-	for ( uint32_t i = 0; i < blurredImageFrameBuffers.size(); ++i )
-	{
-		blurredImageFrameBuffers[ i ].Destroy();
 	}
 	blurredImageFrameBuffers.clear();
 
@@ -127,10 +118,7 @@ void Renderer::DestroyFramebuffers()
 	{
 		resources.cubeImageViews[ i ].Destroy();
 		resources.cubeDepthImageViews[ i ].Destroy();
-		cubeMapFrameBuffer[ i ].Destroy();
-
 		resources.diffuseIblImageViews[ i ].Destroy();
-		diffuseIblFrameBuffer[ i ].Destroy();
 	}
 
 	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );

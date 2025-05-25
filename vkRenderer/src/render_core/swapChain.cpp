@@ -198,8 +198,6 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 
 void SwapChain::Destroy()
 {
-	m_framebuffer.Destroy();
-
 	// Vulkan swapchain images are a bit special since they need to be destroyed with the swapchain
 	m_swapChainImage.gpuImage->DetachVkImage();
 	delete m_swapChainImage.gpuImage;
