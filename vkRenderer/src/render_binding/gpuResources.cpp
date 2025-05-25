@@ -29,7 +29,7 @@ extern DeviceContext context;
 
 uint32_t GpuBuffer::ClampId( const uint32_t bufferId ) const
 {
-	if( m_lifetime == swapBuffering_t::SINGLE_FRAME ) {
+	if( m_swapBuffering == swapBuffering_t::SINGLE_FRAME ) {
 		return 0;
 	}
 	if ( bufferId >= m_bufferCount )
@@ -103,18 +103,18 @@ VkBuffer& GpuBuffer::VkObject()
 
 void GpuBuffer::Create( const bufferCreateInfo_t info )
 {
-	Create( info.name, info.lifetime, info.elements, info.elementSizeBytes, info.type, *info.bufferMemory );
+	Create( info.name, info.swapBuffering, info.elements, info.elementSizeBytes, info.type, *info.bufferMemory );
 }
 
 
-void GpuBuffer::Create( const char* name, const swapBuffering_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
+void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
 {
 	VkBufferUsageFlags usage = 0;
 	VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
 	VkDeviceSize alignment = elementSizeBytes;
 
-	m_lifetime = lifetime;
-	if( m_lifetime == swapBuffering_t::MULTI_FRAME ) {
+	m_swapBuffering = swapBuffering;
+	if( m_swapBuffering == swapBuffering_t::MULTI_FRAME ) {
 		m_bufferCount = MaxFrameStates;
 	} else {
 		m_bufferCount = 1;
@@ -272,7 +272,7 @@ GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t e
 	view.m_elementPadding = m_elementPadding;
 	view.m_bufferCount = m_bufferCount;
 	view.m_type = m_type;
-	view.m_lifetime = m_lifetime;
+	view.m_swapBuffering = m_swapBuffering;
 
 	return view;
 }

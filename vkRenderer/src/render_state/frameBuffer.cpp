@@ -260,7 +260,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		perms[ i ].bits = i;
 	}
 
-	m_bufferCount = ( createInfo.lifetime == swapBuffering_t::MULTI_FRAME ) ? MaxFrameStates : 1;
+	m_bufferCount = ( createInfo.swapBuffering == swapBuffering_t::MULTI_FRAME ) ? MaxFrameStates : 1;
 	const bool canPresent = ( createInfo.color0 != nullptr ) && ( createInfo.color0->info.fmt == g_swapChain.GetBackBufferFormat() );
 
 	m_colorCount += ( createInfo.color0 != nullptr ) ? 1 : 0;
@@ -431,7 +431,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	}
 	m_width = images[ firstValidIx ]->info.width;
 	m_height = images[ firstValidIx ]->info.height;
-	m_lifetime = createInfo.lifetime;
+	m_swapBuffering = createInfo.swapBuffering;
 	
 	if( m_color0 == nullptr ) {
 		assert( ( m_color1 == nullptr ) && ( m_color2 == nullptr ) );

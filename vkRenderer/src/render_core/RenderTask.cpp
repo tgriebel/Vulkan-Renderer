@@ -475,7 +475,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		frameBufferCreateInfo_t info{};
 		info.name = "MipDownsample";
 		info.color0 = &m_tempImage;
-		info.lifetime = swapBuffering_t::SINGLE_FRAME;
+		info.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		m_frameBuffers[ i ].Create( info );
 

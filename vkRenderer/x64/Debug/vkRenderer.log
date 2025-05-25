@@ -1,10 +1,21 @@
-﻿  sceneParser.cpp
+﻿  drawpass.cpp
+  drawGroup.cpp
+  postEffect.cpp
+  renderView.cpp
+  descriptorWrites.cpp
+  gpuResources.cpp
+  gpuTransfer.cpp
+  pipeline.cpp
+  shaderBinding.cpp
+  RenderTask.cpp
+  renderCommand.cpp
+  renderInit.cpp
+  renderShutdown.cpp
   renderer.cpp
   swapChain.cpp
   cmdContext.cpp
   deviceContext.cpp
   frameBuffer.cpp
-  window.cpp
+  vulkinTestApp.cpp
   Generating Code...
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

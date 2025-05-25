@@ -122,8 +122,8 @@ void RenderResource::Cleanup( const renderResourceLifeTime_t lifetime )
 
 void RenderResource::Create( const renderResourceLifeTime_t lifetime )
 {
-	m_lifetime = lifetime;
-	switch ( m_lifetime )
+	m_swapBuffering = lifetime;
+	switch ( m_swapBuffering )
 	{
 		case renderResourceLifeTime_t::TASK:	m_taskDependentResources.push_back( this );		break;
 		case renderResourceLifeTime_t::FRAME:	m_frameDependentResources.push_back( this );	break;

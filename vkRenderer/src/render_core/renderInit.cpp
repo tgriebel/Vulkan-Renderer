@@ -892,7 +892,7 @@ void Renderer::CreateFramebuffers()
 		fbInfo.name = "MainColorResolveFB";
 		fbInfo.color0 = &resources.mainColorResolvedImageViews[0];
 		fbInfo.color1 = &resources.depthStencilResolvedImage;
-		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		mainColorResolved.Create( fbInfo );
 	}
@@ -904,7 +904,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "blurredImageFB";
 		fbInfo.color0 = &resources.blurredImageViews[ i ];
-		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		blurredImageFrameBuffers[ i ].Create( fbInfo );
 	}
@@ -914,7 +914,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "TempColorFB";
 		fbInfo.color0 = &resources.tempColorImage;
-		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		tempColor.Create( fbInfo );
 	}
@@ -925,7 +925,7 @@ void Renderer::CreateFramebuffers()
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "ShadowMapFB";
 		fbInfo.depth = &resources.shadowMapImage[ shadowIx ];
-		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		shadowMap[ shadowIx ].Create( fbInfo );
 	}
@@ -941,7 +941,7 @@ void Renderer::CreateFramebuffers()
 			fbInfo.depth = &resources.depthImageView;
 			fbInfo.stencil = &resources.stencilImageView;
 		}
-		fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		mainColor.Create( fbInfo );
 	}
@@ -955,7 +955,7 @@ void Renderer::CreateFramebuffers()
 				fbInfo.color0 = &resources.cubeImageViews[ i ];
 				fbInfo.depth = &resources.cubeDepthImageViews[ i ];
 			}
-			fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			cubeMapFrameBuffer[ i ].Create( fbInfo );
 		}
@@ -969,7 +969,7 @@ void Renderer::CreateFramebuffers()
 			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
 				fbInfo.color0 = &resources.diffuseIblImageViews[ i ];
 			}
-			fbInfo.lifetime = swapBuffering_t::SINGLE_FRAME;
+			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			diffuseIblFrameBuffer[ i ].Create( fbInfo );
 		}

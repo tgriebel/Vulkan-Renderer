@@ -54,7 +54,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	}
 
 	m_dbgName = name;
-	m_lifetime = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
+	m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
 
 	const uint32_t bufferCount = GetBufferCount();
 	for ( uint32_t i = 0; i < bufferCount; ++i )

@@ -156,7 +156,7 @@ class RenderResource
 private:
 
 public:
-	renderResourceLifeTime_t m_lifetime;
+	renderResourceLifeTime_t m_swapBuffering;
 
 	void Create( const renderResourceLifeTime_t lifetime );
 
