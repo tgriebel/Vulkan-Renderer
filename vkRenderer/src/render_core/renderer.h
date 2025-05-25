@@ -93,6 +93,7 @@ public:
 	ShaderBindParms*		globalParms;
 
 	// Memory
+	AllocatorMemory			scratchMemory;
 	AllocatorMemory			localMemory;
 	AllocatorMemory			frameBufferMemory;
 	AllocatorMemory			sharedMemory;

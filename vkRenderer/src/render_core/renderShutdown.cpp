@@ -154,6 +154,7 @@ void Renderer::ShutdownShaderResources()
 	// Memory
 	renderContext.localMemory.Destroy();
 	renderContext.sharedMemory.Destroy();
+	renderContext.scratchMemory.Destroy();
 
 	// Staging
 	geometry.stagingBuffer.Destroy();

@@ -116,6 +116,7 @@ public:
 	bool					IsMemoryCompatible( const uint32_t memoryType ) const;
 	void*					GetMemoryMapPtr( const allocRecord_t& record ) const;
 	uint64_t				GetSize() const;
+	void					AdjustOffset( const uint64_t offset, const uint64_t alignment );
 	uint64_t				GetAlignedOffset( const uint64_t alignment ) const;
 	bool					CanAllocate( uint64_t alignment, uint64_t allocSize ) const;
 	bool					Allocate( uint64_t alignment, uint64_t allocSize, Allocation& handle );

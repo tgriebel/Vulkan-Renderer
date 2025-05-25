@@ -169,6 +169,16 @@ uint64_t AllocatorMemory::GetSize() const
 }
 
 
+void AllocatorMemory::AdjustOffset( const uint64_t offset, const uint64_t alignment )
+{
+	if( alignment == 0 ) {
+		m_offset = offset;
+	} else {
+		m_offset = GetAlignedOffset( alignment );
+	}
+}
+
+
 uint64_t AllocatorMemory::GetAlignedOffset( const uint64_t alignment ) const
 {
 	const uint64_t boundary = ( m_offset % alignment );

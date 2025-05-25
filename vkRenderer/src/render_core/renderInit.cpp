@@ -336,6 +336,7 @@ void Renderer::InitApi()
 		// Memory Allocations
 		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED );
 		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL );
+		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL );
 	}
 
 	InitConfig();

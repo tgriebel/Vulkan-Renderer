@@ -433,6 +433,8 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	m_context = info.context;
 	m_resources = info.resources;
 
+	m_context->scratchMemory.AdjustOffset( 0, 0 );
+
 	const uint32_t mipLevels = m_image->info.mipLevels;
 
 	m_passes.resize( mipLevels );
@@ -450,7 +452,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		MipDimensions( 1, m_image->info.width, m_image->info.height, &m_tempImage.info.width, &m_tempImage.info.height );
 
 		m_tempImage.gpuImage = new GpuImage();
-		m_tempImage.gpuImage->Create( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->localMemory );
+		m_tempImage.gpuImage->Create( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory );
 	}
 
 	// Create buffer
