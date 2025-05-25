@@ -41,19 +41,6 @@
 
 #include "debugMenu.h"
 
-void CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage, const resourceLifeTime_t lifetime )
-{
-	outImage.info = info;
-	outImage.info.layers = ( info.type == IMAGE_TYPE_CUBE ) ? 6 : info.layers;
-
-	outImage.subResourceView.baseArray = 0;
-	outImage.subResourceView.arrayCount = outImage.info.layers;
-	outImage.subResourceView.baseMip = 0;
-	outImage.subResourceView.mipLevels = outImage.info.mipLevels;
-
-	outImage.gpuImage = new GpuImage( name, outImage.info, flags, memory, lifetime );
-}
-
 void Renderer::Init()
 {
 	InitApi();
@@ -672,7 +659,11 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.shadowMapImage[ shadowIx ], resourceLifeTime_t::RESIZE );
+		resources.shadowMapImage[ shadowIx ].Create(
+			info,
+			nullptr,
+			new GpuImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 	}
 
 	// Main images
@@ -688,14 +679,27 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.mainColorImage, resourceLifeTime_t::RESIZE );
-		CreateImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.gBufferLayerImage, resourceLifeTime_t::RESIZE );
+		resources.mainColorImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+		
+		resources.gBufferLayerImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		CreateImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.depthStencilImage, resourceLifeTime_t::RESIZE );
+		resources.depthStencilImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 	}
 
 	const int glslCubeMapping[ 6 ] = { 4, 5, 1, 0, 2, 3 };
@@ -713,7 +717,11 @@ void Renderer::CreateFramebuffers()
 		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		colorInfo.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbColorImage, resourceLifeTime_t::RESIZE );
+		resources.cubeFbColorImage.Create(
+			colorInfo,
+			nullptr,
+			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 
 		resources.cubeFbColorImage.sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 		resources.cubeFbColorImage.sampler.filter = SAMPLER_FILTER_BILINEAR;
@@ -722,7 +730,11 @@ void Renderer::CreateFramebuffers()
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		depthInfo.fmt = IMAGE_FMT_D_16;
 
-		CreateImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.cubeFbDepthImage, resourceLifeTime_t::RESIZE );
+		resources.cubeFbDepthImage.Create(
+			depthInfo,
+			nullptr,
+			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 
 		resources.cubeFbImageView.Init( resources.cubeFbColorImage, colorInfo, resourceLifeTime_t::RESIZE );
 
@@ -762,7 +774,11 @@ void Renderer::CreateFramebuffers()
 		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		colorInfo.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "diffuseIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resources.diffuseIblImage, resourceLifeTime_t::RESIZE );
+		resources.diffuseIblImage.Create(
+			colorInfo,
+			nullptr,
+			new GpuImage( "diffuseIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
@@ -791,9 +807,16 @@ void Renderer::CreateFramebuffers()
 		info.aspect = resources.mainColorImage.info.aspect;
 		info.tiling = resources.mainColorImage.info.tiling;
 
-		CreateImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resources.mainColorResolvedImage, resourceLifeTime_t::RESIZE );
-		CreateImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resources.blurredImage, resourceLifeTime_t::RESIZE );
-
+		resources.mainColorResolvedImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+		resources.blurredImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 		info.mipLevels = 1;
 
 		const uint32_t mipLevelCount = resources.mainColorResolvedImage.info.mipLevels;
@@ -845,7 +868,11 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = resources.depthStencilImage.info.tiling;
 
-		CreateImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.depthStencilResolvedImage, resourceLifeTime_t::RESIZE );
+		resources.depthStencilResolvedImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 	}
 
 	// Depth-stencil views
@@ -867,7 +894,11 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		CreateImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resources.tempColorImage, resourceLifeTime_t::RESIZE );
+		resources.tempColorImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
 	}
 
 	// Image writeback
@@ -883,7 +914,11 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_LINEAR;
 
-		CreateImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.sharedMemory, resources.tempWritebackImage, resourceLifeTime_t::RESIZE );
+		resources.tempWritebackImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.sharedMemory, resourceLifeTime_t::RESIZE )
+		);
 	}
 
 	// Main Color Resolved Frame buffer

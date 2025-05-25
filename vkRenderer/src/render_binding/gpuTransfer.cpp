@@ -78,7 +78,15 @@ void Renderer::UploadTextures()
 
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
-		CreateImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, texture, resourceLifeTime_t::REBOOT );
+		texture.info.layers = ( texture.info.type == IMAGE_TYPE_CUBE ) ? 6 : texture.info.layers;
+
+		texture.subResourceView.baseArray = 0;
+		texture.subResourceView.arrayCount = texture.info.layers;
+		texture.subResourceView.baseMip = 0;
+		texture.subResourceView.mipLevels = texture.info.mipLevels;
+
+		texture.gpuImage= 
+			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, resourceLifeTime_t::REBOOT );
 
 		Transition( &uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 

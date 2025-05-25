@@ -52,9 +52,6 @@ extern SwapChain					g_swapChain;
 
 extern renderConstants_t	rc;
 
-// TODO: Figure out where to put this
-void CreateImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, Image& outImage, const resourceLifeTime_t lifetime );
-
 struct renderConfig_t
 {
 	imageSamples_t	mainColorSubSamples;
