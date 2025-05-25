@@ -96,6 +96,7 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
 			m_taskDependentResources[ i ]->Destroy();
 		}
+		m_taskDependentResources.clear();
 	}
 	else if ( lifetime == resourceLifeTime_t::FRAME )
 	{
@@ -103,6 +104,7 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
 			m_frameDependentResources[ i ]->Destroy();
 		}
+		m_frameDependentResources.clear();
 	}
 	else if ( lifetime == resourceLifeTime_t::RESIZE )
 	{
@@ -110,6 +112,7 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
 			m_viewDependentResources[ i ]->Destroy();
 		}
+		m_viewDependentResources.clear();
 	}
 	else if ( lifetime == resourceLifeTime_t::REBOOT )
 	{
@@ -117,6 +120,7 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
 			m_appDependentResources[ i ]->Destroy();
 		}
+		m_appDependentResources.clear();
 	}
 }
 
