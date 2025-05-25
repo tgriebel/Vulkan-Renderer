@@ -51,8 +51,7 @@ void CreateImage( const char* name, const imageInfo_t& info, const gpuImageState
 	outImage.subResourceView.baseMip = 0;
 	outImage.subResourceView.mipLevels = outImage.info.mipLevels;
 
-	outImage.gpuImage = new GpuImage();
-	outImage.gpuImage->Create( name, outImage.info, flags, memory );
+	outImage.gpuImage = new GpuImage( name, outImage.info, flags, memory );
 }
 
 void Renderer::Init()

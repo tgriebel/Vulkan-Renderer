@@ -39,20 +39,10 @@ protected:
 	}
 
 public:
-
-	GpuImage()
+	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory )
 	{
-#ifdef USE_VULKAN
-		for( uint32_t i = 0; i < MaxFrameStates; ++i )
-		{
-			vk_image[ i ]  = VK_NULL_HANDLE;
-			vk_view[ i ] = VK_NULL_HANDLE;
-		}
-#endif
-		m_dbgName = "";
-		m_id = -1;
+		Create( name, info, flags, memory );
 	}
-
 
 	virtual GpuImage::~GpuImage()
 	{

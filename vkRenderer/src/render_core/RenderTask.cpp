@@ -451,8 +451,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_tempImage.subResourceView.baseArray = 0;
 		MipDimensions( 1, m_image->info.width, m_image->info.height, &m_tempImage.info.width, &m_tempImage.info.height );
 
-		m_tempImage.gpuImage = new GpuImage();
-		m_tempImage.gpuImage->Create( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory );
+		m_tempImage.gpuImage = new GpuImage( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory );
 	}
 
 	// Create buffer
