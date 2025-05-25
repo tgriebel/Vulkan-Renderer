@@ -333,9 +333,9 @@ void Renderer::InitApi()
 
 	{
 		// Memory Allocations
-		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED, renderResourceLifeTime_t::REBOOT );
-		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::REBOOT );
-		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::REBOOT );
+		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED, resourceLifeTime_t::REBOOT );
+		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
+		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
 	}
 
 	InitConfig();
@@ -345,7 +345,7 @@ void Renderer::InitApi()
 
 	{
 		// Create Frame Resources
-		renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL, renderResourceLifeTime_t::RESIZE );
+		renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::RESIZE );
 
 		CreateSyncObjects();
 		CreateFramebuffers();
@@ -458,22 +458,22 @@ void Renderer::InitShaderResources()
 	}
 
 	{
-		resources.globalConstants.Create( "Globals", swapBuffering_t::MULTI_FRAME, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, renderContext.sharedMemory );
-		resources.viewParms.Create( "View", swapBuffering_t::MULTI_FRAME, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.surfParms.Create( "Surf", swapBuffering_t::MULTI_FRAME, MaxViews * MaxSurfaces, sizeof( surfaceBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.materialBuffers.Create( "Material", swapBuffering_t::MULTI_FRAME, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.lightParms.Create( "Light", swapBuffering_t::MULTI_FRAME, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.particleBuffer.Create( "Particle", swapBuffering_t::MULTI_FRAME, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.globalConstants.Create( "Globals", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, renderContext.sharedMemory );
+		resources.viewParms.Create( "View", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.surfParms.Create( "Surf", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxViews * MaxSurfaces, sizeof( surfaceBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.materialBuffers.Create( "Material", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.lightParms.Create( "Light", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.particleBuffer.Create( "Particle", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
 
 		for ( size_t v = 0; v < MaxViews; ++v ) {
 			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 
-		geometry.vb.Create( "VB", swapBuffering_t::SINGLE_FRAME, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
-		geometry.ib.Create( "IB", swapBuffering_t::SINGLE_FRAME, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
+		geometry.vb.Create( "VB", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
+		geometry.ib.Create( "IB", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
 
-		geometry.stagingBuffer.Create( "Geo Staging", swapBuffering_t::SINGLE_FRAME, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
-		textureStagingBuffer.Create( "Texture Staging", swapBuffering_t::SINGLE_FRAME, 1, 192 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		geometry.stagingBuffer.Create( "Geo Staging", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		textureStagingBuffer.Create( "Texture Staging", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, 1, 192 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
 	}
 }
 

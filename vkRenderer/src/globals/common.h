@@ -142,26 +142,27 @@ enum class swapBuffering_t : uint8_t
 };
 
 
-enum class renderResourceLifeTime_t : uint8_t
+enum class resourceLifeTime_t : uint8_t
 {
 	TASK,
 	FRAME,
 	RESIZE,
-	REBOOT
+	REBOOT,
+	UNMANAGED
 };
 
 
 class RenderResource
 {
 private:
+	resourceLifeTime_t m_lifetime;
 
 public:
-	renderResourceLifeTime_t m_swapBuffering;
 
-	void Create( const renderResourceLifeTime_t lifetime );
+	void Create( const resourceLifeTime_t lifetime );
 
-	static std::vector<RenderResource*> GetResourceList( const renderResourceLifeTime_t lifetime );
-	static void Cleanup( const renderResourceLifeTime_t lifetime );
+	static std::vector<RenderResource*> GetResourceList( const resourceLifeTime_t lifetime );
+	static void Cleanup( const resourceLifeTime_t lifetime );
 
 	virtual void Destroy() = 0;
 };

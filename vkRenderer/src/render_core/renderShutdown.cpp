@@ -133,7 +133,7 @@ void Renderer::DestroyFramebuffers()
 		diffuseIblFrameBuffer[ i ].Destroy();
 	}
 
-	RenderResource::Cleanup( renderResourceLifeTime_t::RESIZE );
+	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
 }
 
 
@@ -148,25 +148,8 @@ void Renderer::ShutdownImGui()
 
 void Renderer::ShutdownShaderResources()
 {
-	geometry.ib.Destroy();
-	geometry.vb.Destroy();
-
 	// Managed Cleanup
-	RenderResource::Cleanup( renderResourceLifeTime_t::REBOOT );
-
-	// Staging
-	geometry.stagingBuffer.Destroy();
-	textureStagingBuffer.Destroy();
-
-	// Buffers
-	{
-		resources.globalConstants.Destroy();
-		resources.viewParms.Destroy();
-		resources.surfParms.Destroy();
-		resources.materialBuffers.Destroy();
-		resources.lightParms.Destroy();
-		resources.particleBuffer.Destroy();
-	}
+	RenderResource::Cleanup( resourceLifeTime_t::REBOOT );
 
 	// Images
 	const uint32_t textureCount = g_assets.textureLib.Count();

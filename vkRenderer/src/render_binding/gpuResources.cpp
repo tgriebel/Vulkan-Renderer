@@ -103,77 +103,86 @@ VkBuffer& GpuBuffer::VkObject()
 
 void GpuBuffer::Create( const bufferCreateInfo_t info )
 {
-	Create( info.name, info.swapBuffering, info.elements, info.elementSizeBytes, info.type, *info.bufferMemory );
+	Create( info.name, info.swapBuffering, info.lifetime, info.elements, info.elementSizeBytes, info.type, *info.bufferMemory );
 }
 
 
-void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
+void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
 {
-	VkBufferUsageFlags usage = 0;
-	VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
-	VkDeviceSize alignment = elementSizeBytes;
-
-	m_swapBuffering = swapBuffering;
-	if( m_swapBuffering == swapBuffering_t::MULTI_FRAME ) {
-		m_bufferCount = MaxFrameStates;
-	} else {
-		m_bufferCount = 1;
-	}
-
-	if( type == bufferType_t::STORAGE ) {
-		alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
-		usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-	} else if ( type == bufferType_t::UNIFORM ) {
-		alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
-		usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-	} else if ( type == bufferType_t::VERTEX ) {
-		usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	} else if ( type == bufferType_t::INDEX ) {
-		usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	} else if ( type == bufferType_t::STAGING ) {
-		usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	} else {
-		assert(0);
-	}
-
-	m_elementSize = elementSizeBytes;
-	m_elementPadding = GpuBuffer::GetAlignedSize( elementSizeBytes, alignment );
-
-	VkDeviceSize stride = m_elementPadding;
-	bufferSize = stride * elements;
-
-	VkBufferCreateInfo bufferInfo{ };
-	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = bufferSize;
-	bufferInfo.usage = usage;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	for( uint32_t bufferId = 0; bufferId < m_bufferCount; ++bufferId )
+	// Resource Management
 	{
-		VK_CHECK_RESULT( vkCreateBuffer( context.device, &bufferInfo, nullptr, &m_buffer[ bufferId ].buffer ) );
+		RenderResource::Create( lifetime );
+	}
 
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements( context.device, m_buffer[ bufferId ].buffer, &memRequirements );
+#ifdef USE_VULKAN
+	{
+		VkBufferUsageFlags usage = 0;
+		VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
+		VkDeviceSize alignment = elementSizeBytes;
 
-		VkMemoryAllocateInfo allocInfo{ };
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
-
-		if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer[ bufferId ].alloc ) ) {
-			vkBindBufferMemory( context.device, m_buffer[ bufferId ].buffer, bufferMemory.GetVkObject(), m_buffer[ bufferId ].alloc.GetOffset() );
+		m_swapBuffering = swapBuffering;
+		if( m_swapBuffering == swapBuffering_t::MULTI_FRAME ) {
+			m_bufferCount = MaxFrameStates;
 		} else {
-			throw std::runtime_error( "Buffer could not allocate!" );
+			m_bufferCount = 1;
 		}
 
-		vk_MarkerSetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT, name );
+		if( type == bufferType_t::STORAGE ) {
+			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
+			usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+		} else if ( type == bufferType_t::UNIFORM ) {
+			alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
+			usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+		} else if ( type == bufferType_t::VERTEX ) {
+			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		} else if ( type == bufferType_t::INDEX ) {
+			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+		} else if ( type == bufferType_t::STAGING ) {
+			usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		} else {
+			assert(0);
+		}
 
-		m_name = name;
+		m_elementSize = elementSizeBytes;
+		m_elementPadding = GpuBuffer::GetAlignedSize( elementSizeBytes, alignment );
 
-		m_end = m_buffer[ bufferId ].alloc.GetSize();
-		m_buffer[ bufferId ].baseOffset = 0;
-		m_buffer[ bufferId ].offset = 0;
+		VkDeviceSize stride = m_elementPadding;
+		bufferSize = stride * elements;
+
+		VkBufferCreateInfo bufferInfo{ };
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = bufferSize;
+		bufferInfo.usage = usage;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		for( uint32_t bufferId = 0; bufferId < m_bufferCount; ++bufferId )
+		{
+			VK_CHECK_RESULT( vkCreateBuffer( context.device, &bufferInfo, nullptr, &m_buffer[ bufferId ].buffer ) );
+
+			VkMemoryRequirements memRequirements;
+			vkGetBufferMemoryRequirements( context.device, m_buffer[ bufferId ].buffer, &memRequirements );
+
+			VkMemoryAllocateInfo allocInfo{ };
+			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+			allocInfo.allocationSize = memRequirements.size;
+			allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
+
+			if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer[ bufferId ].alloc ) ) {
+				vkBindBufferMemory( context.device, m_buffer[ bufferId ].buffer, bufferMemory.GetVkObject(), m_buffer[ bufferId ].alloc.GetOffset() );
+			} else {
+				throw std::runtime_error( "Buffer could not allocate!" );
+			}
+
+			vk_MarkerSetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT, name );
+
+			m_name = name;
+
+			m_end = m_buffer[ bufferId ].alloc.GetSize();
+			m_buffer[ bufferId ].baseOffset = 0;
+			m_buffer[ bufferId ].offset = 0;
+		}
 	}
+#endif
 }
 
 

@@ -338,8 +338,8 @@ void ImageWritebackTask::Init()
 
 	const uint32_t maxBpp = sizeof( vec4f );
 	const uint32_t elementsCount = m_imageArray[0]->info.width * m_imageArray[ 0 ]->info.height * m_imageArray.Count();
-	m_writebackBuffer.Create( "Writeback Buffer", swapBuffering_t::MULTI_FRAME, elementsCount, maxBpp, bufferType_t::STORAGE, m_context->sharedMemory );
-	m_resourceBuffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, 1, sizeof( writeBackParms ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_writebackBuffer.Create( "Writeback Buffer", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::TASK, elementsCount, maxBpp, bufferType_t::STORAGE, m_context->sharedMemory );
+	m_resourceBuffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, 1, sizeof( writeBackParms ), bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	writeBackParms.dimensions = vec4f( (float)m_imageArray[ 0 ]->info.width, (float)m_imageArray[ 0 ]->info.height, (float)m_imageArray.Count(), 0.0f );
 
@@ -418,8 +418,6 @@ void ImageWritebackTask::Execute( CommandContext& context )
 
 void ImageWritebackTask::Shutdown()
 {
-	m_writebackBuffer.Destroy();
-	m_resourceBuffer.Destroy();
 }
 
 
@@ -455,7 +453,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	}
 
 	// Create buffer
-	m_buffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, mipLevels, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_buffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, mipLevels, sizeof( imageProcessObject_t ), bufferType_t::UNIFORM, m_context->sharedMemory );
 
 	// The last view is only needed to create a frame buffer 
 	for ( uint32_t i = 0; i < m_image->info.mipLevels; ++i )
@@ -528,8 +526,6 @@ void MipImageTask::Shutdown()
 			delete m_passes[ i ];
 		}
 	}
-	m_buffer.Destroy();
-
 	m_tempImage.gpuImage->Destroy();
 	delete m_tempImage.gpuImage;
 }
@@ -561,6 +557,7 @@ uint32_t RenderSchedule::PendingTasks() const
 
 void RenderSchedule::Clear()
 {
+	RenderResource::Cleanup( resourceLifeTime_t::TASK );
 	for( size_t i = 0; i < tasks.size(); ++i ) {
 		delete tasks[ i ];
 	}

@@ -67,7 +67,7 @@ void Allocation::Free()
 }
 
 
-void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t region, const renderResourceLifeTime_t lifetime )
+void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t region, const resourceLifeTime_t lifetime )
 {
 	// Resource Management
 	{

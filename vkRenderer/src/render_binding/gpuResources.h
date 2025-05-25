@@ -37,18 +37,19 @@ enum class bufferType_t
 
 struct bufferCreateInfo_t
 {
-	const char*			name;
-	swapBuffering_t		swapBuffering;
-	uint32_t			elements;
-	uint32_t			elementSizeBytes;
-	bufferType_t		type;
-	AllocatorMemory*	bufferMemory;
+	const char*				name;
+	swapBuffering_t			swapBuffering;
+	uint32_t				elements;
+	uint32_t				elementSizeBytes;
+	bufferType_t			type;
+	resourceLifeTime_t		lifetime;
+	AllocatorMemory*		bufferMemory;
 };
 
 
 class GpuBufferView;
 
-class GpuBuffer
+class GpuBuffer : public RenderResource
 {
 private:
 	uint32_t		ClampId( const uint32_t bufferId ) const;
@@ -65,7 +66,7 @@ public:
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
 	void			Create( const bufferCreateInfo_t info );
-	void			Create( const char* name, const swapBuffering_t swapBuffering, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
+	void			Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			Allocate( const uint64_t size );
