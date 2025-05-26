@@ -444,23 +444,103 @@ void Renderer::InitShaderResources()
 		rc.checkerboardImage = &g_assets.textureLib.Find( "_checkerboard" )->Get();
 	}
 
+	// Buffers
 	{
-		resources.globalConstants.Create( "Globals", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, 1, sizeof( viewBufferObject_t ), bufferType_t::UNIFORM, renderContext.sharedMemory );
-		resources.viewParms.Create( "View", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxViews, sizeof( viewBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.surfParms.Create( "Surf", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxViews * MaxSurfaces, sizeof( surfaceBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.materialBuffers.Create( "Material", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxMaterials, sizeof( materialBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.lightParms.Create( "Light", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxLights, sizeof( lightBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
-		resources.particleBuffer.Create( "Particle", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::REBOOT, MaxParticles, sizeof( particleBufferObject_t ), bufferType_t::STORAGE, renderContext.sharedMemory );
+		resources.globalConstants.Create( 
+			"Globals",
+			swapBuffering_t::MULTI_FRAME,
+			resourceLifeTime_t::REBOOT,
+			1,
+			sizeof( viewBufferObject_t ),
+			bufferType_t::UNIFORM,
+			renderContext.sharedMemory
+		);
+		resources.viewParms.Create(
+			"View",
+			swapBuffering_t::MULTI_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxViews,
+			sizeof( viewBufferObject_t ),
+			bufferType_t::STORAGE,
+			renderContext.sharedMemory
+		);
+		resources.surfParms.Create(
+			"Surf",
+			swapBuffering_t::MULTI_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxViews * MaxSurfaces,
+			sizeof( surfaceBufferObject_t ),
+			bufferType_t::STORAGE,
+			renderContext.sharedMemory
+		);
+		resources.materialBuffers.Create(
+			"Material",
+			swapBuffering_t::MULTI_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxMaterials,
+			sizeof( materialBufferObject_t ),
+			bufferType_t::STORAGE,
+			renderContext.sharedMemory
+		);
+		resources.lightParms.Create(
+			"Light",
+			swapBuffering_t::MULTI_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxLights,
+			sizeof( lightBufferObject_t ),
+			bufferType_t::STORAGE,
+			renderContext.sharedMemory
+		);
+		resources.particleBuffer.Create(
+			"Particle",
+			swapBuffering_t::MULTI_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxParticles,
+			sizeof( particleBufferObject_t ),
+			bufferType_t::STORAGE,
+			renderContext.sharedMemory
+		);
 
 		for ( size_t v = 0; v < MaxViews; ++v ) {
 			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 
-		geometry.vb.Create( "VB", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, MaxVertices, sizeof( vsInput_t ), bufferType_t::VERTEX, renderContext.localMemory );
-		geometry.ib.Create( "IB", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, MaxIndices, sizeof( uint32_t ), bufferType_t::INDEX, renderContext.localMemory );
+		geometry.vb.Create(
+			"VB",
+			swapBuffering_t::SINGLE_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxVertices,
+			sizeof( vsInput_t ),
+			bufferType_t::VERTEX,
+			renderContext.localMemory
+		);
+		geometry.ib.Create(
+			"IB",
+			swapBuffering_t::SINGLE_FRAME,
+			resourceLifeTime_t::REBOOT,
+			MaxIndices,
+			sizeof( uint32_t ),
+			bufferType_t::INDEX,
+			renderContext.localMemory
+		);
 
-		geometry.stagingBuffer.Create( "Geo Staging", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, 1, 16 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
-		textureStagingBuffer.Create( "Texture Staging", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, 1, 192 * MB_1, bufferType_t::STAGING, renderContext.sharedMemory );
+		geometry.stagingBuffer.Create(
+			"Geo Staging",
+			swapBuffering_t::SINGLE_FRAME,
+			resourceLifeTime_t::REBOOT,
+			1, 16 * MB_1,
+			bufferType_t::STAGING,
+			renderContext.sharedMemory
+		);
+		textureStagingBuffer.Create(
+			"Texture Staging",
+			swapBuffering_t::SINGLE_FRAME,
+			resourceLifeTime_t::REBOOT,
+			1,
+			192 * MB_1,
+			bufferType_t::STAGING,
+			renderContext.sharedMemory
+		);
 	}
 }
 
