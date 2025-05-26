@@ -91,6 +91,11 @@ void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], co
 		return;
 	}
 
+	{
+		m_lifetime = resourceLifeTime_t::REBOOT;
+		RenderResource::Create( m_lifetime );
+	}
+
 	// Build bind set
 	{
 		m_bindMap.reserve( bindCount );

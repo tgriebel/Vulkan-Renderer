@@ -26,6 +26,7 @@
 #include <vector>
 #include <unordered_map>
 #include "../globals/common.h"
+#include "../render_core/renderResource.h"
 
 class GpuBuffer;
 class GpuImage;
@@ -198,7 +199,7 @@ public:
 };
 
 
-class ShaderBindSet
+class ShaderBindSet : public RenderResource
 {
 private:
 	std::unordered_map<uint32_t, ShaderBinding> m_bindMap;

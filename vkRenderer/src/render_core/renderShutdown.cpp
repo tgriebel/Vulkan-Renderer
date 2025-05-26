@@ -115,10 +115,5 @@ void Renderer::ShutdownShaderResources()
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 1 ], nullptr );
 	}
 
-	// Shader binding resources
-	for( auto bindSet : renderContext.bindSets ) {
-		bindSet.second.Destroy();
-	}
-
 	renderContext.FreeRegisteredBindParms();
 }

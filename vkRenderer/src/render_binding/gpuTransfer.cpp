@@ -78,8 +78,6 @@ void Renderer::UploadTextures()
 
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
-		texture.info.layers = ( texture.info.type == IMAGE_TYPE_CUBE ) ? 6 : texture.info.layers;
-
 		texture.subResourceView.baseArray = 0;
 		texture.subResourceView.arrayCount = texture.info.layers;
 		texture.subResourceView.baseMip = 0;
