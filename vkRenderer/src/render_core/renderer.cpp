@@ -317,7 +317,7 @@ void Renderer::Resize()
 
 	Transition( &uploadContext, resources.diffuseIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
-	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
 	uploadContext.End();
 	uploadContext.Submit();
@@ -381,7 +381,7 @@ void Renderer::UploadAssets()
 
 	Transition( &uploadContext, resources.diffuseIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
-	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
 	uploadContext.End();
 	uploadContext.Submit();

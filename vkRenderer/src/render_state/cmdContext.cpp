@@ -240,13 +240,19 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
+	Transition( cmdCommand, image, swapBuffering_t::SINGLE_FRAME, current, next );
+}
+
+
+void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
 	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
 
 	imageSubResourceView_t subview {};
 	subview.mipLevels = image.info.mipLevels;
 	subview.arrayCount = image.info.layers;
 
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, subview, current, next );
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, subview, buffering, current, next );
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -254,9 +260,15 @@ void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFl
 
 void Transition( CommandContext* cmdCommand, ImageView& imageView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
+	Transition( cmdCommand, imageView, swapBuffering_t::SINGLE_FRAME, current, next );
+}
+
+
+void Transition( CommandContext* cmdCommand, ImageView& imageView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
 	cmdCommand->MarkerBeginRegion( "Transition Image View", ColorToVector( ColorWhite ) );
 
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &imageView, imageView.subResourceView, current, next );
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &imageView, imageView.subResourceView, buffering, current, next );
 
 	cmdCommand->MarkerEndRegion();
 }

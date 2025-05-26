@@ -182,13 +182,12 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 }
 
 
-void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.image = image->gpuImage->GetVkImage( context.bufferId );
 	barrier.subresourceRange.baseMipLevel = 0;//subView.baseMip;
 	barrier.subresourceRange.levelCount = image->info.mipLevels;//subView.mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;//subView.baseArray;
@@ -271,14 +270,34 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 
 	barrier.subresourceRange.aspectMask = vk_GetAspectFlags( image->info.aspect );
 
-	vkCmdPipelineBarrier(
-		cmdBuffer,
-		sourceStage, destinationStage,
-		0,
-		0, nullptr,
-		0, nullptr,
-		1, &barrier
-	);
+	if( buffering == swapBuffering_t::SINGLE_FRAME )
+	{
+		barrier.image = image->gpuImage->GetVkImage( context.bufferId );
+		vkCmdPipelineBarrier(
+			cmdBuffer,
+			sourceStage, destinationStage,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+	}
+	else
+	{
+		const uint32_t bufferCount = image->gpuImage->GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			barrier.image = image->gpuImage->GetVkImage( i );
+			vkCmdPipelineBarrier(
+				cmdBuffer,
+				sourceStage, destinationStage,
+				0,
+				0, nullptr,
+				0, nullptr,
+				1, &barrier
+			);
+		}
+	}
 }
 
 
