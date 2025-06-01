@@ -41,9 +41,9 @@
 
 #include "debugMenu.h"
 
-void Renderer::Init()
+void Renderer::Init( const renderConfig_t& cfg )
 {
-	InitApi();
+	InitApi( cfg );
 
 	resources.gpuImages2D.Resize( MaxImageDescriptors );
 	resources.gpuImagesCube.Resize( MaxImageDescriptors );
@@ -307,11 +307,13 @@ void Renderer::Init()
 }
 
 
-void Renderer::InitApi()
+void Renderer::InitApi( const renderConfig_t& cfg )
 {
 	{
 		// Device Set-up
 		context.Create( g_window );
+
+		InitConfig( cfg ); // Must be after device must be set-up, but before everything is initialized
 
 		int width, height;
 		g_window.GetWindowSize( width, height );
@@ -324,8 +326,6 @@ void Renderer::InitApi()
 		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
 		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
 	}
-
-	InitConfig();
 
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
@@ -789,7 +789,7 @@ void Renderer::CreateFramebuffers()
 		imageInfo_t colorInfo{};
 		colorInfo.width = 512;
 		colorInfo.height = 512;
-		colorInfo.mipLevels = 1;
+		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
 		colorInfo.layers = 6;
 		colorInfo.subsamples = IMAGE_SMP_1;
 		colorInfo.fmt = IMAGE_FMT_RGBA_16;

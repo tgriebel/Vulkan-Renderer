@@ -174,7 +174,7 @@ class Renderer
 public:
 	friend class RenderTask;
 
-	void								Init();
+	void								Init( const renderConfig_t& cfg );
 	void								Shutdown();
 	void								Commit( const Scene* scene );
 	void								Render();
@@ -242,10 +242,10 @@ private:
 	uint32_t							shadowCount = 0;
 
 	// Init/Shutdown
-	void								InitApi();
+	void								InitApi( const renderConfig_t& cfg );
 	void								InitShaderResources();
 	void								AssignBindSetsToGpuProgs();
-	void								InitConfig();
+	void								InitConfig( const renderConfig_t& cfg );
 	void								InitImGui( RenderView& view );
 	void								ShutdownImGui();
 	void								ShutdownShaderResources();

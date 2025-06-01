@@ -28,6 +28,7 @@
 #include <chrono>
 #include <mutex>
 #include "src/globals/common.h"
+#include <syscore/systemUtils.h>
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/assetManager.h>
 #include "window.h"
@@ -37,6 +38,9 @@
 #include <SysCore/systemUtils.h>
 #include <gfxcore/scene/assetBaker.h>
 #include "raytracerInterface.h"
+#include "src/app/cvar.h"
+
+using namespace std::string_literals;
 
 static const bool bake = false;
 
@@ -93,15 +97,64 @@ void BakeAssets()
 	exit(0);
 }
 
+MakeCVar( bool,		cubeCapture );
+MakeCVar( bool,		computeDiffuseIbl );
+MakeCVar( char*,	scene );
+ 
+void ParseCmdArgs( const int argc, char* argv[] )
+{
+	for ( int32_t i = 1; i < argc; ++i )
+	{	
+		std::string arg = argv[ i ];
+		Trim( arg );
+
+		// Flags
+		if( HasPrefix( arg, "-"s ) )
+		{
+			CVar* v = CVar::Search( arg.substr( 1 ) );
+			if( v == nullptr || ( v->IsBool() == false ) ) {
+				continue;
+			}
+			v->Set( true );
+		}
+		// Everything else
+		else
+		{
+			const size_t offset = arg.find( "=" );
+			if ( offset == 0 ) {
+				continue;
+			}
+
+			CVar* v = CVar::Search( arg.substr( 0, offset ) );
+			if ( v == nullptr ) {
+				continue;
+			}
+			if ( v->IsInt() ) {
+				v->Set( std::stoi( arg.substr( offset + 1 ) ) );
+			}
+			else if ( v->IsString() ) {
+				v->Set( arg.substr( offset + 1 ).c_str() );
+			}
+		}
+	}
+}
+
 
 int main( int argc, char* argv[] )
 {
-	CreateCodeAssets();
-	if( argc == 2 ) {
-		LoadScene( argv[1], &g_scene, &g_assets );
+	CreateCodeAssets(); // TODO: Check render dependencies, may need to move into render init?
+
+	ParseCmdArgs( argc, argv );
+
+	if( cvar_scene.IsValid() ) {
+		LoadScene( cvar_scene.GetString(), &g_scene, &g_assets );
 	} else {
 		LoadScene( sceneFile, &g_scene, &g_assets );
 	}
+
+	renderConfig_t config {};
+	config.useCubeViews = cvar_cubeCapture.GetBool();
+	config.downsampleScene = true;
 
 	std::thread renderThread( RenderThread );
 
@@ -114,7 +167,7 @@ int main( int argc, char* argv[] )
 
 	try
 	{
-		g_renderer.Init();
+		g_renderer.Init( config );
 
 		while ( g_window.IsOpen() )
 		{

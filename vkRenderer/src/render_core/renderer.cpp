@@ -694,20 +694,17 @@ void Renderer::UpdateBuffers()
 }
 
 
-void Renderer::InitConfig()
+void Renderer::InitConfig( const renderConfig_t& cfg )
 {
-	imageSamples_t samples = IMAGE_SMP_1;
+	imageSamples_t maxSamples = IMAGE_SMP_1;
 
 #ifdef USE_VULKAN
-	samples = vk_MaxImageSamples();
+	maxSamples = vk_MaxImageSamples();
 #endif
 
-	config.mainColorSubSamples = samples;
-	config.useCubeViews = false;
-	config.writeCubeViews = false;
-	config.computeDiffuseIbl = false;
-	config.downsampleScene = true;
-	config.gaussianBlur = true;
+	config = cfg;
+
+	config.mainColorSubSamples = maxSamples;
 }
 
 

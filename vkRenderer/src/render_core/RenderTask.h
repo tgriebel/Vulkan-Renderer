@@ -198,7 +198,7 @@ public:
 			m_imageArray.Resize( 1 );
 			m_imageArray[ 0 ] = info.img;
 		}
-		else
+		else if ( info.imgCube != nullptr )
 		{
 			m_imageArray.Resize( 6 );
 			for( uint32_t i = 0; i < 6; ++i )
@@ -207,6 +207,10 @@ public:
 				const uint32_t reorderIx = info.imgCube[ i ]->subResourceView.baseArray;
 				m_imageArray[ reorderIx ] = info.imgCube[ i ];
 			}
+		}
+		else
+		{
+			assert( 0 );
 		}
 		m_context = info.context;
 		m_resources = info.resources;

@@ -125,6 +125,9 @@
     <ClCompile Include="src\render_core\renderResource.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\app\cvar.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="src\render_core\renderResource.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\cvar.h">
+      <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

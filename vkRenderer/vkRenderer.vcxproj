@@ -185,6 +185,7 @@
     <ClInclude Include="shaders\color.h" />
     <ClInclude Include="shaders\light.h" />
     <ClInclude Include="shaders\util.h" />
+    <ClInclude Include="src\app\cvar.h" />
     <ClInclude Include="src\draw_passes\drawpass.h" />
     <ClInclude Include="src\globals\common.h" />
     <ClInclude Include="src\globals\drawGroup.h" />
@@ -232,6 +233,7 @@
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\app\cvar.cpp" />
     <ClCompile Include="src\draw_passes\drawpass.cpp" />
     <ClCompile Include="src\globals\drawGroup.cpp" />
     <ClCompile Include="src\globals\postEffect.cpp" />
