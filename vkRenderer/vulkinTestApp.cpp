@@ -42,8 +42,6 @@
 
 using namespace std::string_literals;
 
-static const bool bake = false;
-
 AssetManager						g_assets;
 Scene*								g_scene;
 Renderer							g_renderer;
@@ -93,13 +91,12 @@ void BakeAssets()
 	baker.AddAssetLib( &g_assets.textureLib, TexturePath, BakedTextureExtension );
 
 	baker.Bake();
-
-	exit(0);
 }
 
 MakeCVar( bool,		cubeCapture );
 MakeCVar( bool,		computeDiffuseIbl );
 MakeCVar( char*,	scene );
+MakeCVar( bool,		bakeAssets );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
@@ -154,16 +151,19 @@ int main( int argc, char* argv[] )
 
 	renderConfig_t config {};
 	config.useCubeViews = cvar_cubeCapture.GetBool();
+	config.computeDiffuseIbl = cvar_computeDiffuseIbl.GetBool();
 	config.downsampleScene = true;
 
 	std::thread renderThread( RenderThread );
 
-	g_window.Init();
 	InitScene( g_scene );
 
-	if( bake ) {
+	if( cvar_bakeAssets.GetBool() ) {
 		BakeAssets();
+		exit( 0 );
 	}
+
+	g_window.Init();
 
 	try
 	{

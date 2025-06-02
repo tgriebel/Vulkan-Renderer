@@ -230,6 +230,19 @@ void Renderer::Init( const renderConfig_t& cfg )
 		mipTask = new MipImageTask( info );
 	}
 
+	MipImageTask* mipCubeTask = nullptr;
+	if ( config.useCubeViews )
+	{
+		mipProcessCreateInfo_t info{};
+		info.name = "CubeDownsample";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.img = &resources.cubeFbColorImage;
+		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+
+		mipCubeTask = new MipImageTask( info );
+	}
+
 	ImageWritebackTask* imageCubemapWriteBackTask = nullptr;
 	if ( config.writeCubeViews )
 	{
@@ -284,6 +297,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		for ( uint32_t i = 0; i < 6; ++i ) {
 			schedule.Queue( diffuseIBL[ i ] );
 		}
+		schedule.Queue( mipCubeTask );
 	}
 	schedule.Queue( resolve );
 	if ( config.writeCubeViews ) {
@@ -326,9 +340,6 @@ void Renderer::InitApi( const renderConfig_t& cfg )
 		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
 		renderContext.scratchMemory.Create( MaxScratchMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
 	}
-
-	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 
 	{
 		// Create Frame Resources

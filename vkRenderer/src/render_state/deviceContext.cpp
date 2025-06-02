@@ -340,6 +340,10 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 								0, nullptr,
 								1, &barrier );
 
+		uint32_t dstMipWidth;
+		uint32_t dstMipHeight;
+		MipDimensions( i, image->info.width, image->info.height, &dstMipWidth, &dstMipHeight );
+
 		VkImageBlit blit{ };
 		blit.srcOffsets[ 0 ] = { 0, 0, 0 };
 		blit.srcOffsets[ 1 ] = { mipWidth, mipHeight, 1 };
@@ -348,7 +352,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		blit.srcSubresource.baseArrayLayer = 0;
 		blit.srcSubresource.layerCount = image->subResourceView.arrayCount;
 		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
-		blit.dstOffsets[ 1 ] = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
+		blit.dstOffsets[ 1 ] = { (int32_t)dstMipWidth, (int32_t)dstMipHeight, 1 };
 		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		blit.dstSubresource.mipLevel = i;
 		blit.dstSubresource.baseArrayLayer = 0;
@@ -376,8 +380,8 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 								0, nullptr,
 								1, &barrier );
 
-		mipWidth = ( mipWidth > 1 ) ? ( mipWidth /= 2 ) : mipWidth;
-		mipHeight = ( mipHeight > 1 ) ? ( mipHeight /= 2 ) : mipHeight;
+		mipWidth = static_cast<int32_t>( dstMipWidth );
+		mipHeight = static_cast<int32_t>( dstMipHeight );
 	}
 
 	barrier.subresourceRange.baseMipLevel = image->subResourceView.mipLevels - 1;
