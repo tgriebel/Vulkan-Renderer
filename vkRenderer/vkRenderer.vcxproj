@@ -290,6 +290,7 @@
     <None Include="shaders\shadow.frag" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
+    <None Include="shaders\specularIbl.frag" />
     <None Include="shaders\terrain.frag" />
     <None Include="shaders\terrain.vert" />
     <None Include="shaders\tree.vert" />

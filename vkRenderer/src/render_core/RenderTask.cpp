@@ -533,6 +533,8 @@ void MipImageTask::Shutdown()
 
 void MipImageTask::Execute( CommandContext& context )
 {
+	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorWhite ) );
+
 	if( m_mode == DOWNSAMPLE_LINEAR )
 	{
 		Transition( &context, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
@@ -546,6 +548,8 @@ void MipImageTask::Execute( CommandContext& context )
 		}
 		GenerateDownsampleMips( &context, m_views, m_passes, m_mode );
 	}
+
+	context.MarkerEndRegion();
 }
 
 

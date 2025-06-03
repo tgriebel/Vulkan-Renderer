@@ -406,7 +406,14 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 
 	const RenderContext* renderContext = cmdContext.GetRenderContext();
 
-	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( "DownSample" ) );
+	char* progName = nullptr;
+	switch( mode )
+	{
+		case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "DownSample";	break;
+		case downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL:		progName = "SpecularIBL";	break;
+	}
+	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( progName ) );
+	assert( progAsset );
 
 	ImageView* sampledView = nullptr;
 	ImageView* writeView = nullptr;

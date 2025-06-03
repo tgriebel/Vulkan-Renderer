@@ -99,6 +99,13 @@
 	  "image_shader": true
     },
 	{
+      "name": "SpecularIBL",
+      "vs": "fullscreen",
+      "ps": "specularIbl",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
       "name": "Resolve",
       "vs": "fullscreen",
       "ps": "resolve",
