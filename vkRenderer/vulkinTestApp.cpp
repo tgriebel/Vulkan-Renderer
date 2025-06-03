@@ -97,6 +97,8 @@ MakeCVar( bool,		cubeCapture );
 MakeCVar( bool,		computeDiffuseIbl );
 MakeCVar( char*,	scene );
 MakeCVar( bool,		bakeAssets );
+MakeCVar( bool,		shadows );
+MakeCVar( bool,		downsampleScene );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
@@ -152,7 +154,8 @@ int main( int argc, char* argv[] )
 	renderConfig_t config {};
 	config.useCubeViews = cvar_cubeCapture.GetBool();
 	config.computeDiffuseIbl = cvar_computeDiffuseIbl.GetBool();
-	config.downsampleScene = true;
+	config.shadows = cvar_shadows.GetBool();
+	config.downsampleScene = cvar_downsampleScene.GetBool();
 
 	std::thread renderThread( RenderThread );
 

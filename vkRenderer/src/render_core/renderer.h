@@ -63,6 +63,7 @@ struct renderConfig_t
 	bool			downsampleScene;
 	bool			computeGaussianBlur;
 	bool			gaussianBlur;
+	bool			shadows;
 };
 
 

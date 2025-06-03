@@ -436,7 +436,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	const uint32_t mipLevels = m_image->info.mipLevels;
 
 	m_passes.resize( mipLevels );
-	m_views.resize( mipLevels );
+	m_imgViews.resize( mipLevels );
 	m_frameBuffers.resize( mipLevels );
 	m_bufferViews.resize( mipLevels );
 
@@ -464,7 +464,10 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		subView.baseArray = 0;
 		subView.arrayCount = 1;
 
-		m_views[ i ].Init( *m_image, m_image->info, subView, resourceLifeTime_t::RESIZE );
+		imageInfo_t viewInfo = m_image->info;
+		viewInfo.type = IMAGE_TYPE_2D;
+
+		m_imgViews[ i ].Init( *m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
 	}
 	
 	// All but the first image need a framebuffer since they are being written to
@@ -479,8 +482,8 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 		imageProcessObject_t imageProcessParms{};
 
-		const float w = float( m_views[ i - 1 ].info.width );
-		const float h = float( m_views[ i - 1 ].info.height );
+		const float w = float( m_imgViews[ i - 1 ].info.width );
+		const float h = float( m_imgViews[ i - 1 ].info.height );
 		imageProcessParms.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 
 		m_bufferViews[ i ] = m_buffer.GetView( i, 1 );
@@ -489,9 +492,9 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_bufferViews[ i ].CopyData( &imageProcessParms, sizeof( imageProcessObject_t ) );
 
 		m_passes[ i ] = new PostPass( &m_frameBuffers[ i ] );
-		//m_passes[ i ]->SetViewport( 0, 0, m_views[ i ].info.width, m_views[ i ].info.height );
+		//m_passes[ i ]->SetViewport( 0, 0, m_imgViews[ i ].info.width, m_imgViews[ i ].info.height );
 		m_passes[ i ]->codeImages.Resize( 1 );
-		m_passes[ i ]->codeImages[ 0 ] = &m_views[ i - 1 ];
+		m_passes[ i ]->codeImages[ 0 ] = &m_imgViews[ i - 1 ];
 
 		m_passes[ i ]->parms = m_context->RegisterBindParm( bindset_imageProcess );
 	}
@@ -504,6 +507,7 @@ void MipImageTask::FrameBegin()
 	for ( uint32_t i = 1; i < m_image->info.mipLevels; ++i )
 	{
 		m_passes[ i ]->parms->Bind( bind_sourceImages, &m_passes[ i ]->codeImages );
+		m_passes[ i ]->parms->Bind( bind_sourceCubeImages, &m_resources->cubeFbImageView );
 		m_passes[ i ]->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
 		m_passes[ i ]->parms->Bind( bind_imageProcess, &m_bufferViews[ i ] );
 	}
@@ -521,7 +525,7 @@ void MipImageTask::Shutdown()
 	for ( uint32_t i = 0; i < m_image->info.mipLevels; i++ )
 	{
 		m_frameBuffers[ i ].Destroy();
-		m_views[ i ].Destroy();
+		m_imgViews[ i ].Destroy();
 		if ( m_passes[ i ] != nullptr ) {
 			delete m_passes[ i ];
 		}
@@ -546,7 +550,7 @@ void MipImageTask::Execute( CommandContext& context )
 			Transition( &context, m_tempImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 			m_firstFrame = false;
 		}
-		GenerateDownsampleMips( &context, m_views, m_passes, m_mode );
+		GenerateDownsampleMips( &context, m_imgViews, m_passes, m_mode );
 	}
 
 	context.MarkerEndRegion();

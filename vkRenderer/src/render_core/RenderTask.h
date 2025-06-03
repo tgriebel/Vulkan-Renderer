@@ -244,7 +244,7 @@ private:
 	ResourceContext*			m_resources;
 	Image						m_tempImage;
 	GpuBuffer					m_buffer;
-	std::vector<ImageView>		m_views;
+	std::vector<ImageView>		m_imgViews;
 	std::vector<DrawPass*>		m_passes;
 	std::vector<FrameBuffer>	m_frameBuffers;
 	std::vector<GpuBufferView>	m_bufferViews;

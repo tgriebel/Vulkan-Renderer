@@ -152,13 +152,16 @@ void Renderer::Init( const renderConfig_t& cfg )
 				case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
 			}
 
-			diffuseIBL[ i ] = new ImageProcess( info );
+			if ( config.computeDiffuseIbl )
+			{
+				diffuseIBL[ i ] = new ImageProcess( info );
 
-			mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
-			viewMatrix[ 3 ][ 3 ] = 0.0f;
+				mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
+				viewMatrix[ 3 ][ 3 ] = 0.0f;
 
-			diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
-			diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
+				diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
+				diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
+			}
 		}
 	}
 
@@ -238,7 +241,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.cubeFbColorImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
 
 		mipCubeTask = new MipImageTask( info );
 	}
@@ -294,8 +297,11 @@ void Renderer::Init( const renderConfig_t& cfg )
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 		}
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			schedule.Queue( diffuseIBL[ i ] );
+		if ( config.computeDiffuseIbl )
+		{
+			for ( uint32_t i = 0; i < 6; ++i ) {
+				schedule.Queue( diffuseIBL[ i ] );
+			}
 		}
 		schedule.Queue( mipCubeTask );
 	}
