@@ -620,7 +620,7 @@ void Renderer::UpdateBuffers()
 		globals.defaultNormalId = rc.nmlImage->gpuImage->GetId();
 		globals.defaultRoughnessId = rc.rghImage->gpuImage->GetId();
 		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
-		globals.checkerboardId = rc.checkerboardImage->gpuImage->GetId();
+		globals.defaultImageId = rc.defaultImage->gpuImage->GetId();
 		globals.isTextured = true;
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );

@@ -135,6 +135,7 @@ public:
 	GpuBuffer				materialBuffers;
 	GpuBuffer				lightParms;
 	GpuBuffer				particleBuffer;
+	GpuBuffer				defaultUniformBuffer;
 
 	// TODO: move view-specific data
 	GpuBuffer				viewParms;

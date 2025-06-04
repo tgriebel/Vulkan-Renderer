@@ -507,7 +507,7 @@ void MipImageTask::FrameBegin()
 	for ( uint32_t i = 1; i < m_image->info.mipLevels; ++i )
 	{
 		m_passes[ i ]->parms->Bind( bind_sourceImages, &m_passes[ i ]->codeImages );
-		m_passes[ i ]->parms->Bind( bind_sourceCubeImages, &m_resources->cubeFbImageView );
+		m_passes[ i ]->parms->Bind( bind_sourceCubeImages, rc.defaultImageCube );
 		m_passes[ i ]->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
 		m_passes[ i ]->parms->Bind( bind_imageProcess, &m_bufferViews[ i ] );
 	}

@@ -458,7 +458,8 @@ void Renderer::InitShaderResources()
 		rc.nmlImage = &g_assets.textureLib.Find( "_nml" )->Get();
 		rc.rghImage = &g_assets.textureLib.Find( "_rgh" )->Get();
 		rc.mtlImage = &g_assets.textureLib.Find( "_mtl" )->Get();
-		rc.checkerboardImage = &g_assets.textureLib.Find( "_checkerboard" )->Get();
+		rc.defaultImage = &g_assets.textureLib.Find( "_default" )->Get();
+		rc.defaultImageCube = &g_assets.textureLib.Find( "_defaultCube" )->Get();
 	}
 
 	// Buffers
@@ -515,6 +516,15 @@ void Renderer::InitShaderResources()
 			MaxParticles,
 			sizeof( particleBufferObject_t ),
 			bufferType_t::STORAGE,
+			renderContext.sharedMemory
+		);
+		resources.defaultUniformBuffer.Create(
+			"DefaultUniformBuffer",
+			swapBuffering_t::SINGLE_FRAME,
+			resourceLifeTime_t::REBOOT,
+			1,
+			1024,
+			bufferType_t::UNIFORM,
 			renderContext.sharedMemory
 		);
 

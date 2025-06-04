@@ -119,7 +119,7 @@ struct surface_t
 												uint		defaultNormalId;										\
 												uint		defaultRoughnessId;										\
 												uint		defaultMetalId;											\
-												uint		checkerboardId;											\
+												uint		defaultImageId;											\
 												uint		isTextured;												\
 											} globals;
 

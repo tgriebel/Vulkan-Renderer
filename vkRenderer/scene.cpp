@@ -29,7 +29,7 @@ void DeviceDebugMenu();
 
 void CreateCodeAssets()
 {
-	// Textures
+	// ----------------- TEXTURES ----------------- //
 	{
 		for( uint32_t t = 0; t < 4; ++t )
 		{
@@ -142,9 +142,9 @@ void CreateCodeAssets()
 			texture.cpuImage = imageBuffer;
 		}
 
-		// Checkerboard
+		// Default Image - Checkerboard
 		{
-			hdl_t handle = g_assets.textureLib.Add( "_checkerboard", Image() );
+			hdl_t handle = g_assets.textureLib.Add( "_default", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
 			texture.info = info;
@@ -161,15 +161,53 @@ void CreateCodeAssets()
 				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
 					const Color color = ( ( x % 2 ) == ( y % 2 ) ) ? ColorBlack : ColorWhite;
 					const RGBA pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
-					imageBuffer->SetPixel( x, y, ColorWhite.AsRGBA() );
+					imageBuffer->SetPixel( x, y, pixel );
 				}
 			}
 			texture.cpuImage = imageBuffer;
 		}
-		g_assets.textureLib.SetDefault( "_checkerboard" );
+		g_assets.textureLib.SetDefault( "_default" );
+
+		// Default Image Cube - Rainbow
+		{
+			static const Color* cubeColors[ 6 ] =
+			{
+				&ColorRed,
+				&ColorGreen,
+				&ColorBlue,
+				&ColorPink,
+				&ColorYellow,
+				&ColorCyan,
+			};
+
+			hdl_t handle = g_assets.textureLib.Add( "_defaultCube", Image() );
+			Image& texture = g_assets.textureLib.Find( handle )->Get();
+
+			texture.info = info;
+			texture.info.width = 8;
+			texture.info.height = 8;
+			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
+
+			assert( texture.cpuImage == nullptr );
+
+			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
+			imageBuffer->Init( texture.info.width, texture.info.height );
+
+			for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
+				for ( uint32_t y = 0; y < texture.info.height; ++y ) {
+					for ( uint32_t x = 0; x < texture.info.width; ++x )
+					{
+						const Color* color = cubeColors[ faceId ];
+						const RGBA pixel = Swizzle( color->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+						imageBuffer->SetPixel( x, y, pixel );
+					}
+				}
+			}
+			texture.cpuImage = imageBuffer;
+		}
 	}
 
-	// Materials
+	// ----------------- MATERIALS ----------------- //
 	{
 		{
 			Material material;
@@ -202,7 +240,7 @@ void CreateCodeAssets()
 		g_assets.materialLib.SetDefault( "DEBUG_WIRE" );
 	}
 
-	// Models
+	// ----------------- MODELS ----------------- //
 	{
 		{
 			Model model;

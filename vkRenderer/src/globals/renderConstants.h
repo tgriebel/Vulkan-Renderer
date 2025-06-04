@@ -45,5 +45,6 @@ struct renderConstants_t
 	Image*		nmlImage;
 	Image*		rghImage;
 	Image*		mtlImage;
-	Image*		checkerboardImage;
+	Image*		defaultImage;
+	Image*		defaultImageCube;
 };
