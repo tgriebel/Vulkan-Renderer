@@ -93,12 +93,12 @@ void BakeAssets()
 	baker.Bake();
 }
 
-MakeCVar( bool,		cubeCapture );
-MakeCVar( bool,		computeDiffuseIbl );
-MakeCVar( char*,	scene );
-MakeCVar( bool,		bakeAssets );
-MakeCVar( bool,		shadows );
-MakeCVar( bool,		downsampleScene );
+MakeCVar( bool,		r_cubeCapture );
+MakeCVar( bool,		r_computeDiffuseIbl );
+MakeCVar( char*,	c_scene );
+MakeCVar( bool,		c_bakeAssets );
+MakeCVar( bool,		r_shadows );
+MakeCVar( bool,		r_downsampleScene );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
@@ -106,6 +106,7 @@ void ParseCmdArgs( const int argc, char* argv[] )
 	{	
 		std::string arg = argv[ i ];
 		Trim( arg );
+		ToLower( arg );
 
 		// Flags
 		if( HasPrefix( arg, "-"s ) )
@@ -128,6 +129,13 @@ void ParseCmdArgs( const int argc, char* argv[] )
 			if ( v == nullptr ) {
 				continue;
 			}
+			if ( v->IsBool() ) {
+				if( arg == "1" || arg == "true" ) {
+					v->Set( true );
+				} else {
+					v->Set( false );
+				}
+			}
 			if ( v->IsInt() ) {
 				v->Set( std::stoi( arg.substr( offset + 1 ) ) );
 			}
@@ -145,23 +153,23 @@ int main( int argc, char* argv[] )
 
 	ParseCmdArgs( argc, argv );
 
-	if( cvar_scene.IsValid() ) {
-		LoadScene( cvar_scene.GetString(), &g_scene, &g_assets );
+	if( c_scene.IsValid() ) {
+		LoadScene( c_scene.GetString(), &g_scene, &g_assets );
 	} else {
 		LoadScene( sceneFile, &g_scene, &g_assets );
 	}
 
 	renderConfig_t config {};
-	config.useCubeViews = cvar_cubeCapture.GetBool();
-	config.computeDiffuseIbl = cvar_computeDiffuseIbl.GetBool();
-	config.shadows = cvar_shadows.GetBool();
-	config.downsampleScene = cvar_downsampleScene.GetBool();
+	config.useCubeViews = r_cubeCapture.GetBool();
+	config.computeDiffuseIbl = r_computeDiffuseIbl.GetBool();
+	config.shadows = r_shadows.GetBool();
+	config.downsampleScene = r_downsampleScene.GetBool();
 
 	std::thread renderThread( RenderThread );
 
 	InitScene( g_scene );
 
-	if( cvar_bakeAssets.GetBool() ) {
+	if( c_bakeAssets.GetBool() ) {
 		BakeAssets();
 		exit( 0 );
 	}

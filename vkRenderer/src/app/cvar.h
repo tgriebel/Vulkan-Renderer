@@ -106,4 +106,4 @@ public:
 
 	static CVar* Search( const std::string& searchStr );
 };
-#define MakeCVar(Type, Name) CVar cvar_##Name = CVar( #Name, #Type );
+#define MakeCVar(Type, Name) CVar Name = CVar( #Name, #Type );
