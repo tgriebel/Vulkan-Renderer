@@ -40,8 +40,6 @@
 #include "raytracerInterface.h"
 #include "src/app/cvar.h"
 
-using namespace std::string_literals;
-
 AssetManager						g_assets;
 Scene*								g_scene;
 Renderer							g_renderer;
@@ -102,50 +100,10 @@ MakeCVar( bool,		r_downsampleScene );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
-	for ( int32_t i = 1; i < argc; ++i )
-	{	
-		std::string arg = argv[ i ];
-		Trim( arg );
-		ToLower( arg );
-
-		// Flags
-		if( HasPrefix( arg, "-"s ) )
-		{
-			CVar* v = CVar::Search( arg.substr( 1 ) );
-			if( v == nullptr || ( v->IsBool() == false ) ) {
-				continue;
-			}
-			v->Set( true );
-		}
-		// Everything else
-		else
-		{
-			const size_t offset = arg.find( "=" );
-			if ( offset == 0 ) {
-				continue;
-			}
-
-			CVar* v = CVar::Search( arg.substr( 0, offset ) );
-			if ( v == nullptr ) {
-				continue;
-			}
-			if ( v->IsBool() ) {
-				if( arg == "1" || arg == "true" ) {
-					v->Set( true );
-				} else {
-					v->Set( false );
-				}
-			}
-			if ( v->IsInt() ) {
-				v->Set( std::stoi( arg.substr( offset + 1 ) ) );
-			}
-			else if ( v->IsString() ) {
-				v->Set( arg.substr( offset + 1 ).c_str() );
-			}
-		}
+	for ( int32_t i = 1; i < argc; ++i ) {
+		CVar::ParseCommand( argv[ i ] );
 	}
 }
-
 
 int main( int argc, char* argv[] )
 {

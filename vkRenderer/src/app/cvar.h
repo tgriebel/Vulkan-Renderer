@@ -104,6 +104,7 @@ public:
 		}
 	}
 
+	static bool ParseCommand( const std::string& command );
 	static CVar* Search( const std::string& searchStr );
 };
 #define MakeCVar(Type, Name) CVar Name = CVar( #Name, #Type );
