@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright( c ) 2023 Thomas Griebel
+* Copyright( c ) 2025 Thomas Griebel
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this softwareand associated documentation files( the "Software" ), to deal
 * in the Software without restriction, including without limitation the rights
@@ -27,20 +27,49 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "globals.h"
+#include "color.h"
+#include "light.h"
 
 PS_LAYOUT_BASIC_IO
 
 struct ImageProcess
 {
-    vec4 generic0;
+    float roughness;
+    float pad0;
+    float pad1;
+    float pad2;
     vec4 generic1;
     vec4 generic2;
 };
 
 PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
 
+// https://learnopengl.com/PBR/IBL/Specular-IBL
 void main()
 {
-    const ivec2 pixelLocation = ivec2( dimensions.xy * fragTexCoord.xy );
-    outColor = vec4( texelFetch( codeSamplers[ 0 ], pixelLocation, 0 ).rgb, 1.0f );
+    vec3 N = normalize( fragTexCoord.xyz );
+    vec3 R = N;
+    vec3 V = R;
+
+    const uint SAMPLE_COUNT = 1024u;
+    float totalWeight = 0.0;
+    vec3 prefilteredColor = vec3( 0.0 );
+    for ( uint i = 0u; i < SAMPLE_COUNT; ++i )
+    {
+        vec2 Xi = Hammersley( i, SAMPLE_COUNT );
+        vec3 H = ImportanceSampleGGX( Xi, N, imageProcess.roughness );
+        vec3 L = normalize( 2.0 * dot( V, H ) * H - V );
+
+        float NdotL = max( dot( N, L ), 0.0 );
+        if ( NdotL > 0.0 )
+        {
+            prefilteredColor += texture( codeCubeSamplers[ 0 ], L ).rgb * NdotL;
+            totalWeight += NdotL;
+        }
+    }
+    prefilteredColor = prefilteredColor / totalWeight;
+
+    outColor = vec4( prefilteredColor, 1.0 );
+
+    // MIP_ROUGHNESS_DOWNSAMPLE
 }

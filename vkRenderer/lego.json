@@ -1,9 +1,10 @@
 {
   "sceneClass": "lego",
   "type": "scene",
-  "reflink" : "shaders_common.json",
+  "reflink": "shaders_common.json",
+  "reflink": "image_common.json",
   "images": [
-    {
+	{
 	  "name": "checker.png",
 	  "type": "2D"
 	},
@@ -53,94 +54,94 @@
 	}
   ],
   "materials": [
-    {
-      "name": "Grid",
+	{
+	  "name": "Grid",
 	  "KdR": 1.0,
 	  "KdG": 1.0,
 	  "KdB": 1.0,
-      "tr": 0.0,
-      "ns": 0.0,
-      "ni": 0.0,
-      "d": 1.0,
-      "illum": 0.0,
-      "shaders": {
-          "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
-		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      },
+	  "tr": 0.0,
+	  "ns": 0.0,
+	  "ni": 0.0,
+	  "d": 1.0,
+	  "illum": 0.0,
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_OPAQUE": "LitOpaque",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "grid.png"
+		"GGX_COLOR_MAP_SLOT": "grid.png"
 	  }
-    },
+	},
 	{
-      "name": "SKY",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "Sky"
-      }
-      "textures": {
-          "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
-          "CUBE_LEFT_SLOT" : "chapel_left.jpg",
-          "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
-          "CUBE_FRONT_SLOT" : "chapel_front.jpg",
-          "CUBE_BACK_SLOT" : "chapel_back.jpg",
-      }
-    }
+	  "name": "SKY",
+	  "shaders": {
+		"DRAWPASS_SKYBOX": "Sky"
+	  },
+	  "textures": {
+		"CUBE_RIGHT_SLOT": "chapel_right.jpg",
+		"CUBE_LEFT_SLOT": "chapel_left.jpg",
+		"CUBE_TOP_SLOT": "chapel_top.jpg",
+		"CUBE_BOTTOM_SLOT": "chapel_bottom.jpg",
+		"CUBE_FRONT_SLOT": "chapel_front.jpg",
+		"CUBE_BACK_SLOT": "chapel_back.jpg"
+	  }
+	}
   ],
   "models": [
-  	{
-      "name" : "cube",
-      "model" : "cube.obj"
-    },
 	{
-      "name" : "plane",
-      "model" : "plane.obj"
-    },
+	  "name": "cube",
+	  "model": "cube.obj"
+	},
 	{
-      "name" : "axis",
-      "model" : "axis.obj",
-    },
+	  "name": "plane",
+	  "model": "plane.obj"
+	},
 	{
-      "name" : "grid",
-      "model" : "_terrain",
-	  "argStr0" : "Grid",
-	  "argInt0" : 100,
-	  "argInt1" : 100,
-	  "argFlt0" : 1.0,
-	  "argFlt1" : 100.0,
-    },
+	  "name": "axis",
+	  "model": "axis.obj"
+	},
+	{
+	  "name": "grid",
+	  "model": "_terrain",
+	  "argStr0": "Grid",
+	  "argInt0": 100,
+	  "argInt1": 100,
+	  "argFlt0": 1.0,
+	  "argFlt1": 100.0
+	}
   ],
   "entities": [
-    {
-      "name" : "_skybox",
-      "model" : "_skybox",
-	  "x" : 0.0,
-	  "y" : 0.0,
-	  "z" : 0.0,
-	  "rx" : 0.0,
-	  "ry" : 0.0,
-	  "rz" : 0.0,
-	  "sx" : 1.0,
-	  "sy" : 1.0,
-	  "sz" : 1.0
-    },
 	{
-      "name" : "grid",
-      "model" : "grid",
-    },
+	  "name": "_skybox",
+	  "model": "_skybox",
+	  "x": 0.0,
+	  "y": 0.0,
+	  "z": 0.0,
+	  "rx": 0.0,
+	  "ry": 0.0,
+	  "rz": 0.0,
+	  "sx": 1.0,
+	  "sy": 1.0,
+	  "sz": 1.0
+	},
 	{
-      "name" : "spyrius",
-      "model" : "spyrius_lego.obj",
-	  "rz" : 0.0,
-	  "sx" : 0.01,
-	  "sy" : 0.01,
-	  "sz" : 0.01,
-    },
+	  "name": "grid",
+	  "model": "grid"
+	},
 	{
-      "name" : "sphere",
-      "model" : "sphere.obj",
-	  "hidden" : "true"
-    }
+	  "name": "spyrius",
+	  "model": "spyrius_lego.obj",
+	  "rz": 0.0,
+	  "sx": 0.01,
+	  "sy": 0.01,
+	  "sz": 0.01
+	},
+	{
+	  "name": "sphere",
+	  "model": "sphere.obj",
+	  "hidden": "true"
+	}
   ]
 }

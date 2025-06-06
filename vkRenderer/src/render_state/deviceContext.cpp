@@ -409,8 +409,8 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 	char* progName = nullptr;
 	switch( mode )
 	{
-		case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "DownSample";	break;
-		case downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL:		progName = "SpecularIBL";	break;
+		case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "DownSample";						break;
+		case downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL:		progName = "preCalculatedSpecularRoughnessIbl";	break;
 	}
 	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( progName ) );
 	assert( progAsset );

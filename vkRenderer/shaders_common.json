@@ -99,9 +99,9 @@
 	  "image_shader": true
     },
 	{
-      "name": "SpecularIBL",
+      "name": "preCalculatedSpecularIbl",
       "vs": "fullscreen",
-      "ps": "specularIbl",
+      "ps": "preCalculatedSpecularIbl",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },

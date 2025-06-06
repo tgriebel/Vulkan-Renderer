@@ -1,13 +1,14 @@
 {
   "sceneClass": "default",
   "type": "scene",
-  "reflink" : "shaders_common.json",
+  "reflink": "shaders_common.json",
+  "reflink": "image_common.json",
   "shaders": [
-    {
+	{
 	  "name": "EquirectangularSampler",
 	  "vs": "simple",
-	  "ps": "equirectangularSky",
-    }
+	  "ps": "equirectangularSky"
+	}
   ],
   "images": [
 	{
@@ -83,63 +84,63 @@
   ],
   "materials": [
 	{
-      "name": "SKY",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "Sky"
-      }
-      "textures": {
-          "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
-          "CUBE_LEFT_SLOT" : "chapel_left.jpg",
-          "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
-          "CUBE_FRONT_SLOT" : "chapel_front.jpg",
-          "CUBE_BACK_SLOT" : "chapel_back.jpg",
-      }
-    },
+	  "name": "SKY",
+	  "shaders": {
+		"DRAWPASS_SKYBOX": "Sky"
+	  },
+	  "textures": {
+		"CUBE_RIGHT_SLOT": "chapel_right.jpg",
+		"CUBE_LEFT_SLOT": "chapel_left.jpg",
+		"CUBE_TOP_SLOT": "chapel_top.jpg",
+		"CUBE_BOTTOM_SLOT": "chapel_bottom.jpg",
+		"CUBE_FRONT_SLOT": "chapel_front.jpg",
+		"CUBE_BACK_SLOT": "chapel_back.jpg"
+	  }
+	},
 	{
-      "name": "DEBUG_CUBE",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "Sky"
-      }
-      "textures": {
-          "CUBE_RIGHT_SLOT" : "debug_right.jpg",
-          "CUBE_LEFT_SLOT" : "debug_left.jpg",
-          "CUBE_TOP_SLOT" : "debug_top.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "debug_bottom.jpg",
-          "CUBE_FRONT_SLOT" : "debug_front.jpg",
-          "CUBE_BACK_SLOT" : "debug_back.jpg",
-      }
-    },
+	  "name": "DEBUG_CUBE",
+	  "shaders": {
+		"DRAWPASS_SKYBOX": "Sky"
+	  },
+	  "textures": {
+		"CUBE_RIGHT_SLOT": "debug_right.jpg",
+		"CUBE_LEFT_SLOT": "debug_left.jpg",
+		"CUBE_TOP_SLOT": "debug_top.jpg",
+		"CUBE_BOTTOM_SLOT": "debug_bottom.jpg",
+		"CUBE_FRONT_SLOT": "debug_front.jpg",
+		"CUBE_BACK_SLOT": "debug_back.jpg"
+	  }
+	},
 	{
-      "name": "EquirectangularSky",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "EquirectangularSampler"
-      }
-      "textures": {
-          "TEXTURE_SLOT_0" : "anticChapel_4k.hdr",
-      }
-    }
+	  "name": "EquirectangularSky",
+	  "shaders": {
+		"DRAWPASS_SKYBOX": "EquirectangularSampler"
+	  },
+	  "textures": {
+		"TEXTURE_SLOT_0": "anticChapel_4k.hdr"
+	  }
+	}
   ],
   "models": [
-  	{
-      "name" : "cube",
-      "model" : "cube.obj"
-    },
+	{
+	  "name": "cube",
+	  "model": "cube.obj"
+	}
   ],
   "entities": [
-    {
-      "name" : "_skybox",
-      "model" : "_skybox",
-      "material" : "EquirectangularSky",
-	  "x" : 0.0,
-	  "y" : 0.0,
-	  "z" : 0.0,
-	  "rx" : 0.0,
-	  "ry" : 0.0,
-	  "rz" : 0.0,
-	  "sx" : 1.0,
-	  "sy" : 1.0,
-	  "sz" : 1.0
-    },
+	{
+	  "name": "_skybox",
+	  "model": "_skybox",
+	  "material": "EquirectangularSky",
+	  "x": 0.0,
+	  "y": 0.0,
+	  "z": 0.0,
+	  "rx": 0.0,
+	  "ry": 0.0,
+	  "rz": 0.0,
+	  "sx": 1.0,
+	  "sy": 1.0,
+	  "sz": 1.0
+	}
   ]
 }

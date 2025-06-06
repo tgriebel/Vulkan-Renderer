@@ -69,6 +69,7 @@ struct globalUboConstants_t
 	uint32_t	defaultRoughnessId;
 	uint32_t	defaultMetalId;
 	uint32_t	defaultImageId;
+	uint32_t	brdfLutId;
 	uint32_t	isTextured;
 	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };

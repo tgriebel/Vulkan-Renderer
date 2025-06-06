@@ -621,6 +621,7 @@ void Renderer::UpdateBuffers()
 		globals.defaultRoughnessId = rc.rghImage->gpuImage->GetId();
 		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
 		globals.defaultImageId = rc.defaultImage->gpuImage->GetId();
+		globals.brdfLutId = g_assets.textureLib.Find( "brdf_lut.png" )->Get().gpuImage->GetId();
 		globals.isTextured = true;
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
@@ -662,19 +663,23 @@ void Renderer::UpdateBuffers()
 				continue;
 			}
 
+			Asset<Image>* diffuseIblAsset = g_assets.textureLib.Find( "code_assets/hdrDiffuse.img" );
+			const uint32_t diffuseIblCubeId = diffuseIblAsset->Get().gpuImage->GetId();
+
+			Asset<Image>* envCubeAsset = g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" );
+			const uint32_t envCubeId = envCubeAsset->Get().gpuImage->GetId();
+
 			const drawSurfInstance_t* instances = view.drawGroup[ passIx ].Instances();
 			for ( uint32_t surfIx = 0; surfIx < view.drawGroup[ passIx ].InstanceCount(); ++surfIx )
 			{
 				const uint32_t instanceId = view.drawGroupOffset[ passIx ] + view.drawGroup[ passIx ].InstanceId( surfIx );
 				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();
 				
-				Asset<Image>* diffuseIblAsset = g_assets.textureLib.Find( "code_assets/hdrDiffuse.img" );
 				if( diffuseIblAsset->IsDefault() == false ) {
-					surfBuffer[ instanceId ].diffuseIblCubeId = diffuseIblAsset->Get().gpuImage->GetId();
+					surfBuffer[ instanceId ].diffuseIblCubeId = diffuseIblCubeId;
 				}
-				Asset<Image>*envCubeAsset = g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" );
 				if ( envCubeAsset->IsDefault() == false ) {
-					surfBuffer[ instanceId ].envCubeId = envCubeAsset->Get().gpuImage->GetId();
+					surfBuffer[ instanceId ].envCubeId = envCubeId;
 				}
 			}
 		}

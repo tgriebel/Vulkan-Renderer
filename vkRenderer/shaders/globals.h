@@ -120,6 +120,7 @@ struct surface_t
 												uint		defaultRoughnessId;										\
 												uint		defaultMetalId;											\
 												uint		defaultImageId;											\
+												uint		brdfLutId;												\
 												uint		isTextured;												\
 											} globals;
 

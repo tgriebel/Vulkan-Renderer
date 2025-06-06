@@ -1,0 +1,8 @@
+{
+  "images": [
+    {
+	  "name": "brdf_lut.png",
+	  "type": "2D"
+	},
+  ]
+}

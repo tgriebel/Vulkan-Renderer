@@ -343,7 +343,7 @@
     <None Include="shaders\preCalculatedDiffuseIBL.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\specularIbl.frag">
+    <None Include="shaders\preCalculatedSpecularIbl.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

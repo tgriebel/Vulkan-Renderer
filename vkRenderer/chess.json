@@ -2,6 +2,7 @@
   "sceneClass": "chess",
   "type": "scene",
   "reflink" : "shaders_common.json",
+  "reflink" : "image_common.json",
   "shaders": [
     {
 	  "name": "EquirectangularSampler",

@@ -1,16 +1,17 @@
 {
   "sceneClass": "nes",
   "type": "scene",
-  "reflink" : "shaders_common.json",
+  "reflink": "shaders_common.json",
+  "reflink": "image_common.json",
   "shaders": [
 	{
-      "name": "LitCRT",
-      "vs": "simple",
-      "ps": "crt"
-    },
+	  "name": "LitCRT",
+	  "vs": "simple",
+	  "ps": "crt"
+	}
   ],
   "images": [
-    {
+	{
 	  "name": "checker.png",
 	  "type": "2D"
 	},
@@ -60,221 +61,221 @@
 	}
   ],
   "materials": [
-    {
-      "name": "Grid",
+	{
+	  "name": "Grid",
 	  "KdR": 1.0,
-      "tr": 0.0,
-      "ns": 0.0,
-      "ni": 0.0,
-      "d": 1.0,
-      "illum": 0.0,
-      "shaders": {
-          "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
-		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      },
+	  "tr": 0.0,
+	  "ns": 0.0,
+	  "ni": 0.0,
+	  "d": 1.0,
+	  "illum": 0.0,
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_OPAQUE": "LitOpaque",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "grid2.png"
+		"GGX_COLOR_MAP_SLOT": "grid2.png"
 	  }
-    },
+	},
 	{
-      "name": "TV0",
-      "shaders": {
-		  "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_EMISSIVE": "LitCRT",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
+	  "name": "TV0",
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_EMISSIVE": "LitCRT",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_0"
+		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_0"
 	  }
-    },
+	},
 	{
-      "name": "TV1",
-      "shaders": {
-		  "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_EMISSIVE": "LitCRT",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
+	  "name": "TV1",
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_EMISSIVE": "LitCRT",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_1"
+		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_1"
 	  }
-    },
+	},
 	{
-      "name": "TV2",
-      "shaders": {
-		  "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_EMISSIVE": "LitCRT",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
+	  "name": "TV2",
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_EMISSIVE": "LitCRT",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_2"
+		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_2"
 	  }
-    },
+	},
 	{
-      "name": "TV3",
-      "shaders": {
-		  "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_EMISSIVE": "LitCRT",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
+	  "name": "TV3",
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_EMISSIVE": "LitCRT",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "CODE_COLOR_3"
+		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_3"
 	  }
-    },
+	},
 	{
-      "name": "TERRAIN",
-      "shaders": {
-		  "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
-    },
+	  "name": "TERRAIN",
+	  "shaders": {
+		"DRAWPASS_SHADOW": "Shadow",
+		"DRAWPASS_DEPTH": "LitDepth",
+		"DRAWPASS_OPAQUE": "LitOpaque",
+		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+	  }
+	},
 	{
-      "name": "SKY",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "Sky"
-      }
-      "textures": {
-          "CUBE_RIGHT_SLOT" : "skybox80s.png",
-          "CUBE_LEFT_SLOT" : "skybox80s.png",
-          "CUBE_TOP_SLOT" : "skybox80s.png",	  
-          "CUBE_BOTTOM_SLOT" : "skybox80s.png",
-          "CUBE_FRONT_SLOT" : "skybox80s.png",
-          "CUBE_BACK_SLOT" : "skybox80s.png",
-      }
-    }
+	  "name": "SKY",
+	  "shaders": {
+		"DRAWPASS_SKYBOX": "Sky"
+	  },
+	  "textures": {
+		"CUBE_RIGHT_SLOT": "skybox80s.png",
+		"CUBE_LEFT_SLOT": "skybox80s.png",
+		"CUBE_TOP_SLOT": "skybox80s.png",
+		"CUBE_BOTTOM_SLOT": "skybox80s.png",
+		"CUBE_FRONT_SLOT": "skybox80s.png",
+		"CUBE_BACK_SLOT": "skybox80s.png"
+	  }
+	}
   ],
   "models": [
-  	{
-      "name" : "cube",
-      "model" : "cube.obj"
-    },
 	{
-      "name" : "axis",
-      "model" : "axis.obj",
-    },
-	{
-      "name" : "tubetv",
-      "model" : "tubetv.obj",
-    },
-	{
-      "name" : "grid",
-      "model" : "_terrain",
-	  "argStr0" : "Grid",
-	  "argInt0" : 100,
-	  "argInt1" : 100,
-	  "argFlt0" : 1.0,
-	  "argFlt1" : 100.0,
-    },
-	{
-      "name" : "plane0",
-      "model" : "_terrain",
-	  "argStr0" : "TV0",
-	  "argInt0" : 1,
-	  "argInt1" : 1,
-	  "argFlt0" : 1.0,
-	  "argFlt1" : 1.0,
-    },
-	{
-      "name" : "plane1",
-      "model" : "_terrain",
-	  "argStr0" : "TV1",
-	  "argInt0" : 1,
-	  "argInt1" : 1,
-	  "argFlt0" : 1.0,
+	  "name": "cube",
+	  "model": "cube.obj"
 	},
 	{
-      "name" : "plane2",
-      "model" : "_terrain",
-	  "argStr0" : "TV2",
-	  "argInt0" : 1,
-	  "argInt1" : 1,
-	  "argFlt0" : 1.0,
+	  "name": "axis",
+	  "model": "axis.obj"
 	},
 	{
-      "name" : "plane3",
-      "model" : "_terrain",
-	  "argStr0" : "TV3",
-	  "argInt0" : 1,
-	  "argInt1" : 1,
-	  "argFlt0" : 1.0,
+	  "name": "tubetv",
+	  "model": "tubetv.obj"
+	},
+	{
+	  "name": "grid",
+	  "model": "_terrain",
+	  "argStr0": "Grid",
+	  "argInt0": 100,
+	  "argInt1": 100,
+	  "argFlt0": 1.0,
+	  "argFlt1": 100.0
+	},
+	{
+	  "name": "plane0",
+	  "model": "_terrain",
+	  "argStr0": "TV0",
+	  "argInt0": 1,
+	  "argInt1": 1,
+	  "argFlt0": 1.0,
+	  "argFlt1": 1.0
+	},
+	{
+	  "name": "plane1",
+	  "model": "_terrain",
+	  "argStr0": "TV1",
+	  "argInt0": 1,
+	  "argInt1": 1,
+	  "argFlt0": 1.0
+	},
+	{
+	  "name": "plane2",
+	  "model": "_terrain",
+	  "argStr0": "TV2",
+	  "argInt0": 1,
+	  "argInt1": 1,
+	  "argFlt0": 1.0
+	},
+	{
+	  "name": "plane3",
+	  "model": "_terrain",
+	  "argStr0": "TV3",
+	  "argInt0": 1,
+	  "argInt1": 1,
+	  "argFlt0": 1.0
 	}
   ],
   "entities": [
-    {
-      "name" : "_skybox",
-      "model" : "_skybox",
-	  "x" : 0.0,
-	  "y" : 0.0,
-	  "z" : 0.0,
-	  "rx" : 0.0,
-	  "ry" : 0.0,
-	  "rz" : 0.0,
-	  "sx" : 1.0,
-	  "sy" : 1.0,
-	  "sz" : 1.0
-    },
 	{
-      "name" : "grid",
-      "model" : "grid",
-    },
+	  "name": "_skybox",
+	  "model": "_skybox",
+	  "x": 0.0,
+	  "y": 0.0,
+	  "z": 0.0,
+	  "rx": 0.0,
+	  "ry": 0.0,
+	  "rz": 0.0,
+	  "sx": 1.0,
+	  "sy": 1.0,
+	  "sz": 1.0
+	},
 	{
-      "name" : "tv_0",
-      "model" : "tubetv",
-	  "sx" : 0.01,
-	  "sy" : 0.01,
-	  "sz" : 0.01,
-	  "x" : -4.0,
-	  "y" : 0.0,
-	  "z" : 2.0,
-	  "rz" : 90.0,
-    },
+	  "name": "grid",
+	  "model": "grid"
+	},
 	{
-      "name" : "plane0",
-      "model" : "plane0",
-	   "x" : 3.0,
-	   "z" : 2.0,
-	   "rz" : -90.0,
-    },
+	  "name": "tv_0",
+	  "model": "tubetv",
+	  "sx": 0.01,
+	  "sy": 0.01,
+	  "sz": 0.01,
+	  "x": -4.0,
+	  "y": 0.0,
+	  "z": 2.0,
+	  "rz": 90.0
+	},
 	{
-      "name" : "plane1",
-      "model" : "plane1",
-	   "x" : 4.5,
-	   "z" : 2.0,
-	   "rx" : 180.0,
-	   "rz" : -90.0,
-    },
+	  "name": "plane0",
+	  "model": "plane0",
+	  "x": 3.0,
+	  "z": 2.0,
+	  "rz": -90.0
+	},
 	{
-      "name" : "plane2",
-      "model" : "plane2",
-	   "x" : 6.0,
-	   "z" : 2.0,
-	   "rx" : 180.0,
-	   "rz" : -90.0,
-    },
+	  "name": "plane1",
+	  "model": "plane1",
+	  "x": 4.5,
+	  "z": 2.0,
+	  "rx": 180.0,
+	  "rz": -90.0
+	},
 	{
-      "name" : "plane3",
-      "model" : "plane3",
-	   "x" : 7.5,
-	   "z" : 2.0,
-	   "rx" : 180.0,
-	   "rz" : -90.0,
-    },
+	  "name": "plane2",
+	  "model": "plane2",
+	  "x": 6.0,
+	  "z": 2.0,
+	  "rx": 180.0,
+	  "rz": -90.0
+	},
 	{
-      "name" : "car",
-      "model" : "911_scene.obj",
-	  "rx" : 90.0,
-    },
+	  "name": "plane3",
+	  "model": "plane3",
+	  "x": 7.5,
+	  "z": 2.0,
+	  "rx": 180.0,
+	  "rz": -90.0
+	},
 	{
-      "name" : "sphere",
-      "model" : "sphere.obj",
-	  "hidden" : "true"
-    }
+	  "name": "car",
+	  "model": "911_scene.obj",
+	  "rx": 90.0
+	},
+	{
+	  "name": "sphere",
+	  "model": "sphere.obj",
+	  "hidden": "true"
+	}
   ]
 }
