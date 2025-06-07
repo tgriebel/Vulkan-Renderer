@@ -485,6 +485,11 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		const float w = float( m_imgViews[ i - 1 ].info.width );
 		const float h = float( m_imgViews[ i - 1 ].info.height );
 		imageProcessParms.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+		if( m_mode == downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL )
+		{
+			const float roughness = i / static_cast<float>( mipLevels - 1 );
+			imageProcessParms.generic0[ 0 ] = roughness;
+		}
 
 		m_bufferViews[ i ] = m_buffer.GetView( i, 1 );
 

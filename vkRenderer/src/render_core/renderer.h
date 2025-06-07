@@ -143,10 +143,12 @@ public:
 	Image					cubeFbColorImage;
 	Image					cubeFbDepthImage;
 	Image					diffuseIblImage;
+	Image					specularIblImage;
 	ImageView				cubeFbImageView;
 	ImageView				cubeImageViews[ 6 ];
 	ImageView				cubeDepthImageViews[ 6 ];
 	ImageView				diffuseIblImageViews[ 6 ];
+	ImageView				specularIblImageViews[ 6 ];
 	Image					gBufferLayerImage;
 	Image					depthStencilImage;
 	ImageView				depthImageView;
@@ -200,7 +202,6 @@ private:
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
 	ImageProcess*						resolve = nullptr;
-	ImageProcess*						diffuseIBL[ 6 ] = {};
 	std::vector<ImageProcess*>			pingPongQueue;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
@@ -237,6 +238,7 @@ private:
 	FrameBuffer							mainColor;
 	FrameBuffer							cubeMapFrameBuffer[ 6 ];
 	FrameBuffer							diffuseIblFrameBuffer[ 6 ];
+	FrameBuffer							specularIblFrameBuffer[ 6 ];
 	FrameBuffer							mainColorResolved;
 	std::vector<FrameBuffer>			blurredImageFrameBuffers;
 	FrameBuffer							tempColor;

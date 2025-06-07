@@ -125,19 +125,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	view2Ds[ 0 ]->Commit();
 
+	ImageProcess* diffuseIBL[ 6 ] = {};
+	MipImageTask* specularIBL[ 6 ] = {};
 	if ( config.useCubeViews )
 	{
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
-			imageProcessCreateInfo_t info = {};
-			info.name = "DiffuseIBL";
-			info.clear = false;
-			info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
-			info.fb = &diffuseIblFrameBuffer[ i ];
-			info.context = &renderContext;
-			info.resources = &resources;
-			info.inputImages = 1;
-
 			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
 			camera.SetFov( Radians( 90.0f ) );
 			camera.SetAspectRatio( 1.0f );
@@ -154,6 +147,15 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 			if ( config.computeDiffuseIbl )
 			{
+				imageProcessCreateInfo_t info = {};
+				info.name = "DiffuseIBL";
+				info.clear = false;
+				info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
+				info.fb = &diffuseIblFrameBuffer[ i ];
+				info.context = &renderContext;
+				info.resources = &resources;
+				info.inputImages = 1;
+
 				diffuseIBL[ i ] = new ImageProcess( info );
 
 				mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
@@ -161,6 +163,18 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 				diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
 				diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
+			}
+
+			if ( config.computeSpecularIBL )
+			{
+				mipProcessCreateInfo_t info = {};
+				info.name = "SpecularIbl";
+				info.img = &resources.specularIblImage;
+				info.context = &renderContext;
+				info.resources = &resources;
+				info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+
+				specularIBL[ i ] = new MipImageTask( info );
 			}
 		}
 	}
@@ -301,6 +315,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			for ( uint32_t i = 0; i < 6; ++i ) {
 				schedule.Queue( diffuseIBL[ i ] );
+			}
+		}
+		if ( config.computeSpecularIBL )
+		{
+			for ( uint32_t i = 0; i < 6; ++i ) {
+				schedule.Queue( specularIBL[ i ] );
 			}
 		}
 		schedule.Queue( mipCubeTask );
@@ -901,6 +921,40 @@ void Renderer::CreateFramebuffers()
 		}
 	}
 
+	// Specular IBL images
+	{
+		imageInfo_t colorInfo{};
+		colorInfo.width = 128;
+		colorInfo.height = 128;
+		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
+		colorInfo.layers = 6;
+		colorInfo.channels = 4;
+		colorInfo.subsamples = IMAGE_SMP_1;
+		colorInfo.fmt = IMAGE_FMT_RGBA_16;
+		colorInfo.type = IMAGE_TYPE_CUBE;
+		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		colorInfo.tiling = IMAGE_TILING_MORTON;
+
+		resources.specularIblImage.Create(
+			colorInfo,
+			nullptr,
+			new GpuImage( "specularIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+
+		for ( uint32_t i = 0; i < 6; ++i )
+		{
+			imageSubResourceView_t subView;
+			subView.arrayCount = 1;
+			subView.baseArray = glslCubeMapping[ i ];
+			subView.baseMip = 0;
+			subView.mipLevels = 1;
+
+			colorInfo.type = IMAGE_TYPE_2D;
+
+			resources.specularIblImageViews[ i ].Init( resources.specularIblImage, colorInfo, subView, resourceLifeTime_t::RESIZE );
+		}
+	}
+
 	// Resolve image
 	{
 		imageInfo_t info{};
@@ -1114,6 +1168,20 @@ void Renderer::CreateFramebuffers()
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			diffuseIblFrameBuffer[ i ].Create( fbInfo );
+		}
+	}
+
+	// Specular IBL Render
+	{
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			frameBufferCreateInfo_t fbInfo;
+			fbInfo.name = "SpecularIblFB";
+			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
+				fbInfo.color0 = &resources.specularIblImageViews[ i ];
+			}
+			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+
+			specularIblFrameBuffer[ i ].Create( fbInfo );
 		}
 	}
 }

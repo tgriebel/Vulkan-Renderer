@@ -70,6 +70,4 @@ void main()
     prefilteredColor = prefilteredColor / totalWeight;
 
     outColor = vec4( prefilteredColor, 1.0 );
-
-    // MIP_ROUGHNESS_DOWNSAMPLE
 }

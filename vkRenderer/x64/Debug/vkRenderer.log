@@ -1,25 +1,14 @@
-﻿  scene.cpp
-  chessScene.cpp
-  nesScene.cpp
-  sceneParser.cpp
+﻿  sceneParser.cpp
   drawpass.cpp
   drawGroup.cpp
   postEffect.cpp
   renderView.cpp
-  render_util.cpp
-  io.cpp
-  allocator.cpp
-  binding.cpp
   descriptorWrites.cpp
-  gpuResources.cpp
   gpuTransfer.cpp
   imageView.cpp
   pipeline.cpp
   shaderBinding.cpp
-  GpuSync.cpp
   RenderTask.cpp
-  Generating Code...
-  Compiling...
   debugMenu.cpp
   gpuImage.cpp
   renderCommand.cpp
@@ -29,8 +18,9 @@
   swapChain.cpp
   cmdContext.cpp
   deviceContext.cpp
+  Generating Code...
+  Compiling...
   frameBuffer.cpp
   vulkinTestApp.cpp
-  window.cpp
   Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
