@@ -18,7 +18,6 @@ C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\clear.comp -o shad
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\imagewriteback.comp -o shaders_bin\imagewritebackCS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\fullscreen.vert -o shaders_bin\fullscreenVS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\downsample.frag -o shaders_bin\downsamplePS.spv -g
-C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\specularIbl.frag -o shaders_bin\specularIblPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\preCalculatedSpecularIbl.frag -o shaders_bin\preCalculatedSpecularIblPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\resolve.frag -o shaders_bin\resolvePS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\resolve.frag -o shaders_bin\resolvePS_msaa.spv -g --define-macro USE_MSAA

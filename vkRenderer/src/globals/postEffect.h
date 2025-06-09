@@ -20,6 +20,7 @@ struct imageProcessCreateInfo_t
 	RenderContext*		context;
 	ResourceContext*	resources;
 	uint32_t			inputImages;
+	uint32_t			inputCubeImages;
 	bool				clear;
 	bool				present;
 	bool				resolve;
@@ -68,6 +69,7 @@ public:
 	void				FrameEnd();
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
+	void				SetSourceCubeImage( const uint32_t slot, Image* image );
 	void				SetConstants( const void* dataBlock, const uint32_t sizeInBytes );
 
 	void				Execute( CommandContext& cmdContext );

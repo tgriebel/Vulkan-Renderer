@@ -44,7 +44,7 @@ uint32_t GpuBuffer::ClampId( const uint32_t bufferId ) const
 void GpuBuffer::SetPos( const uint64_t pos )
 {
 	const uint32_t id = ClampId( context.bufferId );
-	m_buffer[ id ].offset = Clamp( pos, m_buffer[ id ].baseOffset, GetMaxSize() );
+	m_buffer[ id ].offset = Clamp( m_buffer[ id ].baseOffset + pos, m_buffer[ id ].baseOffset, GetMaxSize() );
 }
 
 

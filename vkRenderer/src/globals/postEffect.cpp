@@ -15,6 +15,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_pass = new PostPass( info.fb );
 
 	m_pass->codeImages.Resize( info.inputImages );
+	m_pass->codeCubeImages.Resize( info.inputCubeImages );
 
 	m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 
@@ -41,9 +42,20 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 {
+	assert( image->info.type == imageType_t::IMAGE_TYPE_2D );
 	assert( m_pass->codeImages.Count() > slot );
 	if( slot < m_pass->codeImages.Count() ) {
 		m_pass->codeImages[ slot ] = image;
+	}
+}
+
+
+void ImageProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
+{
+	assert( image->info.type == imageType_t::IMAGE_TYPE_CUBE );
+	assert( m_pass->codeCubeImages.Count() > slot );
+	if ( slot < m_pass->codeCubeImages.Count() ) {
+		m_pass->codeCubeImages[ slot ] = image;
 	}
 }
 
@@ -80,14 +92,16 @@ void ImageProcess::FrameBegin()
 
 		vec4f dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 
+		const uint64_t offset = m_buffer.GetSize();
 		m_buffer.SetPos( 0 );
 		m_buffer.CopyData( &dimensions, sizeof( vec4f ) );
+		m_buffer.SetPos( offset );
 	}
 
 	// Set standard binds
 	{
-		m_pass->parms->Bind( bind_sourceImages,		&m_pass->codeImages );
-		m_pass->parms->Bind( bind_sourceCubeImages, &m_resources->cubeFbImageView );
+		m_pass->parms->Bind( bind_sourceImages,		m_pass->codeImages.Count() > 0 ? &m_pass->codeImages : &rc.defaultImageArray );
+		m_pass->parms->Bind( bind_sourceCubeImages, m_pass->codeCubeImages.Count() > 0 ? m_pass->codeCubeImages[ 0 ] : rc.defaultImageCube );
 		m_pass->parms->Bind( bind_imageStencil,		&m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
 		m_pass->parms->Bind( bind_imageProcess,		&m_buffer );
 	}

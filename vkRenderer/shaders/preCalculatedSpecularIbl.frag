@@ -32,22 +32,39 @@
 
 PS_LAYOUT_BASIC_IO
 
-struct ImageProcess
+struct SpecularIblConstants
 {
+    mat4 viewMat;
     float roughness;
-    float pad0;
-    float pad1;
-    float pad2;
-    vec4 generic1;
-    vec4 generic2;
 };
-
-PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, SpecularIblConstants )
 
 // https://learnopengl.com/PBR/IBL/Specular-IBL
 void main()
 {
-    vec3 N = normalize( fragTexCoord.xyz );
+     mat4 glslSpace = mat4(  0.0f, 0.0f, 1.0f, 0.0f,
+                            -1.0f, 0.0f, 0.0f, 0.0f,
+                            0.0f, 1.0f, 0.0f, 0.0f,
+                            0.0f, 0.0f, 0.0f, 0.0f );
+
+    const mat4 viewMat = glslSpace * imageProcess.viewMat;
+    const vec3 viewForward = -normalize( vec3( viewMat[ 2 ][ 0 ], viewMat[ 2 ][ 1 ], viewMat[ 2 ][ 2 ] ) );
+    const vec3 viewRight = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 0 ][ 1 ], viewMat[ 0 ][ 2 ] ) );
+    const vec3 viewUp = normalize( vec3( viewMat[ 1 ][ 0 ], viewMat[ 1 ][ 1 ], viewMat[ 1 ][ 2 ] ) );
+    const vec3 viewVector = normalize( viewForward + ( 2.0f * fragTexCoord.x - 1.0f ) * viewRight + ( 2.0f * fragTexCoord.y - 1.0f ) * viewUp );
+
+    vec3 up = vec3( 0.0, 1.0, 0.0 );
+    vec3 right = normalize( cross( up, viewVector ) );
+    up = normalize( cross( viewVector, right ) );
+
+#if 0
+    vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
+    vec3 sampleVec = normalize( tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector );
+    outColor = texture( codeCubeSamplers[ 0 ], sampleVec );
+   // outColor.rgb = 0.5f * ( sampleVec + vec3( 1.0f, 1.0f, 1.0f ) );
+    outColor.a = 1.0f;
+#else
+    vec3 N = normalize( viewVector );
     vec3 R = N;
     vec3 V = R;
 
@@ -70,4 +87,5 @@ void main()
     prefilteredColor = prefilteredColor / totalWeight;
 
     outColor = vec4( prefilteredColor, 1.0 );
+#endif
 }

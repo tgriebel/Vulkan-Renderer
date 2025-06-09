@@ -170,39 +170,42 @@ void CreateCodeAssets()
 
 		// Default Image Cube - Rainbow
 		{
-			static const Color* cubeColors[ 6 ] =
-			{
-				&ColorRed,
-				&ColorGreen,
-				&ColorBlue,
-				&ColorPink,
-				&ColorYellow,
-				&ColorCyan,
-			};
-
 			hdl_t handle = g_assets.textureLib.Add( "_defaultCube", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
 			texture.info = info;
 			texture.info.width = 8;
 			texture.info.height = 8;
-			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
+			texture.info.layers = 6;
+			texture.info.channels = 4;
+			texture.info.fmt = IMAGE_FMT_RGBA_8;
+			texture.info.type = imageType_t::IMAGE_TYPE_CUBE;
+			texture.info.mipLevels = 1;
 
 			assert( texture.cpuImage == nullptr );
 
-			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( texture.info.width, texture.info.height );
+			const Color* colors[ 6 ] = {
+				&ColorRed,
+				&ColorPink,
+				&ColorGreen,
+				&ColorYellow,
+				&ColorBlue,
+				&ColorCyan		
+			};
 
+			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
+			imageBuffer->Init( texture.info.width, texture.info.height, texture.info.layers, ColorWhite.AsRGBA(), "_defaultCube" );
 			for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
+				const Color* color = colors[ faceId ];
 				for ( uint32_t y = 0; y < texture.info.height; ++y ) {
 					for ( uint32_t x = 0; x < texture.info.width; ++x )
-					{
-						const Color* color = cubeColors[ faceId ];
+					{			
 						const RGBA pixel = Swizzle( color->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
-						imageBuffer->SetPixel( x, y, pixel );
+						imageBuffer->SetPixel( x, y, faceId, pixel );
 					}
 				}
 			}
+
 			texture.cpuImage = imageBuffer;
 		}
 	}

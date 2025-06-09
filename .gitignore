@@ -42,7 +42,7 @@ vkRenderer/x64/Debug/
 x64/Debug/SysCore.lib
 x64/Debug/Chess.lib
 vkRenderer/x64/Debug/
-vkRenderer/textures/
+vkRenderer/textures/*.*
 vkRenderer/vkRenderer.vcxproj.user
 vkRenderer/x64/Release/
 vkRenderer/screenshots/chess.tif

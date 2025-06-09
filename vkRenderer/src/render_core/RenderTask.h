@@ -237,6 +237,10 @@ public:
 class MipImageTask : public GpuTask
 {
 private:
+	static const uint32_t	MaxBufferSizeInBytes = 256;
+	static const uint32_t	ReservedConstantSizeInBytes = 16;
+	static const uint32_t	MaxConstantBlockSizeInBytes = 240;
+
 	Image*						m_image;
 	downSampleMode_t			m_mode;
 	std::string					m_dbgName;
@@ -248,6 +252,7 @@ private:
 	std::vector<DrawPass*>		m_passes;
 	std::vector<FrameBuffer>	m_frameBuffers;
 	std::vector<GpuBufferView>	m_bufferViews;
+	uint32_t					m_mipLevels;
 	bool						m_firstFrame;
 
 	void Init( const mipProcessCreateInfo_t& info );
@@ -260,12 +265,17 @@ public:
 		Init( info );
 	}
 
-	void Resize() {}
+	void		Resize() { assert( 0 ); } // support
 
-	void FrameBegin();
-	void FrameEnd();
+	void		FrameBegin();
+	void		FrameEnd();
 
-	void Execute( CommandContext& context ) override;
+	uint32_t	GetMipCount() const;
+	bool		SetSourceImageForLevel( const uint32_t mipLevel, Image* img );
+	bool		SetConstantsForLevel( const uint32_t mipLevel, const void* dataBlock, const uint32_t sizeInBytes );
+
+	void		Execute( CommandContext& context ) override;
+	
 	~MipImageTask() {
 		Shutdown();
 	}

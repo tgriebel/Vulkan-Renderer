@@ -105,6 +105,7 @@ public:
 	void InsertResourceBarriers( CommandContext& cmdContext );
 
 	Array<const Image*, 100>	codeImages;
+	Array<const Image*, 100>	codeCubeImages;
 	ShaderBindParms*			parms;
 };
 

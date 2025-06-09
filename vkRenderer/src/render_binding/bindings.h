@@ -15,7 +15,7 @@ BINDING( computeImage,			IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_CS );
 // Post Effect Resources
 BINDING( imageProcess,			CONSTANT_BUFFER,	1,						BIND_STATE_PS );
 BINDING( sourceImages,			IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_PS );
-BINDING( sourceCubeImages,		IMAGE_CUBE,			1,						BIND_STATE_PS );
+BINDING( sourceCubeImages,		IMAGE_CUBE,	1,			BIND_STATE_PS );
 
 // Raster Resources
 BINDING( viewBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL );

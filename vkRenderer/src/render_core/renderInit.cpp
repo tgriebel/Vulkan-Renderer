@@ -127,6 +127,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	ImageProcess* diffuseIBL[ 6 ] = {};
 	MipImageTask* specularIBL[ 6 ] = {};
+	CopyImageTask* copyCubeToSpecularIbl = nullptr;
 	if ( config.useCubeViews )
 	{
 		for ( uint32_t i = 0; i < 6; ++i )
@@ -154,27 +155,45 @@ void Renderer::Init( const renderConfig_t& cfg )
 				info.fb = &diffuseIblFrameBuffer[ i ];
 				info.context = &renderContext;
 				info.resources = &resources;
-				info.inputImages = 1;
+				info.inputCubeImages = 1;
 
 				diffuseIBL[ i ] = new ImageProcess( info );
 
 				mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
 				viewMatrix[ 3 ][ 3 ] = 0.0f;
 
-				diffuseIBL[ i ]->SetSourceImage( 0, &resources.cubeFbImageView );
+				diffuseIBL[ i ]->SetSourceCubeImage( 0, &g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" )->Get() ); // FIXME: Stub
 				diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 			}
 
 			if ( config.computeSpecularIBL )
 			{
+				copyCubeToSpecularIbl = new CopyImageTask( &resources.cubeFbColorImage, &resources.specularIblImage );
+
 				mipProcessCreateInfo_t info = {};
 				info.name = "SpecularIbl";
 				info.img = &resources.specularIblImage;
 				info.context = &renderContext;
 				info.resources = &resources;
-				info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+				info.mode = downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL;
+
+				struct SpecularIblConstants
+				{
+					mat4x4f		viewMat;
+					float		roughness;
+				} specConstants;
+
+				specConstants.viewMat = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
 
 				specularIBL[ i ] = new MipImageTask( info );
+
+				const uint32_t mipLevels = specularIBL[ i ]->GetMipCount();
+				for( uint32_t mip = 1; mip < mipLevels; ++mip )
+				{
+					specConstants.roughness = mip / static_cast<float>( mipLevels - 1 );
+					specularIBL[ i ]->SetConstantsForLevel( mip, &specConstants, sizeof( specConstants ) );
+					specularIBL[ i ]->SetSourceImageForLevel( mip, &g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" )->Get() ); // FIXME: Stub
+				}
 			}
 		}
 	}
@@ -255,7 +274,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.cubeFbColorImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
+		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
 
 		mipCubeTask = new MipImageTask( info );
 	}
@@ -319,11 +338,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		}
 		if ( config.computeSpecularIBL )
 		{
+			schedule.Queue( copyCubeToSpecularIbl );
 			for ( uint32_t i = 0; i < 6; ++i ) {
 				schedule.Queue( specularIBL[ i ] );
 			}
 		}
-		schedule.Queue( mipCubeTask );
+	//	schedule.Queue( mipCubeTask );
 	}
 	schedule.Queue( resolve );
 	if ( config.writeCubeViews ) {
@@ -480,6 +500,12 @@ void Renderer::InitShaderResources()
 		rc.mtlImage = &g_assets.textureLib.Find( "_mtl" )->Get();
 		rc.defaultImage = &g_assets.textureLib.Find( "_default" )->Get();
 		rc.defaultImageCube = &g_assets.textureLib.Find( "_defaultCube" )->Get();
+
+		rc.defaultImageArray.Resize( 1 );
+		rc.defaultImageArray[ 0 ] = rc.defaultImage;
+
+		rc.defaultImageCubeArray.Resize( 1 );
+		rc.defaultImageCubeArray[ 0 ] = rc.defaultImageCube;
 	}
 
 	// Buffers
@@ -847,7 +873,7 @@ void Renderer::CreateFramebuffers()
 		resources.cubeFbColorImage.Create(
 			colorInfo,
 			nullptr,
-			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 
 		resources.cubeFbColorImage.sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
@@ -938,7 +964,7 @@ void Renderer::CreateFramebuffers()
 		resources.specularIblImage.Create(
 			colorInfo,
 			nullptr,
-			new GpuImage( "specularIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "specularIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 
 		for ( uint32_t i = 0; i < 6; ++i )
