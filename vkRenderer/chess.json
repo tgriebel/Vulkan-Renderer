@@ -73,6 +73,10 @@
 	  "name": "code_assets/hdrDiffuse.img",
 	  "type": "CUBE"
 	},
+	{
+	  "name": "code_assets/hdrSpecular.img",
+	  "type": "CUBE"
+	},
   ],
   "materials": [
     {

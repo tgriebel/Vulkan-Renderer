@@ -318,6 +318,24 @@ void Renderer::Init( const renderConfig_t& cfg )
 		imageDiffuseIblWriteBackTask = new ImageWritebackTask( info );
 	}
 
+	ImageWritebackTask* imageSpecularIblWriteBackTask = nullptr;
+	if ( config.computeSpecularIBL )
+	{
+		imageWriteBackCreateInfo_t info{};
+		info.name = "SpecularIblWriteback";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fileName = "hdrSpecular.img";
+		info.writeToDiskOnFrameEnd = true;
+		info.cubemap = true;
+
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			info.imgCube[ i ] = &resources.specularIblImageViews[ i ];
+		}
+
+		imageSpecularIblWriteBackTask = new ImageWritebackTask( info );
+	}
+
 	InitShaderResources();
 
 	InitImGui( *view2Ds[ 0 ] );
@@ -354,6 +372,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	if ( config.computeDiffuseIbl ) {
 		schedule.Queue( imageDiffuseIblWriteBackTask );
+	}
+	if ( config.computeSpecularIBL ) {
+		schedule.Queue( imageSpecularIblWriteBackTask );
 	}
 	if ( config.downsampleScene ) {
 		schedule.Queue( mipTask );
