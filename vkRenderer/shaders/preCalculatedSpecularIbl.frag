@@ -48,9 +48,9 @@ void main()
                             0.0f, 0.0f, 0.0f, 0.0f );
 
     const mat4 viewMat = glslSpace * imageProcess.viewMat;
-    const vec3 viewForward = -normalize( vec3( viewMat[ 2 ][ 0 ], viewMat[ 2 ][ 1 ], viewMat[ 2 ][ 2 ] ) );
-    const vec3 viewRight = normalize( vec3( viewMat[ 0 ][ 0 ], viewMat[ 0 ][ 1 ], viewMat[ 0 ][ 2 ] ) );
-    const vec3 viewUp = normalize( vec3( viewMat[ 1 ][ 0 ], viewMat[ 1 ][ 1 ], viewMat[ 1 ][ 2 ] ) );
+    const vec3 viewForward = -normalize( viewMat[ 2 ].xyz );
+    const vec3 viewRight = normalize( viewMat[ 0 ].xyz );
+    const vec3 viewUp = normalize( viewMat[ 1 ].xyz );
     const vec3 viewVector = normalize( viewForward + ( 2.0f * fragTexCoord.x - 1.0f ) * viewRight + ( 2.0f * fragTexCoord.y - 1.0f ) * viewUp );
 
     vec3 up = vec3( 0.0, 1.0, 0.0 );

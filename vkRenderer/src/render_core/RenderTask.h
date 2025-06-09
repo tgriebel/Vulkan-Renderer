@@ -20,6 +20,7 @@ struct mipProcessCreateInfo_t
 {
 	const char*			name;
 	Image*				img;
+	uint32_t			layer;
 	downSampleMode_t	mode;
 	RenderContext*		context;
 	ResourceContext*	resources;

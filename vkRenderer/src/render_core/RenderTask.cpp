@@ -463,7 +463,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		imageSubResourceView_t subView = {};
 		subView.baseMip = i;
 		subView.mipLevels = 1;
-		subView.baseArray = 0;
+		subView.baseArray = info.layer;
 		subView.arrayCount = 1;
 
 		imageInfo_t viewInfo = m_image->info;
