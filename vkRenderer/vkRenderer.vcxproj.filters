@@ -128,6 +128,12 @@
     <ClCompile Include="src\app\cvar.cpp">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_tasks\MipImageTask.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -269,6 +275,12 @@
     <ClInclude Include="src\app\cvar.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_tasks\ImageWritebackTask.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\MipImageTask.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">
@@ -383,6 +395,9 @@
     </Filter>
     <Filter Include="Scenes">
       <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tasks">
+      <UniqueIdentifier>{e842c2f5-a20d-4502-bce7-30628c72001e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -212,6 +212,8 @@
     <ClInclude Include="src\render_state\deviceContext.h" />
     <ClInclude Include="src\render_state\frameBuffer.h" />
     <ClInclude Include="src\render_state\rhi.h" />
+    <ClInclude Include="src\render_tasks\ImageWritebackTask.h" />
+    <ClInclude Include="src\render_tasks\MipImageTask.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
@@ -261,6 +263,8 @@
     <ClCompile Include="src\render_state\cmdContext.cpp" />
     <ClCompile Include="src\render_state\deviceContext.cpp" />
     <ClCompile Include="src\render_state\frameBuffer.cpp" />
+    <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp" />
+    <ClCompile Include="src\render_tasks\MipImageTask.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp">

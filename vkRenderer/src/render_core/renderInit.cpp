@@ -30,6 +30,8 @@
 #include "../render_binding/pipeline.h"
 #include "../render_binding/bindings.h"
 #include "../render_core/RenderTask.h"
+#include "../render_tasks/ImageWritebackTask.h"
+#include "../render_tasks/MipImageTask.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
