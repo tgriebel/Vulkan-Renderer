@@ -162,6 +162,7 @@ struct imguiControls_t
 	bool		openModelImportFileDialog;
 	bool		openSceneFileDialog;
 	bool		reloadScene;
+	bool		captureScreenshot;
 	vec3f		selectedModelOrigin;
 };
 #endif

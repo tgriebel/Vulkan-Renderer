@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>c_scene=chess.json r_cubeCapture=1  r_computeSpecularIbl=1 r_computeDiffuseIbl=0</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>c_scene=chess.json r_cubeCapture=0  r_computeSpecularIbl=0 r_computeDiffuseIbl=0 r_screenshot=1</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

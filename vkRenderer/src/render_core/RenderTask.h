@@ -26,18 +26,29 @@ struct mipProcessCreateInfo_t
 	ResourceContext*	resources;
 };
 
+
+enum imageWritebackFlags_t : uint8_t
+{
+	WRITE_TO_DISK			= ( 1 << 0 ),
+	CUBEMAP					= ( 1 << 1 ),
+	PACKED_HDR				= ( 1 << 2 ),
+	TRY_USE_API_COMMAND		= ( 1 << 3 ),
+	SCREENSHOT				= ( 1 << 4 ),
+};
+DEFINE_ENUM_OPERATORS( imageWritebackFlags_t, uint8_t )
+
+
 struct imageWriteBackCreateInfo_t
 {
-	const char*			name;
-	const char*			fileName;
-	Image*				img;
-	ImageView*			imgCube[6];
-	RenderContext*		context;
-	ResourceContext*	resources;
-	bool				writeToDiskOnFrameEnd;
-	bool				screenshot;
-	bool				cubemap;
+	const char*				name;
+	const char*				fileName;
+	Image*					img;
+	ImageView*				imgCube[6];
+	RenderContext*			context;
+	ResourceContext*		resources;
+	imageWritebackFlags_t	flags;
 };
+
 
 union mipProcessParms_t
 {
@@ -176,16 +187,16 @@ public:
 class ImageWritebackTask : public GpuTask
 {
 private:
-	ImageArray			m_imageArray;
-	RenderContext*		m_context;
-	ResourceContext*	m_resources;
-	GpuBuffer			m_writebackBuffer;
-	GpuBuffer			m_resourceBuffer;
-	ShaderBindParms*	m_parms;
-	std::string			m_fileName;
-	std::string			m_name;
-	bool				m_writeToDiskOnFrameEnd;
-	bool				m_screenshot;
+	ImageArray				m_imageArray;
+	RenderContext*			m_context;
+	ResourceContext*		m_resources;
+	GpuBuffer				m_writebackBuffer;
+	GpuBuffer				m_resourceBuffer;
+	ShaderBindParms*		m_parms;
+	std::string				m_fileName;
+	std::string				m_name;
+	imageWritebackFlags_t	m_flags;
+	bool					m_hasWriteback;
 
 	void Init();
 	void Shutdown();
@@ -217,8 +228,9 @@ public:
 		m_resources = info.resources;
 		m_fileName = info.fileName;
 		m_name = info.name;
-		m_writeToDiskOnFrameEnd = info.writeToDiskOnFrameEnd;
-		m_screenshot = info.screenshot;
+		m_flags = info.flags;
+		m_hasWriteback = false;
+
 		Init();
 	}
 

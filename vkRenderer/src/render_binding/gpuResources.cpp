@@ -129,7 +129,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 
 		if( type == bufferType_t::STORAGE ) {
 			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
-			usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		} else if ( type == bufferType_t::UNIFORM ) {
 			alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
 			usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;

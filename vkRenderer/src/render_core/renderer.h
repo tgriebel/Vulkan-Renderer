@@ -62,6 +62,7 @@ struct renderConfig_t
 	bool			computeSpecularIBL;
 	bool			downsampleScene;
 	bool			computeGaussianBlur;
+	bool			screenshot;
 	bool			gaussianBlur;
 	bool			shadows;
 };

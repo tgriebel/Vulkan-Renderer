@@ -290,8 +290,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "hdrEnvmap.img";
-		info.writeToDiskOnFrameEnd = true;
-		info.cubemap = true;
+		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageWritebackFlags_t::CUBEMAP;
+		info.flags |= imageWritebackFlags_t::PACKED_HDR;
 
 		for ( uint32_t i = 0; i < 6; ++i ) {
 			info.imgCube[ i ] = &resources.cubeImageViews[ i ];
@@ -308,8 +309,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "hdrDiffuse.img";
-		info.writeToDiskOnFrameEnd = true;
-		info.cubemap = true;
+		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageWritebackFlags_t::CUBEMAP;
+		info.flags |= imageWritebackFlags_t::PACKED_HDR;
 
 		for( uint32_t i = 0; i < 6; ++i ) {
 			info.imgCube[ i ] = &resources.diffuseIblImageViews[ i ];
@@ -326,14 +328,31 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "hdrSpecular.img";
-		info.writeToDiskOnFrameEnd = true;
-		info.cubemap = true;
+		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageWritebackFlags_t::CUBEMAP;
+		info.flags |= imageWritebackFlags_t::PACKED_HDR;
 
 		for ( uint32_t i = 0; i < 6; ++i ) {
 			info.imgCube[ i ] = &resources.specularIblImageViews[ i ];
 		}
 
 		imageSpecularIblWriteBackTask = new ImageWritebackTask( info );
+	}
+
+	ImageWritebackTask* screenshotWriteback = nullptr;
+	if ( config.screenshot )
+	{
+		imageWriteBackCreateInfo_t info{};
+		info.name = "ScreenshotWriteback";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fileName = "screenshot.png";
+		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageWritebackFlags_t::CUBEMAP;
+		info.flags |= imageWritebackFlags_t::SCREENSHOT;
+		info.img = &resources.mainColorResolvedImage;
+
+		screenshotWriteback = new ImageWritebackTask( info );
 	}
 
 	InitShaderResources();
@@ -375,6 +394,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	if ( config.computeSpecularIBL ) {
 		schedule.Queue( imageSpecularIblWriteBackTask );
+	}
+	if( config.screenshot ) {
+		schedule.Queue( screenshotWriteback );
 	}
 	if ( config.downsampleScene ) {
 		schedule.Queue( mipTask );
@@ -1021,12 +1043,12 @@ void Renderer::CreateFramebuffers()
 		resources.mainColorResolvedImage.Create(
 			info,
 			nullptr,
-			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 		resources.blurredImage.Create(
 			info,
 			nullptr,
-			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 		info.mipLevels = 1;
 

@@ -98,6 +98,7 @@ MakeCVar( char*,	c_scene );
 MakeCVar( bool,		c_bakeAssets );
 MakeCVar( bool,		r_shadows );
 MakeCVar( bool,		r_downsampleScene );
+MakeCVar( bool,		r_screenshot );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
@@ -124,6 +125,7 @@ int main( int argc, char* argv[] )
 	config.computeSpecularIBL = r_computeSpecularIbl.GetBool();
 	config.shadows = r_shadows.GetBool();
 	config.downsampleScene = r_downsampleScene.GetBool();
+	config.screenshot = r_screenshot.GetBool();
 
 	std::thread renderThread( RenderThread );
 

@@ -533,6 +533,8 @@ void DrawSceneDebugMenu()
 		g_imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
 		ImGui::SameLine();
 		g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
+		ImGui::SameLine();
+		g_imguiControls.captureScreenshot = ImGui::Button( "Capture ScreenShot" );
 
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
 		ImGui::SliderFloat( "Roughness", &g_imguiControls.roughness, 0.1f, 1.0f );
