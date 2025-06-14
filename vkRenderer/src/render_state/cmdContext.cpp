@@ -208,7 +208,14 @@ void CommandContext::Submit( const GpuFence* fence )
 
 void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
 {
+	Dispatch( progHdl, bindParms, nullptr, 0, x, y, z );
+}
+
+
+void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z )
+{
 	assert( isOpen );
+	assert( ( constantsSize % 4 ) == 0 );
 
 	pipelineState_t state = {};
 	state.progHdl = progHdl;
@@ -228,6 +235,9 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 		VkDescriptorSet set[1] = { bindParms.GetVkObject() };
 
+		if( ( constants != nullptr ) && ( constantsSize > 0 )  ) {
+			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, constantsSize, constants );
+		}
 		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
 		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
 

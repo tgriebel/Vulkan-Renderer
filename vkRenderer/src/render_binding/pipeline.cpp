@@ -493,10 +493,17 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	computeShaderStageInfo.pName = "main";
 	computeShaderStageInfo.pNext = nullptr;
 
+	VkPushConstantRange pushRanges;
+	pushRanges.offset = 0;
+	pushRanges.size = 32;
+	pushRanges.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.pSetLayouts = layouts;
 	pipelineLayoutInfo.setLayoutCount = prog.bindsetCount;
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
+	pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 

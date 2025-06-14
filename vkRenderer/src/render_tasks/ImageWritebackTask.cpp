@@ -41,10 +41,10 @@ void ImageWritebackTask::Init()
 {
 	struct writeBackParms_t
 	{
-		vec4f dimensions;
+		vec4f		dimensions;
 	};
 
-	writeBackParms_t writeBackParms{};
+	writeBackParms_t writeBackParms {};
 
 	const uint32_t maxBpp = sizeof( vec4f ); // Data from the readback is float due to buffer restrictions
 	const uint32_t elementsCount = m_imageArray[ 0 ]->info.width * m_imageArray[ 0 ]->info.height * m_imageArray.Count();
@@ -178,8 +178,27 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 	{
 		const uint32_t blockSize = 8;
 
+		const Image* img = m_imageArray[ 0 ];
+		const uint32_t w = img->info.width;
+		const uint32_t h = img->info.height;
+		const uint32_t layers = m_imageArray.Count();
+
+		struct pushConstants_t
+		{
+			vec4f		dimensions;
+			uint32_t	imageId;
+			int32_t		lod;
+			uint32_t	baseOffset;
+		};
+
+		pushConstants_t constants {};
+		constants.dimensions = vec4f( (float)w, (float)h, (float)layers, 0.0f );
+		constants.imageId = 0;
+		constants.lod = 0;
+		constants.baseOffset = 0;
+
 		const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
-		cmdContext.Dispatch( progHdl, *m_parms, m_imageArray[ 0 ]->info.width / blockSize + 1, m_imageArray[ 0 ]->info.height / blockSize + 1, m_imageArray.Count() / blockSize + 1 );
+		cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
 	}
 	else
 	{

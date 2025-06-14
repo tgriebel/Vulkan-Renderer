@@ -161,7 +161,7 @@ struct surface_t
 												light_t lights[MaxLights];											\
 											} lightUbo;
 
-#define PUSH_CONSTANTS						layout( push_constant ) uniform fragmentPushConstants					\
+#define MATERIAL_PUSH_CONSTANTS				layout( push_constant ) uniform fragmentPushConstants					\
 											{																		\
 												layout( offset = 0 ) uint objectId;									\
 												layout( offset = 4 ) uint materialId;								\
@@ -196,7 +196,7 @@ struct surface_t
 											LIGHT_LAYOUT( 2, 0 )													\
 											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
 											STENCIL_LAYOUT( 2, 2, SAMPLER )											\
-											PUSH_CONSTANTS															\
+											MATERIAL_PUSH_CONSTANTS													\
 											VS_IN																	\
 											VS_OUT
 
@@ -224,7 +224,7 @@ struct surface_t
 											LIGHT_LAYOUT( 2, 0 )													\
 											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
 											STENCIL_LAYOUT( 2, 2, SAMPLER )											\
-											PUSH_CONSTANTS															\
+											MATERIAL_PUSH_CONSTANTS													\
 											PS_IN																	\
 											PS_OUT
 
