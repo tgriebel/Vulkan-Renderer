@@ -110,6 +110,9 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
+		if( texture.info.generateMips == false ) {
+		//	continue; // TODO
+		}
 		GenerateMipmaps( &uploadContext, texture );
 	}
 

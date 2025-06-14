@@ -50,6 +50,7 @@ void CreateCodeAssets()
 			texture.info.channels = 4;
 			texture.info.fmt = IMAGE_FMT_RGBA_8;
 			texture.info.tiling = IMAGE_TILING_MORTON;
+			texture.info.generateMips = true;
 
 			assert( texture.cpuImage == nullptr );
 
@@ -126,6 +127,7 @@ void CreateCodeAssets()
 		info.tiling = IMAGE_TILING_MORTON;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.subsamples = IMAGE_SMP_1;
+		info.generateMips = true;
 
 		for ( uint32_t t = 0; t < debugColorCount; ++t )
 		{
@@ -151,6 +153,7 @@ void CreateCodeAssets()
 			texture.info.width = 32;
 			texture.info.height = 32;
 			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
+			texture.info.generateMips = true;
 
 			assert( texture.cpuImage == nullptr );
 
@@ -181,6 +184,7 @@ void CreateCodeAssets()
 			texture.info.fmt = IMAGE_FMT_RGBA_8;
 			texture.info.type = imageType_t::IMAGE_TYPE_CUBE;
 			texture.info.mipLevels = 1;
+			texture.info.generateMips = true;
 
 			assert( texture.cpuImage == nullptr );
 
