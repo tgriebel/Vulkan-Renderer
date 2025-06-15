@@ -78,11 +78,6 @@ void Renderer::UploadTextures()
 
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
-		texture.subResourceView.baseArray = 0;
-		texture.subResourceView.arrayCount = texture.info.layers;
-		texture.subResourceView.baseMip = 0;
-		texture.subResourceView.mipLevels = texture.info.mipLevels;
-
 		texture.gpuImage= 
 			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, resourceLifeTime_t::REBOOT );
 
@@ -110,8 +105,10 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
-		if( texture.info.generateMips == false ) {
-		//	continue; // TODO
+		if( texture.info.generateMips == false )
+		{
+			Transition( &uploadContext, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+			continue;
 		}
 		GenerateMipmaps( &uploadContext, texture );
 	}

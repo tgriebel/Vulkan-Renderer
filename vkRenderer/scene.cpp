@@ -116,32 +116,23 @@ void CreateCodeAssets()
 			"_mtl",
 		};
 
-		imageInfo_t info {};
-		info.width = 1;
-		info.height = 1;
-		info.mipLevels = MipCount( info.width, info.height );
-		info.layers = 1;
-		info.type = IMAGE_TYPE_2D;
-		info.channels = 4;
-		info.fmt = IMAGE_FMT_RGBA_8;
-		info.tiling = IMAGE_TILING_MORTON;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.subsamples = IMAGE_SMP_1;
-		info.generateMips = true;
+		imageInfo_t defaultInfo = DefaultImage2dInfo( 1, 1 );
 
 		for ( uint32_t t = 0; t < debugColorCount; ++t )
 		{
 			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
-			texture.info = info;
+			
+			imageInfo_t info = defaultInfo;
 			
 			RGBA pixel = Swizzle( colors[ t ]->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 
 			assert( texture.cpuImage == nullptr );
 
 			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( texture.info.width, texture.info.height, pixel );
-			texture.cpuImage = imageBuffer;
+			imageBuffer->Init( info.width, info.height, pixel );
+			
+			texture.Create( info, imageBuffer, nullptr );
 		}
 
 		// Default Image - Checkerboard
@@ -149,25 +140,24 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( "_default", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			texture.info = info;
-			texture.info.width = 32;
-			texture.info.height = 32;
-			texture.info.mipLevels = MipCount( texture.info.width, texture.info.height );
-			texture.info.generateMips = true;
+			imageInfo_t info = defaultInfo;
+			info.width = 32;
+			info.height = 32;
+			info.mipLevels = MipCount( texture.info.width, texture.info.height );
 
 			assert( texture.cpuImage == nullptr );
 
 			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( texture.info.width, texture.info.height );
+			imageBuffer->Init( info.width, info.height );
 
-			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
-				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
+			for ( uint32_t y = 0; y < info.height; ++y ) {
+				for ( uint32_t x = 0; x < info.width; ++x ) {
 					const Color color = ( ( x % 2 ) == ( y % 2 ) ) ? ColorBlack : ColorWhite;
 					const RGBA pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 					imageBuffer->SetPixel( x, y, pixel );
 				}
 			}
-			texture.cpuImage = imageBuffer;
+			texture.Create( info, imageBuffer, nullptr );
 		}
 		g_assets.textureLib.SetDefault( "_default" );
 
@@ -176,15 +166,11 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( "_defaultCube", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			texture.info = info;
-			texture.info.width = 8;
-			texture.info.height = 8;
-			texture.info.layers = 6;
-			texture.info.channels = 4;
-			texture.info.fmt = IMAGE_FMT_RGBA_8;
-			texture.info.type = imageType_t::IMAGE_TYPE_CUBE;
-			texture.info.mipLevels = 1;
-			texture.info.generateMips = true;
+			imageInfo_t info = defaultInfo;
+			info.width = 8;
+			info.height = 8;
+			info.layers = 6;
+			info.type = imageType_t::IMAGE_TYPE_CUBE;
 
 			assert( texture.cpuImage == nullptr );
 
@@ -198,11 +184,11 @@ void CreateCodeAssets()
 			};
 
 			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( texture.info.width, texture.info.height, texture.info.layers, ColorWhite.AsRGBA(), "_defaultCube" );
+			imageBuffer->Init( info.width, info.height, info.layers, ColorWhite.AsRGBA(), "_defaultCube" );
 			for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
 				const Color* color = colors[ faceId ];
-				for ( uint32_t y = 0; y < texture.info.height; ++y ) {
-					for ( uint32_t x = 0; x < texture.info.width; ++x )
+				for ( uint32_t y = 0; y < info.height; ++y ) {
+					for ( uint32_t x = 0; x < info.width; ++x )
 					{			
 						const RGBA pixel = Swizzle( color->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 						imageBuffer->SetPixel( x, y, faceId, pixel );
@@ -210,7 +196,7 @@ void CreateCodeAssets()
 				}
 			}
 
-			texture.cpuImage = imageBuffer;
+			texture.Create( info, imageBuffer, nullptr );
 		}
 	}
 

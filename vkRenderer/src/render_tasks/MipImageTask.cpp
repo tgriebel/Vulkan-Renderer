@@ -1,5 +1,7 @@
 #include "MipImageTask.h"
 
+#include <SysCore/systemUtils.h>
+
 #include "../render_binding/gpuResources.h"
 #include "../render_binding/bindings.h"
 
@@ -27,13 +29,13 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	{
 		m_tempImage.info = m_image->info;
 		m_tempImage.info.mipLevels = 1;
-		m_tempImage.subResourceView.mipLevels = m_mipLevels;
-		m_tempImage.subResourceView.baseMip = 0;
-		m_tempImage.subResourceView.arrayCount = m_tempImage.info.layers;
-		m_tempImage.subResourceView.baseArray = 0;
 		MipDimensions( 1, m_image->info.width, m_image->info.height, &m_tempImage.info.width, &m_tempImage.info.height );
 
-		m_tempImage.gpuImage = new GpuImage( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory, resourceLifeTime_t::TASK );
+		m_tempImage.Create(
+			m_image->info,
+			nullptr,
+			new GpuImage( "tempMipImage", m_tempImage.info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory, resourceLifeTime_t::TASK )
+		);
 	}
 
 	// Create buffer
