@@ -33,7 +33,7 @@ void CreateCodeAssets()
 	{
 		for( uint32_t t = 0; t < 4; ++t )
 		{
-			const RGBA rgba = Color( Color::Gold ).AsRGBA();
+			const rgba8_t rgba = Color( Color::Gold ).AsRGBA();
 
 			std::stringstream ss;
 			ss << "CODE_COLOR_" << t;
@@ -42,27 +42,18 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( s.c_str(), Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			texture.info.width = 256;
-			texture.info.height = 240;
-			texture.info.mipLevels = 1;
-			texture.info.layers = 1;
-			texture.info.type = IMAGE_TYPE_2D;
-			texture.info.channels = 4;
-			texture.info.fmt = IMAGE_FMT_RGBA_8;
-			texture.info.tiling = IMAGE_TILING_MORTON;
-			texture.info.generateMips = true;
+			imageInfo_t info = DefaultImage2dInfo( 256, 240 );
+			info.generateMips = false;
 
-			assert( texture.cpuImage == nullptr );
+			texture.Create( info );
 
-			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();	
-			imageBuffer->Init( texture.info.width, texture.info.height );
+			ImageBuffer<rgba8_t>* imageBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( texture.cpuImage );
 
 			for ( uint32_t y = 0; y < texture.info.height; ++y ) {
 				for ( uint32_t x = 0; x < texture.info.width; ++x ) {
 					imageBuffer->SetPixel( x, y, rgba );
 				}
 			}		
-			texture.cpuImage = imageBuffer;
 		}
 
 		const uint32_t debugColorCount = 18;
@@ -123,16 +114,9 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 			
-			imageInfo_t info = defaultInfo;
-			
-			RGBA pixel = Swizzle( colors[ t ]->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+			rgba8_t pixel = Swizzle( colors[ t ]->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 
-			assert( texture.cpuImage == nullptr );
-
-			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( info.width, info.height, pixel );
-			
-			texture.Create( info, imageBuffer, nullptr );
+			texture.Create( defaultInfo, (uint8_t*)&pixel, sizeof( rgba8_t ) );
 		}
 
 		// Default Image - Checkerboard
@@ -140,24 +124,19 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( "_default", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			imageInfo_t info = defaultInfo;
-			info.width = 32;
-			info.height = 32;
-			info.mipLevels = MipCount( texture.info.width, texture.info.height );
+			imageInfo_t info = DefaultImage2dInfo( 32, 32 );
 
-			assert( texture.cpuImage == nullptr );
+			texture.Create( info );
 
-			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( info.width, info.height );
+			ImageBuffer<rgba8_t>* imageBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( texture.cpuImage );
 
 			for ( uint32_t y = 0; y < info.height; ++y ) {
 				for ( uint32_t x = 0; x < info.width; ++x ) {
 					const Color color = ( ( x % 2 ) == ( y % 2 ) ) ? ColorBlack : ColorWhite;
-					const RGBA pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+					const rgba8_t pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 					imageBuffer->SetPixel( x, y, pixel );
 				}
 			}
-			texture.Create( info, imageBuffer, nullptr );
 		}
 		g_assets.textureLib.SetDefault( "_default" );
 
@@ -172,8 +151,6 @@ void CreateCodeAssets()
 			info.layers = 6;
 			info.type = imageType_t::IMAGE_TYPE_CUBE;
 
-			assert( texture.cpuImage == nullptr );
-
 			const Color* colors[ 6 ] = {
 				&ColorRed,
 				&ColorPink,
@@ -183,20 +160,20 @@ void CreateCodeAssets()
 				&ColorCyan		
 			};
 
-			ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-			imageBuffer->Init( info.width, info.height, info.layers, ColorWhite.AsRGBA(), "_defaultCube" );
+			texture.Create( info );
+
+			ImageBuffer<rgba8_t>* imageBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( texture.cpuImage );
+
 			for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
 				const Color* color = colors[ faceId ];
 				for ( uint32_t y = 0; y < info.height; ++y ) {
 					for ( uint32_t x = 0; x < info.width; ++x )
 					{			
-						const RGBA pixel = Swizzle( color->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+						const rgba8_t pixel = Swizzle( color->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 						imageBuffer->SetPixel( x, y, faceId, pixel );
 					}
 				}
 			}
-
-			texture.Create( info, imageBuffer, nullptr );
 		}
 	}
 
@@ -390,31 +367,7 @@ void UpdateScene( Scene* scene )
 	}
 
 	// Skybox
-	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );
-	
-	if(0)
-	{
-		Color randomColor( Random(), Random(), Random(), 1.0f );
-		const RGBA rgba = Color( randomColor ).AsRGBA();
-		Asset<Image>* imageAsset = g_assets.textureLib.Find( "CODE_COLOR_0" );
-		Image& texture = imageAsset->Get();
-
-		assert( texture.cpuImage == nullptr );
-
-		ImageBuffer<RGBA>* imageBuffer = new ImageBuffer<RGBA>();
-
-		imageBuffer->Init( texture.info.width, texture.info.height );
-
-		for ( uint32_t y = 0; y < texture.info.height; ++y ) {
-			for ( uint32_t x = 0; x < texture.info.width; ++x ) {
-				imageBuffer->SetPixel( x, y, rgba );
-			}
-		}
-		texture.cpuImage = imageBuffer;
-
-		imageAsset->QueueUpload();
-	}
-	
+	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );	
 
 #if defined( USE_IMGUI )
 	if ( g_imguiControls.dbgImageId >= 0 )

@@ -83,31 +83,25 @@ void ImageWritebackTask::FrameEnd()
 	// FIXME: Should writeback into the source image, not a separate copy
 	// This is just used for file output and not general CPU readbacks currently
 	Image img;
-	img.info = m_imageArray[ 0 ]->info;
-	img.info.type = IMAGE_TYPE_2D;
-	img.info.fmt = IMAGE_FMT_RGBA_8;
-	img.info.channels = 4;
-	img.info.layers = 1;
+
+	imageInfo_t info = m_imageArray[ 0 ]->info;
+	info.type = IMAGE_TYPE_2D;
+	info.fmt = IMAGE_FMT_RGBA_8;
+	info.channels = 4;
+	info.layers = 1;
 
 	if ( HasFlags( m_flags, CUBEMAP ) )
 	{
-		img.info.type = IMAGE_TYPE_CUBE;
-		img.info.layers = 6;
+		info.type = IMAGE_TYPE_CUBE;
+		info.layers = 6;
 	}
 
 	if ( HasFlags( m_flags, PACKED_HDR ) )
 	{
-		img.info.fmt = IMAGE_FMT_RGBA_16;
-		img.cpuImage = new ImageBuffer<rgbaTupleh_t>();
+		info.fmt = IMAGE_FMT_RGBA_16;
 
-		imageBufferInfo_t info{};
-		info.width = img.info.width;
-		info.height = img.info.height;
-		info.layers = img.info.layers;
-		info.mipCount = 1;
-		info.bpp = sizeof( rgbaTupleh_t );
-
-		img.cpuImage->Init( info );
+		Image img;
+		img.Create( info );
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
 		rgbaTupleh_t* convertedData = reinterpret_cast<rgbaTupleh_t*>( img.cpuImage->Ptr() );
@@ -127,18 +121,10 @@ void ImageWritebackTask::FrameEnd()
 	}
 	else
 	{
-		imageBufferInfo_t info{};
-		info.width = img.info.width;
-		info.height = img.info.height;
-		info.layers = img.info.layers;
-		info.mipCount = 1;
-		info.bpp = sizeof( RGBA );
-
-		img.cpuImage = new ImageBuffer<RGBA>(); // TODO: Merge Init() and constructor
-		img.cpuImage->Init( info );
+		img.Create( info );
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
-		RGBA* convertedData = reinterpret_cast<RGBA*>( img.cpuImage->Ptr() );
+		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( img.cpuImage->Ptr() );
 
 		const uint32_t bufferLength = img.cpuImage->GetPixelCount();
 		for ( uint32_t i = 0; i < bufferLength; ++i )

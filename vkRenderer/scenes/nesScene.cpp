@@ -64,7 +64,7 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 	const uint32_t width = fr.frameBuffer->GetWidth();
 	const uint32_t height = fr.frameBuffer->GetHeight();
 
-	ImageBuffer<RGBA>* imageBuffer =reinterpret_cast<ImageBuffer<RGBA>*>( texture.cpuImage );
+	ImageBuffer<rgba8_t>* imageBuffer =reinterpret_cast<ImageBuffer<rgba8_t>*>( texture.cpuImage );
 
 	imageBuffer->Destroy();
 	imageBuffer->Init( width, height );
