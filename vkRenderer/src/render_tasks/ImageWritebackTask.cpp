@@ -100,7 +100,6 @@ void ImageWritebackTask::FrameEnd()
 	{
 		info.fmt = IMAGE_FMT_RGBA_16;
 
-		Image img;
 		img.Create( info );
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );

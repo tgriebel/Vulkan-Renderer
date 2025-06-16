@@ -92,6 +92,7 @@ void BakeAssets()
 }
 
 MakeCVar( bool,		r_cubeCapture );
+MakeCVar( bool,		r_writeCubeCapture );
 MakeCVar( bool,		r_computeDiffuseIbl );
 MakeCVar( bool,		r_computeSpecularIbl );
 MakeCVar( char*,	c_scene );
@@ -121,6 +122,7 @@ int main( int argc, char* argv[] )
 
 	renderConfig_t config {};
 	config.useCubeViews = r_cubeCapture.GetBool();
+	config.writeCubeViews = r_writeCubeCapture.GetBool();
 	config.computeDiffuseIbl = r_computeDiffuseIbl.GetBool();
 	config.computeSpecularIBL = r_computeSpecularIbl.GetBool();
 	config.shadows = r_shadows.GetBool();
