@@ -143,6 +143,13 @@ uint32_t vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags propertie
 }
 
 
+int32_t vk_MapToGlslCubemapConvention( const uint32_t index )
+{
+	static const int32_t glslCubeMapping[ 6 ] = { 4, 5, 1, 0, 2, 3 };
+	return glslCubeMapping[ index ];
+}
+
+
 VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 {
 	imageSubResourceView_t subResourceView;

@@ -8,24 +8,33 @@
 
 ImageWritebackTask::ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
 {
-	if ( info.img != nullptr )
+	m_readbackImage = info.img;
+	if ( HasFlags( info.flags, CUBEMAP ) == false )
 	{
 		m_imageArray.Resize( 1 );
-		m_imageArray[ 0 ] = info.img;
-	}
-	else if ( info.imgCube != nullptr )
-	{
-		m_imageArray.Resize( 6 );
-		for ( uint32_t i = 0; i < 6; ++i )
-		{
-			// Sort the slices so serialization is ordered 
-			const uint32_t reorderIx = info.imgCube[ i ]->subResourceView.baseArray;
-			m_imageArray[ reorderIx ] = info.imgCube[ i ];
-		}
+		m_imageArray[ 0 ] = m_readbackImage;
 	}
 	else
 	{
-		assert( 0 );
+		assert( m_readbackImage->info.type == imageType_t::IMAGE_TYPE_CUBE );
+		
+		imageInfo_t info = m_readbackImage->info;
+		info.type = imageType_t::IMAGE_TYPE_2D;
+		m_imageArray.Resize( 6 );
+
+		for ( uint32_t i = 0; i < 6; ++i )
+		{
+			imageSubResourceView_t subView;
+			subView.arrayCount = 1;
+			subView.baseArray = vk_MapToGlslCubemapConvention( i );
+			subView.baseMip = 0;
+			subView.mipLevels = info.mipLevels;
+			
+			m_cubeViews[ subView.baseArray ].Init( *m_readbackImage, info, subView, resourceLifeTime_t::TASK );
+
+			// Sort the slices so serialization is ordered 
+			m_imageArray[ subView.baseArray ] = &m_cubeViews[ i ];
+		}
 	}
 	m_context = info.context;
 	m_resources = info.resources;
@@ -80,9 +89,8 @@ void ImageWritebackTask::FrameEnd()
 
 	assert( m_writebackBuffer.VisibleToCpu() );
 
-	// FIXME: Should writeback into the source image, not a separate copy
-	// This is just used for file output and not general CPU readbacks currently
-	Image img;
+	// Clear old CPU image
+	m_readbackImage->Destroy();
 
 	imageInfo_t info = m_imageArray[ 0 ]->info;
 	info.type = IMAGE_TYPE_2D;
@@ -100,12 +108,12 @@ void ImageWritebackTask::FrameEnd()
 	{
 		info.fmt = IMAGE_FMT_RGBA_16;
 
-		img.Create( info );
+		m_readbackImage->Create( info );
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
-		rgbaTupleh_t* convertedData = reinterpret_cast<rgbaTupleh_t*>( img.cpuImage->Ptr() );
+		rgbaTupleh_t* convertedData = reinterpret_cast<rgbaTupleh_t*>( m_readbackImage->cpuImage->Ptr() );
 
-		const uint32_t bufferLength = img.cpuImage->GetPixelCount();
+		const uint32_t bufferLength = m_readbackImage->cpuImage->GetPixelCount();
 		for ( uint32_t i = 0; i < bufferLength; ++i )
 		{
 			rgbaTupleh_t rgba16;
@@ -120,12 +128,12 @@ void ImageWritebackTask::FrameEnd()
 	}
 	else
 	{
-		img.Create( info );
+		m_readbackImage->Create( info );
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
-		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( img.cpuImage->Ptr() );
+		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( m_readbackImage->cpuImage->Ptr() );
 
-		const uint32_t bufferLength = img.cpuImage->GetPixelCount();
+		const uint32_t bufferLength = m_readbackImage->cpuImage->GetPixelCount();
 		for ( uint32_t i = 0; i < bufferLength; ++i )
 		{
 			Color color = Color( floatData[ 3 ], floatData[ 2 ], floatData[ 1 ], floatData[ 0 ] );
@@ -138,12 +146,12 @@ void ImageWritebackTask::FrameEnd()
 	{
 		if ( HasFlags( m_flags, SCREENSHOT ) )
 		{
-			WriteImage( ( ScreenshotPath + m_fileName ).c_str(), img );
+			WriteImage( ( ScreenshotPath + m_fileName ).c_str(), *m_readbackImage );
 		}
 		else
 		{
-			Serializer* s = new Serializer( img.cpuImage->GetByteCount() + 1024, serializeMode_t::STORE );
-			img.Serialize( s );
+			Serializer* s = new Serializer( m_readbackImage->cpuImage->GetByteCount() + 1024, serializeMode_t::STORE );
+			m_readbackImage->Serialize( s );
 			s->WriteFile( TexturePath + CodeAssetPath + m_fileName );
 			delete s;
 		}

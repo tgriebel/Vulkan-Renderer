@@ -133,6 +133,7 @@ bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, cons
 QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
+int32_t				vk_MapToGlslCubemapConvention( const uint32_t index );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );

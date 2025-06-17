@@ -285,20 +285,19 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 
 	ImageWritebackTask* imageCubemapWriteBackTask = nullptr;
-	if ( config.writeCubeViews )
+	if ( config.useCubeViews )
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "EnvironmentMapWriteback";
+		info.img = &resources.cubeFbColorImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "hdrEnvmap.img";
-		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		if ( config.writeCubeViews ) {
+			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		}
 		info.flags |= imageWritebackFlags_t::CUBEMAP;
 		info.flags |= imageWritebackFlags_t::PACKED_HDR;
-
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			info.imgCube[ i ] = &resources.cubeImageViews[ i ];
-		}
 
 		imageCubemapWriteBackTask = new ImageWritebackTask( info );
 	}
@@ -308,16 +307,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "DiffuseIblWriteback";
+		info.img = &resources.diffuseIblImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "hdrDiffuse.img";
 		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
 		info.flags |= imageWritebackFlags_t::CUBEMAP;
 		info.flags |= imageWritebackFlags_t::PACKED_HDR;
-
-		for( uint32_t i = 0; i < 6; ++i ) {
-			info.imgCube[ i ] = &resources.diffuseIblImageViews[ i ];
-		}
 
 		imageDiffuseIblWriteBackTask = new ImageWritebackTask( info );
 	}
@@ -327,16 +323,15 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		imageWriteBackCreateInfo_t info{};
 		info.name = "SpecularIblWriteback";
+		info.img = &resources.specularIblImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "hdrSpecular.img";
-		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		if ( config.writeCubeViews ) {
+			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+		}
 		info.flags |= imageWritebackFlags_t::CUBEMAP;
 		info.flags |= imageWritebackFlags_t::PACKED_HDR;
-
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			info.imgCube[ i ] = &resources.specularIblImageViews[ i ];
-		}
 
 		imageSpecularIblWriteBackTask = new ImageWritebackTask( info );
 	}
@@ -350,7 +345,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 		info.fileName = "screenshot.png";
 		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
-		info.flags |= imageWritebackFlags_t::CUBEMAP;
 		info.flags |= imageWritebackFlags_t::SCREENSHOT;
 		info.img = &resources.mainColorResolvedImage;
 
@@ -377,6 +371,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			for ( uint32_t i = 0; i < 6; ++i ) {
 				schedule.Queue( diffuseIBL[ i ] );
 			}
+			schedule.Queue( imageDiffuseIblWriteBackTask );
 		}
 		if ( config.computeSpecularIBL )
 		{
@@ -384,19 +379,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 			for ( uint32_t i = 0; i < 6; ++i ) {
 				schedule.Queue( specularIBL[ i ] );
 			}
+			schedule.Queue( imageSpecularIblWriteBackTask );
 		}
-	//	schedule.Queue( mipCubeTask );
-	}
-	schedule.Queue( resolve );
-	if ( config.writeCubeViews ) {
+		//schedule.Queue( mipCubeTask );
 		schedule.Queue( imageCubemapWriteBackTask );
 	}
-	if ( config.computeDiffuseIbl ) {
-		schedule.Queue( imageDiffuseIblWriteBackTask );
-	}
-	if ( config.computeSpecularIBL ) {
-		schedule.Queue( imageSpecularIblWriteBackTask );
-	}
+	schedule.Queue( resolve );
+
 	if( config.screenshot ) {
 		schedule.Queue( screenshotWriteback );
 	}

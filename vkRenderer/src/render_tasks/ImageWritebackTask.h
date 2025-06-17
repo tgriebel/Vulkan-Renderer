@@ -17,12 +17,11 @@ DEFINE_ENUM_OPERATORS( imageWritebackFlags_t, uint8_t )
 
 struct imageWriteBackCreateInfo_t
 {
-	const char* name;
-	const char* fileName;
-	Image* img;
-	ImageView* imgCube[ 6 ];
-	RenderContext* context;
-	ResourceContext* resources;
+	const char*				name;
+	const char*				fileName;
+	Image*					img;
+	RenderContext*			context;
+	ResourceContext*		resources;
 	imageWritebackFlags_t	flags;
 };
 
@@ -30,7 +29,9 @@ struct imageWriteBackCreateInfo_t
 class ImageWritebackTask : public GpuTask
 {
 private:
-	ImageArray				m_imageArray;
+	Image*					m_readbackImage;	// Image to readback data into
+	ImageArray				m_imageArray;		// For binding image views
+	ImageView				m_cubeViews[ 6 ];	// Make a view for each face
 	RenderContext*			m_context;
 	ResourceContext*		m_resources;
 	GpuBuffer				m_writebackBuffer;
