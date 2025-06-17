@@ -166,7 +166,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 				mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
 				viewMatrix[ 3 ][ 3 ] = 0.0f;
 
-				diffuseIBL[ i ]->SetSourceCubeImage( 0, &g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" )->Get() ); // FIXME: Stub
+				diffuseIBL[ i ]->SetSourceCubeImage( 0, &resources.cubeFbColorImage );
 				diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 			}
 
@@ -197,7 +197,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 				{
 					specConstants.roughness = mip / static_cast<float>( mipLevels - 1 );
 					specularIBL[ i ]->SetConstantsForLevel( mip, &specConstants, sizeof( specConstants ) );
-					specularIBL[ i ]->SetSourceImageForLevel( mip, &g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" )->Get() ); // FIXME: Stub
+					specularIBL[ i ]->SetSourceImageForLevel( mip, &resources.cubeFbColorImage );
 				}
 			}
 		}
