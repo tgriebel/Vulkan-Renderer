@@ -108,11 +108,35 @@ void ParseCmdArgs( const int argc, char* argv[] )
 	}
 }
 
+void ParseConfig( std::string& fileName )
+{
+	std::ifstream file;
+
+	file.open( fileName );
+
+	if ( !file.is_open() ) {
+		throw std::runtime_error( "Failed to open config file!" );
+	}
+
+	while ( file.good() )
+	{
+		std::string line;
+		getline( file, line );
+
+		CVar::ParseCommand( line );
+	}
+	file.close();
+}
+
 int main( int argc, char* argv[] )
 {
 	CreateCodeAssets(); // TODO: Check render dependencies, may need to move into render init?
 
-	ParseCmdArgs( argc, argv );
+	if( ( argc > 1 ) && HasSuffix( argv[ 1 ], ".ini" ) )
+	{
+		std::string fileName = argv[ 1 ];
+		ParseConfig( fileName );
+	}
 
 	if( c_scene.IsValid() ) {
 		LoadScene( c_scene.GetString(), &g_scene, &g_assets );
