@@ -316,6 +316,7 @@ void Renderer::Resize()
 	Transition( &uploadContext, resources.cubeFbDepthImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	Transition( &uploadContext, resources.diffuseIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.specularIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
@@ -380,6 +381,7 @@ void Renderer::UploadAssets()
 	Transition( &uploadContext, resources.cubeFbDepthImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	Transition( &uploadContext, resources.diffuseIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+	Transition( &uploadContext, resources.specularIblImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 
 	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
