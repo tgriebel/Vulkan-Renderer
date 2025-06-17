@@ -30,7 +30,7 @@ ImageWritebackTask::ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
 			subView.baseMip = 0;
 			subView.mipLevels = info.mipLevels;
 			
-			m_cubeViews[ subView.baseArray ].Init( *m_readbackImage, info, subView, resourceLifeTime_t::TASK );
+			m_cubeViews[ i ].Init( *m_readbackImage, info, subView, resourceLifeTime_t::TASK );
 
 			// Sort the slices so serialization is ordered 
 			m_imageArray[ subView.baseArray ] = &m_cubeViews[ i ];

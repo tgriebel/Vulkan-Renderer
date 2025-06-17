@@ -57,10 +57,12 @@ void main()
     vec3 right = normalize( cross( up, viewVector ) );
     up = normalize( cross( viewVector, right ) );
 
+    const  float lodBias = -10.0f;
+
 #if 0
     vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
     vec3 sampleVec = normalize( tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector );
-    outColor = texture( codeCubeSamplers[ 0 ], sampleVec );
+    outColor = texture( codeCubeSamplers[ 0 ], sampleVec, lodBias );
    // outColor.rgb = 0.5f * ( sampleVec + vec3( 1.0f, 1.0f, 1.0f ) );
     outColor.a = 1.0f;
 #else
@@ -80,7 +82,7 @@ void main()
         float NdotL = max( dot( N, L ), 0.0 );
         if ( NdotL > 0.0 )
         {
-            prefilteredColor += texture( codeCubeSamplers[ 0 ], L ).rgb * NdotL;
+            prefilteredColor += texture( codeCubeSamplers[ 0 ], L, lodBias ).rgb * NdotL;
             totalWeight += NdotL;
         }
     }

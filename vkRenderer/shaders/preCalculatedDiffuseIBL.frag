@@ -57,10 +57,12 @@ void main()
 
     vec3 irradiance = vec3( 0.0f );
 
+   const  float lodBias = -10.0f;
+
 #if 0
     vec3 tangentSample = vec3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
     vec3 sampleVec = normalize( tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector );
-    outColor = texture( codeCubeSamplers[ 0 ], sampleVec );
+    outColor = texture( codeCubeSamplers[ 0 ], sampleVec, lodBias );
     //outColor.rgb = 0.5f * ( sampleVec + vec3( 1.0f, 1.0f, 1.0f ) );
     outColor.a = 1.0f;
 #else
@@ -77,7 +79,7 @@ void main()
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
             sampleVec = normalize( sampleVec );
 
-            irradiance += texture( codeCubeSamplers[ 0 ], sampleVec ).rgb * cos( theta ) * sin( theta );
+            irradiance += texture( codeCubeSamplers[ 0 ], sampleVec, lodBias ).rgb * cos( theta ) * sin( theta );
             nrSamples++;
         }
     }
