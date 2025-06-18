@@ -124,15 +124,22 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( "_default", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			imageInfo_t info = DefaultImage2dInfo( 32, 32 );
+			const uint32_t cellSize = 16;
+
+			imageInfo_t info = DefaultImage2dInfo( 128, 128 );
 
 			texture.Create( info );
 
 			ImageBuffer<rgba8_t>* imageBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( texture.cpuImage );
 
-			for ( uint32_t y = 0; y < info.height; ++y ) {
-				for ( uint32_t x = 0; x < info.width; ++x ) {
-					const Color color = ( ( x % 2 ) == ( y % 2 ) ) ? ColorBlack : ColorWhite;
+			for ( uint32_t y = 0; y < info.height; ++y )
+			{
+				const uint32_t cellY = y / cellSize;
+				for ( uint32_t x = 0; x < info.width; ++x )
+				{
+					const uint32_t cellX = x / cellSize;
+					const float cellGradient = static_cast<float>( Max( 4, Max( abs(int( x % cellSize ) - 8), abs( int( y % cellSize ) - 8 ) ) ) / (0.5f * cellSize) );
+					const Color color = ( ( cellX % 2 ) == ( cellY % 2 ) ) ? Lerp( ColorBlack, ColorLGrey, cellGradient ) : Lerp( ColorDGrey, ColorWhite, cellGradient );
 					const rgba8_t pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 					imageBuffer->SetPixel( x, y, pixel );
 				}
