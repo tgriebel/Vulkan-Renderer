@@ -56,11 +56,27 @@ void ImageWritebackTask::Init()
 	writeBackParms_t writeBackParms {};
 
 	const uint32_t maxBpp = sizeof( vec4f ); // Data from the readback is float due to buffer restrictions
-	const uint32_t elementsCount = m_imageArray[ 0 ]->info.width * m_imageArray[ 0 ]->info.height * m_imageArray.Count();
-	m_writebackBuffer.Create( "Writeback Buffer", swapBuffering_t::MULTI_FRAME, resourceLifeTime_t::TASK, elementsCount, maxBpp, bufferType_t::STORAGE, m_context->sharedMemory );
-	m_resourceBuffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, 1, sizeof( writeBackParms ), bufferType_t::UNIFORM, m_context->sharedMemory );
+	const uint32_t elementsCount = m_readbackImage->info.width * m_readbackImage->info.height * m_readbackImage->info.layers * 2; // FIXME: double as quick hack
+	m_writebackBuffer.Create(
+		"Writeback Buffer",
+		swapBuffering_t::MULTI_FRAME,
+		resourceLifeTime_t::TASK,
+		elementsCount,
+		maxBpp,
+		bufferType_t::STORAGE,
+		m_context->sharedMemory
+	);
+	m_resourceBuffer.Create( 
+		"Resource buffer",
+		swapBuffering_t::SINGLE_FRAME,
+		resourceLifeTime_t::TASK,
+		1,
+		sizeof( writeBackParms ),
+		bufferType_t::UNIFORM,
+		m_context->sharedMemory
+	);
 
-	writeBackParms.dimensions = vec4f( (float)m_imageArray[ 0 ]->info.width, (float)m_imageArray[ 0 ]->info.height, (float)m_imageArray.Count(), 0.0f );
+	writeBackParms.dimensions = vec4f( (float)m_readbackImage->info.width, (float)m_readbackImage->info.height, (float)m_readbackImage->info.layers, (float)m_readbackImage->info.mipLevels );
 
 	m_resourceBuffer.SetPos( 0 );
 	m_resourceBuffer.CopyData( &writeBackParms, sizeof( writeBackParms ) );
@@ -171,10 +187,9 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 	{
 		const uint32_t blockSize = 8;
 
-		const Image* img = m_imageArray[ 0 ];
-		const uint32_t w = img->info.width;
-		const uint32_t h = img->info.height;
-		const uint32_t layers = m_imageArray.Count();
+		const uint32_t w = m_readbackImage->info.width;
+		const uint32_t h = m_readbackImage->info.height;
+		const uint32_t layers = m_readbackImage->info.layers;
 
 		struct pushConstants_t
 		{
@@ -184,14 +199,17 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 			uint32_t	baseOffset;
 		};
 
-		pushConstants_t constants {};
-		constants.dimensions = vec4f( (float)w, (float)h, (float)layers, 0.0f );
-		constants.imageId = 0;
-		constants.lod = 0;
-		constants.baseOffset = 0;
+		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
+		{
+			pushConstants_t constants {};
+			constants.dimensions = vec4f( (float)w, (float)h, (float)layers, 0.0f );
+			constants.imageId = 0;
+			constants.lod = mipLevel;
+			constants.baseOffset = mipLevel * w * h * layers;
 
-		const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
-		cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
+			const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
+			cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
+		}
 	}
 	else
 	{
