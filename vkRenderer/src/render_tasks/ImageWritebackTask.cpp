@@ -51,7 +51,7 @@ void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
 	writeBackParms_t writeBackParms {};
 
 	const uint32_t maxBpp = sizeof( vec4f ); // Data from the readback is float due to buffer restrictions
-	const uint32_t elementsCount = m_readbackImage->info.width * m_readbackImage->info.height * m_readbackImage->info.layers * 2; // FIXME: double as quick hack
+	const uint32_t elementsCount = MipPixelCount( m_readbackImage->info.width, m_readbackImage->info.height ) * m_readbackImage->info.layers; // Allocated as for padded out square MIPs
 	
 	m_writebackBuffer.Create(
 		"Writeback Buffer",
@@ -105,8 +105,6 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 	{
 		const uint32_t blockSize = 8;
 
-		const uint32_t w = m_readbackImage->info.width;
-		const uint32_t h = m_readbackImage->info.height;
 		const uint32_t layers = m_readbackImage->info.layers;
 
 		struct pushConstants_t
@@ -117,13 +115,20 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 			uint32_t	baseOffset;
 		};
 
+		uint32_t baseOffset = 0;
+
 		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
 		{
+			uint32_t w, h;
+			MipDimensions( mipLevel, m_readbackImage->info.width, m_readbackImage->info.height, &w, &h );
+
 			pushConstants_t constants {};
 			constants.dimensions = vec4f( (float)w, (float)h, (float)layers, 0.0f );
 			constants.imageId = 0;
 			constants.lod = mipLevel;
-			constants.baseOffset = mipLevel * w * h * layers;
+			constants.baseOffset = baseOffset;
+
+			baseOffset += w * h * layers; // Pack tightly without MIP padding
 
 			const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
 			cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
