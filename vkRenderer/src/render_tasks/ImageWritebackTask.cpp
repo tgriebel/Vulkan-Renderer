@@ -6,7 +6,7 @@
 #include "../render_binding/gpuResources.h"
 #include "../render_binding/bindings.h"
 
-ImageWritebackTask::ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
+void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
 {
 	m_readbackImage = info.img;
 	if ( HasFlags( info.flags, CUBEMAP ) == false )
@@ -17,7 +17,7 @@ ImageWritebackTask::ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
 	else
 	{
 		assert( m_readbackImage->info.type == imageType_t::IMAGE_TYPE_CUBE );
-		
+
 		imageInfo_t info = m_readbackImage->info;
 		info.type = imageType_t::IMAGE_TYPE_2D;
 		m_imageArray.Resize( 6 );
@@ -29,7 +29,7 @@ ImageWritebackTask::ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
 			subView.baseArray = vk_MapToGlslCubemapConvention( i );
 			subView.baseMip = 0;
 			subView.mipLevels = info.mipLevels;
-			
+
 			m_cubeViews[ i ].Init( *m_readbackImage, info, subView, resourceLifeTime_t::TASK );
 
 			// Sort the slices so serialization is ordered 
@@ -43,11 +43,6 @@ ImageWritebackTask::ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
 	m_flags = info.flags;
 	m_hasWriteback = false;
 
-	Init();
-}
-
-void ImageWritebackTask::Init()
-{
 	struct writeBackParms_t
 	{
 		vec4f		dimensions;
@@ -57,6 +52,7 @@ void ImageWritebackTask::Init()
 
 	const uint32_t maxBpp = sizeof( vec4f ); // Data from the readback is float due to buffer restrictions
 	const uint32_t elementsCount = m_readbackImage->info.width * m_readbackImage->info.height * m_readbackImage->info.layers * 2; // FIXME: double as quick hack
+	
 	m_writebackBuffer.Create(
 		"Writeback Buffer",
 		swapBuffering_t::MULTI_FRAME,
@@ -66,6 +62,7 @@ void ImageWritebackTask::Init()
 		bufferType_t::STORAGE,
 		m_context->sharedMemory
 	);
+
 	m_resourceBuffer.Create( 
 		"Resource buffer",
 		swapBuffering_t::SINGLE_FRAME,
@@ -76,7 +73,10 @@ void ImageWritebackTask::Init()
 		m_context->sharedMemory
 	);
 
-	writeBackParms.dimensions = vec4f( (float)m_readbackImage->info.width, (float)m_readbackImage->info.height, (float)m_readbackImage->info.layers, (float)m_readbackImage->info.mipLevels );
+	writeBackParms.dimensions = vec4f(	(float)m_readbackImage->info.width,
+										(float)m_readbackImage->info.height,
+										(float)m_readbackImage->info.layers,
+										(float)m_readbackImage->info.mipLevels );
 
 	m_resourceBuffer.SetPos( 0 );
 	m_resourceBuffer.CopyData( &writeBackParms, sizeof( writeBackParms ) );
@@ -91,6 +91,66 @@ void ImageWritebackTask::FrameBegin()
 	m_parms->Bind( bind_computeImage, &m_imageArray );
 	m_parms->Bind( bind_computeParms, &m_resourceBuffer );
 	m_parms->Bind( bind_computeWrite, &m_writebackBuffer );
+}
+
+
+void ImageWritebackTask::Execute( CommandContext& cmdContext )
+{
+	if ( HasFlags( m_flags, SCREENSHOT ) && g_imguiControls.captureScreenshot == false ) {
+		return;
+	}
+	g_imguiControls.captureScreenshot = false;
+
+	if ( HasFlags( m_flags, TRY_USE_API_COMMAND ) == false )
+	{
+		const uint32_t blockSize = 8;
+
+		const uint32_t w = m_readbackImage->info.width;
+		const uint32_t h = m_readbackImage->info.height;
+		const uint32_t layers = m_readbackImage->info.layers;
+
+		struct pushConstants_t
+		{
+			vec4f		dimensions;
+			uint32_t	imageId;
+			int32_t		lod;
+			uint32_t	baseOffset;
+		};
+
+		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
+		{
+			pushConstants_t constants {};
+			constants.dimensions = vec4f( (float)w, (float)h, (float)layers, 0.0f );
+			constants.imageId = 0;
+			constants.lod = mipLevel;
+			constants.baseOffset = mipLevel * w * h * layers;
+
+			const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
+			cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
+		}
+	}
+	else
+	{
+		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_SRC );
+
+		VkImageSubresourceLayers subLayers{};
+		subLayers.aspectMask = vk_GetAspectFlags( m_imageArray[ 0 ]->info.aspect );
+		subLayers.baseArrayLayer = 0;
+		subLayers.layerCount = 1;
+		subLayers.mipLevel = 0;
+
+		VkBufferImageCopy copyParms{};
+		copyParms.bufferOffset = 0;
+		copyParms.imageExtent.width = m_imageArray[ 0 ]->info.width;
+		copyParms.imageExtent.height = m_imageArray[ 0 ]->info.height;
+		copyParms.imageExtent.depth = 1;
+		copyParms.imageSubresource = subLayers;
+
+		vkCmdCopyImageToBuffer( cmdContext.CommandBuffer(), m_imageArray[ 0 ]->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_writebackBuffer.GetVkObject(), 1, &copyParms );
+
+		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_TRANSFER_SRC, GPU_IMAGE_READ );
+	}
+	m_hasWriteback = true;
 }
 
 
@@ -172,67 +232,6 @@ void ImageWritebackTask::FrameEnd()
 			delete s;
 		}
 	}
-}
-
-
-
-void ImageWritebackTask::Execute( CommandContext& cmdContext )
-{
-	if ( HasFlags( m_flags, SCREENSHOT ) && g_imguiControls.captureScreenshot == false ) {
-		return;
-	}
-	g_imguiControls.captureScreenshot = false;
-
-	if ( HasFlags( m_flags, TRY_USE_API_COMMAND ) == false )
-	{
-		const uint32_t blockSize = 8;
-
-		const uint32_t w = m_readbackImage->info.width;
-		const uint32_t h = m_readbackImage->info.height;
-		const uint32_t layers = m_readbackImage->info.layers;
-
-		struct pushConstants_t
-		{
-			vec4f		dimensions;
-			uint32_t	imageId;
-			int32_t		lod;
-			uint32_t	baseOffset;
-		};
-
-		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
-		{
-			pushConstants_t constants {};
-			constants.dimensions = vec4f( (float)w, (float)h, (float)layers, 0.0f );
-			constants.imageId = 0;
-			constants.lod = mipLevel;
-			constants.baseOffset = mipLevel * w * h * layers;
-
-			const hdl_t progHdl = AssetLibGpuProgram::Handle( "ImageWriteback" );
-			cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
-		}
-	}
-	else
-	{
-		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_SRC );
-
-		VkImageSubresourceLayers subLayers{};
-		subLayers.aspectMask = vk_GetAspectFlags( m_imageArray[ 0 ]->info.aspect );
-		subLayers.baseArrayLayer = 0;
-		subLayers.layerCount = 1;
-		subLayers.mipLevel = 0;
-
-		VkBufferImageCopy copyParms{};
-		copyParms.bufferOffset = 0;
-		copyParms.imageExtent.width = m_imageArray[ 0 ]->info.width;
-		copyParms.imageExtent.height = m_imageArray[ 0 ]->info.height;
-		copyParms.imageExtent.depth = 1;
-		copyParms.imageSubresource = subLayers;
-
-		vkCmdCopyImageToBuffer( cmdContext.CommandBuffer(), m_imageArray[ 0 ]->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_writebackBuffer.GetVkObject(), 1, &copyParms );
-
-		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_TRANSFER_SRC, GPU_IMAGE_READ );
-	}
-	m_hasWriteback = true;
 }
 
 

@@ -42,12 +42,15 @@ private:
 	imageWritebackFlags_t	m_flags;
 	bool					m_hasWriteback;
 
-	void Init();
+	void Init( const imageWriteBackCreateInfo_t& info );
 	void Shutdown();
 
 public:
 
-	ImageWritebackTask( const imageWriteBackCreateInfo_t& info );
+	ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
+	{
+		Init( info );
+	}
 
 	~ImageWritebackTask()
 	{
