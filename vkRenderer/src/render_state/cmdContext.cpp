@@ -304,7 +304,7 @@ void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 }
 
 
-void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buffer, const uint64_t bufferOffset )
+void CopyBufferToImage( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer, const uint64_t bufferOffset )
 {
 	cmdCommand->MarkerBeginRegion( "CopyBufferToImage", ColorToVector( ColorWhite ) );
 
@@ -316,11 +316,10 @@ void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buf
 	copyParms.width = image.info.width;
 	copyParms.height = image.info.height;
 	copyParms.depth = 1;
-	copyParms.mipLevel = 0;
-	copyParms.subView.baseArray = image.subResourceView.baseArray;
-	copyParms.subView.arrayCount = image.subResourceView.arrayCount;
-	copyParms.subView.baseMip = image.subResourceView.baseMip;
-	copyParms.subView.mipLevels = image.subResourceView.mipLevels;
+	copyParms.baseArray = subView.baseArray;
+	copyParms.arrayCount = subView.arrayCount;
+	copyParms.baseMip = subView.baseMip;
+	copyParms.mipLevels = subView.mipLevels;
 
 	vk_CopyBufferToImage( cmdCommand->CommandBuffer(), &image, copyParms, buffer, bufferOffset );
 

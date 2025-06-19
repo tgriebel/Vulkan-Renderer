@@ -32,6 +32,7 @@ class RenderContext;
 class DrawPass;
 class ImageView;
 class FrameBuffer;
+struct imageSubResourceView_t;
 
 enum gpuImageStateFlags_t : uint8_t;
 enum downSampleMode_t : uint32_t;
@@ -189,7 +190,7 @@ void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFl
 void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
-void CopyBufferToImage( CommandContext* cmdCommand, Image& image, GpuBuffer& buffer, const uint64_t bufferOffset );
+void CopyBufferToImage( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer, const uint64_t bufferOffset );
 void WritebackImage( CommandContext* cmdCommand, Image& image );
 void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode );
 void FlushGPU();

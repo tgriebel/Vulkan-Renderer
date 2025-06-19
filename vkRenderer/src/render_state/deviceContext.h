@@ -44,25 +44,20 @@ struct swapChainInfo_t
 	std::vector<VkPresentModeKHR>	presentModes;
 };
 
-struct copyImageSubViewParms_t
-{
-	uint32_t baseMip;
-	uint32_t mipLevels;
-	uint32_t baseArray;
-	uint32_t arrayCount;
-};
-
 
 struct copyImageParms_t
 {
-	copyImageSubViewParms_t	subView;
 	int32_t					x;
 	int32_t					y;
 	int32_t					z;
 	int32_t					width;
 	int32_t					height;
 	int32_t					depth;
-	int32_t					mipLevel;
+
+	uint32_t baseMip;
+	uint32_t mipLevels;
+	uint32_t baseArray;
+	uint32_t arrayCount;
 };
 
 

@@ -49,7 +49,13 @@ void Renderer::UpdateTextureData()
 
 		Transition( &uploadContext, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
-		CopyBufferToImage( &uploadContext, image, textureStagingBuffer, currentOffset );
+		imageSubResourceView_t subView {};
+		subView.baseMip = 0;
+		subView.mipLevels = 1;
+		subView.baseArray = 0;
+		subView.arrayCount = 1;
+
+		CopyBufferToImage( &uploadContext, image, subView, textureStagingBuffer, currentOffset );
 	
 		Transition( &uploadContext, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 	
@@ -90,7 +96,13 @@ void Renderer::UploadTextures()
 		const uint64_t currentOffset = textureStagingBuffer.GetSize();
 		textureStagingBuffer.CopyData( texture.cpuImage->Ptr(), texture.cpuImage->GetByteCount() );
 
-		CopyBufferToImage( &uploadContext, texture, textureStagingBuffer, currentOffset );
+		imageSubResourceView_t subView{};
+		subView.baseMip = 0;
+		subView.mipLevels = 1;
+		subView.baseArray = 0;
+		subView.arrayCount = texture.info.layers;
+
+		CopyBufferToImage( &uploadContext, texture, subView, textureStagingBuffer, currentOffset );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.gpuImage->SetId( imageFreeSlot );
