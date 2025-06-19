@@ -214,28 +214,26 @@ void ImageWritebackTask::FrameEnd()
 		m_readbackImage->Create( info );
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
-		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( m_readbackImage->cpuImage->Ptr() );
-
+		
 		//for ( uint32_t mipLevel = 0; mipLevel < 1; ++mipLevel )
-		//{
-		//	for ( uint32_t layer = 0; layer < m_readbackImage->info.layers; ++layer )
-		//	{
-		//		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( m_readbackImage->cpuImage->GetSlicePtr( layer, mipLevel ) );
-		//		for ( uint32_t i = 0; i < 1; ++i )
-		//		{
-		//			Color color = Color( floatData[ 3 ], floatData[ 2 ], floatData[ 1 ], floatData[ 0 ] );
-		//			convertedData[ i ] = color.AsRGBA();
-		//			floatData += 4;
-		//		}
-		//	}
-		//}
-
-		const uint32_t bufferLength = m_readbackImage->cpuImage->GetPixelCount();
-		for ( uint32_t i = 0; i < bufferLength; ++i )
 		{
-			Color color = Color( floatData[ 3 ], floatData[ 2 ], floatData[ 1 ], floatData[ 0 ] );
-			convertedData[ i ] = color.AsRGBA();
-			floatData += 4;
+			for ( uint32_t layer = 0; layer < m_readbackImage->info.layers; ++layer )
+			{
+				imageRawBuffer_t< rgba8_t > rawBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( m_readbackImage->cpuImage )->GetRawBuffer( layer, 0 );
+				rgba8_t* convertedData = rawBuffer.ptr;
+
+				for ( uint32_t i = 0; i < rawBuffer.pixelCount; ++i )
+				{
+					Color color = Color( floatData[ 0 ], floatData[ 1 ], floatData[ 2 ], floatData[ 3 ] );
+
+					if( HasFlags( m_flags, SCREENSHOT ) ) {	
+						color = LinearToSrgb( color );
+					}
+					convertedData[ i ] = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+						
+					floatData += 4;
+				}
+			}
 		}
 	}
 
