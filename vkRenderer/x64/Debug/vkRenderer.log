@@ -9,13 +9,13 @@
   imageView.cpp
   pipeline.cpp
   shaderBinding.cpp
-  gpuImage.cpp
   GpuSync.cpp
+  RenderTask.cpp
+  gpuImage.cpp
   renderCommand.cpp
-  renderer.cpp
   renderInit.cpp
   renderShutdown.cpp
-  RenderTask.cpp
+  renderer.cpp
   swapChain.cpp
   cmdContext.cpp
   Generating Code...
@@ -24,7 +24,7 @@
   frameBuffer.cpp
   ImageWritebackTask.cpp
   MipImageTask.cpp
-  window.cpp
   vulkinTestApp.cpp
+  window.cpp
   Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

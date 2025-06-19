@@ -190,7 +190,7 @@ void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFl
 void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
-void CopyBufferToImage( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer, const uint64_t bufferOffset );
+void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );
 void WritebackImage( CommandContext* cmdCommand, Image& image );
 void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode );
 void FlushGPU();

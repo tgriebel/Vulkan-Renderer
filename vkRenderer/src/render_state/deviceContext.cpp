@@ -766,20 +766,31 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 }
 
 
-void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, const copyImageParms_t& copyParms, GpuBuffer& buffer, const uint64_t bufferOffset )
+void vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* image, const copyImageParms_t& copyParms, GpuBuffer& buffer )
 {
 	std::vector<VkBufferImageCopy> regions;
 	regions.resize( copyParms.mipLevels );
 
-	for( uint32_t i = 0; i < copyParms.mipLevels; ++i )
+	for( uint32_t mip = 0; mip < copyParms.mipLevels; ++mip )
 	{
-		VkBufferImageCopy& region = regions[ i ];
+		const uint64_t bufferSize = buffer.GetSize();
+		const uint64_t alignmentOffset = buffer.GetAlignedSize( bufferSize, image->gpuImage->GetAlignment() );
+		buffer.SetPos( alignmentOffset );
+
+		VkBufferImageCopy& region = regions[ mip ];
 		memset( &region, 0, sizeof( VkBufferImageCopy ) );
 
-		region.bufferOffset = bufferOffset;
+		region.bufferOffset = buffer.GetSize();
 
-		region.imageSubresource.aspectMask = vk_GetAspectFlags( texture->info.aspect );
-		region.imageSubresource.mipLevel = copyParms.baseMip + i;
+		// Just assume continuous layers for now
+		for ( uint32_t layer = 0; layer < image->info.layers; ++layer )
+		{
+			const slice_t imageBuffer = image->cpuImage->GetSlice( layer, mip );
+			buffer.CopyData( imageBuffer.ptr, imageBuffer.size );
+		}
+
+		region.imageSubresource.aspectMask = vk_GetAspectFlags( image->info.aspect );
+		region.imageSubresource.mipLevel = copyParms.baseMip + mip;
 		region.imageSubresource.baseArrayLayer = copyParms.baseArray;
 		region.imageSubresource.layerCount = copyParms.arrayCount;
 
@@ -793,7 +804,7 @@ void vk_CopyBufferToImage( VkCommandBuffer cmdBuffer, Image* texture, const copy
 
 	vkCmdCopyBufferToImage( cmdBuffer,
 							buffer.GetVkObject(),
-							texture->gpuImage->GetVkImage( context.bufferId ),
+							image->gpuImage->GetVkImage( context.bufferId ),
 							VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 							static_cast<uint32_t>( regions.size() ),
 							regions.data()
