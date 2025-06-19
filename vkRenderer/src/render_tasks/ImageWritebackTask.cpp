@@ -51,7 +51,7 @@ void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
 	writeBackParms_t writeBackParms {};
 
 	const uint32_t maxBpp = sizeof( vec4f ); // Data from the readback is float due to buffer restrictions
-	const uint32_t elementsCount = MipPixelCount( m_readbackImage->info.width, m_readbackImage->info.height ) * m_readbackImage->info.layers; // Allocated as for padded out square MIPs
+	const uint32_t elementsCount = MipPixelCount( m_readbackImage->info.width, m_readbackImage->info.height ) * m_readbackImage->info.layers; // Allocated as for padded out MIPs
 	
 	m_writebackBuffer.Create(
 		"Writeback Buffer",
@@ -96,11 +96,13 @@ void ImageWritebackTask::FrameBegin()
 
 void ImageWritebackTask::Execute( CommandContext& cmdContext )
 {
-	if ( HasFlags( m_flags, SCREENSHOT ) && g_imguiControls.captureScreenshot == false ) {
-		return;
+	if ( HasFlags( m_flags, SCREENSHOT ) ) {
+		if( g_imguiControls.captureScreenshot == false ) {
+			return;
+		}
+		g_imguiControls.captureScreenshot = false;
 	}
-	g_imguiControls.captureScreenshot = false;
-
+	
 	if ( HasFlags( m_flags, TRY_USE_API_COMMAND ) == false )
 	{
 		const uint32_t blockSize = 8;
@@ -213,6 +215,20 @@ void ImageWritebackTask::FrameEnd()
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
 		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( m_readbackImage->cpuImage->Ptr() );
+
+		//for ( uint32_t mipLevel = 0; mipLevel < 1; ++mipLevel )
+		//{
+		//	for ( uint32_t layer = 0; layer < m_readbackImage->info.layers; ++layer )
+		//	{
+		//		rgba8_t* convertedData = reinterpret_cast<rgba8_t*>( m_readbackImage->cpuImage->GetSlicePtr( layer, mipLevel ) );
+		//		for ( uint32_t i = 0; i < 1; ++i )
+		//		{
+		//			Color color = Color( floatData[ 3 ], floatData[ 2 ], floatData[ 1 ], floatData[ 0 ] );
+		//			convertedData[ i ] = color.AsRGBA();
+		//			floatData += 4;
+		//		}
+		//	}
+		//}
 
 		const uint32_t bufferLength = m_readbackImage->cpuImage->GetPixelCount();
 		for ( uint32_t i = 0; i < bufferLength; ++i )

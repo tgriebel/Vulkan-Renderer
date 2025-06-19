@@ -351,6 +351,19 @@ void Renderer::Init( const renderConfig_t& cfg )
 		screenshotWriteback = new ImageWritebackTask( info );
 	}
 
+	ImageWritebackTask* testMipWriteTask = nullptr;
+	{
+		imageWriteBackCreateInfo_t info{};
+		info.name = "MipMapWriteBack";
+		info.img = &g_assets.textureLib.GetDefault()->Get();
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.fileName = "mipmap.img";
+		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+
+		testMipWriteTask = new ImageWritebackTask( info );
+	}
+
 	InitShaderResources();
 
 	InitImGui( *view2Ds[ 0 ] );
@@ -385,6 +398,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		schedule.Queue( imageCubemapWriteBackTask );
 	}
 	schedule.Queue( resolve );
+	//schedule.Queue( testMipWriteTask );
 
 	if( config.screenshot ) {
 		schedule.Queue( screenshotWriteback );
