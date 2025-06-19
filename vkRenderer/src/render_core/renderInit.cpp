@@ -398,7 +398,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		schedule.Queue( imageCubemapWriteBackTask );
 	}
 	schedule.Queue( resolve );
-	//schedule.Queue( testMipWriteTask );
+	schedule.Queue( testMipWriteTask );
 
 	if( config.screenshot ) {
 		schedule.Queue( screenshotWriteback );
@@ -661,7 +661,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::SINGLE_FRAME,
 			resourceLifeTime_t::REBOOT,
 			1,
-			192 * MB_1,
+			500 * MB_1,
 			bufferType_t::STAGING,
 			renderContext.sharedMemory
 		);

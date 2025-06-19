@@ -43,7 +43,6 @@ void CreateCodeAssets()
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
 			imageInfo_t info = DefaultImage2dInfo( 256, 240 );
-			info.generateMips = false;
 
 			texture.Create( info );
 

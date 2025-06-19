@@ -77,6 +77,10 @@
 	  "name": "code_assets/hdrSpecular.img",
 	  "type": "CUBE"
 	},
+	{
+	  "name": "code_assets/mipmap.img",
+	  "type": "CUBE"
+	},
   ],
   "materials": [
     {

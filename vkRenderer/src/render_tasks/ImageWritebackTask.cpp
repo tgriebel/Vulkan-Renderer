@@ -215,11 +215,11 @@ void ImageWritebackTask::FrameEnd()
 
 		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
 		
-		//for ( uint32_t mipLevel = 0; mipLevel < 1; ++mipLevel )
+		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
 		{
 			for ( uint32_t layer = 0; layer < m_readbackImage->info.layers; ++layer )
 			{
-				imageRawBuffer_t< rgba8_t > rawBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( m_readbackImage->cpuImage )->GetRawBuffer( layer, 0 );
+				imageRawBuffer_t< rgba8_t > rawBuffer = reinterpret_cast<ImageBuffer<rgba8_t>*>( m_readbackImage->cpuImage )->GetRawBuffer( layer, mipLevel );
 				rgba8_t* convertedData = rawBuffer.ptr;
 
 				for ( uint32_t i = 0; i < rawBuffer.pixelCount; ++i )
@@ -245,9 +245,14 @@ void ImageWritebackTask::FrameEnd()
 		}
 		else
 		{
-			Serializer* s = new Serializer( m_readbackImage->cpuImage->GetByteCount() + 1024, serializeMode_t::STORE );
+			bool mipSetting = m_readbackImage->generateMips;
+			m_readbackImage->generateMips = false;
+
+			Serializer* s = new Serializer( m_readbackImage->cpuImage->GetByteCount() + 1024, serializeMode_t::STORE );		
 			m_readbackImage->Serialize( s );
 			s->WriteFile( TexturePath + CodeAssetPath + m_fileName );
+
+			m_readbackImage->generateMips = mipSetting;
 			delete s;
 		}
 	}

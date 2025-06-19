@@ -88,7 +88,7 @@ void Renderer::UploadTextures()
 
 		imageSubResourceView_t subView{};
 		subView.baseMip = 0;
-		subView.mipLevels = 1;
+		subView.mipLevels = texture.generateMips ? 1 : texture.info.mipLevels;
 		subView.baseArray = 0;
 		subView.arrayCount = texture.info.layers;
 
@@ -107,7 +107,7 @@ void Renderer::UploadTextures()
 			continue;
 		}
 		Image& texture = textureAsset->Get();
-		if( texture.info.generateMips == false )
+		if( texture.generateMips == false )
 		{
 			Transition( &uploadContext, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 			continue;

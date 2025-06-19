@@ -771,12 +771,12 @@ void vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* image, const copyImag
 	std::vector<VkBufferImageCopy> regions;
 	regions.resize( copyParms.mipLevels );
 
+	const uint64_t bufferSize = buffer.GetSize();
+	const uint64_t alignmentOffset = buffer.GetAlignedSize( bufferSize, image->gpuImage->GetAlignment() );
+	buffer.SetPos( alignmentOffset );
+
 	for( uint32_t mip = 0; mip < copyParms.mipLevels; ++mip )
 	{
-		const uint64_t bufferSize = buffer.GetSize();
-		const uint64_t alignmentOffset = buffer.GetAlignedSize( bufferSize, image->gpuImage->GetAlignment() );
-		buffer.SetPos( alignmentOffset );
-
 		VkBufferImageCopy& region = regions[ mip ];
 		memset( &region, 0, sizeof( VkBufferImageCopy ) );
 
@@ -794,11 +794,17 @@ void vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* image, const copyImag
 		region.imageSubresource.baseArrayLayer = copyParms.baseArray;
 		region.imageSubresource.layerCount = copyParms.arrayCount;
 
-		region.imageOffset = { copyParms.x, copyParms.y, copyParms.z };
+		uint32_t mipWidth, mipHeight;
+		MipDimensions( mip, copyParms.width, copyParms.height, &mipWidth, &mipHeight );
+
+		const int32_t x = static_cast<int32_t>( ( copyParms.x / (float)copyParms.width ) * mipWidth );
+		const int32_t y = static_cast<int32_t>( ( copyParms.y / (float)copyParms.height ) * mipHeight );
+
+		region.imageOffset = { x, y, 0 };
 		region.imageExtent = {
-			static_cast<uint32_t>( copyParms.width ),
-			static_cast<uint32_t>( copyParms.height ),
-			static_cast<uint32_t>( copyParms.depth ),
+			static_cast<uint32_t>( mipWidth ),
+			static_cast<uint32_t>( mipHeight ),
+			static_cast<uint32_t>( 1.0f ),
 		};
 	}
 
