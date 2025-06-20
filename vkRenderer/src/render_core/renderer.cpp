@@ -668,7 +668,7 @@ void Renderer::UpdateBuffers()
 			Asset<Image>* diffuseIblAsset = g_assets.textureLib.Find( "code_assets/hdrDiffuse.img" );
 			const uint32_t diffuseIblCubeId = diffuseIblAsset->Get().gpuImage->GetId();
 
-			Asset<Image>* envCubeAsset = g_assets.textureLib.Find( "code_assets/hdrEnvmap.img" );
+			Asset<Image>* envCubeAsset = g_assets.textureLib.Find( "code_assets/hdrSpecular.img" );
 			const uint32_t envCubeId = envCubeAsset->Get().gpuImage->GetId();
 
 			const drawSurfInstance_t* instances = view.drawGroup[ passIx ].Instances();

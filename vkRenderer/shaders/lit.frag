@@ -67,20 +67,17 @@ void main()
     const float blendFactor = 0.0f;
     const vec3 normal = fragTangentBasis * mix( vec3( 0.0f, 0.0f, 1.0f ), normalTex, blendFactor );
 
-    const vec3 v = normalize( cameraOrigin.xyz - worldPosition.xyz );
-    const vec3 n = normalize( normal ); // normalize( worldPosition.xyz - modelOrigin );
-    const vec3 viewDiffuse = dot( v, n ).xxx;
+    const vec3 V = normalize( cameraOrigin.xyz - worldPosition.xyz );
+    const vec3 N = normalize( normal ); // normalize( worldPosition.xyz - modelOrigin );
+    const vec3 viewDiffuse = dot( V, N ).xxx;
 
     const uint diffuseIBL = ubo.surface[ objectId ].diffuseIblCubeId;
-    const uint envIBL = ubo.surface[ objectId ].envCubeId;
+    const uint specularIBL = ubo.surface[ objectId ].envCubeId;
+    const uint brdfLutId = globals.brdfLutId;
 
     const int MaxRreflectionLod = 4;
 
-    const vec3 r = reflect( -v, n );
-    const int MipLevels = min( textureQueryLevels( cubeSamplers[ diffuseIBL ] ), MaxRreflectionLod );
-    //const vec3 envMap = SrgbToLinear( textureLod( cubeSamplers[ envIBL ], r, perceptualRoughness * MipLevels ) ).rgb; // FIXME: HACK
-
-    float NoV = max( dot( n, v ), 0.0f );
+    float NoV = max( dot( N, V ), 0.0f );
 
     float metallic = 0.0f;//metalnessTex.r;
 	
@@ -97,12 +94,12 @@ void main()
     {
         const light_t light = lightUbo.lights[ i ];
 
-	    const vec3 l = normalize( light.lightPos.xyz - worldPosition.xyz );
-        const vec3 h = normalize( v + l );
+	    const vec3 L = normalize( light.lightPos.xyz - worldPosition.xyz );
+        const vec3 H = normalize( V + L );
 
-        const float NoL = max( dot( n, l ), 0.0f );
-        const float NoH = max( dot( n, h ), 0.0f );
-        const float LoH = max( dot( l, h ), 0.0f );
+        const float NoL = max( dot( N, L ), 0.0f );
+        const float NoH = max( dot( N, H ), 0.0f );
+        const float LoH = max( dot( L, H ), 0.0f );
 
         const float D   = D_GGX( NoH, perceptualRoughness );
         const float G   = G_Smith( NoV, NoL, perceptualRoughness );      
@@ -116,10 +113,10 @@ void main()
         float denominator   = 4.0f * NoV * NoL + 0.0001;
         vec3 Fr             = numerator / denominator;
 
-        const float spotAngle = dot( l, light.lightDir.xyz );
+        const float spotAngle = dot( L, light.lightDir.xyz );
         const float spotFov = 0.5f;
                
-        const float distance    = length( l );
+        const float distance    = length( L );
         const float attenuation = 1.0f / ( distance * distance );
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
         const vec3 radiance     = attenuation * spotFalloff * light.intensity.rgb;
@@ -155,6 +152,15 @@ void main()
         Lo += shadowing * diffuse;
     }
 
+    const vec3 F = F_SchlickRoughness( NoV, F0, perceptualRoughness );
+
+    const vec3 R = reflect( -V, N );
+    const int MipLevels = min( textureQueryLevels( cubeSamplers[ specularIBL ] ), MaxRreflectionLod );
+    const vec3 specIBL = textureLod( cubeSamplers[ specularIBL ], R, perceptualRoughness * MipLevels ).rgb;
+
+    const vec2 envBRDF = texture( texSampler[ brdfLutId ], vec2( NoV, perceptualRoughness ) ).rg;
+    const vec3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
+
     vec3 kS = F_Schlick( NoV, F0 );
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
@@ -164,20 +170,20 @@ void main()
                             0.0f, 1.0f, 0.0f, 0.0f,
                             0.0f, 0.0f, 0.0f, 0.0f );
 
-    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], (glslSpace * vec4( n, 0.0f )).xyz ).rgb * material.Ka.rgb;
+    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], (glslSpace * vec4( N, 0.0f )).xyz ).rgb * material.Ka.rgb;
     const vec3 diffuse = irradiance * albedoColor;
-    const vec3 ambient = ( kD * diffuse ) * ao;
+    const vec3 ambient = ( kD * diffuse + specular ) * ao;
 
     outColor.rgb = Lo + ambient;
     outColor.a = 1.0f;
 
-    outColor1.rgb = 0.5f * ( n + vec3( 1.0f, 1.0f, 1.0f ) );
+    outColor1.rgb = 0.5f * ( N + vec3( 1.0f, 1.0f, 1.0f ) );
     //outColor1.rgb = vec3( fragTexCoord.xy, 0.0f );
     outColor1.a = 1.0f;
 
     //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
 	outColor.a = material.Tr;
 //  outColor.rgb = envColor.rgb;
-//  outColor.rgb = 0.5f * n + vec3( 0.5f, 0.5f, 0.5f );
+//  outColor.rgb = 0.5f * N + vec3( 0.5f, 0.5f, 0.5f );
 //  outColor.rg = fragTexCoord.rb;
 }
