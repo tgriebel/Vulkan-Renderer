@@ -595,7 +595,7 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 	dstBarrier.subresourceRange.aspectMask = dstAspect;
 	dstBarrier.subresourceRange.baseArrayLayer = dstParms.baseArray;
 	dstBarrier.subresourceRange.layerCount = dstParms.arrayCount;
-	dstBarrier.subresourceRange.baseMipLevel = 0;
+	dstBarrier.subresourceRange.baseMipLevel = dstParms.baseMip;
 	dstBarrier.subresourceRange.levelCount = 1;
 
 	// Transition source image
@@ -642,7 +642,7 @@ static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, co
 		blit.dstSubresource.aspectMask = dstAspect;
 		blit.dstSubresource.baseArrayLayer = dstParms.baseArray;
 		blit.dstSubresource.layerCount = dstParms.arrayCount;
-		blit.dstSubresource.mipLevel = 0;
+		blit.dstSubresource.mipLevel = dstParms.baseMip;
 
 		vkCmdBlitImage( cmdBuffer,
 						src->gpuImage->GetVkImage( context.bufferId ),

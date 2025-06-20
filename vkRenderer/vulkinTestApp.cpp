@@ -145,8 +145,8 @@ int main( int argc, char* argv[] )
 	}
 
 	renderConfig_t config {};
-	config.useCubeViews = r_cubeCapture.GetBool();
-	config.writeCubeViews = r_writeCubeCapture.GetBool();
+	config.useCubeViews = r_cubeCapture.GetBool() || r_computeDiffuseIbl.GetBool() || r_computeSpecularIbl.GetBool();
+	config.writeCubeViews = r_writeCubeCapture.GetBool() || r_computeDiffuseIbl.GetBool() || r_computeSpecularIbl.GetBool();
 	config.computeDiffuseIbl = r_computeDiffuseIbl.GetBool();
 	config.computeSpecularIBL = r_computeSpecularIbl.GetBool();
 	config.shadows = r_shadows.GetBool();

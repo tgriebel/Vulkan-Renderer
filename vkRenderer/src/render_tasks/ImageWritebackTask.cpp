@@ -187,34 +187,51 @@ void ImageWritebackTask::FrameEnd()
 		info.layers = 6;
 	}
 
+	/*/
+	Color debugLayerColors[ 6 ] =
+	{
+		ColorRed,
+		ColorPink,
+		ColorGreen,
+		ColorYellow,
+		ColorBlue,
+		ColorCyan
+	};
+	*/
+
+	float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
+
 	if ( HasFlags( m_flags, PACKED_HDR ) )
 	{
 		info.fmt = IMAGE_FMT_RGBA_16;
 
 		m_readbackImage->Create( info );
-
-		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
-		rgbaTupleh_t* convertedData = reinterpret_cast<rgbaTupleh_t*>( m_readbackImage->cpuImage->Ptr() );
-
-		const uint32_t bufferLength = m_readbackImage->cpuImage->GetPixelCount();
-		for ( uint32_t i = 0; i < bufferLength; ++i )
+		
+		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
 		{
-			rgbaTupleh_t rgba16;
-			rgba16.r = PackFloat32( floatData[ 3 ] );
-			rgba16.g = PackFloat32( floatData[ 2 ] );
-			rgba16.b = PackFloat32( floatData[ 1 ] );
-			rgba16.a = PackFloat32( floatData[ 0 ] );
+			for ( uint32_t layer = 0; layer < m_readbackImage->info.layers; ++layer )
+			{
+				imageRawBuffer_t< rgba16_t > rawBuffer = reinterpret_cast<ImageBuffer<rgba16_t>*>( m_readbackImage->cpuImage )->GetRawBuffer( layer, mipLevel );
+				rgba16_t* convertedData = rawBuffer.ptr;
 
-			convertedData[ i ] = rgba16;
-			floatData += 4;
+				for ( uint32_t i = 0; i < rawBuffer.pixelCount; ++i )
+				{
+					rgba16_t rgba16;
+					rgba16.r = PackFloat32( floatData[ 3 ] );
+					rgba16.g = PackFloat32( floatData[ 2 ] );
+					rgba16.b = PackFloat32( floatData[ 1 ] );
+					rgba16.a = PackFloat32( floatData[ 0 ] );
+
+					convertedData[ i ] = rgba16;
+					floatData += 4;
+				}
+			}
 		}
 	}
 	else
 	{
 		m_readbackImage->Create( info );
 
-		float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
-		
 		for ( uint32_t mipLevel = 0; mipLevel < m_readbackImage->info.mipLevels; ++mipLevel )
 		{
 			for ( uint32_t layer = 0; layer < m_readbackImage->info.layers; ++layer )
