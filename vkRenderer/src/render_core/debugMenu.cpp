@@ -39,7 +39,7 @@ static bool EditFloat( float& f )
 }
 
 
-static bool EditRgb( rgbTuplef_t& rgb )
+static bool EditRgb( rgb32_t& rgb )
 {
 	ImGui::PushItemWidth( 3 * defaultWidth );
 
@@ -125,7 +125,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									ImGui::PushID( ( matAsset->GetName() + "." + #VALUE ).c_str() ); \
 									ImGui::Text( #VALUE );									\
 									ImGui::SameLine();										\
-									rgbTuplef_t rgb = mat.##VALUE();						\
+									rgb32_t rgb = mat.##VALUE();							\
 									if( EditRgb( rgb ) ) {									\
 										mat.##VALUE( rgb );									\
 										matAsset->QueueUpload();							\
@@ -413,7 +413,7 @@ void DebugMenuLightEdit( Scene* scene )
 
 			ImGui::PopItemWidth();
 
-			rgbTuplef_t rgb = scene->lights[ i ].color.AsRGBf();
+			rgb32_t rgb = scene->lights[ i ].color.AsRGBf();
 			
 			EditRgb( rgb );
 
