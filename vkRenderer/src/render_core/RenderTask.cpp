@@ -160,12 +160,12 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 		const GeometryContext* geo = drawGroup->Geometry();
 
+		cmdContext->MarkerBeginRegion( pass->Name(), ColorToVector( Color::Gold ) );
+
 		VkBuffer vertexBuffers[] = { geo->vb.GetVkObject() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers( cmdContext->CommandBuffer(), 0, 1, vertexBuffers, offsets );
 		vkCmdBindIndexBuffer( cmdContext->CommandBuffer(), geo->ib.GetVkObject(), 0, VK_INDEX_TYPE_UINT32 );
-
-		cmdContext->MarkerBeginRegion( pass->Name(), ColorToVector( Color::White ) );
 
 		const viewport_t& viewport = pass->GetViewport();
 
@@ -278,7 +278,7 @@ void RenderTask::FrameEnd()
 
 void RenderTask::Execute( CommandContext& context )
 {
-	context.MarkerBeginRegion( renderView->GetName(), ColorToVector( Color::White ) );
+	context.MarkerBeginRegion( renderView->GetName(), ColorToVector( Color::Cyan ) );
 
 	RenderViewSurfaces( reinterpret_cast<GfxContext*>( &context ) );
 

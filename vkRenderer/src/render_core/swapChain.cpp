@@ -81,6 +81,9 @@ void SwapChain::WaitOnFlip( GpuSemaphore& signalSemaphore )
 
 bool SwapChain::Present( GfxContext& gfxContext )
 {
+	bool ret = 0;
+
+#ifdef USE_VULKAN
 	VkSubmitInfo submitInfo{ };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -99,11 +102,10 @@ bool SwapChain::Present( GfxContext& gfxContext )
 	presentInfo.pResults = nullptr; // Optional
 
 	VkResult result = vkQueuePresentKHR( context.presentQueue, &presentInfo );
-	if( ( result == VK_ERROR_OUT_OF_DATE_KHR ) || ( result == VK_SUBOPTIMAL_KHR ) ) {
-		return false;
-	} else {
-		return true;
-	}
+
+	ret = !( ( result == VK_ERROR_OUT_OF_DATE_KHR ) && ( result == VK_SUBOPTIMAL_KHR ) );
+#endif
+	return ret;
 }
 
 

@@ -46,6 +46,7 @@ VkCommandBuffer& CommandContext::CommandBuffer()
 
 void CommandContext::Begin()
 {
+#ifdef USE_VULKAN
 	vkResetCommandBuffer( CommandBuffer(), 0 );
 
 	waitSemaphores.clear();
@@ -57,6 +58,7 @@ void CommandContext::Begin()
 	beginInfo.pInheritanceInfo = nullptr; // Optional
 
 	VK_CHECK_RESULT( vkBeginCommandBuffer( CommandBuffer(), &beginInfo ) );
+#endif
 
 	isOpen = true;
 }
@@ -64,7 +66,10 @@ void CommandContext::Begin()
 
 void CommandContext::End()
 {
+#ifdef USE_VULKAN
 	VK_CHECK_RESULT( vkEndCommandBuffer( CommandBuffer() ) );
+#endif
+
 	isOpen = false;
 }
 
@@ -73,6 +78,7 @@ void CommandContext::Create( const char* name, RenderContext* renderContext )
 {
 	m_renderContext = renderContext;
 
+#ifdef USE_VULKAN
 	// Pool creation
 	{
 		VkCommandPoolCreateInfo poolInfo{ };
@@ -99,13 +105,16 @@ void CommandContext::Create( const char* name, RenderContext* renderContext )
 			vk_MarkerSetObjectName( (uint64_t)commandBuffers[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT, name );
 		}
 	}
+#endif
 }
 
 
 void CommandContext::Destroy()
 {
+#ifdef USE_VULKAN
 	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MaxFrameStates ), commandBuffers );
 	vkDestroyCommandPool( context.device, commandPool, nullptr );
+#endif
 }
 
 
@@ -125,6 +134,7 @@ void CommandContext::MarkerBeginRegion( const char* pMarkerName, const vec4f& co
 {
 	if ( context.debugMarkersEnabled )
 	{
+#ifdef USE_VULKAN
 		VkDebugMarkerMarkerInfoEXT markerInfo = {};
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		markerInfo.color[ 0 ] = color[ 0 ];
@@ -133,6 +143,7 @@ void CommandContext::MarkerBeginRegion( const char* pMarkerName, const vec4f& co
 		markerInfo.color[ 3 ] = color[ 3 ];
 		markerInfo.pMarkerName = pMarkerName;
 		context.fnCmdDebugMarkerBegin( CommandBuffer(), &markerInfo );
+#endif
 	}
 }
 
@@ -141,7 +152,9 @@ void CommandContext::MarkerEndRegion()
 {
 	if ( context.debugMarkersEnabled && ( context.fnCmdDebugMarkerEnd != nullptr ) )
 	{
+#ifdef USE_VULKAN
 		context.fnCmdDebugMarkerEnd( CommandBuffer() );
+#endif
 	}
 }
 
@@ -150,17 +163,20 @@ void CommandContext::MarkerInsert( std::string markerName, const vec4f& color )
 {
 	if ( context.debugMarkersEnabled )
 	{
+#ifdef USE_VULKAN
 		VkDebugMarkerMarkerInfoEXT markerInfo = {};
 		markerInfo.sType = VK_STRUCTURE_TYPE_DEBUG_MARKER_MARKER_INFO_EXT;
 		memcpy( markerInfo.color, &color[ 0 ], sizeof( float ) * 4 );
 		markerInfo.pMarkerName = markerName.c_str();
 		context.fnCmdDebugMarkerInsert( CommandBuffer(), &markerInfo );
+#endif
 	}
 }
 
 
 void CommandContext::Submit( const GpuFence* fence )
 {
+#ifdef USE_VULKAN
 	VkSubmitInfo submitInfo{ };
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -203,6 +219,7 @@ void CommandContext::Submit( const GpuFence* fence )
 	VkQueue vk_queue = ( queueType == QUEUE_COMPUTE ) ? context.computeContext : context.gfxContext;
 
 	VK_CHECK_RESULT( vkQueueSubmit( vk_queue, 1, &submitInfo, vk_fence ) );
+#endif
 }
 
 
@@ -225,6 +242,7 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipelineHdl, &pipelineObject );
 
+#ifdef USE_VULKAN
 	VkCommandBuffer cmdBuffer = CommandBuffer();
 
 	if ( pipelineObject != nullptr )
@@ -245,6 +263,7 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 		MarkerEndRegion();
 	}
+#endif
 }
 
 
@@ -262,7 +281,9 @@ void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t
 	subview.mipLevels = image.info.mipLevels;
 	subview.arrayCount = image.info.layers;
 
+#ifdef USE_VULKAN
 	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, subview, buffering, current, next );
+#endif
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -278,7 +299,9 @@ void Transition( CommandContext* cmdCommand, ImageView& imageView, swapBuffering
 {
 	cmdCommand->MarkerBeginRegion( "Transition Image View", ColorToVector( ColorWhite ) );
 
+#ifdef USE_VULKAN
 	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &imageView, imageView.subResourceView, buffering, current, next );
+#endif
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -288,7 +311,9 @@ void GenerateMipmaps( CommandContext* cmdCommand, Image& image )
 {
 	cmdCommand->MarkerBeginRegion( "GenerateMips", ColorToVector( ColorWhite ) );
 
+#ifdef USE_VULKAN
 	vk_GenerateMipmaps( cmdCommand->CommandBuffer(), &image );
+#endif
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -298,7 +323,9 @@ void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 {
 	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
 
+#ifdef USE_VULKAN
 	vk_CopyImage( cmdCommand->CommandBuffer(), src, dst );
+#endif
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -321,7 +348,9 @@ void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResource
 	copyParms.baseMip = subView.baseMip;
 	copyParms.mipLevels = subView.mipLevels;
 
+#ifdef USE_VULKAN
 	vk_UploadImageData( cmdCommand->CommandBuffer(), &image, copyParms, buffer );
+#endif
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -359,7 +388,9 @@ void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>&
 {
 	cmdCommand->MarkerBeginRegion( "GenerateDownsampleMips", ColorToVector( ColorWhite ) );
 
+#ifdef USE_VULKAN
 	vk_GenerateDownsampleMips( *cmdCommand, views, passes, mode );
+#endif
 
 	cmdCommand->MarkerEndRegion();
 }
@@ -367,5 +398,7 @@ void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>&
 
 void FlushGPU()
 {
+#ifdef USE_VULKAN
 	vkDeviceWaitIdle( context.device );
+#endif
 }

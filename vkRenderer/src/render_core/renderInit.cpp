@@ -132,8 +132,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 	CopyImageTask* copyCubeToSpecularIbl = nullptr;
 	if ( config.useCubeViews )
 	{
-		const int glslCubeMapping[ 6 ] = { 4, 5, 1, 0, 2, 3 };
-
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
 			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
@@ -177,7 +175,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 				mipProcessCreateInfo_t info = {};
 				info.name = "SpecularIbl";
 				info.img = &resources.specularIblImage;
-				info.layer = glslCubeMapping[ i ];
+				info.layer = vk_MapToGlslCubemapConvention( i );
 				info.context = &renderContext;
 				info.resources = &resources;
 				info.mode = downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL;
@@ -893,8 +891,6 @@ void Renderer::CreateFramebuffers()
 		);
 	}
 
-	const int glslCubeMapping[ 6 ] = { 4, 5, 1, 0, 2, 3 };
-
 	// Cube images
 	{
 		imageInfo_t colorInfo{};
@@ -936,7 +932,7 @@ void Renderer::CreateFramebuffers()
 		{
 			imageSubResourceView_t subView;
 			subView.arrayCount = 1;
-			subView.baseArray = glslCubeMapping[ i ];
+			subView.baseArray = vk_MapToGlslCubemapConvention( i );
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
 
@@ -975,7 +971,7 @@ void Renderer::CreateFramebuffers()
 		{
 			imageSubResourceView_t subView;
 			subView.arrayCount = 1;
-			subView.baseArray = glslCubeMapping[ i ];
+			subView.baseArray = vk_MapToGlslCubemapConvention( i );
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
 
@@ -1009,7 +1005,7 @@ void Renderer::CreateFramebuffers()
 		{
 			imageSubResourceView_t subView;
 			subView.arrayCount = 1;
-			subView.baseArray = glslCubeMapping[ i ];
+			subView.baseArray = vk_MapToGlslCubemapConvention( i );
 			subView.baseMip = 0;
 			subView.mipLevels = 1;
 

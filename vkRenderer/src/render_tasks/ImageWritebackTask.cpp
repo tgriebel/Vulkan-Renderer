@@ -102,6 +102,8 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 		}
 		g_imguiControls.captureScreenshot = false;
 	}
+
+	cmdContext.MarkerBeginRegion( m_name.c_str(), ColorToVector( ColorLGrey ) );
 	
 	if ( HasFlags( m_flags, TRY_USE_API_COMMAND ) == false )
 	{
@@ -157,6 +159,9 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 
 		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_TRANSFER_SRC, GPU_IMAGE_READ );
 	}
+
+	cmdContext.MarkerEndRegion();
+
 	m_hasWriteback = true;
 }
 
