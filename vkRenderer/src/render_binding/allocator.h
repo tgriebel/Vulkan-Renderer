@@ -27,14 +27,6 @@
 
 class AllocatorMemory;
 
-enum memoryRegion_t
-{
-	UNKNOWN,
-	LOCAL,
-	SHARED,
-};
-
-
 struct allocRecord_t
 {
 	uint64_t	offset;

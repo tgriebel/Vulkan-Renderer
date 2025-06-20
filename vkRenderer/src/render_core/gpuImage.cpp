@@ -70,6 +70,12 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 			VkMemoryRequirements memRequirements;
 			vkGetImageMemoryRequirements( context.device, vk_image[ i ], &memRequirements );
 
+			//std::cout << "Allocating: " << name << " - " << memRequirements.size << " - " << memory.GetMemoryRegion() << std::endl;
+			//std::cout << "Memory Size Before: " << memory.GetSize() << std::endl;
+
+			m_resourceMemoryRegion = memory.GetMemoryRegion();
+			m_resourceByteCount = memRequirements.size;
+
 			VkMemoryAllocateInfo allocInfo{ };
 			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			allocInfo.allocationSize = memRequirements.size;
@@ -80,6 +86,8 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 			} else {
 				throw std::runtime_error( "Buffer could not be allocated!" );
 			}
+
+			//std::cout << "Memory Size After: " << memory.GetSize() << std::endl;
 
 			vk_MarkerSetObjectName( (uint64_t)vk_image[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
 

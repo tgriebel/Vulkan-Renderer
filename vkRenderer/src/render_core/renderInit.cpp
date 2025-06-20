@@ -638,7 +638,8 @@ void Renderer::InitShaderResources()
 			"Geo Staging",
 			swapBuffering_t::SINGLE_FRAME,
 			resourceLifeTime_t::REBOOT,
-			1, 16 * MB_1,
+			1,
+			MaxGeometryUploadMemory,
 			bufferType_t::STAGING,
 			renderContext.sharedMemory
 		);
@@ -647,7 +648,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::SINGLE_FRAME,
 			resourceLifeTime_t::REBOOT,
 			1,
-			500 * MB_1,
+			MaxTexturingUploadMemory,
 			bufferType_t::STAGING,
 			renderContext.sharedMemory
 		);
