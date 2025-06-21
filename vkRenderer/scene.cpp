@@ -33,7 +33,7 @@ void CreateCodeAssets()
 	{
 		for( uint32_t t = 0; t < 4; ++t )
 		{
-			const rgba8_t rgba = Color( Color::Gold ).AsRGBA();
+			const rgba8_t rgba = Color( Color::Gold ).AsRgba8();
 
 			std::stringstream ss;
 			ss << "CODE_COLOR_" << t;
@@ -113,7 +113,7 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 			
-			rgba8_t pixel = Swizzle( colors[ t ]->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+			rgba8_t pixel = Swizzle( colors[ t ]->AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 
 			texture.Create( defaultInfo, (uint8_t*)&pixel, sizeof( rgba8_t ) );
 		}
@@ -139,7 +139,7 @@ void CreateCodeAssets()
 					const uint32_t cellX = x / cellSize;
 					const float cellGradient = static_cast<float>( Max( 4, Max( abs(int( x % cellSize ) - 8), abs( int( y % cellSize ) - 8 ) ) ) / (0.5f * cellSize) );
 					const Color color = ( ( cellX % 2 ) == ( cellY % 2 ) ) ? Lerp( ColorBlack, ColorLGrey, cellGradient ) : Lerp( ColorDGrey, ColorWhite, cellGradient );
-					const rgba8_t pixel = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+					const rgba8_t pixel = Swizzle( color.AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 					imageBuffer->SetPixel( x, y, pixel );
 				}
 			}
@@ -175,7 +175,7 @@ void CreateCodeAssets()
 				for ( uint32_t y = 0; y < info.height; ++y ) {
 					for ( uint32_t x = 0; x < info.width; ++x )
 					{			
-						const rgba8_t pixel = Swizzle( color->AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+						const rgba8_t pixel = Swizzle( color->AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 						imageBuffer->SetPixel( x, y, faceId, pixel );
 					}
 				}

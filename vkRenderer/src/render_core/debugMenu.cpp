@@ -413,7 +413,7 @@ void DebugMenuLightEdit( Scene* scene )
 
 			ImGui::PopItemWidth();
 
-			rgb32_t rgb = scene->lights[ i ].color.AsRGBf();
+			rgb32_t rgb = scene->lights[ i ].color.AsRgb32();
 			
 			EditRgb( rgb );
 

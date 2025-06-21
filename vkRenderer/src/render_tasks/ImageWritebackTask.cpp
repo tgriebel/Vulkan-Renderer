@@ -50,7 +50,8 @@ void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
 
 	writeBackParms_t writeBackParms {};
 
-	const uint32_t maxBpp = sizeof( vec4f ); // Data from the readback is float due to buffer restrictions
+	const uint32_t maxBpp = sizeof( Color ); // Data from the readback is float due to buffer restrictions
+	assert( sizeof( vec4f ) == sizeof( Color ) );
 	const uint32_t elementsCount = MipPixelCount( m_readbackImage->info.width, m_readbackImage->info.height ) * m_readbackImage->info.layers; // Allocated as for padded out MIPs
 	
 	m_writebackBuffer.Create(
@@ -204,7 +205,7 @@ void ImageWritebackTask::FrameEnd()
 	};
 	*/
 
-	float* floatData = reinterpret_cast<float*>( m_writebackBuffer.Get() );
+	Color* colorData = reinterpret_cast<Color*>( m_writebackBuffer.Get() );
 
 	if ( HasFlags( m_flags, PACKED_HDR ) )
 	{
@@ -221,14 +222,8 @@ void ImageWritebackTask::FrameEnd()
 
 				for ( uint32_t i = 0; i < rawBuffer.pixelCount; ++i )
 				{
-					rgba16_t rgba16;
-					rgba16.r = PackFloat32( floatData[ 3 ] );
-					rgba16.g = PackFloat32( floatData[ 2 ] );
-					rgba16.b = PackFloat32( floatData[ 1 ] );
-					rgba16.a = PackFloat32( floatData[ 0 ] );
-
-					convertedData[ i ] = rgba16;
-					floatData += 4;
+					convertedData[ i ] = colorData->AsRgba16();
+					colorData += 1;
 				}
 			}
 		}
@@ -246,14 +241,16 @@ void ImageWritebackTask::FrameEnd()
 
 				for ( uint32_t i = 0; i < rawBuffer.pixelCount; ++i )
 				{
-					Color color = Color( floatData[ 0 ], floatData[ 1 ], floatData[ 2 ], floatData[ 3 ] );
+					Color color = *colorData;
 
-					if( HasFlags( m_flags, SCREENSHOT ) ) {	
+					if( HasFlags( m_flags, SCREENSHOT ) )
+					{
 						color = LinearToSrgb( color );
+						color.Swizzle( RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 					}
-					convertedData[ i ] = Swizzle( color.AsRGBA(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
-						
-					floatData += 4;
+					convertedData[ i ] = color.AsRgba8();
+				
+					colorData += 1;
 				}
 			}
 		}

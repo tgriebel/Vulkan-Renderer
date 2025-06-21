@@ -73,9 +73,13 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 			const uint32_t pixelIx = y * width + x;
 			Tomtendo::Pixel pixel = fr.frameBuffer->Get( pixelIx );
 
-			Pixel px;
-			px.r8g8b8a8 = pixel.rawABGR;
-			imageBuffer->SetPixel( x, y, px.rgba );
+			rgba8_t rgba {};
+			rgba.r = pixel.rgba.red;
+			rgba.g = pixel.rgba.green;
+			rgba.b = pixel.rgba.blue;
+			rgba.a = pixel.rgba.alpha;
+
+			imageBuffer->SetPixel( x, y, rgba );
 		}
 	}
 	imageAsset->QueueUpload();
