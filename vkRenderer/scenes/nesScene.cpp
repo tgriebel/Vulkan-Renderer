@@ -108,10 +108,10 @@ void NesScene::Init()
 
 	std::wstring filePaths[ EmuInstances ] =
 	{
-		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super Mario Bros.nes",
-		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super C.nes",
-		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Ninja Gaiden.nes",
-		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Metroid.nes"
+		L"scenes/Super Mario Bros.nes",
+		L"scenes/Super C.nes",
+		L"scenes/Ninja Gaiden.nes",
+		L"scenes/Metroid.nes"
 	};
 
 	Tomtendo::LoadDllInterface( &tomtendo, hinstLib );

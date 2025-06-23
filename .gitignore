@@ -54,3 +54,4 @@ vkRenderer/output/testRayTrace.bmp
 vkRenderer/imgui.ini
 vkRenderer/x64/Debug/
 vkRenderer/external/VulkanSDK/1.2.189.2/
+*.nes
