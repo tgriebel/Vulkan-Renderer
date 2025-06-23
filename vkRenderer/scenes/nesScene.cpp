@@ -24,15 +24,26 @@
 #include "nesScene.h"
 #include "../window.h"
 
-#include <tomtendo/interface.h>
+#include <windows.h> 
+#include <stdio.h>
+
+#define IMPORT_WIN
+#include "tomtendoCore.h"
+
+//using namespace Tomtendo;
 
 static const uint32_t EmuInstances = 4;
 static uint64_t lastFrame[ EmuInstances ] = {};
 static bool paused[ EmuInstances ] = { false, true, true, true };
 static const char* textureBuffers[ EmuInstances ] = { "CODE_COLOR_0", "CODE_COLOR_1", "CODE_COLOR_2", "CODE_COLOR_3" };
-static Tomtendo::Emulator nes[ EmuInstances ];
+static Tomtendo::Emulator* nes[ EmuInstances ];
 static Tomtendo::config_t nesCfg;
 static Tomtendo::wtFrameResult fr;
+
+BOOL fRunTimeLinkSuccess = FALSE;
+HINSTANCE hinstLib = nullptr;
+
+Tomtendo::runtimeDllInterface_t tomtendo{};
 
 struct bind_t
 {
@@ -74,10 +85,10 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 			Tomtendo::Pixel pixel = fr.frameBuffer->Get( pixelIx );
 
 			rgba8_t rgba {};
-			rgba.r = pixel.rgba.red;
-			rgba.g = pixel.rgba.green;
-			rgba.b = pixel.rgba.blue;
-			rgba.a = pixel.rgba.alpha;
+			rgba.r = pixel.rgba.alpha;
+			rgba.g = pixel.rgba.blue;
+			rgba.b = pixel.rgba.green;
+			rgba.a = pixel.rgba.red;
 
 			imageBuffer->SetPixel( x, y, rgba );
 		}
@@ -87,6 +98,14 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 
 void NesScene::Init()
 {
+	// Get a handle to the DLL module.
+	hinstLib = LoadLibrary( TEXT( "scenes/wintendoCore.dll" ) );
+
+	if ( hinstLib == nullptr ) {
+		return;
+	}
+	fRunTimeLinkSuccess = TRUE;
+
 	std::wstring filePaths[ EmuInstances ] =
 	{
 		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Super Mario Bros.nes",
@@ -94,17 +113,24 @@ void NesScene::Init()
 		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Ninja Gaiden.nes",
 		L"C:\\Users\\thoma\\source\\repos\\nesEmu\\wintendo\\wintendoApp\\Games\\Metroid.nes"
 	};
-	nesCfg = Tomtendo::DefaultConfig();
+
+	Tomtendo::LoadDllInterface( &tomtendo, hinstLib );
+
+	std::cout << tomtendo.ScreenHeight() << std::endl;
+
+	nesCfg = tomtendo.DefaultConfig();
 
 	for( uint32_t i = 0; i < EmuInstances; ++i )
 	{
-		nes[i].Boot( filePaths[i] );
-		nes[i].SetConfig( nesCfg );
+		tomtendo.CreateEmulatorInstance( &nes[ i ] );
+
+		tomtendo.Boot( nes[ i ], filePaths[ i ].c_str(), 0x10000 );
+		tomtendo.SetConfig( nes[ i ], nesCfg );
 
 		for ( uint32_t k = 0; k < ButtonCount; ++k )
 		{
 			using namespace Tomtendo;
-			nes[i].input.BindKey( ControllerBinds[ k ].key, ControllerId::CONTROLLER_0, ControllerBinds[ k ].btn );
+			tomtendo.BindKey( &nes[ i ]->input, ControllerBinds[ k ].key, ControllerId::CONTROLLER_0, ControllerBinds[ k ].btn );
 		}
 	}
 }
@@ -112,9 +138,15 @@ void NesScene::Init()
 
 void NesScene::Shutdown()
 {
+	if( fRunTimeLinkSuccess == FALSE ) {
+		return;
+	}
+
 	for ( uint32_t i = 0; i < EmuInstances; ++i )
 	{
+		tomtendo.DestroyEmulatorInstance( &nes[ i ] );
 	}
+	BOOL fFreeResult = FreeLibrary( hinstLib );
 }
 
 
@@ -125,7 +157,7 @@ void NesScene::Update()
 	{
 		for ( uint32_t i = 0; i < EmuInstances; ++i )
 		{
-			if ( !nes[i].RunEpoch( DeltaNano() ) ) {
+			if ( !tomtendo.RunEpoch( nes[ i ], DeltaNano() ) ) {
 				emulatorRunning = false;
 				break;
 			}
@@ -133,13 +165,13 @@ void NesScene::Update()
 			for ( uint32_t k = 0; k < ButtonCount; ++k )
 			{
 				if ( g_window.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
-					nes[i].input.StoreKey( ControllerBinds[ k ].key );
+					tomtendo.StoreKey( &nes[ i ]->input, ControllerBinds[ k ].key );
 				} else {
-					nes[i].input.ReleaseKey( ControllerBinds[ k ].key );
+					tomtendo.ReleaseKey( &nes[ i ]->input, ControllerBinds[ k ].key );
 				}
 			}
 
-			nes[i].GetFrameResult( fr );
+			tomtendo.GetFrameResult( nes[ i ], fr );
 			if ( fr.currentFrame > lastFrame[i] )
 			{
 				lastFrame[i] = fr.currentFrame;

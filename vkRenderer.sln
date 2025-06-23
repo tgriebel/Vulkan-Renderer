@@ -13,8 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SysCore", "..\..\SysCore\Sy
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "..\..\Raytracer-Graphic-Pipeline-master\RayTracer.vcxproj", "{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wintendoCore", "..\..\nesEmu\wintendo\wintendoCore\wintendo.vcxproj", "{F89DD5F8-F02F-43B5-A687-6E61449D54B0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetConverter", "AssetConverter\AssetConverter.vcxproj", "{11A9154E-560C-4CEB-AE50-0A0B661612BB}"
 EndProject
 Global
@@ -87,18 +85,6 @@ Global
 		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x64.Build.0 = Debug|x64
 		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x86.ActiveCfg = Debug|Win32
 		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x86.Build.0 = Debug|Win32
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Debug|x64.ActiveCfg = Debug|x64
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Debug|x64.Build.0 = Debug|x64
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Debug|x86.ActiveCfg = Debug|Win32
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Debug|x86.Build.0 = Debug|Win32
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Release|x64.ActiveCfg = Release|x64
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Release|x64.Build.0 = Release|x64
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Release|x86.ActiveCfg = Release|Win32
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Release|x86.Build.0 = Release|Win32
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x64.ActiveCfg = Debug|x64
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x64.Build.0 = Debug|x64
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x86.ActiveCfg = Debug|Win32
-		{F89DD5F8-F02F-43B5-A687-6E61449D54B0}.Test (Debug)|x86.Build.0 = Debug|Win32
 		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x64.ActiveCfg = Debug|x64
 		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x64.Build.0 = Debug|x64
 		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x86.ActiveCfg = Debug|Win32

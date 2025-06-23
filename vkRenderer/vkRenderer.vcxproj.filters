@@ -281,6 +281,9 @@
     <ClInclude Include="src\render_tasks\MipImageTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
+    <ClInclude Include="scenes\tomtendoCore.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

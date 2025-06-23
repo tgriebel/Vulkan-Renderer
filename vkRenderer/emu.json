@@ -28,34 +28,6 @@
 	  "type": "2D"
 	},
 	{
-	  "name": "chapel_right.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_left.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_top.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_bottom.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_front.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_back.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_low.jpg",
-	  "type": "CUBE"
-	},
-	{
 	  "name": "skybox80s.png",
 	  "type": "2D"
 	}
@@ -266,11 +238,6 @@
 	  "z": 2.0,
 	  "rx": 180.0,
 	  "rz": -90.0
-	},
-	{
-	  "name": "car",
-	  "model": "911_scene.obj",
-	  "rx": 90.0
 	},
 	{
 	  "name": "sphere",
