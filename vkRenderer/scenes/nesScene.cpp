@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright( c ) 2023 Thomas Griebel
+* Copyright( c ) 2023 - 2025 Thomas Griebel
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this softwareand associated documentation files( the "Software" ), to deal
 * in the Software without restriction, including without limitation the rights
@@ -38,7 +38,10 @@ static bool paused[ EmuInstances ] = { false, true, true, true };
 static const char* textureBuffers[ EmuInstances ] = { "CODE_COLOR_0", "CODE_COLOR_1", "CODE_COLOR_2", "CODE_COLOR_3" };
 static Tomtendo::Emulator* nes[ EmuInstances ];
 static Tomtendo::config_t nesCfg;
-static Tomtendo::wtFrameResult fr;
+
+static bool emulatorRunning = true;
+static std::chrono::nanoseconds GlobalDelta;
+static std::vector< std::thread > threadPool;
 
 BOOL fRunTimeLinkSuccess = FALSE;
 HINSTANCE hinstLib = nullptr;
@@ -96,6 +99,40 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 	imageAsset->QueueUpload();
 }
 
+static inline void ThreadRun( Tomtendo::Emulator* emu, const char* bufferName )
+{
+	uint64_t lastFrame = 0;
+	while ( true )
+	{
+		if ( !tomtendo.RunEpoch( emu, GlobalDelta ) ) {
+			break;
+		}
+
+		if( emulatorRunning == false ) {
+			break;
+		}
+
+		for ( uint32_t k = 0; k < ButtonCount; ++k )
+		{
+			if ( g_window.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
+				tomtendo.StoreKey( &emu->input, ControllerBinds[ k ].key );
+			}
+			else {
+				tomtendo.ReleaseKey( &emu->input, ControllerBinds[ k ].key );
+			}
+		}
+
+		Tomtendo::wtFrameResult fr;
+		tomtendo.GetFrameResult( emu, fr );
+		if ( fr.currentFrame > lastFrame )
+		{
+			lastFrame = fr.currentFrame;
+			CopyFrameBuffer( fr, AssetLibImages::Handle( bufferName ) );
+		}
+	}
+}
+
+
 void NesScene::Init()
 {
 	// Get a handle to the DLL module.
@@ -133,11 +170,22 @@ void NesScene::Init()
 			tomtendo.BindKey( &nes[ i ]->input, ControllerBinds[ k ].key, ControllerId::CONTROLLER_0, ControllerBinds[ k ].btn );
 		}
 	}
+
+	threadPool.reserve( EmuInstances );
+
+	for ( uint32_t i = 0; i < EmuInstances; ++i ) {
+		threadPool.push_back( std::thread( ThreadRun, nes[ i ], textureBuffers[ i ] ) );
+	}
 }
 
 
 void NesScene::Shutdown()
 {
+	emulatorRunning = false;
+	for ( auto& thread : threadPool ) {
+		thread.join();
+	}
+
 	if( fRunTimeLinkSuccess == FALSE ) {
 		return;
 	}
@@ -149,34 +197,9 @@ void NesScene::Shutdown()
 	BOOL fFreeResult = FreeLibrary( hinstLib );
 }
 
-
 void NesScene::Update()
 {
-	static bool emulatorRunning = true;
-	if( emulatorRunning )
-	{
-		for ( uint32_t i = 0; i < EmuInstances; ++i )
-		{
-			if ( !tomtendo.RunEpoch( nes[ i ], DeltaNano() ) ) {
-				emulatorRunning = false;
-				break;
-			}
-
-			for ( uint32_t k = 0; k < ButtonCount; ++k )
-			{
-				if ( g_window.input.IsKeyPressed( ControllerBinds[ k ].key ) ) {
-					tomtendo.StoreKey( &nes[ i ]->input, ControllerBinds[ k ].key );
-				} else {
-					tomtendo.ReleaseKey( &nes[ i ]->input, ControllerBinds[ k ].key );
-				}
-			}
-
-			tomtendo.GetFrameResult( nes[ i ], fr );
-			if ( fr.currentFrame > lastFrame[i] )
-			{
-				lastFrame[i] = fr.currentFrame;
-				CopyFrameBuffer( fr, AssetLibImages::Handle( textureBuffers[i] ) );
-			}
-		}
+	if( emulatorRunning ) {
+		GlobalDelta = DeltaNano();
 	}
 }
