@@ -126,6 +126,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 0 ].origin = vec3f( 1.0f, 0.0f, 0.0f );
 	info[ 0 ].up = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 0 ].normal = vec3f( 1.0f, 0.0f, 0.0f );
+	info[ 0 ].side = Cross( info[ 0 ].normal, info[ 0 ].up ).Normalize();
 	info[ 0 ].winding = winding;
 
 	info[ 1 ].gridSize = vec2f( cellSize );
@@ -136,6 +137,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 1 ].origin = vec3f( 0.0f, -1.0f, 0.0f );
 	info[ 1 ].up = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 1 ].normal = vec3f( 0.0f, -1.0f, 0.0f );
+	info[ 1 ].side = Cross( info[ 1 ].normal, info[ 1 ].up ).Normalize();
 	info[ 1 ].winding = winding;
 
 	info[ 2 ].gridSize = vec2f( cellSize );
@@ -146,6 +148,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 2 ].origin = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 2 ].up = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 2 ].normal = vec3f( -1.0f, 0.0f, 0.0f );
+	info[ 2 ].side = Cross( info[ 2 ].normal, info[ 2 ].up ).Normalize();
 	info[ 2 ].winding = winding;
 
 	info[ 3 ].gridSize = vec2f( cellSize );
@@ -156,6 +159,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 3 ].origin = vec3f( 0.0f, 1.0f, 0.0f );
 	info[ 3 ].up = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 3 ].normal = vec3f( 0.0f, 1.0f, 0.0f );
+	info[ 3 ].side = Cross( info[ 3 ].normal, info[ 3 ].up ).Normalize();
 	info[ 3 ].winding = winding;
 
 	info[ 4 ].gridSize = vec2f( cellSize );
@@ -166,6 +170,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 4 ].origin = vec3f( 0.0f, 0.0f, 1.0f );
 	info[ 4 ].up = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 4 ].normal = vec3f( 0.0f, 0.0f, 1.0f );
+	info[ 4 ].side = Cross( info[ 4 ].normal, info[ 4 ].up ).Normalize();
 	info[ 4 ].winding = winding;
 
 	info[ 5 ].gridSize = vec2f( cellSize );
@@ -176,6 +181,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	info[ 5 ].origin = vec3f( 0.0f, 0.0f, -1.0f );
 	info[ 5 ].up = vec3f( -1.0f, 0.0f, 0.0f );
 	info[ 5 ].normal = vec3f( 0.0f, 0.0f, -1.0f );
+	info[ 5 ].side = Cross( info[ 5 ].normal, info[ 5 ].up ).Normalize();
 	info[ 5 ].winding = winding;
 
 	GeoBuilder gb;
@@ -201,7 +207,12 @@ bool TerrainLoader::Load( Asset<Model>& modelAsset )
 	info.gridSize = vec2f( cellSize );
 	info.subDivisionsX = width;
 	info.subDivisionsY = height;
-	info.origin = vec3f( 0.5f * info.gridSize[ 0 ] * info.subDivisionsX, 0.5f * info.gridSize[ 1 ] * info.subDivisionsY, 0.0f );
+	info.normal = vec3f( 0.0f, 0.0f, 1.0f );
+	info.up = vec3f( 1.0f, 0.0f, 0.0f );
+	info.side = Cross( info.normal, info.up ).Normalize().Reverse();
+	info.centerAtOrigin = true;
+	info.flipUv = true;
+	//info.uvDy = -1.0f;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );
@@ -253,7 +264,9 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	info.origin = vec3f( origin[ 0 ], origin[ 1 ], 0.0f );
 	info.normal = vec3f( 0.0f, 0.0f, -1.0f );
 	info.up = vec3f( 0.0f, 1.0f, 0.0f );
+	info.side = Cross( info.normal, info.up ).Normalize();
 	info.winding = GeoBuilder::WINDING_COUNTER_CLOCKWISE;
+	//info.flipUv = true;
 
 	GeoBuilder gb;
 	gb.AddPlaneSurf( info );

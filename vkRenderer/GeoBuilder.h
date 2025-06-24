@@ -58,6 +58,7 @@ public:
 		winding_t			winding;
 		vec3f				up;
 		vec3f				normal;
+		vec3f				side;
 		vec2f				uvOffset;
 		vec2f				uvDx;
 		vec2f				uvDy;
@@ -76,9 +77,10 @@ public:
 			color = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
 			up = vec3f( 0.0f, 0.0f, 1.0f );
 			normal = vec3f( 1.0f, 0.0f, 0.0f );
+			side = vec3f( 0.0f, 0.0f, 1.0f );
 			winding = WINDING_COUNTER_CLOCKWISE;
-			flipUv = false;
 			centerAtOrigin = true;
+			flipUv = false;
 		}
 	};
 
@@ -107,15 +109,22 @@ public:
 
 		const vec3f up = info.up.Normalize();
 		const vec3f normal = info.normal.Normalize();
-		const vec3f side = Cross( normal, up ).Normalize();
+		const vec3f side = info.side.Normalize();
 
 		// Create vertices
 		for ( size_t j = 0; j < sizeInVertices.second; ++j )
 		{
 			for ( size_t i = 0; i < sizeInVertices.first; ++i )
-			{
-				const float u = ( i / static_cast<float>( info.subDivisionsX ) );
-				const float v = ( j / static_cast<float>( info.subDivisionsY ) );
+			{		
+				float u = ( i / static_cast<float>( info.subDivisionsX ) );
+				float v = ( j / static_cast<float>( info.subDivisionsY ) );
+
+				if( info.flipUv )
+				{
+					float temp = u;
+					u = v;
+					v = temp;
+				}
 
 				vertex_t& vert = vb[ vbIx ];
 
