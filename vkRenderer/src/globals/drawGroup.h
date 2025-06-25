@@ -63,9 +63,11 @@ struct drawSurfInstance_t
 {
 	mat4x4f		modelMatrix;
 	uint16_t	surfId;
+	uint16_t	envMapId;
+	uint16_t	diffuseIblId;
 	uint16_t	id;
 };
-static_assert( sizeof( drawSurfInstance_t ) == 68, "Informative" );
+static_assert( sizeof( drawSurfInstance_t ) == 72, "Informative" );
 
 
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )

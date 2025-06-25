@@ -3,6 +3,9 @@
   "type": "scene",
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
+  "envMap" : "code_assets/chess_env.img",
+  "diffuseIblMap" : "code_assets/chess_diffuseIbl.img",
+  "specIblMap" : "code_assets/chess_specIbl.img",
   "shaders": [
 	{
 	  "name": "LitCRT",
@@ -33,6 +36,18 @@
 	},
 	{
 	  "name": "debug.jpg",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_env.img",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_diffuseIbl.img",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_specIbl.img",
 	  "type": "CUBE"
 	},
   ],

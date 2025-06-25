@@ -285,12 +285,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 	ImageWritebackTask* imageCubemapWriteBackTask = nullptr;
 	if ( config.useCubeViews )
 	{
+		const std::string fileName = std::string( config.cubemapName ) + "_env.img";
+
 		imageWriteBackCreateInfo_t info{};
 		info.name = "EnvironmentMapWriteback";
 		info.img = &resources.cubeFbColorImage;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.fileName = "hdrEnvmap.img";
+		info.fileName = fileName.c_str();
 		if ( config.writeCubeViews ) {
 			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
 		}
@@ -303,12 +305,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 	ImageWritebackTask* imageDiffuseIblWriteBackTask = nullptr;
 	if ( config.computeDiffuseIbl )
 	{
+		const std::string fileName = std::string( config.cubemapName ) + "_diffuseIbl.img";
+
 		imageWriteBackCreateInfo_t info{};
 		info.name = "DiffuseIblWriteback";
 		info.img = &resources.diffuseIblImage;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.fileName = "hdrDiffuse.img";
+		info.fileName = fileName.c_str();
 		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
 		info.flags |= imageWritebackFlags_t::CUBEMAP;
 		info.flags |= imageWritebackFlags_t::PACKED_HDR;
@@ -319,12 +323,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 	ImageWritebackTask* imageSpecularIblWriteBackTask = nullptr;
 	if ( config.computeSpecularIBL )
 	{
+		const std::string fileName = std::string( config.cubemapName ) + "_specIbl.img";
+
 		imageWriteBackCreateInfo_t info{};
 		info.name = "SpecularIblWriteback";
 		info.img = &resources.specularIblImage;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.fileName = "hdrSpecular.img";
+		info.fileName = fileName.c_str();
 		if ( config.writeCubeViews ) {
 			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
 		}

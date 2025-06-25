@@ -3,6 +3,9 @@
   "type": "scene",
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
+  "envMap" : "code_assets/chess_env.img",
+  "diffuseIblMap" : "code_assets/chess_diffuseIbl.img",
+  "specIblMap" : "code_assets/chess_specIbl.img",
   "images": [
 	{
 	  "name": "checker.png",
@@ -51,7 +54,19 @@
 	{
 	  "name": "skybox80s.png",
 	  "type": "2D"
-	}
+	},
+	{
+	  "name": "code_assets/chess_env.img",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_diffuseIbl.img",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_specIbl.img",
+	  "type": "CUBE"
+	},
   ],
   "materials": [
 	{
@@ -96,7 +111,16 @@
 		"CUBE_FRONT_SLOT": "skybox80s.png",
 		"CUBE_BACK_SLOT": "skybox80s.png"
 	  }
-	}
+	},
+	{
+      "name": "EquirectangularSky",
+      "shaders": {
+          "DRAWPASS_SKYBOX": "SkyCube"
+      }
+      "textures": {
+          "TEXTURE_SLOT_0" : "code_assets/chess_env.img",
+      }
+    }
   ],
   "models": [
 	{
@@ -143,7 +167,10 @@
 	{
 	  "name": "sphere",
 	  "model": "sphere.obj",
-	  "hidden": "true"
+	  "hidden": "false",
+	  "x": 10.0,
+	  "y": 10.0,
+	  "z": 10.0,
 	}
   ]
 }

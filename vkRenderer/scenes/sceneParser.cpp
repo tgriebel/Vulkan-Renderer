@@ -711,6 +711,8 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 
 	if( isRoot )
 	{
+		char stringBuffer[ TOKEN_LEN ] = "";
+
 		while( st.tx < st.r )
 		{
 			const int items = st.tokens[ st.tx ].size;
@@ -723,7 +725,8 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 			{
 				st.tx += 1;
 				ParseJson( ParseToken( st ), scene, assets, false );
-			} else {
+			}
+			else {
 				st.tx += 1;
 			}
 			st.tx += items;
@@ -733,14 +736,21 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	st.tx = 0;
 	st.scene = *scene;
 
+	char envMap[ TOKEN_LEN ] = "";
+	char diffuseIblMap[ TOKEN_LEN ] = "";
+	char specIblMap[ TOKEN_LEN ] = "";
+
 	assert( COUNTARRAY( trashBuffer ) >= file.size() );
 
-	const uint32_t objectCount = 8;
+	const uint32_t objectCount = 11;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "sceneClass", &trashBuffer, &ParseStringObject },
 		{ "type", &trashBuffer, &ParseStringObject },
 		{ "reflink", &trashBuffer, &ParseStringObject },
+		{ "envMap", &envMap, &ParseStringObject },
+		{ "diffuseIblMap", &diffuseIblMap, &ParseStringObject },
+		{ "specIblMap", &specIblMap, &ParseStringObject },
 		{ "shaders", &st.assets->gpuPrograms, &ParseShaderObject },
 		{ "images", &st.assets->textureLib, &ParseImageObject },
 		{ "materials", &st.assets->materialLib, &ParseMaterialObject },
@@ -749,6 +759,13 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	};
 
 	ParseObject( st, objectMap, objectCount );
+
+	if( isRoot )
+	{
+		( *scene )->envMap = envMap;
+		( *scene )->diffuseIblMap = diffuseIblMap;
+		( *scene )->specIblMap = specIblMap;
+	}
 
 	delete st.p;
 	delete[] st.tokens;

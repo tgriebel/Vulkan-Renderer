@@ -239,6 +239,9 @@ void InitScene( Scene* scene )
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i ) {
 		scene->CreateEntityBounds( scene->entities[ i ]->modelHdl, *scene->entities[ i ] );
+
+		scene->entities[ i ]->envMap = g_assets.textureLib.RetrieveHdl( scene->envMap.c_str() );
+		scene->entities[ i ]->diffuseIblMap = g_assets.textureLib.RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
 
 	scene->Init();
@@ -370,6 +373,13 @@ void UpdateScene( Scene* scene )
 	{
 		Ray ray = scene->mainCamera->GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
 		scene->selectedEntity = scene->GetTracedEntity( ray );
+	}
+
+	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
+	for ( uint32_t i = 0; i < entCount; ++i )
+	{
+		scene->entities[ i ]->envMap = g_assets.textureLib.RetrieveHdl( scene->specIblMap.c_str() );
+		scene->entities[ i ]->diffuseIblMap = g_assets.textureLib.RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
 
 	// Skybox

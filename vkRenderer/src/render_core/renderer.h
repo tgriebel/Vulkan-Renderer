@@ -55,6 +55,7 @@ extern renderConstants_t	rc;
 struct renderConfig_t
 {
 	imageSamples_t	mainColorSubSamples;
+	const char*		cubemapName;
 	bool			present;
 	bool			useCubeViews;
 	bool			writeCubeViews;

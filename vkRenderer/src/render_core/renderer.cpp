@@ -182,6 +182,9 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
+		instance.envMapId = g_assets.textureLib.Find( ent.envMap )->Get().gpuImage->GetId();
+		instance.diffuseIblId = g_assets.textureLib.Find( ent.diffuseIblMap )->Get().gpuImage->GetId();
+
 		surf.uploadId = ( model.uploadId + i );
 		surf.stencilBit = ent.outline ? OutlineStencilBit : 0;
 		surf.objectOffset = 0;
@@ -665,24 +668,13 @@ void Renderer::UpdateBuffers()
 				continue;
 			}
 
-			Asset<Image>* diffuseIblAsset = g_assets.textureLib.Find( "code_assets/hdrDiffuse.img" );
-			const uint32_t diffuseIblCubeId = diffuseIblAsset->Get().gpuImage->GetId();
-
-			Asset<Image>* envCubeAsset = g_assets.textureLib.Find( "code_assets/hdrSpecular.img" );
-			const uint32_t envCubeId = envCubeAsset->Get().gpuImage->GetId();
-
 			const drawSurfInstance_t* instances = view.drawGroup[ passIx ].Instances();
 			for ( uint32_t surfIx = 0; surfIx < view.drawGroup[ passIx ].InstanceCount(); ++surfIx )
 			{
 				const uint32_t instanceId = view.drawGroupOffset[ passIx ] + view.drawGroup[ passIx ].InstanceId( surfIx );
-				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();
-				
-				if( diffuseIblAsset->IsDefault() == false ) {
-					surfBuffer[ instanceId ].diffuseIblCubeId = diffuseIblCubeId;
-				}
-				if ( envCubeAsset->IsDefault() == false ) {
-					surfBuffer[ instanceId ].envCubeId = envCubeId;
-				}
+				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();		
+				surfBuffer[ instanceId ].diffuseIblCubeId = instances[ surfIx ].diffuseIblId;
+				surfBuffer[ instanceId ].envCubeId = instances[ surfIx ].envMapId;
 			}
 		}
 

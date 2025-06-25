@@ -96,6 +96,7 @@ MakeCVar( bool,		r_writeCubeCapture );
 MakeCVar( bool,		r_computeDiffuseIbl );
 MakeCVar( bool,		r_computeSpecularIbl );
 MakeCVar( char*,	c_scene );
+MakeCVar( char*,	r_cubemapName );
 MakeCVar( bool,		c_bakeAssets );
 MakeCVar( bool,		r_shadows );
 MakeCVar( bool,		r_downsampleScene );
@@ -152,6 +153,7 @@ int main( int argc, char* argv[] )
 	config.shadows = r_shadows.GetBool();
 	config.downsampleScene = r_downsampleScene.GetBool();
 	config.screenshot = r_screenshot.GetBool();
+	config.cubemapName = r_cubemapName.GetString();
 
 	std::thread renderThread( RenderThread );
 

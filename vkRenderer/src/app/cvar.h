@@ -62,7 +62,7 @@ public:
 		return value.asInt;
 	}
 
-	std::string GetString() const
+	const char* GetString() const
 	{
 		assert( type == Type::STRING );
 		return value.asStr;

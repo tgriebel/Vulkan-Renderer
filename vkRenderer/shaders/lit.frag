@@ -42,10 +42,10 @@ void main()
     const material_t material = materialUbo.materials[ materialId ];
 
 	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
-    const uint albedoTexId = isTextured ? material.textureId0 : globals.defaultAlbedoId;
-    const uint normalTexId = isTextured ? material.textureId1 : globals.defaultNormalId;
-    const uint roughnessTexId = isTextured ? material.textureId2 : globals.defaultRoughnessId;
-    const uint metalnessTexId = isTextured ? material.textureId3 : globals.defaultMetalId;
+    const uint albedoTexId = ( isTextured && material.textureId0 >= 0 ) ? material.textureId0 : globals.defaultAlbedoId;
+    const uint normalTexId = ( isTextured && material.textureId1 >= 0 ) ? material.textureId1 : globals.defaultNormalId;
+    const uint roughnessTexId = ( isTextured && material.textureId2 >= 0 ) ? material.textureId2 : globals.defaultRoughnessId;
+    const uint metalnessTexId = ( isTextured && material.textureId3 >= 0 ) ? material.textureId3 : globals.defaultMetalId;
 	
 	const vec3 diffuseColor = material.Kd.rgb;
     const vec3 specularColor = material.Ks.rgb;
@@ -79,7 +79,7 @@ void main()
 
     float NoV = max( dot( N, V ), 0.0f );
 
-    float metallic = 0.0f;//metalnessTex.r;
+    float metallic = metalnessTex.r;
 	
 	//const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;

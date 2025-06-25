@@ -3,6 +3,9 @@
   "type": "scene",
   "reflink" : "shaders_common.json",
   "reflink" : "image_common.json",
+  "envMap" : "code_assets/chess_env.img",
+  "diffuseIblMap" : "code_assets/chess_diffuseIbl.img",
+  "specIblMap" : "code_assets/chess_specIbl.img",
   "shaders": [
     {
 	  "name": "EquirectangularSampler",
@@ -66,19 +69,15 @@
 	  "type": "2D"
 	},
 	{
-	  "name": "code_assets/hdrEnvmap.img",
+	  "name": "code_assets/chess_env.img",
 	  "type": "CUBE"
 	},
 	{
-	  "name": "code_assets/hdrDiffuse.img",
+	  "name": "code_assets/chess_diffuseIbl.img",
 	  "type": "CUBE"
 	},
 	{
-	  "name": "code_assets/hdrSpecular.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/mipmap.img",
+	  "name": "code_assets/chess_specIbl.img",
 	  "type": "CUBE"
 	},
   ],
@@ -127,7 +126,7 @@
           "DRAWPASS_SKYBOX": "SkyCube"
       }
       "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/hdrEnvmap.img",
+          "TEXTURE_SLOT_0" : "code_assets/chess_env.img",
       }
     }
   ],
