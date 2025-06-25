@@ -158,12 +158,12 @@ void CreateCodeAssets()
 			info.type = imageType_t::IMAGE_TYPE_CUBE;
 
 			const Color* colors[ 6 ] = {
-				&ColorRed,
-				&ColorPink,
-				&ColorGreen,
 				&ColorYellow,
+				&ColorGreen,
 				&ColorBlue,
-				&ColorCyan		
+				&ColorCyan,
+				&ColorRed,
+				&ColorPink
 			};
 
 			texture.Create( info );

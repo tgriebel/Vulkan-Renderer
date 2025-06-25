@@ -19,6 +19,11 @@ vec2f PackFloat32( const float unpacked )
 }
 */
 
+mat4 glslSpace = mat4(	0.0f, 0.0f, 1.0f, 0.0f,
+						-1.0f, 0.0f, 0.0f, 0.0f,
+						0.0f, 1.0f, 0.0f, 0.0f,
+						0.0f, 0.0f, 0.0f, 0.0f );
+
 vec3 CubeVector( const vec3 v )
 {
 	return vec3( -v.y, v.z, v.x ); // to glsl coordinate space

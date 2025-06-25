@@ -29,6 +29,7 @@
 #include "globals.h"
 #include "light.h"
 #include "color.h"
+#include "util.h"
 
 PS_LAYOUT_STANDARD( sampler2D )
 PS_LAYOUT_MRT_1_OUT
@@ -156,7 +157,7 @@ void main()
 
     const vec3 R = reflect( -V, N );
     const int MipLevels = min( textureQueryLevels( cubeSamplers[ specularIBL ] ), MaxRreflectionLod );
-    const vec3 specIBL = textureLod( cubeSamplers[ specularIBL ], R, perceptualRoughness * MipLevels ).rgb;
+    const vec3 specIBL = textureLod( cubeSamplers[ specularIBL ], CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
 
     const vec2 envBRDF = texture( texSampler[ brdfLutId ], vec2( NoV, perceptualRoughness ) ).rg;
     const vec3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
@@ -165,12 +166,7 @@ void main()
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    mat4 glslSpace = mat4(  0.0f, 0.0f, 1.0f, 0.0f,
-                            -1.0f, 0.0f, 0.0f, 0.0f,
-                            0.0f, 1.0f, 0.0f, 0.0f,
-                            0.0f, 0.0f, 0.0f, 0.0f );
-
-    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], (glslSpace * vec4( N, 0.0f )).xyz ).rgb * material.Ka.rgb;
+    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], CubeVector( N ) ).rgb * material.Ka.rgb;
     const vec3 diffuse = irradiance * albedoColor;
     const vec3 ambient = ( kD * diffuse + specular ) * ao;
 
