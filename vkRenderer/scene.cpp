@@ -61,36 +61,31 @@ void CreateCodeAssets()
 
 			struct dbgColorImageInfo_t
 			{
-				Color		color;
 				char*		name;
+				Color		color;
 				imageFmt_t	format;
 			};
 
-			const Color colorAlb = Color( 1.0f, 1.0f, 1.0f );
-			const Color colorNml = Color( 0.0f, 0.0f, 1.0f );
-			const Color colorRgh = Color( 1.0f, 0.0f, 0.0f );
-			const Color colorMtl = Color( 0.6f, 0.0f, 0.0f );
-
 			static const dbgColorImageInfo_t colorInfo[ debugColorCount ] =
 			{
-				{ ColorRed,		"_red",			imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorGreen,	"_green",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorBlue,	"_blue",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorWhite,	"_white",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorBlack,	"_black",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorLGrey,	"_lightGrey",	imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorDGrey,	"_darkGrey",	imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorBrown,	"_brown",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorCyan,	"_cyan",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorYellow,	"_yellow",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorPurple,	"_purple",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorOrange,	"_orange",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorPink,	"_pink",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ ColorGold,	"_gold",		imageFmt_t::IMAGE_FMT_RGBA_8 },
-				{ colorAlb,		"_alb",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
-				{ colorNml,		"_nml",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
-				{ colorRgh,		"_rgh",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
-				{ colorMtl,		"_mtl",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ "_red",		ColorRed,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_green",		ColorGreen,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_blue",		ColorBlue,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_white",		ColorWhite,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_black",		ColorBlack,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_lightGrey",	ColorLGrey,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_darkGrey",	ColorDGrey,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_brown",		ColorBrown,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_cyan",		ColorCyan,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_yellow",	ColorYellow,				imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_purple",	ColorPurple,				imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_orange",	ColorOrange,				imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_pink",		ColorPink,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_gold",		ColorGold,					imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ "_alb",		Color( 1.0f, 1.0f, 1.0f ),	imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ "_nml",		Color( 0.5f, 0.5f, 1.0f ),	imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ "_rgh",		Color( 1.0f, 0.0f, 0.0f ),	imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ "_mtl",		Color( 0.6f, 0.0f, 0.0f ),	imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
 			};
 
 			imageInfo_t defaultInfo = DefaultImage2dInfo( 1, 1 );

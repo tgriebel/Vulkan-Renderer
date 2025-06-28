@@ -66,7 +66,7 @@ void main()
 
     const float perceptualRoughness = Saturate( globals.generic.x * roughnessTex.r + globals.generic.y );
 
-    const float blendFactor = 0.5f;
+    const float blendFactor = 1.0f;
     const vec3 normal = fragTangentBasis * mix( vec3( 0.0f, 0.0f, 1.0f ), normalize( normalTex ), blendFactor );
 
     const vec3 V = normalize( cameraOrigin.xyz - worldPosition.xyz );
