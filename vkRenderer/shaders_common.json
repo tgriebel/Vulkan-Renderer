@@ -99,6 +99,13 @@
 	  "image_shader": true
     },
 	{
+      "name": "preCalculatedBrdfLut",
+      "vs": "fullscreen",
+      "ps": "computeBrdfLut",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
       "name": "preCalculatedSpecularIbl",
       "vs": "fullscreen",
       "ps": "preCalculatedSpecularIbl",

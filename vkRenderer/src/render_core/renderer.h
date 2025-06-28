@@ -66,6 +66,7 @@ struct renderConfig_t
 	bool			screenshot;
 	bool			gaussianBlur;
 	bool			shadows;
+	bool			computeBrdfLut;
 };
 
 

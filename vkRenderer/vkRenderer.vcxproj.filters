@@ -361,6 +361,9 @@
     <None Include="shaders\preCalculatedSpecularIbl.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\computeBrdfLut.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

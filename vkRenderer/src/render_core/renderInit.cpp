@@ -320,6 +320,39 @@ void Renderer::Init( const renderConfig_t& cfg )
 		imageDiffuseIblWriteBackTask = new ImageWritebackTask( info );
 	}
 
+	ImageProcess* brdfLutTask = nullptr;
+	ImageWritebackTask* writeBrdfLut = nullptr;
+	if( config.computeBrdfLut )
+	{
+		{
+			imageProcessCreateInfo_t info = {};
+			info.name = "BrdfLutCalculation";
+			info.clear = false;
+			info.resolve = true;
+			info.progHdl = AssetLibGpuProgram::Handle( "preCalculatedBrdfLut" );
+			info.fb = &tempColor;
+			info.context = &renderContext;
+			info.resources = &resources;
+
+			brdfLutTask = new ImageProcess( info );
+		}
+
+		{
+			const std::string fileName = "brdf_lut.img";
+
+			imageWriteBackCreateInfo_t info{};
+			info.name = "BrdfLutWriteback";
+			info.img = &resources.tempColorImage;
+			info.context = &renderContext;
+			info.resources = &resources;
+			info.fileName = fileName.c_str();
+			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+			info.flags |= imageWritebackFlags_t::PACKED_HDR;
+
+			writeBrdfLut = new ImageWritebackTask( info );
+		}
+	}
+
 	ImageWritebackTask* imageSpecularIblWriteBackTask = nullptr;
 	if ( config.computeSpecularIBL )
 	{
@@ -370,6 +403,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
 			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 		}
+
 		if ( config.computeDiffuseIbl )
 		{
 			for ( uint32_t i = 0; i < 6; ++i ) {
@@ -387,6 +421,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 		}
 		//schedule.Queue( mipCubeTask );
 		schedule.Queue( imageCubemapWriteBackTask );
+	}
+	if ( brdfLutTask )
+	{
+		schedule.Queue( brdfLutTask );
+	}
+	if ( writeBrdfLut )
+	{
+		schedule.Queue( writeBrdfLut );
 	}
 	schedule.Queue( resolve );
 

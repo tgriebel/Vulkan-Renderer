@@ -278,6 +278,7 @@
   <ItemGroup>
     <None Include="glsl_compile.bat" />
     <None Include="shaders\clear.comp" />
+    <None Include="shaders\computeBrdfLut.frag" />
     <None Include="shaders\crt.frag" />
     <None Include="shaders\depth.frag" />
     <None Include="shaders\downsample.frag" />
