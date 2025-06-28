@@ -626,7 +626,7 @@ void Renderer::UpdateBuffers()
 		globals.defaultRoughnessId = rc.rghImage->gpuImage->GetId();
 		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
 		globals.defaultImageId = rc.defaultImage->gpuImage->GetId();
-		globals.brdfLutId = g_assets.textureLib.Find( "brdf_lut.png" )->Get().gpuImage->GetId();
+		globals.brdfLutId = g_assets.textureLib.Find( "code_assets/brdf_lut.img" )->Get().gpuImage->GetId();
 		globals.isTextured = true;
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );

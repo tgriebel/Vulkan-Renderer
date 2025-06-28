@@ -1,9 +1,8 @@
 {
   "images": [
     {
-	  "name": "brdf_lut.png",
+	  "name": "code_assets/brdf_lut.img",
 	  "type": "2D",
-	  "isLinear": true,
 	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
   ]

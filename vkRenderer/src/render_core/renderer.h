@@ -167,6 +167,7 @@ public:
 	Image					mainColorResolvedImage;
 	Image					blurredImage;
 	Image					tempColorImage;
+	Image					brdfImage;
 	Image					tempWritebackImage;
 	Image					depthStencilResolvedImage;
 
@@ -245,6 +246,7 @@ private:
 	FrameBuffer							mainColorResolved;
 	std::vector<FrameBuffer>			blurredImageFrameBuffers;
 	FrameBuffer							tempColor;
+	FrameBuffer							brdfLutFb;
 
 	uint32_t							shadowCount = 0;
 

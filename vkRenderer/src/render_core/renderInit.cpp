@@ -330,7 +330,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.clear = false;
 			info.resolve = true;
 			info.progHdl = AssetLibGpuProgram::Handle( "preCalculatedBrdfLut" );
-			info.fb = &tempColor;
+			info.fb = &brdfLutFb;
 			info.context = &renderContext;
 			info.resources = &resources;
 
@@ -342,7 +342,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 			imageWriteBackCreateInfo_t info{};
 			info.name = "BrdfLutWriteback";
-			info.img = &resources.tempColorImage;
+			info.img = &resources.brdfImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.fileName = fileName.c_str();
@@ -1173,6 +1173,26 @@ void Renderer::CreateFramebuffers()
 		);
 	}
 
+	// BRDF image
+	{
+		imageInfo_t info{};
+		info.width = 512;
+		info.height = 512;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		resources.brdfImage.Create(
+			info,
+			nullptr,
+			new GpuImage( "brdfImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+	}
+
 	// Image writeback
 	{
 		imageInfo_t info{};
@@ -1214,6 +1234,16 @@ void Renderer::CreateFramebuffers()
 		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		blurredImageFrameBuffers[ i ].Create( fbInfo );
+	}
+
+	// BRDF LUT Frame buffer
+	{
+		frameBufferCreateInfo_t fbInfo;
+		fbInfo.name = "BrdfLut";
+		fbInfo.color0 = &resources.brdfImage;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+
+		brdfLutFb.Create( fbInfo );
 	}
 
 	// Temp Frame buffer
