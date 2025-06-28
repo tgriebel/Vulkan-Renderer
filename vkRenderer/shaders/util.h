@@ -28,3 +28,13 @@ vec3 CubeVector( const vec3 v )
 {
 	return vec3( -v.y, v.z, v.x ); // to glsl coordinate space
 }
+
+float Saturate( const float v )
+{
+	return min( 1.0f, max( 0.0f, v ) );
+}
+
+vec3 Saturate( const vec3 v )
+{
+	return vec3( Saturate( v.x ), Saturate( v.y ), Saturate( v.z ) );
+}

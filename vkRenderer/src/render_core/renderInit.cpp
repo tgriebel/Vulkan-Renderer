@@ -706,7 +706,10 @@ void Renderer::InitImGui( RenderView& view )
 	g_imguiControls.rebuildShaders = false;
 	g_imguiControls.shaderHdl = INVALID_HDL;
 	g_imguiControls.heightMapHeight = 1.0f;
-	g_imguiControls.roughness = 0.9f;
+	g_imguiControls.roughnessScale = 1.0f;
+	g_imguiControls.roughnessBias = 0.0f;
+	g_imguiControls.metalnessScale = 1.0f;
+	g_imguiControls.metalnessBias = 0.0f;
 	g_imguiControls.shadowStrength = 0.99f;
 	g_imguiControls.toneMapColor[ 0 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 1 ] = 1.0f;

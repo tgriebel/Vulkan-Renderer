@@ -165,6 +165,10 @@
 	  "rx": 90.0
 	},
 	{
+	  "name": "gun",
+	  "model": "Cerberus_LP.obj",
+	},
+	{
 	  "name": "sphere",
 	  "model": "sphere.obj",
 	  "hidden": "false",

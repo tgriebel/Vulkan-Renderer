@@ -55,67 +55,57 @@ void CreateCodeAssets()
 			}		
 		}
 
-		const uint32_t debugColorCount = 18;
-
-		const Color colorAlb = Color( 1.0f, 1.0f, 1.0f );
-		const Color colorNml = Color( 0.0f, 0.0f, 0.5f );
-		const Color colorRgh = Color( 1.0f, 0.0f, 0.0f );
-		const Color colorMtl = Color( 0.0f, 0.0f, 0.0f );
-
-		static const Color* colors[ debugColorCount ] =
+		// Solid Colors
 		{
-			&ColorRed,
-			&ColorGreen,
-			&ColorBlue,
-			&ColorWhite,
-			&ColorBlack,
-			&ColorLGrey,
-			&ColorDGrey,
-			&ColorBrown,
-			&ColorCyan,
-			&ColorYellow,
-			&ColorPurple,
-			&ColorOrange,
-			&ColorPink,
-			&ColorGold,
-			&colorAlb,
-			&colorNml,
-			&colorRgh,
-			&colorMtl,
-		};
+			const uint32_t debugColorCount = 18;
 
-		const char* names[ debugColorCount ] =
-		{
-			"_red",
-			"_green",
-			"_blue",
-			"_white",
-			"_black",
-			"_lightGrey",
-			"_darkGrey",
-			"_brown",
-			"_cyan",
-			"_yellow",
-			"_purple",
-			"_orange",
-			"_pink",
-			"_gold",
-			"_alb",
-			"_nml",
-			"_rgh",
-			"_mtl",
-		};
+			struct dbgColorImageInfo_t
+			{
+				Color		color;
+				char*		name;
+				imageFmt_t	format;
+			};
 
-		imageInfo_t defaultInfo = DefaultImage2dInfo( 1, 1 );
+			const Color colorAlb = Color( 1.0f, 1.0f, 1.0f );
+			const Color colorNml = Color( 0.0f, 0.0f, 1.0f );
+			const Color colorRgh = Color( 1.0f, 0.0f, 0.0f );
+			const Color colorMtl = Color( 0.6f, 0.0f, 0.0f );
 
-		for ( uint32_t t = 0; t < debugColorCount; ++t )
-		{
-			hdl_t handle = g_assets.textureLib.Add( names[ t ], Image() );
-			Image& texture = g_assets.textureLib.Find( handle )->Get();
+			static const dbgColorImageInfo_t colorInfo[ debugColorCount ] =
+			{
+				{ ColorRed,		"_red",			imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorGreen,	"_green",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorBlue,	"_blue",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorWhite,	"_white",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorBlack,	"_black",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorLGrey,	"_lightGrey",	imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorDGrey,	"_darkGrey",	imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorBrown,	"_brown",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorCyan,	"_cyan",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorYellow,	"_yellow",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorPurple,	"_purple",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorOrange,	"_orange",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorPink,	"_pink",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ ColorGold,	"_gold",		imageFmt_t::IMAGE_FMT_RGBA_8 },
+				{ colorAlb,		"_alb",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ colorNml,		"_nml",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ colorRgh,		"_rgh",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+				{ colorMtl,		"_mtl",			imageFmt_t::IMAGE_FMT_RGBA_8_UNORM },
+			};
+
+			imageInfo_t defaultInfo = DefaultImage2dInfo( 1, 1 );
+
+			for ( uint32_t t = 0; t < debugColorCount; ++t )
+			{
+				hdl_t handle = g_assets.textureLib.Add( colorInfo[ t ].name, Image() );
+				Image& texture = g_assets.textureLib.Find( handle )->Get();
 			
-			rgba8_t pixel = Swizzle( colors[ t ]->AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
+				rgba8_t pixel = Swizzle( colorInfo[ t ].color.AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 
-			texture.Create( defaultInfo, (uint8_t*)&pixel, sizeof( rgba8_t ) );
+				defaultInfo.fmt = colorInfo[ t ].format;
+
+				texture.Create( defaultInfo, (uint8_t*)&pixel, sizeof( rgba8_t ) );
+			}
 		}
 
 		// Default Image - Checkerboard
@@ -151,7 +141,7 @@ void CreateCodeAssets()
 			hdl_t handle = g_assets.textureLib.Add( "_defaultCube", Image() );
 			Image& texture = g_assets.textureLib.Find( handle )->Get();
 
-			imageInfo_t info = defaultInfo;
+			imageInfo_t info = DefaultImage2dInfo( 1, 1 );
 			info.width = 8;
 			info.height = 8;
 			info.layers = 6;
@@ -496,7 +486,10 @@ void DrawSceneDebugMenu()
 		g_imguiControls.captureScreenshot = ImGui::Button( "Capture ScreenShot" );
 
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
-		ImGui::SliderFloat( "Roughness", &g_imguiControls.roughness, 0.1f, 1.0f );
+		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.roughnessScale, 0.0f, 1.0f );
+		ImGui::SliderFloat( "Roughness Bias", &g_imguiControls.roughnessBias, -1.0f, 1.0f );
+		ImGui::SliderFloat( "Metalness Scale", &g_imguiControls.metalnessScale, 0.0f, 1.0f );
+		ImGui::SliderFloat( "Metalness Bias", &g_imguiControls.metalnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
 		ImGui::InputFloat( "Tone Map R", &g_imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );

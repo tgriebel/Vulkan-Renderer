@@ -148,7 +148,10 @@ enum class swapBuffering_t : uint8_t
 struct imguiControls_t
 {
 	float		heightMapHeight;
-	float		roughness;
+	float		roughnessScale;
+	float		roughnessBias;
+	float		metalnessScale;
+	float		metalnessBias;
 	float		shadowStrength;
 	float		toneMapColor[ 4 ];
 	float		dofFocalDepth;

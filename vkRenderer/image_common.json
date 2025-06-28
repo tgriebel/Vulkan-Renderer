@@ -2,7 +2,9 @@
   "images": [
     {
 	  "name": "brdf_lut.png",
-	  "type": "2D"
+	  "type": "2D",
+	  "isLinear": true,
+	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
 	},
   ]
 }

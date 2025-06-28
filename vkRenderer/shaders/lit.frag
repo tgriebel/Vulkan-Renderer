@@ -45,6 +45,7 @@ void main()
 	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
     const uint albedoTexId = ( isTextured && material.textureId0 >= 0 ) ? material.textureId0 : globals.defaultAlbedoId;
     const uint normalTexId = ( isTextured && material.textureId1 >= 0 ) ? material.textureId1 : globals.defaultNormalId;
+    //const uint normalTexId = globals.defaultNormalId;
     const uint roughnessTexId = ( isTextured && material.textureId2 >= 0 ) ? material.textureId2 : globals.defaultRoughnessId;
     const uint metalnessTexId = ( isTextured && material.textureId3 >= 0 ) ? material.textureId3 : globals.defaultMetalId;
 	
@@ -63,10 +64,10 @@ void main()
     const vec4 roughnessTex = texture( texSampler[ roughnessTexId ], fragTexCoord.xy );
     const vec4 metalnessTex = texture( texSampler[ metalnessTexId ], fragTexCoord.xy );
 
-    const float perceptualRoughness = globals.generic.y * roughnessTex.r;
+    const float perceptualRoughness = Saturate( globals.generic.x * roughnessTex.r + globals.generic.y );
 
-    const float blendFactor = 0.0f;
-    const vec3 normal = fragTangentBasis * mix( vec3( 0.0f, 0.0f, 1.0f ), normalTex, blendFactor );
+    const float blendFactor = 0.5f;
+    const vec3 normal = fragTangentBasis * mix( vec3( 0.0f, 0.0f, 1.0f ), normalize( normalTex ), blendFactor );
 
     const vec3 V = normalize( cameraOrigin.xyz - worldPosition.xyz );
     const vec3 N = normalize( normal ); // normalize( worldPosition.xyz - modelOrigin );
@@ -80,7 +81,7 @@ void main()
 
     float NoV = max( dot( N, V ), 0.0f );
 
-    float metallic = metalnessTex.r;
+    const float metallic = Saturate( globals.generic.z * metalnessTex.r + globals.generic.w );
 	
 	//const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;
@@ -91,6 +92,8 @@ void main()
     F0 = mix( F0, albedoColor.rgb, metallic );
 	
     vec3 Lo = vec3( 0.0f, 0.0f, 0.0f );
+
+#if 1
     for( int i = 0; i < view.numLights; ++i )
     {
         const light_t light = lightUbo.lights[ i ];
@@ -101,10 +104,11 @@ void main()
         const float NoL = max( dot( N, L ), 0.0f );
         const float NoH = max( dot( N, H ), 0.0f );
         const float LoH = max( dot( L, H ), 0.0f );
+        const float HoV = max( dot( H, V ), 0.0f );
 
         const float D   = D_GGX( NoH, perceptualRoughness );
         const float G   = G_Smith( NoV, NoL, perceptualRoughness );      
-        const vec3 F    = F_SchlickRoughness( NoH, F0, perceptualRoughness );
+        const vec3 F    = F_Schlick( HoV, F0 );
 
         const vec3 kS = F;
         vec3 kD = vec3( 1.0f ) - kS;
@@ -152,6 +156,7 @@ void main()
 
         Lo += shadowing * diffuse;
     }
+#endif
 
     const vec3 F = F_SchlickRoughness( NoV, F0, perceptualRoughness );
 
@@ -162,23 +167,26 @@ void main()
     const vec2 envBRDF = texture( texSampler[ brdfLutId ], vec2( NoV, perceptualRoughness ) ).rg;
     const vec3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 
-    vec3 kS = F_Schlick( NoV, F0 );
+    vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], CubeVector( N ) ).rgb * material.Ka.rgb;
+    const vec3 irradiance = texture( cubeSamplers[ diffuseIBL ], CubeVector( N ) ).rgb;
     const vec3 diffuse = irradiance * albedoColor;
-    const vec3 ambient = ( kD * diffuse + specular ) * ao;
+    const vec3 ambient = ( kD * diffuse + specular ) * ao;// * material.Ka.rgb;
 
     outColor.rgb = Lo + ambient;
-    outColor.a = 1.0f;
+    outColor.a = material.Tr;
 
     outColor1.rgb = 0.5f * ( N + vec3( 1.0f, 1.0f, 1.0f ) );
     //outColor1.rgb = vec3( fragTexCoord.xy, 0.0f );
     outColor1.a = 1.0f;
 
-    //outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
-	outColor.a = material.Tr;
+    //outColor.rgb = 0.5f * normalTex + vec3( 0.5f, 0.5f, 0.5f );
+    //outColor.rg = envBRDF.rg;//vec3( NoV );
+
+//    outColor.rgb = vec3( NoV );
+//  outColor.rgb += vec3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );   
 //  outColor.rgb = envColor.rgb;
 //  outColor.rgb = 0.5f * N + vec3( 0.5f, 0.5f, 0.5f );
 //  outColor.rg = fragTexCoord.rb;

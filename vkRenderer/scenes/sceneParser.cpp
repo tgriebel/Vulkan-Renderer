@@ -200,6 +200,7 @@ int ParseImageObject( parseState_t& st, void* object )
 
 	AssetLibImages& textureLib = st.assets->textureLib;
 
+	bool isLinear = false;
 	char name[TOKEN_LEN] = "";
 	char type[TOKEN_LEN] = "";
 	char uvAddress[TOKEN_LEN] = "";
@@ -221,11 +222,12 @@ int ParseImageObject( parseState_t& st, void* object )
 		MAKE_ENUM_STRING( SAMPLER_FILTER_TRILINEAR ),
 	};
 
-	const uint32_t objectCount = 4;
+	const uint32_t objectCount = 5;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", &name, &ParseStringObject },
 		{ "type", &type, &ParseStringObject },
+		{ "isLinear", &isLinear, &ParseBoolObject },
 		{ "uvAddress", &uvAddress, &ParseStringObject },
 		{ "uvFilter", &uvFilter, &ParseStringObject },
 	};
@@ -259,6 +261,7 @@ int ParseImageObject( parseState_t& st, void* object )
 	loader->SetTextureFile( name );
 	loader->SetSampler( samplerState );
 	loader->LoadAsCubemap( strcmp( type, "CUBE" ) == 0 ? true : false );
+	loader->LoadAsLinear( isLinear );
 
 	textureLib.AddDeferred( name, Asset<Image>::loadHandlerPtr_t( loader ) );
 

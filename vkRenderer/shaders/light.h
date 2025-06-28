@@ -52,13 +52,13 @@ float G_Smith( const float NoV, const float NoL, const float roughness )
     return ( ggx1 * ggx2 );
 }
 
-vec3 F_Schlick( float cosTheta, vec3 f0 ) {
-    return f0 + ( 1.0 - f0 ) * pow( 1.0 - cosTheta, 5.0 );
+vec3 F_Schlick( float cosTheta, vec3 F0 ) {
+    return F0 + ( 1.0f - F0 ) * pow( clamp( 1.0f - cosTheta, 0.0f, 1.0f ), 5.0f );
 }
 
-vec3 F_SchlickRoughness( float cosTheta, vec3 f0, float roughness )
+vec3 F_SchlickRoughness( float cosTheta, vec3 F0, float roughness )
 {
-    return f0 + ( max( vec3( 1.0 - roughness ), f0 ) - f0 ) * pow( clamp( 1.0 - cosTheta, 0.0, 1.0 ), 5.0 );
+    return F0 + ( max( vec3( 1.0f - roughness ), F0 ) - F0 ) * pow( clamp( 1.0f - cosTheta, 0.0f, 1.0f ), 5.0f );
 }
 
 float Fd_Lambert() {
