@@ -12,7 +12,16 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 	m_dbgName = info.name;
 
-	m_pass = new PostPass( info.fb );
+	{
+		frameBufferCreateInfo_t fbInfo;
+		fbInfo.name = m_dbgName.c_str();
+		fbInfo.color0 = info.image;
+		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+
+		m_fb.Create( fbInfo );
+	}
+
+	m_pass = new PostPass( &m_fb );
 
 	m_pass->codeImages.Resize( info.inputImages );
 	m_pass->codeCubeImages.Resize( info.inputCubeImages );

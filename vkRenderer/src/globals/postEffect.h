@@ -16,7 +16,7 @@ struct imageProcessCreateInfo_t
 {
 	const char*			name;
 	hdl_t				progHdl;
-	FrameBuffer*		fb;
+	Image*				image;
 	RenderContext*		context;
 	ResourceContext*	resources;
 	uint32_t			inputImages;
@@ -43,6 +43,7 @@ private:
 	uint32_t				m_clearStencil;
 	ResourceContext*		m_resources;
 	RenderContext*			m_context;
+	FrameBuffer				m_fb;
 	DrawPass*				m_pass;
 	GpuBuffer				m_buffer;
 

@@ -241,12 +241,8 @@ private:
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
 	FrameBuffer							cubeMapFrameBuffer[ 6 ];
-	FrameBuffer							diffuseIblFrameBuffer[ 6 ];
-	FrameBuffer							specularIblFrameBuffer[ 6 ];
-	FrameBuffer							mainColorResolved;
 	std::vector<FrameBuffer>			blurredImageFrameBuffers;
 	FrameBuffer							tempColor;
-	FrameBuffer							brdfLutFb;
 
 	uint32_t							shadowCount = 0;
 

@@ -154,7 +154,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 				info.name = "DiffuseIBL";
 				info.clear = false;
 				info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
-				info.fb = &diffuseIblFrameBuffer[ i ];
+				info.image = &resources.diffuseIblImageViews[ i ];
 				info.context = &renderContext;
 				info.resources = &resources;
 				info.inputCubeImages = 1;
@@ -211,7 +211,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		} else {
 			info.progHdl = AssetLibGpuProgram::Handle( "ResolveMSAA" );
 		}
-		info.fb = &mainColorResolved;
+		info.image = &resources.mainColorResolvedImageViews[ 0 ];
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.inputImages = 3;
@@ -242,14 +242,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 		// Foreach Mip-Level: Downscale Image -> Blur Horizontal -> Temp -> Blur Vertical -> Blurred Image
 		for ( uint32_t passNum = 0; passNum < mipCount; ++passNum )
 		{
-			info.fb = &tempColor;
+			info.image = &resources.tempColorImage;
 			pingPongQueue[ 2 * passNum + 0 ] = new ImageProcess( info );
 			pingPongQueue[ 2 * passNum + 0 ]->SetSourceImage( 0, &resources.mainColorResolvedImageViews[ passNum ] );
 			pingPongQueue[ 2 * passNum + 0 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
 
 			verticalPass = 1;
 
-			info.fb = &blurredImageFrameBuffers[ passNum ];
+			info.image = &resources.blurredImageViews[ passNum ];
 			pingPongQueue[ 2 * passNum + 1 ] = new ImageProcess( info );
 			pingPongQueue[ 2 * passNum + 1 ]->SetSourceImage( 0, &resources.tempColorImage );
 			pingPongQueue[ 2 * passNum + 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
@@ -330,7 +330,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.clear = false;
 			info.resolve = true;
 			info.progHdl = AssetLibGpuProgram::Handle( "preCalculatedBrdfLut" );
-			info.fb = &brdfLutFb;
+			info.image = &resources.brdfImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 
@@ -1213,17 +1213,6 @@ void Renderer::CreateFramebuffers()
 		);
 	}
 
-	// Main Color Resolved Frame buffer
-	{
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = "MainColorResolveFB";
-		fbInfo.color0 = &resources.mainColorResolvedImageViews[0];
-		fbInfo.color1 = &resources.depthStencilResolvedImage;
-		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		mainColorResolved.Create( fbInfo );
-	}
-
 	// Blurred Image Frame buffer
 	blurredImageFrameBuffers.resize( resources.blurredImageViews.size() );
 	for ( uint32_t i = 0; i < blurredImageFrameBuffers.size(); ++i )
@@ -1234,16 +1223,6 @@ void Renderer::CreateFramebuffers()
 		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		blurredImageFrameBuffers[ i ].Create( fbInfo );
-	}
-
-	// BRDF LUT Frame buffer
-	{
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = "BrdfLut";
-		fbInfo.color0 = &resources.brdfImage;
-		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		brdfLutFb.Create( fbInfo );
 	}
 
 	// Temp Frame buffer
@@ -1271,13 +1250,10 @@ void Renderer::CreateFramebuffers()
 	{
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = "MainColorFB";
-		for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx )
-		{
-			fbInfo.color0 = &resources.mainColorImage;
-			fbInfo.color1 = &resources.gBufferLayerImage;
-			fbInfo.depth = &resources.depthImageView;
-			fbInfo.stencil = &resources.stencilImageView;
-		}
+		fbInfo.color0 = &resources.mainColorImage;
+		fbInfo.color1 = &resources.gBufferLayerImage;
+		fbInfo.depth = &resources.depthImageView;
+		fbInfo.stencil = &resources.stencilImageView;
 		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		mainColor.Create( fbInfo );
@@ -1288,41 +1264,11 @@ void Renderer::CreateFramebuffers()
 		for ( uint32_t i = 0; i < 6; ++i ) {
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "CubeColorFB";
-			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
-				fbInfo.color0 = &resources.cubeImageViews[ i ];
-				fbInfo.depth = &resources.cubeDepthImageViews[ i ];
-			}
+			fbInfo.color0 = &resources.cubeImageViews[ i ];
+			fbInfo.depth = &resources.cubeDepthImageViews[ i ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			cubeMapFrameBuffer[ i ].Create( fbInfo );
-		}
-	}
-
-	// Diffuse IBL Render
-	{
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			frameBufferCreateInfo_t fbInfo;
-			fbInfo.name = "DiffuseIblFB";
-			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
-				fbInfo.color0 = &resources.diffuseIblImageViews[ i ];
-			}
-			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-			diffuseIblFrameBuffer[ i ].Create( fbInfo );
-		}
-	}
-
-	// Specular IBL Render
-	{
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			frameBufferCreateInfo_t fbInfo;
-			fbInfo.name = "SpecularIblFB";
-			for ( uint32_t frameIx = 0; frameIx < MaxFrameStates; ++frameIx ) {
-				fbInfo.color0 = &resources.specularIblImageViews[ i ];
-			}
-			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-			specularIblFrameBuffer[ i ].Create( fbInfo );
 		}
 	}
 }
