@@ -195,10 +195,10 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.subresourceRange.baseMipLevel = 0;//subView.baseMip;
-	barrier.subresourceRange.levelCount = image->info.mipLevels;//subView.mipLevels;
-	barrier.subresourceRange.baseArrayLayer = 0;//subView.baseArray;
-	barrier.subresourceRange.layerCount = image->info.layers;//subView.arrayCount;
+	barrier.subresourceRange.baseMipLevel = subView.baseMip;
+	barrier.subresourceRange.levelCount = subView.mipLevels;
+	barrier.subresourceRange.baseArrayLayer = subView.baseArray;
+	barrier.subresourceRange.layerCount = subView.arrayCount;
 
 	const bool hasColorAspect = ( image->info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0;
 	const bool hasDepthAspect = ( image->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
