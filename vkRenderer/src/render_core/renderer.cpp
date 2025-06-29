@@ -226,7 +226,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 
-			const DrawPass* pass = view.passes[ passIx ];
+			const DrawPass* pass = view.passes[ 0 ][ passIx ];
 			if( pass == nullptr ){
 				continue;
 			}
@@ -547,15 +547,16 @@ void Renderer::CommitViews( const Scene* scene )
 			renderViews[ 0 ]->lights[ lightIx ] = lightIx;
 		}
 
-		assert( Max3DViews >= 7 );
-		for ( uint32_t cubeViewIx = 1; cubeViewIx < 7; ++cubeViewIx )
+		if( config.useCubeViews )
 		{
-			renderViews[ cubeViewIx ]->SetViewRect( 0, 0, 256, 256 );
-			renderViews[ cubeViewIx ]->SetCamera( scene->cameras[ cubeViewIx ] );
+			renderViews[ 1 ]->SetViewRect( 0, 0, 256, 256 );
+			for ( uint32_t cubeViewIx = 0; cubeViewIx < 6; ++cubeViewIx ) {
+				renderViews[ 1 ]->SetCamera( scene->cameras[ 1 + cubeViewIx ], true, cubeViewIx );
+			}
 
-			renderViews[ cubeViewIx ]->numLights = lightCount;
+			renderViews[ 1 ]->numLights = lightCount;
 			for ( uint32_t lightIx = 0; lightIx < lightCount; ++lightIx ) {
-				renderViews[ cubeViewIx ]->lights[ lightIx ] = lightIx;
+				renderViews[ 1 ]->lights[ lightIx ] = lightIx;
 			}
 		}
 	}
@@ -637,17 +638,23 @@ void Renderer::UpdateBuffers()
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
 		const RenderView& view = views[ viewIx ];
-
-		viewBufferObject_t viewBuffer = {};
-		if( view.IsCommitted() )
+		if( view.IsCommitted() == false ) {
+			continue;
+		}
+		
+		const uint32_t multiViewCount = view.GetMultiViewCount();
+		for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
 		{
+			viewBufferObject_t viewBuffer = {};
+
 			const vec2i& frameSize = view.GetFrameSize();
-			viewBuffer.view = view.GetViewMatrix();
-			viewBuffer.proj = view.GetProjMatrix();
+			viewBuffer.view = view.GetViewMatrix( multiViewIndex );
+			viewBuffer.proj = view.GetProjMatrix( multiViewIndex );
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
-		}
-		resources.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+
+			resources.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+		}	
 	}
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
@@ -656,7 +663,7 @@ void Renderer::UpdateBuffers()
 		if ( view.IsCommitted() == false ) {
 			continue;
 		}
-		const uint32_t viewId = view.GetViewId();
+		const uint32_t viewId = view.GetSurfaceBufferId();
 
 		static surfaceBufferObject_t surfBuffer[ MaxSurfaces ];
 

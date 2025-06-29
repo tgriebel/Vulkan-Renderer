@@ -34,68 +34,82 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 {
 	const uint32_t frameStateCount = MaxFrameStates;
 
-	const uint32_t width = info.fb->GetWidth();
-	const uint32_t height = info.fb->GetHeight();
+	const uint32_t width = info.fb[ 0 ]->GetWidth();
+	const uint32_t height = info.fb[ 0 ]->GetHeight();
 
 	m_viewport.width = width;
 	m_viewport.height = height;
 
 	m_name = info.name;
 	m_region = info.region;
-	m_framebuffer = info.fb;
 	m_resources = info.resources;
-	m_viewId = info.viewId;
+	m_surfaceBufferId = info.viewId;
+	m_viewBufferId = info.viewId;
+
+	m_multiViewCount = info.multiViewCount;
+
+	for ( uint32_t multiView = 0; multiView < info.multiViewCount; ++multiView ) {
+		m_framebuffers[ multiView ] = info.fb[ multiView ];
+	}
 
 	m_viewParms = info.context->RegisterBindParm( bindset_view );
 
-	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
-		passes[ passIx ] = nullptr;
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
+	{
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
+			passes[ multiViewIndex ][ passIx ] = nullptr;
+		}
 	}
 
 	const uint32_t beginPass = ViewRegionPassBegin();
 	const uint32_t endPass = ViewRegionPassEnd();
 
-	for ( uint32_t passIx = beginPass; passIx <= endPass; ++passIx )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
 	{
-		switch( passIx )
-		{
-			case DRAWPASS_SHADOW:
-				passes[ passIx ] = new ShadowPass( info.fb );
-				break;
-			case DRAWPASS_DEPTH:
-				passes[ passIx ] = new DepthPass( info.fb );
-				break;
-			case DRAWPASS_TERRAIN:
-				passes[ passIx ] = new TerrainPass( info.fb );
-				break;
-			case DRAWPASS_OPAQUE:
-				passes[ passIx ] = new OpaquePass( info.fb );
-				break;
-			case DRAWPASS_SKYBOX:
-				passes[ passIx ] = new SkyboxPass( info.fb );
-				break;
-			case DRAWPASS_TRANS:
-				passes[ passIx ] = new TransPass( info.fb );
-				break;
-			case DRAWPASS_EMISSIVE:
-				passes[ passIx ] = new EmissivePass( info.fb );
-				break;
-			case DRAWPASS_DEBUG_3D:
-				passes[ passIx ] = new Debug3dPass( info.fb );
-				break;
-			case DRAWPASS_DEBUG_WIREFRAME:
-				passes[ passIx ] = new WireframePass( info.fb );
-				break;
-			case DRAWPASS_2D:
-				passes[ passIx ] = new PostPass( info.fb );
-				break;
-			case DRAWPASS_DEBUG_2D:
-				passes[ passIx ] = new Debug2dPass( info.fb );
-				break;
-		}
+		FrameBuffer* fb = m_framebuffers[ multiViewIndex ];
 
-		const ShaderBindSet* bindset_pass = info.context->LookupBindSet( "bindset_pass"  );
-		passes[ passIx ]->parms = info.context->RegisterBindParm( bindset_pass );
+		for ( uint32_t passIx = beginPass; passIx <= endPass; ++passIx )
+		{
+			switch( passIx )
+			{
+				case DRAWPASS_SHADOW:
+					passes[ multiViewIndex ][ passIx ] = new ShadowPass( fb );
+					break;
+				case DRAWPASS_DEPTH:
+					passes[ multiViewIndex ][ passIx ] = new DepthPass( fb );
+					break;
+				case DRAWPASS_TERRAIN:
+					passes[ multiViewIndex ][ passIx ] = new TerrainPass( fb );
+					break;
+				case DRAWPASS_OPAQUE:
+					passes[ multiViewIndex ][ passIx ] = new OpaquePass( fb );
+					break;
+				case DRAWPASS_SKYBOX:
+					passes[ multiViewIndex ][ passIx ] = new SkyboxPass( fb );
+					break;
+				case DRAWPASS_TRANS:
+					passes[ multiViewIndex ][ passIx ] = new TransPass( fb );
+					break;
+				case DRAWPASS_EMISSIVE:
+					passes[ multiViewIndex ][ passIx ] = new EmissivePass( fb );
+					break;
+				case DRAWPASS_DEBUG_3D:
+					passes[ multiViewIndex ][ passIx ] = new Debug3dPass( fb );
+					break;
+				case DRAWPASS_DEBUG_WIREFRAME:
+					passes[ multiViewIndex ][ passIx ] = new WireframePass( fb );
+					break;
+				case DRAWPASS_2D:
+					passes[ multiViewIndex ][ passIx ] = new PostPass( fb );
+					break;
+				case DRAWPASS_DEBUG_2D:
+					passes[ multiViewIndex ][ passIx ] = new Debug2dPass( fb );
+					break;
+			}
+
+			const ShaderBindSet* bindset_pass = info.context->LookupBindSet( "bindset_pass"  );
+			passes[ multiViewIndex ][ passIx ]->parms = info.context->RegisterBindParm( bindset_pass );
+		}
 	}
 
 
@@ -145,15 +159,18 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 
 void RenderView::FrameBegin()
 {
-	m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_viewId ] );
+	m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
 
-	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
-		DrawPass* pass = passes[ passIx ];
-		if ( pass == nullptr ) {
-			continue;
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
+			if ( pass == nullptr ) {
+				continue;
+			}
+			pass->FrameBegin( m_resources );
 		}
-		pass->FrameBegin( m_resources );
 	}
 
 	DrawDebugMenu( *this );
@@ -162,26 +179,32 @@ void RenderView::FrameBegin()
 
 void RenderView::FrameEnd()
 {
-	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
-		DrawPass* pass = passes[ passIx ];
-		if ( pass == nullptr ) {
-			continue;
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
+			if ( pass == nullptr ) {
+				continue;
+			}
+			pass->FrameEnd();
 		}
-		pass->FrameEnd();
 	}
 }
 
 
 void RenderView::Resize()
 {
-	for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
-		DrawPass* pass = passes[ passIx ];
-		if ( pass == nullptr ) {
-			continue;
+		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
+			if ( pass == nullptr ) {
+				continue;
+			}
+			pass->SetViewport( 0, 0, pass->GetFrameBuffer()->GetWidth(), pass->GetFrameBuffer()->GetHeight() );
 		}
-		pass->SetViewport( 0, 0, pass->GetFrameBuffer()->GetWidth(), pass->GetFrameBuffer()->GetHeight() );
 	}
 }
 
@@ -251,10 +274,10 @@ const ShaderBindParms* RenderView::BindParms() const
 
 vec2i RenderView::GetFrameSize() const
 {
-	if( m_framebuffer == nullptr ) {
+	if( m_framebuffers[ 0 ] == nullptr ) {
 		return vec2i( 0, 0 );
 	}
-	return vec2i( static_cast<int32_t>( m_framebuffer->GetWidth() ), static_cast<int32_t>( m_framebuffer->GetHeight() ) );
+	return vec2i( static_cast<int32_t>( m_framebuffers[ 0 ]->GetWidth() ), static_cast<int32_t>( m_framebuffers[ 0 ]->GetHeight() ) );
 }
 
 
@@ -264,33 +287,39 @@ const viewport_t& RenderView::GetViewport() const
 }
 
 
-const mat4x4f& RenderView::GetViewMatrix() const
+const mat4x4f& RenderView::GetViewMatrix( const uint32_t multiView ) const
 {
-	return m_viewMatrix;
+	return m_viewMatrices[ multiView ];
 }
 
 
-const mat4x4f& RenderView::GetProjMatrix() const
+const mat4x4f& RenderView::GetProjMatrix( const uint32_t multiView ) const
 {
-	return m_projMatrix;
+	return m_projMatrices[ multiView ];
 }
 
 
-const mat4x4f& RenderView::GetViewprojMatrix() const
+const mat4x4f& RenderView::GetViewprojMatrix( const uint32_t multiView ) const
 {
-	return m_viewprojMatrix;
+	return m_viewprojMatrices[ multiView ];
 }
 
 
-const int RenderView::GetViewId() const
+int RenderView::GetViewBufferId( const int multiView ) const
 {
-	return m_viewId;
+	return m_viewBufferId + multiView;
 }
 
 
-const void RenderView::SetViewId( const int id )
+int RenderView::GetSurfaceBufferId() const
 {
-	m_viewId = id;
+	return m_surfaceBufferId;
+}
+
+
+uint32_t RenderView::GetMultiViewCount() const
+{
+	return m_multiViewCount;
 }
 
 
@@ -312,17 +341,17 @@ const void RenderView::Commit()
 }
 
 
-const bool RenderView::IsCommitted() const
+bool RenderView::IsCommitted() const
 {
 	return m_committed;
 }
 
 
-void RenderView::SetCamera( const Camera& camera, const bool reverseZ )
+void RenderView::SetCamera( const Camera& camera, const bool reverseZ, const uint32_t multiView )
 {
-	m_viewMatrix = camera.GetViewMatrix();
-	m_projMatrix = camera.GetPerspectiveMatrix( reverseZ );
-	m_viewprojMatrix = m_projMatrix * m_viewMatrix;
+	m_viewMatrices[ multiView ] = camera.GetViewMatrix();
+	m_projMatrices[ multiView ] = camera.GetPerspectiveMatrix( reverseZ );
+	m_viewprojMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
 
 	m_viewport.near = camera.GetNearClip();
 	m_viewport.far = camera.GetFarClip();

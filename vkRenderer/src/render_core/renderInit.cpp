@@ -61,7 +61,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.fb = &shadowMap[ i ];
+		info.multiViewCount = 1;
+		info.fb[ 0 ] = &shadowMap[ i ];
 
 		shadowViews[ i ] = &views[ viewCount ];
 		shadowViews[ i ]->Init( info );
@@ -76,26 +77,30 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.fb = &mainColor;
+		info.multiViewCount = 1;
+		info.fb[ 0 ] = &mainColor;
 
 		renderViews[ 0 ] = &views[ viewCount ];
-		renderViews[ 0 ]->Init( info );
+		renderViews[ 0 ]->Init( info );	
 		++viewCount;
+	}
 
-		for ( uint32_t i = 1; i < Max3DViews; ++i )
-		{
-			renderViewCreateInfo_t info{};
-			info.name = "Cube View";
-			info.region = renderViewRegion_t::STANDARD_RASTER;
-			info.viewId = viewCount;
-			info.context = &renderContext;
-			info.resources = &resources;
-			info.fb = &cubeMapFrameBuffer[ i - 1 ];
-
-			renderViews[ i ] = &views[ viewCount ];
-			renderViews[ i ]->Init( info );
-			++viewCount;
+	if ( config.useCubeViews )
+	{
+		renderViewCreateInfo_t info{};
+		info.name = "Cube View";
+		info.region = renderViewRegion_t::STANDARD_RASTER;
+		info.viewId = viewCount;
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.multiViewCount = 6;
+		for ( uint32_t i = 0; i < 6; ++i ) {
+			info.fb[ i ] = &cubeMapFrameBuffer[ i ];
 		}
+
+		renderViews[ 1 ] = &views[ viewCount ];
+		renderViews[ 1 ]->Init( info );
+		++viewCount;
 	}
 
 	// 2D views
@@ -106,7 +111,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.fb = g_swapChain.GetFrameBuffer();
+		info.multiViewCount = 1;
+		info.fb[ 0 ] = g_swapChain.GetFrameBuffer();
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
@@ -121,9 +127,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	renderViews[ 0 ]->Commit();
 
 	if( config.useCubeViews ) {
-		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
-			renderViews[ i ]->Commit();
-		}
+		renderViews[ 1 ]->Commit();
 	}
 	view2Ds[ 0 ]->Commit();
 
@@ -400,9 +404,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 	if ( config.useCubeViews )
 	{
-		for ( uint32_t i = 1; i < Max3DViews; ++i ) {
-			schedule.Queue( new RenderTask( renderViews[ i ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
-		}
+		schedule.Queue( new RenderTask( renderViews[ 1 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 
 		if ( config.computeDiffuseIbl )
 		{
@@ -724,9 +726,9 @@ void Renderer::InitImGui( RenderView& view )
 	vkInfo.ImageCount = MaxFrameStates;
 	vkInfo.CheckVkResultFn = nullptr;
 
-	assert( view.passes[ DRAWPASS_DEBUG_2D ] != nullptr );
+	assert( view.passes[ 0 ][ DRAWPASS_DEBUG_2D ] != nullptr );
 	const renderPassTransition_t transitionState = view.TransitionState();
-	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ DRAWPASS_DEBUG_2D ]->GetFrameBuffer()->GetVkRenderPass( transitionState ) );
+	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ 0 ][ DRAWPASS_DEBUG_2D ]->GetFrameBuffer()->GetVkRenderPass( transitionState ) );
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
@@ -828,11 +830,15 @@ void Renderer::BuildPipelines()
 			continue;
 		}
 
-		for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		const uint32_t multiViewCount = views[ viewIx ].GetMultiViewCount();
+		for ( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
 		{
-			const DrawPass* pass = views[ viewIx ].passes[ passIx ];
-			if( pass != nullptr ) {
-				passes.push_back( pass );
+			for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+			{
+				const DrawPass* pass = views[ viewIx ].passes[ multiViewIndex ][ passIx ];
+				if( pass != nullptr ) {
+					passes.push_back( pass );
+				}
 			}
 		}
 	}

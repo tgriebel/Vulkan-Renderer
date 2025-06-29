@@ -304,9 +304,6 @@
     <None Include="shaders\terrain.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\vertexSimple.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="shaders\depth.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -316,16 +313,10 @@
     <None Include="shaders\postProcess.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="shaders\vertexDefault.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="shaders\emissive.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\tree.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\pixelSimple.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\crt.frag">
@@ -338,9 +329,6 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\fullscreen.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\pixelDefault.frag">
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\resolve.frag">
@@ -362,6 +350,18 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\computeBrdfLut.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\default.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\default.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\simple.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -23,7 +23,7 @@
 
 #define MaxLights		128
 #define MaxMaterials	256
-#define MaxViews		6
+#define MaxViews		15
 #define MaxSurfaces		1000
 
 #define PI				3.14159265359f

@@ -31,6 +31,8 @@
 class ResourceContext;
 class RenderContext;
 
+static const uint32_t MaxMultiViews = 6;
+
 enum class renderViewRegion_t : uint32_t
 {
 	SHADOW			= 0,
@@ -46,9 +48,10 @@ struct renderViewCreateInfo_t
 	const char*				name;
 	renderViewRegion_t		region;
 	int						viewId;
+	uint32_t				multiViewCount;
 	const ResourceContext*	resources;
 	RenderContext*			context;
-	FrameBuffer*			fb;
+	FrameBuffer*			fb[ MaxMultiViews ];
 };
 
 
@@ -58,19 +61,21 @@ private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
 	const ResourceContext*	m_resources;
-	const FrameBuffer*		m_framebuffer;
+	FrameBuffer*			m_framebuffers[ MaxMultiViews ];
 	ShaderBindParms*		m_viewParms;
 	vec4f					m_clearColor;
 	float					m_clearDepth;
 	uint32_t				m_clearStencil;
 	renderPassTransition_t	m_transitionState;
 	viewport_t				m_viewport;
-	mat4x4f					m_viewMatrix;
-	mat4x4f					m_projMatrix;
-	mat4x4f					m_viewprojMatrix;
+	mat4x4f					m_viewMatrices[ MaxMultiViews ];
+	mat4x4f					m_projMatrices[ MaxMultiViews ];
+	mat4x4f					m_viewprojMatrices[ MaxMultiViews ];
 	const char*				m_name;
 	renderViewRegion_t		m_region;
-	int						m_viewId;
+	uint32_t				m_multiViewCount;
+	int						m_viewBufferId;
+	int						m_surfaceBufferId;
 	bool					m_committed;
 
 public:
@@ -79,30 +84,39 @@ public:
 	{
 		m_viewport = viewport_t( 0, 0, DefaultDisplayWidth, DefaultDisplayHeight, 0.0f, 1.0f );
 
-		for( uint32_t i = 0; i < DRAWPASS_COUNT; ++i ) {
-			passes[ i ] = nullptr;
-		}
+		m_multiViewCount = 1;
 
-		m_viewMatrix = mat4x4f( 1.0f );
-		m_projMatrix = mat4x4f( 1.0f );
-		m_viewprojMatrix = mat4x4f( 1.0f );
-
-		m_viewId = -1;
+		m_viewBufferId = -1;
+		m_surfaceBufferId = -1;
 		m_committed = false;
 
 		numLights = 0;
 		memset( drawGroupOffset, 0, sizeof( drawGroupOffset ) );
 
-		m_framebuffer = nullptr;
+		for( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
+		{
+			m_viewMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
+			m_projMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
+			m_viewprojMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
+
+			m_framebuffers[ multiViewIndex ] = nullptr;
+
+			for ( uint32_t passIndex = 0; passIndex < DRAWPASS_COUNT; ++passIndex ) {
+				passes[ multiViewIndex ][ passIndex ] = nullptr;
+			}
+		}
 		m_region = renderViewRegion_t::UNKNOWN;
 	}
 
 	~RenderView()
 	{
-		for ( uint32_t i = 0; i < DRAWPASS_COUNT; ++i )
+		for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 		{
-			delete passes[ i ];
-			passes[ i ] = nullptr;
+			for ( uint32_t passIndex = 0; passIndex < DRAWPASS_COUNT; ++passIndex )
+			{
+				delete passes[ multiViewIndex ][ passIndex ];
+				passes[ multiViewIndex ][ passIndex ] = nullptr;
+			}
 		}
 	}
 
@@ -119,28 +133,30 @@ public:
 	uint32_t				ClearStencil() const;
 	const ShaderBindParms*	BindParms() const;
 
-	void					SetCamera( const Camera& camera, const bool reverseZ = true );
+	void					SetCamera( const Camera& camera, const bool reverseZ = true, const uint32_t multiView = 0 );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
 	const viewport_t&		GetViewport() const;
 	vec2i					GetFrameSize() const;
-	const mat4x4f&			GetViewMatrix() const;
-	const mat4x4f&			GetProjMatrix() const;
-	const mat4x4f&			GetViewprojMatrix() const;
-	const int				GetViewId() const;
-	const void				SetViewId( const int id );
+	const mat4x4f&			GetViewMatrix( const uint32_t multiView = 0 ) const;
+	const mat4x4f&			GetProjMatrix( const uint32_t multiView = 0 ) const;
+	const mat4x4f&			GetViewprojMatrix( const uint32_t multiView = 0 ) const;
+	int						GetViewBufferId( const int multiView ) const; // TODO: Have view own it's view buffer. Eliminates indexing
+	int						GetSurfaceBufferId() const; // TODO: Have view own it's surface buffer. Eliminates indexing
+
+	uint32_t				GetMultiViewCount() const;
 
 	const char*				GetName() const;
 	const renderViewRegion_t GetRegion() const;
 
 	const void				Commit();
-	const bool				IsCommitted() const;
+	bool					IsCommitted() const;
 
 	void					AttachDebugMenu( const debugMenuFuncPtr funcPtr );
 
 	uint32_t				lights[ MaxLights ];
 	uint32_t				numLights;
 	uint32_t				drawGroupOffset[ DRAWPASS_COUNT ];
-	DrawPass*				passes[ DRAWPASS_COUNT ];
+	DrawPass*				passes[ MaxMultiViews ][ DRAWPASS_COUNT ];
 	DrawGroup				drawGroup[ DRAWPASS_COUNT ];
 	debugMenuArray_t		debugMenus;
 };

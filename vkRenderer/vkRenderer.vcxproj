@@ -280,6 +280,8 @@
     <None Include="shaders\clear.comp" />
     <None Include="shaders\computeBrdfLut.frag" />
     <None Include="shaders\crt.frag" />
+    <None Include="shaders\default.frag" />
+    <None Include="shaders\default.vert" />
     <None Include="shaders\depth.frag" />
     <None Include="shaders\downsample.frag" />
     <None Include="shaders\emissive.frag" />
@@ -288,20 +290,18 @@
     <None Include="shaders\gaussian.frag" />
     <None Include="shaders\imagewriteback.comp" />
     <None Include="shaders\lit.frag" />
-    <None Include="shaders\pixelDefault.frag" />
-    <None Include="shaders\pixelSimple.frag" />
     <None Include="shaders\postProcess.frag" />
     <None Include="shaders\preCalculatedDiffuseIBL.frag" />
     <None Include="shaders\resolve.frag" />
     <None Include="shaders\shadow.frag" />
+    <None Include="shaders\simple.frag" />
+    <None Include="shaders\simple.vert" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
     <None Include="shaders\preCalculatedSpecularIbl.frag" />
     <None Include="shaders\terrain.frag" />
     <None Include="shaders\terrain.vert" />
     <None Include="shaders\tree.vert" />
-    <None Include="shaders\vertexDefault.vert" />
-    <None Include="shaders\vertexSimple.vert" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Chess\Chess\Chess.vcxproj">

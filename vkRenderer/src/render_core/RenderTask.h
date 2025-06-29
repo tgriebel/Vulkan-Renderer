@@ -62,7 +62,7 @@ private:
 
 	void Init( RenderView* view, drawPass_t begin, drawPass_t end );
 	void Shutdown();
-	void RenderViewSurfaces( GfxContext* context );
+	void RenderViewSurfaces( GfxContext* context, const uint32_t multiViewIndex );
 
 public:
 	RenderTask()

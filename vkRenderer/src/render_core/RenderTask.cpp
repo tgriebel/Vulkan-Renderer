@@ -67,13 +67,13 @@ static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 }
 
 
-void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
+void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t multiViewIndex )
 {
 	const drawPass_t passBegin = renderView->ViewRegionPassBegin();
 	const drawPass_t passEnd = renderView->ViewRegionPassEnd();
 
 	// For now the pass state is the same for the entire view region
-	const DrawPass* pass = renderView->passes[ passBegin ];
+	const DrawPass* pass = renderView->passes[ multiViewIndex ][ passBegin ];
 	if ( pass == nullptr ) {
 		throw std::runtime_error( "Missing pass state!" );
 	}
@@ -121,7 +121,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
-		DrawPass* pass = renderView->passes[ passIx ];
+		DrawPass* pass = renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {
 			continue;
 		}
@@ -135,7 +135,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
-		DrawPass* pass = renderView->passes[ passIx ];
+		DrawPass* pass = renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {
 			continue;
 		}
@@ -229,7 +229,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext )
 			assert( surface.sortKey.materialId < ( 1ull << KeyMaterialBits ) );
 
 			pushConstants_t pushConstants = {};
-			pushConstants.viewId = uint32_t( renderView->GetViewId() );
+			pushConstants.viewId = uint32_t( renderView->GetViewBufferId( multiViewIndex ) );
 			pushConstants.objectId = surface.objectOffset + renderView->drawGroupOffset[ passIx ];
 			pushConstants.materialId = uint32_t( surface.sortKey.materialId );
 
@@ -280,7 +280,10 @@ void RenderTask::Execute( CommandContext& context )
 {
 	context.MarkerBeginRegion( renderView->GetName(), ColorToVector( Color::Cyan ) );
 
-	RenderViewSurfaces( reinterpret_cast<GfxContext*>( &context ) );
+	const uint32_t multiViewCount = renderView->GetMultiViewCount();
+	for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex ) {
+		RenderViewSurfaces( reinterpret_cast<GfxContext*>( &context ), multiViewIndex );
+	}
 
 	context.MarkerEndRegion();
 }
