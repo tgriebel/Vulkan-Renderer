@@ -102,6 +102,7 @@ MakeCVar( bool,		c_bakeAssets );
 MakeCVar( bool,		r_shadows );
 MakeCVar( bool,		r_downsampleScene );
 MakeCVar( bool,		r_screenshot );
+MakeCVar( bool,		r_gaussianBlur );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
@@ -156,6 +157,7 @@ int main( int argc, char* argv[] )
 	config.screenshot = r_screenshot.GetBool();
 	config.cubemapName = r_cubemapName.GetString();
 	config.computeBrdfLut = r_computeBrdfLut.GetBool();
+	config.gaussianBlur = r_gaussianBlur.GetBool();
 
 	std::thread renderThread( RenderThread );
 

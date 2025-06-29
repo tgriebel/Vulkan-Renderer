@@ -62,7 +62,6 @@ struct renderConfig_t
 	bool			computeDiffuseIbl;
 	bool			computeSpecularIBL;
 	bool			downsampleScene;
-	bool			computeGaussianBlur;
 	bool			screenshot;
 	bool			gaussianBlur;
 	bool			shadows;
@@ -241,8 +240,6 @@ private:
 	FrameBuffer							shadowMap[ MaxShadowMaps ];
 	FrameBuffer							mainColor;
 	FrameBuffer							cubeMapFrameBuffer[ 6 ];
-	std::vector<FrameBuffer>			blurredImageFrameBuffers;
-	FrameBuffer							tempColor;
 
 	uint32_t							shadowCount = 0;
 

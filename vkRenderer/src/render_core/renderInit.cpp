@@ -243,12 +243,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		pingPongQueue.resize( imagePassCount );
 
+		Image* initialPassImage = &resources.mainColorResolvedImageViews[ 0 ];
+
 		// Foreach Mip-Level: Downscale Image -> Blur Horizontal -> Temp -> Blur Vertical -> Blurred Image
 		for ( uint32_t passNum = 0; passNum < mipCount; ++passNum )
 		{
 			info.image = &resources.tempColorImage;
 			pingPongQueue[ 2 * passNum + 0 ] = new ImageProcess( info );
-			pingPongQueue[ 2 * passNum + 0 ]->SetSourceImage( 0, &resources.mainColorResolvedImageViews[ passNum ] );
+			pingPongQueue[ 2 * passNum + 0 ]->SetSourceImage( 0, initialPassImage );
 			pingPongQueue[ 2 * passNum + 0 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
 
 			verticalPass = 1;
@@ -257,6 +259,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 			pingPongQueue[ 2 * passNum + 1 ] = new ImageProcess( info );
 			pingPongQueue[ 2 * passNum + 1 ]->SetSourceImage( 0, &resources.tempColorImage );
 			pingPongQueue[ 2 * passNum + 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+
+			initialPassImage = &resources.blurredImageViews[ passNum ];
 		}
 	}
 
@@ -268,7 +272,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.mainColorResolvedImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
 
 		mipTask = new MipImageTask( info );
 	}
@@ -1217,28 +1221,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.sharedMemory, resourceLifeTime_t::RESIZE )
 		);
-	}
-
-	// Blurred Image Frame buffer
-	blurredImageFrameBuffers.resize( resources.blurredImageViews.size() );
-	for ( uint32_t i = 0; i < blurredImageFrameBuffers.size(); ++i )
-	{
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = "blurredImageFB";
-		fbInfo.color0 = &resources.blurredImageViews[ i ];
-		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		blurredImageFrameBuffers[ i ].Create( fbInfo );
-	}
-
-	// Temp Frame buffer
-	{
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = "TempColorFB";
-		fbInfo.color0 = &resources.tempColorImage;
-		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		tempColor.Create( fbInfo );
 	}
 
 	// Shadow map
