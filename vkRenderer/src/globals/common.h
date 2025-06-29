@@ -82,6 +82,7 @@ const uint32_t	MaxLights						= 128;
 const uint32_t	MaxParticles					= 1024;
 const uint32_t	MaxShadowMaps					= 6;
 const uint32_t	MaxShadowViews					= MaxShadowMaps;
+const uint32_t	MaxMipMaps						= 16;
 const uint32_t	Max2DViews						= 2;
 const uint32_t	Max3DViews						= 7;
 const uint32_t	MaxViews						= ( MaxShadowViews + Max3DViews + Max2DViews );

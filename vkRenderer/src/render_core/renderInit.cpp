@@ -1108,7 +1108,6 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 
 		const uint32_t mipLevelCount = resources.mainColorResolvedImage.info.mipLevels;
-		resources.mainColorResolvedImageViews.resize( mipLevelCount );
 		for ( uint32_t i = 0; i < mipLevelCount; ++i )
 		{
 			imageSubResourceView_t subView = {};
@@ -1119,7 +1118,7 @@ void Renderer::CreateFramebuffers()
 
 			resources.mainColorResolvedImageViews[ i ].Init( resources.mainColorResolvedImage, info, subView, resourceLifeTime_t::RESIZE );
 		}
-		resources.blurredImageViews.resize( mipLevelCount );
+
 		for ( uint32_t i = 0; i < mipLevelCount; ++i )
 		{
 			imageSubResourceView_t subView = {};

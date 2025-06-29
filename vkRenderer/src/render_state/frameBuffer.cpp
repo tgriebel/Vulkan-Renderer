@@ -256,6 +256,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		RenderResource::Create( createInfo.lifetime );
 	}
 
+	m_createInfo = createInfo;
+
 	if ( m_bufferCount > 0 ) {
 		throw std::runtime_error( "Framebuffer already initialized." );
 	}
@@ -469,4 +471,9 @@ void FrameBuffer::Destroy()
 	m_dsCount = 0;
 	m_attachmentCount = 0;
 	m_bufferCount = 0;
+}
+
+void FrameBuffer::Resize()
+{
+	Create( m_createInfo );
 }

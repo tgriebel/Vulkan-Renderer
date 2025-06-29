@@ -158,8 +158,8 @@ public:
 	GpuBufferView			surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 
 	// Code images
-	std::vector<ImageView>	mainColorResolvedImageViews;
-	std::vector<ImageView>	blurredImageViews;
+	ImageView				mainColorResolvedImageViews[ MaxMipMaps ];
+	ImageView				blurredImageViews[ MaxMipMaps ];
 	ImageView				depthResolvedImageView;
 	ImageView				stencilResolvedImageView;
 	Image					shadowMapImage[ MaxShadowViews ];

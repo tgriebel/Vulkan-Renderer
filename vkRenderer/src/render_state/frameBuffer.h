@@ -63,6 +63,8 @@ class FrameBuffer : public RenderResource
 private:
 	static const uint32_t MaxAttachmentCount = 5;
 
+	frameBufferCreateInfo_t		m_createInfo;
+
 	Image*						m_color0;
 	Image*						m_color1;
 	Image*						m_color2;
@@ -195,4 +197,5 @@ public:
 
 	void Create( const frameBufferCreateInfo_t& createInfo );
 	void Destroy();
+	void Resize();
 };

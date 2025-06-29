@@ -200,16 +200,17 @@ void RenderView::FrameEnd()
 
 void RenderView::Resize()
 {
-	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
+		m_framebuffers[ multiViewIndex ]->Resize();
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
 			if ( pass == nullptr ) {
 				continue;
 			}
-			pass->SetViewport( 0, 0, pass->GetFrameBuffer()->GetWidth(), pass->GetFrameBuffer()->GetHeight() );
-		}
+			pass->SetViewport( 0, 0, m_framebuffers[ multiViewIndex ]->GetWidth(), m_framebuffers[ multiViewIndex ]->GetHeight() );
+		}		
 	}
 }
 

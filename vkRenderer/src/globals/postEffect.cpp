@@ -79,7 +79,8 @@ void ImageProcess::SetConstants( const void* dataBlock, const uint32_t sizeInByt
 
 void ImageProcess::Resize()
 {
-	m_pass->SetViewport( 0, 0, m_pass->GetFrameBuffer()->GetWidth(), m_pass->GetFrameBuffer()->GetHeight() );
+	m_fb.Resize();
+	m_pass->SetViewport( 0, 0, m_fb.GetWidth(), m_fb.GetHeight() );
 }
 
 
