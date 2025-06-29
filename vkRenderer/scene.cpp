@@ -294,52 +294,52 @@ void UpdateScene( Scene* scene )
 	{
 		// FIXME: race conditions
 		// Need to do a ping-pong update
-		if ( g_window.input.IsKeyPressed( 'D' ) ) {
+		if ( g_window.input.IsKeyPressed( KEY_D ) ) {
 			scene->mainCamera->Truck( cameraSpeed * dt );
 		}
-		if ( g_window.input.IsKeyPressed( 'A' ) ) {
+		if ( g_window.input.IsKeyPressed( KEY_A ) ) {
 			scene->mainCamera->Truck( -cameraSpeed * dt );
 		}
-		if ( g_window.input.IsKeyPressed( 'W' ) ) {
+		if ( g_window.input.IsKeyPressed( KEY_W ) ) {
 			scene->mainCamera->Dolly( cameraSpeed * dt );
 		}
-		if ( g_window.input.IsKeyPressed( 'S' ) ) {
+		if ( g_window.input.IsKeyPressed( KEY_S ) ) {
 			scene->mainCamera->Dolly( -cameraSpeed * dt );
 		}
-		if ( g_window.input.IsKeyPressed( '1' ) )
+		if ( g_window.input.IsKeyPressed( KEY_1 ) )
 		{
 			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 			scene->mainCamera->Pan( 0.0f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '2' ) )
+		if ( g_window.input.IsKeyPressed( KEY_2 ) )
 		{
 			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 			scene->mainCamera->Pan( 0.5f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '3' ) )
+		if ( g_window.input.IsKeyPressed( KEY_3 ) )
 		{
 			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 			scene->mainCamera->Pan( 1.0f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '4' ) )
+		if ( g_window.input.IsKeyPressed( KEY_4 ) )
 		{
 			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 			scene->mainCamera->Pan( 1.5f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '5' ) )
+		if ( g_window.input.IsKeyPressed( KEY_5 ) )
 		{
 			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 			scene->mainCamera->Tilt( -0.5f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '6' ) )
+		if ( g_window.input.IsKeyPressed( KEY_6 ) )
 		{
 			scene->mainCamera->SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 			scene->mainCamera->Tilt( 0.5f * PI );
 		}
-		if ( g_window.input.IsKeyPressed( '+' ) ) {
+		if ( g_window.input.IsKeyPressed( KEY_ADD ) ) {
 			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ) );
 		}
-		if ( g_window.input.IsKeyPressed( '-' ) ) {
+		if ( g_window.input.IsKeyPressed( KEY_SUB ) ) {
 			scene->mainCamera->SetFov( scene->mainCamera->GetFov() - Radians( 0.1f ) );
 		}
 	}
