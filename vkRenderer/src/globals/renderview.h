@@ -48,10 +48,17 @@ struct renderViewCreateInfo_t
 	const char*				name;
 	renderViewRegion_t		region;
 	int						viewId;
-	uint32_t				multiViewCount;
+
 	const ResourceContext*	resources;
 	RenderContext*			context;
-	FrameBuffer*			fb[ MaxMultiViews ];
+
+	uint32_t				multiViewCount;
+	swapBuffering_t			swapBuffering;
+	Image*					color[ MaxMultiViews ];
+	Image*					gBuffer0[ MaxMultiViews ];
+	Image*					gBuffer1[ MaxMultiViews ];
+	Image*					depth[ MaxMultiViews ];
+	Image*					stencil[ MaxMultiViews ];
 };
 
 
@@ -117,6 +124,8 @@ public:
 				delete passes[ multiViewIndex ][ passIndex ];
 				passes[ multiViewIndex ][ passIndex ] = nullptr;
 			}
+			delete m_framebuffers[ multiViewIndex ];
+			m_framebuffers[ multiViewIndex ] = nullptr;
 		}
 	}
 

@@ -34,12 +34,6 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 {
 	const uint32_t frameStateCount = MaxFrameStates;
 
-	const uint32_t width = info.fb[ 0 ]->GetWidth();
-	const uint32_t height = info.fb[ 0 ]->GetHeight();
-
-	m_viewport.width = width;
-	m_viewport.height = height;
-
 	m_name = info.name;
 	m_region = info.region;
 	m_resources = info.resources;
@@ -48,8 +42,19 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 
 	m_multiViewCount = info.multiViewCount;
 
-	for ( uint32_t multiView = 0; multiView < info.multiViewCount; ++multiView ) {
-		m_framebuffers[ multiView ] = info.fb[ multiView ];
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
+	{
+		frameBufferCreateInfo_t fbInfo;
+		fbInfo.name = m_name;
+		fbInfo.color0 = info.color[ multiViewIndex ];
+		fbInfo.color1 = info.gBuffer0[ multiViewIndex ];
+		fbInfo.color2 = info.gBuffer1[ multiViewIndex ];
+		fbInfo.depth = info.depth[ multiViewIndex ];
+		fbInfo.stencil = info.stencil[ multiViewIndex ];
+		fbInfo.swapBuffering = info.swapBuffering;
+
+		m_framebuffers[ multiViewIndex ] = new FrameBuffer();
+		m_framebuffers[ multiViewIndex ]->Create( fbInfo );
 	}
 
 	m_viewParms = info.context->RegisterBindParm( bindset_view );

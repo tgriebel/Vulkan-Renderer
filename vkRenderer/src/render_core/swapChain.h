@@ -45,7 +45,6 @@ private:
 #ifdef USE_VULKAN
 	VkSwapchainKHR				vk_swapChain;
 #endif
-	FrameBuffer					m_framebuffer;
 	uint32_t					m_imageIndex;
 
 public:
@@ -79,18 +78,6 @@ public:
 	inline const Image* GetBackBuffer() const
 	{
 		return &m_swapChainImage;
-	}
-	
-
-	inline FrameBuffer* GetFrameBuffer()
-	{
-		return &m_framebuffer;
-	}
-
-
-	inline const FrameBuffer* GetFrameBuffer() const
-	{
-		return &m_framebuffer;
 	}
 
 

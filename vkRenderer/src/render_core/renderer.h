@@ -237,10 +237,6 @@ private:
 	materialBufferArray_t				materialBuffer;
 	committedLightsArray_t				committedLights;
 
-	FrameBuffer							shadowMap[ MaxShadowMaps ];
-	FrameBuffer							mainColor;
-	FrameBuffer							cubeMapFrameBuffer[ 6 ];
-
 	uint32_t							shadowCount = 0;
 
 	// Init/Shutdown

@@ -188,13 +188,6 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 
 	gpuImageStateFlags_t flags = GPU_IMAGE_PRESENT | GPU_IMAGE_PERSISTENT;
 	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages, vk_swapChainImageViews, flags );
-
-	frameBufferCreateInfo_t fbInfo = {};
-	fbInfo.name = "SwapChainFB";
-	fbInfo.color0 = &m_swapChainImage;
-	fbInfo.swapBuffering = swapBuffering_t::MULTI_FRAME;
-
-	m_framebuffer.Create( fbInfo );
 }
 
 

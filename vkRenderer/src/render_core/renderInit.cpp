@@ -62,7 +62,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.multiViewCount = 1;
-		info.fb[ 0 ] = &shadowMap[ i ];
+		info.depth[ 0 ] = &resources.shadowMapImage[ i ];
 
 		shadowViews[ i ] = &views[ viewCount ];
 		shadowViews[ i ]->Init( info );
@@ -78,7 +78,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.multiViewCount = 1;
-		info.fb[ 0 ] = &mainColor;
+		info.color[ 0 ] = &resources.mainColorImage;
+		info.gBuffer0[ 0 ] = &resources.gBufferLayerImage;
+		info.depth[ 0 ] = &resources.depthImageView;
+		info.stencil[ 0 ] = &resources.stencilImageView;
 
 		renderViews[ 0 ] = &views[ viewCount ];
 		renderViews[ 0 ]->Init( info );	
@@ -94,8 +97,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.multiViewCount = 6;
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			info.fb[ i ] = &cubeMapFrameBuffer[ i ];
+		for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
+		{
+			info.color[ multiViewIndex ] = &resources.cubeImageViews[ multiViewIndex ];
+			info.depth[ multiViewIndex ] = &resources.cubeDepthImageViews[ multiViewIndex ];
 		}
 
 		renderViews[ 1 ] = &views[ viewCount ];
@@ -112,7 +117,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.multiViewCount = 1;
-		info.fb[ 0 ] = g_swapChain.GetFrameBuffer();
+		info.swapBuffering = swapBuffering_t::MULTI_FRAME;
+		info.color[ 0 ] = g_swapChain.GetBackBuffer();
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
@@ -1221,43 +1227,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.sharedMemory, resourceLifeTime_t::RESIZE )
 		);
-	}
-
-	// Shadow map
-	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
-	{	
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = "ShadowMapFB";
-		fbInfo.depth = &resources.shadowMapImage[ shadowIx ];
-		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		shadowMap[ shadowIx ].Create( fbInfo );
-	}
-
-	// Main Scene 3D Render
-	{
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = "MainColorFB";
-		fbInfo.color0 = &resources.mainColorImage;
-		fbInfo.color1 = &resources.gBufferLayerImage;
-		fbInfo.depth = &resources.depthImageView;
-		fbInfo.stencil = &resources.stencilImageView;
-		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		mainColor.Create( fbInfo );
-	}
-
-	// Cubemap Render
-	{
-		for ( uint32_t i = 0; i < 6; ++i ) {
-			frameBufferCreateInfo_t fbInfo;
-			fbInfo.name = "CubeColorFB";
-			fbInfo.color0 = &resources.cubeImageViews[ i ];
-			fbInfo.depth = &resources.cubeDepthImageViews[ i ];
-			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-			cubeMapFrameBuffer[ i ].Create( fbInfo );
-		}
 	}
 }
 
