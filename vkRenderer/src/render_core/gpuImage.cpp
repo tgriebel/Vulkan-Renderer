@@ -46,6 +46,11 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	{
 		RenderResource::Create( lifetime );
 	}
+	m_isViewOwned = false;
+	m_flags = flags;
+	m_dbgName = name;
+	m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
+
 #ifdef USE_VULKAN
 	{
 		VkImageCreateInfo imageInfo = vk_GetImageCreateInfo( info, flags );
@@ -58,9 +63,6 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 			imageInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
 			imageInfo.pNext = &stencilUsage;
 		}
-
-		m_dbgName = name;
-		m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
 
 		const uint32_t bufferCount = GetBufferCount();
 		for ( uint32_t i = 0; i < bufferCount; ++i )

@@ -52,6 +52,7 @@ struct renderViewCreateInfo_t
 	const ResourceContext*	resources;
 	RenderContext*			context;
 
+	bool					isCubeView;
 	uint32_t				multiViewCount;
 	swapBuffering_t			swapBuffering;
 	Image*					color[ MaxMultiViews ];
@@ -69,6 +70,11 @@ private:
 
 	const ResourceContext*	m_resources;
 	FrameBuffer*			m_framebuffers[ MaxMultiViews ];
+	ImageView*				m_colorViews[ MaxMultiViews ];
+	ImageView*				m_gBuffer0Views[ MaxMultiViews ];
+	ImageView*				m_gBuffer1Views[ MaxMultiViews ];
+	ImageView*				m_depthViews[ MaxMultiViews ];
+	ImageView*				m_stencilViews[ MaxMultiViews ];
 	ShaderBindParms*		m_viewParms;
 	vec4f					m_clearColor;
 	float					m_clearDepth;
@@ -121,11 +127,32 @@ public:
 		{
 			for ( uint32_t passIndex = 0; passIndex < DRAWPASS_COUNT; ++passIndex )
 			{
-				delete passes[ multiViewIndex ][ passIndex ];
-				passes[ multiViewIndex ][ passIndex ] = nullptr;
+				if ( passes[ multiViewIndex ] != nullptr )
+				{
+					delete passes[ multiViewIndex ][ passIndex ];
+					passes[ multiViewIndex ][ passIndex ] = nullptr;
+				}
 			}
-			delete m_framebuffers[ multiViewIndex ];
-			m_framebuffers[ multiViewIndex ] = nullptr;
+			if( m_framebuffers[ multiViewIndex ] != nullptr )
+			{
+				delete m_framebuffers[ multiViewIndex ];
+				m_framebuffers[ multiViewIndex ] = nullptr;
+
+				delete m_colorViews[ multiViewIndex ];
+				m_colorViews[ multiViewIndex ] = nullptr;
+
+				delete m_gBuffer0Views[ multiViewIndex ];
+				m_gBuffer0Views[ multiViewIndex ] = nullptr;
+
+				delete m_gBuffer1Views[ multiViewIndex ];
+				m_gBuffer1Views[ multiViewIndex ] = nullptr;
+
+				delete m_depthViews[ multiViewIndex ];
+				m_depthViews[ multiViewIndex ] = nullptr;
+
+				delete m_stencilViews[ multiViewIndex ];
+				m_stencilViews[ multiViewIndex ] = nullptr;
+			}	
 		}
 	}
 

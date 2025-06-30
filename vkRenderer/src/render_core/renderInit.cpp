@@ -97,11 +97,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.multiViewCount = 6;
-		for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
-		{
-			info.color[ multiViewIndex ] = &resources.cubeImageViews[ multiViewIndex ];
-			info.depth[ multiViewIndex ] = &resources.cubeDepthImageViews[ multiViewIndex ];
-		}
+		info.isCubeView = true;
+		info.color[ 0 ] = &resources.cubeFbColorImage;
+		info.depth[ 0 ] = &resources.cubeFbDepthImage;
 
 		renderViews[ 1 ] = &views[ viewCount ];
 		renderViews[ 1 ]->Init( info );
@@ -991,29 +989,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
-
-		resources.cubeFbImageView.Init( resources.cubeFbColorImage, colorInfo, resourceLifeTime_t::RESIZE );
-
-		resources.cubeFbImageView.sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-		resources.cubeFbImageView.sampler.filter = SAMPLER_FILTER_BILINEAR;
-
-		for ( uint32_t i = 0; i < 6; ++i )
-		{
-			imageSubResourceView_t subView;
-			subView.arrayCount = 1;
-			subView.baseArray = vk_MapToGlslCubemapConvention( i );
-			subView.baseMip = 0;
-			subView.mipLevels = 1;
-
-			colorInfo.type = IMAGE_TYPE_2D;
-			depthInfo.type = IMAGE_TYPE_2D;
-
-			resources.cubeImageViews[ i ].Init( resources.cubeFbColorImage, colorInfo, subView, resourceLifeTime_t::RESIZE );
-			resources.cubeDepthImageViews[ i ].Init( resources.cubeFbDepthImage, depthInfo, subView, resourceLifeTime_t::RESIZE );
-
-			resources.cubeImageViews[ i ].sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-			resources.cubeImageViews[ i ].sampler.filter = SAMPLER_FILTER_BILINEAR;
-		}
 	}
 
 	// Diffuse IBL images

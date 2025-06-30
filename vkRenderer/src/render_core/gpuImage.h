@@ -25,13 +25,15 @@ class GpuImage : public RenderResource
 {
 protected:
 #ifdef USE_VULKAN
-	VkImage				vk_image[ MaxFrameStates ];
-	VkImageView			vk_view[ MaxFrameStates ];
-	Allocation			m_allocation;
+	VkImage					vk_image[ MaxFrameStates ];
+	VkImageView				vk_view[ MaxFrameStates ];
+	Allocation				m_allocation;
 #endif
-	swapBuffering_t		m_swapBuffering;
-	const char*			m_dbgName;
-	int					m_id;
+	gpuImageStateFlags_t	m_flags;
+	swapBuffering_t			m_swapBuffering;
+	const char*				m_dbgName;
+	int32_t					m_id;
+	bool					m_isViewOwned;
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
 	{
@@ -71,12 +73,19 @@ public:
 	}
 
 #ifdef USE_VULKAN
-	GpuImage( const char* name, const VkImage image, const VkImageView view )
+	GpuImage( const GpuImage* gpuImage, const VkImageView views[ MaxFrameStates ] )
 	{
-		vk_image[ 0 ] = image;
-		vk_view[ 0 ] = view;
-		m_dbgName = name;
-		m_swapBuffering = swapBuffering_t::SINGLE_FRAME;
+		const uint32_t bufferCount = gpuImage->GetBufferCount();
+		for ( uint32_t i = 0; i < bufferCount; ++i )
+		{
+			vk_image[ i ] = gpuImage->GetVkImage( i );
+			vk_view[ i ] = views[ i ];
+		}
+		m_dbgName = gpuImage->GetDebugName();
+		m_swapBuffering = gpuImage->m_swapBuffering;
+		m_flags = gpuImage->m_flags;
+		m_id = gpuImage->m_id;
+		m_isViewOwned = true;
 	}
 
 	// TODO: take in swapchain
@@ -91,6 +100,9 @@ public:
 			vk_image[ i ] = image[ i ];
 			vk_view[ i ] = view[ i ];
 		}
+		m_flags = flags;
+		m_id = -1;
+		m_isViewOwned = true;
 	}
 
 
@@ -128,6 +140,16 @@ public:
 	inline const char* GetDebugName() const
 	{
 		return m_dbgName;
+	}
+
+	inline gpuImageStateFlags_t GetFlags() const
+	{
+		return m_flags;
+	}
+
+	inline bool OwnedByImage() const
+	{
+		return m_isViewOwned;
 	}
 
 	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime );

@@ -40,19 +40,103 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_surfaceBufferId = info.viewId;
 	m_viewBufferId = info.viewId;
 
-	m_multiViewCount = info.multiViewCount;
+	assert( ( info.multiViewCount == 6 && info.isCubeView ) || ( info.multiViewCount == 1 ) );
+
+	m_multiViewCount = info.isCubeView ? 6 : info.multiViewCount;
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
 	{
+		imageSubResourceView_t subView;
+		subView.arrayCount = 1;
+		subView.baseArray = info.isCubeView ? vk_MapToGlslCubemapConvention( multiViewIndex ) : 0;
+		subView.baseMip = 0;
+		subView.mipLevels = 1;
+
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = m_name;
-		fbInfo.color0 = info.color[ multiViewIndex ];
-		fbInfo.color1 = info.gBuffer0[ multiViewIndex ];
-		fbInfo.color2 = info.gBuffer1[ multiViewIndex ];
-		fbInfo.depth = info.depth[ multiViewIndex ];
-		fbInfo.stencil = info.stencil[ multiViewIndex ];
 		fbInfo.swapBuffering = info.swapBuffering;
 
+		if( info.color[ 0 ] != nullptr )
+		{
+			imageInfo_t colorInfo = info.color[ 0 ]->info;
+			colorInfo.type = IMAGE_TYPE_2D;
+
+			m_colorViews[ multiViewIndex ] = new ImageView();
+			m_colorViews[ multiViewIndex ]->Init( *info.color[ 0 ], colorInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if( info.isCubeView )
+			{
+				m_colorViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_colorViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.gBuffer0[ 0 ] != nullptr )
+		{
+			imageInfo_t gbufferInfo = info.gBuffer0[ 0 ]->info;
+			gbufferInfo.type = IMAGE_TYPE_2D;
+
+			m_gBuffer0Views[ multiViewIndex ] = new ImageView();
+			m_gBuffer0Views[ multiViewIndex ]->Init( *info.gBuffer0[ 0 ], gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( info.isCubeView )
+			{
+				m_gBuffer0Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_gBuffer0Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.gBuffer1[ 0 ] != nullptr )
+		{
+			imageInfo_t gbufferInfo = info.gBuffer1[ 0 ]->info;
+			gbufferInfo.type = IMAGE_TYPE_2D;
+
+			m_gBuffer1Views[ multiViewIndex ] = new ImageView();
+			m_gBuffer1Views[ multiViewIndex ]->Init( *info.gBuffer1[ 0 ], gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( info.isCubeView )
+			{
+				m_gBuffer1Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_gBuffer1Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.depth[ 0 ] != nullptr )
+		{
+			imageInfo_t depthInfo = info.depth[ 0 ]->info;
+			depthInfo.type = IMAGE_TYPE_2D;
+
+			m_depthViews[ multiViewIndex ] = new ImageView();
+			m_depthViews[ multiViewIndex ]->Init( *info.depth[ 0 ], depthInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( info.isCubeView )
+			{
+				m_depthViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_depthViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.stencil[ 0 ] != nullptr )
+		{
+			imageInfo_t stencilInfo = info.stencil[ 0 ]->info;
+			stencilInfo.type = IMAGE_TYPE_2D;
+
+			m_stencilViews[ multiViewIndex ] = new ImageView();
+			m_stencilViews[ multiViewIndex ]->Init( *info.stencil[ 0 ], stencilInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( info.isCubeView )
+			{
+				m_stencilViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_stencilViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+			
+		fbInfo.color0 = m_colorViews[ multiViewIndex ];
+		fbInfo.color1 = m_gBuffer0Views[ multiViewIndex ];
+		fbInfo.color2 = m_gBuffer1Views[ multiViewIndex ];
+		fbInfo.depth = m_depthViews[ multiViewIndex ];
+		fbInfo.stencil = m_stencilViews[ multiViewIndex ];
+			
 		m_framebuffers[ multiViewIndex ] = new FrameBuffer();
 		m_framebuffers[ multiViewIndex ]->Create( fbInfo );
 	}
