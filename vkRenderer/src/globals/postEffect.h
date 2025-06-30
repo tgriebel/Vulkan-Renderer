@@ -68,6 +68,7 @@ public:
 
 	void				FrameBegin();
 	void				FrameEnd();
+	std::string			AsString() const;
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
 	void				SetSourceCubeImage( const uint32_t slot, Image* image );

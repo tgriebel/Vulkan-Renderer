@@ -39,6 +39,7 @@ public:
 
 	void		FrameBegin();
 	void		FrameEnd();
+	std::string	AsString() const;
 
 	uint32_t	GetMipCount() const;
 	bool		SetSourceImageForLevel( const uint32_t mipLevel, Image* img );

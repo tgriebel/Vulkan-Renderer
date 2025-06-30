@@ -69,16 +69,16 @@ static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 
 void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t multiViewIndex )
 {
-	const drawPass_t passBegin = renderView->ViewRegionPassBegin();
-	const drawPass_t passEnd = renderView->ViewRegionPassEnd();
+	const drawPass_t passBegin = m_renderView->ViewRegionPassBegin();
+	const drawPass_t passEnd = m_renderView->ViewRegionPassEnd();
 
 	// For now the pass state is the same for the entire view region
-	const DrawPass* pass = renderView->passes[ multiViewIndex ][ passBegin ];
+	const DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passBegin ];
 	if ( pass == nullptr ) {
 		throw std::runtime_error( "Missing pass state!" );
 	}
 
-	const renderPassTransition_t& transitionState = renderView->TransitionState();
+	const renderPassTransition_t& transitionState = m_renderView->TransitionState();
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -87,9 +87,9 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
 	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
-	const vec4f clearColor = renderView->ClearColor();
-	const float clearDepth = renderView->ClearDepth();
-	const uint32_t clearStencil = renderView->ClearStencil();
+	const vec4f clearColor = m_renderView->ClearColor();
+	const float clearDepth = m_renderView->ClearDepth();
+	const uint32_t clearStencil = m_renderView->ClearStencil();
 
 	const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
 	const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
@@ -121,7 +121,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
-		DrawPass* pass = renderView->passes[ multiViewIndex ][ passIx ];
+		DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {
 			continue;
 		}
@@ -135,7 +135,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
 	{
-		DrawPass* pass = renderView->passes[ multiViewIndex ][ passIx ];
+		DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {
 			continue;
 		}
@@ -151,7 +151,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 			continue;
 		}
 
-		const DrawGroup* drawGroup = &renderView->drawGroup[ passIx ];
+		const DrawGroup* drawGroup = &m_renderView->drawGroup[ passIx ];
 
 		const uint32_t surfaceCount = drawGroup->Count();
 		if( surfaceCount == 0 ) {
@@ -217,7 +217,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 					const RenderContext* renderContext = cmdContext->GetRenderContext();
 
 					const uint32_t descSetCount = 3;
-					VkDescriptorSet descSetArray[ descSetCount ] = { renderContext->globalParms->GetVkObject(), renderView->BindParms()->GetVkObject(), pass->parms->GetVkObject() };
+					VkDescriptorSet descSetArray[ descSetCount ] = { renderContext->globalParms->GetVkObject(), m_renderView->BindParms()->GetVkObject(), pass->parms->GetVkObject() };
 
 					vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 					vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
@@ -229,8 +229,8 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 			assert( surface.sortKey.materialId < ( 1ull << KeyMaterialBits ) );
 
 			pushConstants_t pushConstants = {};
-			pushConstants.viewId = uint32_t( renderView->GetViewBufferId( multiViewIndex ) );
-			pushConstants.objectId = surface.objectOffset + renderView->drawGroupOffset[ passIx ];
+			pushConstants.viewId = uint32_t( m_renderView->GetViewBufferId( multiViewIndex ) );
+			pushConstants.objectId = surface.objectOffset + m_renderView->drawGroupOffset[ passIx ];
 			pushConstants.materialId = uint32_t( surface.sortKey.materialId );
 
 			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
@@ -246,41 +246,48 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 void RenderTask::Init( RenderView* view, drawPass_t begin, drawPass_t end )
 {
-	renderView = view;
-	beginPass = begin;
-	endPass= end;
+	m_renderView = view;
+	m_beginPass = begin;
+	m_endPass= end;
 
-	finishedSemaphore.Create( "Task Finished" );
+	m_finishedSemaphore.Create( "Task Finished" );
 }
 
 
 void RenderTask::Shutdown()
 {
-	finishedSemaphore.Destroy();
+	m_finishedSemaphore.Destroy();
 }
 
 
 void RenderTask::FrameBegin()
 {
-	if( renderView != nullptr ) {
-		renderView->FrameBegin();
+	if( m_renderView != nullptr ) {
+		m_renderView->FrameBegin();
 	}
 }
 
 
 void RenderTask::FrameEnd()
 {
-	if ( renderView != nullptr ) {
-		renderView->FrameEnd();
+	if ( m_renderView != nullptr ) {
+		m_renderView->FrameEnd();
 	}
+}
+
+std::string RenderTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<RenderTask: " << m_renderView->GetName() << ">";
+	return ss.str();
 }
 
 
 void RenderTask::Execute( CommandContext& context )
 {
-	context.MarkerBeginRegion( renderView->GetName(), ColorToVector( Color::Cyan ) );
+	context.MarkerBeginRegion( m_renderView->GetName(), ColorToVector( Color::Cyan ) );
 
-	const uint32_t multiViewCount = renderView->GetMultiViewCount();
+	const uint32_t multiViewCount = m_renderView->GetMultiViewCount();
 	for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex ) {
 		RenderViewSurfaces( reinterpret_cast<GfxContext*>( &context ), multiViewIndex );
 	}
@@ -291,6 +298,7 @@ void RenderTask::Execute( CommandContext& context )
 
 ComputeTask::ComputeTask( const char* csName, ComputeState* state )
 {
+	m_name = csName;
 	m_state = state;
 	m_progHdl = g_assets.gpuPrograms.RetrieveHdl( csName );
 }
@@ -308,6 +316,14 @@ void ComputeTask::FrameEnd()
 }
 
 
+std::string ComputeTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<ComputeTask: " << m_name << ">";
+	return ss.str();
+}
+
+
 void ComputeTask::Execute( CommandContext& context )
 {
 	ComputeContext* computeContext = reinterpret_cast<ComputeContext*>( &context );
@@ -315,9 +331,25 @@ void ComputeTask::Execute( CommandContext& context )
 }
 
 
+std::string TransitionImageTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<TransitionImageTask: " << m_img->gpuImage->GetDebugName() << ">";
+	return ss.str();
+}
+
+
 void TransitionImageTask::Execute( CommandContext& context )
 {
 	Transition( &context, *m_img, m_srcState, m_dstState );
+}
+
+
+std::string CopyImageTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<CopyImageTask: " << "" << ">";
+	return ss.str();
 }
 
 
@@ -386,4 +418,18 @@ void RenderSchedule::IssueNext( CommandContext& context )
 	++currentTask;
 
 	task->Execute( context );
+}
+
+
+void RenderSchedule::AsString() const
+{
+	std::cout << "Schedule\n";
+
+	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
+	for ( uint32_t i = 0; i < taskCount; ++i )
+	{
+		GpuTask* task = tasks[ i ];
+		std::cout << "+ " << task->AsString() << "\n";
+	}
+	std::cout << std::flush;
 }

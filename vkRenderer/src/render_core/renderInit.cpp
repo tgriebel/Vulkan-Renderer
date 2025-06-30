@@ -409,12 +409,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 	UploadAssets();
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i ) {
-		schedule.Queue( new RenderTask( shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
+		schedule.Queue( new RenderTask( shadowViews[i], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END));
 	}
-	schedule.Queue( new RenderTask( renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	schedule.Queue( new RenderTask( renderViews[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
 	if ( config.useCubeViews )
 	{
-		schedule.Queue( new RenderTask( renderViews[ 1 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+		schedule.Queue( new RenderTask( renderViews[1], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
 
 		if ( config.computeDiffuseIbl )
 		{
@@ -457,8 +457,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 			schedule.Queue( pingPongQueue[i] );
 		}
 	}
-	schedule.Queue( new RenderTask( view2Ds[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	schedule.Queue( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
 	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
+
+	schedule.AsString();
 }
 
 

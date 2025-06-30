@@ -43,10 +43,11 @@ enum gpuImageStateFlags_t : uint8_t;
 class GpuTask
 {
 public:
-	virtual void	FrameBegin() = 0;
-	virtual void	FrameEnd() = 0;
-	virtual void	Resize() = 0;
-	virtual void	Execute( CommandContext& context ) = 0;
+	virtual void		FrameBegin() = 0;
+	virtual void		FrameEnd() = 0;
+	virtual void		Resize() = 0;
+	virtual void		Execute( CommandContext& context ) = 0;
+	virtual std::string	AsString() const = 0;
 
 	virtual ~GpuTask() {};
 };
@@ -55,10 +56,10 @@ public:
 class RenderTask : public GpuTask
 {
 private:
-	RenderView*		renderView;
-	drawPass_t		beginPass;
-	drawPass_t		endPass;
-	GpuSemaphore	finishedSemaphore;
+	RenderView*		m_renderView;
+	drawPass_t		m_beginPass;
+	drawPass_t		m_endPass;
+	GpuSemaphore	m_finishedSemaphore;
 
 	void Init( RenderView* view, drawPass_t begin, drawPass_t end );
 	void Shutdown();
@@ -67,7 +68,7 @@ private:
 public:
 	RenderTask()
 	{
-		Init( nullptr, DRAWPASS_COUNT, DRAWPASS_COUNT );
+		Init( nullptr, DRAWPASS_COUNT, DRAWPASS_COUNT);
 	}
 
 	RenderTask( RenderView* view, drawPass_t begin, drawPass_t end )
@@ -82,10 +83,11 @@ public:
 
 	void Resize() {}
 
-	void FrameBegin();
-	void FrameEnd();
+	void				FrameBegin();
+	void				FrameEnd();
+	std::string			AsString() const;
 
-	void Execute( CommandContext& context ) override;
+	void				Execute( CommandContext& context ) override;
 };
 
 
@@ -94,16 +96,18 @@ class ComputeTask : public GpuTask
 private:
 	ComputeState*		m_state;
 	hdl_t				m_progHdl;
+	std::string			m_name;
 
 public:
 	ComputeTask( const char* csName, ComputeState* state );
 
 	void Resize() {}
 
-	void FrameBegin();
-	void FrameEnd();
+	void			FrameBegin();
+	void			FrameEnd();
+	std::string		AsString() const;
 
-	void Execute( CommandContext& context ) override;
+	void			Execute( CommandContext& context ) override;
 	~ComputeTask()
 	{}
 };
@@ -127,8 +131,10 @@ public:
 
 	void Resize() {}
 
-	void FrameBegin() {}
-	void FrameEnd() {}
+	void			FrameBegin() {}
+	void			FrameEnd() {}
+	std::string		AsString() const;
+	const char*		GetName() const;
 
 	void Execute( CommandContext& context ) override;
 	~TransitionImageTask()
@@ -152,8 +158,10 @@ public:
 
 	void Resize() {}
 
-	void FrameBegin() {}
-	void FrameEnd() {}
+	void			FrameBegin() {}
+	void			FrameEnd() {}
+	std::string		AsString() const;
+	const char*		GetName() const;
 
 	void Execute( CommandContext& context ) override;
 	~CopyImageTask()
@@ -178,4 +186,5 @@ public:
 	void		FrameBegin();
 	void		FrameEnd();
 	void		IssueNext( CommandContext& context );
+	void		AsString() const;
 };

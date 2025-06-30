@@ -6,6 +6,15 @@
 #include "../render_binding/gpuResources.h"
 #include "../render_binding/bindings.h"
 
+
+std::string ImageWritebackTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<ImageWritebackTask: " << m_name << ">";
+	return ss.str();
+}
+
+
 void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
 {
 	m_readbackImage = info.img;

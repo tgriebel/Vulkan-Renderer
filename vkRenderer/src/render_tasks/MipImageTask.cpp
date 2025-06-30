@@ -5,6 +5,15 @@
 #include "../render_binding/gpuResources.h"
 #include "../render_binding/bindings.h"
 
+
+std::string MipImageTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<MipImageTask: " << m_dbgName << ">\n";
+	return ss.str();
+}
+
+
 void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 {
 	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );

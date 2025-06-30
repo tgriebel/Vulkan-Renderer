@@ -59,8 +59,9 @@ public:
 
 	void Resize() {}
 
-	void FrameBegin();
-	void FrameEnd();
+	void			FrameBegin();
+	void			FrameEnd();
+	std::string		AsString() const;
 
 	void Execute( CommandContext& context ) override;
 };
