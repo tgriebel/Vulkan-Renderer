@@ -40,29 +40,23 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_surfaceBufferId = info.viewId;
 	m_viewBufferId = info.viewId;
 
-	assert( ( info.multiViewCount == 6 && info.isCubeView ) || ( info.multiViewCount == 1 ) );
+	m_multiViewCount = info.isCubeView ? 6 : 1;
 
-	m_multiViewCount = info.isCubeView ? 6 : info.multiViewCount;
-
-	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
 		imageSubResourceView_t subView;
 		subView.arrayCount = 1;
-		subView.baseArray = info.isCubeView ? vk_MapToGlslCubemapConvention( multiViewIndex ) : 0;
+		subView.baseArray = info.isCubeView ? vk_MapToGlslCubemapConvention( multiViewIndex ) : 0; // This is all that changes for cube views
 		subView.baseMip = 0;
 		subView.mipLevels = 1;
 
-		frameBufferCreateInfo_t fbInfo;
-		fbInfo.name = m_name;
-		fbInfo.swapBuffering = info.swapBuffering;
-
-		if( info.color[ 0 ] != nullptr )
+		if( info.fbImages.color0 != nullptr )
 		{
-			imageInfo_t colorInfo = info.color[ 0 ]->info;
+			imageInfo_t colorInfo = info.fbImages.color0->info;
 			colorInfo.type = IMAGE_TYPE_2D;
 
 			m_colorViews[ multiViewIndex ] = new ImageView();
-			m_colorViews[ multiViewIndex ]->Init( *info.color[ 0 ], colorInfo, subView, resourceLifeTime_t::RESIZE );
+			m_colorViews[ multiViewIndex ]->Init( *info.fbImages.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if( info.isCubeView )
 			{
@@ -71,13 +65,13 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			}
 		}
 
-		if ( info.gBuffer0[ 0 ] != nullptr )
+		if ( info.fbImages.color1 != nullptr )
 		{
-			imageInfo_t gbufferInfo = info.gBuffer0[ 0 ]->info;
+			imageInfo_t gbufferInfo = info.fbImages.color1->info;
 			gbufferInfo.type = IMAGE_TYPE_2D;
 
 			m_gBuffer0Views[ multiViewIndex ] = new ImageView();
-			m_gBuffer0Views[ multiViewIndex ]->Init( *info.gBuffer0[ 0 ], gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+			m_gBuffer0Views[ multiViewIndex ]->Init( *info.fbImages.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( info.isCubeView )
 			{
@@ -86,13 +80,13 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			}
 		}
 
-		if ( info.gBuffer1[ 0 ] != nullptr )
+		if ( info.fbImages.color2 != nullptr )
 		{
-			imageInfo_t gbufferInfo = info.gBuffer1[ 0 ]->info;
+			imageInfo_t gbufferInfo = info.fbImages.color2->info;
 			gbufferInfo.type = IMAGE_TYPE_2D;
 
 			m_gBuffer1Views[ multiViewIndex ] = new ImageView();
-			m_gBuffer1Views[ multiViewIndex ]->Init( *info.gBuffer1[ 0 ], gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+			m_gBuffer1Views[ multiViewIndex ]->Init( *info.fbImages.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( info.isCubeView )
 			{
@@ -101,13 +95,13 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			}
 		}
 
-		if ( info.depth[ 0 ] != nullptr )
+		if ( info.fbImages.depth != nullptr )
 		{
-			imageInfo_t depthInfo = info.depth[ 0 ]->info;
+			imageInfo_t depthInfo = info.fbImages.depth->info;
 			depthInfo.type = IMAGE_TYPE_2D;
 
 			m_depthViews[ multiViewIndex ] = new ImageView();
-			m_depthViews[ multiViewIndex ]->Init( *info.depth[ 0 ], depthInfo, subView, resourceLifeTime_t::RESIZE );
+			m_depthViews[ multiViewIndex ]->Init( *info.fbImages.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( info.isCubeView )
 			{
@@ -116,13 +110,13 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			}
 		}
 
-		if ( info.stencil[ 0 ] != nullptr )
+		if ( info.fbImages.stencil != nullptr )
 		{
-			imageInfo_t stencilInfo = info.stencil[ 0 ]->info;
+			imageInfo_t stencilInfo = info.fbImages.stencil->info;
 			stencilInfo.type = IMAGE_TYPE_2D;
 
 			m_stencilViews[ multiViewIndex ] = new ImageView();
-			m_stencilViews[ multiViewIndex ]->Init( *info.stencil[ 0 ], stencilInfo, subView, resourceLifeTime_t::RESIZE );
+			m_stencilViews[ multiViewIndex ]->Init( *info.fbImages.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( info.isCubeView )
 			{
@@ -130,7 +124,10 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 				m_stencilViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
 			}
 		}
-			
+
+		frameBufferCreateInfo_t fbInfo {};
+		fbInfo.name = info.fbImages.name;
+		fbInfo.swapBuffering = info.fbImages.swapBuffering;
 		fbInfo.color0 = m_colorViews[ multiViewIndex ];
 		fbInfo.color1 = m_gBuffer0Views[ multiViewIndex ];
 		fbInfo.color2 = m_gBuffer1Views[ multiViewIndex ];
@@ -143,7 +140,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 
 	m_viewParms = info.context->RegisterBindParm( bindset_view );
 
-	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
 			passes[ multiViewIndex ][ passIx ] = nullptr;
@@ -153,7 +150,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	const uint32_t beginPass = ViewRegionPassBegin();
 	const uint32_t endPass = ViewRegionPassEnd();
 
-	for ( uint32_t multiViewIndex = 0; multiViewIndex < info.multiViewCount; ++multiViewIndex )
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
 		FrameBuffer* fb = m_framebuffers[ multiViewIndex ];
 

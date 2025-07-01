@@ -45,21 +45,15 @@ enum class renderViewRegion_t : uint32_t
 
 struct renderViewCreateInfo_t
 {
-	const char*				name;
-	renderViewRegion_t		region;
-	int						viewId;
+	const char*					name;
+	renderViewRegion_t			region;
+	int							viewId;
 
-	const ResourceContext*	resources;
-	RenderContext*			context;
+	const ResourceContext*		resources;
+	RenderContext*				context;
 
-	bool					isCubeView;
-	uint32_t				multiViewCount;
-	swapBuffering_t			swapBuffering;
-	Image*					color[ MaxMultiViews ];
-	Image*					gBuffer0[ MaxMultiViews ];
-	Image*					gBuffer1[ MaxMultiViews ];
-	Image*					depth[ MaxMultiViews ];
-	Image*					stencil[ MaxMultiViews ];
+	bool						isCubeView;
+	frameBufferCreateInfo_t		fbImages;
 };
 
 

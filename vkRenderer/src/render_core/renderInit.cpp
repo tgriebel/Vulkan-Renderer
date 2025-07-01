@@ -61,8 +61,11 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.multiViewCount = 1;
-		info.depth[ 0 ] = &resources.shadowMapImage[ i ];
+
+		info.fbImages.name = "ShadowFB";
+		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
+		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+		info.fbImages.depth = &resources.shadowMapImage[ i ];
 
 		shadowViews[ i ] = &views[ viewCount ];
 		shadowViews[ i ]->Init( info );
@@ -77,11 +80,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.multiViewCount = 1;
-		info.color[ 0 ] = &resources.mainColorImage;
-		info.gBuffer0[ 0 ] = &resources.gBufferLayerImage;
-		info.depth[ 0 ] = &resources.depthImageView;
-		info.stencil[ 0 ] = &resources.stencilImageView;
+
+		info.fbImages.name = "MainFB";
+		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
+		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+		info.fbImages.color0 = &resources.mainColorImage;
+		info.fbImages.color1 = &resources.gBufferLayerImage;
+		info.fbImages.depth = &resources.depthImageView;
+		info.fbImages.stencil = &resources.stencilImageView;
 
 		renderViews[ 0 ] = &views[ viewCount ];
 		renderViews[ 0 ]->Init( info );	
@@ -96,10 +102,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.multiViewCount = 6;
+
 		info.isCubeView = true;
-		info.color[ 0 ] = &resources.cubeFbColorImage;
-		info.depth[ 0 ] = &resources.cubeFbDepthImage;
+		info.fbImages.name = "CubeFB";
+		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
+		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+		info.fbImages.color0 = &resources.cubeFbColorImage;
+		info.fbImages.depth = &resources.cubeFbDepthImage;
 
 		renderViews[ 1 ] = &views[ viewCount ];
 		renderViews[ 1 ]->Init( info );
@@ -114,9 +123,11 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.multiViewCount = 1;
-		info.swapBuffering = swapBuffering_t::MULTI_FRAME;
-		info.color[ 0 ] = g_swapChain.GetBackBuffer();
+
+		info.fbImages.name = "BackBufferFB";
+		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
+		info.fbImages.swapBuffering = swapBuffering_t::MULTI_FRAME;
+		info.fbImages.color0 = g_swapChain.GetBackBuffer();
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
