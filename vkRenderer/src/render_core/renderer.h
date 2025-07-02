@@ -27,13 +27,14 @@
 
 #include "../globals/common.h"
 #include "../globals/renderConstants.h"
-#include "../globals/renderview.h"
-#include "../globals/postEffect.h"
 
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
 #include "../render_core/RenderTask.h"
 #include "../render_core/renderResource.h"
+
+#include "../render_tasks/renderview.h"
+#include "../render_tasks/imageProcess.h"
 
 class Window;
 class SwapChain;

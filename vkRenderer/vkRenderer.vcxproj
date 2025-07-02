@@ -190,9 +190,7 @@
     <ClInclude Include="src\draw_passes\drawpass.h" />
     <ClInclude Include="src\globals\common.h" />
     <ClInclude Include="src\globals\drawGroup.h" />
-    <ClInclude Include="src\globals\postEffect.h" />
     <ClInclude Include="src\globals\renderConstants.h" />
-    <ClInclude Include="src\globals\renderview.h" />
     <ClInclude Include="src\globals\render_util.h" />
     <ClInclude Include="src\io\io.h" />
     <ClInclude Include="src\render_binding\allocator.h" />
@@ -213,8 +211,10 @@
     <ClInclude Include="src\render_state\deviceContext.h" />
     <ClInclude Include="src\render_state\frameBuffer.h" />
     <ClInclude Include="src\render_state\rhi.h" />
+    <ClInclude Include="src\render_tasks\imageProcess.h" />
     <ClInclude Include="src\render_tasks\ImageWritebackTask.h" />
     <ClInclude Include="src\render_tasks\MipImageTask.h" />
+    <ClInclude Include="src\render_tasks\renderview.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
@@ -239,8 +239,6 @@
     <ClCompile Include="src\app\cvar.cpp" />
     <ClCompile Include="src\draw_passes\drawpass.cpp" />
     <ClCompile Include="src\globals\drawGroup.cpp" />
-    <ClCompile Include="src\globals\postEffect.cpp" />
-    <ClCompile Include="src\globals\renderView.cpp" />
     <ClCompile Include="src\globals\render_util.cpp" />
     <ClCompile Include="src\io\io.cpp" />
     <ClCompile Include="src\render_binding\allocator.cpp" />
@@ -264,8 +262,10 @@
     <ClCompile Include="src\render_state\cmdContext.cpp" />
     <ClCompile Include="src\render_state\deviceContext.cpp" />
     <ClCompile Include="src\render_state\frameBuffer.cpp" />
+    <ClCompile Include="src\render_tasks\imageProcess.cpp" />
     <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp" />
     <ClCompile Include="src\render_tasks\MipImageTask.cpp" />
+    <ClCompile Include="src\render_tasks\renderView.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp">

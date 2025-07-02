@@ -95,9 +95,6 @@
     <ClCompile Include="src\render_core\swapChain.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\globals\renderView.cpp">
-      <Filter>Globals</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_binding\allocator.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
@@ -109,9 +106,6 @@
     </ClCompile>
     <ClCompile Include="src\render_core\RenderTask.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\globals\postEffect.cpp">
-      <Filter>Globals</Filter>
     </ClCompile>
     <ClCompile Include="src\globals\drawGroup.cpp">
       <Filter>Globals</Filter>
@@ -132,6 +126,12 @@
       <Filter>Tasks</Filter>
     </ClCompile>
     <ClCompile Include="src\render_tasks\MipImageTask.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_tasks\imageProcess.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_tasks\renderView.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
   </ItemGroup>
@@ -209,9 +209,6 @@
     <ClInclude Include="src\globals\renderConstants.h">
       <Filter>Globals</Filter>
     </ClInclude>
-    <ClInclude Include="src\globals\renderview.h">
-      <Filter>Globals</Filter>
-    </ClInclude>
     <ClInclude Include="src\io\io.h">
       <Filter>IO</Filter>
     </ClInclude>
@@ -251,9 +248,6 @@
     <ClInclude Include="src\render_core\RenderTask.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\globals\postEffect.h">
-      <Filter>Globals</Filter>
-    </ClInclude>
     <ClInclude Include="src\globals\drawGroup.h">
       <Filter>Globals</Filter>
     </ClInclude>
@@ -283,6 +277,12 @@
     </ClInclude>
     <ClInclude Include="scenes\tomtendoCore.h">
       <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\imageProcess.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\renderview.h">
+      <Filter>Tasks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

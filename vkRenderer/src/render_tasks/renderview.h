@@ -25,7 +25,7 @@
 #include <cstdint>
 #include <gfxcore/scene/scene.h>
 #include "common.h"
-#include "drawGroup.h"
+#include "../globals/drawGroup.h"
 #include "../draw_passes/drawpass.h"
 
 class ResourceContext;

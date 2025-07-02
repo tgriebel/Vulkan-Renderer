@@ -1,4 +1,4 @@
-#include "postEffect.h"
+#include "imageProcess.h"
 
 #include <gfxcore/scene/scene.h>
 #include "../render_core/renderer.h"
