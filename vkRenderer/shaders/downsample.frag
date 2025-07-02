@@ -41,6 +41,6 @@ PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
 
 void main()
 {
-    const ivec2 pixelLocation = ivec2( dimensions.xy * fragTexCoord.xy );
-    outColor = vec4( texelFetch( codeSamplers[ 0 ], pixelLocation, 0 ).rgb, 1.0f );
+   // const ivec2 pixelLocation = ivec2( dimensions.xy * fragTexCoord.xy );
+    outColor = vec4( texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb, 1.0f );
 }

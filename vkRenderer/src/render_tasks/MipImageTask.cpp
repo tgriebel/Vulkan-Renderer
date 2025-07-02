@@ -9,7 +9,7 @@
 std::string MipImageTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<MipImageTask: " << m_dbgName << ">\n";
+	ss << "<MipImageTask: " << m_dbgName << ">";
 	return ss.str();
 }
 
@@ -70,7 +70,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	{
 		frameBufferCreateInfo_t info{};
 		info.name = "MipDownsample";
-		info.color0 = &m_tempImage;
+		info.color0 = &m_imgViews[ i ];
 		info.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		m_frameBuffers[ i ].Create( info );
@@ -185,7 +185,7 @@ void MipImageTask::Execute( CommandContext& context )
 {
 	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorWhite ) );
 
-	if ( m_mode == DOWNSAMPLE_LINEAR )
+	if ( m_mode == DOWNSAMPLE_LINEAR_API )
 	{
 		Transition( &context, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
 		GenerateMipmaps( &context, *m_image );

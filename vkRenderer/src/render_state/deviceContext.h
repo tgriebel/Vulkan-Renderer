@@ -31,6 +31,7 @@ class FrameBuffer;
 
 enum downSampleMode_t : uint32_t
 {
+	DOWNSAMPLE_LINEAR_API,
 	DOWNSAMPLE_LINEAR,
 	DOWNSAMPLE_GAUSSIAN,
 	DOWNSAMPLE_SPECULAR_IBL,

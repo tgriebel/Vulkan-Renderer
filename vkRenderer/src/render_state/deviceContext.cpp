@@ -416,60 +416,70 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 	char* progName = nullptr;
 	switch( mode )
 	{
-		case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "DownSample";				break;
+		case downSampleMode_t::DOWNSAMPLE_LINEAR:			progName = "DownSample";				break;
+		case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "SeparableGaussianBlur";		break;
 		case downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL:		progName = "preCalculatedSpecularIbl";	break;
 	}
 	Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( AssetLibGpuProgram::Handle( progName ) );
 	assert( progAsset );
 
 	ImageView* sampledView = nullptr;
-	ImageView* writeView = nullptr;
+	const Image* writeImage = nullptr;
 
 	renderPassTransition_t transitionState = {};
 	transitionState.flags.clear = true;
 	transitionState.flags.store = true;
 	transitionState.flags.presentAfter = false;
-	transitionState.flags.readAfter = true;
-	transitionState.flags.readOnly = true;
+	transitionState.flags.readAfter = false; // Use manual transitions
+	transitionState.flags.readOnly = false; // Use manual transitions
+
+	if( mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN ) {
+	}
 
 	const uint32_t mipLevels = static_cast<uint32_t>( views.size() );
 	for ( uint32_t i = 1; i < mipLevels; i++ )
 	{
 		sampledView = &views[ i - 1 ];
-		writeView = &views[ i ];
+
+		const FrameBuffer* fb = passes[ i ]->GetFrameBuffer();
+		writeImage = fb->GetColor();
+
+		vk_TransitionImageLayout( cmdContext.CommandBuffer(), writeImage, writeImage->subResourceView, swapBuffering_t::SINGLE_FRAME, gpuImageStateFlags_t::GPU_IMAGE_NONE, gpuImageStateFlags_t::GPU_IMAGE_WRITE );
 
 		hdl_t pipeLineHandle = CreateGraphicsPipeline( renderContext, passes[ i ], *progAsset );
 		vk_RenderImageShader( cmdContext, pipeLineHandle, passes[ i ], transitionState );
+	
+		vk_TransitionImageLayout( cmdContext.CommandBuffer(), writeImage, writeImage->subResourceView, swapBuffering_t::SINGLE_FRAME, gpuImageStateFlags_t::GPU_IMAGE_WRITE, gpuImageStateFlags_t::GPU_IMAGE_READ );
 
-		const viewport_t& viewport = passes[ i ]->GetViewport();
-		const FrameBuffer* fb = passes[ i ]->GetFrameBuffer();
-		const Image* fbImage = fb->GetColor();
+		//const viewport_t& viewport = passes[ i ]->GetViewport();
+		//const FrameBuffer* fb = passes[ i ]->GetFrameBuffer();
+		//const Image* fbImage = fb->GetColor();
 
-		copyImageParms_t srcCopy{};
-		srcCopy.baseArray = 0;
-		srcCopy.arrayCount = 1;
-		srcCopy.baseMip = 0;
-		srcCopy.mipLevels = 1;
-		srcCopy.x = 0;
-		srcCopy.y = 0;
-		srcCopy.z = 0;
-		srcCopy.width = viewport.width;
-		srcCopy.height = viewport.height;
-		srcCopy.depth = 1;
+		//copyImageParms_t srcCopy{};
+		//srcCopy.baseArray = 0;
+		//srcCopy.arrayCount = 1;
+		//srcCopy.baseMip = 0;
+		//srcCopy.mipLevels = 1;
+		//srcCopy.x = 0;
+		//srcCopy.y = 0;
+		//srcCopy.z = 0;
+		//srcCopy.width = viewport.width;
+		//srcCopy.height = viewport.height;
+		//srcCopy.depth = 1;
 
-		copyImageParms_t dstCopy{};
-		dstCopy.baseArray = writeView->subResourceView.baseArray;
-		dstCopy.arrayCount = writeView->subResourceView.arrayCount;
-		dstCopy.baseMip = writeView->subResourceView.baseMip;
-		dstCopy.mipLevels = writeView->subResourceView.mipLevels;
-		dstCopy.x = 0;
-		dstCopy.y = 0;
-		dstCopy.z = 0;
-		dstCopy.width = writeView->info.width;
-		dstCopy.height = writeView->info.height;
-		dstCopy.depth = 1;
+		//copyImageParms_t dstCopy{};
+		//dstCopy.baseArray = writeView->subResourceView.baseArray;
+		//dstCopy.arrayCount = writeView->subResourceView.arrayCount;
+		//dstCopy.baseMip = writeView->subResourceView.baseMip;
+		//dstCopy.mipLevels = writeView->subResourceView.mipLevels;
+		//dstCopy.x = 0;
+		//dstCopy.y = 0;
+		//dstCopy.z = 0;
+		//dstCopy.width = writeView->info.width;
+		//dstCopy.height = writeView->info.height;
+		//dstCopy.depth = 1;
 
-		vk_CopyImage( cmdBuffer, fbImage, srcCopy, writeView, dstCopy );
+		//vk_CopyImage( cmdBuffer, fbImage, srcCopy, writeView, dstCopy );
 	}
 }
 

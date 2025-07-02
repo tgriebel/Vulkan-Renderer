@@ -52,6 +52,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	viewCount = 0;
 
+	ScopedLogTimer timer( "Schedule Build", timerPrecision_t::MICROSECOND, &TimerPrint );
+
 	// Shadow Views
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{
@@ -287,7 +289,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.mainColorResolvedImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
+		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
 
 		mipTask = new MipImageTask( info );
 	}
