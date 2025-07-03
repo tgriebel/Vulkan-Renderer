@@ -32,6 +32,7 @@
 #include "../render_core/RenderTask.h"
 #include "../render_tasks/ImageWritebackTask.h"
 #include "../render_tasks/MipImageTask.h"
+#include "../render_tasks/imageCubeProcess.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -175,10 +176,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 				info.name = "DiffuseIBL";
 				info.clear = false;
 				info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
-				info.image = &resources.diffuseIblImageViews[ i ];
+				info.image = &resources.diffuseIblImage;
 				info.context = &renderContext;
 				info.resources = &resources;
 				info.inputCubeImages = 1;
+				info.mipLevel = 0;
+				info.layer = vk_MapToGlslCubemapConvention( i );
 
 				diffuseIBL[ i ] = new ImageProcess( info );
 
@@ -1023,19 +1026,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "diffuseIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
-
-		for ( uint32_t i = 0; i < 6; ++i )
-		{
-			imageSubResourceView_t subView;
-			subView.arrayCount = 1;
-			subView.baseArray = vk_MapToGlslCubemapConvention( i );
-			subView.baseMip = 0;
-			subView.mipLevels = 1;
-
-			colorInfo.type = IMAGE_TYPE_2D;
-
-			resources.diffuseIblImageViews[ i ].Init( resources.diffuseIblImage, colorInfo, subView, resourceLifeTime_t::RESIZE );
-		}
 	}
 
 	// Specular IBL images

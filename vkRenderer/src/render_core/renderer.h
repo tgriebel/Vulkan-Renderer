@@ -147,7 +147,6 @@ public:
 	Image					cubeFbDepthImage;
 	Image					diffuseIblImage;
 	Image					specularIblImage;
-	ImageView				diffuseIblImageViews[ 6 ];
 	ImageView				specularIblImageViews[ 6 ];
 	Image					gBufferLayerImage;
 	Image					depthStencilImage;

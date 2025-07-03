@@ -21,6 +21,8 @@ struct imageProcessCreateInfo_t
 	ResourceContext*	resources;
 	uint32_t			inputImages;
 	uint32_t			inputCubeImages;
+	uint32_t			mipLevel;
+	uint32_t			layer;
 	bool				clear;
 	bool				present;
 	bool				resolve;
@@ -46,6 +48,7 @@ private:
 	FrameBuffer				m_fb;
 	DrawPass*				m_pass;
 	GpuBuffer				m_buffer;
+	ImageView*				m_view;
 
 	imageProcessFrameBeginCallback_t* m_callback = nullptr;
 

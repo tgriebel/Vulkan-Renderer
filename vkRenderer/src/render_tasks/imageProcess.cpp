@@ -21,9 +21,20 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	m_dbgName = info.name;
 
 	{
+		imageSubResourceView_t view{};
+		view.baseArray = info.layer;
+		view.arrayCount = 1;
+		view.baseMip = info.mipLevel;
+		view.mipLevels = 1;
+
+		imageInfo_t imageInfo = info.image->info;
+		imageInfo.type = IMAGE_TYPE_2D;
+
+		m_view = new ImageView( *info.image, imageInfo, view, resourceLifeTime_t::TASK );
+
 		frameBufferCreateInfo_t fbInfo;
 		fbInfo.name = m_dbgName.c_str();
-		fbInfo.color0 = info.image;
+		fbInfo.color0 = m_view;
 		fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 		m_fb.Create( fbInfo );
@@ -96,7 +107,17 @@ void ImageProcess::Shutdown()
 {
 	m_buffer.Destroy();
 
-	delete m_pass;
+	if( m_view != nullptr )
+	{
+		delete m_view;
+		m_view = nullptr;
+	}
+
+	if ( m_pass != nullptr )
+	{
+		delete m_pass;
+		m_pass = nullptr;
+	}
 }
 
 

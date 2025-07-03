@@ -42,12 +42,29 @@ enum gpuImageStateFlags_t : uint8_t;
 
 class GpuTask
 {
+protected:
+	GpuTask* m_child = nullptr;
+
 public:
-	virtual void		FrameBegin() = 0;
-	virtual void		FrameEnd() = 0;
-	virtual void		Resize() = 0;
-	virtual void		Execute( CommandContext& context ) = 0;
-	virtual std::string	AsString() const = 0;
+	virtual void			FrameBegin() {};
+	virtual void			FrameEnd() {};
+	virtual void			Resize() = 0;
+	virtual void			Execute( CommandContext& context ) = 0;
+	virtual std::string		AsString() const = 0;
+	GpuTask*				GetChild() { return m_child; };
+
+	void SetChild( GpuTask* child )
+	{
+		if( child == nullptr ) {
+			return;
+		}
+		if ( m_child != nullptr )
+		{
+			delete m_child;
+			m_child = nullptr;
+		}
+		m_child = child;
+	};
 
 	virtual ~GpuTask() {};
 };
