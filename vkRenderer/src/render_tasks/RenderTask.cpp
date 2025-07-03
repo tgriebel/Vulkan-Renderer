@@ -22,9 +22,9 @@
 */
 
 #include "RenderTask.h"
-#include "renderer.h"
+#include "../render_core/renderer.h"
 #include "../render_state/cmdContext.h"
-#include "../render_tasks/renderview.h"
+#include "../render_core/renderview.h"
 #include "../render_binding/gpuResources.h"
 #include "../render_binding/bindings.h"
 

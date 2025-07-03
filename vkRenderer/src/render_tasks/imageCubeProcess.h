@@ -2,7 +2,7 @@
 
 #include "common.h"
 #include "../draw_passes/drawpass.h"
-#include "../render_core/RenderTask.h"
+#include "../render_tasks/RenderTask.h"
 #include "imageProcess.h"
 
 class ShaderBindParms;

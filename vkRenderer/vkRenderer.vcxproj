@@ -205,7 +205,7 @@
     <ClInclude Include="src\render_core\GpuSync.h" />
     <ClInclude Include="src\render_core\renderer.h" />
     <ClInclude Include="src\render_core\renderResource.h" />
-    <ClInclude Include="src\render_core\RenderTask.h" />
+    <ClInclude Include="src\render_core\renderview.h" />
     <ClInclude Include="src\render_core\swapChain.h" />
     <ClInclude Include="src\render_state\cmdContext.h" />
     <ClInclude Include="src\render_state\deviceContext.h" />
@@ -215,7 +215,7 @@
     <ClInclude Include="src\render_tasks\imageProcess.h" />
     <ClInclude Include="src\render_tasks\ImageWritebackTask.h" />
     <ClInclude Include="src\render_tasks\MipImageTask.h" />
-    <ClInclude Include="src\render_tasks\renderview.h" />
+    <ClInclude Include="src\render_tasks\RenderTask.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
@@ -258,7 +258,7 @@
     <ClCompile Include="src\render_core\renderInit.cpp" />
     <ClCompile Include="src\render_core\renderResource.cpp" />
     <ClCompile Include="src\render_core\renderShutdown.cpp" />
-    <ClCompile Include="src\render_core\RenderTask.cpp" />
+    <ClCompile Include="src\render_core\renderView.cpp" />
     <ClCompile Include="src\render_core\swapChain.cpp" />
     <ClCompile Include="src\render_state\cmdContext.cpp" />
     <ClCompile Include="src\render_state\deviceContext.cpp" />
@@ -267,7 +267,7 @@
     <ClCompile Include="src\render_tasks\imageProcess.cpp" />
     <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp" />
     <ClCompile Include="src\render_tasks\MipImageTask.cpp" />
-    <ClCompile Include="src\render_tasks\renderView.cpp" />
+    <ClCompile Include="src\render_tasks\RenderTask.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp">
