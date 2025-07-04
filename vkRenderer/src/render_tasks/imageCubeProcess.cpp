@@ -9,7 +9,7 @@ extern AssetManager g_assets;
 std::string ImageCubeProcess::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImageCubeProcess: " << m_dbgName << ">";
+	ss << "<ImageCubeProcess: " << m_name << ">";
 	return ss.str();
 }
 
@@ -20,6 +20,7 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 
 	assert( ( info.image->info.layers == 6 ) && ( info.image->info.type == IMAGE_TYPE_CUBE ) );
 
+	m_name = info.name;
 	{
 		imageProcessCreateInfo_t subInfo{};
 		subInfo.name = info.name;
@@ -31,10 +32,13 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 		subInfo.resolve = false;
 		subInfo.present = false;
 		subInfo.clear = info.clear;
+		subInfo.mipLevel = 0;
 
 		GpuTask* child = this;
 		for( uint32_t i = 0; i < 6; ++i )
 		{
+			subInfo.layer = vk_MapToGlslCubemapConvention( i );
+
 			ImageProcess* imageProcess = new ImageProcess( subInfo );
 
 			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
@@ -65,9 +69,9 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 
 void ImageCubeProcess::SetSourceImage( const uint32_t slot, Image* image )
 {
+	ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
-		ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 		child->SetSourceImage( slot, image );
 		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
 	}
@@ -76,9 +80,9 @@ void ImageCubeProcess::SetSourceImage( const uint32_t slot, Image* image )
 
 void ImageCubeProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
 {
+	ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
-		ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 		child->SetSourceCubeImage( slot, image );
 		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
 	}
@@ -87,9 +91,9 @@ void ImageCubeProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
 
 void ImageCubeProcess::Resize()
 {
+	GpuTask* child = m_child;
 	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		GpuTask* child = m_child;
+	{		
 		child->Resize();
 		child = child->GetChild();
 	}
@@ -98,9 +102,10 @@ void ImageCubeProcess::Resize()
 
 void ImageCubeProcess::Shutdown()
 {
+	ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
+
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
-		ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 		child->Shutdown();
 		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
 	}
@@ -109,35 +114,38 @@ void ImageCubeProcess::Shutdown()
 
 void ImageCubeProcess::FrameBegin()
 {
+	GpuTask* child = m_child;
+
 	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
+	{		
 		child->FrameBegin();
-		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
+		child = child->GetChild();
 	}
 }
 
 
 void ImageCubeProcess::FrameEnd()
 {
+	GpuTask* child = m_child;
+
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
-		ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 		child->FrameEnd();
-		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
+		child = child->GetChild();
 	}
 }
 
 
 void ImageCubeProcess::Execute( CommandContext& cmdContext )
 {
-	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
+	cmdContext.MarkerBeginRegion( m_name.c_str(), ColorToVector( Color::White ) );
+
+	GpuTask* child = m_child;
 
 	for ( uint32_t i = 0; i < 6; ++i )
 	{
-		ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
 		child->Execute( cmdContext );
-		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
+		child = child->GetChild();
 	}
 
 	cmdContext.MarkerEndRegion();

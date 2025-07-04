@@ -149,11 +149,26 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	view2Ds[ 0 ]->Commit();
 
-	ImageProcess* diffuseIBL[ 6 ] = {};
+	ImageCubeProcess* diffuseIBL = {};
 	MipImageTask* specularIBL[ 6 ] = {};
 	CopyImageTask* copyCubeToSpecularIbl = nullptr;
 	if ( config.useCubeViews )
 	{
+		if ( config.computeDiffuseIbl )
+		{
+			imageCubeProcessCreateInfo_t info = {};
+			info.name = "DiffuseIBL";
+			info.clear = false;
+			info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
+			info.image = &resources.diffuseIblImage;
+			info.context = &renderContext;
+			info.resources = &resources;
+			info.inputCubeImages = 1;
+
+			diffuseIBL = new ImageCubeProcess( info );
+			diffuseIBL->SetSourceCubeImage( 0, &resources.cubeFbColorImage );
+		}
+
 		for ( uint32_t i = 0; i < 6; ++i )
 		{
 			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
@@ -168,28 +183,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 				case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
 				case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
 				case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
-			}
-
-			if ( config.computeDiffuseIbl )
-			{
-				imageProcessCreateInfo_t info = {};
-				info.name = "DiffuseIBL";
-				info.clear = false;
-				info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
-				info.image = &resources.diffuseIblImage;
-				info.context = &renderContext;
-				info.resources = &resources;
-				info.inputCubeImages = 1;
-				info.mipLevel = 0;
-				info.layer = vk_MapToGlslCubemapConvention( i );
-
-				diffuseIBL[ i ] = new ImageProcess( info );
-
-				mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
-				viewMatrix[ 3 ][ 3 ] = 0.0f;
-
-				diffuseIBL[ i ]->SetSourceCubeImage( 0, &resources.cubeFbColorImage );
-				diffuseIBL[ i ]->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 			}
 
 			if ( config.computeSpecularIBL )
@@ -432,9 +425,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		if ( config.computeDiffuseIbl )
 		{
-			for ( uint32_t i = 0; i < 6; ++i ) {
-				schedule.Queue( diffuseIBL[ i ] );
-			}
+			schedule.Queue( diffuseIBL );
 			schedule.Queue( imageDiffuseIblWriteBackTask );
 		}
 		if ( config.computeSpecularIBL )
@@ -1212,12 +1203,14 @@ void Renderer::CreateFramebuffers()
 
 ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 {
-	ShaderBindParms parms = ShaderBindParms( set );
+	const uint32_t id = bindParmsList.Count();
 
-	pendingIndices.Append( bindParmsList.Count() );
+	ShaderBindParms parms = ShaderBindParms( set, id );
+
+	pendingIndices.Append( id );
 	bindParmsList.Append( parms );
 
-	return &bindParmsList[ bindParmsList.Count() - 1 ];
+	return &bindParmsList[ id ];
 }
 
 

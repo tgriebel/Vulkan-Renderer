@@ -145,6 +145,8 @@ void ImageProcess::FrameBegin()
 		m_pass->parms->Bind( bind_imageProcess,		&m_buffer );
 	}
 
+	// std::cout << m_pass->parms->AsString() << std::endl;
+
 	// Allow custom constants/binds
 	if ( m_callback != nullptr ) {
 		( *m_callback )( this );

@@ -43,7 +43,23 @@ enum class bindType_t
 	WRITE_BUFFER,
 	READ_IMAGE_BUFFER,
 	WRITE_IMAGE_BUFFER,
+	COUNT,
 };
+
+static const char* s_bindTypeName[]
+{
+	"Constant Buffer",
+	"Image 2D",
+	"Image 2D Array",
+	"Image 3D",
+	"Image Cube",
+	"Image Cube Array",
+	"Read Buffer",
+	"Write Buffer",
+	"Read Image Buffer",
+	"Write Image Buffer",
+};
+static_assert( COUNTARRAY( s_bindTypeName ) == (uint32_t)bindType_t::COUNT, "Name count mismatches enum." );
 
 
 enum class bindSemantic_t
@@ -52,7 +68,17 @@ enum class bindSemantic_t
 	BUFFER,
 	IMAGE,
 	IMAGE_ARRAY,
+	COUNT,
 };
+
+static const char* s_bindSemanticName[]
+{
+	"Unknown",
+	"Buffer",
+	"Image",
+	"Image Array",
+};
+static_assert( COUNTARRAY( s_bindSemanticName ) == (uint32_t)bindSemantic_t::COUNT, "Name count mismatches enum." );
 
 
 enum bindStateFlag_t
@@ -124,6 +150,7 @@ public:
 	uint32_t		GetMaxDescriptorCount() const;
 	bindStateFlag_t	GetBindFlags() const;
 	uint32_t		GetHash() const;
+	const char*		GetName() const;
 
 	friend class ShaderBindSet;
 };
@@ -205,6 +232,7 @@ private:
 	std::unordered_map<uint32_t, ShaderBinding> m_bindMap;
 	uint32_t									m_hash;
 	bool										m_valid;
+	std::string									m_name;
 
 #ifdef USE_VULKAN
 	VkDescriptorSetLayout						vk_layout;
@@ -226,6 +254,7 @@ public:
 
 	const uint32_t			Count() const;
 	const uint32_t			GetHash() const;
+	const char*				GetName() const;
 	const ShaderBinding*	GetBinding( const uint32_t id ) const;
 	bool					HasBinding( const uint32_t id ) const;
 	bool					HasBinding( const ShaderBinding& binding ) const;
@@ -238,6 +267,7 @@ private:
 	const ShaderBindSet*							bindSet;
 	std::unordered_map<uint32_t, ShaderAttachment>	attachments[ MaxFrameStates ];
 	std::unordered_map<uint32_t, bool>				dirty[ MaxFrameStates ];
+	uint32_t										entryId;
 
 #ifdef USE_VULKAN
 	VkDescriptorSet									vk_descriptorSets[ MaxFrameStates ];
@@ -251,12 +281,13 @@ public:
 		InitApiObjects();
 	}
 
-	ShaderBindParms::ShaderBindParms( const ShaderBindSet* set )
+	ShaderBindParms::ShaderBindParms( const ShaderBindSet* set, const uint32_t id )
 	{
 		bindSet = set;
 		for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
 			attachments[ i ].reserve( bindSet->Count() );
 		}
+		entryId = id;
 
 		InitApiObjects();
 	}
@@ -276,6 +307,7 @@ public:
 	void						Clear();
 	void						Bind( const ShaderBinding& binding, const ShaderAttachment attachment );
 	void						Unbind( const ShaderBinding& binding );
+	std::string					AsString() const;
 	const ShaderAttachment*		GetAttachment( const ShaderBinding& binding ) const;
 	const ShaderAttachment*		GetAttachment( const uint32_t id ) const;
 };

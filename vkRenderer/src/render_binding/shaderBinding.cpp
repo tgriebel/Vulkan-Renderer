@@ -82,6 +82,11 @@ uint32_t ShaderBinding::GetHash() const
 	return m_hash;
 }
 
+const char* ShaderBinding::GetName() const
+{
+	return m_name;
+}
+
 
 void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], const uint32_t bindCount )
 {
@@ -95,6 +100,8 @@ void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], co
 		m_lifetime = resourceLifeTime_t::REBOOT;
 		RenderResource::Create( m_lifetime );
 	}
+
+	m_name = name;
 
 	// Build bind set
 	{
@@ -169,6 +176,12 @@ const uint32_t ShaderBindSet::Count() const
 const uint32_t ShaderBindSet::GetHash() const
 {
 	return m_hash;
+}
+
+
+const char* ShaderBindSet::GetName() const
+{
+	return m_name.c_str();
 }
 
 
@@ -285,6 +298,72 @@ void ShaderBindParms::Unbind( const ShaderBinding& binding )
 }
 
 
+std::string ShaderBindParms::AsString() const
+{
+	auto& frameAttachments = attachments[ context.bufferId ];
+
+	std::stringstream ss;
+
+	ss << bindSet->GetName() << ": " << entryId << "\n{\n";
+
+	for ( uint32_t bindSlot = 0; bindSlot < bindSet->Count(); ++bindSlot )
+	{
+		const ShaderBinding* bind = bindSet->GetBinding( bindSlot );
+
+		ss << "\t" << bind->GetSlot() << ": {\"" << bind->GetName();
+		ss << "\" : " << s_bindTypeName[ (uint32_t)bind->GetType() ] << "}, ";
+
+		const ShaderAttachment* attachment = GetAttachment( *bind );
+
+		if ( attachment == nullptr )
+		{
+			ss << "\n";
+			continue;
+		}
+
+		switch ( attachment->GetSemantic() )
+		{
+			case bindSemantic_t::BUFFER:
+				ss << "\"" << attachment->GetBuffer()->GetName() << "\"";
+				break;
+
+			case bindSemantic_t::IMAGE:
+				ss << "\"" << attachment->GetImage()->gpuImage->GetDebugName() << "\"";
+				break;
+
+			case bindSemantic_t::IMAGE_ARRAY:
+			{
+				ss << "{";
+				const ImageArray* imageArray = attachment->GetImageArray();
+
+				const uint32_t arrayCount = imageArray->Count();
+				const uint32_t displayCount = Min( 4u, arrayCount );
+
+				for ( uint32_t imageIndex = 0; imageIndex < displayCount; ++imageIndex )
+				{
+					const Image* image = (*imageArray)[ imageIndex ];
+					ss << "\"" << image->gpuImage->GetDebugName() << "\"";
+					
+					if( imageIndex < ( imageArray->Count() - 1) ) {
+						ss << ", ";
+					}
+				}
+				if( arrayCount > displayCount ) {
+					ss << "...";
+				}
+				ss << "}";
+			}
+			break;
+		}
+		ss << "\n";
+	}
+
+	ss << "}";
+
+	return ss.str();
+}
+
+
 const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding& binding ) const
 {
 	auto it = attachments[ context.bufferId ].find( binding.GetHash() );
@@ -297,7 +376,6 @@ const ShaderAttachment* ShaderBindParms::GetAttachment( const ShaderBinding& bin
 
 const ShaderAttachment* ShaderBindParms::GetAttachment( const uint32_t id ) const
 {
-	assert(0); // UNTESTED
 	auto it = attachments[ context.bufferId ].begin();
 	std::advance( it, id );
 

@@ -25,7 +25,7 @@ class ImageCubeProcess : public GpuTask
 {
 private:
 	Asset<GpuProgram>*		m_progAsset;
-	std::string				m_dbgName;
+	std::string				m_name;
 	ImageView				m_imgViews[ 6 ];
 
 public:
