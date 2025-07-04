@@ -212,6 +212,7 @@
     <ClInclude Include="src\render_state\frameBuffer.h" />
     <ClInclude Include="src\render_state\rhi.h" />
     <ClInclude Include="src\render_tasks\imageCubeProcess.h" />
+    <ClInclude Include="src\render_tasks\imageMultiPass.h" />
     <ClInclude Include="src\render_tasks\imageProcess.h" />
     <ClInclude Include="src\render_tasks\ImageWritebackTask.h" />
     <ClInclude Include="src\render_tasks\MipImageTask.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="src\render_state\deviceContext.cpp" />
     <ClCompile Include="src\render_state\frameBuffer.cpp" />
     <ClCompile Include="src\render_tasks\imageCubeProcess.cpp" />
+    <ClCompile Include="src\render_tasks\imageMultiPass.cpp" />
     <ClCompile Include="src\render_tasks\imageProcess.cpp" />
     <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp" />
     <ClCompile Include="src\render_tasks\MipImageTask.cpp" />

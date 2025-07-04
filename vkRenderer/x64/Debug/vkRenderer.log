@@ -1,27 +1,2 @@
-﻿  drawpass.cpp
-  drawGroup.cpp
-  binding.cpp
-  descriptorWrites.cpp
-  gpuTransfer.cpp
-  pipeline.cpp
-  shaderBinding.cpp
-  gpuImage.cpp
-  renderCommand.cpp
-  renderInit.cpp
-  renderShutdown.cpp
-  renderView.cpp
-  renderer.cpp
-  swapChain.cpp
-  cmdContext.cpp
-  deviceContext.cpp
-  frameBuffer.cpp
-  ImageWritebackTask.cpp
-  MipImageTask.cpp
-  RenderTask.cpp
-  Generating Code...
-  Compiling...
-  imageCubeProcess.cpp
-  imageProcess.cpp
-  vulkinTestApp.cpp
-  Generating Code...
+﻿  imageProcess.cpp
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

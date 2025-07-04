@@ -137,6 +137,9 @@
     <ClCompile Include="src\render_tasks\RenderTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_tasks\imageMultiPass.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -288,6 +291,9 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\render_tasks\RenderTask.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\imageMultiPass.h">
       <Filter>Tasks</Filter>
     </ClInclude>
   </ItemGroup>

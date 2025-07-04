@@ -23,6 +23,7 @@ struct imageProcessCreateInfo_t
 	uint32_t			inputCubeImages;
 	uint32_t			mipLevel;
 	uint32_t			layer;
+	uint32_t			passCount;
 	bool				clear;
 	bool				present;
 	bool				resolve;
@@ -36,6 +37,7 @@ private:
 	static const uint32_t	MaxBufferSizeInBytes = 256;
 	static const uint32_t	ReservedConstantSizeInBytes = 16;
 	static const uint32_t	MaxConstantBlockSizeInBytes = 240;
+	static const uint32_t	MaxPasses = 2;
 
 	Asset<GpuProgram>*		m_progAsset;
 	std::string				m_dbgName;
@@ -45,10 +47,11 @@ private:
 	uint32_t				m_clearStencil;
 	ResourceContext*		m_resources;
 	RenderContext*			m_context;
-	FrameBuffer				m_fb;
-	DrawPass*				m_pass;
-	GpuBuffer				m_buffer;
+	FrameBuffer				m_fb[ MaxPasses ];
+	DrawPass*				m_passes[ MaxPasses ];
+	GpuBuffer				m_buffer[ MaxPasses ];
 	ImageView*				m_view;
+	uint32_t				m_passCount;
 
 	imageProcessFrameBeginCallback_t* m_callback = nullptr;
 
@@ -75,7 +78,7 @@ public:
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
 	void				SetSourceCubeImage( const uint32_t slot, Image* image );
-	void				SetConstants( const void* dataBlock, const uint32_t sizeInBytes );
+	void				SetConstants( const void* dataBlock, const uint32_t sizeInBytes, const uint32_t passIndex = 0 );
 
 	void				Execute( CommandContext& cmdContext );
 };
