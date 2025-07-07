@@ -95,7 +95,6 @@ struct surface_t
 												uint	previousImageId;											\
 												uint	pad0;														\
 												uint	pad1;														\
-
 												TYPE	NAME;														\
 											};
 

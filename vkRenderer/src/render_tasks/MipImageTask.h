@@ -7,11 +7,20 @@
 class MipImageTask : public GpuTask
 {
 private:
-	static const uint32_t	MaxBufferSizeInBytes		= 256;
-	static const uint32_t	ReservedConstantSizeInBytes	= 16;
-	static const uint32_t	MaxConstantBlockSizeInBytes	= 240;
+	struct constants_t
+	{
+		vec4f		dimensions;
+		uint32_t	pad0;
+		uint32_t	pad1;
+		uint32_t	pad2;
+		uint32_t	pad3;
+	};
 
-	Image* m_image;
+	static const uint32_t	MaxBufferSizeInBytes		= 256;
+	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
+	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
+
+	Image*						m_image;
 	downSampleMode_t			m_mode;
 	std::string					m_dbgName;
 	RenderContext*				m_context;
