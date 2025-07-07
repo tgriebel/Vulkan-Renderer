@@ -359,19 +359,30 @@ void CopyImageTask::Execute( CommandContext& context )
 }
 
 
-uint32_t RenderSchedule::PendingTasks() const
+uint32_t RenderSchedule::TaskCount() const
 {
-	return ( static_cast<uint32_t>( tasks.size() ) - currentTask );
+	return taskCount;
+}
+
+
+bool RenderSchedule::HasPendingTasks() const
+{
+	return ( currentTask != nullptr );
 }
 
 
 void RenderSchedule::Clear()
 {
 	RenderResource::Cleanup( resourceLifeTime_t::TASK );
-	for( size_t i = 0; i < tasks.size(); ++i ) {
-		delete tasks[ i ];
+	
+	GpuTask* t = tasks;
+	while( t != nullptr )
+	{
+		GpuTask* next = t->GetChild();
+		delete t;
+		t = next;
 	}
-	tasks.clear();
+	tasks = nullptr;
 }
 
 
@@ -379,19 +390,31 @@ void RenderSchedule::Link( GpuTask* task )
 {
 	// FIXME: must own pointer
 	assert( task );
-	tasks.push_back( task );
+	if( end == nullptr )
+	{
+		assert( tasks == nullptr );
+		tasks = task;
+		end = task;
+	}
+	else
+	{
+		end->SetChild( task );
+		end = task;
+	}
+
+	++taskCount;
 }
 
 
 void RenderSchedule::FrameBegin()
 {
-	currentTask = 0;
+	currentTask = tasks;
 
-	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
-	for( uint32_t i = 0; i < taskCount; ++i )
+	GpuTask* t = tasks;
+	while ( t != nullptr )
 	{
-		GpuTask* task = tasks[ i ];
-		task->FrameBegin();
+		t->FrameBegin();
+		t = t->GetChild();
 	}
 
 #ifdef USE_IMGUI
@@ -403,21 +426,20 @@ void RenderSchedule::FrameBegin()
 
 void RenderSchedule::FrameEnd()
 {
-	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
-	for ( uint32_t i = 0; i < taskCount; ++i )
+	GpuTask* t = tasks;
+	while ( t != nullptr )
 	{
-		GpuTask* task = tasks[ i ];
-		task->FrameEnd();
+		t->FrameEnd();
+		t = t->GetChild();
 	}
+	assert( currentTask == nullptr );
 }
 
 
 void RenderSchedule::IssueNext( CommandContext& context )
 {
-	GpuTask* task = tasks[ currentTask ];
-	++currentTask;
-
-	task->Execute( context );
+	currentTask->Execute( context );
+	currentTask = currentTask->GetChild();
 }
 
 
@@ -425,11 +447,11 @@ void RenderSchedule::AsString() const
 {
 	std::cout << "Schedule\n";
 
-	const uint32_t taskCount = static_cast<uint32_t>( tasks.size() );
-	for ( uint32_t i = 0; i < taskCount; ++i )
+	GpuTask* t = tasks;
+	while ( t != nullptr )
 	{
-		GpuTask* task = tasks[ i ];
-		std::cout << "+ " << task->AsString() << "\n";
+		std::cout << "+ " << t->AsString() << "\n";
+		t = t->GetChild();
 	}
 	std::cout << std::flush;
 }

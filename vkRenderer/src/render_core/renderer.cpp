@@ -454,7 +454,7 @@ void Renderer::SubmitFrame()
 
 		renderContext.UpdateBindParms();
 
-		while( schedule.PendingTasks() > 0 ) {
+		while( schedule.HasPendingTasks() ) {
 			schedule.IssueNext( gfxContext );
 		}
 

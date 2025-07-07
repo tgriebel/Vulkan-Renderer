@@ -189,15 +189,18 @@ public:
 class RenderSchedule
 {
 private:
-	std::vector< GpuTask* >	tasks;
-	uint32_t				currentTask;
+	GpuTask*	tasks;
+	GpuTask*	end;
+	GpuTask*	currentTask;
+	uint32_t	taskCount;
 	
 public:
 
-	RenderSchedule() : currentTask( 0 )
+	RenderSchedule() : tasks( nullptr ), end( nullptr ), currentTask( nullptr ), taskCount( 0 )
 	{}
 
-	uint32_t	PendingTasks() const;
+	uint32_t	TaskCount() const;
+	bool		HasPendingTasks() const;
 	void		Clear();
 	void		Link( GpuTask* task );
 	void		FrameBegin();
