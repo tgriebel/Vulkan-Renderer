@@ -375,7 +375,7 @@ void RenderSchedule::Clear()
 }
 
 
-void RenderSchedule::Queue( GpuTask* task )
+void RenderSchedule::Link( GpuTask* task )
 {
 	// FIXME: must own pointer
 	assert( task );

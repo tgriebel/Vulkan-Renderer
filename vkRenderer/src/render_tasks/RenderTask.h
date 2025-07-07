@@ -199,7 +199,7 @@ public:
 
 	uint32_t	PendingTasks() const;
 	void		Clear();
-	void		Queue( GpuTask* task );
+	void		Link( GpuTask* task );
 	void		FrameBegin();
 	void		FrameEnd();
 	void		IssueNext( CommandContext& context );

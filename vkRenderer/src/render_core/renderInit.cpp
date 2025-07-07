@@ -410,54 +410,54 @@ void Renderer::Init( const renderConfig_t& cfg )
 	UploadAssets();
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i ) {
-		schedule.Queue( new RenderTask( shadowViews[i], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END));
+		schedule.Link( new RenderTask( shadowViews[i], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END));
 	}
-	schedule.Queue( new RenderTask( renderViews[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
+	schedule.Link( new RenderTask( renderViews[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
 	if ( config.useCubeViews )
 	{
-		schedule.Queue( new RenderTask( renderViews[1], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
+		schedule.Link( new RenderTask( renderViews[1], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
 
 		if ( config.computeDiffuseIbl )
 		{
-			schedule.Queue( diffuseIBL );
-			schedule.Queue( imageDiffuseIblWriteBackTask );
+			schedule.Link( diffuseIBL );
+			schedule.Link( imageDiffuseIblWriteBackTask );
 		}
 		if ( config.computeSpecularIBL )
 		{
-			schedule.Queue( copyCubeToSpecularIbl );
+			schedule.Link( copyCubeToSpecularIbl );
 			for ( uint32_t i = 0; i < 6; ++i ) {
-				schedule.Queue( specularIBL[ i ] );
+				schedule.Link( specularIBL[ i ] );
 			}
-			schedule.Queue( imageSpecularIblWriteBackTask );
+			schedule.Link( imageSpecularIblWriteBackTask );
 		}
-		//schedule.Queue( mipCubeTask );
-		schedule.Queue( imageCubemapWriteBackTask );
+		//schedule.Link( mipCubeTask );
+		schedule.Link( imageCubemapWriteBackTask );
 	}
 	if ( brdfLutTask )
 	{
-		schedule.Queue( brdfLutTask );
+		schedule.Link( brdfLutTask );
 	}
 	if ( writeBrdfLut )
 	{
-		schedule.Queue( writeBrdfLut );
+		schedule.Link( writeBrdfLut );
 	}
-	schedule.Queue( resolve );
+	schedule.Link( resolve );
 
 	if( config.screenshot ) {
-		schedule.Queue( screenshotWriteback );
+		schedule.Link( screenshotWriteback );
 	}
 	if ( config.downsampleScene ) {
-		schedule.Queue( mipTask );
+		schedule.Link( mipTask );
 	}
 	if ( config.gaussianBlur )
 	{
 		for ( uint32_t i = 0; i < gaussianTaskQueue.size(); ++i )
 		{
-			schedule.Queue( gaussianTaskQueue[i] );
+			schedule.Link( gaussianTaskQueue[i] );
 		}
 	}
-	schedule.Queue( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
-	schedule.Queue( new ComputeTask( "ClearParticles", &particleState ) );
+	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
+	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
 
 	schedule.AsString();
 }
