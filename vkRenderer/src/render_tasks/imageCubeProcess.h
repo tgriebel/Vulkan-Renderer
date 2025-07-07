@@ -27,6 +27,7 @@ private:
 	Asset<GpuProgram>*		m_progAsset;
 	std::string				m_name;
 	ImageView				m_imgViews[ 6 ];
+	ImageProcess*			m_imgProcesses[ 6 ];
 
 public:
 	ImageCubeProcess() {}

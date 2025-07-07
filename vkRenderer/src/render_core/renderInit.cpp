@@ -136,6 +136,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
+
 		InitImGui( *view2Ds[ 0 ] );
 
 		++viewCount;

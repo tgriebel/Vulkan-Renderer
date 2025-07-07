@@ -34,9 +34,18 @@ struct imageProcessCreateInfo_t
 class ImageProcess : public GpuTask
 {
 private:
+	struct constants_t
+	{
+		vec4f		dimensions;
+		uint32_t	pass;
+		uint32_t	previousImageId;
+		uint32_t	pad0;
+		uint32_t	pad1;
+	};
+
 	static const uint32_t	MaxBufferSizeInBytes = 256;
-	static const uint32_t	ReservedConstantSizeInBytes = 16;
-	static const uint32_t	MaxConstantBlockSizeInBytes = 240;
+	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
+	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
 	static const uint32_t	MaxPasses = 2;
 
 	Asset<GpuProgram>*		m_progAsset;

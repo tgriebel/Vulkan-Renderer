@@ -91,6 +91,11 @@ struct surface_t
 											layout( set = S, binding = N ) uniform ShaderConstants					\
 											{																		\
 												vec4	dimensions;													\
+												uint	pass;														\
+												uint	previousImageId;											\
+												uint	pad0;														\
+												uint	pad1;														\
+
 												TYPE	NAME;														\
 											};
 
@@ -102,7 +107,7 @@ struct surface_t
 
 #define MODEL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer UniformBufferObject				\
 											{																		\
-												surface_t	surface[MaxSurfaces];										\
+												surface_t	surface[MaxSurfaces];									\
 											} ubo;
 
 #define GLOBALS_LAYOUT( S, N )				layout( set = S, binding = N ) uniform GlobalConstants					\

@@ -32,11 +32,11 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 		subInfo.present = false;
 		subInfo.clear = info.clear;
 		subInfo.mipLevel = 0;
+		subInfo.inputCubeImages = 1;
 
-		GpuTask* child = this;
-		for( uint32_t i = 0; i < 6; ++i )
+		for( uint32_t faceId = 0; faceId < 6; ++faceId )
 		{
-			subInfo.layer = vk_MapToGlslCubemapConvention( i );
+			subInfo.layer = vk_MapToGlslCubemapConvention( faceId );
 
 			ImageProcess* imageProcess = new ImageProcess( subInfo );
 
@@ -44,7 +44,7 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 			camera.SetFov( Radians( 90.0f ) );
 			camera.SetAspectRatio( 1.0f );
 
-			switch ( i )
+			switch ( faceId )
 			{
 			case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
 			case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
@@ -57,10 +57,15 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 			mat4x4f viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
 			viewMatrix[ 3 ][ 3 ] = 0.0f;
 
+			//for ( uint32_t j = 0; j < 4; ++j ) {
+			//	for ( uint32_t i = 0; i < 4; ++i ) {
+			//		viewMatrix[ j ][ i ] = i + j * 4;
+			//	}
+			//}
+
 			imageProcess->SetConstants( &viewMatrix, sizeof( mat4x4f ) );
 
-			child->SetChild( imageProcess );
-			child = imageProcess;
+			m_imgProcesses[ faceId ] = imageProcess;
 		}
 	}
 }
@@ -68,69 +73,50 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 
 void ImageCubeProcess::SetSourceImage( const uint32_t slot, Image* image )
 {
-	ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
-	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		child->SetSourceImage( slot, image );
-		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
+		m_imgProcesses[ faceId ]->SetSourceImage( slot, image );
 	}
 }
 
 
 void ImageCubeProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
 {
-	ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
-	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		child->SetSourceCubeImage( slot, image );
-		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
+		m_imgProcesses[ faceId ]->SetSourceCubeImage( slot, image );
 	}
 }
 
 
 void ImageCubeProcess::Resize()
 {
-	GpuTask* child = m_child;
-	for ( uint32_t i = 0; i < 6; ++i )
-	{		
-		child->Resize();
-		child = child->GetChild();
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {		
+		m_imgProcesses[ faceId ]->Resize();
 	}
 }
 
 
 void ImageCubeProcess::Shutdown()
 {
-	ImageProcess* child = reinterpret_cast<ImageProcess*>( m_child );
-
-	for ( uint32_t i = 0; i < 6; ++i )
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId )
 	{
-		child->Shutdown();
-		child = reinterpret_cast<ImageProcess*>( child->GetChild() );
+		m_imgProcesses[ faceId ]->Shutdown();
+		delete m_imgProcesses[ faceId ];
 	}
 }
 
 
 void ImageCubeProcess::FrameBegin()
 {
-	GpuTask* child = m_child;
-
-	for ( uint32_t i = 0; i < 6; ++i )
-	{		
-		child->FrameBegin();
-		child = child->GetChild();
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {		
+		m_imgProcesses[ faceId ]->FrameBegin();
 	}
 }
 
 
 void ImageCubeProcess::FrameEnd()
 {
-	GpuTask* child = m_child;
-
-	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		child->FrameEnd();
-		child = child->GetChild();
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
+		m_imgProcesses[ faceId ]->FrameEnd();
 	}
 }
 
@@ -139,12 +125,8 @@ void ImageCubeProcess::Execute( CommandContext& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_name.c_str(), ColorToVector( Color::White ) );
 
-	GpuTask* child = m_child;
-
-	for ( uint32_t i = 0; i < 6; ++i )
-	{
-		child->Execute( cmdContext );
-		child = child->GetChild();
+	for ( uint32_t faceId = 0; faceId < 6; ++faceId ) {
+		m_imgProcesses[ faceId ]->Execute( cmdContext );
 	}
 
 	cmdContext.MarkerEndRegion();

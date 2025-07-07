@@ -203,12 +203,6 @@ void ImageProcess::FrameBegin()
 			const float w = float( viewport.width );
 			const float h = float( viewport.height );
 
-			struct constants_t
-			{
-				vec4f dimensions;
-				uint32_t pass;
-				uint32_t previousImageId;
-			};
 			constants_t constants {};
 			constants.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 			constants.pass = passIndex;

@@ -30,20 +30,19 @@
 
 PS_LAYOUT_BASIC_IO
 
-struct ImageProcess
+struct GaussianProcess
 {
-    uint pass;
-    uint previousImageId;
+    uint dummy;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, GaussianProcess )
 
 const uint weightCount = 5;
 const float weights[ weightCount ] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
 
 void main()
 {
-    const bool horizontal = ( imageProcess.pass == 0 ) ? true : false;
+    const bool horizontal = ( pass == 0 ) ? true : false;
 
     vec2 offset = dimensions.zw;
     outColor = vec4( texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb * weights[ 0 ], 1.0f );
@@ -60,8 +59,8 @@ void main()
     {
         for ( uint i = 1; i < weightCount; ++i )
         {
-            outColor.rgb += texture( codeSamplers[ imageProcess.previousImageId ], fragTexCoord.xy + vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
-            outColor.rgb += texture( codeSamplers[ imageProcess.previousImageId ], fragTexCoord.xy - vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
+            outColor.rgb += texture( codeSamplers[ previousImageId ], fragTexCoord.xy + vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
+            outColor.rgb += texture( codeSamplers[ previousImageId ], fragTexCoord.xy - vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
         }
     }
 }
