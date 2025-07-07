@@ -48,6 +48,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 {
 	InitApi( cfg );
 
+	InitShaderResources();
+
 	resources.gpuImages2D.Resize( MaxImageDescriptors );
 	resources.gpuImagesCube.Resize( MaxImageDescriptors );
 
@@ -134,6 +136,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
+		InitImGui( *view2Ds[ 0 ] );
+
 		++viewCount;
 	}
 
@@ -240,6 +244,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
+	std::vector<ImageProcess*> gaussianTaskQueue;
 	if ( config.gaussianBlur )
 	{
 		imageProcessCreateInfo_t info = {};
@@ -247,33 +252,25 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.progHdl = AssetLibGpuProgram::Handle( "SeparableGaussianBlur" );
 		info.context = &renderContext;
 		info.resources = &resources;
+		info.image = &resources.blurredImage;
+		info.passCount = 2;
 		info.inputImages = 1;
 
-		uint32_t verticalPass = 0;
-
 		const uint32_t mipCount = resources.blurredImage.info.mipLevels;
-		const uint32_t imagePassCount = 2 * mipCount;
 
-		pingPongQueue.resize( imagePassCount );
-
-		Image* initialPassImage = &resources.mainColorResolvedImageViews[ 0 ];
+		Image* sourceImage = &resources.mainColorResolvedImageViews[ 0 ];
 
 		// Foreach Mip-Level: Downscale Image -> Blur Horizontal -> Temp -> Blur Vertical -> Blurred Image
-		for ( uint32_t passNum = 0; passNum < mipCount; ++passNum )
+		for ( uint32_t mipIndex = 0; mipIndex < mipCount; ++mipIndex )
 		{
-			info.image = &resources.tempColorImage;
-			pingPongQueue[ 2 * passNum + 0 ] = new ImageProcess( info );
-			pingPongQueue[ 2 * passNum + 0 ]->SetSourceImage( 0, initialPassImage );
-			pingPongQueue[ 2 * passNum + 0 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+			info.mipLevel = mipIndex;
 
-			verticalPass = 1;
+			ImageProcess* process = new ImageProcess( info );	
+			process->SetSourceImage( 0, sourceImage );
 
-			info.image = &resources.blurredImageViews[ passNum ];
-			pingPongQueue[ 2 * passNum + 1 ] = new ImageProcess( info );
-			pingPongQueue[ 2 * passNum + 1 ]->SetSourceImage( 0, &resources.tempColorImage );
-			pingPongQueue[ 2 * passNum + 1 ]->SetConstants( &verticalPass, sizeof( uint32_t ) );
+			sourceImage = process->GetWriteImage();
 
-			initialPassImage = &resources.blurredImageViews[ passNum ];
+			gaussianTaskQueue.push_back( process );
 		}
 	}
 
@@ -409,10 +406,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 		screenshotWriteback = new ImageWritebackTask( info );
 	}
 
-	InitShaderResources();
-
-	InitImGui( *view2Ds[ 0 ] );
-
 	UploadAssets();
 
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i ) {
@@ -457,9 +450,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	if ( config.gaussianBlur )
 	{
-		for ( uint32_t i = 0; i < pingPongQueue.size(); ++i )
+		for ( uint32_t i = 0; i < gaussianTaskQueue.size(); ++i )
 		{
-			schedule.Queue( pingPongQueue[i] );
+			schedule.Queue( gaussianTaskQueue[i] );
 		}
 	}
 	schedule.Queue( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
@@ -1144,7 +1137,7 @@ void Renderer::CreateFramebuffers()
 		imageInfo_t info{};
 		info.width = width;
 		info.height = height;
-		info.mipLevels = 1;
+		info.mipLevels = MipCount( width, height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_RGBA_16;

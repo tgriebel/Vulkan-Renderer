@@ -31,8 +31,6 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		imageInfo_t imageInfo = info.image->info;
 		imageInfo.type = IMAGE_TYPE_2D;
 
-		m_view = new ImageView( *info.image, imageInfo, view, resourceLifeTime_t::TASK );
-
 		assert( info.passCount <= 2 ); // TODO: Support?
 		m_passCount = Clamp( info.passCount, 1u, 2u );
 
@@ -41,9 +39,11 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		// Intermediate Frame Buffer
 		if ( m_passCount > 1 )
 		{
+			m_view[ passIndex ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::TASK );
+
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "TempImageProcessFb";
-			fbInfo.color0 = &info.resources->tempColorImage;
+			fbInfo.color0 = m_view[ passIndex ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			m_fb[ passIndex ].Create( fbInfo );
@@ -54,9 +54,11 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 		// Main Frame Buffer
 		{
+			m_view[ passIndex ] = new ImageView( *info.image, imageInfo, view, resourceLifeTime_t::TASK );
+
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = m_dbgName.c_str();
-			fbInfo.color0 = m_view;
+			fbInfo.color0 = m_view[ passIndex ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			m_fb[ passIndex ].Create( fbInfo );
@@ -83,8 +85,13 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
 
+	uint32_t multiPassImageCount = ( m_passCount > 1 ) ? 1 : 0;
+
+	m_image2dSlotCount = info.inputImages;
+	m_imageCubeSlotCount = info.inputCubeImages;
+
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
-	{
+	{		
 		m_passes[ passIndex ]->codeImages.Resize( info.inputImages );
 		m_passes[ passIndex ]->codeCubeImages.Resize( info.inputCubeImages );
 
@@ -92,17 +99,35 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 		m_buffer[ passIndex ].Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
 	}
+
+	// HACK: Clean this up with a better design
+	// Attach the previous frame buffers as input for the next pass
+	for ( uint32_t passIndex = 1; passIndex < m_passCount; ++passIndex )
+	{
+		m_passes[ passIndex ]->codeImages.Resize( info.inputImages + multiPassImageCount );
+
+		for ( uint32_t codeImageIx = 0; codeImageIx < m_image2dSlotCount; ++codeImageIx ) {
+			m_passes[ passIndex ]->codeImages[ codeImageIx ] = rc.defaultImage;
+		}
+		m_passes[ passIndex ]->codeImages[ m_image2dSlotCount ] = m_view[ passIndex - 1 ];
+	}
+}
+
+
+ImageView* ImageProcess::GetWriteImage()
+{
+	return m_view[ m_passCount - 1 ];
 }
 
 
 void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 {
 	assert( image->info.type == imageType_t::IMAGE_TYPE_2D );
+	assert( m_image2dSlotCount > slot );
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		assert( m_passes[ passIndex ]->codeImages.Count() > slot );
-		if( slot < m_passes[ passIndex ]->codeImages.Count() ) {
+		if( slot < m_image2dSlotCount ) {
 			m_passes[ passIndex ]->codeImages[ slot ] = image;
 		}
 	}
@@ -112,11 +137,11 @@ void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 void ImageProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
 {
 	assert( image->info.type == imageType_t::IMAGE_TYPE_CUBE );
+	assert( m_imageCubeSlotCount > slot );
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		assert( m_passes[ passIndex ]->codeCubeImages.Count() > slot );
-		if ( slot < m_passes[ passIndex ]->codeCubeImages.Count() ) {
+		if ( slot < m_imageCubeSlotCount ) {
 			m_passes[ passIndex ]->codeCubeImages[ slot ] = image;
 		}
 	}
@@ -147,14 +172,14 @@ void ImageProcess::Resize()
 
 void ImageProcess::Shutdown()
 {
-	if( m_view != nullptr )
-	{
-		delete m_view;
-		m_view = nullptr;
-	}
-
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
+		if ( m_view[ passIndex ] != nullptr )
+		{
+			delete m_view[ passIndex ];
+			m_view[ passIndex ] = nullptr;
+		}
+
 		m_buffer[ passIndex ].Destroy();
 
 		m_fb[ passIndex ].Destroy();
@@ -178,11 +203,20 @@ void ImageProcess::FrameBegin()
 			const float w = float( viewport.width );
 			const float h = float( viewport.height );
 
-			vec4f dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+			struct constants_t
+			{
+				vec4f dimensions;
+				uint32_t pass;
+				uint32_t previousImageId;
+			};
+			constants_t constants {};
+			constants.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
+			constants.pass = passIndex;
+			constants.previousImageId = m_image2dSlotCount;
 
 			const uint64_t offset = m_buffer[ passIndex ].GetSize();
 			m_buffer[ passIndex ].SetPos( 0 );
-			m_buffer[ passIndex ].CopyData( &dimensions, sizeof( vec4f ) );
+			m_buffer[ passIndex ].CopyData( &constants, sizeof( constants_t ) );
 			m_buffer[ passIndex ].SetPos( offset );
 		}
 
@@ -210,15 +244,19 @@ void ImageProcess::FrameEnd()
 
 void ImageProcess::Execute( CommandContext& cmdContext )
 {
-	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
+	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::Brown ) );
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
+		cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
+
 		m_passes[ passIndex ]->InsertResourceBarriers( cmdContext );
 
 		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), m_passes[ passIndex ], *m_progAsset );
 
 		vk_RenderImageShader( cmdContext, pipeLineHandle, m_passes[ passIndex ], m_transitionState );
+
+		cmdContext.MarkerEndRegion();
 	}
 
 	cmdContext.MarkerEndRegion();

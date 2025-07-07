@@ -50,8 +50,10 @@ private:
 	FrameBuffer				m_fb[ MaxPasses ];
 	DrawPass*				m_passes[ MaxPasses ];
 	GpuBuffer				m_buffer[ MaxPasses ];
-	ImageView*				m_view;
+	ImageView*				m_view[ MaxPasses ];;
 	uint32_t				m_passCount;
+	uint32_t				m_image2dSlotCount;
+	uint32_t				m_imageCubeSlotCount;
 
 	imageProcessFrameBeginCallback_t* m_callback = nullptr;
 
@@ -75,6 +77,8 @@ public:
 	void				FrameBegin();
 	void				FrameEnd();
 	std::string			AsString() const;
+
+	ImageView*			GetWriteImage();
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
 	void				SetSourceCubeImage( const uint32_t slot, Image* image );

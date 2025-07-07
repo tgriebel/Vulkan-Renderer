@@ -28,7 +28,6 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 		subInfo.progHdl = info.progHdl;
 		subInfo.context = info.context;
 		subInfo.resources = info.resources;
-		subInfo.inputCubeImages = info.inputCubeImages;
 		subInfo.resolve = false;
 		subInfo.present = false;
 		subInfo.clear = info.clear;

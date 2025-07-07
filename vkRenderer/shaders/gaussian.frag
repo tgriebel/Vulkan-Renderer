@@ -32,9 +32,8 @@ PS_LAYOUT_BASIC_IO
 
 struct ImageProcess
 {
-    vec4 generic0;
-    vec4 generic1;
-    vec4 generic2;
+    uint pass;
+    uint previousImageId;
 };
 
 PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
@@ -44,7 +43,7 @@ const float weights[ weightCount ] = { 0.227027f, 0.1945946f, 0.1216216f, 0.0540
 
 void main()
 {
-    const bool horizontal = ( imageProcess.generic0.x != 0.0f ) ? true : false;
+    const bool horizontal = ( imageProcess.pass == 0 ) ? true : false;
 
     vec2 offset = dimensions.zw;
     outColor = vec4( texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb * weights[ 0 ], 1.0f );
@@ -61,8 +60,8 @@ void main()
     {
         for ( uint i = 1; i < weightCount; ++i )
         {
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy - vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
+            outColor.rgb += texture( codeSamplers[ imageProcess.previousImageId ], fragTexCoord.xy + vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
+            outColor.rgb += texture( codeSamplers[ imageProcess.previousImageId ], fragTexCoord.xy - vec2( 0.0, offset.y * i ) ).rgb * weights[ i ];
         }
     }
 }

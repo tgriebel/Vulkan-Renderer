@@ -202,7 +202,6 @@ private:
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
 	ImageProcess*						resolve = nullptr;
-	std::vector<ImageProcess*>			pingPongQueue;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
