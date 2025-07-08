@@ -280,15 +280,7 @@ void Renderer::RecreateSwapChain()
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
 
-	for ( uint32_t viewIx = 0; viewIx < viewCount; ++viewIx )
-	{
-		views[ viewIx ].Resize();
-		views[ viewIx ].SetViewRect( 0, 0, width, height );
-	}
-
-	if( resolve != nullptr ) {
-		resolve->Resize();
-	}
+	schedule.Resize();
 }
 
 

@@ -35,108 +35,13 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	const uint32_t frameStateCount = MaxFrameStates;
 
 	m_name = info.name;
+	m_fbSourceImages = info.fbImages;
 	m_region = info.region;
 	m_resources = info.resources;
 	m_surfaceBufferId = info.viewId;
 	m_viewBufferId = info.viewId;
 
 	m_multiViewCount = info.isCubeView ? 6 : 1;
-
-	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
-	{
-		imageSubResourceView_t subView;
-		subView.arrayCount = 1;
-		subView.baseArray = info.isCubeView ? vk_MapToGlslCubemapConvention( multiViewIndex ) : 0; // This is all that changes for cube views
-		subView.baseMip = 0;
-		subView.mipLevels = 1;
-
-		if( info.fbImages.color0 != nullptr )
-		{
-			imageInfo_t colorInfo = info.fbImages.color0->info;
-			colorInfo.type = IMAGE_TYPE_2D;
-
-			m_colorViews[ multiViewIndex ] = new ImageView();
-			m_colorViews[ multiViewIndex ]->Init( *info.fbImages.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if( info.isCubeView )
-			{
-				m_colorViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_colorViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
-		}
-
-		if ( info.fbImages.color1 != nullptr )
-		{
-			imageInfo_t gbufferInfo = info.fbImages.color1->info;
-			gbufferInfo.type = IMAGE_TYPE_2D;
-
-			m_gBuffer0Views[ multiViewIndex ] = new ImageView();
-			m_gBuffer0Views[ multiViewIndex ]->Init( *info.fbImages.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( info.isCubeView )
-			{
-				m_gBuffer0Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_gBuffer0Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
-		}
-
-		if ( info.fbImages.color2 != nullptr )
-		{
-			imageInfo_t gbufferInfo = info.fbImages.color2->info;
-			gbufferInfo.type = IMAGE_TYPE_2D;
-
-			m_gBuffer1Views[ multiViewIndex ] = new ImageView();
-			m_gBuffer1Views[ multiViewIndex ]->Init( *info.fbImages.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( info.isCubeView )
-			{
-				m_gBuffer1Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_gBuffer1Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
-		}
-
-		if ( info.fbImages.depth != nullptr )
-		{
-			imageInfo_t depthInfo = info.fbImages.depth->info;
-			depthInfo.type = IMAGE_TYPE_2D;
-
-			m_depthViews[ multiViewIndex ] = new ImageView();
-			m_depthViews[ multiViewIndex ]->Init( *info.fbImages.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( info.isCubeView )
-			{
-				m_depthViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_depthViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
-		}
-
-		if ( info.fbImages.stencil != nullptr )
-		{
-			imageInfo_t stencilInfo = info.fbImages.stencil->info;
-			stencilInfo.type = IMAGE_TYPE_2D;
-
-			m_stencilViews[ multiViewIndex ] = new ImageView();
-			m_stencilViews[ multiViewIndex ]->Init( *info.fbImages.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( info.isCubeView )
-			{
-				m_stencilViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_stencilViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
-		}
-
-		frameBufferCreateInfo_t fbInfo {};
-		fbInfo.name = info.fbImages.name;
-		fbInfo.swapBuffering = info.fbImages.swapBuffering;
-		fbInfo.color0 = m_colorViews[ multiViewIndex ];
-		fbInfo.color1 = m_gBuffer0Views[ multiViewIndex ];
-		fbInfo.color2 = m_gBuffer1Views[ multiViewIndex ];
-		fbInfo.depth = m_depthViews[ multiViewIndex ];
-		fbInfo.stencil = m_stencilViews[ multiViewIndex ];
-			
-		m_framebuffers[ multiViewIndex ] = new FrameBuffer();
-		m_framebuffers[ multiViewIndex ]->Create( fbInfo );
-	}
 
 	m_viewParms = info.context->RegisterBindParm( bindset_view );
 
@@ -145,7 +50,26 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
 			passes[ multiViewIndex ][ passIx ] = nullptr;
 		}
+		m_framebuffers[ multiViewIndex ] = new FrameBuffer();
+
+		if ( info.fbImages.color0 != nullptr ) {
+			m_colorViews[ multiViewIndex ] = new ImageView();
+		}
+		if ( info.fbImages.color1 != nullptr ) {
+			m_gBuffer0Views[ multiViewIndex ] = new ImageView();
+		}
+		if ( info.fbImages.color2 != nullptr ) {
+			m_gBuffer1Views[ multiViewIndex ] = new ImageView();
+		}
+		if ( info.fbImages.depth != nullptr ) {
+			m_depthViews[ multiViewIndex ] = new ImageView();
+		}
+		if ( info.fbImages.stencil != nullptr ) {
+			m_stencilViews[ multiViewIndex ] = new ImageView();
+		}
 	}
+
+	CreateFrameBuffers( info.fbImages );
 
 	const uint32_t beginPass = ViewRegionPassBegin();
 	const uint32_t endPass = ViewRegionPassEnd();
@@ -243,6 +167,102 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 }
 
 
+void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
+{
+	m_fbSourceImages = info;
+
+	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
+	{
+		imageSubResourceView_t subView;
+		subView.arrayCount = 1;
+		subView.baseArray = m_isCubeView ? vk_MapToGlslCubemapConvention( multiViewIndex ) : 0; // This is all that changes for cube views
+		subView.baseMip = 0;
+		subView.mipLevels = 1;
+
+		if( info.color0 != nullptr )
+		{
+			imageInfo_t colorInfo = info.color0->info;
+			colorInfo.type = IMAGE_TYPE_2D;
+
+			m_colorViews[ multiViewIndex ]->Init( *info.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if( m_isCubeView )
+			{
+				m_colorViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_colorViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.color1 != nullptr )
+		{
+			imageInfo_t gbufferInfo = info.color1->info;
+			gbufferInfo.type = IMAGE_TYPE_2D;
+
+			m_gBuffer0Views[ multiViewIndex ]->Init( *info.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( m_isCubeView )
+			{
+				m_gBuffer0Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_gBuffer0Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.color2 != nullptr )
+		{
+			imageInfo_t gbufferInfo = info.color2->info;
+			gbufferInfo.type = IMAGE_TYPE_2D;
+
+			m_gBuffer1Views[ multiViewIndex ]->Init( *info.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( m_isCubeView )
+			{
+				m_gBuffer1Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_gBuffer1Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.depth != nullptr )
+		{
+			imageInfo_t depthInfo = info.depth->info;
+			depthInfo.type = IMAGE_TYPE_2D;
+
+			m_depthViews[ multiViewIndex ]->Init( *info.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( m_isCubeView )
+			{
+				m_depthViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_depthViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		if ( info.stencil != nullptr )
+		{
+			imageInfo_t stencilInfo = info.stencil->info;
+			stencilInfo.type = IMAGE_TYPE_2D;
+
+			m_stencilViews[ multiViewIndex ]->Init( *info.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
+
+			if ( m_isCubeView )
+			{
+				m_stencilViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+				m_stencilViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
+			}
+		}
+
+		frameBufferCreateInfo_t fbInfo {};
+		fbInfo.name = info.name;
+		fbInfo.swapBuffering = info.swapBuffering;
+		fbInfo.color0 = m_colorViews[ multiViewIndex ];
+		fbInfo.color1 = m_gBuffer0Views[ multiViewIndex ];
+		fbInfo.color2 = m_gBuffer1Views[ multiViewIndex ];
+		fbInfo.depth = m_depthViews[ multiViewIndex ];
+		fbInfo.stencil = m_stencilViews[ multiViewIndex ];
+			
+		m_framebuffers[ multiViewIndex ]->Create( fbInfo );
+	}
+}
+
+
 void RenderView::FrameBegin()
 {
 	m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
@@ -281,6 +301,8 @@ void RenderView::FrameEnd()
 
 void RenderView::Resize()
 {
+	CreateFrameBuffers( m_fbSourceImages );
+
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
 		m_framebuffers[ multiViewIndex ]->Resize();
@@ -291,8 +313,9 @@ void RenderView::Resize()
 				continue;
 			}
 			pass->SetViewport( 0, 0, m_framebuffers[ multiViewIndex ]->GetWidth(), m_framebuffers[ multiViewIndex ]->GetHeight() );
-		}		
+		}
 	}
+	SetViewRect( 0, 0, m_framebuffers[ 0 ]->GetWidth(), m_framebuffers[ 0 ]->GetHeight() );
 }
 
 

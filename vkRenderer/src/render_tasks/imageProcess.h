@@ -60,6 +60,7 @@ private:
 	DrawPass*				m_passes[ MaxPasses ];
 	GpuBuffer				m_buffer[ MaxPasses ];
 	ImageView*				m_view[ MaxPasses ];;
+	Image*					m_image;
 	uint32_t				m_passCount;
 	uint32_t				m_image2dSlotCount;
 	uint32_t				m_imageCubeSlotCount;

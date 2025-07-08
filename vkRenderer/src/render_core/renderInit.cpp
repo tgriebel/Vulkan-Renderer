@@ -223,6 +223,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		}
 	}
 
+	ImageProcess* resolve = nullptr;
 	{
 		imageProcessCreateInfo_t info = {};
 		info.name = "ResolveMain";

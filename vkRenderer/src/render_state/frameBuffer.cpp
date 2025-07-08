@@ -475,5 +475,9 @@ void FrameBuffer::Destroy()
 
 void FrameBuffer::Resize()
 {
-	Create( m_createInfo );
+	if( m_createInfo.lifetime == resourceLifeTime_t::RESIZE )
+	{
+		Destroy();
+		Create( m_createInfo );
+	}
 }

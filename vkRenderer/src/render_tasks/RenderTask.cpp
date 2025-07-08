@@ -275,6 +275,15 @@ void RenderTask::FrameEnd()
 	}
 }
 
+
+void RenderTask::Resize()
+{
+	if ( m_renderView != nullptr ) {
+		m_renderView->Resize();
+	}
+}
+
+
 std::string RenderTask::AsString() const
 {
 	std::stringstream ss;
@@ -433,6 +442,17 @@ void RenderSchedule::FrameEnd()
 		t = t->GetChild();
 	}
 	assert( currentTask == nullptr );
+}
+
+
+void RenderSchedule::Resize()
+{
+	GpuTask* t = tasks;
+	while ( t != nullptr )
+	{
+		t->Resize();
+		t = t->GetChild();
+	}
 }
 
 

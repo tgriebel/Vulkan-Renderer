@@ -78,12 +78,14 @@ private:
 	mat4x4f					m_viewMatrices[ MaxMultiViews ];
 	mat4x4f					m_projMatrices[ MaxMultiViews ];
 	mat4x4f					m_viewprojMatrices[ MaxMultiViews ];
+	frameBufferCreateInfo_t	m_fbSourceImages;
 	const char*				m_name;
 	renderViewRegion_t		m_region;
 	uint32_t				m_multiViewCount;
 	int						m_viewBufferId;
 	int						m_surfaceBufferId;
 	bool					m_committed;
+	bool					m_isCubeView;
 
 public:
 
@@ -151,6 +153,7 @@ public:
 	}
 
 	void					Init( const renderViewCreateInfo_t& info );
+	void					CreateFrameBuffers( const frameBufferCreateInfo_t& info );
 	void					FrameBegin();
 	void					FrameEnd();
 	void					Resize();

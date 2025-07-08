@@ -98,10 +98,9 @@ public:
 		Shutdown();
 	}
 
-	void Resize() {}
-
 	void				FrameBegin();
 	void				FrameEnd();
+	void				Resize();
 	std::string			AsString() const;
 
 	void				Execute( CommandContext& context ) override;
@@ -205,6 +204,7 @@ public:
 	void		Link( GpuTask* task );
 	void		FrameBegin();
 	void		FrameEnd();
+	void		Resize();
 	void		IssueNext( CommandContext& context );
 	void		AsString() const;
 };

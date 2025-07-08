@@ -201,7 +201,6 @@ private:
 	RenderView*							renderViews[ Max3DViews ];
 	RenderView*							shadowViews[ MaxShadowViews ];
 	RenderView*							view2Ds[ Max2DViews ];
-	ImageProcess*						resolve = nullptr;
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 

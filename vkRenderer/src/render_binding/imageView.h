@@ -84,6 +84,12 @@ public:
 	}
 
 
+	void Resize()
+	{
+		Destroy();
+	}
+
+
 	void Destroy()
 	{
 		if ( gpuImage != nullptr )

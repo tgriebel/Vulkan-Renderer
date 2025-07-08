@@ -39,12 +39,12 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		// Intermediate Frame Buffer
 		if ( m_passCount > 1 )
 		{
-			m_view[ passIndex ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::TASK );
+			m_view[ passIndex ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "TempImageProcessFb";
 			fbInfo.color0 = m_view[ passIndex ];
-			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME; 
 
 			m_fb[ passIndex ].Create( fbInfo );
 			m_passes[ passIndex ] = new PostPass( &m_fb[ passIndex ] );
@@ -54,7 +54,8 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 		// Main Frame Buffer
 		{
-			m_view[ passIndex ] = new ImageView( *info.image, imageInfo, view, resourceLifeTime_t::TASK );
+			m_image = info.image;
+			m_view[ passIndex ] = new ImageView( *m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = m_dbgName.c_str();
@@ -164,6 +165,13 @@ void ImageProcess::Resize()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
+		m_view[ passIndex ]->Destroy();
+		if ( m_passCount > 1 ) {
+			m_view[ passIndex ]->Init( m_resources->tempColorImage, m_resources->tempColorImage.info, m_resources->tempColorImage.subResourceView, resourceLifeTime_t::RESIZE );
+		} else {
+			m_view[ passIndex ]->Init( *m_image, m_image->info, m_image->subResourceView, resourceLifeTime_t::RESIZE );
+		}
+
 		m_fb[ passIndex ].Resize();
 		m_passes[ passIndex ]->SetViewport( 0, 0, m_fb[ passIndex ].GetWidth(), m_fb[ passIndex ].GetHeight() );
 	}
