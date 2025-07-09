@@ -95,6 +95,7 @@ public:
 
 		info.width = m_sourceImage->info.width;
 		info.height = m_sourceImage->info.height;
+		info.mipLevels = m_sourceImage->info.mipLevels;
 
 		Init( m_sourceImage, info, subResourceView, m_lifetime );
 	}
