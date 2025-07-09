@@ -42,6 +42,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_viewBufferId = info.viewId;
 
 	m_multiViewCount = info.isCubeView ? 6 : 1;
+	m_isCubeView = info.isCubeView;
 
 	m_viewParms = info.context->RegisterBindParm( bindset_view );
 
