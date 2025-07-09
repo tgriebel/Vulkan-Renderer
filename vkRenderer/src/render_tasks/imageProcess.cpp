@@ -19,13 +19,15 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 	ScopedLogTimer timer( "ImageProcessInit", timerPrecision_t::MICROSECOND, &TimerPrint );
 
 	m_dbgName = info.name;
+	m_layer = info.layer;
+	m_mipLevel = info.mipLevel;
 
 	// Set-up Views and Frame Buffers
 	{
 		imageSubResourceView_t view{};
-		view.baseArray = info.layer;
+		view.baseArray = m_layer;
 		view.arrayCount = 1;
-		view.baseMip = info.mipLevel;
+		view.baseMip = m_mipLevel;
 		view.mipLevels = 1;
 
 		imageInfo_t imageInfo = info.image->info;
@@ -166,10 +168,20 @@ void ImageProcess::Resize()
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
 		m_view[ passIndex ]->Destroy();
-		if ( m_passCount > 1 ) {
-			m_view[ passIndex ]->Init( m_resources->tempColorImage, m_resources->tempColorImage.info, m_resources->tempColorImage.subResourceView, resourceLifeTime_t::RESIZE );
+
+		imageSubResourceView_t view{};
+		view.baseArray = m_layer;
+		view.arrayCount = 1;
+		view.baseMip = m_mipLevel;
+		view.mipLevels = 1;
+
+		imageInfo_t imageInfo = m_image->info;
+		imageInfo.type = IMAGE_TYPE_2D;
+
+		if ( passIndex > 0 ) {
+			m_view[ passIndex ]->Init( m_resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
 		} else {
-			m_view[ passIndex ]->Init( *m_image, m_image->info, m_image->subResourceView, resourceLifeTime_t::RESIZE );
+			m_view[ passIndex ]->Init( *m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
 		}
 
 		m_fb[ passIndex ].Resize();
