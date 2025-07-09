@@ -5,25 +5,28 @@
 
 class ImageView : public Image, public RenderResource
 {
+private:
+	const Image* m_sourceImage = nullptr;
+
 public:
 	ImageView() : Image()
 	{}
 
 	ImageView( const Image& _image ) = delete;
 
-	ImageView( const ImageView& image ) : Image()
+	ImageView( const ImageView* image ) : Image()
 	{
-		Init( image, image.info, image.m_lifetime );
+		Init( image, image->info, image->m_lifetime );
 	}
 
 
-	ImageView( const Image& image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime ) : Image()
+	ImageView( const Image* image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime ) : Image()
 	{
 		Init( image, imageInfo, lifetime );
 	}
 
 
-	ImageView( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subResourceView, const resourceLifeTime_t lifetime ) : Image()
+	ImageView( const Image* image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subResourceView, const resourceLifeTime_t lifetime ) : Image()
 	{
 		Init( image, imageInfo, subResourceView, lifetime );
 	}
@@ -35,14 +38,14 @@ public:
 	}
 
 
-	ImageView& operator=( const ImageView& image )
+	ImageView& operator=( const ImageView* image )
 	{
-		Init( image, image.info, image.m_lifetime );
+		Init( image, image->info, image->m_lifetime );
 		return *this;
 	}
 
 
-	void Init( const Image& image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime )
+	void Init( const Image* image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime )
 	{
 		imageSubResourceView_t subView;
 		subView.baseMip = 0;
@@ -56,13 +59,15 @@ public:
 	}
 
 
-	void Init( const Image& image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView, const resourceLifeTime_t lifetime )
+	void Init( const Image* image, const imageInfo_t& imageInfo, const imageSubResourceView_t& subView, const resourceLifeTime_t lifetime )
 	{
 		// Manage Resources
 		{
 			m_lifetime = lifetime;
 			RenderResource::Create( m_lifetime );
 		}
+
+		m_sourceImage = image;
 
 		info = imageInfo;
 		assert( info.layers >= 1 );
@@ -74,12 +79,12 @@ public:
 #ifdef USE_VULKAN
 		VkImageView views[ MaxFrameStates ];
 
-		const uint32_t bufferCount = image.gpuImage->GetBufferCount();
+		const uint32_t bufferCount = m_sourceImage->gpuImage->GetBufferCount();
 		for ( uint32_t i = 0; i < bufferCount; ++i ) {
-			views[ i ] = vk_CreateImageView( image.gpuImage->GetVkImage( i ), info, subResourceView );
+			views[ i ] = vk_CreateImageView( m_sourceImage->gpuImage->GetVkImage( i ), info, subResourceView );
 		}
 
-		gpuImage = new GpuImage( image.gpuImage, views );
+		gpuImage = new GpuImage( m_sourceImage->gpuImage, views );
 #endif
 	}
 
@@ -87,6 +92,11 @@ public:
 	void Resize()
 	{
 		Destroy();
+
+		info.width = m_sourceImage->info.width;
+		info.height = m_sourceImage->info.height;
+
+		Init( m_sourceImage, info, subResourceView, m_lifetime );
 	}
 
 

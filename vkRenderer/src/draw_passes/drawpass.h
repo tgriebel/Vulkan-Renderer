@@ -59,6 +59,11 @@ public:
 	virtual void FrameBegin( const ResourceContext* resources ) = 0;
 	virtual void FrameEnd() = 0;
 
+	inline void Resize()
+	{
+		SetFrameBuffer( m_fb );
+	}
+
 	inline drawPass_t Type() const
 	{
 		return m_passId;

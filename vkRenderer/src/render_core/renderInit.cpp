@@ -1044,7 +1044,7 @@ void Renderer::CreateFramebuffers()
 
 			colorInfo.type = IMAGE_TYPE_2D;
 
-			resources.specularIblImageViews[ i ].Init( resources.specularIblImage, colorInfo, subView, resourceLifeTime_t::RESIZE );
+			resources.specularIblImageViews[ i ].Init( &resources.specularIblImage, colorInfo, subView, resourceLifeTime_t::RESIZE );
 		}
 	}
 
@@ -1082,7 +1082,7 @@ void Renderer::CreateFramebuffers()
 			subView.baseArray = 0;
 			subView.arrayCount = 1;
 
-			resources.mainColorResolvedImageViews[ i ].Init( resources.mainColorResolvedImage, info, subView, resourceLifeTime_t::RESIZE );
+			resources.mainColorResolvedImageViews[ i ].Init( &resources.mainColorResolvedImage, info, subView, resourceLifeTime_t::RESIZE );
 		}
 
 		for ( uint32_t i = 0; i < mipLevelCount; ++i )
@@ -1093,7 +1093,7 @@ void Renderer::CreateFramebuffers()
 			subView.baseArray = 0;
 			subView.arrayCount = 1;
 
-			resources.blurredImageViews[ i ].Init( resources.blurredImage, info, subView, resourceLifeTime_t::RESIZE );
+			resources.blurredImageViews[ i ].Init( &resources.blurredImage, info, subView, resourceLifeTime_t::RESIZE );
 		}
 	}
 
@@ -1101,11 +1101,11 @@ void Renderer::CreateFramebuffers()
 	{
 		imageInfo_t depthInfo = resources.depthStencilImage.info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		resources.depthImageView.Init( resources.depthStencilImage, depthInfo, resourceLifeTime_t::RESIZE );
+		resources.depthImageView.Init( &resources.depthStencilImage, depthInfo, resourceLifeTime_t::RESIZE );
 
 		imageInfo_t stencilInfo = resources.depthStencilImage.info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, resourceLifeTime_t::RESIZE );
+		resources.stencilImageView.Init( &resources.depthStencilImage, stencilInfo, resourceLifeTime_t::RESIZE );
 	}
 
 	// Resolve depth-stencil image
@@ -1130,8 +1130,8 @@ void Renderer::CreateFramebuffers()
 
 	// Depth-stencil views
 	{
-		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info, resourceLifeTime_t::RESIZE );
-		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info, resourceLifeTime_t::RESIZE );
+		resources.depthResolvedImageView.Init( &resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info, resourceLifeTime_t::RESIZE );
+		resources.stencilResolvedImageView.Init( &resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info, resourceLifeTime_t::RESIZE );
 	}
 
 	// Temp image

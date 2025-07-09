@@ -58,7 +58,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		imageInfo_t viewInfo = m_image->info;
 		viewInfo.type = IMAGE_TYPE_2D;
 
-		m_imgViews[ i ].Init( *m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
+		m_imgViews[ i ].Init( m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
 	}
 
 	// FIXME: Needs a cleaner interface
@@ -140,7 +140,7 @@ void MipImageTask::Resize()
 		imageInfo_t viewInfo = m_image->info;
 		viewInfo.type = IMAGE_TYPE_2D;
 
-		m_imgViews[ i ].Init( *m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
+		m_imgViews[ i ].Init( m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
 	}
 
 	for ( uint32_t i = 1; i < m_mipLevels; ++i )

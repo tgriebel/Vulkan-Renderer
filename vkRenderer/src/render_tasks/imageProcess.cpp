@@ -41,7 +41,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		// Intermediate Frame Buffer
 		if ( m_passCount > 1 )
 		{
-			m_view[ passIndex ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_view[ passIndex ] = new ImageView( &info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "TempImageProcessFb";
@@ -57,7 +57,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		// Main Frame Buffer
 		{
 			m_image = info.image;
-			m_view[ passIndex ] = new ImageView( *m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_view[ passIndex ] = new ImageView( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = m_dbgName.c_str();
@@ -167,25 +167,9 @@ void ImageProcess::Resize()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		m_view[ passIndex ]->Destroy();
-
-		imageSubResourceView_t view{};
-		view.baseArray = m_layer;
-		view.arrayCount = 1;
-		view.baseMip = m_mipLevel;
-		view.mipLevels = 1;
-
-		imageInfo_t imageInfo = m_image->info;
-		imageInfo.type = IMAGE_TYPE_2D;
-
-		if ( passIndex > 0 ) {
-			m_view[ passIndex ]->Init( m_resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
-		} else {
-			m_view[ passIndex ]->Init( *m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
-		}
-
+		m_view[ passIndex ]->Resize();
 		m_fb[ passIndex ].Resize();
-		m_passes[ passIndex ]->SetViewport( 0, 0, m_fb[ passIndex ].GetWidth(), m_fb[ passIndex ].GetHeight() );
+		m_passes[ passIndex ]->Resize();
 	}
 }
 

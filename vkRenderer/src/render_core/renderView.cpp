@@ -185,7 +185,7 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			imageInfo_t colorInfo = info.color0->info;
 			colorInfo.type = IMAGE_TYPE_2D;
 
-			m_colorViews[ multiViewIndex ]->Init( *info.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
+			m_colorViews[ multiViewIndex ]->Init( info.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if( m_isCubeView )
 			{
@@ -199,7 +199,7 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			imageInfo_t gbufferInfo = info.color1->info;
 			gbufferInfo.type = IMAGE_TYPE_2D;
 
-			m_gBuffer0Views[ multiViewIndex ]->Init( *info.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+			m_gBuffer0Views[ multiViewIndex ]->Init( info.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( m_isCubeView )
 			{
@@ -213,7 +213,7 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			imageInfo_t gbufferInfo = info.color2->info;
 			gbufferInfo.type = IMAGE_TYPE_2D;
 
-			m_gBuffer1Views[ multiViewIndex ]->Init( *info.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+			m_gBuffer1Views[ multiViewIndex ]->Init( info.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( m_isCubeView )
 			{
@@ -227,7 +227,7 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			imageInfo_t depthInfo = info.depth->info;
 			depthInfo.type = IMAGE_TYPE_2D;
 
-			m_depthViews[ multiViewIndex ]->Init( *info.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
+			m_depthViews[ multiViewIndex ]->Init( info.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( m_isCubeView )
 			{
@@ -241,7 +241,7 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			imageInfo_t stencilInfo = info.stencil->info;
 			stencilInfo.type = IMAGE_TYPE_2D;
 
-			m_stencilViews[ multiViewIndex ]->Init( *info.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
+			m_stencilViews[ multiViewIndex ]->Init( info.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
 
 			if ( m_isCubeView )
 			{
@@ -313,7 +313,7 @@ void RenderView::Resize()
 			if ( pass == nullptr ) {
 				continue;
 			}
-			pass->SetViewport( 0, 0, m_framebuffers[ multiViewIndex ]->GetWidth(), m_framebuffers[ multiViewIndex ]->GetHeight() );
+			pass->Resize();
 		}
 	}
 	SetViewRect( 0, 0, m_framebuffers[ 0 ]->GetWidth(), m_framebuffers[ 0 ]->GetHeight() );
