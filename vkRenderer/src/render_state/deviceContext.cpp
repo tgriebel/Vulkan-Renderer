@@ -407,7 +407,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 }
 
 
-void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode )
+void vk_GenerateDownsampleMips( CommandContext& cmdContext, ImageView* views, DrawPass** passes, const uint32_t mipLevels, downSampleMode_t mode )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
@@ -436,7 +436,6 @@ void vk_GenerateDownsampleMips( CommandContext& cmdContext, std::vector<ImageVie
 	if( mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN ) {
 	}
 
-	const uint32_t mipLevels = static_cast<uint32_t>( views.size() );
 	for ( uint32_t i = 1; i < mipLevels; i++ )
 	{
 		sampledView = &views[ i - 1 ];

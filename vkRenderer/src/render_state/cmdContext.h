@@ -192,5 +192,5 @@ void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
 void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );
 void WritebackImage( CommandContext* cmdCommand, Image& image );
-void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode );
+void GenerateDownsampleMips( CommandContext* cmdCommand, ImageView* views, DrawPass** passes, const uint32_t mipLevels, downSampleMode_t mode );
 void FlushGPU();

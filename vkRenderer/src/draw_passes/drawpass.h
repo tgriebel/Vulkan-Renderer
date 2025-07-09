@@ -183,6 +183,10 @@ public:
 class PostPass : public DrawPass
 {
 public:
+	PostPass()
+	{
+	}
+
 	PostPass( FrameBuffer* fb )
 	{
 		Init( fb );

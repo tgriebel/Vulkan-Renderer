@@ -19,6 +19,7 @@ private:
 	static const uint32_t	MaxBufferSizeInBytes		= 256;
 	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
 	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
+	static const uint32_t	MaxMipMaps = 16;
 
 	Image*						m_image;
 	downSampleMode_t			m_mode;
@@ -27,11 +28,12 @@ private:
 	ResourceContext*			m_resources;
 	Image						m_tempImage;
 	GpuBuffer					m_buffer;
-	std::vector<ImageView>		m_imgViews;
-	std::vector<DrawPass*>		m_passes;
-	std::vector<FrameBuffer>	m_frameBuffers;
-	std::vector<GpuBufferView>	m_bufferViews;
+	ImageView					m_imgViews[ MaxMipMaps ];
+	DrawPass*					m_passes[ MaxMipMaps ];
+	FrameBuffer					m_frameBuffers[ MaxMipMaps ];
+	GpuBufferView				m_bufferViews[ MaxMipMaps ];
 	uint32_t					m_mipLevels;
+	uint32_t					m_layer;
 	bool						m_firstFrame;
 
 	void Init( const mipProcessCreateInfo_t& info );
@@ -44,10 +46,9 @@ public:
 		Init( info );
 	}
 
-	void		Resize() { assert( 0 ); } // support
-
 	void		FrameBegin();
 	void		FrameEnd();
+	void		Resize();
 	std::string	AsString() const;
 
 	uint32_t	GetMipCount() const;

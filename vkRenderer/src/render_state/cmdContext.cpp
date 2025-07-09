@@ -384,12 +384,12 @@ void WritebackImage( CommandContext* cmdCommand, Image& image )
 }
 
 
-void GenerateDownsampleMips( CommandContext* cmdCommand, std::vector<ImageView>& views, std::vector<DrawPass*>& passes, downSampleMode_t mode )
+void GenerateDownsampleMips( CommandContext* cmdCommand, ImageView* views, DrawPass** passes, const uint32_t mipLevels, downSampleMode_t mode )
 {
 	cmdCommand->MarkerBeginRegion( "GenerateDownsampleMips", ColorToVector( ColorWhite ) );
 
 #ifdef USE_VULKAN
-	vk_GenerateDownsampleMips( *cmdCommand, views, passes, mode );
+	vk_GenerateDownsampleMips( *cmdCommand, views, passes, mipLevels, mode );
 #endif
 
 	cmdCommand->MarkerEndRegion();
