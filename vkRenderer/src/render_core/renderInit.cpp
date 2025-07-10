@@ -270,7 +270,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			ImageProcess* process = new ImageProcess( info );	
 			process->SetSourceImage( 0, sourceImage );
 
-			sourceImage = process->GetWriteImage();
+			sourceImage = process->GetOutputImage();
 
 			gaussianTaskQueue.push_back( process );
 		}

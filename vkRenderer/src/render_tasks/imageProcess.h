@@ -90,11 +90,11 @@ public:
 	void				FrameEnd();
 	std::string			AsString() const;
 
-	ImageView*			GetWriteImage();
+	ImageView*			GetOutputImage();
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
 	void				SetSourceCubeImage( const uint32_t slot, Image* image );
-	void				SetConstants( const void* dataBlock, const uint32_t sizeInBytes, const uint32_t passIndex = 0 );
+	void				SetConstants( const void* dataBlock, const uint32_t sizeInBytes);
 
 	void				Execute( CommandContext& cmdContext );
 };

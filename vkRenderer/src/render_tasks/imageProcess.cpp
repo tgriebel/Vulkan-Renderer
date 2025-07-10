@@ -117,7 +117,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 }
 
 
-ImageView* ImageProcess::GetWriteImage()
+ImageView* ImageProcess::GetOutputImage()
 {
 	return m_view[ m_passCount - 1 ];
 }
@@ -151,15 +151,15 @@ void ImageProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
 }
 
 
-void ImageProcess::SetConstants( const void* dataBlock, const uint32_t sizeInBytes, const uint32_t passIndex )
+void ImageProcess::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
 {
-	if( passIndex >= m_passCount ) {
-		return;
-	}
-
 	assert( sizeInBytes <= MaxConstantBlockSizeInBytes );
-	m_buffer[ passIndex ].SetPos( ReservedConstantSizeInBytes );
-	m_buffer[ passIndex ].CopyData( dataBlock, Min( sizeInBytes, MaxConstantBlockSizeInBytes ) );
+
+	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
+	{	
+		m_buffer[ passIndex ].SetPos( ReservedConstantSizeInBytes );
+		m_buffer[ passIndex ].CopyData( dataBlock, Min( sizeInBytes, MaxConstantBlockSizeInBytes ) );
+	}
 }
 
 

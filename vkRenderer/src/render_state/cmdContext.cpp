@@ -383,19 +383,6 @@ void WritebackImage( CommandContext* cmdCommand, Image& image )
 //	cmdCommand->Dispatch( )
 }
 
-
-void GenerateDownsampleMips( CommandContext* cmdCommand, ImageView* views, DrawPass** passes, const uint32_t mipLevels, downSampleMode_t mode )
-{
-	cmdCommand->MarkerBeginRegion( "GenerateDownsampleMips", ColorToVector( ColorWhite ) );
-
-#ifdef USE_VULKAN
-	vk_GenerateDownsampleMips( *cmdCommand, views, passes, mipLevels, mode );
-#endif
-
-	cmdCommand->MarkerEndRegion();
-}
-
-
 void FlushGPU()
 {
 #ifdef USE_VULKAN

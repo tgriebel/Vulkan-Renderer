@@ -30,59 +30,50 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 	m_mipLevels = m_image->info.mipLevels;
 	m_layer = info.layer;
+	m_multiPass = ( info.mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN );
 
+	// Image Process for writing each MIP
 	{
-		imageInfo_t info = m_image->info;
-		info.mipLevels = 1;
-		MipDimensions( 1, m_image->info.width, m_image->info.height, &info.width, &info.height );
+		imageProcessCreateInfo_t imgProcessInfo = {};
+		imgProcessInfo.name = info.name;
+		imgProcessInfo.context = m_context;
+		imgProcessInfo.resources = m_resources;
+		imgProcessInfo.passCount = m_multiPass ? 2 : 1;
+		imgProcessInfo.inputImages = 1;
+		imgProcessInfo.image = m_image;
 
-		m_tempImage.Create(
-			info,
-			nullptr,
-			new GpuImage( "tempMipImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, m_context->scratchMemory, resourceLifeTime_t::TASK )
-		);
-	}
+		char* progName = nullptr;
+		switch ( info.mode )
+		{
+			case downSampleMode_t::DOWNSAMPLE_LINEAR:			progName = "DownSample";				break;
+			case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "SeparableGaussianBlur";		break;
+			case downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL:		progName = "preCalculatedSpecularIbl";	break;
+		}
+		imgProcessInfo.progHdl = AssetLibGpuProgram::Handle( progName );
 
-	// Create buffer
-	m_buffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, MaxMipMaps, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
+		imageSubResourceView_t view{};
+		view.baseArray = m_layer;
+		view.arrayCount = 1;
+		view.baseMip = 0;
+		view.mipLevels = 1;
 
-	// The last view is only needed to create a frame buffer 
-	for ( uint32_t i = 0; i < m_mipLevels; ++i )
-	{
-		imageSubResourceView_t subView = {};
-		subView.baseMip = i;
-		subView.mipLevels = 1;
-		subView.baseArray = m_layer;
-		subView.arrayCount = 1;
+		imageInfo_t imageInfo = m_image->info;
+		imageInfo.type = IMAGE_TYPE_2D;
 
-		imageInfo_t viewInfo = m_image->info;
-		viewInfo.type = IMAGE_TYPE_2D;
+		m_baseView.Init( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
 
-		m_imgViews[ i ].Init( m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
-	}
+		Image* sourceImage = &m_baseView;
 
-	// FIXME: Needs a cleaner interface
-	for ( uint32_t i = 1; i < MaxMipMaps; ++i )
-	{
-		m_passes[ i ] = new PostPass();
-		m_passes[ i ]->parms = m_context->RegisterBindParm( bindset_imageProcess );
-	}
+		// All but the first image need a framebuffer since they are being written to
+		for ( uint32_t i = 1; i < m_mipLevels; ++i )
+		{
+			imgProcessInfo.mipLevel = i;
 
-	// All but the first image need a framebuffer since they are being written to
-	for ( uint32_t i = 1; i < m_mipLevels; ++i )
-	{
-		frameBufferCreateInfo_t info{};
-		info.name = "MipDownsample";
-		info.color0 = &m_imgViews[ i ];
-		info.swapBuffering = swapBuffering_t::SINGLE_FRAME;
+			m_imgProcesses[ i ] = new ImageProcess( imgProcessInfo );
+			m_imgProcesses[ i ]->SetSourceImage( 0, sourceImage );
 
-		m_frameBuffers[ i ].Create( info );
-
-		m_passes[ i ]->Init( &m_frameBuffers[ i ] );
-		m_passes[ i ]->SetViewport( 0, 0, m_imgViews[ i ].info.width, m_imgViews[ i ].info.height );
-
-		m_passes[ i ]->codeImages.Resize( 1 );
-		m_passes[ i ]->codeImages[ 0 ] = &m_imgViews[ i - 1 ];	
+			sourceImage = m_imgProcesses[ i ]->GetOutputImage();
+		}
 	}
 	m_firstFrame = true;
 }
@@ -90,38 +81,17 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 void MipImageTask::FrameBegin()
 {
-	for ( uint32_t i = 1; i < m_mipLevels; ++i )
-	{
-		imageProcessObject_t imageProcessParms{};
-
-		const float w = float( m_imgViews[ i - 1 ].info.width );
-		const float h = float( m_imgViews[ i - 1 ].info.height );
-		imageProcessParms.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
-		assert( sizeof( imageProcessParms.dimensions ) <= ReservedConstantSizeInBytes );
-
-		m_bufferViews[ i ] = m_buffer.GetView( i, 1 );
-
-		m_bufferViews[ i ].SetPos( 0 );
-		m_bufferViews[ i ].CopyData( &imageProcessParms, ReservedConstantSizeInBytes );
-
-		if ( m_image->info.type == IMAGE_TYPE_2D )
-		{
-			m_passes[ i ]->parms->Bind( bind_sourceImages, &m_passes[ i ]->codeImages );
-			m_passes[ i ]->parms->Bind( bind_sourceCubeImages, rc.defaultImageCube );
-		}
-		else if ( m_image->info.type == IMAGE_TYPE_CUBE )
-		{
-			m_passes[ i ]->parms->Bind( bind_sourceImages, &rc.defaultImageArray );
-			m_passes[ i ]->parms->Bind( bind_sourceCubeImages, m_passes[ i ]->codeCubeImages.Count() > 0 ? m_passes[ i ]->codeCubeImages[ 0 ] : rc.defaultImageCube );
-		}
-		m_passes[ i ]->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
-		m_passes[ i ]->parms->Bind( bind_imageProcess, &m_bufferViews[ i ] );
+	for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
+		m_imgProcesses[ i ]->FrameBegin();
 	}
 }
 
 
 void MipImageTask::FrameEnd()
 {
+	for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
+		m_imgProcesses[ i ]->FrameEnd();
+	}
 }
 
 
@@ -129,49 +99,23 @@ void MipImageTask::Resize()
 {
 	m_mipLevels = m_image->info.mipLevels;
 
-	for ( uint32_t i = 0; i < m_mipLevels; ++i )
-	{
-		imageSubResourceView_t subView = {};
-		subView.baseMip = i;
-		subView.mipLevels = 1;
-		subView.baseArray = m_layer;
-		subView.arrayCount = 1;
-
-		imageInfo_t viewInfo = m_image->info;
-		viewInfo.type = IMAGE_TYPE_2D;
-
-		m_imgViews[ i ].Init( m_image, viewInfo, subView, resourceLifeTime_t::RESIZE );
-	}
+	m_baseView.Resize();
 
 	for ( uint32_t i = 1; i < m_mipLevels; ++i )
 	{
-		frameBufferCreateInfo_t info{};
-		info.name = "MipDownsample";
-		info.color0 = &m_imgViews[ i ];
-		info.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-
-		m_frameBuffers[ i ].Create( info );
-
-		m_passes[ i ]->Init( &m_frameBuffers[ i ] );
-		m_passes[ i ]->SetViewport( 0, 0, m_imgViews[ i ].info.width, m_imgViews[ i ].info.height );
-
-		m_passes[ i ]->codeImages.Resize( 1 );
-		m_passes[ i ]->codeImages[ 0 ] = &m_imgViews[ i - 1 ];
+		for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
+			m_imgProcesses[ i ]->Resize();
+		}
 	}
 }
 
 
 void MipImageTask::Shutdown()
 {
-	for ( uint32_t i = 0; i < m_mipLevels; i++ )
-	{
-		m_frameBuffers[ i ].Destroy();
-		m_imgViews[ i ].Destroy();
-		if ( m_passes[ i ] != nullptr ) {
-			delete m_passes[ i ];
-		}
+	for ( uint32_t i = 0; i < m_mipLevels; i++ ) {
+		delete m_imgProcesses[ i ];
 	}
-	delete m_tempImage.gpuImage;
+	m_baseView.Destroy();
 }
 
 
@@ -183,6 +127,8 @@ uint32_t MipImageTask::GetMipCount() const
 
 bool MipImageTask::SetSourceImageForLevel( const uint32_t mipLevel, Image* img )
 {
+	// TODO: Delete this function
+
 	if ( mipLevel > 0 && mipLevel >= GetMipCount() )
 	{
 		assert( 0 );
@@ -191,13 +137,11 @@ bool MipImageTask::SetSourceImageForLevel( const uint32_t mipLevel, Image* img )
 
 	if ( m_image->info.type == IMAGE_TYPE_2D )
 	{
-		m_passes[ mipLevel ]->codeImages.Resize( 1 );
-		m_passes[ mipLevel ]->codeImages[ 0 ] = img;
+		m_imgProcesses[ mipLevel ]->SetSourceImage( 0, img );
 	}
 	else if ( m_image->info.type == IMAGE_TYPE_CUBE )
 	{
-		m_passes[ mipLevel ]->codeCubeImages.Resize( 1 );
-		m_passes[ mipLevel ]->codeCubeImages[ 0 ] = img;
+		m_imgProcesses[ mipLevel ]->SetSourceCubeImage( 0, img );
 	}
 	return true;
 }
@@ -211,8 +155,9 @@ bool MipImageTask::SetConstantsForLevel( const uint32_t mipLevel, const void* da
 		return false;
 	}
 	assert( sizeInBytes <= MaxConstantBlockSizeInBytes );
-	m_bufferViews[ mipLevel ].SetPos( ReservedConstantSizeInBytes );
-	m_bufferViews[ mipLevel ].CopyData( dataBlock, Min( sizeInBytes, MaxConstantBlockSizeInBytes ) );
+
+	m_imgProcesses[ mipLevel ]->SetConstants( dataBlock, sizeInBytes );
+
 	return true;
 }
 
@@ -228,11 +173,9 @@ void MipImageTask::Execute( CommandContext& context )
 	}
 	else
 	{
-		if ( m_firstFrame ) {
-			Transition( &context, m_tempImage, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-			m_firstFrame = false;
+		for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
+			m_imgProcesses[ i ]->Execute( context );
 		}
-		GenerateDownsampleMips( &context, m_imgViews, &m_passes[ 0 ], m_mipLevels, m_mode );
 	}
 
 	context.MarkerEndRegion();

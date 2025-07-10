@@ -26,15 +26,13 @@ private:
 	std::string					m_dbgName;
 	RenderContext*				m_context;
 	ResourceContext*			m_resources;
-	Image						m_tempImage;
-	GpuBuffer					m_buffer;
-	ImageView					m_imgViews[ MaxMipMaps ];
-	DrawPass*					m_passes[ MaxMipMaps ];
-	FrameBuffer					m_frameBuffers[ MaxMipMaps ];
-	GpuBufferView				m_bufferViews[ MaxMipMaps ];
+
+	ImageProcess*				m_imgProcesses[ MaxMipMaps ];
+	ImageView					m_baseView;
 	uint32_t					m_mipLevels;
 	uint32_t					m_layer;
 	bool						m_firstFrame;
+	bool						m_multiPass;
 
 	void Init( const mipProcessCreateInfo_t& info );
 	void Shutdown();
