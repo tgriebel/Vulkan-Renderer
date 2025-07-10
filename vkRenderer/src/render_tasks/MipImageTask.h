@@ -4,6 +4,41 @@
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/imageView.h"
 
+enum downSampleMode_t : uint32_t;
+
+struct mipProcessBlurInfo_t
+{
+	Image* sampleImage;
+};
+
+
+struct mipProcessCreateInfo_t
+{
+	const char*			name;
+	Image*				img;
+	uint32_t			layer;
+	downSampleMode_t	mode;
+	RenderContext*		context;
+	ResourceContext*	resources;
+
+	union
+	{
+		mipProcessBlurInfo_t	blurInfo;
+	};
+};
+
+
+union mipProcessParms_t
+{
+	struct downsample
+	{
+		uint32_t a;
+		uint32_t b;
+		uint32_t c;
+		uint32_t d;
+	};
+};
+
 class MipImageTask : public GpuTask
 {
 private:
@@ -19,9 +54,11 @@ private:
 	static const uint32_t	MaxBufferSizeInBytes		= 256;
 	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
 	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
-	static const uint32_t	MaxMipMaps = 16;
+	static const uint32_t	MaxMipMaps					= 16;
 
 	Image*						m_image;
+	Image*						m_sampleImage;
+	const char*					m_progName;
 	downSampleMode_t			m_mode;
 	std::string					m_dbgName;
 	RenderContext*				m_context;
@@ -33,6 +70,8 @@ private:
 	uint32_t					m_layer;
 	bool						m_firstFrame;
 	bool						m_multiPass;
+	bool						m_computeBaseMip;
+	bool						m_useApi;
 
 	void Init( const mipProcessCreateInfo_t& info );
 	void Shutdown();

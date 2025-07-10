@@ -14,30 +14,6 @@ class ResourceContext;
 class Image;
 struct ComputeState;
 
-enum downSampleMode_t : uint32_t;
-
-struct mipProcessCreateInfo_t
-{
-	const char*			name;
-	Image*				img;
-	uint32_t			layer;
-	downSampleMode_t	mode;
-	RenderContext*		context;
-	ResourceContext*	resources;
-};
-
-
-union mipProcessParms_t
-{
-	struct downsample
-	{
-		uint32_t a;
-		uint32_t b;
-		uint32_t c;
-		uint32_t d;
-	};
-};
-
 enum gpuImageStateFlags_t : uint8_t;
 
 class GpuTask

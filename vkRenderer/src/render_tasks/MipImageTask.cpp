@@ -30,49 +30,74 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 	m_mipLevels = m_image->info.mipLevels;
 	m_layer = info.layer;
-	m_multiPass = ( info.mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN );
 
-	// Image Process for writing each MIP
+	if ( info.mode == downSampleMode_t::DOWNSAMPLE_LINEAR )
 	{
-		imageProcessCreateInfo_t imgProcessInfo = {};
-		imgProcessInfo.name = info.name;
-		imgProcessInfo.context = m_context;
-		imgProcessInfo.resources = m_resources;
-		imgProcessInfo.passCount = m_multiPass ? 2 : 1;
-		imgProcessInfo.inputImages = 1;
-		imgProcessInfo.image = m_image;
+		m_progName = "DownSample";
+		m_computeBaseMip = false;
+		m_multiPass = false;
+		m_useApi = false;
+		m_sampleImage = m_image;
+	}
+	else if ( info.mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN )
+	{
+		m_progName = "SeparableGaussianBlur";
+		m_computeBaseMip = true;
+		m_multiPass = true;
+		m_useApi = false;
+		m_sampleImage = info.blurInfo.sampleImage;
+	}
+	else if( info.mode == downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL )
+	{
+		m_progName = "preCalculatedSpecularIbl";
+		m_computeBaseMip = true;
+		m_multiPass = false;
+		m_useApi = false;
+		m_sampleImage = m_image;
+	}
+	else if ( info.mode == downSampleMode_t::DOWNSAMPLE_LINEAR_API )
+	{
+		m_progName = "MIP API";
+		m_computeBaseMip = false;
+		m_multiPass = false;
+		m_useApi = true;
+		m_sampleImage = nullptr;
+	}
 
-		char* progName = nullptr;
-		switch ( info.mode )
+	if( m_useApi == false )
+	{
+		// Base View
 		{
-			case downSampleMode_t::DOWNSAMPLE_LINEAR:			progName = "DownSample";				break;
-			case downSampleMode_t::DOWNSAMPLE_GAUSSIAN:			progName = "SeparableGaussianBlur";		break;
-			case downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL:		progName = "preCalculatedSpecularIbl";	break;
+			imageSubResourceView_t view{};
+			view.baseArray = m_layer;
+			view.arrayCount = 1;
+			view.baseMip = 0;
+			view.mipLevels = 1;
+
+			imageInfo_t imageInfo = m_sampleImage->info;
+			imageInfo.type = IMAGE_TYPE_2D;
+
+			m_baseView.Init( m_sampleImage, imageInfo, view, resourceLifeTime_t::RESIZE );
 		}
-		imgProcessInfo.progHdl = AssetLibGpuProgram::Handle( progName );
 
-		imageSubResourceView_t view{};
-		view.baseArray = m_layer;
-		view.arrayCount = 1;
-		view.baseMip = 0;
-		view.mipLevels = 1;
-
-		imageInfo_t imageInfo = m_image->info;
-		imageInfo.type = IMAGE_TYPE_2D;
-
-		m_baseView.Init( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
-
-		Image* sourceImage = &m_baseView;
-
-		// All but the first image need a framebuffer since they are being written to
-		for ( uint32_t i = 1; i < m_mipLevels; ++i )
+		// Image Process for writing each MIP
 		{
-			imgProcessInfo.mipLevel = i;
+			imageProcessCreateInfo_t imgProcessInfo = {};
+			imgProcessInfo.name = info.name;
+			imgProcessInfo.context = m_context;
+			imgProcessInfo.resources = m_resources;
+			imgProcessInfo.passCount = m_multiPass ? 2 : 1;
+			imgProcessInfo.inputImages = 1;
+			imgProcessInfo.image = m_image;
+			imgProcessInfo.progHdl = AssetLibGpuProgram::Handle( m_progName );
 
-			m_imgProcesses[ i ] = new ImageProcess( imgProcessInfo );
-			m_imgProcesses[ i ]->SetSourceImage( 0, sourceImage );
+			// All but the first image need a framebuffer since they are being written to
+			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
+			{
+				imgProcessInfo.mipLevel = mipLevel;
 
-			sourceImage = m_imgProcesses[ i ]->GetOutputImage();
+				m_imgProcesses[ mipLevel ] = new ImageProcess( imgProcessInfo );
+			}
 		}
 	}
 	m_firstFrame = true;
@@ -81,16 +106,31 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 void MipImageTask::FrameBegin()
 {
-	for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
-		m_imgProcesses[ i ]->FrameBegin();
+	if ( m_useApi ) {
+		return;
+	}
+
+	Image* sourceImage = &m_baseView;
+
+	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
+	{
+		m_imgProcesses[ mipLevel ]->SetSourceImage( 0, sourceImage );
+		sourceImage = m_imgProcesses[ mipLevel ]->GetOutputImage();
+	}
+
+	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+		m_imgProcesses[ mipLevel ]->FrameBegin();
 	}
 }
 
 
 void MipImageTask::FrameEnd()
 {
-	for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
-		m_imgProcesses[ i ]->FrameEnd();
+	if ( m_useApi ) {
+		return;
+	}
+	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+		m_imgProcesses[ mipLevel ]->FrameEnd();
 	}
 }
 
@@ -101,21 +141,21 @@ void MipImageTask::Resize()
 
 	m_baseView.Resize();
 
-	for ( uint32_t i = 1; i < m_mipLevels; ++i )
-	{
-		for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
-			m_imgProcesses[ i ]->Resize();
-		}
+	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+		m_imgProcesses[ mipLevel ]->Resize();
 	}
 }
 
 
 void MipImageTask::Shutdown()
 {
-	for ( uint32_t i = 0; i < m_mipLevels; i++ ) {
-		delete m_imgProcesses[ i ];
+	if ( m_useApi == false )
+	{
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+			delete m_imgProcesses[ mipLevel ];
+		}
+		m_baseView.Destroy();
 	}
-	m_baseView.Destroy();
 }
 
 
@@ -166,15 +206,17 @@ void MipImageTask::Execute( CommandContext& context )
 {
 	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorWhite ) );
 
-	if ( m_mode == DOWNSAMPLE_LINEAR_API )
+	if ( m_useApi )
 	{
 		Transition( &context, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
 		GenerateMipmaps( &context, *m_image );
 	}
 	else
 	{
-		for ( uint32_t i = 1; i < m_mipLevels; ++i ) {
-			m_imgProcesses[ i ]->Execute( context );
+		uint32_t mipLevel = m_computeBaseMip ? 0 : 1;
+
+		for ( ; mipLevel < m_mipLevels; ++mipLevel ) {
+			m_imgProcesses[ mipLevel ]->Execute( context );
 		}
 	}
 

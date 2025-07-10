@@ -246,34 +246,18 @@ void Renderer::Init( const renderConfig_t& cfg )
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
-	std::vector<ImageProcess*> gaussianTaskQueue;
+	MipImageTask* gaussianTask = nullptr;
 	if ( config.gaussianBlur )
 	{
-		imageProcessCreateInfo_t info = {};
+		mipProcessCreateInfo_t info{};
 		info.name = "Separable Gaussian";
-		info.progHdl = AssetLibGpuProgram::Handle( "SeparableGaussianBlur" );
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.image = &resources.blurredImage;
-		info.passCount = 2;
-		info.inputImages = 1;
+		info.img = &resources.blurredImage;
+		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
+		info.blurInfo.sampleImage = &resources.mainColorResolvedImage;
 
-		const uint32_t mipCount = resources.blurredImage.info.mipLevels;
-
-		Image* sourceImage = &resources.mainColorResolvedImageViews[ 0 ];
-
-		// Foreach Mip-Level: Downscale Image -> Blur Horizontal -> Temp -> Blur Vertical -> Blurred Image
-		for ( uint32_t mipIndex = 0; mipIndex < mipCount; ++mipIndex )
-		{
-			info.mipLevel = mipIndex;
-
-			ImageProcess* process = new ImageProcess( info );	
-			process->SetSourceImage( 0, sourceImage );
-
-			sourceImage = process->GetOutputImage();
-
-			gaussianTaskQueue.push_back( process );
-		}
+		gaussianTask = new MipImageTask( info );
 	}
 
 	MipImageTask* mipTask = nullptr;
@@ -297,7 +281,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.cubeFbColorImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR_API;
 
 		mipCubeTask = new MipImageTask( info );
 	}
@@ -452,10 +436,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	if ( config.gaussianBlur )
 	{
-		for ( uint32_t i = 0; i < gaussianTaskQueue.size(); ++i )
-		{
-			schedule.Link( gaussianTaskQueue[i] );
-		}
+		schedule.Link( gaussianTask );
 	}
 	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
 	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
