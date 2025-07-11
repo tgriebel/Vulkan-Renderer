@@ -30,7 +30,7 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		view.baseMip = m_mipLevel;
 		view.mipLevels = 1;
 
-		imageInfo_t imageInfo = info.image->info;
+		imageInfo_t imageInfo = info.outputImage->info;
 		imageInfo.type = IMAGE_TYPE_2D;
 
 		assert( info.passCount <= 2 ); // TODO: Support?
@@ -41,11 +41,13 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		// Intermediate Frame Buffer
 		if ( m_passCount > 1 )
 		{
-			m_view[ passIndex ] = new ImageView( &info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_views[ passIndex ][ 0 ] = new ImageView( &info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+
+			assert( ( m_views[ passIndex ][ 1 ] == nullptr ) && ( m_views[ passIndex ][ 2 ] == nullptr ) ); // Not supported
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "TempImageProcessFb";
-			fbInfo.color0 = m_view[ passIndex ];
+			fbInfo.color0 = m_views[ passIndex ][ 0 ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME; 
 
 			m_fb[ passIndex ].Create( fbInfo );
@@ -56,12 +58,33 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 
 		// Main Frame Buffer
 		{
-			m_image = info.image;
-			m_view[ passIndex ] = new ImageView( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_image = info.outputImage;
+			m_views[ passIndex ][ 0 ] = new ImageView( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
+
+			m_views[ passIndex ][ 1 ] = nullptr;
+			m_views[ passIndex ][ 2 ] = nullptr;
+
+			if( info.outputImage1 )
+			{
+				imageInfo_t imageInfo = info.outputImage1->info;
+				imageInfo.type = IMAGE_TYPE_2D;
+
+				m_views[ passIndex ][ 1 ] = new ImageView( info.outputImage1, imageInfo, view, resourceLifeTime_t::RESIZE );
+			}
+
+			if ( info.outputImage2 )
+			{
+				imageInfo_t imageInfo = info.outputImage2->info;
+				imageInfo.type = IMAGE_TYPE_2D;
+
+				m_views[ passIndex ][ 2 ] = new ImageView( info.outputImage2, imageInfo, view, resourceLifeTime_t::RESIZE );
+			}
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = m_dbgName.c_str();
-			fbInfo.color0 = m_view[ passIndex ];
+			fbInfo.color0 = m_views[ passIndex ][ 0 ];
+			fbInfo.color1 = m_views[ passIndex ][ 1 ];
+			fbInfo.color2 = m_views[ passIndex ][ 2 ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			m_fb[ passIndex ].Create( fbInfo );
@@ -112,14 +135,14 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 		for ( uint32_t codeImageIx = 0; codeImageIx < m_image2dSlotCount; ++codeImageIx ) {
 			m_passes[ passIndex ]->codeImages[ codeImageIx ] = rc.defaultImage;
 		}
-		m_passes[ passIndex ]->codeImages[ m_image2dSlotCount ] = m_view[ passIndex - 1 ];
+		m_passes[ passIndex ]->codeImages[ m_image2dSlotCount ] = m_views[ passIndex - 1 ][ 0 ];
 	}
 }
 
 
-ImageView* ImageProcess::GetOutputImage()
+ImageView* ImageProcess::GetOutputImage( const uint32_t outputImageIndex )
 {
-	return m_view[ m_passCount - 1 ];
+	return m_views[ m_passCount - 1 ][ outputImageIndex ];
 }
 
 
@@ -167,7 +190,12 @@ void ImageProcess::Resize()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		m_view[ passIndex ]->Resize();
+		for ( uint32_t outputImageIx = 0; outputImageIx < MaxOutputImages; ++outputImageIx )
+		{
+			if( m_views[ passIndex ][ outputImageIx ] != nullptr ) {
+				m_views[ passIndex ][ outputImageIx ]->Resize();
+			}
+		}
 		m_fb[ passIndex ].Resize();
 		m_passes[ passIndex ]->Resize();
 	}
@@ -178,10 +206,13 @@ void ImageProcess::Shutdown()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		if ( m_view[ passIndex ] != nullptr )
+		for ( uint32_t outputImageIx = 0; outputImageIx < MaxOutputImages; ++outputImageIx )
 		{
-			delete m_view[ passIndex ];
-			m_view[ passIndex ] = nullptr;
+			if ( m_views[ passIndex ][ outputImageIx ] != nullptr )
+			{
+				delete m_views[ passIndex ][ outputImageIx ];
+				m_views[ passIndex ][ outputImageIx ] = nullptr;
+			}
 		}
 
 		m_buffer[ passIndex ].Destroy();

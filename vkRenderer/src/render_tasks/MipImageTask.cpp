@@ -88,7 +88,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 			imgProcessInfo.resources = m_resources;
 			imgProcessInfo.passCount = m_multiPass ? 2 : 1;
 			imgProcessInfo.inputImages = 1;
-			imgProcessInfo.image = m_image;
+			imgProcessInfo.outputImage = m_image;
 			imgProcessInfo.progHdl = AssetLibGpuProgram::Handle( m_progName );
 
 			// All but the first image need a framebuffer since they are being written to

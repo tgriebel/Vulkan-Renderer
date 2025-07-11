@@ -16,7 +16,9 @@ struct imageProcessCreateInfo_t
 {
 	const char*			name;
 	hdl_t				progHdl;
-	Image*				image;
+	Image*				outputImage;
+	Image*				outputImage1;
+	Image*				outputImage2;
 	RenderContext*		context;
 	ResourceContext*	resources;
 	uint32_t			inputImages;
@@ -47,6 +49,7 @@ private:
 	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
 	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
 	static const uint32_t	MaxPasses = 2;
+	static const uint32_t	MaxOutputImages = 3;
 
 	Asset<GpuProgram>*		m_progAsset;
 	std::string				m_dbgName;
@@ -59,7 +62,7 @@ private:
 	FrameBuffer				m_fb[ MaxPasses ];
 	DrawPass*				m_passes[ MaxPasses ];
 	GpuBuffer				m_buffer[ MaxPasses ];
-	ImageView*				m_view[ MaxPasses ];;
+	ImageView*				m_views[ MaxPasses ][ MaxOutputImages ];
 	Image*					m_image;
 	uint32_t				m_layer;
 	uint32_t				m_mipLevel;
@@ -90,7 +93,7 @@ public:
 	void				FrameEnd();
 	std::string			AsString() const;
 
-	ImageView*			GetOutputImage();
+	ImageView*			GetOutputImage( const uint32_t outputImageIndex = 0 );
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
 	void				SetSourceCubeImage( const uint32_t slot, Image* image );

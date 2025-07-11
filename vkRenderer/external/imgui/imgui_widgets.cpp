@@ -1093,7 +1093,7 @@ bool ImGui::ImageButton(ImTextureID user_texture_id, const ImVec2& size, const I
 
     // Default to using texture ID as ID. User can still push string/integer prefixes.
     PushID((void*)(intptr_t)user_texture_id);
-    const ImGuiID id = window->GetID("#image");
+    const ImGuiID id = window->GetID("#outputImage");
     PopID();
 
     if (frame_padding >= 0)

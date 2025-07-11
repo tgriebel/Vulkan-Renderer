@@ -315,7 +315,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 
 	if ( !( formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT ) )
 	{
-		throw std::runtime_error( "texture image format does not support linear blitting!" );
+		throw std::runtime_error( "texture outputImage format does not support linear blitting!" );
 	}
 
 	VkImageMemoryBarrier barrier{ };

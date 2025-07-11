@@ -24,7 +24,7 @@ void ImageCubeProcess::Init( const imageCubeProcessCreateInfo_t& info )
 	{
 		imageProcessCreateInfo_t subInfo{};
 		subInfo.name = info.name;
-		subInfo.image = info.image;
+		subInfo.outputImage = info.image;
 		subInfo.progHdl = info.progHdl;
 		subInfo.context = info.context;
 		subInfo.resources = info.resources;

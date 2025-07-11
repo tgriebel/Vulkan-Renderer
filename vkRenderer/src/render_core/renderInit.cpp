@@ -234,7 +234,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		} else {
 			info.progHdl = AssetLibGpuProgram::Handle( "ResolveMSAA" );
 		}
-		info.image = &resources.mainColorResolvedImageViews[ 0 ];
+		info.outputImage = &resources.mainColorResolvedImage;
+		info.outputImage1 = &resources.depthResolvedImageView;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.inputImages = 3;
@@ -334,7 +335,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.clear = false;
 			info.resolve = true;
 			info.progHdl = AssetLibGpuProgram::Handle( "preCalculatedBrdfLut" );
-			info.image = &resources.brdfImage;
+			info.outputImage = &resources.brdfImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 
