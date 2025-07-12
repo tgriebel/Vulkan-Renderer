@@ -41,8 +41,8 @@ private:
 		vec4f		dimensions;
 		uint32_t	pass;
 		uint32_t	previousImageId;
-		uint32_t	pad0;
-		uint32_t	pad1;
+		uint32_t	level;
+		uint32_t	layer;
 	};
 
 	static const uint32_t	MaxBufferSizeInBytes = 256;

@@ -33,6 +33,7 @@
 #include "../render_tasks/ImageWritebackTask.h"
 #include "../render_tasks/MipImageTask.h"
 #include "../render_tasks/imageCubeProcess.h"
+#include "../render_tasks/mipCubeProcess.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -155,7 +156,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	view2Ds[ 0 ]->Commit();
 
 	ImageCubeProcess* diffuseIBL = {};
-	MipImageTask* specularIBL[ 6 ] = {};
+	MipCubeProcess* specularIBL = {};
 	CopyImageTask* copyCubeToSpecularIbl = nullptr;
 	if ( config.useCubeViews )
 	{
@@ -174,52 +175,19 @@ void Renderer::Init( const renderConfig_t& cfg )
 			diffuseIBL->SetSourceCubeImage( 0, &resources.cubeFbColorImage );
 		}
 
-		for ( uint32_t i = 0; i < 6; ++i )
+		if ( config.computeSpecularIBL )
 		{
-			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-			camera.SetFov( Radians( 90.0f ) );
-			camera.SetAspectRatio( 1.0f );
+			copyCubeToSpecularIbl = new CopyImageTask( &resources.cubeFbColorImage, &resources.specularIblImage );
 
-			switch( i )
-			{
-				case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
-				case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
-				case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
-				case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
-				case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
-				case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
-			}
+			mipCubeProcessCreateInfo_t info = {};
+			info.name = "SpecularIbl";
+			info.img = &resources.specularIblImage;
+			info.sampleImage = &resources.cubeFbColorImage;
+			info.context = &renderContext;
+			info.resources = &resources;
+			info.mode = downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL;
 
-			if ( config.computeSpecularIBL )
-			{
-				copyCubeToSpecularIbl = new CopyImageTask( &resources.cubeFbColorImage, &resources.specularIblImage );
-
-				mipProcessCreateInfo_t info = {};
-				info.name = "SpecularIbl";
-				info.img = &resources.specularIblImage;
-				info.layer = vk_MapToGlslCubemapConvention( i );
-				info.context = &renderContext;
-				info.resources = &resources;
-				info.mode = downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL;
-
-				struct SpecularIblConstants
-				{
-					mat4x4f		viewMat;
-					float		roughness;
-				} specConstants;
-
-				specConstants.viewMat = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
-
-				specularIBL[ i ] = new MipImageTask( info );
-
-				const uint32_t mipLevels = specularIBL[ i ]->GetMipCount();
-				for( uint32_t mip = 1; mip < mipLevels; ++mip )
-				{
-					specConstants.roughness = mip / static_cast<float>( mipLevels - 1 );
-					specularIBL[ i ]->SetConstantsForLevel( mip, &specConstants, sizeof( specConstants ) );
-					specularIBL[ i ]->SetSourceImageForLevel( mip, &resources.cubeFbColorImage );
-				}
-			}
+			specularIBL = new MipCubeProcess( info );
 		}
 	}
 
@@ -256,7 +224,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 		info.img = &resources.blurredImage;
 		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
-		info.blurInfo.sampleImage = &resources.mainColorResolvedImage;
+		info.sampleImage = &resources.mainColorResolvedImage;
 
 		gaussianTask = new MipImageTask( info );
 	}
@@ -411,9 +379,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		if ( config.computeSpecularIBL )
 		{
 			schedule.Link( copyCubeToSpecularIbl );
-			for ( uint32_t i = 0; i < 6; ++i ) {
-				schedule.Link( specularIBL[ i ] );
-			}
+			schedule.Link( specularIBL );
 			schedule.Link( imageSpecularIblWriteBackTask );
 		}
 		//schedule.Link( mipCubeTask );

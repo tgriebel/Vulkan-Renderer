@@ -6,25 +6,16 @@
 
 enum downSampleMode_t : uint32_t;
 
-struct mipProcessBlurInfo_t
-{
-	Image* sampleImage;
-};
-
 
 struct mipProcessCreateInfo_t
 {
 	const char*			name;
 	Image*				img;
+	Image*				sampleImage;
 	uint32_t			layer;
 	downSampleMode_t	mode;
 	RenderContext*		context;
 	ResourceContext*	resources;
-
-	union
-	{
-		mipProcessBlurInfo_t	blurInfo;
-	};
 };
 
 
@@ -42,19 +33,7 @@ union mipProcessParms_t
 class MipImageTask : public GpuTask
 {
 private:
-	struct constants_t
-	{
-		vec4f		dimensions;
-		uint32_t	pad0;
-		uint32_t	pad1;
-		uint32_t	pad2;
-		uint32_t	pad3;
-	};
-
-	static const uint32_t	MaxBufferSizeInBytes		= 256;
-	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
-	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
-	static const uint32_t	MaxMipMaps					= 16;
+	static const uint32_t MaxMipMaps = 16;
 
 	Image*						m_image;
 	Image*						m_sampleImage;
@@ -70,11 +49,9 @@ private:
 	uint32_t					m_layer;
 	bool						m_firstFrame;
 	bool						m_multiPass;
+	bool						m_progressiveSampling;
 	bool						m_computeBaseMip;
 	bool						m_useApi;
-
-	void Init( const mipProcessCreateInfo_t& info );
-	void Shutdown();
 
 public:
 
@@ -83,14 +60,16 @@ public:
 		Init( info );
 	}
 
+	void		Init( const mipProcessCreateInfo_t& info );
+	void		Shutdown();
+
 	void		FrameBegin();
 	void		FrameEnd();
 	void		Resize();
 	std::string	AsString() const;
 
 	uint32_t	GetMipCount() const;
-	bool		SetSourceImageForLevel( const uint32_t mipLevel, Image* img );
-	bool		SetConstantsForLevel( const uint32_t mipLevel, const void* dataBlock, const uint32_t sizeInBytes );
+	bool		SetConstants( const void* dataBlock, const uint32_t sizeInBytes );
 
 	void		Execute( CommandContext& context ) override;
 

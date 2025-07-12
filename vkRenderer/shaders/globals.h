@@ -93,8 +93,8 @@ struct surface_t
 												vec4	dimensions;													\
 												uint	pass;														\
 												uint	previousImageId;											\
-												uint	pad0;														\
-												uint	pad1;														\
+												uint	level;														\
+												uint	layer;														\
 												TYPE	NAME;														\
 											};
 

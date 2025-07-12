@@ -38,6 +38,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_multiPass = false;
 		m_useApi = false;
 		m_sampleImage = m_image;
+		m_progressiveSampling = true;
 	}
 	else if ( info.mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN )
 	{
@@ -45,7 +46,8 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_computeBaseMip = true;
 		m_multiPass = true;
 		m_useApi = false;
-		m_sampleImage = info.blurInfo.sampleImage;
+		m_sampleImage = info.sampleImage;
+		m_progressiveSampling = true;
 	}
 	else if( info.mode == downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL )
 	{
@@ -53,7 +55,8 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_computeBaseMip = true;
 		m_multiPass = false;
 		m_useApi = false;
-		m_sampleImage = m_image;
+		m_sampleImage = info.sampleImage;
+		m_progressiveSampling = false;
 	}
 	else if ( info.mode == downSampleMode_t::DOWNSAMPLE_LINEAR_API )
 	{
@@ -62,11 +65,13 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 		m_multiPass = false;
 		m_useApi = true;
 		m_sampleImage = nullptr;
+		m_progressiveSampling = true;
 	}
 
 	if( m_useApi == false )
 	{
-		// Base View
+		// Base View: Can be another image or the first MIP of the target image
+		if ( m_progressiveSampling )
 		{
 			imageSubResourceView_t view{};
 			view.baseArray = m_layer;
@@ -87,7 +92,9 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 			imgProcessInfo.context = m_context;
 			imgProcessInfo.resources = m_resources;
 			imgProcessInfo.passCount = m_multiPass ? 2 : 1;
-			imgProcessInfo.inputImages = 1;
+			imgProcessInfo.inputCubeImages = !m_progressiveSampling ? 1 : 0; // FIXME: quick hack b/c this happens to be true
+			imgProcessInfo.inputImages = ( info.img->info.type == IMAGE_TYPE_2D ) && imgProcessInfo.inputCubeImages == 0;
+			imgProcessInfo.layer = m_layer;
 			imgProcessInfo.outputImage = m_image;
 			imgProcessInfo.progHdl = AssetLibGpuProgram::Handle( m_progName );
 
@@ -110,12 +117,25 @@ void MipImageTask::FrameBegin()
 		return;
 	}
 
-	Image* sourceImage = &m_baseView;
+	// Can lock to base view
+	Image* sourceImage = m_progressiveSampling  ? &m_baseView : m_sampleImage;
 
+	// Chain mip level N as sample image for mip level N + 1
 	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
 	{
-		m_imgProcesses[ mipLevel ]->SetSourceImage( 0, sourceImage );
-		sourceImage = m_imgProcesses[ mipLevel ]->GetOutputImage();
+		if( sourceImage->info.type == IMAGE_TYPE_CUBE )
+		{
+			assert( !m_progressiveSampling );
+			m_imgProcesses[ mipLevel ]->SetSourceCubeImage( 0, sourceImage );
+		}
+		else
+		{
+			m_imgProcesses[ mipLevel ]->SetSourceImage( 0, sourceImage );
+		}
+
+		if( m_progressiveSampling ) {
+			sourceImage = m_imgProcesses[ mipLevel ]->GetOutputImage();
+		}
 	}
 
 	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
@@ -165,39 +185,11 @@ uint32_t MipImageTask::GetMipCount() const
 }
 
 
-bool MipImageTask::SetSourceImageForLevel( const uint32_t mipLevel, Image* img )
+bool MipImageTask::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
 {
-	// TODO: Delete this function
-
-	if ( mipLevel > 0 && mipLevel >= GetMipCount() )
-	{
-		assert( 0 );
-		return false;
+	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+		m_imgProcesses[ mipLevel ]->SetConstants( dataBlock, sizeInBytes );
 	}
-
-	if ( m_image->info.type == IMAGE_TYPE_2D )
-	{
-		m_imgProcesses[ mipLevel ]->SetSourceImage( 0, img );
-	}
-	else if ( m_image->info.type == IMAGE_TYPE_CUBE )
-	{
-		m_imgProcesses[ mipLevel ]->SetSourceCubeImage( 0, img );
-	}
-	return true;
-}
-
-
-bool MipImageTask::SetConstantsForLevel( const uint32_t mipLevel, const void* dataBlock, const uint32_t sizeInBytes )
-{
-	if ( mipLevel > 0 && mipLevel >= GetMipCount() )
-	{
-		assert( 0 );
-		return false;
-	}
-	assert( sizeInBytes <= MaxConstantBlockSizeInBytes );
-
-	m_imgProcesses[ mipLevel ]->SetConstants( dataBlock, sizeInBytes );
-
 	return true;
 }
 
