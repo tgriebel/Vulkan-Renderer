@@ -13,8 +13,10 @@ struct mipProcessCreateInfo_t
 	RenderContext*		context;
 	ResourceContext*	resources;
 
+	uint32_t			baseMip;
+	uint32_t			lastMip;
+
 	bool				useAPI;
-	bool				computeBaseMip;
 	bool				multiPass;
 	bool				progressiveSampling;
 };
@@ -49,12 +51,14 @@ private:
 	ImageView					m_baseViews[ MaxLayers ];
 	uint32_t					m_mipLevels;
 	uint32_t					m_layers;
+	uint32_t					m_baseMip;
 	bool						m_firstFrame;
 	bool						m_multiPass;
 	bool						m_cubeMip;
 	bool						m_progressiveSampling;
-	bool						m_computeBaseMip;
 	bool						m_useApi;
+
+	ImageProcess* CreateImageProcess( const uint32_t layerId, const uint32_t mipLevel );
 
 public:
 

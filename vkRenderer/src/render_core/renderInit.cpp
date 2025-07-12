@@ -183,7 +183,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.resources = &resources;
 			info.progName = "preCalculatedSpecularIbl";
 			info.progressiveSampling = false;
-			info.computeBaseMip = true;
+			info.baseMip = 0;
 
 			specularIBL = new MipImageTask( info );
 		}
@@ -223,6 +223,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.img = &resources.blurredImage;
 		info.progName = "SeparableGaussianBlur";
 		info.sampleImage = &resources.mainColorResolvedImage;
+		info.baseMip = 0;
 
 		gaussianTask = new MipImageTask( info );
 	}
@@ -237,6 +238,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.img = &resources.mainColorResolvedImage;
 		info.progressiveSampling = true;
 		info.progName = "DownSample";
+		info.baseMip = 1;
 
 		mipTask = new MipImageTask( info );
 	}
@@ -249,6 +251,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.cubeFbColorImage;
+		info.baseMip = 1;
 
 		mipCubeTask = new MipImageTask( info );
 	}

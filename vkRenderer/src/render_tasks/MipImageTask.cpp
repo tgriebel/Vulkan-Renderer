@@ -32,7 +32,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 	m_layers = m_cubeMip ? 6 : 1;
 
 	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
-	m_computeBaseMip = info.computeBaseMip;
+	m_baseMip = info.baseMip;
 	m_multiPass = info.multiPass;
 	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
 	m_sampleImage = ( info.sampleImage != nullptr ) ? info.sampleImage : m_image;
@@ -60,11 +60,17 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 				mat4x4f& viewMatrix = m_viewMatrices[ layerId ];
 
+				//for ( uint32_t j = 0; j < 4; ++j ) {
+				//	for ( uint32_t i = 0; i < 4; ++i ) {
+				//		viewMatrix[ j ][ i ] = i + j * 4;
+				//	}
+				//}
+
 				viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
 				viewMatrix[ 3 ][ 3 ] = 0.0f;
 			}
 
-			const uint32_t remappedLayerId = vk_MapToGlslCubemapConvention( layerId );
+			const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
 
 			// Base View: Can be another image or the first MIP of the target image
 			if ( m_progressiveSampling )
@@ -82,33 +88,40 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 			}
 
 			// Image Process for writing each MIP
+			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
 			{
-				imageProcessCreateInfo_t imgProcessInfo = {};
-				imgProcessInfo.name = info.name;
-				imgProcessInfo.context = m_context;
-				imgProcessInfo.resources = m_resources;
-				imgProcessInfo.passCount = m_multiPass ? 2 : 1;
-				imgProcessInfo.inputCubeImages = ( m_sampleImage->info.type == IMAGE_TYPE_CUBE ) ? 1 : 0;
-				imgProcessInfo.inputImages = ( m_sampleImage->info.type == IMAGE_TYPE_2D ) ? 1 : 0;
-				imgProcessInfo.layer = remappedLayerId;
-				imgProcessInfo.outputImage = m_image;
-				imgProcessInfo.progHdl = m_progHdl;
-
-				// All but the first image need a framebuffer since they are being written to
-				for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
-				{
-					imgProcessInfo.mipLevel = mipLevel;
-
-					m_imgProcesses[ layerId ][ mipLevel ] = new ImageProcess( imgProcessInfo );
-
-					if( m_cubeMip ) {
-						m_imgProcesses[ layerId ][ mipLevel ]->SetConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
-					}
-				}
+				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageProcess( layerId, mipLevel );
 			}
 		}
 	}
 	m_firstFrame = true;
+}
+
+
+ImageProcess* MipImageTask::CreateImageProcess( const uint32_t layerId, const uint32_t mipLevel )
+{
+	const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
+
+	imageProcessCreateInfo_t imgProcessInfo = {};
+	imgProcessInfo.name = m_dbgName.c_str();
+	imgProcessInfo.context = m_context;
+	imgProcessInfo.resources = m_resources;
+	imgProcessInfo.passCount = m_multiPass ? 2 : 1;
+	imgProcessInfo.inputCubeImages = ( m_sampleImage->info.type == IMAGE_TYPE_CUBE ) ? 1 : 0;
+	imgProcessInfo.inputImages = ( m_sampleImage->info.type == IMAGE_TYPE_2D ) ? 1 : 0;
+	imgProcessInfo.layer = remappedLayerId;
+	imgProcessInfo.outputImage = m_image;
+	imgProcessInfo.progHdl = m_progHdl;
+
+	// All but the first image need a framebuffer since they are being written to
+	imgProcessInfo.mipLevel = mipLevel;
+
+	ImageProcess* imageProcess = new ImageProcess( imgProcessInfo );
+
+	if ( m_cubeMip ) {
+		imageProcess->SetConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
+	}
+	return imageProcess;
 }
 
 
@@ -164,14 +177,52 @@ void MipImageTask::FrameEnd()
 
 void MipImageTask::Resize()
 {
-	m_mipLevels = m_image->info.mipLevels;
-
-	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+	if ( m_useApi )
 	{
-		m_baseViews[ layerId ].Resize();
+		m_mipLevels = m_image->info.mipLevels;
+		return;
+	}
 
-		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-			m_imgProcesses[ layerId ][ mipLevel ]->Resize();
+	if( m_mipLevels > m_image->info.mipLevels )
+	{
+		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+		{
+			for ( uint32_t mipLevel = m_image->info.mipLevels; mipLevel < m_mipLevels; ++mipLevel )
+			{
+				delete m_imgProcesses[ layerId ][ mipLevel ];
+				m_imgProcesses[ layerId ][ mipLevel ] = nullptr;
+			}
+		}
+		m_mipLevels = m_image->info.mipLevels;
+	}
+	else if ( m_mipLevels < m_image->info.mipLevels )
+	{
+		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+		{
+			for ( uint32_t mipLevel = m_mipLevels; mipLevel < m_image->info.mipLevels; ++mipLevel )
+			{
+				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageProcess( layerId, mipLevel );
+			}
+		}
+		m_mipLevels = m_image->info.mipLevels;
+	}
+	else
+	{
+		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+		{
+			if ( m_progressiveSampling ) {
+				m_baseViews[ layerId ].Resize();
+			}
+
+			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+				m_imgProcesses[ layerId ][ mipLevel ]->Resize();
+			}
+		}
+	}
+
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId ) {
+		if( m_progressiveSampling ) {
+			m_baseViews[ layerId ].Resize();
 		}
 	}
 }
@@ -179,15 +230,16 @@ void MipImageTask::Resize()
 
 void MipImageTask::Shutdown()
 {
-	if ( m_useApi == false )
+	if ( m_useApi ) {
+		return;
+	}
+
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
-		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
-		{
-			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-				delete m_imgProcesses[ layerId ][ mipLevel ];
-			}
-			m_baseViews[ layerId ].Destroy();
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+			delete m_imgProcesses[ layerId ][ mipLevel ];
 		}
+		m_baseViews[ layerId ].Destroy();
 	}
 }
 
@@ -224,7 +276,7 @@ void MipImageTask::Execute( CommandContext& context )
 			const uint32_t writeLayer = m_imgProcesses[ layerId ][ 0 ]->GetOutputImage()->subResourceView.baseArray;
 
 			context.MarkerBeginRegion( faceNames[ writeLayer ], ColorToVector( ColorPurple ) );
-			uint32_t mipLevel = m_computeBaseMip ? 0 : 1;
+			uint32_t mipLevel = m_baseMip;
 
 			for ( ; mipLevel < m_mipLevels; ++mipLevel ) {
 				m_imgProcesses[ layerId ][ mipLevel ]->Execute( context );
