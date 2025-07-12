@@ -206,23 +206,19 @@ void MipImageTask::Resize()
 		}
 		m_mipLevels = m_image->info.mipLevels;
 	}
-	else
+
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
-		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
-		{
-			if ( m_progressiveSampling ) {
-				m_baseViews[ layerId ].Resize();
-			}
-
-			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-				m_imgProcesses[ layerId ][ mipLevel ]->Resize();
-			}
-		}
-	}
-
-	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId ) {
-		if( m_progressiveSampling ) {
+		if ( m_progressiveSampling ) {
 			m_baseViews[ layerId ].Resize();
+		}
+
+		if ( m_progressiveSampling ) {
+			m_baseViews[ layerId ].Resize();
+		}
+
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+			m_imgProcesses[ layerId ][ mipLevel ]->Resize();
 		}
 	}
 }
@@ -261,15 +257,7 @@ void MipImageTask::Execute( CommandContext& context )
 	}
 	else
 	{
-		static const char* faceNames[ 6 ] =
-		{
-			"X+",
-			"X-",
-			"Y+",
-			"Y-",
-			"Z+",
-			"Z-",
-		};
+		static const char* faceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
 
 		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 		{
