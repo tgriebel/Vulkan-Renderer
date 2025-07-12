@@ -4,18 +4,19 @@
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/imageView.h"
 
-enum downSampleMode_t : uint32_t;
-
-
 struct mipProcessCreateInfo_t
 {
 	const char*			name;
 	Image*				img;
 	Image*				sampleImage;
-	uint32_t			layer;
-	downSampleMode_t	mode;
+	const char*			progName;
 	RenderContext*		context;
 	ResourceContext*	resources;
+
+	bool				useAPI;
+	bool				computeBaseMip;
+	bool				multiPass;
+	bool				progressiveSampling;
 };
 
 
@@ -34,21 +35,23 @@ class MipImageTask : public GpuTask
 {
 private:
 	static const uint32_t MaxMipMaps = 16;
+	static const uint32_t MaxLayers = 6;
 
+	hdl_t						m_progHdl;
 	Image*						m_image;
 	Image*						m_sampleImage;
-	const char*					m_progName;
-	downSampleMode_t			m_mode;
 	std::string					m_dbgName;
 	RenderContext*				m_context;
 	ResourceContext*			m_resources;
 
-	ImageProcess*				m_imgProcesses[ MaxMipMaps ];
-	ImageView					m_baseView;
+	mat4x4f						m_viewMatrices[ MaxLayers ];
+	ImageProcess*				m_imgProcesses[ MaxLayers ][ MaxMipMaps ];
+	ImageView					m_baseViews[ MaxLayers ];
 	uint32_t					m_mipLevels;
-	uint32_t					m_layer;
+	uint32_t					m_layers;
 	bool						m_firstFrame;
 	bool						m_multiPass;
+	bool						m_cubeMip;
 	bool						m_progressiveSampling;
 	bool						m_computeBaseMip;
 	bool						m_useApi;
@@ -69,7 +72,6 @@ public:
 	std::string	AsString() const;
 
 	uint32_t	GetMipCount() const;
-	bool		SetConstants( const void* dataBlock, const uint32_t sizeInBytes );
 
 	void		Execute( CommandContext& context ) override;
 

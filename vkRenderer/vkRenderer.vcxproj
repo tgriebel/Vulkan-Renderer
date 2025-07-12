@@ -214,7 +214,6 @@
     <ClInclude Include="src\render_tasks\imageCubeProcess.h" />
     <ClInclude Include="src\render_tasks\imageProcess.h" />
     <ClInclude Include="src\render_tasks\ImageWritebackTask.h" />
-    <ClInclude Include="src\render_tasks\mipCubeProcess.h" />
     <ClInclude Include="src\render_tasks\MipImageTask.h" />
     <ClInclude Include="src\render_tasks\RenderTask.h" />
     <ClInclude Include="window.h" />
@@ -267,7 +266,6 @@
     <ClCompile Include="src\render_tasks\imageCubeProcess.cpp" />
     <ClCompile Include="src\render_tasks\imageProcess.cpp" />
     <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp" />
-    <ClCompile Include="src\render_tasks\mipCubeProcess.cpp" />
     <ClCompile Include="src\render_tasks\MipImageTask.cpp" />
     <ClCompile Include="src\render_tasks\RenderTask.cpp" />
     <ClCompile Include="window.cpp" />

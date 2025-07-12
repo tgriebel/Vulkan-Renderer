@@ -33,7 +33,6 @@
 #include "../render_tasks/ImageWritebackTask.h"
 #include "../render_tasks/MipImageTask.h"
 #include "../render_tasks/imageCubeProcess.h"
-#include "../render_tasks/mipCubeProcess.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -156,8 +155,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	view2Ds[ 0 ]->Commit();
 
 	ImageCubeProcess* diffuseIBL = {};
-	MipCubeProcess* specularIBL = {};
-	CopyImageTask* copyCubeToSpecularIbl = nullptr;
+	MipImageTask* specularIBL = {};
 	if ( config.useCubeViews )
 	{
 		if ( config.computeDiffuseIbl )
@@ -177,17 +175,17 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		if ( config.computeSpecularIBL )
 		{
-			copyCubeToSpecularIbl = new CopyImageTask( &resources.cubeFbColorImage, &resources.specularIblImage );
-
-			mipCubeProcessCreateInfo_t info = {};
+			mipProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
 			info.img = &resources.specularIblImage;
 			info.sampleImage = &resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
-			info.mode = downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL;
+			info.progName = "preCalculatedSpecularIbl";
+			info.progressiveSampling = false;
+			info.computeBaseMip = true;
 
-			specularIBL = new MipCubeProcess( info );
+			specularIBL = new MipImageTask( info );
 		}
 	}
 
@@ -223,7 +221,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.blurredImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_GAUSSIAN;
+		info.progName = "SeparableGaussianBlur";
 		info.sampleImage = &resources.mainColorResolvedImage;
 
 		gaussianTask = new MipImageTask( info );
@@ -237,7 +235,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.mainColorResolvedImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR;
+		info.progressiveSampling = true;
+		info.progName = "DownSample";
 
 		mipTask = new MipImageTask( info );
 	}
@@ -250,7 +249,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.cubeFbColorImage;
-		info.mode = downSampleMode_t::DOWNSAMPLE_LINEAR_API;
 
 		mipCubeTask = new MipImageTask( info );
 	}
@@ -378,11 +376,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 		}
 		if ( config.computeSpecularIBL )
 		{
-			schedule.Link( copyCubeToSpecularIbl );
 			schedule.Link( specularIBL );
 			schedule.Link( imageSpecularIblWriteBackTask );
 		}
-		//schedule.Link( mipCubeTask );
+		schedule.Link( mipCubeTask );
 		schedule.Link( imageCubemapWriteBackTask );
 	}
 	if ( brdfLutTask )

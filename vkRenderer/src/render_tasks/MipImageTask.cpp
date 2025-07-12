@@ -22,88 +22,89 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 	m_dbgName = info.name;
 	m_image = info.img;
-	m_mode = info.mode;
 	m_context = info.context;
 	m_resources = info.resources;
 
 	m_context->scratchMemory.AdjustOffset( 0, 0 );
 
+	m_cubeMip = ( info.img->info.type == IMAGE_TYPE_CUBE );
 	m_mipLevels = m_image->info.mipLevels;
-	m_layer = info.layer;
+	m_layers = m_cubeMip ? 6 : 1;
 
-	if ( info.mode == downSampleMode_t::DOWNSAMPLE_LINEAR )
-	{
-		m_progName = "DownSample";
-		m_computeBaseMip = false;
-		m_multiPass = false;
-		m_useApi = false;
-		m_sampleImage = m_image;
-		m_progressiveSampling = true;
-	}
-	else if ( info.mode == downSampleMode_t::DOWNSAMPLE_GAUSSIAN )
-	{
-		m_progName = "SeparableGaussianBlur";
-		m_computeBaseMip = true;
-		m_multiPass = true;
-		m_useApi = false;
-		m_sampleImage = info.sampleImage;
-		m_progressiveSampling = true;
-	}
-	else if( info.mode == downSampleMode_t::DOWNSAMPLE_SPECULAR_IBL )
-	{
-		m_progName = "preCalculatedSpecularIbl";
-		m_computeBaseMip = true;
-		m_multiPass = false;
-		m_useApi = false;
-		m_sampleImage = info.sampleImage;
-		m_progressiveSampling = false;
-	}
-	else if ( info.mode == downSampleMode_t::DOWNSAMPLE_LINEAR_API )
-	{
-		m_progName = "MIP API";
-		m_computeBaseMip = false;
-		m_multiPass = false;
-		m_useApi = true;
-		m_sampleImage = nullptr;
-		m_progressiveSampling = true;
-	}
+	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
+	m_computeBaseMip = info.computeBaseMip;
+	m_multiPass = info.multiPass;
+	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
+	m_sampleImage = ( info.sampleImage != nullptr ) ? info.sampleImage : m_image;
+	m_progressiveSampling = info.progressiveSampling;
 
 	if( m_useApi == false )
 	{
-		// Base View: Can be another image or the first MIP of the target image
-		if ( m_progressiveSampling )
+		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 		{
-			imageSubResourceView_t view{};
-			view.baseArray = m_layer;
-			view.arrayCount = 1;
-			view.baseMip = 0;
-			view.mipLevels = 1;
-
-			imageInfo_t imageInfo = m_sampleImage->info;
-			imageInfo.type = IMAGE_TYPE_2D;
-
-			m_baseView.Init( m_sampleImage, imageInfo, view, resourceLifeTime_t::RESIZE );
-		}
-
-		// Image Process for writing each MIP
-		{
-			imageProcessCreateInfo_t imgProcessInfo = {};
-			imgProcessInfo.name = info.name;
-			imgProcessInfo.context = m_context;
-			imgProcessInfo.resources = m_resources;
-			imgProcessInfo.passCount = m_multiPass ? 2 : 1;
-			imgProcessInfo.inputCubeImages = !m_progressiveSampling ? 1 : 0; // FIXME: quick hack b/c this happens to be true
-			imgProcessInfo.inputImages = ( info.img->info.type == IMAGE_TYPE_2D ) && imgProcessInfo.inputCubeImages == 0;
-			imgProcessInfo.layer = m_layer;
-			imgProcessInfo.outputImage = m_image;
-			imgProcessInfo.progHdl = AssetLibGpuProgram::Handle( m_progName );
-
-			// All but the first image need a framebuffer since they are being written to
-			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
+			if( m_cubeMip )
 			{
-				imgProcessInfo.mipLevel = mipLevel;
+				Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+				camera.SetFov( Radians( 90.0f ) );
+				camera.SetAspectRatio( 1.0f );
 
-				m_imgProcesses[ mipLevel ] = new ImageProcess( imgProcessInfo );
+				switch ( layerId )
+				{
+				case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
+				case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
+				case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
+				case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
+				case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
+				case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
+				}
+
+				mat4x4f& viewMatrix = m_viewMatrices[ layerId ];
+
+				viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
+				viewMatrix[ 3 ][ 3 ] = 0.0f;
+			}
+
+			const uint32_t remappedLayerId = vk_MapToGlslCubemapConvention( layerId );
+
+			// Base View: Can be another image or the first MIP of the target image
+			if ( m_progressiveSampling )
+			{
+				imageSubResourceView_t view{};
+				view.baseArray = remappedLayerId;
+				view.arrayCount = 1;
+				view.baseMip = 0;
+				view.mipLevels = 1;
+
+				imageInfo_t imageInfo = m_sampleImage->info;
+				imageInfo.type = IMAGE_TYPE_2D;
+
+				m_baseViews[ layerId ].Init( m_sampleImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+			}
+
+			// Image Process for writing each MIP
+			{
+				imageProcessCreateInfo_t imgProcessInfo = {};
+				imgProcessInfo.name = info.name;
+				imgProcessInfo.context = m_context;
+				imgProcessInfo.resources = m_resources;
+				imgProcessInfo.passCount = m_multiPass ? 2 : 1;
+				imgProcessInfo.inputCubeImages = ( m_sampleImage->info.type == IMAGE_TYPE_CUBE ) ? 1 : 0;
+				imgProcessInfo.inputImages = ( m_sampleImage->info.type == IMAGE_TYPE_2D ) ? 1 : 0;
+				imgProcessInfo.layer = remappedLayerId;
+				imgProcessInfo.outputImage = m_image;
+				imgProcessInfo.progHdl = m_progHdl;
+
+				// All but the first image need a framebuffer since they are being written to
+				for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
+				{
+					imgProcessInfo.mipLevel = mipLevel;
+
+					m_imgProcesses[ layerId ][ mipLevel ] = new ImageProcess( imgProcessInfo );
+
+					if( m_cubeMip ) {
+						m_imgProcesses[ layerId ][ mipLevel ]->SetConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
+					}
+				}
 			}
 		}
 	}
@@ -118,28 +119,31 @@ void MipImageTask::FrameBegin()
 	}
 
 	// Can lock to base view
-	Image* sourceImage = m_progressiveSampling  ? &m_baseView : m_sampleImage;
-
-	// Chain mip level N as sample image for mip level N + 1
-	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
-		if( sourceImage->info.type == IMAGE_TYPE_CUBE )
+		Image* sourceImage = m_progressiveSampling  ? &m_baseViews[ layerId ]: m_sampleImage;
+
+		// Chain mip level N as sample image for mip level N + 1
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
 		{
-			assert( !m_progressiveSampling );
-			m_imgProcesses[ mipLevel ]->SetSourceCubeImage( 0, sourceImage );
-		}
-		else
-		{
-			m_imgProcesses[ mipLevel ]->SetSourceImage( 0, sourceImage );
+			if( sourceImage->info.type == IMAGE_TYPE_CUBE )
+			{
+				assert( !m_progressiveSampling );
+				m_imgProcesses[ layerId ][ mipLevel ]->SetSourceCubeImage( 0, sourceImage );
+			}
+			else
+			{
+				m_imgProcesses[ layerId ][ mipLevel ]->SetSourceImage( 0, sourceImage );
+			}
+
+			if( m_progressiveSampling ) {
+				sourceImage = m_imgProcesses[ layerId ][ mipLevel ]->GetOutputImage();
+			}
 		}
 
-		if( m_progressiveSampling ) {
-			sourceImage = m_imgProcesses[ mipLevel ]->GetOutputImage();
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+			m_imgProcesses[ layerId ][ mipLevel ]->FrameBegin();
 		}
-	}
-
-	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-		m_imgProcesses[ mipLevel ]->FrameBegin();
 	}
 }
 
@@ -149,8 +153,11 @@ void MipImageTask::FrameEnd()
 	if ( m_useApi ) {
 		return;
 	}
-	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-		m_imgProcesses[ mipLevel ]->FrameEnd();
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+	{
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+			m_imgProcesses[ layerId ][ mipLevel ]->FrameEnd();
+		}
 	}
 }
 
@@ -159,10 +166,13 @@ void MipImageTask::Resize()
 {
 	m_mipLevels = m_image->info.mipLevels;
 
-	m_baseView.Resize();
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+	{
+		m_baseViews[ layerId ].Resize();
 
-	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-		m_imgProcesses[ mipLevel ]->Resize();
+		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+			m_imgProcesses[ layerId ][ mipLevel ]->Resize();
+		}
 	}
 }
 
@@ -171,10 +181,13 @@ void MipImageTask::Shutdown()
 {
 	if ( m_useApi == false )
 	{
-		for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-			delete m_imgProcesses[ mipLevel ];
+		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+		{
+			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
+				delete m_imgProcesses[ layerId ][ mipLevel ];
+			}
+			m_baseViews[ layerId ].Destroy();
 		}
-		m_baseView.Destroy();
 	}
 }
 
@@ -185,18 +198,9 @@ uint32_t MipImageTask::GetMipCount() const
 }
 
 
-bool MipImageTask::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
-{
-	for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel ) {
-		m_imgProcesses[ mipLevel ]->SetConstants( dataBlock, sizeInBytes );
-	}
-	return true;
-}
-
-
 void MipImageTask::Execute( CommandContext& context )
 {
-	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorWhite ) );
+	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
 
 	if ( m_useApi )
 	{
@@ -205,10 +209,27 @@ void MipImageTask::Execute( CommandContext& context )
 	}
 	else
 	{
-		uint32_t mipLevel = m_computeBaseMip ? 0 : 1;
+		static const char* faceNames[ 6 ] =
+		{
+			"X+",
+			"X-",
+			"Y+",
+			"Y-",
+			"Z+",
+			"Z-",
+		};
 
-		for ( ; mipLevel < m_mipLevels; ++mipLevel ) {
-			m_imgProcesses[ mipLevel ]->Execute( context );
+		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+		{
+			const uint32_t writeLayer = m_imgProcesses[ layerId ][ 0 ]->GetOutputImage()->subResourceView.baseArray;
+
+			context.MarkerBeginRegion( faceNames[ writeLayer ], ColorToVector( ColorPurple ) );
+			uint32_t mipLevel = m_computeBaseMip ? 0 : 1;
+
+			for ( ; mipLevel < m_mipLevels; ++mipLevel ) {
+				m_imgProcesses[ layerId ][ mipLevel ]->Execute( context );
+			}
+			context.MarkerEndRegion();
 		}
 	}
 

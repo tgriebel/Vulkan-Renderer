@@ -35,7 +35,6 @@ class FrameBuffer;
 struct imageSubResourceView_t;
 
 enum gpuImageStateFlags_t : uint8_t;
-enum downSampleMode_t : uint32_t;
 
 enum pipelineQueue_t
 {

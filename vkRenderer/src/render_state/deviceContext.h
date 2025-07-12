@@ -29,15 +29,6 @@ class Window;
 class ImageView;
 class FrameBuffer;
 
-enum downSampleMode_t : uint32_t
-{
-	DOWNSAMPLE_LINEAR_API,
-	DOWNSAMPLE_LINEAR,
-	DOWNSAMPLE_GAUSSIAN,
-	DOWNSAMPLE_SPECULAR_IBL,
-};
-
-
 struct swapChainInfo_t
 {
 	VkSurfaceCapabilitiesKHR		capabilities;
@@ -122,7 +113,6 @@ class AllocatorMemory;
 class DrawPass;
 
 enum imageSamples_t : uint8_t;
-enum downSampleMode_t : uint32_t;
 
 bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
