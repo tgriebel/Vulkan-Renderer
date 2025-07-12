@@ -1226,7 +1226,7 @@ void RenderContext::AllocRegisteredBindParms()
 	{
 		const uint32_t bindIx = pendingIndices[ i ];
 		ShaderBindParms& parms = bindParmsList[ bindIx ];
-		parms.SetVkObject( &descSets[ MaxFrameStates * bindIx ] );
+		parms.SetVkObject( &descSets[ MaxFrameStates * i ] );
 	}
 	pendingIndices.Reset();
 }
