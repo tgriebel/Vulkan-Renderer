@@ -380,6 +380,19 @@ void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset )
 
 void DebugMenuLightEdit( Scene* scene )
 {
+
+#define EditFlagValue( NAME, FLAGS, CHECKFLAG )	{																					\
+													bool NAME = HasFlags( FLAGS, CHECKFLAG );										\
+													if ( ImGui::Checkbox( #NAME, &NAME ) )											\
+													{																				\
+														if ( NAME ) {																\
+															SetFlags( FLAGS, CHECKFLAG );											\
+														} else {																	\
+															ClearFlags( FLAGS, CHECKFLAG );											\
+														}																			\
+													}																				\
+												}
+
 	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
 	for ( uint32_t i = 0; i < lightCount; ++i )
 	{
@@ -411,21 +424,8 @@ void DebugMenuLightEdit( Scene* scene )
 
 			ImGui::InputFloat( "##lightIntesity", &scene->lights[ i ].intensity, 0.1f, 1.0f );
 
-			//bool shadowed = HasFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
-			//ImGui::Checkbox( "Shadow", &shadowed );
-			//if( shadowed ) {
-			//	MarkFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
-			//} else {
-			//	ClearFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
-			//}
-
-			//bool isPoint = HasFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
-			//ImGui::Checkbox( "Point Light", &isPoint );
-			//if ( isPoint ) {
-			//	MarkFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
-			//} else {
-			//	ClearFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
-			//}
+			EditFlagValue( Shadow, scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
+			EditFlagValue( PointLight, scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
 
 			ImGui::PopItemWidth();
 
