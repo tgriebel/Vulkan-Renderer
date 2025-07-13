@@ -1,4 +1,4 @@
-#include "MipImageTask.h"
+#include "imageProcessTask.h"
 
 #include <SysCore/systemUtils.h>
 
@@ -6,15 +6,15 @@
 #include "../render_binding/bindings.h"
 
 
-std::string MipImageTask::AsString() const
+std::string ImageProcessTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<MipImageTask: " << m_dbgName << ">";
+	ss << "<ImageProcessTask: " << m_dbgName << ">";
 	return ss.str();
 }
 
 
-void MipImageTask::Init( const mipProcessCreateInfo_t& info )
+void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 {
 	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );
 
@@ -91,7 +91,7 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 			// Image Process for writing each MIP
 			for ( uint32_t mipLevel = 0; mipLevel < m_mipLevels; ++mipLevel )
 			{
-				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageProcess( layerId, mipLevel );
+				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageShaderTask( layerId, mipLevel );
 			}
 		}
 	}
@@ -99,11 +99,11 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 }
 
 
-ImageProcess* MipImageTask::CreateImageProcess( const uint32_t layerId, const uint32_t mipLevel )
+ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel )
 {
 	const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
 
-	imageProcessCreateInfo_t imgProcessInfo = {};
+	imageShaderCreateInfo_t imgProcessInfo = {};
 	imgProcessInfo.name = m_dbgName.c_str();
 	imgProcessInfo.context = m_context;
 	imgProcessInfo.resources = m_resources;
@@ -117,7 +117,7 @@ ImageProcess* MipImageTask::CreateImageProcess( const uint32_t layerId, const ui
 	// All but the first image need a framebuffer since they are being written to
 	imgProcessInfo.mipLevel = mipLevel;
 
-	ImageProcess* imageProcess = new ImageProcess( imgProcessInfo );
+	ImageShaderTask* imageProcess = new ImageShaderTask( imgProcessInfo );
 
 	if ( m_cubeMip ) {
 		imageProcess->SetConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
@@ -126,7 +126,7 @@ ImageProcess* MipImageTask::CreateImageProcess( const uint32_t layerId, const ui
 }
 
 
-void MipImageTask::FrameBegin()
+void ImageProcessTask::FrameBegin()
 {
 	if ( m_useApi ) {
 		return;
@@ -162,7 +162,7 @@ void MipImageTask::FrameBegin()
 }
 
 
-void MipImageTask::FrameEnd()
+void ImageProcessTask::FrameEnd()
 {
 	if ( m_useApi ) {
 		return;
@@ -176,7 +176,7 @@ void MipImageTask::FrameEnd()
 }
 
 
-void MipImageTask::Resize()
+void ImageProcessTask::Resize()
 {
 	if ( m_useApi == false )
 	{
@@ -201,7 +201,7 @@ void MipImageTask::Resize()
 		{
 			for ( uint32_t mipLevel = m_mipLevels; mipLevel < m_image->info.mipLevels; ++mipLevel )
 			{
-				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageProcess( layerId, mipLevel );
+				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageShaderTask( layerId, mipLevel );
 			}
 		}
 	}
@@ -224,7 +224,7 @@ void MipImageTask::Resize()
 }
 
 
-void MipImageTask::Shutdown()
+void ImageProcessTask::Shutdown()
 {
 	if ( m_useApi ) {
 		return;
@@ -240,13 +240,13 @@ void MipImageTask::Shutdown()
 }
 
 
-uint32_t MipImageTask::GetMipCount() const
+uint32_t ImageProcessTask::GetMipCount() const
 {
 	return m_mipLevels;
 }
 
 
-void MipImageTask::Execute( CommandContext& context )
+void ImageProcessTask::Execute( CommandContext& context )
 {
 	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
 

@@ -8,11 +8,11 @@ class ShaderBindParms;
 class RenderContext;
 class ResourceContext;
 
-class ImageProcess;
+class ImageShaderTask;
 // A callback is used instead of inheritance for now since most image processes will be very similar
-typedef void imageProcessFrameBeginCallback_t( ImageProcess* imageProcess );
+typedef void imageShaderFrameBeginCallback_t( ImageShaderTask* imageProcess );
 
-struct imageProcessCreateInfo_t
+struct imageShaderCreateInfo_t
 {
 	const char*			name;
 	hdl_t				progHdl;
@@ -30,10 +30,10 @@ struct imageProcessCreateInfo_t
 	bool				present;
 	bool				resolve;
 
-	imageProcessFrameBeginCallback_t * callback;
+	imageShaderFrameBeginCallback_t* callback;
 };
 
-class ImageProcess : public GpuTask
+class ImageShaderTask : public GpuTask
 {
 private:
 	struct constants_t
@@ -70,22 +70,22 @@ private:
 	uint32_t				m_image2dSlotCount;
 	uint32_t				m_imageCubeSlotCount;
 
-	imageProcessFrameBeginCallback_t* m_callback = nullptr;
+	imageShaderFrameBeginCallback_t* m_callback = nullptr;
 
 public:
-	ImageProcess() {}
+	ImageShaderTask() {}
 
-	~ImageProcess()
+	~ImageShaderTask()
 	{
 		Shutdown();
 	}
 
-	ImageProcess( const imageProcessCreateInfo_t& info )
+	ImageShaderTask( const imageShaderCreateInfo_t& info )
 	{
 		Init( info );
 	}
 
-	void				Init( const imageProcessCreateInfo_t& info );
+	void				Init( const imageShaderCreateInfo_t& info );
 	void				Resize();
 	void				Shutdown();
 

@@ -34,7 +34,7 @@
 #include "../render_core/renderResource.h"
 
 #include "../render_tasks/RenderTask.h"
-#include "../render_tasks/imageProcess.h"
+#include "../render_tasks/imageShaderTask.h"
 
 class Window;
 class SwapChain;

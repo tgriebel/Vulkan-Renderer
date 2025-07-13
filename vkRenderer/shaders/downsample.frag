@@ -30,14 +30,14 @@
 
 PS_LAYOUT_BASIC_IO
 
-struct ImageProcess
+struct ImageShaderTask
 {
     vec4 generic0;
     vec4 generic1;
     vec4 generic2;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageShaderTask )
 
 void main()
 {

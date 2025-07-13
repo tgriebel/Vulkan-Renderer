@@ -4,7 +4,7 @@
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/imageView.h"
 
-struct mipProcessCreateInfo_t
+struct imageProcessCreateInfo_t
 {
 	const char*			name;
 	Image*				img;
@@ -22,18 +22,7 @@ struct mipProcessCreateInfo_t
 };
 
 
-union mipProcessParms_t
-{
-	struct downsample
-	{
-		uint32_t a;
-		uint32_t b;
-		uint32_t c;
-		uint32_t d;
-	};
-};
-
-class MipImageTask : public GpuTask
+class ImageProcessTask : public GpuTask
 {
 private:
 	static const uint32_t MaxMipMaps = 16;
@@ -47,7 +36,7 @@ private:
 	ResourceContext*			m_resources;
 
 	mat4x4f						m_viewMatrices[ MaxLayers ];
-	ImageProcess*				m_imgProcesses[ MaxLayers ][ MaxMipMaps ];
+	ImageShaderTask*			m_imgProcesses[ MaxLayers ][ MaxMipMaps ];
 	ImageView					m_baseViews[ MaxLayers ];
 	uint32_t					m_mipLevels;
 	uint32_t					m_layers;
@@ -59,16 +48,16 @@ private:
 	bool						m_useApi;
 	bool						m_singleLevel;
 
-	ImageProcess* CreateImageProcess( const uint32_t layerId, const uint32_t mipLevel );
+	ImageShaderTask* CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel );
 
 public:
 
-	MipImageTask( const mipProcessCreateInfo_t& info )
+	ImageProcessTask( const imageProcessCreateInfo_t& info )
 	{
 		Init( info );
 	}
 
-	void		Init( const mipProcessCreateInfo_t& info );
+	void		Init( const imageProcessCreateInfo_t& info );
 	void		Shutdown();
 
 	void		FrameBegin();
@@ -80,7 +69,7 @@ public:
 
 	void		Execute( CommandContext& context ) override;
 
-	~MipImageTask() {
+	~ImageProcessTask() {
 		Shutdown();
 	}
 };

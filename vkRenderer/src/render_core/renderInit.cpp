@@ -31,7 +31,7 @@
 #include "../render_binding/bindings.h"
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/ImageReadbackTask.h"
-#include "../render_tasks/MipImageTask.h"
+#include "../render_tasks/ImageProcessTask.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -153,13 +153,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	view2Ds[ 0 ]->Commit();
 
-	MipImageTask* diffuseIBL = nullptr;
-	MipImageTask* specularIBL = nullptr;
+	ImageProcessTask* diffuseIBL = nullptr;
+	ImageProcessTask* specularIBL = nullptr;
 	if ( config.useCubeViews )
 	{
 		if ( config.computeDiffuseIbl )
 		{
-			mipProcessCreateInfo_t info = {};
+			imageProcessCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
 			info.progName = "DiffuseIBL";
 			info.img = &resources.diffuseIblImage;
@@ -169,12 +169,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.baseMip = 0;
 			info.singleLevel = 1;
 
-			diffuseIBL = new MipImageTask( info );
+			diffuseIBL = new ImageProcessTask( info );
 		}
 
 		if ( config.computeSpecularIBL )
 		{
-			mipProcessCreateInfo_t info = {};
+			imageProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
 			info.img = &resources.specularIblImage;
 			info.sampleImage = &resources.cubeFbColorImage;
@@ -184,13 +184,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.progressiveSampling = false;
 			info.baseMip = 0;
 
-			specularIBL = new MipImageTask( info );
+			specularIBL = new ImageProcessTask( info );
 		}
 	}
 
-	ImageProcess* resolve = nullptr;
+	ImageShaderTask* resolve = nullptr;
 	{
-		imageProcessCreateInfo_t info = {};
+		imageShaderCreateInfo_t info = {};
 		info.name = "ResolveMain";
 		info.clear = false;
 		info.resolve = true;
@@ -205,17 +205,17 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 		info.inputImages = 3;
 
-		resolve = new ImageProcess( info );
+		resolve = new ImageShaderTask( info );
 
 		resolve->SetSourceImage( 0, &resources.mainColorImage );
 		resolve->SetSourceImage( 1, &resources.depthImageView );
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
 
-	MipImageTask* gaussianTask = nullptr;
+	ImageProcessTask* gaussianTask = nullptr;
 	if ( config.gaussianBlur )
 	{
-		mipProcessCreateInfo_t info{};
+		imageProcessCreateInfo_t info{};
 		info.name = "Separable Gaussian";
 		info.context = &renderContext;
 		info.resources = &resources;
@@ -224,13 +224,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.sampleImage = &resources.mainColorResolvedImage;
 		info.baseMip = 0;
 
-		gaussianTask = new MipImageTask( info );
+		gaussianTask = new ImageProcessTask( info );
 	}
 
-	MipImageTask* mipTask = nullptr;
+	ImageProcessTask* mipTask = nullptr;
 	if ( config.downsampleScene )
 	{
-		mipProcessCreateInfo_t info{};
+		imageProcessCreateInfo_t info{};
 		info.name = "MainColorDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
@@ -239,20 +239,20 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.progName = "DownSample";
 		info.baseMip = 1;
 
-		mipTask = new MipImageTask( info );
+		mipTask = new ImageProcessTask( info );
 	}
 
-	MipImageTask* mipCubeTask = nullptr;
+	ImageProcessTask* mipCubeTask = nullptr;
 	if ( config.useCubeViews )
 	{
-		mipProcessCreateInfo_t info{};
+		imageProcessCreateInfo_t info{};
 		info.name = "CubeDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.img = &resources.cubeFbColorImage;
 		info.baseMip = 1;
 
-		mipCubeTask = new MipImageTask( info );
+		mipCubeTask = new ImageProcessTask( info );
 	}
 
 	ImageReadbackTask* imageCubemapReadBackTask = nullptr;
@@ -293,12 +293,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
 	}
 
-	ImageProcess* brdfLutTask = nullptr;
+	ImageShaderTask* brdfLutTask = nullptr;
 	ImageReadbackTask* readbackBrdfLut = nullptr;
 	if( config.computeBrdfLut )
 	{
 		{
-			imageProcessCreateInfo_t info = {};
+			imageShaderCreateInfo_t info = {};
 			info.name = "BrdfLutCalculation";
 			info.clear = false;
 			info.resolve = true;
@@ -307,7 +307,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.context = &renderContext;
 			info.resources = &resources;
 
-			brdfLutTask = new ImageProcess( info );
+			brdfLutTask = new ImageShaderTask( info );
 		}
 
 		{

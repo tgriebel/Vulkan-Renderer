@@ -122,10 +122,10 @@
     <ClCompile Include="src\render_tasks\ImageReadbackTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_tasks\MipImageTask.cpp">
+    <ClCompile Include="src\render_tasks\imageProcessTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_tasks\imageProcess.cpp">
+    <ClCompile Include="src\render_tasks\imageShaderTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\renderView.cpp">
@@ -269,13 +269,13 @@
     <ClInclude Include="src\render_tasks\ImageReadbackTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_tasks\MipImageTask.h">
+    <ClInclude Include="src\render_tasks\imageProcessTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
     <ClInclude Include="scenes\tomtendoCore.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_tasks\imageProcess.h">
+    <ClInclude Include="src\render_tasks\imageShaderTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\renderview.h">

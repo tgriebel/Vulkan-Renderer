@@ -31,7 +31,7 @@
 #include "../render_binding/bufferObjects.h"
 #include "../render_binding/bindings.h"
 #include "../render_binding/imageView.h"
-#include "../render_tasks/imageProcess.h"
+#include "../render_tasks/imageShaderTask.h"
 
 extern AssetManager g_assets;
 

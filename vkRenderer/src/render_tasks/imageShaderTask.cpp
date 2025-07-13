@@ -1,4 +1,4 @@
-#include "imageProcess.h"
+#include "imageShaderTask.h"
 
 #include <gfxcore/scene/scene.h>
 #include "../render_core/renderer.h"
@@ -6,15 +6,15 @@
 
 extern AssetManager g_assets;
 
-std::string ImageProcess::AsString() const
+std::string ImageShaderTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImageProcess: " << m_dbgName << ">";
+	ss << "<ImageShaderTask: " << m_dbgName << ">";
 	return ss.str();
 }
 
 
-void ImageProcess::Init( const imageProcessCreateInfo_t& info )
+void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 {
 	ScopedLogTimer timer( "ImageProcessInit", timerPrecision_t::MICROSECOND, &TimerPrint );
 
@@ -140,13 +140,13 @@ void ImageProcess::Init( const imageProcessCreateInfo_t& info )
 }
 
 
-ImageView* ImageProcess::GetOutputImage( const uint32_t outputImageIndex )
+ImageView* ImageShaderTask::GetOutputImage( const uint32_t outputImageIndex )
 {
 	return m_views[ m_passCount - 1 ][ outputImageIndex ];
 }
 
 
-void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
+void ImageShaderTask::SetSourceImage( const uint32_t slot, Image* image )
 {
 	assert( image->info.type == imageType_t::IMAGE_TYPE_2D );
 	assert( m_image2dSlotCount > slot );
@@ -160,7 +160,7 @@ void ImageProcess::SetSourceImage( const uint32_t slot, Image* image )
 }
 
 
-void ImageProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
+void ImageShaderTask::SetSourceCubeImage( const uint32_t slot, Image* image )
 {
 	assert( image->info.type == imageType_t::IMAGE_TYPE_CUBE );
 	assert( m_imageCubeSlotCount > slot );
@@ -174,7 +174,7 @@ void ImageProcess::SetSourceCubeImage( const uint32_t slot, Image* image )
 }
 
 
-void ImageProcess::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
+void ImageShaderTask::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
 {
 	assert( sizeInBytes <= MaxConstantBlockSizeInBytes );
 
@@ -186,7 +186,7 @@ void ImageProcess::SetConstants( const void* dataBlock, const uint32_t sizeInByt
 }
 
 
-void ImageProcess::Resize()
+void ImageShaderTask::Resize()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
@@ -202,7 +202,7 @@ void ImageProcess::Resize()
 }
 
 
-void ImageProcess::Shutdown()
+void ImageShaderTask::Shutdown()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
@@ -228,7 +228,7 @@ void ImageProcess::Shutdown()
 }
 
 
-void ImageProcess::FrameBegin()
+void ImageShaderTask::FrameBegin()
 {
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
@@ -267,13 +267,13 @@ void ImageProcess::FrameBegin()
 }
 
 
-void ImageProcess::FrameEnd()
+void ImageShaderTask::FrameEnd()
 {
 
 }
 
 
-void ImageProcess::Execute( CommandContext& cmdContext )
+void ImageShaderTask::Execute( CommandContext& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::Brown ) );
 

@@ -32,7 +32,7 @@
 PS_LAYOUT_BASIC_IO
 PS_LAYOUT_MRT_1_OUT
 
-struct ImageProcess
+struct ImageShaderTask
 {
 	vec4 generic0;
 	vec4 generic1;
@@ -40,9 +40,9 @@ struct ImageProcess
 };
 
 #ifdef USE_MSAA
-PS_LAYOUT_IMAGE_PROCESS( sampler2DMS, ImageProcess )
+PS_LAYOUT_IMAGE_PROCESS( sampler2DMS, ImageShaderTask )
 #else
-PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageProcess )
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageShaderTask )
 #endif
 
 void main()
