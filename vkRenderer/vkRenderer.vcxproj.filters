@@ -119,7 +119,7 @@
     <ClCompile Include="src\app\cvar.cpp">
       <Filter>app</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_tasks\ImageWritebackTask.cpp">
+    <ClCompile Include="src\render_tasks\ImageReadbackTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
     <ClCompile Include="src\render_tasks\MipImageTask.cpp">
@@ -266,7 +266,7 @@
     <ClInclude Include="src\app\cvar.h">
       <Filter>app</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_tasks\ImageWritebackTask.h">
+    <ClInclude Include="src\render_tasks\ImageReadbackTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
     <ClInclude Include="src\render_tasks\MipImageTask.h">
