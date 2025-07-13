@@ -128,9 +128,6 @@
     <ClCompile Include="src\render_tasks\imageProcess.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_tasks\imageCubeProcess.cpp">
-      <Filter>Tasks</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_core\renderView.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -279,9 +276,6 @@
       <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="src\render_tasks\imageProcess.h">
-      <Filter>Tasks</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render_tasks\imageCubeProcess.h">
       <Filter>Tasks</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\renderview.h">

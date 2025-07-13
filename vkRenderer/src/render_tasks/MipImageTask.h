@@ -14,9 +14,9 @@ struct mipProcessCreateInfo_t
 	ResourceContext*	resources;
 
 	uint32_t			baseMip;
-	uint32_t			lastMip;
 
 	bool				useAPI;
+	bool				singleLevel;
 	bool				multiPass;
 	bool				progressiveSampling;
 };
@@ -57,6 +57,7 @@ private:
 	bool						m_cubeMip;
 	bool						m_progressiveSampling;
 	bool						m_useApi;
+	bool						m_singleLevel;
 
 	ImageProcess* CreateImageProcess( const uint32_t layerId, const uint32_t mipLevel );
 

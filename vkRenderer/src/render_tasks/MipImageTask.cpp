@@ -27,8 +27,9 @@ void MipImageTask::Init( const mipProcessCreateInfo_t& info )
 
 	m_context->scratchMemory.AdjustOffset( 0, 0 );
 
+	m_singleLevel = info.singleLevel;
 	m_cubeMip = ( info.img->info.type == IMAGE_TYPE_CUBE );
-	m_mipLevels = m_image->info.mipLevels;
+	m_mipLevels = m_singleLevel ? 1 : m_image->info.mipLevels;
 	m_layers = m_cubeMip ? 6 : 1;
 
 	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
@@ -177,9 +178,9 @@ void MipImageTask::FrameEnd()
 
 void MipImageTask::Resize()
 {
-	if ( m_useApi )
+	if ( m_useApi == false )
 	{
-		m_mipLevels = m_image->info.mipLevels;
+		m_mipLevels = m_singleLevel ? 1 : m_image->info.mipLevels;
 		return;
 	}
 
@@ -193,7 +194,6 @@ void MipImageTask::Resize()
 				m_imgProcesses[ layerId ][ mipLevel ] = nullptr;
 			}
 		}
-		m_mipLevels = m_image->info.mipLevels;
 	}
 	else if ( m_mipLevels < m_image->info.mipLevels )
 	{
@@ -204,8 +204,8 @@ void MipImageTask::Resize()
 				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageProcess( layerId, mipLevel );
 			}
 		}
-		m_mipLevels = m_image->info.mipLevels;
 	}
+	m_mipLevels = m_singleLevel ? 1 : m_image->info.mipLevels;
 
 	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{

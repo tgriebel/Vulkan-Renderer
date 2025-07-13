@@ -32,7 +32,6 @@
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/ImageWritebackTask.h"
 #include "../render_tasks/MipImageTask.h"
-#include "../render_tasks/imageCubeProcess.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -154,23 +153,23 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	view2Ds[ 0 ]->Commit();
 
-	ImageCubeProcess* diffuseIBL = {};
-	MipImageTask* specularIBL = {};
+	MipImageTask* diffuseIBL = nullptr;
+	MipImageTask* specularIBL = nullptr;
 	if ( config.useCubeViews )
 	{
 		if ( config.computeDiffuseIbl )
 		{
-			imageCubeProcessCreateInfo_t info = {};
+			mipProcessCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
-			info.clear = false;
-			info.progHdl = AssetLibGpuProgram::Handle( "DiffuseIBL" );
-			info.image = &resources.diffuseIblImage;
+			info.progName = "DiffuseIBL";
+			info.img = &resources.diffuseIblImage;
+			info.sampleImage = &resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
-			info.inputCubeImages = 1;
+			info.baseMip = 0;
+			info.singleLevel = 1;
 
-			diffuseIBL = new ImageCubeProcess( info );
-			diffuseIBL->SetSourceCubeImage( 0, &resources.cubeFbColorImage );
+			diffuseIBL = new MipImageTask( info );
 		}
 
 		if ( config.computeSpecularIBL )
