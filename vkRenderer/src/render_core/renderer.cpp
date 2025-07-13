@@ -491,14 +491,18 @@ void Renderer::CommitLight( const light_t& light )
 	{
 		lightObject.shadowViewId = shadowCount;
 
-		Camera shadowCam;
-		shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
-		shadowCam.SetClip( 0.1f, 1000.0f );
-		shadowCam.SetFov( Radians( 90.0f ) );
-		shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
-
 		shadowViews[ shadowCount ]->SetViewRect( 0, 0, ShadowMapWidth, ShadowMapHeight );
-		shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
+
+		if( HasFlags( light.flags, LIGHT_FLAGS_POINT ) == false )
+		{
+			Camera shadowCam;
+			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
+			shadowCam.SetClip( 0.1f, 1000.0f );
+			shadowCam.SetFov( Radians( 90.0f ) );
+			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+
+			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
+		}
 	}
 	committedLights.Append( lightObject );
 
@@ -614,7 +618,15 @@ void Renderer::UpdateBuffers()
 		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
 		globals.defaultImageId = rc.defaultImage->gpuImage->GetId();
 		globals.brdfLutId = g_assets.textureLib.Find( "code_assets/brdf_lut.img" )->Get().gpuImage->GetId();
-		globals.isTextured = true;
+		globals.isTextured = g_imguiControls.isTextured;
+		
+		globals.shadow2dCount = 0;
+		globals.shadowCubeCount = 0;
+		for( uint32_t i = 0; i < MaxShadowMaps; ++i )
+		{
+			globals.shadow2dCount += ( resources.shadowMapImage->info.type == imageType_t::IMAGE_TYPE_2D );
+			globals.shadowCubeCount += ( resources.shadowMapImage->info.type == imageType_t::IMAGE_TYPE_CUBE );
+		}	
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}

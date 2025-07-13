@@ -411,6 +411,22 @@ void DebugMenuLightEdit( Scene* scene )
 
 			ImGui::InputFloat( "##lightIntesity", &scene->lights[ i ].intensity, 0.1f, 1.0f );
 
+			//bool shadowed = HasFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
+			//ImGui::Checkbox( "Shadow", &shadowed );
+			//if( shadowed ) {
+			//	MarkFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
+			//} else {
+			//	ClearFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
+			//}
+
+			//bool isPoint = HasFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
+			//ImGui::Checkbox( "Point Light", &isPoint );
+			//if ( isPoint ) {
+			//	MarkFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
+			//} else {
+			//	ClearFlags( scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
+			//}
+
 			ImGui::PopItemWidth();
 
 			rgb32_t rgb = scene->lights[ i ].color.AsRgb32();

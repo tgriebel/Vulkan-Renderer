@@ -259,7 +259,7 @@ void InitScene( Scene* scene )
 		scene->lights[ 1 ].intensity = 1.0f;
 		scene->lights[ 1 ].dir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 		scene->lights[ 1 ].color = Color::Red;
-		scene->lights[ 1 ].flags = LIGHT_FLAGS_SHADOW;
+		scene->lights[ 1 ].flags = LIGHT_FLAGS_SHADOW | LIGHT_FLAGS_POINT;
 
 		scene->lights[ 2 ].pos = vec4f( 0.0f, -10.0f, 5.0f, 0.0f );
 		scene->lights[ 2 ].intensity = 1.0f;
@@ -479,6 +479,8 @@ void DrawSceneDebugMenu()
 		g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
 		ImGui::SameLine();
 		g_imguiControls.captureScreenshot = ImGui::Button( "Capture ScreenShot" );
+
+		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );
 
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
 		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.roughnessScale, 0.0f, 1.0f );

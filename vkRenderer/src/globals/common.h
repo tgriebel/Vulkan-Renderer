@@ -169,6 +169,7 @@ struct imguiControls_t
 	bool		openSceneFileDialog;
 	bool		reloadScene;
 	bool		captureScreenshot;
+	bool		isTextured;
 	vec3f		selectedModelOrigin;
 };
 #endif

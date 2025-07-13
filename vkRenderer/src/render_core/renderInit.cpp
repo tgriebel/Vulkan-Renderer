@@ -65,6 +65,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
+		info.isCubeView = ( resources.shadowMapImage[ i ].info.type == imageType_t::IMAGE_TYPE_CUBE );
 
 		info.fbImages.name = "ShadowFB";
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
@@ -567,7 +568,7 @@ void Renderer::InitShaderResources()
 			"View",
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
-			MaxViews,
+			MaxViews * MaxMultiViews,
 			sizeof( viewBufferObject_t ),
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
@@ -718,9 +719,11 @@ void Renderer::InitImGui( RenderView& view )
 	g_imguiControls.toneMapColor[ 1 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 2 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 3 ] = 1.0f;
+	g_imguiControls.dofEnable = false;
 	g_imguiControls.dofFocalDepth = 0.01f;
 	g_imguiControls.dofFocalRange = 0.25f;
 	g_imguiControls.dbgImageId = -1;
+	g_imguiControls.isTextured = true;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
 

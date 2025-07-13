@@ -71,6 +71,8 @@ struct globalUboConstants_t
 	uint32_t	defaultImageId;
 	uint32_t	brdfLutId;
 	uint32_t	isTextured;
+	uint32_t	shadow2dCount;
+	uint32_t	shadowCubeCount;
 	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };
 
