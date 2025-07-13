@@ -4,7 +4,7 @@
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/imageView.h"
 
-enum imageWritebackFlags_t : uint8_t
+enum imageReadbackFlags_t : uint8_t
 {
 	WRITE_TO_DISK		= ( 1 << 0 ),
 	CUBEMAP				= ( 1 << 1 ),
@@ -12,21 +12,21 @@ enum imageWritebackFlags_t : uint8_t
 	TRY_USE_API_COMMAND	= ( 1 << 3 ),
 	SCREENSHOT			= ( 1 << 4 ),
 };
-DEFINE_ENUM_OPERATORS( imageWritebackFlags_t, uint8_t )
+DEFINE_ENUM_OPERATORS( imageReadbackFlags_t, uint8_t )
 
 
-struct imageWriteBackCreateInfo_t
+struct imageReadBackCreateInfo_t
 {
 	const char*				name;
 	const char*				fileName;
 	Image*					img;
 	RenderContext*			context;
 	ResourceContext*		resources;
-	imageWritebackFlags_t	flags;
+	imageReadbackFlags_t	flags;
 };
 
 
-class ImageWritebackTask : public GpuTask
+class ImageReadbackTask : public GpuTask
 {
 private:
 	Image*					m_readbackImage;	// Image to readback data into
@@ -39,20 +39,20 @@ private:
 	ShaderBindParms*		m_parms;
 	std::string				m_fileName;
 	std::string				m_name;
-	imageWritebackFlags_t	m_flags;
+	imageReadbackFlags_t	m_flags;
 	bool					m_hasWriteback;
 
-	void Init( const imageWriteBackCreateInfo_t& info );
+	void Init( const imageReadBackCreateInfo_t& info );
 	void Shutdown();
 
 public:
 
-	ImageWritebackTask( const imageWriteBackCreateInfo_t& info )
+	ImageReadbackTask( const imageReadBackCreateInfo_t& info )
 	{
 		Init( info );
 	}
 
-	~ImageWritebackTask()
+	~ImageReadbackTask()
 	{
 		Shutdown();
 	}

@@ -7,15 +7,15 @@
 #include "../render_binding/bindings.h"
 
 
-std::string ImageWritebackTask::AsString() const
+std::string ImageReadbackTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImageWritebackTask: " << m_name << ">";
+	ss << "<ImageReadbackTask: " << m_name << ">";
 	return ss.str();
 }
 
 
-void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
+void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 {
 	m_readbackImage = info.img;
 	if ( HasFlags( info.flags, CUBEMAP ) == false )
@@ -95,7 +95,7 @@ void ImageWritebackTask::Init( const imageWriteBackCreateInfo_t& info )
 }
 
 
-void ImageWritebackTask::FrameBegin()
+void ImageReadbackTask::FrameBegin()
 {
 	m_parms->Bind( bind_globalsBuffer, &m_resources->globalConstants );
 	m_parms->Bind( bind_computeImage, &m_imageArray );
@@ -104,7 +104,7 @@ void ImageWritebackTask::FrameBegin()
 }
 
 
-void ImageWritebackTask::Execute( CommandContext& cmdContext )
+void ImageReadbackTask::Execute( CommandContext& cmdContext )
 {
 	if ( HasFlags( m_flags, SCREENSHOT ) ) {
 		if( g_imguiControls.captureScreenshot == false ) {
@@ -176,7 +176,7 @@ void ImageWritebackTask::Execute( CommandContext& cmdContext )
 }
 
 
-void ImageWritebackTask::FrameEnd()
+void ImageReadbackTask::FrameEnd()
 {
 	if ( m_hasWriteback == false ) {
 		return;
@@ -287,6 +287,6 @@ void ImageWritebackTask::FrameEnd()
 }
 
 
-void ImageWritebackTask::Shutdown()
+void ImageReadbackTask::Shutdown()
 {
 }

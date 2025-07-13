@@ -255,46 +255,46 @@ void Renderer::Init( const renderConfig_t& cfg )
 		mipCubeTask = new MipImageTask( info );
 	}
 
-	ImageWritebackTask* imageCubemapWriteBackTask = nullptr;
+	ImageReadbackTask* imageCubemapReadBackTask = nullptr;
 	if ( config.useCubeViews )
 	{
 		const std::string fileName = std::string( config.cubemapName ) + "_env.img";
 
-		imageWriteBackCreateInfo_t info{};
-		info.name = "EnvironmentMapWriteback";
+		imageReadBackCreateInfo_t info{};
+		info.name = "EnvironmentMapReadback";
 		info.img = &resources.cubeFbColorImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = fileName.c_str();
 		if ( config.writeCubeViews ) {
-			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
 		}
-		info.flags |= imageWritebackFlags_t::CUBEMAP;
-		info.flags |= imageWritebackFlags_t::PACKED_HDR;
+		info.flags |= imageReadbackFlags_t::CUBEMAP;
+		info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-		imageCubemapWriteBackTask = new ImageWritebackTask( info );
+		imageCubemapReadBackTask = new ImageReadbackTask( info );
 	}
 
-	ImageWritebackTask* imageDiffuseIblWriteBackTask = nullptr;
+	ImageReadbackTask* imageDiffuseIblReadbackTask = nullptr;
 	if ( config.computeDiffuseIbl )
 	{
 		const std::string fileName = std::string( config.cubemapName ) + "_diffuseIbl.img";
 
-		imageWriteBackCreateInfo_t info{};
-		info.name = "DiffuseIblWriteback";
+		imageReadBackCreateInfo_t info{};
+		info.name = "DiffuseIblReadback";
 		info.img = &resources.diffuseIblImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = fileName.c_str();
-		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
-		info.flags |= imageWritebackFlags_t::CUBEMAP;
-		info.flags |= imageWritebackFlags_t::PACKED_HDR;
+		info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageReadbackFlags_t::CUBEMAP;
+		info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-		imageDiffuseIblWriteBackTask = new ImageWritebackTask( info );
+		imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
 	}
 
 	ImageProcess* brdfLutTask = nullptr;
-	ImageWritebackTask* writeBrdfLut = nullptr;
+	ImageReadbackTask* readbackBrdfLut = nullptr;
 	if( config.computeBrdfLut )
 	{
 		{
@@ -313,52 +313,52 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			const std::string fileName = "brdf_lut.img";
 
-			imageWriteBackCreateInfo_t info{};
-			info.name = "BrdfLutWriteback";
+			imageReadBackCreateInfo_t info{};
+			info.name = "BrdfLutReadback";
 			info.img = &resources.brdfImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.fileName = fileName.c_str();
-			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
-			info.flags |= imageWritebackFlags_t::PACKED_HDR;
+			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+			info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-			writeBrdfLut = new ImageWritebackTask( info );
+			readbackBrdfLut = new ImageReadbackTask( info );
 		}
 	}
 
-	ImageWritebackTask* imageSpecularIblWriteBackTask = nullptr;
+	ImageReadbackTask* imageSpecularIblReadBackTask = nullptr;
 	if ( config.computeSpecularIBL )
 	{
 		const std::string fileName = std::string( config.cubemapName ) + "_specIbl.img";
 
-		imageWriteBackCreateInfo_t info{};
-		info.name = "SpecularIblWriteback";
+		imageReadBackCreateInfo_t info{};
+		info.name = "SpecularIblReadback";
 		info.img = &resources.specularIblImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = fileName.c_str();
 		if ( config.writeCubeViews ) {
-			info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
+			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
 		}
-		info.flags |= imageWritebackFlags_t::CUBEMAP;
-		info.flags |= imageWritebackFlags_t::PACKED_HDR;
+		info.flags |= imageReadbackFlags_t::CUBEMAP;
+		info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-		imageSpecularIblWriteBackTask = new ImageWritebackTask( info );
+		imageSpecularIblReadBackTask = new ImageReadbackTask( info );
 	}
 
-	ImageWritebackTask* screenshotWriteback = nullptr;
+	ImageReadbackTask* screenshotReadback = nullptr;
 	if ( config.screenshot )
 	{
-		imageWriteBackCreateInfo_t info{};
-		info.name = "ScreenshotWriteback";
+		imageReadBackCreateInfo_t info{};
+		info.name = "ScreenshotReadback";
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = "screenshot.png";
-		info.flags |= imageWritebackFlags_t::WRITE_TO_DISK;
-		info.flags |= imageWritebackFlags_t::SCREENSHOT;
+		info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageReadbackFlags_t::SCREENSHOT;
 		info.img = &resources.mainColorResolvedImage;
 
-		screenshotWriteback = new ImageWritebackTask( info );
+		screenshotReadback = new ImageReadbackTask( info );
 	}
 
 	UploadAssets();
@@ -374,28 +374,28 @@ void Renderer::Init( const renderConfig_t& cfg )
 		if ( config.computeDiffuseIbl )
 		{
 			schedule.Link( diffuseIBL );
-			schedule.Link( imageDiffuseIblWriteBackTask );
+			schedule.Link( imageDiffuseIblReadbackTask );
 		}
 		if ( config.computeSpecularIBL )
 		{
 			schedule.Link( specularIBL );
-			schedule.Link( imageSpecularIblWriteBackTask );
+			schedule.Link( imageSpecularIblReadBackTask );
 		}
 		schedule.Link( mipCubeTask );
-		schedule.Link( imageCubemapWriteBackTask );
+		schedule.Link( imageCubemapReadBackTask );
 	}
 	if ( brdfLutTask )
 	{
 		schedule.Link( brdfLutTask );
 	}
-	if ( writeBrdfLut )
+	if ( readbackBrdfLut )
 	{
-		schedule.Link( writeBrdfLut );
+		schedule.Link( readbackBrdfLut );
 	}
 	schedule.Link( resolve );
 
 	if( config.screenshot ) {
-		schedule.Link( screenshotWriteback );
+		schedule.Link( screenshotReadback );
 	}
 	if ( config.downsampleScene ) {
 		schedule.Link( mipTask );
