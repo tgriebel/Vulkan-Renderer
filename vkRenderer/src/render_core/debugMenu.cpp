@@ -409,6 +409,7 @@ void DebugMenuLightEdit( Scene* scene )
 
 			ImGui::PushItemWidth( 100 );
 
+			ImGui::Text( "Origin: " );
 			ImGui::SameLine();
 			ImGui::InputFloat( "##lightOriginX", &origin[ 0 ], 0.1f, 1.0f );
 			ImGui::SameLine();
@@ -416,12 +417,16 @@ void DebugMenuLightEdit( Scene* scene )
 			ImGui::SameLine();
 			ImGui::InputFloat( "##lightOriginZ", &origin[ 2 ], 0.1f, 1.0f );
 
+			ImGui::Text( "Direction: " );
+			ImGui::SameLine();
 			ImGui::InputFloat( "##lightDirX", &dir[ 0 ], 0.1f, 1.0f );
 			ImGui::SameLine();
 			ImGui::InputFloat( "##lightDirY", &dir[ 1 ], 0.1f, 1.0f );
 			ImGui::SameLine();
 			ImGui::InputFloat( "##lightDirZ", &dir[ 2 ], 0.1f, 1.0f );
 
+			ImGui::Text( "Intensity: " );
+			ImGui::SameLine();
 			ImGui::InputFloat( "##lightIntesity", &scene->lights[ i ].intensity, 0.1f, 1.0f );
 
 			EditFlagValue( Shadow, scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );

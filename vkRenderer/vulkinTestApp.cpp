@@ -37,6 +37,7 @@
 #include "scenes/sceneParser.h"
 #include <SysCore/systemUtils.h>
 #include <gfxcore/scene/assetBaker.h>
+#include <gfxcore/io/serializeClasses.h>
 #include "raytracerInterface.h"
 #include "src/app/cvar.h"
 
@@ -141,6 +142,10 @@ int main( int argc, char* argv[] )
 		ParseConfig( fileName );
 	}
 
+	if ( c_bakeAssets.GetBool() ) {
+		ToggleBakedLoading( false );
+	}
+
 	if( c_scene.IsValid() ) {
 		LoadScene( c_scene.GetString(), &g_scene, &g_assets );
 	} else {
@@ -163,7 +168,8 @@ int main( int argc, char* argv[] )
 
 	InitScene( g_scene );
 
-	if( c_bakeAssets.GetBool() ) {
+	if( c_bakeAssets.GetBool() )
+	{
 		BakeAssets();
 		exit( 0 );
 	}
