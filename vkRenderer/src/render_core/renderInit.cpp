@@ -996,19 +996,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "specularIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
-
-		for ( uint32_t i = 0; i < 6; ++i )
-		{
-			imageSubResourceView_t subView;
-			subView.arrayCount = 1;
-			subView.baseArray = vk_MapToGlslCubemapConvention( i );
-			subView.baseMip = 0;
-			subView.mipLevels = 1;
-
-			colorInfo.type = IMAGE_TYPE_2D;
-
-			resources.specularIblImageViews[ i ].Init( &resources.specularIblImage, colorInfo, subView, resourceLifeTime_t::RESIZE );
-		}
 	}
 
 	// Resolve image
@@ -1034,30 +1021,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
-		info.mipLevels = 1;
-
-		const uint32_t mipLevelCount = resources.mainColorResolvedImage.info.mipLevels;
-		for ( uint32_t i = 0; i < mipLevelCount; ++i )
-		{
-			imageSubResourceView_t subView = {};
-			subView.baseMip = i;
-			subView.mipLevels = 1;
-			subView.baseArray = 0;
-			subView.arrayCount = 1;
-
-			resources.mainColorResolvedImageViews[ i ].Init( &resources.mainColorResolvedImage, info, subView, resourceLifeTime_t::RESIZE );
-		}
-
-		for ( uint32_t i = 0; i < mipLevelCount; ++i )
-		{
-			imageSubResourceView_t subView = {};
-			subView.baseMip = i;
-			subView.mipLevels = 1;
-			subView.baseArray = 0;
-			subView.arrayCount = 1;
-
-			resources.blurredImageViews[ i ].Init( &resources.blurredImage, info, subView, resourceLifeTime_t::RESIZE );
-		}
 	}
 
 	// Depth-stencil views

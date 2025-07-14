@@ -147,7 +147,6 @@ public:
 	Image					cubeFbDepthImage;
 	Image					diffuseIblImage;
 	Image					specularIblImage;
-	ImageView				specularIblImageViews[ 6 ];
 	Image					gBufferLayerImage;
 	Image					depthStencilImage;
 	ImageView				depthImageView;
@@ -155,8 +154,6 @@ public:
 	GpuBufferView			surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 
 	// Code images
-	ImageView				mainColorResolvedImageViews[ MaxMipMaps ];
-	ImageView				blurredImageViews[ MaxMipMaps ];
 	ImageView				depthResolvedImageView;
 	ImageView				stencilResolvedImageView;
 	Image					shadowMapImage[ MaxShadowViews ];
