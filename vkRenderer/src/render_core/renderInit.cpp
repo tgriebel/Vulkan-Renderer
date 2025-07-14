@@ -301,12 +301,25 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			imageShaderCreateInfo_t info = {};
 			info.name = "BrdfLutCalculation";
-			info.clear = false;
-			info.resolve = true;
 			info.progHdl = AssetLibGpuProgram::Handle( "preCalculatedBrdfLut" );
-			info.outputImage = &resources.brdfImage;
 			info.context = &renderContext;
 			info.resources = &resources;
+
+			{
+				imageInfo_t imgInfo{};
+				imgInfo.width = 512;
+				imgInfo.height = 512;
+				imgInfo.mipLevels = 1;
+				imgInfo.layers = 1;
+				imgInfo.subsamples = IMAGE_SMP_1;
+				imgInfo.fmt = IMAGE_FMT_RGBA_16;
+				imgInfo.type = IMAGE_TYPE_2D;
+				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				imgInfo.tiling = IMAGE_TILING_MORTON;
+
+				info.taskImageCount = 1;
+				info.createInfos = { &imgInfo };
+			}
 
 			brdfLutTask = new ImageShaderTask( info );
 		}
@@ -316,7 +329,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 			imageReadBackCreateInfo_t info{};
 			info.name = "BrdfLutReadback";
-			info.img = &resources.brdfImage;
+			info.img = brdfLutTask->GetOutputImage();
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.fileName = fileName.c_str();
@@ -1101,46 +1114,6 @@ void Renderer::CreateFramebuffers()
 			info,
 			nullptr,
 			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
-		);
-	}
-
-	// BRDF image
-	{
-		imageInfo_t info{};
-		info.width = 512;
-		info.height = 512;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
-
-		resources.brdfImage.Create(
-			info,
-			nullptr,
-			new GpuImage( "brdfImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
-		);
-	}
-
-	// Image writeback
-	{
-		imageInfo_t info{};
-		info.width = width;
-		info.height = height;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_8_UNORM;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_LINEAR;
-
-		resources.tempWritebackImage.Create(
-			info,
-			nullptr,
-			new GpuImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.sharedMemory, resourceLifeTime_t::RESIZE )
 		);
 	}
 }

@@ -26,6 +26,8 @@ struct imageShaderCreateInfo_t
 	uint32_t			mipLevel;
 	uint32_t			layer;
 	uint32_t			passCount;
+	imageInfo_t*		createInfos;
+	uint32_t			taskImageCount;
 	bool				clear;
 	bool				present;
 	bool				resolve;
@@ -62,13 +64,16 @@ private:
 	FrameBuffer				m_fb[ MaxPasses ];
 	DrawPass*				m_passes[ MaxPasses ];
 	GpuBuffer				m_buffer[ MaxPasses ];
-	ImageView*				m_views[ MaxPasses ][ MaxOutputImages ];
-	Image*					m_image;
+	ImageView*				m_views[ MaxPasses ][ MaxOutputImages ] = {};
+	Image*					m_image = nullptr;
+	Image*					m_taskImages[ MaxOutputImages ] = {};
+	uint32_t				m_taskImageCount;
 	uint32_t				m_layer;
 	uint32_t				m_mipLevel;
 	uint32_t				m_passCount;
 	uint32_t				m_image2dSlotCount;
 	uint32_t				m_imageCubeSlotCount;
+	bool					m_firstFrame;
 
 	imageShaderFrameBeginCallback_t* m_callback = nullptr;
 

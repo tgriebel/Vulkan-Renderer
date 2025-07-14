@@ -22,6 +22,34 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 	m_layer = info.layer;
 	m_mipLevel = info.mipLevel;
 
+	m_resources = info.resources;
+	m_context = info.context;
+
+	m_callback = info.callback;
+
+	Image* outputImage0 = info.outputImage;
+	Image* outputImage1 = info.outputImage1;
+	Image* outputImage2 = info.outputImage2;
+
+	m_taskImageCount = info.taskImageCount;
+
+	if( m_taskImageCount > 0 )
+	{
+		assert( ( outputImage0 == nullptr ) && ( outputImage1 == nullptr ) && ( outputImage2 == nullptr ) );
+
+		for( uint32_t i = 0; i < m_taskImageCount; ++i )
+		{
+			m_taskImages[ i ] = new Image(
+				info.createInfos[ i ],
+				nullptr,
+				new GpuImage( "ImageShaderImage", info.createInfos[ i ], GPU_IMAGE_RW, m_context->frameBufferMemory, resourceLifeTime_t::TASK )
+			);
+		}
+		outputImage0 = m_taskImages[ 0 ];
+		outputImage1 = m_taskImages[ 1 ];
+		outputImage2 = m_taskImages[ 2 ];
+	}
+
 	// Set-up Views and Frame Buffers
 	{
 		imageSubResourceView_t view{};
@@ -30,7 +58,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		view.baseMip = m_mipLevel;
 		view.mipLevels = 1;
 
-		imageInfo_t imageInfo = info.outputImage->info;
+		imageInfo_t imageInfo = outputImage0->info;
 		imageInfo.type = IMAGE_TYPE_2D;
 
 		assert( info.passCount <= 2 ); // TODO: Support?
@@ -58,26 +86,26 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 		// Main Frame Buffer
 		{
-			m_image = info.outputImage;
+			m_image = outputImage0;
 			m_views[ passIndex ][ 0 ] = new ImageView( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
 
 			m_views[ passIndex ][ 1 ] = nullptr;
 			m_views[ passIndex ][ 2 ] = nullptr;
 
-			if( info.outputImage1 )
+			if( outputImage1 )
 			{
-				imageInfo_t imageInfo = info.outputImage1->info;
+				imageInfo_t imageInfo = outputImage1->info;
 				imageInfo.type = IMAGE_TYPE_2D;
 
-				m_views[ passIndex ][ 1 ] = new ImageView( info.outputImage1, imageInfo, view, resourceLifeTime_t::RESIZE );
+				m_views[ passIndex ][ 1 ] = new ImageView( outputImage1, imageInfo, view, resourceLifeTime_t::RESIZE );
 			}
 
-			if ( info.outputImage2 )
+			if ( outputImage2 )
 			{
-				imageInfo_t imageInfo = info.outputImage2->info;
+				imageInfo_t imageInfo = outputImage2->info;
 				imageInfo.type = IMAGE_TYPE_2D;
 
-				m_views[ passIndex ][ 2 ] = new ImageView( info.outputImage2, imageInfo, view, resourceLifeTime_t::RESIZE );
+				m_views[ passIndex ][ 2 ] = new ImageView( outputImage2, imageInfo, view, resourceLifeTime_t::RESIZE );
 			}
 
 			frameBufferCreateInfo_t fbInfo;
@@ -102,11 +130,6 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 	m_transitionState.flags.presentAfter = info.present;
 	m_transitionState.flags.readAfter = !info.present;
 	m_transitionState.flags.readOnly = true;
-
-	m_resources = info.resources;
-	m_context = info.context;
-
-	m_callback = info.callback;
 
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
@@ -137,6 +160,8 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		}
 		m_passes[ passIndex ]->codeImages[ m_image2dSlotCount ] = m_views[ passIndex - 1 ][ 0 ];
 	}
+
+	m_firstFrame = true;
 }
 
 
@@ -204,6 +229,14 @@ void ImageShaderTask::Resize()
 
 void ImageShaderTask::Shutdown()
 {
+	for ( uint32_t i = 0; i < MaxOutputImages; ++i )
+	{
+		if( m_taskImages[ i ] != nullptr ) {
+			delete m_taskImages[ i ];
+			m_taskImages[ i ] = nullptr;
+		}
+	}
+
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
 		for ( uint32_t outputImageIx = 0; outputImageIx < MaxOutputImages; ++outputImageIx )
@@ -276,6 +309,14 @@ void ImageShaderTask::FrameEnd()
 void ImageShaderTask::Execute( CommandContext& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::Brown ) );
+
+	if( m_firstFrame )
+	{
+		for ( uint32_t i = 0; i < m_taskImageCount; ++i ) {
+			Transition( &cmdContext, *m_taskImages[ i ], GPU_IMAGE_NONE, GPU_IMAGE_READ ); // Initial state is always assumed as read-only
+		}
+		m_firstFrame = false;
+	}
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
