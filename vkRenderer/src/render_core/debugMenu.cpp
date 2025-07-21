@@ -474,7 +474,7 @@ void DebugMenuEntityEdit( Scene* scene )
 
 	static ImVector<int32_t> selection;
 
-	if ( ImGui::BeginTable( "Entities", 1, flags ) )
+	if ( ImGui::BeginTable( "Entities", 2, flags ) )
 	{
 		const uint32_t entryCount = static_cast<uint32_t>( entries.size() );
 		for ( uint32_t i = 0; i < entryCount; ++i )
@@ -485,7 +485,7 @@ void DebugMenuEntityEdit( Scene* scene )
 			const bool isSelected = selection.contains( itemId );
 
 			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex( 0 );
+			ImGui::TableNextColumn();
 			ImGui::PushID( i );
 			if( ImGui::Selectable( entry.label.c_str(), isSelected, ImGuiSelectableFlags_SpanAllColumns ) )
 			{
@@ -502,6 +502,9 @@ void DebugMenuEntityEdit( Scene* scene )
 					selection.push_back( itemId );
 				}
 			}
+			ImGui::TableNextColumn();
+			ImGui::Text( entry.isEntity ? "Entity" : "Light" );
+
 			ImGui::PopID();
 		}
 		ImGui::EndTable();
