@@ -10,6 +10,8 @@ extern AssetManager g_assets;
 
 renderDebugData_t g_renderDebugData;
 
+#include "../globals/render_util.h"
+
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
 #include "../../external/imgui/backends/imgui_impl_glfw.h"
@@ -25,6 +27,47 @@ struct ImguiStyle
 {
 	static const ImGuiTableFlags TableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 };
+
+
+#define EditFlagValue( NAME, FLAGS, CHECKFLAG )	{																					\
+													bool NAME = HasFlags( FLAGS, CHECKFLAG );										\
+													if ( ImGui::Checkbox( "##" #NAME, &NAME ) )										\
+													{																				\
+														if ( NAME ) {																\
+															SetFlags( FLAGS, CHECKFLAG );											\
+														} else {																	\
+															ClearFlags( FLAGS, CHECKFLAG );											\
+														}																			\
+													}																				\
+												}
+
+void EditVector3Field( vec3f& v, const std::string& label, const float speedSlow = 0.1f, const float speedFast = 1.0f )
+{
+	float vec[ 3 ] = { v[ 0 ], v[ 1 ], v[ 2 ] };
+
+	static ImGuiTableFlags vectorFieldFlags = ImGuiTableFlags_Hideable;
+
+	if ( ImGui::BeginTable( ( "##" + label ).c_str(), 3, vectorFieldFlags ) )
+	{
+		ImGui::TableNextColumn();
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.5f, 0.0f, 0.0f, 1.0f ) );
+		ImGui::InputFloat( "X", &vec[ 0 ], speedSlow, speedFast );
+		ImGui::PopStyleColor();
+
+		ImGui::TableNextColumn();
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.0f, 0.5f, 0.0f, 1.0f ) );
+		ImGui::InputFloat( "Y", &vec[ 1 ], speedSlow, speedFast );
+		ImGui::PopStyleColor();
+
+		ImGui::TableNextColumn();
+		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.0f, 0.0f, 0.5f, 1.0f ) );
+		ImGui::InputFloat( "Z", &vec[ 2 ], speedSlow, speedFast );
+		ImGui::PopStyleColor();
+
+		ImGui::EndTable();
+	}
+	v = vec;
+}
 
 static bool EditFloat( float& f )
 {
@@ -378,73 +421,207 @@ void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset )
 }
 
 
-void DebugMenuLightEdit( Scene* scene )
+void DebugMenuEntityEdit( Scene* scene )
 {
+	static ImGuiTableFlags flags = ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
-#define EditFlagValue( NAME, FLAGS, CHECKFLAG )	{																					\
-													bool NAME = HasFlags( FLAGS, CHECKFLAG );										\
-													if ( ImGui::Checkbox( #NAME, &NAME ) )											\
-													{																				\
-														if ( NAME ) {																\
-															SetFlags( FLAGS, CHECKFLAG );											\
-														} else {																	\
-															ClearFlags( FLAGS, CHECKFLAG );											\
-														}																			\
-													}																				\
-												}
+	struct outlinerEntry_t
+	{
+		std::string		label;
+		int32_t			id;
+		bool			isEntity;
+	};
 
+	const uint32_t entityCount = scene->EntityCount();
 	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
+
+	std::vector<outlinerEntry_t> entries;
+	entries.reserve( entityCount + lightCount );
+
+	ImGui::BeginChild( "Scene", ImVec2( 0, 260 ) );
+	
 	for ( uint32_t i = 0; i < lightCount; ++i )
 	{
+		light_t& light = scene->lights[ i ];
+
 		std::stringstream ss;
-		ss << "##Light" << i;
-		std::string label = ss.str();
+		ss << "Light" << i;
 
-		if ( ImGui::TreeNode( label.c_str() + 2 ) )
+		outlinerEntry_t entry;
+		entry.label = ss.str();
+		entry.isEntity = false;
+		entry.id = i;
+
+		entries.push_back( entry );
+	}
+
+	for ( uint32_t i = 0; i < entityCount; ++i )
+	{
+		Entity* ent = scene->FindEntity( i );
+		if ( ent == nullptr ) {
+			continue;
+		}
+		
+		std::stringstream ss;
+
+		outlinerEntry_t entry;
+		entry.label = scene->entities[ i ]->name;
+		entry.isEntity = true;
+		entry.id = i;
+
+		entries.push_back( entry );
+	}
+
+	static ImVector<int32_t> selection;
+
+	if ( ImGui::BeginTable( "Entities", 1, flags ) )
+	{
+		const uint32_t entryCount = static_cast<uint32_t>( entries.size() );
+		for ( uint32_t i = 0; i < entryCount; ++i )
 		{
-			const vec4f o = scene->lights[ i ].pos;
-			const vec4f d = scene->lights[ i ].dir;
-			float origin[ 3 ] = { o[ 0 ], o[ 1 ], o[ 2 ] };
-			float dir[ 3 ] = { d[ 0 ], d[ 1 ], d[ 2 ] };
+			const int32_t itemId = i;
 
-			ImGui::PushItemWidth( 100 );
+			const outlinerEntry_t& entry = entries[ i ];
+			const bool isSelected = selection.contains( itemId );
 
-			ImGui::Text( "Origin: " );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightOriginX", &origin[ 0 ], 0.1f, 1.0f );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightOriginY", &origin[ 1 ], 0.1f, 1.0f );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightOriginZ", &origin[ 2 ], 0.1f, 1.0f );
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex( 0 );
+			ImGui::PushID( i );
+			if( ImGui::Selectable( entry.label.c_str(), isSelected, ImGuiSelectableFlags_SpanAllColumns ) )
+			{
+				if ( ImGui::GetIO().KeyCtrl )
+				{
+					if ( isSelected )
+						selection.find_erase_unsorted( itemId );
+					else
+						selection.push_back( itemId );
+				}
+				else
+				{
+					selection.clear();
+					selection.push_back( itemId );
+				}
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndTable();
+	}
+	ImGui::EndChild();
 
-			ImGui::Text( "Direction: " );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightDirX", &dir[ 0 ], 0.1f, 1.0f );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightDirY", &dir[ 1 ], 0.1f, 1.0f );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightDirZ", &dir[ 2 ], 0.1f, 1.0f );
+	ImGui::Separator();
 
-			ImGui::Text( "Intensity: " );
-			ImGui::SameLine();
-			ImGui::InputFloat( "##lightIntesity", &scene->lights[ i ].intensity, 0.1f, 1.0f );
+	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
 
-			EditFlagValue( Shadow, scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
-			EditFlagValue( PointLight, scene->lights[ i ].flags, lightFlags_t::LIGHT_FLAGS_POINT );
+	if( selection.empty() ) {
+		return;
+	}
 
-			ImGui::PopItemWidth();
+	const int32_t currentEntityId = selection[ 0 ];
 
-			rgb32_t rgb = scene->lights[ i ].color.AsRgb32();
+	if ( currentEntityId < 0 ) {
+		return;
+	}
+
+	const outlinerEntry_t& entry = entries[ currentEntityId ];
+
+	ImGui::BeginChild( "##PropertyGrid", ImVec2( 0, 260 ), true );
+	ImGui::Separator();
+	ImGui::Text( "Property Grid" );
+	ImGui::Separator();
+
+	static ImGuiTableFlags propertyGridFlags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+
+	ImGui::PushItemWidth( 100 );
+	ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.2f, 0.2f, 0.2f, 1.0f ) );
+
+	if( entry.isEntity )
+	{
+		Entity* ent = scene->FindEntity( entry.id );
+
+		if ( ImGui::BeginTable( "##EntityProperties", 2, propertyGridFlags ) )
+		{
+			vec3f origin = ent->GetOrigin();
+			vec3f scale = ent->GetScale();
+			const mat4x4f R = ent->GetRotation();
+
+			vec3f rotation;
+			MatrixToEulerZYX( R, rotation[ 0 ], rotation[ 1 ], rotation[ 2 ] );
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Origin" );
+			ImGui::TableNextColumn();
+			EditVector3Field( origin, "Origin", 0.1f, 1.0f );
 			
+			ImGui::TableNextColumn();
+			ImGui::Text( "Scale" );
+			ImGui::TableNextColumn();
+			EditVector3Field( scale, "Scale", 0.1f, 1.0f );
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Rotation" );
+			ImGui::TableNextColumn();
+			EditVector3Field( rotation, "Rotation", 1.0f, 10.0f );
+
+			ent->SetOrigin( origin );
+			ent->SetScale( scale );
+			ent->SetRotation( rotation );
+
+			ImGui::EndTable();
+		}		
+	}
+	else
+	{
+		light_t& light = scene->lights[ entry.id ];
+
+		if ( ImGui::BeginTable( "##LightProperties", 2, propertyGridFlags ) )
+		{
+			vec3f origin = light.pos;
+			vec3f dir = light.dir;
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Origin" );
+			ImGui::TableNextColumn();
+			EditVector3Field( origin, "Origin", 0.1f, 1.0f );
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Direction" );
+			ImGui::TableNextColumn();
+			EditVector3Field( dir, "Direction", 0.1f, 1.0f );
+
+			light.pos = vec4f( origin, 0.0f );
+			light.dir = vec4f( dir, 0.0f );
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Intensity" );
+			ImGui::TableNextColumn();
+			ImGui::InputFloat( "##lightIntesity", &light.intensity, 0.1f, 1.0f );
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Shadow" );
+			ImGui::TableNextColumn();
+			EditFlagValue( Shadow, light.flags, lightFlags_t::LIGHT_FLAGS_SHADOW );
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Point Light" );
+			ImGui::TableNextColumn();
+			EditFlagValue( PointLight, light.flags, lightFlags_t::LIGHT_FLAGS_POINT );
+
+			rgb32_t rgb = light.color.AsRgb32();
+
+			ImGui::TableNextColumn();
+			ImGui::Text( "Color" );
+			ImGui::TableNextColumn();
 			EditRgb( rgb );
+			light.color = rgb;
 
-			scene->lights[ i ].pos = origin;
-			scene->lights[ i ].dir = dir;
-			scene->lights[ i ].color = rgb;
-
-			ImGui::TreePop();
+			ImGui::EndTable();
 		}
 	}
+	ImGui::PopStyleColor();
+	ImGui::PopItemWidth();
+	
+	ImGui::EndChild();
+	ImGui::Separator();
 }
 
 

@@ -221,6 +221,8 @@ void Window::Init()
 	glfwSetKeyCallback( window, KeyCallback );
 	glfwSetMouseButtonCallback( window, MousePressCallback );
 	glfwSetCursorPosCallback( window, MouseMoveCallback );
+
+	focused = true;
 }
 
 
