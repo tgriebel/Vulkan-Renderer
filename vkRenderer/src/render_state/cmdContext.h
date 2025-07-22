@@ -31,6 +31,7 @@ class GpuBuffer;
 class RenderContext;
 class DrawPass;
 class ImageView;
+class GpuImage;
 class FrameBuffer;
 struct imageSubResourceView_t;
 
@@ -187,6 +188,7 @@ public:
 
 void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void Transition( CommandContext* cmdCommand, const GpuImage* gpuImage, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
 void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );

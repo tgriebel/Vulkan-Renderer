@@ -191,6 +191,12 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 
 void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
+	vk_TransitionImageLayout( cmdBuffer, image->gpuImage, subView, buffering, current, next );
+}
+
+
+void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuImage, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -200,9 +206,11 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 	barrier.subresourceRange.baseArrayLayer = subView.baseArray;
 	barrier.subresourceRange.layerCount = subView.arrayCount;
 
-	const bool hasColorAspect = ( image->info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0;
-	const bool hasDepthAspect = ( image->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
-	const bool hasStencilAspect = ( image->info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
+	const imageAspectFlags_t aspectFlags = gpuImage->GetInfo().aspect;
+
+	const bool hasColorAspect = ( aspectFlags & IMAGE_ASPECT_COLOR_FLAG ) != 0;
+	const bool hasDepthAspect = ( aspectFlags & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
+	const bool hasStencilAspect = ( aspectFlags & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
 
 	VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 	VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
@@ -234,7 +242,7 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
-	else if ( ( current & GPU_IMAGE_WRITE ) != 0 ) 
+	else if ( ( current & GPU_IMAGE_WRITE ) != 0 )
 	{
 		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
@@ -275,11 +283,11 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 		barrier.newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	barrier.subresourceRange.aspectMask = vk_GetAspectFlags( image->info.aspect );
+	barrier.subresourceRange.aspectMask = vk_GetAspectFlags( aspectFlags );
 
-	if( buffering == swapBuffering_t::SINGLE_FRAME )
+	if ( buffering == swapBuffering_t::SINGLE_FRAME )
 	{
-		barrier.image = image->gpuImage->GetVkImage( context.bufferId );
+		barrier.image = gpuImage->GetVkImage( context.bufferId );
 		vkCmdPipelineBarrier(
 			cmdBuffer,
 			sourceStage, destinationStage,
@@ -291,10 +299,10 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, co
 	}
 	else
 	{
-		const uint32_t bufferCount = image->gpuImage->GetBufferCount();
+		const uint32_t bufferCount = gpuImage->GetBufferCount();
 		for ( uint32_t i = 0; i < bufferCount; ++i )
 		{
-			barrier.image = image->gpuImage->GetVkImage( i );
+			barrier.image = gpuImage->GetVkImage( i );
 			vkCmdPipelineBarrier(
 				cmdBuffer,
 				sourceStage, destinationStage,

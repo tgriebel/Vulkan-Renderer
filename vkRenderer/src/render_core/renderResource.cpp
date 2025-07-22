@@ -1,4 +1,6 @@
 #include "renderResource.h"
+#include "../render_state/cmdContext.h"
+#include "../render_core/gpuImage.h"
 
 static std::vector<RenderResource*> m_taskDependentResources;
 static std::vector<RenderResource*> m_frameDependentResources;
@@ -16,6 +18,7 @@ std::vector<RenderResource*> RenderResource::GetResourceList( const resourceLife
 	}
 	return std::vector<RenderResource*>();
 }
+
 
 void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 {
@@ -53,8 +56,27 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 	}
 }
 
-void RenderResource::Create( const resourceLifeTime_t lifetime )
+
+void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourceLifeTime_t lifetime )
 {
+	if ( lifetime == resourceLifeTime_t::RESIZE )
+	{
+		const uint32_t resourceCount = static_cast<uint32_t>( m_viewDependentResources.size() );
+		for ( uint32_t i = 0; i < resourceCount; ++i )
+		{
+			if( m_viewDependentResources[ i ]->m_type == resourceType_t::IMAGE )
+			{
+				GpuImage* gpuImage = reinterpret_cast<GpuImage*>( m_viewDependentResources[ i ] );
+				Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+			}
+		}
+	}
+}
+
+
+void RenderResource::Create( const resourceType_t type, const resourceLifeTime_t lifetime )
+{
+	m_type = type;
 	m_lifetime = lifetime;
 	switch ( m_lifetime )
 	{

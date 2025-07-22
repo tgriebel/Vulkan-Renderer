@@ -253,7 +253,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 {
 	// Managed Resource
 	{
-		RenderResource::Create( createInfo.lifetime );
+		RenderResource::Create( resourceType_t::FRAMEBUFFER, createInfo.lifetime );
 	}
 
 	m_createInfo = createInfo;

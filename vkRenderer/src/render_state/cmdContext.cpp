@@ -289,6 +289,22 @@ void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t
 }
 
 
+void Transition( CommandContext* cmdCommand, const GpuImage* gpuImage, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+{
+	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
+
+	imageSubResourceView_t subview{};
+	subview.mipLevels = gpuImage->GetInfo().mipLevels;
+	subview.arrayCount = gpuImage->GetInfo().layers;
+
+#ifdef USE_VULKAN
+	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), gpuImage, subview, buffering, current, next );
+#endif
+
+	cmdCommand->MarkerEndRegion();
+}
+
+
 void Transition( CommandContext* cmdCommand, ImageView& imageView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
 	Transition( cmdCommand, imageView, swapBuffering_t::SINGLE_FRAME, current, next );

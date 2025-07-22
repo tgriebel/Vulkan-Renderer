@@ -64,7 +64,7 @@ public:
 		// Manage Resources
 		{
 			m_lifetime = lifetime;
-			RenderResource::Create( m_lifetime );
+			RenderResource::Create( resourceType_t::IMAGE_VIEW, m_lifetime );
 		}
 
 		m_sourceImage = image;

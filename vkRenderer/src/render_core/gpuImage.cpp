@@ -44,9 +44,10 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 {
 	// Managed Resource
 	{
-		RenderResource::Create( lifetime );
+		RenderResource::Create( resourceType_t::IMAGE, lifetime );
 	}
 	m_isViewOwned = false;
+	m_info = info;
 	m_flags = flags;
 	m_dbgName = name;
 	m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;

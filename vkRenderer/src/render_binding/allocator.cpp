@@ -71,7 +71,7 @@ void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t reg
 {
 	// Resource Management
 	{
-		RenderResource::Create( lifetime );
+		RenderResource::Create( resourceType_t::MEMORY, lifetime );
 	}
 
 #ifdef USE_VULKAN

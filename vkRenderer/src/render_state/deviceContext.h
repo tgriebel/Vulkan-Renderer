@@ -123,6 +123,7 @@ int32_t				vk_MapToGlslCubemapConvention( const uint32_t index );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
 VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuImage, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image );
 void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass, const renderPassTransition_t& transitionState );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst );

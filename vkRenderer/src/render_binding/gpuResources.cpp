@@ -111,7 +111,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 {
 	// Resource Management
 	{
-		RenderResource::Create( lifetime );
+		RenderResource::Create( resourceType_t::BUFFER, lifetime );
 	}
 
 #ifdef USE_VULKAN

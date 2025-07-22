@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GfxCore/asset_types/texture.h>
+
 #include "../render_binding/allocator.h"
 #include "../render_core/renderResource.h"
 
@@ -31,6 +33,8 @@ protected:
 #endif
 	gpuImageStateFlags_t	m_flags;
 	swapBuffering_t			m_swapBuffering;
+	imageInfo_t				m_info;
+	imageTiling_t			m_tiling;
 	const char*				m_dbgName;
 	int32_t					m_id;
 	bool					m_isViewOwned;
@@ -85,12 +89,15 @@ public:
 		m_swapBuffering = gpuImage->m_swapBuffering;
 		m_flags = gpuImage->m_flags;
 		m_id = gpuImage->m_id;
+		m_info = gpuImage->m_info;
 		m_isViewOwned = true;
 	}
 
 	// TODO: take in swapchain
-	GpuImage( const char* name, const VkImage* image, const VkImageView* view, const gpuImageStateFlags_t flags )
+	GpuImage( const char* name, imageInfo_t& info, const gpuImageStateFlags_t flags, const VkImage* image, const VkImageView* view )
 	{
+		RenderResource::Create( resourceType_t::SWAPCHAIN, resourceLifeTime_t::UNMANAGED );
+
 		m_dbgName = name;
 		m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
 
@@ -102,6 +109,7 @@ public:
 		}
 		m_flags = flags;
 		m_id = -1;
+		m_info = info;
 		m_isViewOwned = true;
 	}
 
@@ -145,6 +153,11 @@ public:
 	inline gpuImageStateFlags_t GetFlags() const
 	{
 		return m_flags;
+	}
+
+	inline imageInfo_t GetInfo() const
+	{
+		return m_info;
 	}
 
 	inline bool OwnedByImage() const

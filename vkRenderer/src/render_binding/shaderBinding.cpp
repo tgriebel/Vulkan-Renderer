@@ -98,7 +98,7 @@ void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], co
 
 	{
 		m_lifetime = resourceLifeTime_t::REBOOT;
-		RenderResource::Create( m_lifetime );
+		RenderResource::Create( resourceType_t::BINDSET, m_lifetime );
 	}
 
 	m_name = name;

@@ -187,7 +187,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	}
 
 	gpuImageStateFlags_t flags = GPU_IMAGE_PRESENT | GPU_IMAGE_PERSISTENT;
-	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", vk_swapChainImages, vk_swapChainImageViews, flags );
+	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", info, flags, vk_swapChainImages, vk_swapChainImageViews );
 }
 
 
