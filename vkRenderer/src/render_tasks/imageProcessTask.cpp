@@ -18,17 +18,31 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 {
 	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );
 
-	assert( ( info.img->info.type == IMAGE_TYPE_2D ) || ( info.img->info.type == IMAGE_TYPE_CUBE ) );
+	assert( ( info.taskImageCount == 0 ) || ( info.taskImageCount == 1 ) );
 
 	m_dbgName = info.name;
-	m_image = info.img;
+	m_image = info.outputImage;
 	m_context = info.context;
 	m_resources = info.resources;
+	m_taskImageCount = info.taskImageCount;
+
+	if ( m_taskImageCount > 0 )
+	{
+		assert( m_image == nullptr );
+
+		m_image = new Image(
+				info.createInfos[ 0 ],
+				nullptr,
+				new GpuImage( "ImageProcessImage", info.createInfos[ 0 ], GPU_IMAGE_RW, m_context->frameBufferMemory, resourceLifeTime_t::TASK )
+			);
+	}
+
+	assert( ( m_image->info.type == IMAGE_TYPE_2D ) || ( m_image->info.type == IMAGE_TYPE_CUBE ) );
 
 	m_context->scratchMemory.AdjustOffset( 0, 0 );
 
 	m_singleLevel = info.singleLevel;
-	m_cubeMip = ( info.img->info.type == IMAGE_TYPE_CUBE );
+	m_cubeMip = ( m_image->info.type == IMAGE_TYPE_CUBE );
 	m_mipLevels = m_singleLevel ? 1 : m_image->info.mipLevels;
 	m_layers = m_cubeMip ? 6 : 1;
 
@@ -240,38 +254,50 @@ void ImageProcessTask::Shutdown()
 }
 
 
+Image* ImageProcessTask::GetOutputImage()
+{
+	return m_image;
+}
+
+
 uint32_t ImageProcessTask::GetMipCount() const
 {
 	return m_mipLevels;
 }
 
 
-void ImageProcessTask::Execute( CommandContext& context )
+void ImageProcessTask::Execute( CommandContext& cmdContext )
 {
-	context.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
+	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
 
 	if ( m_useApi )
 	{
-		Transition( &context, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
-		GenerateMipmaps( &context, *m_image );
+		Transition( &cmdContext, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
+		GenerateMipmaps( &cmdContext, *m_image );
 	}
 	else
 	{
+		if ( m_firstFrame )
+		{
+			Transition( &cmdContext, *m_image, GPU_IMAGE_NONE, GPU_IMAGE_READ ); // Initial state is always assumed as read-only
+			m_firstFrame = false;
+		}
+
 		static const char* faceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
 
 		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 		{
 			const uint32_t writeLayer = m_imgProcesses[ layerId ][ 0 ]->GetOutputImage()->subResourceView.baseArray;
 
-			context.MarkerBeginRegion( faceNames[ writeLayer ], ColorToVector( ColorPurple ) );
+			cmdContext.MarkerBeginRegion( faceNames[ writeLayer ], ColorToVector( ColorPurple ) );
 			uint32_t mipLevel = m_baseMip;
 
 			for ( ; mipLevel < m_mipLevels; ++mipLevel ) {
-				m_imgProcesses[ layerId ][ mipLevel ]->Execute( context );
+				m_imgProcesses[ layerId ][ mipLevel ]->Execute( cmdContext );
 			}
-			context.MarkerEndRegion();
+			cmdContext.MarkerEndRegion();
 		}
 	}
 
-	context.MarkerEndRegion();
+	cmdContext.MarkerEndRegion();
 }

@@ -145,8 +145,6 @@ public:
 	Image					mainColorImage;
 	Image					cubeFbColorImage;
 	Image					cubeFbDepthImage;
-	Image					diffuseIblImage;
-	Image					specularIblImage;
 	Image					gBufferLayerImage;
 	Image					depthStencilImage;
 	ImageView				depthImageView;

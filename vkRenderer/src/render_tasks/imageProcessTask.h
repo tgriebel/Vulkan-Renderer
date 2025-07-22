@@ -7,13 +7,15 @@
 struct imageProcessCreateInfo_t
 {
 	const char*			name;
-	Image*				img;
+	Image*				outputImage;
 	Image*				sampleImage;
 	const char*			progName;
 	RenderContext*		context;
 	ResourceContext*	resources;
 
 	uint32_t			baseMip;
+	uint32_t			taskImageCount;
+	imageInfo_t*		createInfos;
 
 	bool				useAPI;
 	bool				singleLevel;
@@ -41,6 +43,7 @@ private:
 	uint32_t					m_mipLevels;
 	uint32_t					m_layers;
 	uint32_t					m_baseMip;
+	uint32_t					m_taskImageCount;
 	bool						m_firstFrame;
 	bool						m_multiPass;
 	bool						m_cubeMip;
@@ -57,17 +60,19 @@ public:
 		Init( info );
 	}
 
-	void		Init( const imageProcessCreateInfo_t& info );
-	void		Shutdown();
+	void			Init( const imageProcessCreateInfo_t& info );
+	void			Shutdown();
 
-	void		FrameBegin();
-	void		FrameEnd();
-	void		Resize();
-	std::string	AsString() const;
+	void			FrameBegin();
+	void			FrameEnd();
+	void			Resize();
+	std::string		AsString() const;
 
-	uint32_t	GetMipCount() const;
+	Image*			GetOutputImage();
 
-	void		Execute( CommandContext& context ) override;
+	uint32_t		GetMipCount() const;
+
+	void			Execute( CommandContext& context ) override;
 
 	~ImageProcessTask() {
 		Shutdown();

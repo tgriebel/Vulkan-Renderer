@@ -155,7 +155,11 @@ void Renderer::Init( const renderConfig_t& cfg )
 	view2Ds[ 0 ]->Commit();
 
 	ImageProcessTask* diffuseIBL = nullptr;
+	ImageReadbackTask* imageDiffuseIblReadbackTask = nullptr;
+
 	ImageProcessTask* specularIBL = nullptr;
+	ImageReadbackTask* imageSpecularIblReadBackTask = nullptr;
+
 	if ( config.useCubeViews )
 	{
 		if ( config.computeDiffuseIbl )
@@ -163,21 +167,56 @@ void Renderer::Init( const renderConfig_t& cfg )
 			imageProcessCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
 			info.progName = "DiffuseIBL";
-			info.img = &resources.diffuseIblImage;
 			info.sampleImage = &resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.baseMip = 0;
 			info.singleLevel = 1;
+			info.taskImageCount = 1;
+			info.createInfos ;
+
+			// Temp image
+			{
+				imageInfo_t imgInfo{};
+				imgInfo.width = 32;
+				imgInfo.height = 32;
+				imgInfo.mipLevels = 1;
+				imgInfo.layers = 6;
+				imgInfo.channels = 4;
+				imgInfo.subsamples = IMAGE_SMP_1;
+				imgInfo.fmt = IMAGE_FMT_RGBA_16;
+				imgInfo.type = IMAGE_TYPE_CUBE;
+				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				imgInfo.tiling = IMAGE_TILING_MORTON;
+
+				info.taskImageCount = 1;
+				info.createInfos = { &imgInfo };
+			}
 
 			diffuseIBL = new ImageProcessTask( info );
+		
+			// Readback
+			{
+				const std::string fileName = std::string( config.cubemapName ) + "_diffuseIbl.img";
+
+				imageReadBackCreateInfo_t info{};
+				info.name = "DiffuseIblReadback";
+				info.img = diffuseIBL->GetOutputImage();
+				info.context = &renderContext;
+				info.resources = &resources;
+				info.fileName = fileName.c_str();
+				info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+				info.flags |= imageReadbackFlags_t::CUBEMAP;
+				info.flags |= imageReadbackFlags_t::PACKED_HDR;
+
+				imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
+			}
 		}
 
 		if ( config.computeSpecularIBL )
 		{
 			imageProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
-			info.img = &resources.specularIblImage;
 			info.sampleImage = &resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
@@ -185,7 +224,42 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.progressiveSampling = false;
 			info.baseMip = 0;
 
+			{
+				imageInfo_t imgInfo{};
+				imgInfo.width = 128;
+				imgInfo.height = 128;
+				imgInfo.mipLevels = MipCount( imgInfo.width, imgInfo.height );
+				imgInfo.layers = 6;
+				imgInfo.channels = 4;
+				imgInfo.subsamples = IMAGE_SMP_1;
+				imgInfo.fmt = IMAGE_FMT_RGBA_16;
+				imgInfo.type = IMAGE_TYPE_CUBE;
+				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				imgInfo.tiling = IMAGE_TILING_MORTON;
+
+				info.taskImageCount = 1;
+				info.createInfos = { &imgInfo };
+			}
+
 			specularIBL = new ImageProcessTask( info );
+
+			{
+				const std::string fileName = std::string( config.cubemapName ) + "_specIbl.img";
+
+				imageReadBackCreateInfo_t info{};
+				info.name = "SpecularIblReadback";
+				info.img = specularIBL->GetOutputImage();
+				info.context = &renderContext;
+				info.resources = &resources;
+				info.fileName = fileName.c_str();
+				if ( config.writeCubeViews ) {
+					info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+				}
+				info.flags |= imageReadbackFlags_t::CUBEMAP;
+				info.flags |= imageReadbackFlags_t::PACKED_HDR;
+
+				imageSpecularIblReadBackTask = new ImageReadbackTask( info );
+			}
 		}
 	}
 
@@ -220,7 +294,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "Separable Gaussian";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.img = &resources.blurredImage;
+		info.outputImage = &resources.blurredImage;
 		info.progName = "SeparableGaussianBlur";
 		info.sampleImage = &resources.mainColorResolvedImage;
 		info.baseMip = 0;
@@ -235,7 +309,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "MainColorDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.img = &resources.mainColorResolvedImage;
+		info.outputImage = &resources.mainColorResolvedImage;
 		info.progressiveSampling = true;
 		info.progName = "DownSample";
 		info.baseMip = 1;
@@ -250,7 +324,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "CubeDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.img = &resources.cubeFbColorImage;
+		info.outputImage = &resources.cubeFbColorImage;
 		info.baseMip = 1;
 
 		mipCubeTask = new ImageProcessTask( info );
@@ -274,24 +348,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
 		imageCubemapReadBackTask = new ImageReadbackTask( info );
-	}
-
-	ImageReadbackTask* imageDiffuseIblReadbackTask = nullptr;
-	if ( config.computeDiffuseIbl )
-	{
-		const std::string fileName = std::string( config.cubemapName ) + "_diffuseIbl.img";
-
-		imageReadBackCreateInfo_t info{};
-		info.name = "DiffuseIblReadback";
-		info.img = &resources.diffuseIblImage;
-		info.context = &renderContext;
-		info.resources = &resources;
-		info.fileName = fileName.c_str();
-		info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
-		info.flags |= imageReadbackFlags_t::CUBEMAP;
-		info.flags |= imageReadbackFlags_t::PACKED_HDR;
-
-		imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
 	}
 
 	ImageShaderTask* brdfLutTask = nullptr;
@@ -338,26 +394,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 			readbackBrdfLut = new ImageReadbackTask( info );
 		}
-	}
-
-	ImageReadbackTask* imageSpecularIblReadBackTask = nullptr;
-	if ( config.computeSpecularIBL )
-	{
-		const std::string fileName = std::string( config.cubemapName ) + "_specIbl.img";
-
-		imageReadBackCreateInfo_t info{};
-		info.name = "SpecularIblReadback";
-		info.img = &resources.specularIblImage;
-		info.context = &renderContext;
-		info.resources = &resources;
-		info.fileName = fileName.c_str();
-		if ( config.writeCubeViews ) {
-			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
-		}
-		info.flags |= imageReadbackFlags_t::CUBEMAP;
-		info.flags |= imageReadbackFlags_t::PACKED_HDR;
-
-		imageSpecularIblReadBackTask = new ImageReadbackTask( info );
 	}
 
 	ImageReadbackTask* screenshotReadback = nullptr;
@@ -953,48 +989,6 @@ void Renderer::CreateFramebuffers()
 			depthInfo,
 			nullptr,
 			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
-		);
-	}
-
-	// Diffuse IBL images
-	{
-		imageInfo_t colorInfo{};
-		colorInfo.width = 32;
-		colorInfo.height = 32;
-		colorInfo.mipLevels = 1;
-		colorInfo.layers = 6;
-		colorInfo.channels = 4;
-		colorInfo.subsamples = IMAGE_SMP_1;
-		colorInfo.fmt = IMAGE_FMT_RGBA_16;
-		colorInfo.type = IMAGE_TYPE_CUBE;
-		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		colorInfo.tiling = IMAGE_TILING_MORTON;
-
-		resources.diffuseIblImage.Create(
-			colorInfo,
-			nullptr,
-			new GpuImage( "diffuseIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
-		);
-	}
-
-	// Specular IBL images
-	{
-		imageInfo_t colorInfo{};
-		colorInfo.width = 128;
-		colorInfo.height = 128;
-		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
-		colorInfo.layers = 6;
-		colorInfo.channels = 4;
-		colorInfo.subsamples = IMAGE_SMP_1;
-		colorInfo.fmt = IMAGE_FMT_RGBA_16;
-		colorInfo.type = IMAGE_TYPE_CUBE;
-		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		colorInfo.tiling = IMAGE_TILING_MORTON;
-
-		resources.specularIblImage.Create(
-			colorInfo,
-			nullptr,
-			new GpuImage( "specularIblColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 	}
 
