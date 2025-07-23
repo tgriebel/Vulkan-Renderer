@@ -253,13 +253,13 @@ private:
 	// Update/Upload
 	void								BeginUploadCommands( UploadContext& uploadContext );
 	void								EndUploadCommands( UploadContext& uploadContext );
-	void								CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
+	void								CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 
 	void								UploadAssets();
-	void								UpdateTextureData();
-	void								UploadTextures();
+	void								UpdateTextureData( CommandContext* cmdCommand );
+	void								UploadTextures( CommandContext* cmdCommand );
 	void								UpdateGpuMaterials();
-	void								UploadModelsToGPU();
+	void								UploadModelsToGPU( CommandContext* cmdCommand );
 	void								UpdateBindSets();
 	void								UpdateBuffers();
 	void								UpdateFrameDescSet();

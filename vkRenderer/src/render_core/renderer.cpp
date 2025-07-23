@@ -338,9 +338,9 @@ void Renderer::UploadAssets()
 	textureStagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
-	UploadModelsToGPU();
+	UploadModelsToGPU( &uploadContext );
 
-	UploadTextures();
+	UploadTextures( &uploadContext );
 
 	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
 	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
@@ -368,10 +368,10 @@ void Renderer::Render()
 	textureStagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
-	UploadModelsToGPU();
+	UploadModelsToGPU( &uploadContext );
 
-	UploadTextures();
-	UpdateTextureData();
+	UploadTextures( &uploadContext );
+	UpdateTextureData( &uploadContext );
 
 	uploadContext.End();
 	uploadContext.Signal( &uploadFinishedSemaphore );

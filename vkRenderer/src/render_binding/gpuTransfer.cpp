@@ -32,7 +32,7 @@
 
 extern AssetManager g_assets;
 
-void Renderer::UpdateTextureData()
+void Renderer::UpdateTextureData( CommandContext* cmdCommand )
 {
 	const uint32_t textureCount = static_cast<uint32_t>( updateTextures.size() );
 	if( textureCount == 0 ) {
@@ -44,7 +44,7 @@ void Renderer::UpdateTextureData()
 		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );
 		Image& image = imageAsset->Get();
 
-		Transition( &uploadContext, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+		Transition( cmdCommand, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		imageSubResourceView_t subView {};
 		subView.baseMip = 0;
@@ -52,9 +52,9 @@ void Renderer::UpdateTextureData()
 		subView.baseArray = 0;
 		subView.arrayCount = 1;
 
-		UploadImageData( &uploadContext, image, subView, textureStagingBuffer );
+		UploadImageData( cmdCommand, image, subView, textureStagingBuffer );
 	
-		Transition( &uploadContext, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+		Transition( cmdCommand, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 	
 		imageAsset->CompleteUpload();
 	}
@@ -63,7 +63,7 @@ void Renderer::UpdateTextureData()
 }
 
 
-void Renderer::UploadTextures()
+void Renderer::UploadTextures( CommandContext* cmdCommand )
 {
 	const uint32_t textureCount = static_cast<uint32_t>( uploadTextures.size() );
 	if ( textureCount == 0 ) {
@@ -84,7 +84,7 @@ void Renderer::UploadTextures()
 		texture.gpuImage= 
 			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, resourceLifeTime_t::REBOOT );
 
-		Transition( &uploadContext, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+		Transition( cmdCommand, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		imageSubResourceView_t subView{};
 		subView.baseMip = 0;
@@ -92,7 +92,7 @@ void Renderer::UploadTextures()
 		subView.baseArray = 0;
 		subView.arrayCount = texture.info.layers;
 
-		UploadImageData( &uploadContext, texture, subView, textureStagingBuffer );
+		UploadImageData( cmdCommand, texture, subView, textureStagingBuffer );
 		
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.gpuImage->SetId( imageFreeSlot );
@@ -109,10 +109,10 @@ void Renderer::UploadTextures()
 		Image& texture = textureAsset->Get();
 		if( texture.generateMips == false )
 		{
-			Transition( &uploadContext, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+			Transition( cmdCommand, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 			continue;
 		}
-		GenerateMipmaps( &uploadContext, texture );
+		GenerateMipmaps( cmdCommand, texture );
 	}
 
 	// 3. Add to resource type lists
@@ -222,15 +222,15 @@ void Renderer::UpdateGpuMaterials()
 	uploadMaterials.clear();
 }
 
-void Renderer::CopyGpuBuffer( GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
+void Renderer::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
-	VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
+	VkCommandBuffer commandBuffer = cmdCommand->CommandBuffer();
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
 
 	dstBuffer.Allocate( copyRegion.size );
 }
 
-void Renderer::UploadModelsToGPU()
+void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 {
 	const uint32_t modelCount = g_assets.modelLib.Count();
 
@@ -282,7 +282,7 @@ void Renderer::UploadModelsToGPU()
 			
 				geometry.stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
 
-				CopyGpuBuffer( geometry.stagingBuffer, geometry.vb, vbCopyRegion );
+				CopyGpuBuffer( cmdCommand, geometry.stagingBuffer, geometry.vb, vbCopyRegion );
 
 				upload.vertexCount = vertexCount;
 				geometry.vbBufElements += vertexCount;
@@ -299,7 +299,7 @@ void Renderer::UploadModelsToGPU()
 				ibCopyRegion.size = ibCopySize;
 				ibCopyRegion.srcOffset = geometry.stagingBuffer.GetSize();
 				ibCopyRegion.dstOffset = geometry.ib.GetSize();
-				CopyGpuBuffer( geometry.stagingBuffer, geometry.ib, ibCopyRegion );
+				CopyGpuBuffer( cmdCommand, geometry.stagingBuffer, geometry.ib, ibCopyRegion );
 
 				geometry.stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 

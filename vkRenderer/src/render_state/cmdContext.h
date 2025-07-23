@@ -192,5 +192,4 @@ void Transition( CommandContext* cmdCommand, const GpuImage* gpuImage, swapBuffe
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
 void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );
-void WritebackImage( CommandContext* cmdCommand, Image& image );
 void FlushGPU();

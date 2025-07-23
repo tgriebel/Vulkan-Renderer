@@ -372,33 +372,6 @@ void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResource
 }
 
 
-void WritebackImage( CommandContext* cmdCommand, Image& image )
-{
-	//Image tempFormatConversion;
-
-	Image tempWritebackImage;
-	{
-		imageInfo_t info{};
-		info.width = image.info.width;
-		info.height = image.info.height;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_8_UNORM;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_LINEAR;
-
-		tempWritebackImage.Create(
-			info,
-			nullptr,
-			new GpuImage( "tempWritebackImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, cmdCommand->GetRenderContext()->sharedMemory, resourceLifeTime_t::TASK )
-		);
-	}
-
-//	cmdCommand->Dispatch( )
-}
-
 void FlushGPU()
 {
 #ifdef USE_VULKAN
