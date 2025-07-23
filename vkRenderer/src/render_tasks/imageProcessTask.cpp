@@ -109,7 +109,6 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 			}
 		}
 	}
-	m_firstFrame = true;
 }
 
 
@@ -277,12 +276,6 @@ void ImageProcessTask::Execute( CommandContext& cmdContext )
 	}
 	else
 	{
-		if ( m_firstFrame )
-		{
-			Transition( &cmdContext, *m_image, GPU_IMAGE_NONE, GPU_IMAGE_READ ); // Initial state is always assumed as read-only
-			m_firstFrame = false;
-		}
-
 		static const char* faceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
 
 		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )

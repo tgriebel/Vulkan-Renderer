@@ -59,16 +59,24 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 
 void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourceLifeTime_t lifetime )
 {
-	if ( lifetime == resourceLifeTime_t::RESIZE )
+	std::vector<RenderResource*>* resourceList = nullptr;
+	if ( lifetime == resourceLifeTime_t::RESIZE ) {
+		resourceList = &m_viewDependentResources;
+	} else if ( lifetime == resourceLifeTime_t::TASK ) {
+		resourceList = &m_taskDependentResources;
+	}
+
+	if( resourceList == nullptr ) {
+		return;
+	}
+
+	const uint32_t resourceCount = static_cast<uint32_t>( resourceList->size() );
+	for ( uint32_t i = 0; i < resourceCount; ++i )
 	{
-		const uint32_t resourceCount = static_cast<uint32_t>( m_viewDependentResources.size() );
-		for ( uint32_t i = 0; i < resourceCount; ++i )
+		if ( (*resourceList)[ i ]->m_type == resourceType_t::IMAGE )
 		{
-			if( m_viewDependentResources[ i ]->m_type == resourceType_t::IMAGE )
-			{
-				GpuImage* gpuImage = reinterpret_cast<GpuImage*>( m_viewDependentResources[ i ] );
-				Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
-			}
+			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( ( *resourceList )[ i ] );
+			Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 		}
 	}
 }

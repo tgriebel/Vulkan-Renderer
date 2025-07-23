@@ -292,6 +292,7 @@ void Renderer::Resize()
 	uploadContext.Begin();
 
 	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
 
 	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
@@ -342,6 +343,7 @@ void Renderer::UploadAssets()
 	UploadTextures();
 
 	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
 
 	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 

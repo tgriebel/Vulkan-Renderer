@@ -73,7 +73,6 @@ private:
 	uint32_t				m_passCount;
 	uint32_t				m_image2dSlotCount;
 	uint32_t				m_imageCubeSlotCount;
-	bool					m_firstFrame;
 
 	imageShaderFrameBeginCallback_t* m_callback = nullptr;
 

@@ -44,7 +44,6 @@ private:
 	uint32_t					m_layers;
 	uint32_t					m_baseMip;
 	uint32_t					m_taskImageCount;
-	bool						m_firstFrame;
 	bool						m_multiPass;
 	bool						m_cubeMip;
 	bool						m_progressiveSampling;

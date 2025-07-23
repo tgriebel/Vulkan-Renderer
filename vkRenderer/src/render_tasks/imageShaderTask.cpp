@@ -160,8 +160,6 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		}
 		m_passes[ passIndex ]->codeImages[ m_image2dSlotCount ] = m_views[ passIndex - 1 ][ 0 ];
 	}
-
-	m_firstFrame = true;
 }
 
 
@@ -309,14 +307,6 @@ void ImageShaderTask::FrameEnd()
 void ImageShaderTask::Execute( CommandContext& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::Brown ) );
-
-	if( m_firstFrame )
-	{
-		for ( uint32_t i = 0; i < m_taskImageCount; ++i ) {
-			Transition( &cmdContext, *m_taskImages[ i ], GPU_IMAGE_NONE, GPU_IMAGE_READ ); // Initial state is always assumed as read-only
-		}
-		m_firstFrame = false;
-	}
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
