@@ -364,6 +364,9 @@
     <None Include="shaders\simple.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\luminance.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

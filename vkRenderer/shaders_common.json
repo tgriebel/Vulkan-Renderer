@@ -140,6 +140,13 @@
       "ps": "preCalculatedDiffuseIbl",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
+    },
+	{
+      "name": "Luminance",
+      "vs": "fullscreen",
+      "ps": "luminance",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
     }
   ]
 }

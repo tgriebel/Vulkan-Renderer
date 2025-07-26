@@ -140,12 +140,46 @@ private:
 	Image*	m_src;
 	Image*	m_dst;
 
+	copyImageParms_t m_srcParms;
+	copyImageParms_t m_dstParms;
+
 public:
 
 	CopyImageTask( Image* src, Image* dst )
 	{
 		m_src = src;
 		m_dst = dst;
+
+		m_srcParms.baseArray = 0;
+		m_srcParms.arrayCount = m_src->subResourceView.arrayCount;
+		m_srcParms.baseMip = 0;
+		m_srcParms.mipLevels = m_src->subResourceView.mipLevels;
+		m_srcParms.x = 0;
+		m_srcParms.y = 0;
+		m_srcParms.z = 0;
+		m_srcParms.width = m_src->info.width;
+		m_srcParms.height = m_src->info.height;
+		m_srcParms.depth = 1;
+
+		m_dstParms.baseArray = 0;
+		m_dstParms.arrayCount = m_dst->subResourceView.arrayCount;
+		m_dstParms.baseMip = 0;
+		m_dstParms.mipLevels = m_dst->subResourceView.mipLevels;
+		m_dstParms.x = 0;
+		m_dstParms.y = 0;
+		m_dstParms.z = 0;
+		m_dstParms.width = m_dst->info.width;
+		m_dstParms.height = m_dst->info.height;
+		m_dstParms.depth = 1;
+	}
+
+	CopyImageTask( Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms )
+	{
+		m_src = src;
+		m_dst = dst;
+
+		m_srcParms = srcParms;
+		m_dstParms = dstParms;
 	}
 
 	void Resize() {}
@@ -154,6 +188,9 @@ public:
 	void			FrameEnd() {}
 	std::string		AsString() const;
 	const char*		GetName() const;
+
+	void SetSourceParms( const copyImageParms_t& src );
+	void SetDestinationParms( const copyImageParms_t& dst );
 
 	void Execute( CommandContext& context ) override;
 	~CopyImageTask()

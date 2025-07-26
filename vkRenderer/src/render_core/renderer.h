@@ -158,6 +158,7 @@ public:
 	Image					mainColorResolvedImage;
 	Image					blurredImage;
 	Image					tempColorImage;
+	Image					previousLum;
 	Image					depthStencilResolvedImage;
 
 	// Data images

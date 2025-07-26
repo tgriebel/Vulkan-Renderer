@@ -30,8 +30,6 @@
 
 DeviceContext context;
 
-static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms );
-
 bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
 	uint32_t extensionCount;
@@ -484,7 +482,7 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 }
 
 
-static inline void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms )
+void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms )
 {
 	bool supportsBlit = true;
 

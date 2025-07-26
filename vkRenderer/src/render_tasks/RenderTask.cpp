@@ -362,9 +362,21 @@ std::string CopyImageTask::AsString() const
 }
 
 
+void CopyImageTask::SetSourceParms( const copyImageParms_t& src )
+{
+	m_srcParms = src;
+}
+
+
+void CopyImageTask::SetDestinationParms( const copyImageParms_t& dst )
+{
+	m_dstParms = dst;
+}
+
+
 void CopyImageTask::Execute( CommandContext& context )
 {
-	CopyImage( &context, *m_src, *m_dst );
+	CopyImage( &context, *m_src, m_srcParms, *m_dst, m_dstParms );
 }
 
 

@@ -25,3 +25,4 @@ C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\gaussian.frag -o s
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\equirectangularSky.frag -o shaders_bin\equirectangularSkyPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\preCalculatedDiffuseIbl.frag -o shaders_bin\preCalculatedDiffuseIblPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\computeBrdfLut.frag -o shaders_bin\computeBrdfLutPS.spv -g
+C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\luminance.frag -o shaders_bin\luminancePS.spv -g

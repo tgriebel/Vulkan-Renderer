@@ -61,7 +61,6 @@ void main()
 	stencilCoverage /= 4.0f;
 
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
-	sceneColor.rgb = LinearToSrgb( texture( codeSamplers[ textureId0 ], fragTexCoord.xy, 0 ).rgb );
 
 	const vec4 uvColor = vec4( fragTexCoord.xy, 0.0f, 1.0f );
 	const float sceneDepth = texelFetch( codeSamplers[ textureId1 ], pixelLocation, 0 ).r;
@@ -75,14 +74,25 @@ void main()
 	float coc = ( sceneDepth - focalDepth ) / focalRange;
 	const int MAX_MIP_LEVELS = 3;
 	coc = clamp( coc, -1.0, 1.0f );
+
+	vec3 hdrColor;
 	if ( enabled && ( coc < 0.0f ) ) {
-		sceneColor.rgb = LinearToSrgb( textureLod( codeSamplers[ textureId2 ], fragTexCoord.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb );
+		hdrColor.rgb = textureLod( codeSamplers[ textureId2 ], fragTexCoord.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
+	} else {
+		hdrColor.rgb = texture( codeSamplers[ textureId0 ], fragTexCoord.xy, 0 ).rgb;
 	}
+
+	const vec3 tint = globals.toneMap.rgb;
+	const float exposure = globals.toneMap.a;
+
+	const vec3 exposureAdjustedColor = vec3( 1.0f ) - exp( -hdrColor * exposure );
+
+	sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 
 	outColor.a = 1.0f;
 	if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
-		outColor.rgb = globals.toneMap.rgb * mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
+		outColor.rgb = tint * mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
 	} else {
-		outColor.rgb = globals.toneMap.rgb * sceneColor.rgb;
+		outColor.rgb = tint * sceneColor.rgb;
 	}
 }

@@ -303,8 +303,38 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 
 	ImageProcessTask* mipTask = nullptr;
+	CopyImageTask* copyLuminance = nullptr;
+
 	if ( config.downsampleScene )
 	{
+		{
+			copyImageParms_t srcCopy{};
+			srcCopy.baseArray = 0;
+			srcCopy.arrayCount = 1;
+			srcCopy.mipLevels = resources.mainColorResolvedImage.subResourceView.mipLevels;
+			srcCopy.baseMip = srcCopy.mipLevels - 1;		
+			srcCopy.x = 0;
+			srcCopy.y = 0;
+			srcCopy.z = 0;
+			srcCopy.width = 1;
+			srcCopy.height = 1;
+			srcCopy.depth = 1;
+
+			copyImageParms_t dstCopy{};
+			dstCopy.baseArray = 0;
+			dstCopy.arrayCount = 1;
+			dstCopy.baseMip = 0;
+			dstCopy.mipLevels = 1;
+			dstCopy.x = 0;
+			dstCopy.y = 0;
+			dstCopy.z = 0;
+			dstCopy.width = 1;
+			dstCopy.height = 1;
+			dstCopy.depth = 1;
+
+			copyLuminance = new CopyImageTask( &resources.mainColorResolvedImage, srcCopy, &resources.previousLum, dstCopy );
+		}
+
 		imageProcessCreateInfo_t info{};
 		info.name = "MainColorDownsample";
 		info.context = &renderContext;
@@ -447,7 +477,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 	if( config.screenshot ) {
 		schedule.Link( screenshotReadback );
 	}
-	if ( config.downsampleScene ) {
+	if ( config.downsampleScene )
+	{
+	//	schedule.Link( copyLuminance );
 		schedule.Link( mipTask );
 	}
 	if ( config.gaussianBlur )
@@ -1071,6 +1103,26 @@ void Renderer::CreateFramebuffers()
 			info,
 			nullptr,
 			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+	}
+
+	// Previous Luminance
+	{
+		imageInfo_t info{};
+		info.width = 1;
+		info.height = 1;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		resources.previousLum.Create(
+			info,
+			nullptr,
+			new GpuImage( "prevLuminance", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
 		);
 	}
 }

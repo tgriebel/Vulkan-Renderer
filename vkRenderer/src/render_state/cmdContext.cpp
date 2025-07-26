@@ -347,6 +347,18 @@ void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
 }
 
 
+void CopyImage( CommandContext* cmdCommand, Image& src, const copyImageParms_t& srcParms, Image& dst, const copyImageParms_t& dstParms )
+{
+	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
+
+#ifdef USE_VULKAN
+	vk_CopyImage( cmdCommand->CommandBuffer(), &src, srcParms, &dst, dstParms );
+#endif
+
+	cmdCommand->MarkerEndRegion();
+}
+
+
 void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer )
 {
 	cmdCommand->MarkerBeginRegion( "UploadImageData", ColorToVector( ColorWhite ) );
