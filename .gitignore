@@ -13,7 +13,6 @@
 *.exe
 *.iobj
 *.ilk
-*.spv
 vkTestProj/x64/Release/
 vkTestProj/x64/Debug/
 .vs/vkTestSolution/v16/
