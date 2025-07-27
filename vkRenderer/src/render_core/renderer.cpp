@@ -342,6 +342,7 @@ void Renderer::UploadAssets()
 
 	UploadTextures( &uploadContext );
 
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
 	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
 	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
 

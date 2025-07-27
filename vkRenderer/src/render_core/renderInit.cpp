@@ -479,7 +479,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	if ( config.downsampleScene )
 	{
-	//	schedule.Link( copyLuminance );
+		schedule.Link( copyLuminance );
 		schedule.Link( mipTask );
 	}
 	if ( config.gaussianBlur )
@@ -1122,7 +1122,7 @@ void Renderer::CreateFramebuffers()
 		resources.previousLum.Create(
 			info,
 			nullptr,
-			new GpuImage( "prevLuminance", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
+			new GpuImage( "prevLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
 		);
 	}
 }

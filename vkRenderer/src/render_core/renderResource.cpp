@@ -60,7 +60,9 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourceLifeTime_t lifetime )
 {
 	std::vector<RenderResource*>* resourceList = nullptr;
-	if ( lifetime == resourceLifeTime_t::RESIZE ) {
+	if ( lifetime == resourceLifeTime_t::REBOOT ) {
+		resourceList = &m_appDependentResources;
+	} else if ( lifetime == resourceLifeTime_t::RESIZE ) {
 		resourceList = &m_viewDependentResources;
 	} else if ( lifetime == resourceLifeTime_t::TASK ) {
 		resourceList = &m_taskDependentResources;

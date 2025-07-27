@@ -163,6 +163,9 @@ static inline VkImageAspectFlagBits vk_GetAspectFlags( const imageAspectFlags_t 
 			case IMAGE_ASPECT_COLOR_FLAG:		vkFlags |= VK_IMAGE_ASPECT_COLOR_BIT;	break;
 			case IMAGE_ASPECT_DEPTH_FLAG:		vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;	break;
 			case IMAGE_ASPECT_STENCIL_FLAG:		vkFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;	break;
+			case IMAGE_ASPECT_PLANE0:			vkFlags |= VK_IMAGE_ASPECT_PLANE_0_BIT;	break;
+			case IMAGE_ASPECT_PLANE1:			vkFlags |= VK_IMAGE_ASPECT_PLANE_1_BIT;	break;
+			case IMAGE_ASPECT_PLANE2:			vkFlags |= VK_IMAGE_ASPECT_PLANE_2_BIT;	break;
 		}
 		bitMask <<= 1;
 	}

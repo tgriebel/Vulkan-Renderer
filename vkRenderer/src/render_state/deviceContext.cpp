@@ -162,10 +162,7 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 
 VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView )
 {
-	VkImageAspectFlags aspectFlags = 0;
-	aspectFlags |= ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
-	aspectFlags |= ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
-	aspectFlags |= ( info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+	VkImageAspectFlags aspectFlags = vk_GetAspectFlags( info.aspect );
 
 	assert( subResourceView.mipLevels >= 1 );
 	assert( subResourceView.arrayCount >= 1 );
@@ -324,12 +321,14 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		throw std::runtime_error( "texture outputImage format does not support linear blitting!" );
 	}
 
+	VkImageAspectFlags aspectMask = vk_GetAspectFlags( image->info.aspect );
+
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.image = image->gpuImage->GetVkImage( context.bufferId );
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.aspectMask = aspectMask;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = image->subResourceView.arrayCount;
 	barrier.subresourceRange.levelCount = 1;
@@ -360,13 +359,13 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		VkImageBlit blit{ };
 		blit.srcOffsets[ 0 ] = { 0, 0, 0 };
 		blit.srcOffsets[ 1 ] = { mipWidth, mipHeight, 1 };
-		blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.srcSubresource.aspectMask = aspectMask;
 		blit.srcSubresource.mipLevel = i - 1;
 		blit.srcSubresource.baseArrayLayer = 0;
 		blit.srcSubresource.layerCount = image->subResourceView.arrayCount;
 		blit.dstOffsets[ 0 ] = { 0, 0, 0 };
 		blit.dstOffsets[ 1 ] = { (int32_t)dstMipWidth, (int32_t)dstMipHeight, 1 };
-		blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		blit.dstSubresource.aspectMask = aspectMask;
 		blit.dstSubresource.mipLevel = i;
 		blit.dstSubresource.baseArrayLayer = 0;
 		blit.dstSubresource.layerCount = image->subResourceView.arrayCount;

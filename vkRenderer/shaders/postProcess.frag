@@ -28,6 +28,7 @@
 
 #include "globals.h"
 #include "color.h"
+#include "light.h"
 
 PS_LAYOUT_STANDARD( sampler2D )
 
@@ -83,6 +84,7 @@ void main()
 	}
 
 	const vec3 tint = globals.toneMap.rgb;
+	const float luminance = LuminanceFromRGB( texture( codeSamplers[ textureId3 ], vec2( 0.0f, 0.0f ), 0 ).rgb );
 	const float exposure = globals.toneMap.a;
 
 	const vec3 exposureAdjustedColor = vec3( 1.0f ) - exp( -hdrColor * exposure );
