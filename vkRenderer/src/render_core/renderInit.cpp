@@ -167,11 +167,11 @@ void Renderer::Init( const renderConfig_t& cfg )
 			imageProcessCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
 			info.progName = "DiffuseIBL";
-			info.sampleImage = &resources.cubeFbColorImage;
+			info.sampleImages[ 0 ] = &resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.baseMip = 0;
-			info.singleLevel = 1;
+			info.mipCount = 1;
 			info.taskImageCount = 1;
 			info.createInfos ;
 
@@ -217,11 +217,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			imageProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
-			info.sampleImage = &resources.cubeFbColorImage;
+			info.sampleImages[ 0 ] = &resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.progName = "preCalculatedSpecularIbl";
-			info.progressiveSampling = false;
 			info.baseMip = 0;
 
 			{
@@ -296,22 +295,25 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 		info.outputImage = &resources.blurredImage;
 		info.progName = "SeparableGaussianBlur";
-		info.sampleImage = &resources.mainColorResolvedImage;
+		info.sampleImages[ 0 ] = &resources.mainColorResolvedImage;
 		info.baseMip = 0;
 
 		gaussianTask = new ImageProcessTask( info );
 	}
 
-	ImageProcessTask* mipTask = nullptr;
-	CopyImageTask* copyLuminance = nullptr;
+	
+	CopyImageTask* copyPreviousLuminance = nullptr;
+	ImageProcessTask* luminanceSceneAvg = nullptr;
+	ImageProcessTask* luminanceFrameAvg = nullptr;
 
-	if ( config.downsampleScene )
+	if ( config.autoExposure )
 	{
+		// Copy previous luminance
 		{
 			copyImageParms_t srcCopy{};
 			srcCopy.baseArray = 0;
 			srcCopy.arrayCount = 1;
-			srcCopy.mipLevels = resources.mainColorResolvedImage.subResourceView.mipLevels;
+			srcCopy.mipLevels = resources.currentLum.subResourceView.mipLevels;
 			srcCopy.baseMip = srcCopy.mipLevels - 1;		
 			srcCopy.x = 0;
 			srcCopy.y = 0;
@@ -332,9 +334,44 @@ void Renderer::Init( const renderConfig_t& cfg )
 			dstCopy.height = 1;
 			dstCopy.depth = 1;
 
-			copyLuminance = new CopyImageTask( &resources.mainColorResolvedImage, srcCopy, &resources.previousLum, dstCopy );
+			copyPreviousLuminance = new CopyImageTask( &resources.currentLum, srcCopy, &resources.previousLum, dstCopy );
 		}
 
+		// Average scene luminance
+		{
+			imageProcessCreateInfo_t info{};
+			info.name = "LuminanceDownsample";
+			info.context = &renderContext;
+			info.resources = &resources;
+			info.sampleImages[ 0 ] = &resources.mainColorResolvedImage;
+			info.sampleImages[ 1 ] = &resources.previousLum;
+			info.outputImage = &resources.currentLum;
+			info.mipCount = resources.currentLum.info.mipLevels;
+			info.progressiveSampling = true;
+			info.progName = "LuminanceDownsample";
+
+			luminanceSceneAvg = new ImageProcessTask( info );
+		}
+
+		// Compute new luminance from previous luminance and averaged scene color
+		//{
+		//	imageProcessCreateInfo_t info = {};
+		//	info.name = "LuminanceTemnporalAverage";
+		//	info.progName = "Luminance";
+		//	info.outputImage = &resources.currentLum;
+		//	info.sampleImage = &resources.previousLum;
+		//	info.context = &renderContext;
+		//	info.resources = &resources;
+		//	info.baseMip = resources.currentLum.info.mipLevels - 1;
+		//	info.mipCount = resources.currentLum.info.mipLevels;
+
+		//	luminanceFrameAvg = new ImageProcessTask( info );
+		//}
+	}
+
+	ImageProcessTask* mipTask = nullptr;
+	if ( config.downsampleScene )
+	{
 		imageProcessCreateInfo_t info{};
 		info.name = "MainColorDownsample";
 		info.context = &renderContext;
@@ -477,9 +514,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 	if( config.screenshot ) {
 		schedule.Link( screenshotReadback );
 	}
+	if ( config.autoExposure )
+	{
+		schedule.Link( copyPreviousLuminance );
+		schedule.Link( luminanceSceneAvg );
+	//	schedule.Link( luminanceFrameAvg );
+	}
 	if ( config.downsampleScene )
 	{
-		schedule.Link( copyLuminance );
 		schedule.Link( mipTask );
 	}
 	if ( config.gaussianBlur )
@@ -1122,7 +1164,27 @@ void Renderer::CreateFramebuffers()
 		resources.previousLum.Create(
 			info,
 			nullptr,
-			new GpuImage( "prevLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
+			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
+		);
+	}
+
+	// Luminance MIP-chain
+	{
+		imageInfo_t info{};
+		info.width = 1024;
+		info.height = 1024;
+		info.mipLevels = MipCount( info.width, info.height );
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		resources.currentLum.Create(
+			info,
+			nullptr,
+			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
 		);
 	}
 }

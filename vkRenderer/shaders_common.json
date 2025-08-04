@@ -142,6 +142,13 @@
 	  "image_shader": true
     },
 	{
+      "name": "LuminanceDownsample",
+      "vs": "fullscreen",
+      "ps": "luminanceDownsample",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
       "name": "Luminance",
       "vs": "fullscreen",
       "ps": "luminance",

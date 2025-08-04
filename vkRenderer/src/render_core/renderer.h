@@ -63,6 +63,7 @@ struct renderConfig_t
 	bool			computeDiffuseIbl;
 	bool			computeSpecularIBL;
 	bool			downsampleScene;
+	bool			autoExposure;
 	bool			screenshot;
 	bool			gaussianBlur;
 	bool			shadows;
@@ -159,6 +160,7 @@ public:
 	Image					blurredImage;
 	Image					tempColorImage;
 	Image					previousLum;
+	Image					currentLum;
 	Image					depthStencilResolvedImage;
 
 	// Data images

@@ -310,7 +310,9 @@ void ImageShaderTask::Execute( CommandContext& cmdContext )
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::White ) );
+		if( m_passCount > 1 ) {
+			cmdContext.MarkerBeginRegion( ( passIndex == 0 ) ? "Pass #0" : "Pass #1", ColorToVector( Color::White ) );
+		}
 
 		m_passes[ passIndex ]->InsertResourceBarriers( cmdContext );
 
@@ -318,7 +320,9 @@ void ImageShaderTask::Execute( CommandContext& cmdContext )
 
 		vk_RenderImageShader( cmdContext, pipeLineHandle, m_passes[ passIndex ], m_transitionState );
 
-		cmdContext.MarkerEndRegion();
+		if ( m_passCount > 1 ) {
+			cmdContext.MarkerEndRegion();
+		}
 	}
 
 	cmdContext.MarkerEndRegion();

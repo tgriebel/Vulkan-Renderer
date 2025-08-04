@@ -564,14 +564,21 @@ void Renderer::UpdateBuffers()
 	resources.globalConstants.SetPos( 0 );
 	{
 		globalUboConstants_t globals = {};
-		static auto startTime = std::chrono::high_resolution_clock::now();
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
+		static std::chrono::steady_clock::time_point startTime = std::chrono::high_resolution_clock::now();
+		static std::chrono::steady_clock::time_point currentTime = startTime;
+		
+		auto previousTime = currentTime;
+		currentTime = std::chrono::high_resolution_clock::now();
 
-		float intPart = 0;
-		const float fracPart = modf( time, &intPart );
+		auto deltaTime = ( currentTime - previousTime );
+				
+		float elapsedTime = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
+		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( deltaTime ).count();
 
-		globals.time = vec4f( time, intPart, fracPart, 1.0f );
+		float timeIntPart = 0;
+		const float timeFracPart = modf( elapsedTime, &timeIntPart );
+
+		globals.time = vec4f( elapsedTime, timeIntPart, timeFracPart, dt );
 #if defined( USE_IMGUI )
 		globals.generic = vec4f( g_imguiControls.roughnessScale, g_imguiControls.roughnessBias, g_imguiControls.metalnessScale, g_imguiControls.metalnessBias );
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );

@@ -39,17 +39,15 @@ PS_LAYOUT_IMAGE_PROCESS( sampler2D, LuminanceConstants )
 
 void main()
 {
-   const float luminance = texture( codeSamplers[ 0 ], fragTexCoord.xy ).r;
-   const float previousLuminance = texture( codeSamplers[ 1 ], fragTexCoord.xy ).r;
-
-   const float dtSec = globals.time.w / 1000.0f;
-
-   const float adaptationRate = globals.toneMap.a;
-   const float weight = 1.0f - exp2( -dtSec * adaptationRate );
-
-   // Pattanaik et al: "Time-Dependent Visual Adaptation For Fast Realistic Image Display"
-   const float weightedAvgLum = previousLuminance + ( luminance - previousLuminance ) * weight;
-
-   outColor.r = weightedAvgLum;
-   outColor.a = 1.0f;
+   if( level == 0 )
+   {
+		const vec3 sceneColor = texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb;
+		outColor.r = dot( sceneColor, vec3( 0.30f, 0.59f, 0.11f ) );
+   }
+   else
+   {
+	   const float luminanceFilterAverage = texture( codeSamplers[ 0 ], fragTexCoord.xy ).r;
+	   outColor.r = luminanceFilterAverage.r;
+   }
+   outColor.gba = vec3( 0.0f, 0.0f, 1.0f );
 }

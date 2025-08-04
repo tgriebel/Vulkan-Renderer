@@ -4,21 +4,23 @@
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/imageView.h"
 
+static const uint32_t MaxImageProcessSampleImages = 3;
+
 struct imageProcessCreateInfo_t
 {
 	const char*			name;
 	Image*				outputImage;
-	Image*				sampleImage;
+	Image*				sampleImages[ MaxImageProcessSampleImages ];
 	const char*			progName;
 	RenderContext*		context;
 	ResourceContext*	resources;
 
 	uint32_t			baseMip;
+	uint32_t			mipCount;
 	uint32_t			taskImageCount;
 	imageInfo_t*		createInfos;
 
 	bool				useAPI;
-	bool				singleLevel;
 	bool				multiPass;
 	bool				progressiveSampling;
 };
@@ -32,23 +34,26 @@ private:
 
 	hdl_t						m_progHdl;
 	Image*						m_image;
-	Image*						m_sampleImage;
+	Image*						m_sample2dImages[ MaxImageProcessSampleImages ];
+	Image*						m_sampleCubeImages[ MaxImageProcessSampleImages ];
 	std::string					m_dbgName;
 	RenderContext*				m_context;
 	ResourceContext*			m_resources;
 
 	mat4x4f						m_viewMatrices[ MaxLayers ];
-	ImageShaderTask*			m_imgProcesses[ MaxLayers ][ MaxMipMaps ];
+	ImageShaderTask*			m_imgProcesses[ MaxLayers ][ MaxMipMaps ] = {};
 	ImageView					m_baseViews[ MaxLayers ];
 	uint32_t					m_mipLevels;
 	uint32_t					m_layers;
 	uint32_t					m_baseMip;
+	uint32_t					m_requestedMipCount;
 	uint32_t					m_taskImageCount;
+	uint32_t					m_sample2dCount;
+	uint32_t					m_sampleCubeCount;
 	bool						m_multiPass;
 	bool						m_cubeMip;
 	bool						m_progressiveSampling;
 	bool						m_useApi;
-	bool						m_singleLevel;
 
 	ImageShaderTask* CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel );
 

@@ -102,6 +102,7 @@ MakeCVar( char*,	r_cubemapName );
 MakeCVar( bool,		c_bakeAssets );
 MakeCVar( bool,		r_shadows );
 MakeCVar( bool,		r_downsampleScene );
+MakeCVar( bool,		r_autoExposure );
 MakeCVar( bool,		r_screenshot );
 MakeCVar( bool,		r_gaussianBlur );
  
@@ -159,6 +160,7 @@ int main( int argc, char* argv[] )
 	config.computeSpecularIBL = r_computeSpecularIbl.GetBool();
 	config.shadows = r_shadows.GetBool();
 	config.downsampleScene = r_downsampleScene.GetBool();
+	config.autoExposure = r_autoExposure.GetBool();
 	config.screenshot = r_screenshot.GetBool();
 	config.cubemapName = r_cubemapName.GetString();
 	config.computeBrdfLut = r_computeBrdfLut.GetBool();

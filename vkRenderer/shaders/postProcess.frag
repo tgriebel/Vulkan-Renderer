@@ -83,11 +83,15 @@ void main()
 		hdrColor.rgb = texture( codeSamplers[ textureId0 ], fragTexCoord.xy, 0 ).rgb;
 	}
 
-	const vec3 tint = globals.toneMap.rgb;
-	const float luminance = LuminanceFromRGB( texture( codeSamplers[ textureId3 ], vec2( 0.0f, 0.0f ), 0 ).rgb );
-	const float exposure = globals.toneMap.a;
+	//hdrColor.rgb = LuminanceFromRGB( hdrColor.rgb ).xxx;
 
-	const vec3 exposureAdjustedColor = vec3( 1.0f ) - exp( -hdrColor * exposure );
+	const vec3 tint = globals.toneMap.rgb;
+	const float luminance = LuminanceFromRGB( texture( codeSamplers[ textureId3 ], vec2( 1.0f, 1.0f ), 0 ).rgb );
+	//const float exposure = 1.0f / ( pow( 2.0f, log2( luminance * 8.0f ) ) * 1.2f );// globals.toneMap.a;
+	const float exposure = 0.18f / clamp( luminance, 0.2f, 100.0f );
+
+	//const vec3 exposureAdjustedColor = hdrColor * exposure;
+	const vec3 exposureAdjustedColor = hdrColor * exposure;
 
 	sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 
