@@ -304,7 +304,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 	
 	CopyImageTask* copyPreviousLuminance = nullptr;
 	ImageProcessTask* luminanceSceneAvg = nullptr;
-	ImageProcessTask* luminanceFrameAvg = nullptr;
 
 	if ( config.autoExposure )
 	{
@@ -377,6 +376,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.outputImage = &resources.cubeFbColorImage;
+		info.progressiveSampling = true;
 		info.baseMip = 1;
 
 		mipCubeTask = new ImageProcessTask( info );
