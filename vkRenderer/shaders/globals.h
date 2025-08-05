@@ -95,6 +95,8 @@ struct surface_t
 												uint	previousImageId;											\
 												uint	level;														\
 												uint	layer;														\
+												uint	mipCount;													\
+												uint	layerCount;													\
 												TYPE	NAME;														\
 											};
 

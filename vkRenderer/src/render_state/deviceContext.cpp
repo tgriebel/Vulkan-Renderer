@@ -522,8 +522,8 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageP
 	srcBarrier.subresourceRange.aspectMask = srcAspect;
 	srcBarrier.subresourceRange.baseArrayLayer = srcParms.baseArray;
 	srcBarrier.subresourceRange.layerCount = srcParms.arrayCount;
-	srcBarrier.subresourceRange.baseMipLevel = 0;
-	srcBarrier.subresourceRange.levelCount = 1;
+	srcBarrier.subresourceRange.baseMipLevel = srcParms.baseMip;
+	srcBarrier.subresourceRange.levelCount = srcParms.mipLevels;
 
 	VkImageMemoryBarrier dstBarrier{ };
 	dstBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -534,7 +534,7 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageP
 	dstBarrier.subresourceRange.baseArrayLayer = dstParms.baseArray;
 	dstBarrier.subresourceRange.layerCount = dstParms.arrayCount;
 	dstBarrier.subresourceRange.baseMipLevel = dstParms.baseMip;
-	dstBarrier.subresourceRange.levelCount = 1;
+	dstBarrier.subresourceRange.levelCount = dstParms.mipLevels;
 
 	// Transition source image
 	{
@@ -568,11 +568,14 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageP
 	// Perform blit/copy
 	if( supportsBlit )
 	{
+		// Add multiple regions for each mip-level
+		assert( ( srcParms.mipLevels == 1 ) && ( dstParms.mipLevels == 1 ) );
+
 		VkImageBlit blit{ };
 		blit.srcOffsets[ 0 ] = { srcParms.x, srcParms.y, srcParms.z };
 		blit.srcOffsets[ 1 ] = { srcParms.width, srcParms.height, srcParms.depth };
 		blit.srcSubresource.aspectMask = srcAspect;
-		blit.srcSubresource.mipLevel = 0;
+		blit.srcSubresource.mipLevel = srcParms.baseMip;
 		blit.srcSubresource.baseArrayLayer = srcParms.baseArray;
 		blit.srcSubresource.layerCount = srcParms.arrayCount;
 		blit.dstOffsets[ 0 ] = { dstParms.x, dstParms.y, dstParms.z };
@@ -593,11 +596,18 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageP
 	}
 	else
 	{
+		// Add multiple regions for each mip-level
+		assert( ( srcParms.mipLevels == 1 ) && ( dstParms.mipLevels == 1 ) );
+
 		VkImageCopy imageCopyRegion{};
 		imageCopyRegion.srcSubresource.aspectMask = srcAspect;
 		imageCopyRegion.srcSubresource.layerCount = srcParms.arrayCount;
+		imageCopyRegion.srcSubresource.baseArrayLayer = srcParms.baseArray;
+		imageCopyRegion.srcSubresource.mipLevel = srcParms.baseMip;
 		imageCopyRegion.dstSubresource.aspectMask = dstAspect;
 		imageCopyRegion.dstSubresource.layerCount = dstParms.arrayCount;
+		imageCopyRegion.dstSubresource.baseArrayLayer = dstParms.baseArray;
+		imageCopyRegion.dstSubresource.mipLevel = dstParms.baseMip;
 		imageCopyRegion.extent.width = srcParms.width;
 		imageCopyRegion.extent.height = srcParms.height;
 		imageCopyRegion.extent.depth = srcParms.depth;

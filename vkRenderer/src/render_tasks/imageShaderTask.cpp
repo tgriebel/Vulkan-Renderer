@@ -275,6 +275,8 @@ void ImageShaderTask::FrameBegin()
 			constants.previousImageId = m_image2dSlotCount;
 			constants.level = m_mipLevel;
 			constants.layer = m_layer;
+			constants.mipCount = m_image->info.mipLevels;
+			constants.layerCount = m_image->info.layers;
 
 			const uint64_t offset = m_buffer[ passIndex ].GetSize();
 			m_buffer[ passIndex ].SetPos( 0 );

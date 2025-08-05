@@ -45,6 +45,8 @@ private:
 		uint32_t	previousImageId;
 		uint32_t	level;
 		uint32_t	layer;
+		uint32_t	mipCount;
+		uint32_t	layerCount;
 	};
 
 	static const uint32_t	MaxBufferSizeInBytes = 256;

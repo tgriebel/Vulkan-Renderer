@@ -313,7 +313,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			copyImageParms_t srcCopy{};
 			srcCopy.baseArray = 0;
 			srcCopy.arrayCount = 1;
-			srcCopy.mipLevels = resources.currentLum.subResourceView.mipLevels;
+			srcCopy.mipLevels = 1;
 			srcCopy.baseMip = srcCopy.mipLevels - 1;		
 			srcCopy.x = 0;
 			srcCopy.y = 0;
@@ -352,21 +352,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 			luminanceSceneAvg = new ImageProcessTask( info );
 		}
-
-		// Compute new luminance from previous luminance and averaged scene color
-		//{
-		//	imageProcessCreateInfo_t info = {};
-		//	info.name = "LuminanceTemnporalAverage";
-		//	info.progName = "Luminance";
-		//	info.outputImage = &resources.currentLum;
-		//	info.sampleImage = &resources.previousLum;
-		//	info.context = &renderContext;
-		//	info.resources = &resources;
-		//	info.baseMip = resources.currentLum.info.mipLevels - 1;
-		//	info.mipCount = resources.currentLum.info.mipLevels;
-
-		//	luminanceFrameAvg = new ImageProcessTask( info );
-		//}
 	}
 
 	ImageProcessTask* mipTask = nullptr;
@@ -1156,7 +1141,7 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
+		info.fmt = IMAGE_FMT_R_16;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
@@ -1176,7 +1161,7 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = MipCount( info.width, info.height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
+		info.fmt = IMAGE_FMT_R_16;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
