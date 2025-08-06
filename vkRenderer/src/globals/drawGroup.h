@@ -10,6 +10,8 @@ class GeometryContext;
 
 const static uint32_t KeyMaterialBits = 32;
 const static uint32_t KeyStencilBits = 8;
+const static uint32_t KeyCustomBits = 8;
+const static uint32_t KeyUnused = 15;
 const static uint32_t KeyVisBits = 1;
 
 struct surfaceUpload_t
@@ -29,6 +31,8 @@ union sortKey_t
 	{
 		uint64_t	materialId	: KeyMaterialBits;
 		uint64_t	stencilBit	: KeyStencilBits;
+		uint64_t	customId	: KeyCustomBits;
+		uint64_t	unused		: KeyUnused;
 		uint64_t	visible		: KeyVisBits;
 	};
 	uint64_t	key;
@@ -85,11 +89,11 @@ inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )
 
 inline bool operator<( const drawSurf_t& surf0, const drawSurf_t& surf1 )
 {
-	if ( surf0.sortKey.materialId == surf1.sortKey.materialId ) {
+	if ( surf0.sortKey.key == surf1.sortKey.key ) {
 		return ( surf0.objectOffset < surf1.objectOffset );
 	}
 	else {
-		return ( surf0.sortKey.materialId < surf1.sortKey.materialId );
+		return ( surf0.sortKey.key < surf1.sortKey.key );
 	}
 }
 

@@ -193,6 +193,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		surf.sortKey = {};
 		surf.sortKey.materialId = material.uploadId;
 		surf.sortKey.stencilBit = surf.stencilBit;
+		surf.sortKey.customId = ent.GetSortOrder();
 
 		surf.dbgName = materialAsset->GetName().c_str();
 

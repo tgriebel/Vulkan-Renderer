@@ -383,7 +383,9 @@ void UpdateScene( Scene* scene )
 			{
 				Material& mat = matAsset->Get();
 				mat.AddTexture( 0, g_imguiControls.dbgImageId );
-			}
+				matAsset->QueueUpload();
+			}		
+			ent->SetSortOrder( 1 );
 		}
 	}
 	else
