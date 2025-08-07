@@ -173,8 +173,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
 
-		InitImGui( *view2Ds[ 0 ] );
-
 		++viewCount;
 	}
 
@@ -554,6 +552,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
 
 	schedule.AsString();
+
+	InitImGui( *view2Ds[ 0 ] );
 }
 
 
@@ -809,7 +809,7 @@ void Renderer::InitShaderResources()
 }
 
 
-void Renderer::InitImGui( RenderView& view )
+void Renderer::InitImGui( const RenderView& view )
 {
 #if defined( USE_IMGUI )
 	IMGUI_CHECKVERSION();
