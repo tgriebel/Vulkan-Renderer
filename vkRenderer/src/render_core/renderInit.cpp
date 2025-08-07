@@ -32,6 +32,7 @@
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/ImageReadbackTask.h"
 #include "../render_tasks/ImageProcessTask.h"
+#include "../render_tasks/imguiTask.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -72,6 +73,15 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.depth = &resources.shadowMapImage[ i ];
 
+		renderPassTransition_t& t = info.transition;		
+		{
+			t = {};
+			t.flags.clear = true;
+			t.flags.store = true;
+			t.flags.readOnly = true;
+			t.flags.readAfter = true;
+		}
+
 		shadowViews[ i ] = &views[ viewCount ];
 		shadowViews[ i ]->Init( info );
 		++viewCount;
@@ -94,6 +104,15 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.depth = &resources.depthImageView;
 		info.fbImages.stencil = &resources.stencilImageView;
 
+		renderPassTransition_t& t = info.transition;
+		{
+			t = {};
+			t.flags.clear = true;
+			t.flags.store = true;
+			t.flags.readOnly = true;
+			t.flags.readAfter = true;
+		}
+
 		renderViews[ 0 ] = &views[ viewCount ];
 		renderViews[ 0 ]->Init( info );	
 		++viewCount;
@@ -115,6 +134,15 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.color0 = &resources.cubeFbColorImage;
 		info.fbImages.depth = &resources.cubeFbDepthImage;
 
+		renderPassTransition_t& t = info.transition;
+		{
+			t = {};
+			t.flags.clear = true;
+			t.flags.store = true;
+			t.flags.readOnly = true;
+			t.flags.readAfter = true;
+		}
+
 		renderViews[ 1 ] = &views[ viewCount ];
 		renderViews[ 1 ]->Init( info );
 		++viewCount;
@@ -133,6 +161,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::MULTI_FRAME;
 		info.fbImages.color0 = g_swapChain.GetBackBuffer();
+
+		renderPassTransition_t& t = info.transition;
+		{
+			t = {};
+			t.flags.clear = true;
+			t.flags.store = true;
+			t.flags.presentBefore = true; // First write to swapchain
+		}
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
@@ -513,7 +549,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		schedule.Link( gaussianTask );
 	}
-	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END));
+	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END) );
+	schedule.Link( new ImguiTask( view2Ds[ 0 ], true ) );
 	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
 
 	schedule.AsString();

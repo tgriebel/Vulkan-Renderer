@@ -123,48 +123,26 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		}
 	}
 
+	m_transitionState = info.transition;
 
 	if( info.region == renderViewRegion_t::SHADOW )
 	{
-		m_transitionState.flags.clear = true;
-		m_transitionState.flags.store = true;
-		m_transitionState.flags.readOnly = true;
-		m_transitionState.flags.readAfter = true;
-		m_transitionState.flags.presentBefore = false;
-		m_transitionState.flags.presentAfter = false;
-
 		m_clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
 		m_clearDepth = 1.0f;
 		m_clearStencil = 0;
 	}
 	else if( info.region == renderViewRegion_t::STANDARD_RASTER )
 	{
-		m_transitionState.flags.clear = true;
-		m_transitionState.flags.store = true;
-		m_transitionState.flags.readOnly = true;
-		m_transitionState.flags.readAfter = true;
-		m_transitionState.flags.presentBefore = false;
-		m_transitionState.flags.presentAfter = false;
-
 		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 		m_clearDepth = 0.0f;
 		m_clearStencil = 0;
 	}
 	else if ( info.region == renderViewRegion_t::STANDARD_2D )
 	{
-		m_transitionState.flags.clear = true;
-		m_transitionState.flags.store = true;
-		m_transitionState.flags.readOnly = false;
-		m_transitionState.flags.readAfter = false;
-		m_transitionState.flags.presentBefore = true;
-		m_transitionState.flags.presentAfter = true;
-
 		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 		m_clearDepth = 0.0f;
 		m_clearStencil = 0;
 	}
-
-
 }
 
 

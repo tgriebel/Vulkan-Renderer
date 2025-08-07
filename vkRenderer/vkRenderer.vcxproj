@@ -214,6 +214,7 @@
     <ClInclude Include="src\render_tasks\imageShaderTask.h" />
     <ClInclude Include="src\render_tasks\ImageReadbackTask.h" />
     <ClInclude Include="src\render_tasks\imageProcessTask.h" />
+    <ClInclude Include="src\render_tasks\imguiTask.h" />
     <ClInclude Include="src\render_tasks\RenderTask.h" />
     <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
@@ -265,6 +266,7 @@
     <ClCompile Include="src\render_tasks\imageShaderTask.cpp" />
     <ClCompile Include="src\render_tasks\ImageReadbackTask.cpp" />
     <ClCompile Include="src\render_tasks\imageProcessTask.cpp" />
+    <ClCompile Include="src\render_tasks\imguiTask.cpp" />
     <ClCompile Include="src\render_tasks\RenderTask.cpp" />
     <ClCompile Include="window.cpp" />
     <ClCompile Include="vulkinTestApp.cpp" />

@@ -140,14 +140,9 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 			continue;
 		}
 
-		// FIXME: Make this it's own task
+		// FIXME: Remove
 		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
 		{
-#ifdef USE_IMGUI
-			cmdContext->MarkerBeginRegion( "Debug Menus", ColorToVector( Color::White ) );
-			ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
-			cmdContext->MarkerEndRegion();
-#endif
 			continue;
 		}
 
@@ -437,11 +432,6 @@ void RenderSchedule::FrameBegin()
 		t->FrameBegin();
 		t = t->GetChild();
 	}
-
-#ifdef USE_IMGUI
-	// Prepare dear imgui render data
-	ImGui::Render();
-#endif
 }
 
 

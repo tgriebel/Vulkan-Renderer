@@ -45,15 +45,16 @@ enum class renderViewRegion_t : uint32_t
 
 struct renderViewCreateInfo_t
 {
-	const char*					name;
 	renderViewRegion_t			region;
-	int							viewId;
+	renderPassTransition_t		transition;
+	frameBufferCreateInfo_t		fbImages;
 
+	const char*					name;
 	const ResourceContext*		resources;
 	RenderContext*				context;
 
+	int							viewId;
 	bool						isCubeView;
-	frameBufferCreateInfo_t		fbImages;
 };
 
 
