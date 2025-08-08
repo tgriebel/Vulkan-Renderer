@@ -27,3 +27,4 @@ C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\preCalculatedDiffu
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\computeBrdfLut.frag -o shaders_bin\computeBrdfLutPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\luminance.frag -o shaders_bin\luminancePS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\luminanceDownsample.frag -o shaders_bin\luminanceDownsamplePS.spv -g
+C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\imageViewer.frag -o shaders_bin\imageViewerPS.spv -g

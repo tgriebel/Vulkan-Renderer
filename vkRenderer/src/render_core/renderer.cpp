@@ -608,7 +608,9 @@ void Renderer::UpdateBuffers()
 		{
 			globals.shadow2dCount += ( resources.shadowMapImage->info.type == imageType_t::IMAGE_TYPE_2D );
 			globals.shadowCubeCount += ( resources.shadowMapImage->info.type == imageType_t::IMAGE_TYPE_CUBE );
-		}	
+		}
+		globals.textureCount = g_assets.textureLib.Count();
+		globals.materialCount = g_assets.materialLib.Count();
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}

@@ -73,6 +73,8 @@ struct globalUboConstants_t
 	uint32_t	isTextured;
 	uint32_t	shadow2dCount;
 	uint32_t	shadowCubeCount;
+	uint32_t	textureCount;
+	uint32_t	materialCount;
 	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };
 
@@ -91,6 +93,7 @@ struct materialBufferObject_t
 	vec3f					Tf;
 	uint32_t				textured;
 	uint32_t				pad[ 4 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
+	uint8_t					extra[ Material::MaxExtraDataBytes ];
 };
 
 

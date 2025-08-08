@@ -79,7 +79,7 @@
     {
       "name": "Image2D",
       "vs": "default",
-      "ps": "simple"
+      "ps": "imageViewer"
     },
 	{
       "name": "ClearParticles",

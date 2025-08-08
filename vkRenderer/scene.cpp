@@ -381,8 +381,17 @@ void UpdateScene( Scene* scene )
 			Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
 			if( matAsset != nullptr )
 			{
+				struct imageViewerParms_t
+				{
+					uint32_t bitfield;
+				};
+
+				imageViewerParms_t iamgeViewParms{};
+				iamgeViewParms.bitfield = 0x00000001;
+				
 				Material& mat = matAsset->Get();
 				mat.AddTexture( 0, g_imguiControls.dbgImageId );
+				mat.SetExtraData( &iamgeViewParms, sizeof( imageViewerParms_t ) );
 				matAsset->QueueUpload();
 			}		
 			ent->SetSortOrder( 1 );

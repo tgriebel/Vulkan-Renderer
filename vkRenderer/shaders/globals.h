@@ -63,6 +63,7 @@ struct material_t
 	uint	pad1;
 	uint	pad2;
 	uint	pad3;
+	uint	extraData[ 64 ]; // 256 bytes, aligned on 64 byte boundary
 };
 
 struct view_t
@@ -74,6 +75,11 @@ struct view_t
 	uint	pad0;
 	uint	pad1;
 	uint	pad2;
+};
+
+struct pass_t
+{
+	uint	codeImageCount;
 };
 
 struct surface_t
@@ -128,6 +134,10 @@ struct surface_t
 												uint		defaultImageId;											\
 												uint		brdfLutId;												\
 												uint		isTextured;												\
+												uint		shadow2dCount;											\
+												uint		shadowCubeCount;										\
+												uint		textureCount;											\
+												uint		materialCount;											\
 											} globals;
 
 #define VIEW_LAYOUT( S, N )					layout( set = S, binding = N ) buffer ViewUniformBuffer					\
@@ -166,6 +176,11 @@ struct surface_t
 											{																		\
 												light_t lights[MaxLights];											\
 											} lightUbo;
+
+#define PASS_LAYOUT( S, N )					layout( set = S, binding = N ) buffer PassBuffer						\
+											{																		\
+												pass_t pass;														\
+											} passUbo;
 
 #define MATERIAL_PUSH_CONSTANTS				layout( push_constant ) uniform fragmentPushConstants					\
 											{																		\

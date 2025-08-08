@@ -376,6 +376,9 @@
     <None Include="shaders\luminanceDownsample.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\imageViewer.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

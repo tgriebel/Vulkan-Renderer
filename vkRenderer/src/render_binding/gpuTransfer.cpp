@@ -218,6 +218,8 @@ void Renderer::UpdateGpuMaterials()
 		materialObject.Ns = m.Ns();
 		materialObject.illum = m.Illum();
 		materialObject.textured = m.IsTextured();
+
+		m.CopyExtraData( materialObject.extra, m.GetExtraDataByteCount() );
 	}
 	uploadMaterials.clear();
 }
