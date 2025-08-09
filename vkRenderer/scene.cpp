@@ -396,6 +396,10 @@ void UpdateScene( Scene* scene )
 			}		
 			ent->SetSortOrder( 1 );
 		}
+
+		static float x = 0.0f;
+		++x;
+		ent->SetOrigin( vec3f( x, 0.0f, 0.0f ) );
 	}
 	else
 #endif
@@ -471,6 +475,8 @@ void UpdateScene( Scene* scene )
 	ImGui::Text( "Frame Number: %d", g_renderDebugData.frameNumber );
 	ImGui::SameLine();
 	ImGui::Text( "FPS: %f", 1000.0f / g_renderDebugData.frameTimeMs );
+
+	ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ), 0, ImVec2( 200.0f, 200.0f ) );
 
 	ImGui::End();
 #endif

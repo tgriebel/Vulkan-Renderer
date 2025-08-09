@@ -77,6 +77,7 @@ private:
 	uint32_t					m_dsCount;
 	uint32_t					m_attachmentCount;
 	uint32_t					m_bufferCount;
+	bool						m_isBackBuffer;
 
 	swapBuffering_t				m_swapBuffering;
 	renderPassAttachmentMask_t	m_attachmentMask;
@@ -101,7 +102,8 @@ public:
 		m_colorCount( 0 ),
 		m_dsCount( 0 ),
 		m_width( 0 ),
-		m_height( 0 )
+		m_height( 0 ),
+		m_isBackBuffer( false )
 	{
 		m_color0 = nullptr;
 		m_color1 = nullptr;
@@ -143,6 +145,14 @@ public:
 	inline imageSamples_t SampleCount() const
 	{
 		return ( ColorLayerCount() > 0 ) ? GetColor()->info.subsamples : GetDepth()->info.subsamples;
+	}
+
+	inline bool IsBackbuffer() const
+	{
+		if( m_color0 == nullptr ) {
+			return false;
+		}
+		return HasFlags( m_color0->gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_PRESENT );
 	}
 
 	inline const Image* GetColor() const

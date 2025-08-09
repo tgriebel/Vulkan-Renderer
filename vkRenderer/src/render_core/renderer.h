@@ -235,7 +235,7 @@ private:
 	void								InitShaderResources();
 	void								AssignBindSetsToGpuProgs();
 	void								InitConfig( const renderConfig_t& cfg );
-	void								InitImGui( const RenderView& view );
+	void								InitImGui( const FrameBuffer* fb );
 	void								ShutdownImGui();
 	void								ShutdownShaderResources();
 	void								Destroy();

@@ -72,8 +72,27 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 
 	CreateFrameBuffers( info.fbImages );
 
-	const uint32_t beginPass = ViewRegionPassBegin();
-	const uint32_t endPass = ViewRegionPassEnd();
+	uint32_t beginPass;
+	uint32_t endPass;
+
+	switch ( m_region )
+	{
+		case renderViewRegion_t::SHADOW:
+		{
+			beginPass = DRAWPASS_SHADOW_BEGIN;
+			endPass = DRAWPASS_SHADOW_END;
+		} break;
+		case renderViewRegion_t::STANDARD_RASTER:
+		{
+			beginPass = DRAWPASS_MAIN_BEGIN;
+			endPass = DRAWPASS_MAIN_END;
+		} break;
+		case renderViewRegion_t::STANDARD_2D:
+		{
+			beginPass = DRAWPASS_2D_BEGIN;
+			endPass = DRAWPASS_2D_END;
+		} break;
+	}
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
@@ -124,24 +143,15 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	}
 
 	m_transitionState = info.transition;
+	
+	m_clearImage = info.clear;
+	m_finalizeImage = info.finalize;
 
-	if( info.region == renderViewRegion_t::SHADOW )
+	if( m_clearImage )
 	{
-		m_clearColor = vec4f( 0.0f, 0.0f, 0.0f, 1.0f );
-		m_clearDepth = 1.0f;
-		m_clearStencil = 0;
-	}
-	else if( info.region == renderViewRegion_t::STANDARD_RASTER )
-	{
-		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-		m_clearDepth = 0.0f;
-		m_clearStencil = 0;
-	}
-	else if ( info.region == renderViewRegion_t::STANDARD_2D )
-	{
-		m_clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
-		m_clearDepth = 0.0f;
-		m_clearStencil = 0;
+		m_clearColor = info.clearColor;
+		m_clearDepth = info.clearDepth;
+		m_clearStencil = info.clearStencil;
 	}
 }
 
@@ -334,6 +344,18 @@ drawPass_t RenderView::ViewRegionPassEnd() const
 renderPassTransition_t RenderView::TransitionState() const
 {
 	return m_transitionState;
+}
+
+
+bool RenderView::Finalize() const
+{
+	return m_finalizeImage;
+}
+
+
+bool RenderView::Clear() const
+{
+	return m_clearImage;
 }
 
 

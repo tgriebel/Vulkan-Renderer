@@ -73,11 +73,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.depth = &resources.shadowMapImage[ i ];
 
+		info.clear = true;
+		info.clearDepth = 1.0f;
+
 		renderPassTransition_t& t = info.transition;		
 		{
 			t = {};
-			t.flags.clear = true;
-			t.flags.store = true;
 			t.flags.readOnly = true;
 			t.flags.readAfter = true;
 		}
@@ -104,11 +105,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.depth = &resources.depthImageView;
 		info.fbImages.stencil = &resources.stencilImageView;
 
+		info.clear = true;
+		info.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+
 		renderPassTransition_t& t = info.transition;
 		{
 			t = {};
-			t.flags.clear = true;
-			t.flags.store = true;
 			t.flags.readOnly = true;
 			t.flags.readAfter = true;
 		}
@@ -134,11 +136,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.color0 = &resources.cubeFbColorImage;
 		info.fbImages.depth = &resources.cubeFbDepthImage;
 
+		info.clear = true;
+		info.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+
 		renderPassTransition_t& t = info.transition;
 		{
 			t = {};
-			t.flags.clear = true;
-			t.flags.store = true;
 			t.flags.readOnly = true;
 			t.flags.readAfter = true;
 		}
@@ -162,13 +165,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.swapBuffering = swapBuffering_t::MULTI_FRAME;
 		info.fbImages.color0 = g_swapChain.GetBackBuffer();
 
-		renderPassTransition_t& t = info.transition;
-		{
-			t = {};
-			t.flags.clear = true;
-			t.flags.store = true;
-			t.flags.presentBefore = true; // First write to swapchain
-		}
+		info.clear = true;
+		info.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
+		info.finalize = true;
 
 		view2Ds[ 0 ] = &views[ viewCount ];
 		view2Ds[ 0 ]->Init( info );
@@ -547,13 +546,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		schedule.Link( gaussianTask );
 	}
-	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END) );
-	schedule.Link( new ImguiTask( view2Ds[ 0 ], true ) );
+	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_2D, DRAWPASS_2D ) );
+	schedule.Link( new ImguiTask( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], true ) );
+	//schedule.Link( new RenderTask( view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) );
 	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
 
 	schedule.AsString();
 
-	InitImGui( *view2Ds[ 0 ] );
+	InitImGui( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ]->GetFrameBuffer() );
 }
 
 
@@ -809,7 +809,7 @@ void Renderer::InitShaderResources()
 }
 
 
-void Renderer::InitImGui( const RenderView& view )
+void Renderer::InitImGui( const FrameBuffer* fb )
 {
 #if defined( USE_IMGUI )
 	IMGUI_CHECKVERSION();
@@ -831,9 +831,16 @@ void Renderer::InitImGui( const RenderView& view )
 	vkInfo.ImageCount = MaxFrameStates;
 	vkInfo.CheckVkResultFn = nullptr;
 
-	assert( view.passes[ 0 ][ DRAWPASS_DEBUG_2D ] != nullptr );
-	const renderPassTransition_t transitionState = view.TransitionState();
-	ImGui_ImplVulkan_Init( &vkInfo, view.passes[ 0 ][ DRAWPASS_DEBUG_2D ]->GetFrameBuffer()->GetVkRenderPass( transitionState ) );
+	assert( fb != nullptr );
+
+	renderPassTransition_t transitionState {};
+	transitionState.flags.clear = false;
+	transitionState.flags.presentAfter = false;
+	transitionState.flags.presentBefore = false;
+	transitionState.flags.readOnly = true;
+	transitionState.flags.readAfter = true;
+
+	ImGui_ImplVulkan_Init( &vkInfo, fb->GetVkRenderPass( transitionState ) );
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();

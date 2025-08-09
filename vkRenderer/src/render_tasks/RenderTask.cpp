@@ -69,33 +69,40 @@ static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 
 void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t multiViewIndex )
 {
-	const drawPass_t passBegin = m_renderView->ViewRegionPassBegin();
-	const drawPass_t passEnd = m_renderView->ViewRegionPassEnd();
-
 	// For now the pass state is the same for the entire view region
-	const DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passBegin ];
+	const DrawPass* pass = m_renderView->passes[ multiViewIndex ][ m_beginPass ];
 	if ( pass == nullptr ) {
 		throw std::runtime_error( "Missing pass state!" );
 	}
 
-	const renderPassTransition_t& transitionState = m_renderView->TransitionState();
+	const FrameBuffer* fb = pass->GetFrameBuffer();
+
+	const bool startOnFirstPass = ( m_beginPass == m_renderView->ViewRegionPassBegin() );
+	const bool endOnLastPass = ( m_endPass == m_renderView->ViewRegionPassEnd() );
+	const bool isBackBuffer = fb->IsBackbuffer();
+
+	renderPassTransition_t transitionState = m_renderView->TransitionState();
+
+	transitionState.flags.clear = m_renderView->Clear() && startOnFirstPass;
+	transitionState.flags.store = true;
+
+	// If this is the first write to the backbuffer then it needs to transition from the present state
+	if( transitionState.flags.clear ) {
+		transitionState.flags.presentBefore = isBackBuffer;
+	}
+	if( endOnLastPass && m_renderView->Finalize() ) {
+		transitionState.flags.presentAfter = isBackBuffer;
+	}
 
 	VkRenderPassBeginInfo passInfo{ };
 	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->GetFrameBuffer()->GetVkBuffer( transitionState, context.bufferId );
+	passInfo.renderPass = fb->GetVkRenderPass( transitionState );
+	passInfo.framebuffer = fb->GetVkBuffer( transitionState, context.bufferId );
 	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
 	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
-	const vec4f clearColor = m_renderView->ClearColor();
-	const float clearDepth = m_renderView->ClearDepth();
-	const uint32_t clearStencil = m_renderView->ClearStencil();
-
-	const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
-	const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
-
-	const uint32_t colorAttachmentsCount = pass->GetFrameBuffer()->ColorLayerCount();
-	const uint32_t attachmentsCount = pass->GetFrameBuffer()->LayerCount();
+	const uint32_t colorAttachmentsCount = fb->ColorLayerCount();
+	const uint32_t attachmentsCount = fb->LayerCount();
 
 	passInfo.clearValueCount = 0;
 	passInfo.pClearValues = nullptr;
@@ -105,6 +112,13 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 	if ( transitionState.flags.clear )
 	{
+		const vec4f clearColor = m_renderView->ClearColor();
+		const float clearDepth = m_renderView->ClearDepth();
+		const uint32_t clearStencil = m_renderView->ClearStencil();
+
+		const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
+		const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
+
 		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
 			clearValues[ i ].color = vk_clearColor;
 		}
@@ -119,7 +133,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
 
-	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
+	for ( uint32_t passIx = m_beginPass; passIx <= m_endPass; ++passIx )
 	{
 		DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {
@@ -133,7 +147,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 	uint32_t modelOffset = 0;
 
-	for ( uint32_t passIx = passBegin; passIx <= passEnd; ++passIx )
+	for ( uint32_t passIx = m_beginPass; passIx <= m_endPass; ++passIx )
 	{
 		DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {

@@ -53,8 +53,14 @@ struct renderViewCreateInfo_t
 	const ResourceContext*		resources;
 	RenderContext*				context;
 
-	int							viewId;
+	vec4f						clearColor;
+	float						clearDepth;
+	bool						clear;
+	uint8_t						clearStencil;
+	bool						finalize;
+
 	bool						isCubeView;
+	int							viewId;
 };
 
 
@@ -87,6 +93,8 @@ private:
 	int						m_surfaceBufferId;
 	bool					m_committed;
 	bool					m_isCubeView;
+	bool					m_clearImage;
+	bool					m_finalizeImage;
 
 public:
 
@@ -162,6 +170,8 @@ public:
 	drawPass_t				ViewRegionPassBegin() const;
 	drawPass_t				ViewRegionPassEnd() const;
 	renderPassTransition_t	TransitionState() const;
+	bool					Finalize() const;
+	bool					Clear() const;
 	const vec4f&			ClearColor() const;
 	float					ClearDepth() const;
 	uint32_t				ClearStencil() const;

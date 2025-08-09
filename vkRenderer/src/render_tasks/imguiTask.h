@@ -17,15 +17,15 @@ class ImguiTask : public GpuTask
 {
 private:
 	renderPassTransition_t	m_transitionState = {};
-	DrawPass*				m_pass;
+	const DrawPass*			m_pass;
 
-	void Init( RenderView* view, const bool presentAfter );
+	void Init( const DrawPass* pass, const bool finalizeImage );
 	void Shutdown();
 
 public:
-	ImguiTask( RenderView* view, const bool presentAfter )
+	ImguiTask( const DrawPass* pass, const bool finalizeImage )
 	{
-		Init( view, presentAfter );
+		Init( pass, finalizeImage );
 	}
 
 	~ImguiTask()

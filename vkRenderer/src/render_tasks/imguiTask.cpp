@@ -34,11 +34,11 @@ extern imguiControls_t			g_imguiControls;
 #endif
 
 
-void ImguiTask::Init( RenderView* view, const bool presentAfter )
+void ImguiTask::Init( const DrawPass* pass, const bool finalizeImage )
 {
-	m_pass = view->passes[ 0 ][ DRAWPASS_DEBUG_2D ];
+	m_pass = pass;
 
-	m_transitionState.flags.presentAfter = presentAfter;
+	m_transitionState.flags.presentAfter = finalizeImage;
 	m_transitionState.flags.store = true;
 }
 
