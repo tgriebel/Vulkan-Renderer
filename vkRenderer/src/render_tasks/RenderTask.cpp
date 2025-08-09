@@ -154,12 +154,6 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 			continue;
 		}
 
-		// FIXME: Remove
-		if ( passIx == drawPass_t::DRAWPASS_DEBUG_2D )
-		{
-			continue;
-		}
-
 		const DrawGroup* drawGroup = &m_renderView->drawGroup[ passIx ];
 
 		const uint32_t surfaceCount = drawGroup->Count();
@@ -272,7 +266,7 @@ void RenderTask::Shutdown()
 void RenderTask::FrameBegin()
 {
 	if( m_renderView != nullptr ) {
-		m_renderView->FrameBegin();
+		m_renderView->FrameBegin( m_beginPass, m_endPass );
 	}
 }
 
@@ -280,7 +274,7 @@ void RenderTask::FrameBegin()
 void RenderTask::FrameEnd()
 {
 	if ( m_renderView != nullptr ) {
-		m_renderView->FrameEnd();
+		m_renderView->FrameEnd( m_beginPass, m_endPass );
 	}
 }
 

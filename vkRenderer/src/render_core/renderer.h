@@ -90,6 +90,8 @@ private:
 	bindParmArray_t			bindParmsList;
 	pendingArray_t			pendingIndices;
 	bindSetMap_t			bindSets;
+	uint64_t				frameNumber = 0;
+	float					deltaTimeMs = 0.0f;
 
 public:
 	ShaderBindParms*		globalParms;
@@ -109,6 +111,8 @@ public:
 	void					AllocRegisteredBindParms();
 	void					FreeRegisteredBindParms();
 	void					RefreshRegisteredBindParms();
+
+	inline uint64_t			FrameNumber() const { return frameNumber; }
 
 	friend class Renderer; // TODO: Need an interface for bind sets
 };
@@ -204,7 +208,6 @@ private:
 
 	// Timers
 	Timer								frameTimer;
-	uint32_t							m_frameNumber = 0;
 
 	// Upload management
 	std::set<hdl_t>						uploadTextures;

@@ -184,7 +184,7 @@ void CreateCodeAssets()
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
-			material.AddShader( DRAWPASS_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
+			material.AddShader( DRAWPASS_DEBUG_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
 			g_assets.materialLib.Add( "IMAGE2D", material );
 		}
 
@@ -396,10 +396,7 @@ void UpdateScene( Scene* scene )
 			}		
 			ent->SetSortOrder( 1 );
 		}
-
-		static float x = 0.0f;
-		++x;
-		ent->SetOrigin( vec3f( x, 0.0f, 0.0f ) );
+		ent->SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
 	}
 	else
 #endif

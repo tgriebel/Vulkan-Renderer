@@ -148,7 +148,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		}
 		else if ( view.GetRegion() == renderViewRegion_t::STANDARD_2D )
 		{
-			if ( material.GetShader( DRAWPASS_2D ) == INVALID_HDL ) {
+			if ( ( material.GetShader( DRAWPASS_2D ) == INVALID_HDL ) && ( material.GetShader( DRAWPASS_DEBUG_2D ) == INVALID_HDL ) ) {
 				continue;
 			}
 		}
@@ -388,7 +388,7 @@ void Renderer::Render()
 	frameTimer.Stop();
 
 	g_renderDebugData.frameTimeMs = static_cast<float>( frameTimer.GetElapsed() );
-	g_renderDebugData.frameNumber = m_frameNumber;
+	g_renderDebugData.frameNumber = renderContext.frameNumber;
 }
 
 
@@ -407,7 +407,7 @@ void Renderer::WaitForEndFrame()
 	ImGui_ImplVulkan_NewFrame();
 #endif
 
-	++m_frameNumber;
+	++renderContext.frameNumber;
 }
 
 
@@ -529,6 +529,9 @@ void Renderer::CommitViews( const Scene* scene )
 	// Post view
 	{
 		view2Ds[ 0 ]->SetViewRect( 0, 0, width, height );
+
+		extern void DrawDebugMenu( RenderView& view );
+		DrawDebugMenu( *view2Ds[ 0 ] );
 	}
 
 	activeViewCount = 0;
@@ -574,12 +577,12 @@ void Renderer::UpdateBuffers()
 		auto deltaTime = ( currentTime - previousTime );
 				
 		float elapsedTime = std::chrono::duration<float, std::chrono::seconds::period>( currentTime - startTime ).count();
-		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>( deltaTime ).count();
+		renderContext.deltaTimeMs = std::chrono::duration<float, std::chrono::milliseconds::period>( deltaTime ).count();
 
 		float timeIntPart = 0;
 		const float timeFracPart = modf( elapsedTime, &timeIntPart );
 
-		globals.time = vec4f( elapsedTime, timeIntPart, timeFracPart, dt );
+		globals.time = vec4f( elapsedTime, timeIntPart, timeFracPart, renderContext.deltaTimeMs );
 #if defined( USE_IMGUI )
 		globals.generic = vec4f( g_imguiControls.roughnessScale, g_imguiControls.roughnessBias, g_imguiControls.metalnessScale, g_imguiControls.metalnessBias );
 		globals.tonemap = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );

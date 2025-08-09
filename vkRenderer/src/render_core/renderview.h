@@ -70,6 +70,7 @@ private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
 	const ResourceContext*	m_resources;
+	RenderContext*			m_context;
 	FrameBuffer*			m_framebuffers[ MaxMultiViews ];
 	ImageView*				m_colorViews[ MaxMultiViews ];
 	ImageView*				m_gBuffer0Views[ MaxMultiViews ];
@@ -89,8 +90,9 @@ private:
 	const char*				m_name;
 	renderViewRegion_t		m_region;
 	uint32_t				m_multiViewCount;
-	int						m_viewBufferId;
-	int						m_surfaceBufferId;
+	int32_t					m_viewBufferId;
+	int32_t					m_surfaceBufferId;
+	uint64_t				m_lastUpdateFrame = ~0u;
 	bool					m_committed;
 	bool					m_isCubeView;
 	bool					m_clearImage;
@@ -163,8 +165,8 @@ public:
 
 	void					Init( const renderViewCreateInfo_t& info );
 	void					CreateFrameBuffers( const frameBufferCreateInfo_t& info );
-	void					FrameBegin();
-	void					FrameEnd();
+	void					FrameBegin( const drawPass_t begin, const drawPass_t end );
+	void					FrameEnd( const drawPass_t begin, const drawPass_t end );
 	void					Resize();
 
 	drawPass_t				ViewRegionPassBegin() const;

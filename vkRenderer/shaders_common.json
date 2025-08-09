@@ -78,7 +78,7 @@
     },
     {
       "name": "Image2D",
-      "vs": "default",
+      "vs": "simple",
       "ps": "imageViewer"
     },
 	{

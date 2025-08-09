@@ -4,7 +4,7 @@ class Scene;
 
 struct renderDebugData_t
 {
-	uint32_t	frameNumber;
+	uint64_t	frameNumber;
 	float		frameTimeMs;
 	float		mouseX;
 	float		mouseY;

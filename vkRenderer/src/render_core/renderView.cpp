@@ -13,7 +13,7 @@
 extern Scene*	g_scene;
 extern Window	g_window;
 
-static void DrawDebugMenu( RenderView& view )
+void DrawDebugMenu( RenderView& view )
 {
 #if defined( USE_IMGUI )
 	ImGui::Begin( "Control Panel" );
@@ -44,7 +44,8 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_multiViewCount = info.isCubeView ? 6 : 1;
 	m_isCubeView = info.isCubeView;
 
-	m_viewParms = info.context->RegisterBindParm( bindset_view );
+	m_context = info.context;
+	m_viewParms = m_context->RegisterBindParm( bindset_view );
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
@@ -137,8 +138,8 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 					break;
 			}
 
-			const ShaderBindSet* bindset_pass = info.context->LookupBindSet( "bindset_pass"  );
-			passes[ multiViewIndex ][ passIx ]->parms = info.context->RegisterBindParm( bindset_pass );
+			const ShaderBindSet* bindset_pass = m_context->LookupBindSet( "bindset_pass"  );
+			passes[ multiViewIndex ][ passIx ]->parms = m_context->RegisterBindParm( bindset_pass );
 		}
 	}
 
@@ -252,13 +253,19 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 }
 
 
-void RenderView::FrameBegin()
+void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 {
-	m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
+	const uint64_t currentFrame = m_context->FrameNumber();
+	if( m_lastUpdateFrame != currentFrame )
+	{
+		m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
+
+		m_lastUpdateFrame = currentFrame;
+	}
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
-		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		for ( uint32_t passIx = begin; passIx <= end; ++passIx )
 		{
 			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
 			if ( pass == nullptr ) {
@@ -267,16 +274,14 @@ void RenderView::FrameBegin()
 			pass->FrameBegin( m_resources );
 		}
 	}
-
-	DrawDebugMenu( *this );
 }
 
 
-void RenderView::FrameEnd()
+void RenderView::FrameEnd( const drawPass_t begin, const drawPass_t end )
 {
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
-		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		for ( uint32_t passIx = begin; passIx <= end; ++passIx )
 		{
 			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
 			if ( pass == nullptr ) {
