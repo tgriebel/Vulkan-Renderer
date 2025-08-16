@@ -211,7 +211,7 @@ void CreateCodeAssets()
 		}
 		{
 			Model model;
-			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 0.0f, 0.0f ), vec2f( 1.0f * ( 9.0 / 16.0f ), 1.0f ) );
+			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 100.0f, 100.0f ), vec2f( 500.0f, 500.0f ) );
 			g_assets.modelLib.Add( "_quadTexDebug", model );
 		}
 		g_assets.modelLib.SetDefault( "_quadTexDebug" );
@@ -360,6 +360,8 @@ void UpdateScene( Scene* scene )
 		Ray ray = scene->mainCamera->GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
 		scene->selectedEntity = scene->GetTracedEntity( ray );
 	}
+
+	scene->camera2D.SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
 
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i )

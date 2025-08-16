@@ -36,6 +36,7 @@
 #include <gfxcore/asset_types/gpuProgram.h>
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/entity.h>
+#include <gfxcore/math/vector.h>
 
 #include "debugMenu.h"
 #include "gpuImage.h"
@@ -529,6 +530,7 @@ void Renderer::CommitViews( const Scene* scene )
 	// Post view
 	{
 		view2Ds[ 0 ]->SetViewRect( 0, 0, width, height );
+		view2Ds[ 0 ]->SetCamera2D( scene->camera2D, vec4f( 0.0f, (float)width, 0.0f, (float)height ) );
 
 		extern void DrawDebugMenu( RenderView& view );
 		DrawDebugMenu( *view2Ds[ 0 ] );

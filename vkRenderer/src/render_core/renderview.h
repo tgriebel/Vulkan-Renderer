@@ -180,6 +180,7 @@ public:
 	const ShaderBindParms*	BindParms() const;
 
 	void					SetCamera( const Camera& camera, const bool reverseZ = true, const uint32_t multiView = 0 );
+	void					SetCamera2D( const Camera& camera, const vec4f& frame, const uint32_t multiView = 0 );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
 	const viewport_t&		GetViewport() const;
 	vec2i					GetFrameSize() const;
