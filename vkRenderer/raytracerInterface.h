@@ -31,7 +31,8 @@ static void BuildRayTraceScene( const Scene* scene )
 		rtScene.aabb.Expand( aabb.GetMax() );
 	}
 
-	for ( uint32_t i = 0; i < MaxLights; ++i )
+	const uint32_t lightCount = static_cast<uint32_t>( scene->lights.size() );
+	for ( uint32_t i = 0; i < lightCount; ++i )
 	{
 		rtScene.lights.push_back( scene->lights[ i ] );
 	}
