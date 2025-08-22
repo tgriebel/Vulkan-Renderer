@@ -578,8 +578,8 @@ void DebugMenuEntityEdit( Scene* scene )
 
 		if ( ImGui::BeginTable( "##LightProperties", 2, propertyGridFlags ) )
 		{
-			vec3f origin = light.pos;
-			vec3f dir = light.dir;
+			vec3f origin = light.pos.xyz;
+			vec3f dir = light.dir.xyz;
 
 			ImGui::TableNextColumn();
 			ImGui::Text( "Origin" );

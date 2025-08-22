@@ -472,7 +472,7 @@ void Renderer::CommitLight( const light_t& light )
 		if( HasFlags( light.flags, LIGHT_FLAGS_POINT ) == false )
 		{
 			Camera shadowCam;
-			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.Reverse() ) );
+			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.xyz.Reverse() ) );
 			shadowCam.SetClip( 0.1f, 1000.0f );
 			shadowCam.SetFov( Radians( 90.0f ) );
 			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );

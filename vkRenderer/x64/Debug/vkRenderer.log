@@ -1,43 +1,4 @@
-﻿  scene.cpp
-  chessScene.cpp
-  nesScene.cpp
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: 'APIENTRY': macro redefinition
-C:\Program Files (x86)\Microsoft Visual Studio\Libraries\glfw-3.3.5.bin.WIN64\include\GLFW\glfw3.h(123): message : see previous definition of 'APIENTRY'
-  sceneParser.cpp
-  drawpass.cpp
-  drawGroup.cpp
-  render_util.cpp
-  io.cpp
-  allocator.cpp
-  binding.cpp
-  descriptorWrites.cpp
-  gpuResources.cpp
-  gpuTransfer.cpp
-  imageView.cpp
-  pipeline.cpp
-  shaderBinding.cpp
-  GpuSync.cpp
-  debugMenu.cpp
-  gpuImage.cpp
-  renderCommand.cpp
-  Generating Code...
-  Compiling...
-  renderInit.cpp
-  renderResource.cpp
-  renderShutdown.cpp
-  renderView.cpp
-  renderer.cpp
-  swapChain.cpp
-  cmdContext.cpp
-  deviceContext.cpp
-  frameBuffer.cpp
-  ImageReadbackTask.cpp
-  RenderTask.cpp
-  imageProcessTask.cpp
-  imageShaderTask.cpp
-  imguiTask.cpp
+﻿  renderer.cpp
   vulkinTestApp.cpp
-  window.cpp
   Generating Code...
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

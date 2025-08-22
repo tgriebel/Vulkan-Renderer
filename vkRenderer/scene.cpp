@@ -651,7 +651,7 @@ void DrawManipDebugMenu()
 			{
 				AABB bounds = ent->GetLocalBounds();
 				const vec3f boundScale = 0.5f * ( bounds.GetMax() - bounds.GetMin() );
-				const vec3f boundCenter = vec3f( ent->GetMatrix() * vec4f( bounds.GetCenter(), 1.0f ) );
+				const vec3f boundCenter = ( ent->GetMatrix() * vec4f( bounds.GetCenter(), 1.0f ) ).xyz;
 
 				Entity* boundEnt = new Entity( *ent );
 				boundEnt->name = ent->name + "_bounds";

@@ -96,7 +96,7 @@ static void CopyGeoBuilderResult( const GeoBuilder& gb, Surface& surf, AABB& bou
 		vert.uv2 = vec2f( 0.0f, 0.0f );
 
 		surf.vertices.push_back( vert );
-		bounds.Expand( vert.pos );
+		bounds.Expand( vert.pos.xyz );
 	}
 
 	surf.indices.reserve( gb.ib.size() );
