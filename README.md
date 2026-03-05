@@ -1,5 +1,7 @@
 # Extensa: Vulkan-Renderer
 
+This really isn't in a deployable state so don't expect to just download and run, but feel free to reference the source
+
 Calling this "Extensa" after Descartes Res Extensa--"a thing extended in space". I've always conceived of 3D rendering as giving shape to abstract logical worlds so felt the name fit.
 
 Work-in-progress. Some parts are rough yet, but it's taking shape. The Gfx-Core repo is essential for repo.
