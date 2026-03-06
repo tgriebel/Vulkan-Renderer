@@ -362,6 +362,7 @@ void UpdateScene( Scene* scene )
 	}
 
 	scene->camera2D.SetAngles( vec3f( 0.0f, 0.0f, 0.0f ) );
+	scene->camera2D.SetClip( -1.0f, 1.0f );
 
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i )
