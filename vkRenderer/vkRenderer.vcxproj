@@ -184,6 +184,7 @@
     <ClInclude Include="scenes\sceneParser.h" />
     <ClInclude Include="scenes\tomtendoCore.h" />
     <ClInclude Include="shaders\color.h" />
+    <ClInclude Include="shaders\globals_hlsl.h" />
     <ClInclude Include="shaders\light.h" />
     <ClInclude Include="shaders\util.h" />
     <ClInclude Include="src\app\cvar.h" />

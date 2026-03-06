@@ -475,7 +475,8 @@ void RenderView::SetCamera( const Camera& camera, const bool reverseZ, const uin
 
 void RenderView::SetCamera2D( const Camera& camera, const vec4f& frame, const uint32_t multiView )
 {
-	m_viewMatrices[ multiView ] = camera.GetViewMatrix();
+	m_viewMatrices[ multiView ] = mat4x4f::Identity();
+	m_viewMatrices[ multiView ][1][1] *= -1.0f;
 	m_projMatrices[ multiView ] = camera.GetOrthogonalMatrix( frame[ 0 ], frame[ 1 ], frame[ 2 ], frame[ 3 ] );
 	m_viewprojMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
 
