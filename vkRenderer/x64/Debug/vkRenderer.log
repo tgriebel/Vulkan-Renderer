@@ -1,22 +1,12 @@
-﻿  scene.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\scene.cpp(404,62): warning C4244: 'argument': conversion from 'uint32_t' to 'const T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\scene.cpp(404,44): warning C4244: 'argument': conversion from 'uint32_t' to 'const T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\scene.cpp(405,54): warning C4244: 'argument': conversion from 'uint32_t' to 'const T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\scene.cpp(405,36): warning C4244: 'argument': conversion from 'uint32_t' to 'const T', possible loss of data
-          with
-          [
-              T=float
-          ]
+﻿  debug2dPass.cpp
+  debug3dPass.cpp
+  drawpass.cpp
+  skyboxPass.cpp
+  terrainPass.cpp
+  wireframePass.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+SysCore.lib(serializer.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(systemUtils.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
+SysCore.lib(timer.obj) : warning LNK4204: 'C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\SysCore.pdb' is missing debugging information for referencing module; linking object as if no debug info
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

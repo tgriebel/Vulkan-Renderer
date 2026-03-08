@@ -137,6 +137,39 @@
     <ClCompile Include="src\render_tasks\imguiTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
+    <ClCompile Include="src\draw_passes\shadowPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\depthPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\opaquePass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\transPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\emissivePass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\postPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\terrainPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\skyboxPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\wireframePass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\debug2dPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\draw_passes\debug3dPass.cpp">
+      <Filter>Draw Passes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
