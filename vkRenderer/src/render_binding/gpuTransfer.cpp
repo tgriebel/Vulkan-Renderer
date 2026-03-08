@@ -79,9 +79,23 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		}
 		Image& texture = textureAsset->Get();
 
+		// TODO: Allow for recreation for read-only textures
+		if ( texture.gpuImage != nullptr )
+		{
+			if ( HasFlags( texture.gpuImage->GetFlags(), GPU_IMAGE_WRITE ) )
+			{		
+				continue;
+			}
+			else
+			{
+				std::cout << "GPU Image already exists!" << std::endl;
+				continue;
+			}
+		}
+
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
-		texture.gpuImage= 
+		texture.gpuImage = 
 			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, resourceLifeTime_t::REBOOT );
 
 		Transition( cmdCommand, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
@@ -107,6 +121,15 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 			continue;
 		}
 		Image& texture = textureAsset->Get();
+
+		if ( texture.gpuImage == nullptr )
+		{
+			continue;
+		}
+		if ( HasFlags( texture.gpuImage->GetFlags(), GPU_IMAGE_WRITE ) )
+		{
+			continue;
+		}
 		if( texture.generateMips == false )
 		{
 			Transition( cmdCommand, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
