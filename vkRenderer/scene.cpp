@@ -211,7 +211,7 @@ void CreateCodeAssets()
 		}
 		{
 			Model model;
-			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 100.0f, 100.0f ), vec2f( 500.0f, 500.0f ) );
+			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) );
 			g_assets.modelLib.Add( "_quadTexDebug", model );
 		}
 		g_assets.modelLib.SetDefault( "_quadTexDebug" );
@@ -378,7 +378,7 @@ void UpdateScene( Scene* scene )
 	if ( g_imguiControls.dbgImageId >= 0 )
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
-		if( ent != nullptr )
+		if( ( ent != nullptr ) && ( g_imguiControls.dbgImageId >= 0 ) )
 		{
 			ent->ClearFlag( ENT_FLAG_NO_DRAW );
 			Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
@@ -398,8 +398,13 @@ void UpdateScene( Scene* scene )
 				matAsset->QueueUpload();
 			}		
 			ent->SetSortOrder( 1 );
+
+			// TODO: Should code images be included in the lib for convenience and save-to-disk?
+			//Image& image = g_assets.textureLib.Find( g_imguiControls.dbgImageId )->Get();
+
+			//ent->SetOrigin( 0.5f * vec3f( image.info.width, image.info.height, 0.0f ) );
+			//ent->SetScale( vec3f( image.info.width, image.info.height, 0.0f ) );
 		}
-		ent->SetOrigin( vec3f( 0.0f, 0.0f, 0.0f ) );
 	}
 	else
 #endif
