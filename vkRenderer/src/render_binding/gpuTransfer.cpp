@@ -93,6 +93,11 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 			}
 		}
 
+		if ( texture.cpuImage == nullptr )
+		{
+			continue;
+		}
+
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
 		texture.gpuImage = 
@@ -163,7 +168,14 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
+
 			Image& texture = textureAsset->Get();
+
+			if ( texture.gpuImage == nullptr )
+			{
+				continue;
+			}
+
 			const int uploadId = texture.gpuImage->GetId();
 
 			switch ( texture.info.type )
