@@ -173,7 +173,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 				throw std::runtime_error( "Buffer could not allocate!" );
 			}
 
-			vk_MarkerSetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT, name );
+			vk_SetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_OBJECT_TYPE_BUFFER, vk_BuildObjectName( "Buffer", name, bufferId ).c_str() );
 
 			m_name = name;
 

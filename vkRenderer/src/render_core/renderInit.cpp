@@ -930,7 +930,7 @@ void Renderer::BuildPipelines()
 		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
 		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx ) {
-			prog.vk_shaders[ shaderIx ] = vk_CreateShaderModule( prog.shaders[ shaderIx ].blob );
+			prog.vk_shaders[ shaderIx ] = vk_CreateShaderModule( prog.shaders[ shaderIx ].blob, progAsset->GetName().c_str() );
 		}
 	}
 
@@ -1272,9 +1272,11 @@ void RenderContext::AllocRegisteredBindParms()
 
 	std::vector<VkDescriptorSetLayout> layouts;
 	std::vector<VkDescriptorSet> descSets;
+	std::vector<const char*> descNames;
 
 	layouts.reserve( MaxFrameStates * pendingParmCount );
 	descSets.reserve( MaxFrameStates * pendingParmCount );
+	descNames.reserve( MaxFrameStates * pendingParmCount );
 
 	for ( uint32_t i = 0; i < pendingParmCount; ++i )
 	{
@@ -1286,6 +1288,7 @@ void RenderContext::AllocRegisteredBindParms()
 		{
 			layouts.push_back( set->GetVkObject() );
 			descSets.push_back( VK_NULL_HANDLE );
+			descNames.push_back( set->GetName() );
 		}
 	}
 
@@ -1296,6 +1299,11 @@ void RenderContext::AllocRegisteredBindParms()
 	allocInfo.pSetLayouts = layouts.data();
 
 	VK_CHECK_RESULT( vkAllocateDescriptorSets( context.device, &allocInfo, descSets.data() ) );
+
+	for ( uint32_t i = 0; i < pendingParmCount; ++i )
+	{
+		vk_SetObjectName( (uint64_t)descSets[ i ], VK_OBJECT_TYPE_DESCRIPTOR_SET, vk_BuildObjectName( "DescriptorSet", descNames[ i ] ).c_str() );
+	}
 
 	for ( uint32_t i = 0; i < pendingParmCount; ++i )
 	{

@@ -96,6 +96,14 @@ void AllocatorMemory::Create( const uint32_t sizeBytes, const memoryRegion_t reg
 		VkDeviceMemory memory;
 		VK_CHECK_RESULT( vkAllocateMemory( context.device, &allocInfo, nullptr, &memory ) );
 
+		std::string memoryName;
+		if ( region == SHARED ) {
+			memoryName = "Shared";
+		} else if ( region == LOCAL ) {
+			memoryName = "Local";
+		}
+		vk_SetObjectName( (uint64_t)memory, VK_OBJECT_TYPE_DEVICE_MEMORY, vk_BuildObjectName( "Memory", memoryName.c_str() ).c_str() );
+
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProperties );
 		VkMemoryType type = memProperties.memoryTypes[ typeIndex ];

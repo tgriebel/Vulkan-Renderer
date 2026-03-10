@@ -233,6 +233,8 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 	VK_CHECK_RESULT( vkCreateRenderPass( context.device, &renderPassInfo, nullptr, &pass ) );
 
+	//vk_SetObjectName( (uint64_t)pass, VK_OBJECT_TYPE_RENDER_PASS, vk_BuildObjectName( "RenderPass", name ).c_str() );
+
 	renderPassCache[ passHash ] = renderPassTuple_t{ pass, passState };
 
 	return pass;
@@ -428,7 +430,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 			VK_CHECK_RESULT( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &vk_buffers[ frameIx ][ permIx ] ) );
 
-			vk_MarkerSetObjectName( (uint64_t)vk_buffers[ frameIx ][ permIx ], VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT, createInfo.name );
+			vk_SetObjectName( (uint64_t)vk_buffers[ frameIx ][ permIx ], VK_OBJECT_TYPE_FRAMEBUFFER, vk_BuildObjectName( "FrameBuffer", createInfo.name, frameIx ).c_str() );
 		}
 		m_color0 = createInfo.color0;
 		m_color1 = createInfo.color1;

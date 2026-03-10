@@ -112,6 +112,8 @@ void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout 
 	layoutInfo.pBindings = layoutBindings.data();
 
 	VK_CHECK_RESULT( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) );
+
+	vk_SetObjectName( (uint64_t)layout, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, vk_BuildObjectName( "DescriptorSetLayout", bindSet.GetName() ).c_str() );
 }
 
 
@@ -377,6 +379,8 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
+	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "Pipeline Layout (GFX): < " + prog.shaders[ 0 ].binName + " | " + prog.shaders[ 1 ].binName + " >" ).c_str() );
+
 	const bool depthTestEnable = ( ( state.stateBits & GFX_STATE_DEPTH_TEST ) != 0 );
 	const bool depthWriteEnable = ( ( state.stateBits & GFX_STATE_DEPTH_WRITE ) != 0 );
 
@@ -439,6 +443,8 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	pipelineInfo.pDepthStencilState = &depthStencil;
 
 	VK_CHECK_RESULT( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
+
+	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE,  ( "Pipeline (GFX): < " + prog.shaders[0].binName + " | " + prog.shaders[1].binName + " >" ).c_str() );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 
@@ -507,6 +513,8 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
+	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "PipelineLayout (Compute): < " + prog.shaders[ 0 ].binName + " >" ).c_str() );
+
 	VkComputePipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 	pipelineInfo.flags = 0;
@@ -517,6 +525,8 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	pipelineObject.csName = prog.shaders->name.c_str();
 
 	VK_CHECK_RESULT( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
+
+	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE, ( "Pipeline (Compute): < " + prog.shaders[ 0 ].binName + " >" ).c_str() );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }

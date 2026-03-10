@@ -85,6 +85,7 @@ public:
 	PFN_vkCmdDebugMarkerBeginEXT		fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerEndEXT			fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
 	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
+	PFN_vkSetDebugUtilsObjectNameEXT	fnCmdSetDebugUtilsObjectName = VK_NULL_HANDLE;
 #endif
 	// "bufferId" flips between double/triple buffers - 0, 1, 2
 	uint32_t							bufferId;
@@ -120,8 +121,8 @@ QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR s
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );
 int32_t				vk_MapToGlslCubemapConvention( const uint32_t index );
-VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info );
-VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView );
+VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const char* debugName = "", const uint32_t debugBufferId = 0 );
+VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView, const char* debugName = "", const uint32_t debugBufferId = 0 );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuImage, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image );
@@ -131,7 +132,9 @@ void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst );
 void				vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* texture, const copyImageParms_t& copyParms, GpuBuffer& buffer );
 imageSamples_t		vk_MaxImageSamples();
-VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code );
+VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code, const char* debugName );
 VkResult			vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger );
+std::string			vk_BuildObjectName( const char* typeName, const char* baseName, int32_t bufferId = -1 );
+void				vk_SetObjectName( const uint64_t handle, VkObjectType objectType, const char* name );
 void				vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
 void				vk_MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );

@@ -92,9 +92,12 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 
 			//std::cout << "Memory Size After: " << memory.GetSize() << std::endl;
 
-			vk_MarkerSetObjectName( (uint64_t)vk_image[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, m_dbgName );
+			if ( m_dbgName != "" )
+			{
+				vk_SetObjectName( (uint64_t)vk_image[ i ], VK_OBJECT_TYPE_IMAGE, vk_BuildObjectName( "Image", m_dbgName, i ).c_str() );
+			}
 
-			vk_view[ i ] = vk_CreateImageView( vk_image[ i ], info );
+			vk_view[ i ] = vk_CreateImageView( vk_image[ i ], info, m_dbgName, i );
 		}
 	}
 #endif

@@ -146,7 +146,7 @@ void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], co
 
 	VK_CHECK_RESULT( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &vk_layout ) );
 
-	vk_MarkerSetObjectName( (uint64_t)vk_layout, VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT, name );
+	vk_SetObjectName( (uint64_t)vk_layout, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, vk_BuildObjectName( "DescriptorSetLayout", m_name.c_str() ).c_str() );
 #else
 	assert(0);
 #endif

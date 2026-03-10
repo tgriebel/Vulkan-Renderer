@@ -86,7 +86,8 @@ void CommandContext::Create( const char* name, RenderContext* renderContext )
 		poolInfo.queueFamilyIndex = context.queueFamilyIndices[ queueType ];
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		VK_CHECK_RESULT( vkCreateCommandPool( context.device, &poolInfo, nullptr, &commandPool ) );
-		vk_MarkerSetObjectName( (uint64_t)commandPool, VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT, name );
+
+		vk_SetObjectName( (uint64_t)commandPool, VK_OBJECT_TYPE_COMMAND_POOL, vk_BuildObjectName( "CommandPool", name ).c_str() );
 	}
 
 	// Buffer creation
@@ -102,7 +103,7 @@ void CommandContext::Create( const char* name, RenderContext* renderContext )
 		for ( size_t i = 0; i < MaxFrameStates; i++ )
 		{
 			vkResetCommandBuffer( commandBuffers[ i ], 0 );
-			vk_MarkerSetObjectName( (uint64_t)commandBuffers[ i ], VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT, name );
+			vk_SetObjectName( (uint64_t)commandBuffers[ i ], VK_OBJECT_TYPE_COMMAND_BUFFER, vk_BuildObjectName( "CommandBuffer", name, i ).c_str() );
 		}
 	}
 #endif

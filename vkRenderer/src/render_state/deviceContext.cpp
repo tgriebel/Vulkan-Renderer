@@ -148,7 +148,7 @@ int32_t vk_MapToGlslCubemapConvention( const uint32_t index )
 }
 
 
-VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
+VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, const char* debugName, const uint32_t debugBufferId )
 {
 	imageSubResourceView_t subResourceView;
 	subResourceView.baseMip = 0;
@@ -156,11 +156,11 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info )
 	subResourceView.baseArray = 0;
 	subResourceView.arrayCount = info.layers;
 
-	return vk_CreateImageView( image, info, subResourceView );
+	return vk_CreateImageView( image, info, subResourceView, debugName, debugBufferId );
 }
 
 
-VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView )
+VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView, const char* debugName, const uint32_t debugBufferId )
 {
 	VkImageAspectFlags aspectFlags = vk_GetAspectFlags( info.aspect );
 
@@ -180,6 +180,12 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 
 	VkImageView imageView;
 	VK_CHECK_RESULT( vkCreateImageView( context.device, &viewInfo, nullptr, &imageView ) );
+
+	if( debugName != "" )
+	{
+		vk_SetObjectName( (uint64_t)imageView, VK_OBJECT_TYPE_IMAGE_VIEW, vk_BuildObjectName( "ImageView", debugName, debugBufferId ).c_str() );
+	}
+
 	return imageView;
 }
 
@@ -789,7 +795,7 @@ imageSamples_t vk_MaxImageSamples()
 }
 
 
-VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
+VkShaderModule vk_CreateShaderModule( const std::vector<char>& code, const char* debugName )
 {
 	VkShaderModuleCreateInfo createInfo{ };
 	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -798,6 +804,8 @@ VkShaderModule vk_CreateShaderModule( const std::vector<char>& code )
 
 	VkShaderModule shaderModule;
 	VK_CHECK_RESULT( vkCreateShaderModule( context.device, &createInfo, nullptr, &shaderModule ) );
+
+	vk_SetObjectName( (uint64_t)shaderModule, VK_OBJECT_TYPE_SHADER_MODULE, vk_BuildObjectName( "Shader", debugName ).c_str() );
 
 	return shaderModule;
 }
@@ -812,6 +820,35 @@ VkResult vk_CreateDebugUtilsMessengerEXT( VkInstance instance, const VkDebugUtil
 	else {
 		return VK_ERROR_EXTENSION_NOT_PRESENT;
 	}
+}
+
+
+std::string vk_BuildObjectName( const char* typeName, const char* baseName, int32_t bufferId )
+{
+	std::stringstream dbgNameSS;
+	dbgNameSS.clear();
+
+	dbgNameSS << typeName << ": " << baseName;
+	if( bufferId >= 0 ) {
+		dbgNameSS << "(" << bufferId << ")";
+	}
+	return dbgNameSS.str();
+}
+
+
+void vk_SetObjectName( const uint64_t handle, VkObjectType objectType, const char* name )
+{
+	if ( context.fnCmdSetDebugUtilsObjectName == nullptr ) {
+		return;
+	}
+
+	VkDebugUtilsObjectNameInfoEXT nameInfo{};
+	nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+	nameInfo.objectType = objectType;
+	nameInfo.objectHandle = handle;
+	nameInfo.pObjectName = name;
+
+	context.fnCmdSetDebugUtilsObjectName( context.device, &nameInfo );
 }
 
 
@@ -987,6 +1024,8 @@ void DeviceContext::Create( Window& window )
 		createInfo.ppEnabledExtensionNames = extensions.data();
 
 		VK_CHECK_RESULT( vkCreateInstance( &createInfo, nullptr, &instance ) );
+
+		vk_SetObjectName( (uint64_t)instance, VK_OBJECT_TYPE_INSTANCE, "VulkanInstance" );
 	}
 
 	// Debug Messenger
@@ -1032,6 +1071,7 @@ void DeviceContext::Create( Window& window )
 		if ( physicalDevice == VK_NULL_HANDLE ) {
 			throw std::runtime_error( "Failed to find a suitable GPU!" );
 		}
+		vk_SetObjectName( (uint64_t)physicalDevice, VK_OBJECT_TYPE_DEVICE, "VulkanPhysicalDevice" );
 	}
 
 	// Create logical device
@@ -1099,6 +1139,7 @@ void DeviceContext::Create( Window& window )
 		createInfo.pNext = &descIndexing;
 
 		VK_CHECK_RESULT( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) );
+		vk_SetObjectName( (uint64_t)device, VK_OBJECT_TYPE_DEVICE, "VulkanLogicalDevice" );
 
 		vkGetDeviceQueue( device, indices.graphicsFamily.value(), 0, &gfxContext );
 		vkGetDeviceQueue( device, indices.presentFamily.value(), 0, &presentQueue );
@@ -1141,6 +1182,11 @@ void DeviceContext::Create( Window& window )
 		else {
 			std::cout << "Debug markers \"" << VK_EXT_DEBUG_MARKER_EXTENSION_NAME << "\" disabled." << std::endl;
 		}
+	}
+
+	// Debug
+	{
+		fnCmdSetDebugUtilsObjectName = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetDeviceProcAddr( device, "vkSetDebugUtilsObjectNameEXT" );
 	}
 
 	// Bilinear Samplers
@@ -1215,6 +1261,8 @@ void DeviceContext::Create( Window& window )
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 		VK_CHECK_RESULT( vkCreateDescriptorPool( device, &poolInfo, nullptr, &descriptorPool ) );
+
+		vk_SetObjectName( (uint64_t)descriptorPool, VK_OBJECT_TYPE_DESCRIPTOR_POOL, "DescriptorPool (Uniform | Storage | ImageSampler | Image)" );
 	}
 
 	// Query Pool (Statistics)

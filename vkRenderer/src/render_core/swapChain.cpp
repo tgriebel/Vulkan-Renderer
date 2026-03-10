@@ -182,8 +182,9 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 
 	VkImageView vk_swapChainImageViews[ MaxSwapChainBuffers ];
 
-	for ( uint32_t i = 0; i < m_imageCount; ++i ) {
-		vk_swapChainImageViews[ i ] = vk_CreateImageView( vk_swapChainImages[ i ], info );
+	for ( uint32_t i = 0; i < m_imageCount; ++i )
+	{
+		vk_swapChainImageViews[ i ] = vk_CreateImageView( vk_swapChainImages[ i ], info, "Swapchain", i );
 	}
 
 	gpuImageStateFlags_t flags = GPU_IMAGE_PRESENT | GPU_IMAGE_PERSISTENT;
