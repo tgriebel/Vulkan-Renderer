@@ -177,7 +177,6 @@ public:
 	Image*					previousLum;
 	Image*					currentLum;
 	Image*					depthStencilResolvedImage;
-	Image*					debug2DImage;
 	Image					gpuOutput2D[ MaxFrameImages ];
 
 	// Data images
@@ -227,7 +226,8 @@ public:
 	void								Resize();
 
 	// Debug Information
-	imageInfo_t							QueryOutputImage( const char* debugName );
+	uint32_t							OutputImageCount();
+	const Image*						FindOutputImage( const uint32_t id );
 
 private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;

@@ -21,7 +21,19 @@ void Debug2dPass::Init( FrameBuffer* frameBuffer )
 
 void Debug2dPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = resources->debug2DImage;
+	uint32_t uploadId = 0;
+	const uint32_t codeImageCount = codeImages.Count();
+	for( uint32_t i = 0; i < codeImageCount; ++i )
+	{
+		if( resources->gpuOutput2D[ i ].info.subsamples != imageSamples_t::IMAGE_SMP_1 ) {
+		//	continue;
+		}
+		if ( resources->gpuOutput2D[ i ].info.type != imageType_t::IMAGE_TYPE_2D ) {
+		//	continue;
+		}
+	//	codeImages[ uploadId++ ] = &resources->gpuOutput2D[ i ];
+	}
+	codeImages[ 0 ] = resources->mainColorResolvedImage;
 	codeImages[ 1 ] = resources->depthStencilResolvedImage;
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );

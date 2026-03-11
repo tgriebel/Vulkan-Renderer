@@ -147,15 +147,6 @@ enum class swapBuffering_t : uint8_t
 
 
 #if defined( USE_IMGUI )
-struct imageDebug_t
-{
-	int32_t		dbgImageId;
-	int32_t		x;
-	int32_t		y;
-	uint32_t	width;
-	uint32_t	height;
-};
-
 struct imguiControls_t
 {
 	float			heightMapHeight;
@@ -168,7 +159,8 @@ struct imguiControls_t
 	float			dofFocalDepth;
 	float			dofFocalRange;
 	bool			dofEnable;
-	imageDebug_t	imageDebug;
+	int32_t			dbgImageId;
+	int32_t			selectedFrameBufferImageId;
 	int32_t			selectedEntityId;
 	bool			rebuildShaders;
 	hdl_t			shaderHdl;

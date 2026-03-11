@@ -101,7 +101,6 @@ void Renderer::Commit( const Scene* scene )
 			drawGroupOffset += view.drawGroup[ passIx ].InstanceCount();
 		}
 	}
-	resources.debug2DImage = &g_assets.textureLib.Find( scene->debugImageId )->Get();
 	CommitViews( scene );
 }
 
@@ -306,16 +305,19 @@ void Renderer::Resize()
 }
 
 
-imageInfo_t Renderer::QueryOutputImage( const char* debugName )
+uint32_t Renderer::OutputImageCount()
 {
-	const uint32_t outputImageCount = resources.OutputImageCount();
-	for ( uint32_t i = 0; i < outputImageCount; ++i )
+	return resources.OutputImageCount();
+}
+
+
+const Image* Renderer::FindOutputImage( const uint32_t id )
+{
+	if( id < resources.OutputImageCount() )
 	{
-		if( _stricmp( debugName, resources.gpuOutput2D[ i ].gpuImage->GetDebugName() ) == 0 ) {
-			return resources.gpuOutput2D[ i ].info;
-		}
+		return &resources.gpuOutput2D[ id ];
 	}
-	return imageInfo_t{};
+	return nullptr;
 }
 
 

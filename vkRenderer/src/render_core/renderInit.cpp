@@ -874,7 +874,8 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	g_imguiControls.dofEnable = false;
 	g_imguiControls.dofFocalDepth = 0.01f;
 	g_imguiControls.dofFocalRange = 0.25f;
-	g_imguiControls.imageDebug.dbgImageId = -1;
+	g_imguiControls.dbgImageId = -1;
+	g_imguiControls.selectedFrameBufferImageId = -1;
 	g_imguiControls.isTextured = true;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );

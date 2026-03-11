@@ -377,36 +377,44 @@ void UpdateScene( Scene* scene )
 	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );	
 
 #if defined( USE_IMGUI )
-	if ( g_imguiControls.imageDebug.dbgImageId >= 0 )
+	if ( g_imguiControls.dbgImageId >= 0 )
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
 		if( ent != nullptr )
 		{
 			ent->ClearFlag( ENT_FLAG_NO_DRAW );
-			Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
-			if( matAsset != nullptr )
+
+			const Image* debugImage = &g_assets.textureLib.Find( g_imguiControls.dbgImageId )->Get();
+			if ( debugImage != nullptr )
 			{
-				struct imageViewerParms_t
+				Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
+		
+				if( matAsset != nullptr )
 				{
-					uint32_t bitfield;
-				};
+					struct imageViewerParms_t
+					{
+						uint32_t bitfield;
+					};
 
-				imageViewerParms_t iamgeViewParms{};
-				iamgeViewParms.bitfield = 0x00000001;
+					imageViewerParms_t iamgeViewParms{};
+					//iamgeViewParms.bitfield = 0x00000001; // TODO: CodeImage
 				
-				Material& mat = matAsset->Get();
-				mat.AddTexture( 0, g_imguiControls.imageDebug.dbgImageId );
-				mat.SetExtraData( &iamgeViewParms, sizeof( imageViewerParms_t ) );
-				matAsset->QueueUpload();
+					Material& mat = matAsset->Get();
+					mat.AddTexture( 0, debugImage->gpuImage->GetId() );
+					mat.SetExtraData( &iamgeViewParms, sizeof( imageViewerParms_t ) );
+					matAsset->QueueUpload();
+				}
+				ent->SetSortOrder( 1 );
+
+				const imageInfo_t debugImageInfo = debugImage->info;
+				const float aspectRatio = (float)debugImageInfo.width / (float)debugImageInfo.height;
+
+				const float width = 250.0f;
+				const float height = width / aspectRatio;
+
+				ent->SetOrigin( 0.5f * vec3f( width, height, 0.0f ) );
+				ent->SetScale( vec3f( width, height, 0.0f ) );
 			}
-			ent->SetSortOrder( 1 );
-
-			scene->debugImageId = g_imguiControls.imageDebug.dbgImageId;
-
-			imageInfo_t debugImageInfo = g_renderer.QueryOutputImage( "mainColor" );
-
-			ent->SetOrigin( 0.5f * vec3f( (float)debugImageInfo.width, (float)debugImageInfo.height, 0.0f ) );
-			ent->SetScale( 0.25f * vec3f( (float)debugImageInfo.width, (float)debugImageInfo.height, 0.0f ) );
 		}
 	}
 	else
@@ -461,8 +469,56 @@ void UpdateScene( Scene* scene )
 		ImGui::EndTabBar();
 	}
 
-	ImGui::InputInt( "Image Id", &g_imguiControls.imageDebug.dbgImageId );
-	g_imguiControls.imageDebug.dbgImageId = Clamp( g_imguiControls.imageDebug.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
+	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
+	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
+
+	Asset<Image>* dbgImageAsset = ( g_imguiControls.dbgImageId >= 0 ) ? g_assets.textureLib.Find( g_imguiControls.dbgImageId ) : nullptr;
+	const Image* dbgImage = ( dbgImageAsset != nullptr ) ? &dbgImageAsset->Get() : nullptr;
+	const char* debugImageName = ( dbgImage != nullptr ) ? dbgImage->gpuImage->GetDebugName() : "";
+
+	if ( ImGui::BeginCombo( "Images", debugImageName ) )
+	{
+		const uint32_t dbgImageCount = g_assets.textureLib.Count();
+		for ( uint32_t i = 0; i < dbgImageCount; ++i )
+		{
+			dbgImage = &g_assets.textureLib.Find( i )->Get();
+			if ( dbgImage == nullptr ) {
+				continue;
+			}
+			const bool selected = ( i == g_imguiControls.dbgImageId );
+			if ( ImGui::Selectable( dbgImage->gpuImage->GetDebugName(), selected ) ) {
+				g_imguiControls.dbgImageId = i;
+			}
+			if ( selected ) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	const Image* fbImage = g_renderer.FindOutputImage( g_imguiControls.selectedFrameBufferImageId );
+	const char* debugFbName = ( fbImage != nullptr ) ? fbImage->gpuImage->GetDebugName() : "";
+
+	if ( ImGui::BeginCombo( "FrameBuffers", debugFbName ) )
+	{
+		const uint32_t outputImageCount = g_renderer.OutputImageCount();
+		for ( uint32_t i = 0; i < outputImageCount; ++i )
+		{
+			fbImage = g_renderer.FindOutputImage( i );
+			if( fbImage == nullptr ) {
+				continue;
+			}
+			const bool selected = ( i == g_imguiControls.selectedFrameBufferImageId );
+			if ( ImGui::Selectable( fbImage->gpuImage->GetDebugName(), selected ) ) {
+				g_imguiControls.selectedFrameBufferImageId = i;
+			}
+
+			if ( selected ) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
 
 	char entityName[ 256 ];
 	if ( g_imguiControls.selectedEntityId >= 0 ) {
