@@ -306,6 +306,19 @@ void Renderer::Resize()
 }
 
 
+imageInfo_t Renderer::QueryOutputImage( const char* debugName )
+{
+	const uint32_t outputImageCount = resources.OutputImageCount();
+	for ( uint32_t i = 0; i < outputImageCount; ++i )
+	{
+		if( _stricmp( debugName, resources.gpuOutput2D[ i ].gpuImage->GetDebugName() ) == 0 ) {
+			return resources.gpuOutput2D[ i ].info;
+		}
+	}
+	return imageInfo_t{};
+}
+
+
 void Renderer::UploadAssets()
 {
 	const uint32_t materialCount = g_assets.materialLib.Count();

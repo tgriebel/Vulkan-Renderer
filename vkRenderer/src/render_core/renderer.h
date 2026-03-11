@@ -144,6 +144,7 @@ private:
 
 	Image* NextImage()
 	{
+		assert( outputImageCount < MaxFrameImages );
 		return &gpuOutput2D[ outputImageCount++ ];
 	}
 
@@ -224,6 +225,9 @@ public:
 	void								InitGPU();
 	void								ShutdownGPU();
 	void								Resize();
+
+	// Debug Information
+	imageInfo_t							QueryOutputImage( const char* debugName );
 
 private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;

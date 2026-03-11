@@ -11,9 +11,11 @@
 #endif
 
 #include "src/render_core/debugMenu.h"
+#include "src/render_core/renderer.h"
 
 extern AssetManager g_assets;
 extern Scene* g_scene;
+extern Renderer g_renderer;
 
 #if defined( USE_IMGUI )
 extern imguiControls_t			g_imguiControls;
@@ -401,13 +403,10 @@ void UpdateScene( Scene* scene )
 
 			scene->debugImageId = g_imguiControls.imageDebug.dbgImageId;
 
-			//Image* image = &g_assets.textureLib.Find( scene->debugImageId )->Get();
+			imageInfo_t debugImageInfo = g_renderer.QueryOutputImage( "mainColor" );
 
-			// TODO: Should code images be included in the lib for convenience and save-to-disk?
-			//Image& image = g_assets.textureLib.Find( g_imguiControls.dbgImageId )->Get();
-
-			//ent->SetOrigin( 0.5f * vec3f( image.info.width, image.info.height, 0.0f ) );
-			//ent->SetScale( vec3f( image.info.width, image.info.height, 0.0f ) );
+			ent->SetOrigin( 0.5f * vec3f( (float)debugImageInfo.width, (float)debugImageInfo.height, 0.0f ) );
+			ent->SetScale( 0.25f * vec3f( (float)debugImageInfo.width, (float)debugImageInfo.height, 0.0f ) );
 		}
 	}
 	else
