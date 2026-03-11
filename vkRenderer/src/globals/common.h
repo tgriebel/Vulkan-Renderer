@@ -82,6 +82,7 @@ const uint32_t	MaxLights						= 128;
 const uint32_t	MaxParticles					= 1024;
 const uint32_t	MaxShadowMaps					= 6;
 const uint32_t	MaxShadowViews					= MaxShadowMaps;
+const uint32_t	MaxFrameImages					= 36;
 const uint32_t	MaxMipMaps						= 16;
 const uint32_t	Max2DViews						= 2;
 const uint32_t	Max3DViews						= 7;
@@ -146,30 +147,39 @@ enum class swapBuffering_t : uint8_t
 
 
 #if defined( USE_IMGUI )
+struct imageDebug_t
+{
+	int32_t		dbgImageId;
+	int32_t		x;
+	int32_t		y;
+	uint32_t	width;
+	uint32_t	height;
+};
+
 struct imguiControls_t
 {
-	float		heightMapHeight;
-	float		roughnessScale;
-	float		roughnessBias;
-	float		metalnessScale;
-	float		metalnessBias;
-	float		shadowStrength;
-	float		toneMapColor[ 4 ];
-	float		dofFocalDepth;
-	float		dofFocalRange;
-	bool		dofEnable;
-	int			dbgImageId;
-	int			selectedEntityId;
-	bool		rebuildShaders;
-	hdl_t		shaderHdl;
-	bool		raytraceScene;
-	bool		rasterizeScene;
-	bool		rebuildRaytraceScene;
-	bool		openModelImportFileDialog;
-	bool		openSceneFileDialog;
-	bool		reloadScene;
-	bool		captureScreenshot;
-	bool		isTextured;
-	vec3f		selectedModelOrigin;
+	float			heightMapHeight;
+	float			roughnessScale;
+	float			roughnessBias;
+	float			metalnessScale;
+	float			metalnessBias;
+	float			shadowStrength;
+	float			toneMapColor[ 4 ];
+	float			dofFocalDepth;
+	float			dofFocalRange;
+	bool			dofEnable;
+	imageDebug_t	imageDebug;
+	int32_t			selectedEntityId;
+	bool			rebuildShaders;
+	hdl_t			shaderHdl;
+	bool			raytraceScene;
+	bool			rasterizeScene;
+	bool			rebuildRaytraceScene;
+	bool			openModelImportFileDialog;
+	bool			openSceneFileDialog;
+	bool			reloadScene;
+	bool			captureScreenshot;
+	bool			isTextured;
+	vec3f			selectedModelOrigin;
 };
 #endif

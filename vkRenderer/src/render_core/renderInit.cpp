@@ -66,12 +66,12 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.isCubeView = ( resources.shadowMapImage[ i ].info.type == imageType_t::IMAGE_TYPE_CUBE );
+		info.isCubeView = ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_CUBE );
 
 		info.fbImages.name = "ShadowFB";
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-		info.fbImages.depth = &resources.shadowMapImage[ i ];
+		info.fbImages.depth = resources.shadowMapImage[ i ];
 
 		info.clear = true;
 		info.clearDepth = 1.0f;
@@ -100,8 +100,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.name = "MainFB";
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-		info.fbImages.color0 = &resources.mainColorImage;
-		info.fbImages.color1 = &resources.gBufferLayerImage;
+		info.fbImages.color0 = resources.mainColorImage;
+		info.fbImages.color1 = resources.gBufferLayerImage;
 		info.fbImages.depth = &resources.depthImageView;
 		info.fbImages.stencil = &resources.stencilImageView;
 
@@ -133,8 +133,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.name = "CubeFB";
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-		info.fbImages.color0 = &resources.cubeFbColorImage;
-		info.fbImages.depth = &resources.cubeFbDepthImage;
+		info.fbImages.color0 = resources.cubeFbColorImage;
+		info.fbImages.depth = resources.cubeFbDepthImage;
 
 		info.clear = true;
 		info.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
@@ -200,7 +200,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			imageProcessCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
 			info.progName = "DiffuseIBL";
-			info.sampleImages[ 0 ] = &resources.cubeFbColorImage;
+			info.sampleImages[ 0 ] = resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.baseMip = 0;
@@ -250,7 +250,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			imageProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
-			info.sampleImages[ 0 ] = &resources.cubeFbColorImage;
+			info.sampleImages[ 0 ] = resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.progName = "preCalculatedSpecularIbl";
@@ -306,7 +306,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		} else {
 			info.progHdl = AssetLibGpuProgram::Handle( "ResolveMSAA" );
 		}
-		info.outputImage = &resources.mainColorResolvedImage;
+		info.outputImage = resources.mainColorResolvedImage;
 		info.outputImage1 = &resources.depthResolvedImageView;
 		info.context = &renderContext;
 		info.resources = &resources;
@@ -314,7 +314,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		resolve = new ImageShaderTask( info );
 
-		resolve->SetSourceImage( 0, &resources.mainColorImage );
+		resolve->SetSourceImage( 0, resources.mainColorImage );
 		resolve->SetSourceImage( 1, &resources.depthImageView );
 		resolve->SetSourceImage( 2, &resources.stencilImageView );
 	}
@@ -326,9 +326,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "Separable Gaussian";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.outputImage = &resources.blurredImage;
+		info.outputImage = resources.blurredImage;
 		info.progName = "SeparableGaussianBlur";
-		info.sampleImages[ 0 ] = &resources.mainColorResolvedImage;
+		info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
 		info.baseMip = 0;
 
 		gaussianTask = new ImageProcessTask( info );
@@ -366,7 +366,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			dstCopy.height = 1;
 			dstCopy.depth = 1;
 
-			copyPreviousLuminance = new CopyImageTask( &resources.currentLum, srcCopy, &resources.previousLum, dstCopy );
+			copyPreviousLuminance = new CopyImageTask( resources.currentLum, srcCopy, resources.previousLum, dstCopy );
 		}
 
 		// Average scene luminance
@@ -375,10 +375,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.name = "LuminanceDownsample";
 			info.context = &renderContext;
 			info.resources = &resources;
-			info.sampleImages[ 0 ] = &resources.mainColorResolvedImage;
-			info.sampleImages[ 1 ] = &resources.previousLum;
-			info.outputImage = &resources.currentLum;
-			info.mipCount = resources.currentLum.info.mipLevels;
+			info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
+			info.sampleImages[ 1 ] = resources.previousLum;
+			info.outputImage = resources.currentLum;
+			info.mipCount = resources.currentLum->info.mipLevels;
 			info.progressiveSampling = true;
 			info.progName = "LuminanceDownsample";
 
@@ -393,7 +393,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "MainColorDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.outputImage = &resources.mainColorResolvedImage;
+		info.outputImage = resources.mainColorResolvedImage;
 		info.progressiveSampling = true;
 		info.progName = "DownSample";
 		info.baseMip = 1;
@@ -408,7 +408,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "CubeDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.outputImage = &resources.cubeFbColorImage;
+		info.outputImage = resources.cubeFbColorImage;
 		info.progressiveSampling = true;
 		info.baseMip = 1;
 
@@ -422,7 +422,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		imageReadBackCreateInfo_t info{};
 		info.name = "EnvironmentMapReadback";
-		info.img = &resources.cubeFbColorImage;
+		info.img = resources.cubeFbColorImage;
 		info.context = &renderContext;
 		info.resources = &resources;
 		info.fileName = fileName.c_str();
@@ -491,7 +491,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fileName = "screenshot.png";
 		info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
 		info.flags |= imageReadbackFlags_t::SCREENSHOT;
-		info.img = &resources.mainColorResolvedImage;
+		info.img = resources.mainColorResolvedImage;
 
 		screenshotReadback = new ImageReadbackTask( info );
 	}
@@ -874,7 +874,7 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	g_imguiControls.dofEnable = false;
 	g_imguiControls.dofFocalDepth = 0.01f;
 	g_imguiControls.dofFocalRange = 0.25f;
-	g_imguiControls.dbgImageId = -1;
+	g_imguiControls.imageDebug.dbgImageId = -1;
 	g_imguiControls.isTextured = true;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
@@ -1005,6 +1005,8 @@ void Renderer::CreateFramebuffers()
 	int height = 0;
 	g_window.GetWindowFrameBufferSize( width, height );
 
+	resources.RegisterOutputImages();
+
 	// Shadow images
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
@@ -1019,7 +1021,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.shadowMapImage[ shadowIx ].Create(
+		resources.shadowMapImage[ shadowIx ]->Create(
 			info,
 			nullptr,
 			new GpuImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1039,13 +1041,13 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.mainColorImage.Create(
+		resources.mainColorImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 		
-		resources.gBufferLayerImage.Create(
+		resources.gBufferLayerImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1055,7 +1057,7 @@ void Renderer::CreateFramebuffers()
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
-		resources.depthStencilImage.Create(
+		resources.depthStencilImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1075,20 +1077,20 @@ void Renderer::CreateFramebuffers()
 		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		colorInfo.tiling = IMAGE_TILING_MORTON;
 
-		resources.cubeFbColorImage.Create(
+		resources.cubeFbColorImage->Create(
 			colorInfo,
 			nullptr,
 			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
 
-		resources.cubeFbColorImage.sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-		resources.cubeFbColorImage.sampler.filter = SAMPLER_FILTER_BILINEAR;
+		resources.cubeFbColorImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+		resources.cubeFbColorImage->sampler.filter = SAMPLER_FILTER_BILINEAR;
 
 		imageInfo_t depthInfo = colorInfo;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		depthInfo.fmt = IMAGE_FMT_D_16;
 
-		resources.cubeFbDepthImage.Create(
+		resources.cubeFbDepthImage->Create(
 			depthInfo,
 			nullptr,
 			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1103,17 +1105,17 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = MipCount( info.width, info.height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = resources.mainColorImage.info.fmt;
+		info.fmt = resources.mainColorImage->info.fmt;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = resources.mainColorImage.info.aspect;
-		info.tiling = resources.mainColorImage.info.tiling;
+		info.aspect = resources.mainColorImage->info.aspect;
+		info.tiling = resources.mainColorImage->info.tiling;
 
-		resources.mainColorResolvedImage.Create(
+		resources.mainColorResolvedImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
-		resources.blurredImage.Create(
+		resources.blurredImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1122,13 +1124,13 @@ void Renderer::CreateFramebuffers()
 
 	// Depth-stencil views
 	{
-		imageInfo_t depthInfo = resources.depthStencilImage.info;
+		imageInfo_t depthInfo = resources.depthStencilImage->info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		resources.depthImageView.Init( &resources.depthStencilImage, depthInfo, resourceLifeTime_t::RESIZE );
+		resources.depthImageView.Init( resources.depthStencilImage, depthInfo, resourceLifeTime_t::RESIZE );
 
-		imageInfo_t stencilInfo = resources.depthStencilImage.info;
+		imageInfo_t stencilInfo = resources.depthStencilImage->info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		resources.stencilImageView.Init( &resources.depthStencilImage, stencilInfo, resourceLifeTime_t::RESIZE );
+		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, resourceLifeTime_t::RESIZE );
 	}
 
 	// Resolve depth-stencil image
@@ -1142,9 +1144,9 @@ void Renderer::CreateFramebuffers()
 		info.fmt = IMAGE_FMT_RG_32;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = resources.depthStencilImage.info.tiling;
+		info.tiling = resources.depthStencilImage->info.tiling;
 
-		resources.depthStencilResolvedImage.Create(
+		resources.depthStencilResolvedImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1153,8 +1155,8 @@ void Renderer::CreateFramebuffers()
 
 	// Depth-stencil views
 	{
-		resources.depthResolvedImageView.Init( &resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info, resourceLifeTime_t::RESIZE );
-		resources.stencilResolvedImageView.Init( &resources.depthStencilResolvedImage, resources.depthStencilResolvedImage.info, resourceLifeTime_t::RESIZE );
+		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, resourceLifeTime_t::RESIZE );
+		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, resourceLifeTime_t::RESIZE );
 	}
 
 	// Temp image
@@ -1170,7 +1172,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.tempColorImage.Create(
+		resources.tempColorImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
@@ -1190,7 +1192,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.previousLum.Create(
+		resources.previousLum->Create(
 			info,
 			nullptr,
 			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
@@ -1210,7 +1212,7 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.currentLum.Create(
+		resources.currentLum->Create(
 			info,
 			nullptr,
 			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )

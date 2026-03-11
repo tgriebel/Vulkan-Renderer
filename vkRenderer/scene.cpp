@@ -375,10 +375,10 @@ void UpdateScene( Scene* scene )
 	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );	
 
 #if defined( USE_IMGUI )
-	if ( g_imguiControls.dbgImageId >= 0 )
+	if ( g_imguiControls.imageDebug.dbgImageId >= 0 )
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
-		if( ( ent != nullptr ) && ( g_imguiControls.dbgImageId >= 0 ) )
+		if( ent != nullptr )
 		{
 			ent->ClearFlag( ENT_FLAG_NO_DRAW );
 			Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
@@ -393,11 +393,15 @@ void UpdateScene( Scene* scene )
 				iamgeViewParms.bitfield = 0x00000001;
 				
 				Material& mat = matAsset->Get();
-				mat.AddTexture( 0, g_imguiControls.dbgImageId );
+				mat.AddTexture( 0, g_imguiControls.imageDebug.dbgImageId );
 				mat.SetExtraData( &iamgeViewParms, sizeof( imageViewerParms_t ) );
 				matAsset->QueueUpload();
-			}		
+			}
 			ent->SetSortOrder( 1 );
+
+			scene->debugImageId = g_imguiControls.imageDebug.dbgImageId;
+
+			//Image* image = &g_assets.textureLib.Find( scene->debugImageId )->Get();
 
 			// TODO: Should code images be included in the lib for convenience and save-to-disk?
 			//Image& image = g_assets.textureLib.Find( g_imguiControls.dbgImageId )->Get();
@@ -458,8 +462,8 @@ void UpdateScene( Scene* scene )
 		ImGui::EndTabBar();
 	}
 
-	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
-	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
+	ImGui::InputInt( "Image Id", &g_imguiControls.imageDebug.dbgImageId );
+	g_imguiControls.imageDebug.dbgImageId = Clamp( g_imguiControls.imageDebug.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
 
 	char entityName[ 256 ];
 	if ( g_imguiControls.selectedEntityId >= 0 ) {

@@ -23,9 +23,9 @@ void OpaquePass::Init( FrameBuffer* frameBuffer )
 
 void OpaquePass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = &resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = &resources->shadowMapImage[ 2 ];
+	codeImages[ 0 ] = resources->shadowMapImage[ 0 ];
+	codeImages[ 1 ] = resources->shadowMapImage[ 1 ];
+	codeImages[ 2 ] = resources->shadowMapImage[ 2 ];
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );

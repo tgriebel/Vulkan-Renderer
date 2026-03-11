@@ -21,8 +21,8 @@ void Debug2dPass::Init( FrameBuffer* frameBuffer )
 
 void Debug2dPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->mainColorResolvedImage;
-	codeImages[ 1 ] = &resources->depthStencilResolvedImage;
+	codeImages[ 0 ] = resources->debug2DImage;
+	codeImages[ 1 ] = resources->depthStencilResolvedImage;
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );

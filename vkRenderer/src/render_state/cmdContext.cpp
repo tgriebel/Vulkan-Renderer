@@ -100,7 +100,7 @@ void CommandContext::Create( const char* name, RenderContext* renderContext )
 
 		VK_CHECK_RESULT( vkAllocateCommandBuffers( context.device, &allocInfo, commandBuffers ) );
 
-		for ( size_t i = 0; i < MaxFrameStates; i++ )
+		for ( uint32_t i = 0; i < MaxFrameStates; i++ )
 		{
 			vkResetCommandBuffer( commandBuffers[ i ], 0 );
 			vk_SetObjectName( (uint64_t)commandBuffers[ i ], VK_OBJECT_TYPE_COMMAND_BUFFER, vk_BuildObjectName( "CommandBuffer", name, i ).c_str() );

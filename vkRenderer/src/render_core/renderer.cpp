@@ -101,6 +101,7 @@ void Renderer::Commit( const Scene* scene )
 			drawGroupOffset += view.drawGroup[ passIx ].InstanceCount();
 		}
 	}
+	resources.debug2DImage = &g_assets.textureLib.Find( scene->debugImageId )->Get();
 	CommitViews( scene );
 }
 
@@ -611,8 +612,8 @@ void Renderer::UpdateBuffers()
 		globals.shadowCubeCount = 0;
 		for( uint32_t i = 0; i < MaxShadowMaps; ++i )
 		{
-			globals.shadow2dCount += ( resources.shadowMapImage->info.type == imageType_t::IMAGE_TYPE_2D );
-			globals.shadowCubeCount += ( resources.shadowMapImage->info.type == imageType_t::IMAGE_TYPE_CUBE );
+			globals.shadow2dCount += ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_2D );
+			globals.shadowCubeCount += ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_CUBE );
 		}
 		globals.textureCount = g_assets.textureLib.Count();
 		globals.materialCount = g_assets.materialLib.Count();

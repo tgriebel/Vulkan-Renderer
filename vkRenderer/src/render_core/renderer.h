@@ -139,6 +139,14 @@ public:
 // Resources that are globally accessible for shader binding
 class ResourceContext
 {
+private:
+	uint32_t				outputImageCount = 0;
+
+	Image* NextImage()
+	{
+		return &gpuOutput2D[ outputImageCount++ ];
+	}
+
 public:
 	GpuBuffer				globalConstants;
 	GpuBuffer				surfParms;
@@ -149,11 +157,11 @@ public:
 
 	// TODO: move view-specific data
 	GpuBuffer				viewParms;
-	Image					mainColorImage;
-	Image					cubeFbColorImage;
-	Image					cubeFbDepthImage;
-	Image					gBufferLayerImage;
-	Image					depthStencilImage;
+	Image*					mainColorImage;
+	Image*					cubeFbColorImage;
+	Image*					cubeFbDepthImage;
+	Image*					gBufferLayerImage;
+	Image*					depthStencilImage;
 	ImageView				depthImageView;
 	ImageView				stencilImageView;
 	GpuBufferView			surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
@@ -161,17 +169,45 @@ public:
 	// Code images
 	ImageView				depthResolvedImageView;
 	ImageView				stencilResolvedImageView;
-	Image					shadowMapImage[ MaxShadowViews ];
-	Image					mainColorResolvedImage;
-	Image					blurredImage;
-	Image					tempColorImage;
-	Image					previousLum;
-	Image					currentLum;
-	Image					depthStencilResolvedImage;
+	Image*					shadowMapImage[ MaxShadowViews ];
+	Image*					mainColorResolvedImage;
+	Image*					blurredImage;
+	Image*					tempColorImage;
+	Image*					previousLum;
+	Image*					currentLum;
+	Image*					depthStencilResolvedImage;
+	Image*					debug2DImage;
+	Image					gpuOutput2D[ MaxFrameImages ];
 
 	// Data images
 	ImageArray				gpuImages2D;
 	ImageArray				gpuImagesCube;
+
+	void RegisterOutputImages()
+	{
+		outputImageCount = 0;
+
+		mainColorImage = NextImage();
+		cubeFbColorImage = NextImage();
+		cubeFbDepthImage = NextImage();
+		gBufferLayerImage = NextImage();
+		depthStencilImage = NextImage();
+
+		for( uint32_t i = 0; i < MaxShadowViews; ++i ) {
+			shadowMapImage[ i ] = NextImage();
+		}
+		mainColorResolvedImage = NextImage();
+		blurredImage = NextImage();
+		tempColorImage = NextImage();
+		previousLum = NextImage();
+		currentLum = NextImage();
+		depthStencilResolvedImage = NextImage();
+	}
+
+	uint32_t OutputImageCount()
+	{
+		return outputImageCount;
+	}
 };
 
 

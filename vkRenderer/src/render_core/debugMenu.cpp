@@ -370,7 +370,11 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 			ImGui::TableNextRow();
 
 			ImGui::TableNextColumn();	ImGui::Text( "Size(bytes)" );
-			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.cpuImage->GetByteCount() );
+			if( texture.cpuImage != nullptr ) {
+				ImGui::TableNextColumn();	ImGui::Text( "%u", texture.cpuImage->GetByteCount() );
+			} else {
+				ImGui::TableNextColumn();	ImGui::Text( "No CPU Mem" );
+			}
 			ImGui::TableNextRow();
 
 			ImGui::EndTable();

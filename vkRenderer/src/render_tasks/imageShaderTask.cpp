@@ -69,7 +69,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		// Intermediate Frame Buffer
 		if ( m_passCount > 1 )
 		{
-			m_views[ passIndex ][ 0 ] = new ImageView( &info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_views[ passIndex ][ 0 ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
 
 			assert( ( m_views[ passIndex ][ 1 ] == nullptr ) && ( m_views[ passIndex ][ 2 ] == nullptr ) ); // Not supported
 

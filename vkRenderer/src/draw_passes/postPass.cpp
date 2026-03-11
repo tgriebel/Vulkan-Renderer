@@ -21,10 +21,10 @@ void PostPass::Init( FrameBuffer* frameBuffer )
 
 void PostPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = &resources->mainColorResolvedImage;
-	codeImages[ 1 ] = &resources->depthStencilResolvedImage;
-	codeImages[ 2 ] = &resources->blurredImage;
-	codeImages[ 3 ] = &resources->currentLum;
+	codeImages[ 0 ] = resources->mainColorResolvedImage;
+	codeImages[ 1 ] = resources->depthStencilResolvedImage;
+	codeImages[ 2 ] = resources->blurredImage;
+	codeImages[ 3 ] = resources->currentLum;
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
