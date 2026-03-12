@@ -7,6 +7,7 @@
 #include "src/globals/render_util.h"
 
 #if defined( USE_IMGUI )
+#include "external/imgui/imgui_internal.h"
 #include "external/imgui/imgui.h"
 #endif
 
@@ -396,12 +397,14 @@ void UpdateScene( Scene* scene )
 						uint32_t bitfield;
 					};
 
-					imageViewerParms_t iamgeViewParms{};
-					//iamgeViewParms.bitfield = 0x00000001; // TODO: CodeImage
+					imageViewerParms_t imageViewParms{};
+					if( HasFlags( debugImage->gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_WRITE ) ) {
+						imageViewParms.bitfield = 0x00000001;
+					}
 				
 					Material& mat = matAsset->Get();
 					mat.AddTexture( 0, debugImage->gpuImage->GetId() );
-					mat.SetExtraData( &iamgeViewParms, sizeof( imageViewerParms_t ) );
+					mat.SetExtraData( &imageViewParms, sizeof( imageViewerParms_t ) );
 					matAsset->QueueUpload();
 				}
 				ent->SetSortOrder( 1 );
@@ -409,10 +412,10 @@ void UpdateScene( Scene* scene )
 				const imageInfo_t debugImageInfo = debugImage->info;
 				const float aspectRatio = (float)debugImageInfo.width / (float)debugImageInfo.height;
 
-				const float width = 250.0f;
-				const float height = width / aspectRatio;
+				const float width = g_imguiControls.dbgImageInfo.width;
+				const float height = Min( width / aspectRatio, (float)g_imguiControls.dbgImageInfo.height );
 
-				ent->SetOrigin( 0.5f * vec3f( width, height, 0.0f ) );
+				ent->SetOrigin( vec3f( g_imguiControls.dbgImageInfo.x, g_imguiControls.dbgImageInfo.y, 0.0f ) + 0.5f * vec3f( width, height, 0.0f ) );
 				ent->SetScale( vec3f( width, height, 0.0f ) );
 			}
 		}
@@ -540,9 +543,41 @@ void UpdateScene( Scene* scene )
 	ImGui::SameLine();
 	ImGui::Text( "FPS: %f", 1000.0f / g_renderDebugData.frameTimeMs );
 
-	ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ), 0, ImVec2( 200.0f, 200.0f ) );
-
 	ImGui::End();
+
+	if ( g_imguiControls.dbgImageId >= 0 )
+	{
+		ImGui::Begin( "Image Viewer" );
+		ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ), 0, ImVec2( 200.0f, 200.0f ) );
+
+		ImVec2 pos = ImGui::GetItemRectMin();  // top-left of last item
+		ImVec2 size = ImGui::GetItemRectSize();
+		ImVec2 max = ImGui::GetItemRectMax();  // bottom-right
+
+		// Get the current window's clip rect
+		ImRect clipRectV4 = ImGui::GetCurrentContext()->CurrentWindow->ClipRect;
+		ImVec2 clipMin = ImVec2( clipRectV4.Min.x, clipRectV4.Min.y );
+		ImVec2 clipMax = ImVec2( clipRectV4.Max.x, clipRectV4.Max.y );
+
+		// Intersect
+		ImVec2 visibleMin = ImVec2( Max( pos.x, clipMin.x ), Max( pos.y, clipMin.y ) );
+		ImVec2 visibleMax = ImVec2( Min( max.x, clipMax.x ), Min( max.y, clipMax.y ) );
+
+		ImVec2 visibleSize = size;
+
+		// Check if visible at all
+		if ( visibleMin.x < visibleMax.x && visibleMin.y < visibleMax.y )
+		{
+			visibleSize = ImVec2( visibleMax.x - visibleMin.x, visibleMax.y - visibleMin.y );
+		}
+
+		g_imguiControls.dbgImageInfo.x = pos.x;
+		g_imguiControls.dbgImageInfo.y = pos.y;
+		g_imguiControls.dbgImageInfo.width = visibleSize.x;
+		g_imguiControls.dbgImageInfo.height = visibleSize.y;
+
+		ImGui::End();
+	}
 #endif
 
 	scene->Update();
