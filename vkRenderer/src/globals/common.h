@@ -147,31 +147,41 @@ enum class swapBuffering_t : uint8_t
 
 
 #if defined( USE_IMGUI )
+struct imageViewerInfo_t
+{
+	uint32_t id;
+	float x;
+	float y;
+	float width;
+	float height;
+};
+
 struct imguiControls_t
 {
-	float			heightMapHeight;
-	float			roughnessScale;
-	float			roughnessBias;
-	float			metalnessScale;
-	float			metalnessBias;
-	float			shadowStrength;
-	float			toneMapColor[ 4 ];
-	float			dofFocalDepth;
-	float			dofFocalRange;
-	bool			dofEnable;
-	int32_t			dbgImageId;
-	int32_t			selectedFrameBufferImageId;
-	int32_t			selectedEntityId;
-	bool			rebuildShaders;
-	hdl_t			shaderHdl;
-	bool			raytraceScene;
-	bool			rasterizeScene;
-	bool			rebuildRaytraceScene;
-	bool			openModelImportFileDialog;
-	bool			openSceneFileDialog;
-	bool			reloadScene;
-	bool			captureScreenshot;
-	bool			isTextured;
-	vec3f			selectedModelOrigin;
+	float				heightMapHeight;
+	float				roughnessScale;
+	float				roughnessBias;
+	float				metalnessScale;
+	float				metalnessBias;
+	float				shadowStrength;
+	float				toneMapColor[ 4 ];
+	float				dofFocalDepth;
+	float				dofFocalRange;
+	bool				dofEnable;
+	int32_t				dbgImageId;
+	imageViewerInfo_t	dbgImageInfo;
+	int32_t				selectedFrameBufferImageId;
+	int32_t				selectedEntityId;
+	bool				rebuildShaders;
+	hdl_t				shaderHdl;
+	bool				raytraceScene;
+	bool				rasterizeScene;
+	bool				rebuildRaytraceScene;
+	bool				openModelImportFileDialog;
+	bool				openSceneFileDialog;
+	bool				reloadScene;
+	bool				captureScreenshot;
+	bool				isTextured;
+	vec3f				selectedModelOrigin;
 };
 #endif

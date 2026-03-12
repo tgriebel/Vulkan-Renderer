@@ -244,7 +244,8 @@ struct surface_t
 											MODEL_LAYOUT( 1, 0 )													\
 											LIGHT_LAYOUT( 2, 0 )													\
 											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
-											STENCIL_LAYOUT( 2, 2, SAMPLER )											\
+											CODE_IMAGE_CUBE_LAYOUT( 2, 2 )											\
+											STENCIL_LAYOUT( 2, 3, SAMPLER )											\
 											MATERIAL_PUSH_CONSTANTS													\
 											PS_IN																	\
 											PS_OUT

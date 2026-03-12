@@ -23,6 +23,7 @@ void ShadowPass::FrameBegin( const ResourceContext* resources )
 {
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
+	parms->Bind( bind_imageCodeCubeArray, &codeCubeImages );
 	parms->Bind( bind_imageStencil, rc.whiteImage );
 }
 

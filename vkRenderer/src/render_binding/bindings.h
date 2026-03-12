@@ -2,6 +2,12 @@
 
 #include "shaderBinding.h"
 
+// *********************** IMPORTANT ***********************
+// 
+// Must mirror changes and recompile all shaders when adjusting bindings
+//
+// *********************************************************
+
 #define BINDING( NAME, TYPE, COUNT, FLAGS )	static const ShaderBinding bind_##NAME( #NAME, bindType_t::TYPE, COUNT, FLAGS )
 
 BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
@@ -25,6 +31,7 @@ BINDING( imageCubeArray,		IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL 
 BINDING( materialBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL );
 BINDING( lightBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL );
 BINDING( imageCodeArray,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL );
+BINDING( imageCodeCubeArray,	IMAGE_CUBE_ARRAY,	MaxCodeImages,			BIND_STATE_ALL );
 BINDING( imageStencil,			IMAGE_2D,			1,						BIND_STATE_ALL );
 
 
@@ -50,6 +57,7 @@ static const ShaderBinding g_passBindings[] =
 {
 	bind_lightBuffer,
 	bind_imageCodeArray,
+	bind_imageCodeCubeArray,
 	bind_imageStencil
 };
 const uint64_t bindset_pass = Hash( "bindset_pass" );
