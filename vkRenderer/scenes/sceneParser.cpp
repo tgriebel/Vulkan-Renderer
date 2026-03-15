@@ -589,7 +589,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 	shaderFlags_t shaderFlags = shaderFlags_t::NONE;
 	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
 
-	const uint32_t objectCount = 8;
+	const uint32_t objectCount = 9;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name", reinterpret_cast<void*>( name ), &ParseStringObject },
@@ -600,6 +600,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 		{ "perm", reinterpret_cast<void*>( &perm ), &ParseStringObject },
 		{ "sampling_ms", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
 		{ "image_shader", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
+		{ "no_vb", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> },
 	};
 
 	ParseObject( st, objectMap, objectCount );

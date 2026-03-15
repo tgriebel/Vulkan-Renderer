@@ -307,6 +307,7 @@
     <None Include="shaders\lit.frag" />
     <None Include="shaders\luminance.frag" />
     <None Include="shaders\luminanceDownsample.frag" />
+    <None Include="shaders\noVb.vert" />
     <None Include="shaders\postProcess.frag" />
     <None Include="shaders\preCalculatedDiffuseIBL.frag" />
     <None Include="shaders\resolve.frag" />

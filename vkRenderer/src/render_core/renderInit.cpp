@@ -547,7 +547,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		schedule.Link( gaussianTask );
 	}
 	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_2D, DRAWPASS_2D ) );
-	schedule.Link( new ImguiTask( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], false ) );
+	schedule.Link( new ImguiTask( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], &renderContext, &resources, false ) );
 	schedule.Link( new RenderTask( view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) );
 	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
 

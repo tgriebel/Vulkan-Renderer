@@ -147,14 +147,16 @@ enum class swapBuffering_t : uint8_t
 
 
 #if defined( USE_IMGUI )
-struct imageViewerInfo_t
+
+struct imguiImageCallbackData_t
 {
-	uint32_t id;
-	float x;
-	float y;
-	float width;
-	float height;
+	Asset<GpuProgram>*	progAsset;
+	float				x;
+	float				y;
+	float				width;
+	float				height;
 };
+
 
 struct imguiControls_t
 {
@@ -169,7 +171,6 @@ struct imguiControls_t
 	float				dofFocalRange;
 	bool				dofEnable;
 	int32_t				dbgImageId;
-	imageViewerInfo_t	dbgImageInfo;
 	int32_t				selectedFrameBufferImageId;
 	int32_t				selectedEntityId;
 	bool				rebuildShaders;

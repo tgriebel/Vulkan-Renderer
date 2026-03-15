@@ -418,7 +418,39 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 }
 
 
-void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, DrawPass* pass, const renderPassTransition_t& transitionState )
+void vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const vec2f topCorner, const vec2f bottomCorner, const DrawPass* pass )
+{
+	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
+
+	VkViewport vk_viewport{ };
+	vk_viewport.x = topCorner.x;
+	vk_viewport.y = topCorner.y;
+	vk_viewport.width = bottomCorner.x;
+	vk_viewport.height = bottomCorner.y;
+	vk_viewport.minDepth = 0.0f;
+	vk_viewport.maxDepth = 1.0f;
+	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
+
+	VkRect2D rect{ };
+	rect.extent.width = static_cast<uint32_t>( fabs( bottomCorner.x - topCorner.x ) );
+	rect.extent.height = static_cast<uint32_t>( fabs( bottomCorner.y - topCorner.y ) );
+	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
+
+	pipelineObject_t* pipelineObject = nullptr;
+	GetPipelineObject( pipeLineHandle, &pipelineObject );
+	if ( pipelineObject != nullptr ) {
+		const uint32_t descSetCount = 2;
+		VkDescriptorSet descSetArray[ descSetCount ] = { cmdContext.GetRenderContext()->globalParms->GetVkObject(), pass->parms->GetVkObject() };
+
+		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
+		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
+
+		vkCmdDraw( cmdBuffer, 3, 1, 0, 0 );
+	}
+}
+
+
+void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, const DrawPass* pass, const renderPassTransition_t& transitionState )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
