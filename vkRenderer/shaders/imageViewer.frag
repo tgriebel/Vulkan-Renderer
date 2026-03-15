@@ -28,21 +28,32 @@
 
 #include "globals.h"
 
-PS_LAYOUT_STANDARD( sampler2D )
+PS_LAYOUT_BASIC_IO
+
+struct ImageViewer
+{
+	uint textureId;
+};
+
+PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageViewer )
+
+MATERIAL_PUSH_CONSTANTS
 
 void main()
 {
 	const uint materialId = pushConstants.materialId;
-	const uint textureId0 = materialUbo.materials[ materialId ].textureId0;
+	const uint textureId0 = imageProcess.textureId;
 
 	const uint bitfield = materialUbo.materials[ materialId ].extraData[ 0 ];
 
 	const bool isCodeImage = bitfieldExtract( bitfield, 0, 1 ) != 0;
 
-	if( isCodeImage ) {
-		outColor = texture( codeSamplers[ textureId0 ], fragTexCoord.xy );
-	}
-	else {
-		outColor = texture( texSampler[ textureId0 ], fragTexCoord.xy );
-	}
+	outColor = texture( texSampler[ 2 ], fragTexCoord.xy );
+
+	//if( isCodeImage ) {
+	//	outColor = texture( codeSamplers[ textureId0 ], fragTexCoord.xy );
+	//}
+	//else {
+	//	outColor = texture( texSampler[ textureId0 ], fragTexCoord.xy );
+	//}
 }

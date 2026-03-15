@@ -28,30 +28,30 @@
 
 #include "globals.h"
 
-VS_LAYOUT_BASIC_IO
+VS_OUT
 
-vec2 positions[ 3 ] = vec2[] (
-	vec2( -1.0f, -1.0f ),
-	vec2( 3.0f, -1.0f ),
-	vec2( -1.0f, 3.0f )
-);
-
-vec2 uvs[ 3 ] = vec2[](
+vec2 positions[ 4 ] = vec2[](
 	vec2( 0.0f, 0.0f ),
-	vec2( 2.0f, 0.0f ),
-	vec2( 0.0f, 2.0f )
+	vec2( 1.0f, 0.0f ),
+	vec2( 0.0f, 1.0f ),
+	vec2( 1.0f, 1.0f )
 );
 
-// TODO: replace with this
-// vec2( ( gl_VertexIndex << 1 ) & 2, gl_VertexIndex & 2 );
-// vec4( fragTexCoord.xy * 2.0f + -1.0f, 0.0f, 1.0f );
+vec2 uvs[ 4 ] = vec2[](
+	vec2( 0.0f, 0.0f ),
+	vec2( 1.0f, 0.0f ),
+	vec2( 0.0f, 1.0f ),
+	vec2( 1.0f, 1.0f )
+);
 
-void main() {
-	objectPosition = vec3( positions[ gl_VertexIndex ].xy, 0.0f );
-	worldPosition = vec4( positions[ gl_VertexIndex ].xy, 0.0, 1.0 );
-	gl_Position = worldPosition;
-	fragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
-	fragTexCoord = vec4( uvs[ gl_VertexIndex ], 0.0, 0.0 );
-	fragNormal = vec3( 0.0f, 0.0f, 1.0f );
-	clipPosition = gl_Position;
+void main()
+{
+    fragTexCoord = vec4( uvs[ gl_VertexIndex ], 0.0, 0.0 );
+    gl_Position = vec4( positions[ gl_VertexIndex ], 0.0f, 0.0f );
+
+	objectPosition	= gl_Position.xyz;
+	worldPosition	= gl_Position;
+    fragColor		= vec4( 1.0f, 1.0f, 1.0f, 1.0f );
+	fragNormal		= vec3( 0.0f, 0.0f, 1.0f );
+	clipPosition	= gl_Position;
 }

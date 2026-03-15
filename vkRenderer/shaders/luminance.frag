@@ -45,11 +45,13 @@ void main()
    const float dtSec = globals.time.w / 1000.0f;
 
    const float adaptationRate = globals.toneMap.a;
-   const float weight = 1.0f - exp2( -dtSec * adaptationRate );
+   const float weight = 1.0f - exp( -dtSec * adaptationRate );
 
    // Pattanaik et al: "Time-Dependent Visual Adaptation For Fast Realistic Image Display"
    const float weightedAvgLum = previousLuminance + ( luminance - previousLuminance ) * weight;
 
    outColor.r = weightedAvgLum;
+   outColor.g = 0.0f;
+   outColor.b = 0.0f;
    outColor.a = 1.0f;
 }

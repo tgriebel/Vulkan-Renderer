@@ -32,6 +32,39 @@
 
 PS_LAYOUT_STANDARD( sampler2D )
 
+
+float SampleCoverage( const ivec2 pos, const uint stencilTextureId ) {
+	return texelFetch( codeSamplers[ stencilTextureId ], pos, 0 ).g;
+}
+
+
+float EdgeOutline( const ivec2 pixelLocation, const uint stencilTextureId )
+{
+	const float c00 = SampleCoverage( pixelLocation + ivec2( -1, -1 ), stencilTextureId );
+	const float c10 = SampleCoverage( pixelLocation + ivec2( 0, -1 ), stencilTextureId );
+	const float c20 = SampleCoverage( pixelLocation + ivec2( 1, -1 ), stencilTextureId );
+	const float c01 = SampleCoverage( pixelLocation + ivec2( -1, 0 ), stencilTextureId );
+	const float c11 = SampleCoverage( pixelLocation + ivec2( 0, 0 ), stencilTextureId );
+	const float c21 = SampleCoverage( pixelLocation + ivec2( 1, 0 ), stencilTextureId );
+	const float c02 = SampleCoverage( pixelLocation + ivec2( -1, 1 ), stencilTextureId );
+	const float c12 = SampleCoverage( pixelLocation + ivec2( 0, 1 ), stencilTextureId );
+	const float c22 = SampleCoverage( pixelLocation + ivec2( 1, 1 ), stencilTextureId );
+
+	const float minCoverage = min( min( min( c00, c10 ), min( c20, c01 ) ),
+		min( min( c11, c21 ), min( c02, min( c12, c22 ) ) ) );
+	const float maxCoverage = max( max( max( c00, c10 ), max( c20, c01 ) ),
+		max( max( c11, c21 ), max( c02, max( c12, c22 ) ) ) );
+
+	const float edge = maxCoverage - minCoverage;
+
+	const float outerStrength = 0.1f;
+	const float innerStrength = 0.8f;
+	const float stencilCoverage = smoothstep( outerStrength, innerStrength, edge );
+
+	return stencilCoverage;
+}
+
+
 void main()
 {
     const uint materialId = pushConstants.materialId;
@@ -53,13 +86,7 @@ void main()
 
 	const ivec2 pixelLocation = ivec2( view.dimensions.xy * fragTexCoord.xy );
 
-	float stencilCoverage = 0;
-	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( -1, -1 ), 0 ).g;
-	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( 1, -1 ), 0 ).g;
-	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( -1, 1 ), 0 ).g;
-	stencilCoverage += texelFetch( codeSamplers[ textureId1 ], pixelLocation + ivec2( 1, 1 ), 0 ).g;
-
-	stencilCoverage /= 4.0f;
+	const float stencilCoverage = EdgeOutline( pixelLocation, textureId1 );
 
 	vec4 sceneColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 
@@ -86,19 +113,14 @@ void main()
 	//hdrColor.rgb = LuminanceFromRGB( hdrColor.rgb ).xxx;
 
 	const vec3 tint = globals.toneMap.rgb;
-	const float luminance = LuminanceFromRGB( texture( codeSamplers[ textureId3 ], vec2( 1.0f, 1.0f ), 16 ).rgb );
+	const float luminance = LuminanceFromRGB( textureLod( codeSamplers[ textureId3 ], vec2( 0.5f, 0.5f ), 16 ).rgb );
 	//const float exposure = 1.0f / ( pow( 2.0f, log2( luminance * 8.0f ) ) * 1.2f );// globals.toneMap.a;
 	const float exposure = 0.18f / clamp( luminance, 0.2f, 100.0f );
 
-	//const vec3 exposureAdjustedColor = hdrColor * exposure;
 	const vec3 exposureAdjustedColor = hdrColor * exposure;
 
 	sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 
+	outColor.rgb = tint * mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
 	outColor.a = 1.0f;
-	if( abs( stencilCoverage - 0.5f ) < 0.5f ) {
-		outColor.rgb = tint * mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
-	} else {
-		outColor.rgb = tint * sceneColor.rgb;
-	}
 }

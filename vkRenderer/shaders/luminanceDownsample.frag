@@ -42,28 +42,29 @@ void main()
    if( level == 0 )
    {
 		const vec3 sceneColor = texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb;
-		outColor.r = dot( sceneColor, vec3( 0.30f, 0.59f, 0.11f ) );
+		const float luminance = dot( sceneColor, vec3( 0.2126f, 0.7152f, 0.0722f ) );
+		outColor.r = log( max( luminance, 0.0001f ) );
    }
    else if( level == ( mipCount - 1 ) )
    {
-	   const float luminance = texture( codeSamplers[ 0 ], fragTexCoord.xy ).r;
-	   const float previousLuminance = texture( codeSamplers[ 2 ], fragTexCoord.xy ).r;
+		const float logLuminance = texture( codeSamplers[ 0 ], fragTexCoord.xy ).r;
+		const float luminance = exp( logLuminance );
 
-	   const float dtSec = globals.time.w / 1000.0f;
+		const float previousLuminance = texture( codeSamplers[ 2 ], fragTexCoord.xy ).r;
 
-	   const float adaptationRate = globals.toneMap.a;
-	   const float weight = 1.0f - exp2( -dtSec * adaptationRate );
+		const float dtSec = globals.time.w / 1000.0f;
 
-	   // Pattanaik et al: "Time-Dependent Visual Adaptation For Fast Realistic Image Display"
-	   const float weightedAvgLum = previousLuminance + ( luminance - previousLuminance ) * weight;
+		const float adaptationRate = globals.toneMap.a;
+		const float weight = 1.0f - exp( -dtSec * adaptationRate );
 
-	//   outColor.r = 1.23456789f;
-		outColor.r =weightedAvgLum;
+		// Pattanaik et al: "Time-Dependent Visual Adaptation For Fast Realistic Image Display"
+		const float weightedAvgLum = previousLuminance + ( luminance - previousLuminance ) * weight;
+
+		outColor.r = weightedAvgLum;
    }
    else
    {
-	   const float luminanceFilterAverage = texture( codeSamplers[ 0 ], fragTexCoord.xy ).r;
-	   outColor.r = luminanceFilterAverage;
+	   outColor.r = texture( codeSamplers[ 0 ], fragTexCoord.xy ).r;
    }
    outColor.a = 1.0f;
 }

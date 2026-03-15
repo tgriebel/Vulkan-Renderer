@@ -77,7 +77,7 @@ void main()
     const uint specularIBL = ubo.surface[ objectId ].envCubeId;
     const uint brdfLutId = globals.brdfLutId;
 
-    const int MaxRreflectionLod = 4;
+    const int MaxReflectionLod = 4;
 
     float NoV = max( dot( N, V ), 0.0f );
 
@@ -98,7 +98,9 @@ void main()
     {
         const light_t light = lightUbo.lights[ i ];
 
-	    const vec3 L = normalize( light.lightPos.xyz - worldPosition.xyz );
+        const vec3 lightRay = ( light.lightPos.xyz - worldPosition.xyz );
+        const float lightDistance = length( lightRay );
+	    const vec3 L = lightRay / lightDistance;
         const vec3 H = normalize( V + L );
 
         const float NoL = max( dot( N, L ), 0.0f );
@@ -121,8 +123,7 @@ void main()
         const float spotAngle = dot( L, light.lightDir.xyz );
         const float spotFov = 0.5f;
                
-        const float distance    = length( L );
-        const float attenuation = 1.0f / ( distance * distance );
+        const float attenuation = 1.0f / ( lightDistance * lightDistance );
         const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
         const vec3 radiance     = attenuation * spotFalloff * light.intensity.rgb;
 
@@ -142,13 +143,12 @@ void main()
 
             if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f )
             {
-                const ivec2 shadowPixelLocation = ivec2( globals.shadowParms.yz * ndc.xy );
                 const float shadowValue = texture( codeSamplers[ shadowMapTexId ], ndc.xy ).r;
                 if ( shadowValue < ( depth - bias ) ) {
                     shadowing = 1.0f - min( 1.0f, globals.shadowParms.w );
                 }
             } else {
-                shadowing = 1.0f - min( 1.0f, globals.shadowParms.w );
+                shadowing = 1.0f;
             }
         }
 
@@ -161,7 +161,7 @@ void main()
     const vec3 F = F_SchlickRoughness( NoV, F0, perceptualRoughness );
 
     const vec3 R = reflect( -V, N );
-    const int MipLevels = min( textureQueryLevels( cubeSamplers[ specularIBL ] ), MaxRreflectionLod );
+    const int MipLevels = min( textureQueryLevels( cubeSamplers[ specularIBL ] ), MaxReflectionLod );
     const vec3 specIBL = textureLod( cubeSamplers[ specularIBL ], CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
 
     const vec2 envBRDF = texture( texSampler[ brdfLutId ], vec2( NoV, perceptualRoughness ) ).rg;

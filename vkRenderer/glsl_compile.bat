@@ -4,6 +4,7 @@ C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\skybox.frag -o sha
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\terrain.vert -o shaders_bin\terrainVS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\terrain.frag -o shaders_bin\terrainPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\simple.vert -o shaders_bin\simpleVS.spv -g
+C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\noVb.vert -o shaders_bin\noVb.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\lit.frag -o shaders_bin\litPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\depth.frag -o shaders_bin\depthPS.spv -g
 C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe -l -V shaders\shadow.frag -o shaders_bin\shadowPS.spv -g

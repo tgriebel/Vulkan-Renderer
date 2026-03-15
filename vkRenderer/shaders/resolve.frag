@@ -51,18 +51,17 @@ void main()
 
 	outColor = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	for ( int i = 0; i < int( globals.numSamples ); ++i ) {
-		outColor.rgb += LinearToSrgb( texelFetch( codeSamplers[ 0 ], pixelLocation, i ).rgb );
+		outColor.rgb += texelFetch( codeSamplers[ 0 ], pixelLocation, i ).rgb;
 	}
 	outColor.rgb /= globals.numSamples;
-	outColor.rgb = SrgbToLinear( outColor.rgb );
 	outColor.a = 1.0f;
 
 	outColor1 = vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 
 	for ( int i = 0; i < int( globals.numSamples ); ++i )
 	{
-		outColor1.r += ( texelFetch( codeSamplers[ 1 ], pixelLocation, i ).r );
-		outColor1.g += floatBitsToUint( texelFetch( stencilImage, pixelLocation + ivec2( -1, -1 ), 0 ).r ) == 0x01 ? 1.0f : 0.0f;
+		outColor1.r += texelFetch( codeSamplers[ 1 ], pixelLocation, i ).r;
+		outColor1.g += floatBitsToUint( texelFetch( stencilImage, pixelLocation, i ).r ) == 0x01 ? 1.0f : 0.0f;
 	}
 	outColor1.rgb /= globals.numSamples;
 }

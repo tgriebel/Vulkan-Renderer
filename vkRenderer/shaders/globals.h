@@ -103,6 +103,8 @@ struct surface_t
 												uint	layer;														\
 												uint	mipCount;													\
 												uint	layerCount;													\
+												uint	pad0;														\
+												uint	pad1; /* 16byte aligned */									\
 												TYPE	NAME;														\
 											};
 

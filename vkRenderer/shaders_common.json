@@ -78,8 +78,10 @@
     },
     {
       "name": "Image2D",
-      "vs": "simple",
-      "ps": "imageViewer"
+      "vs": "fullscreen",
+      "ps": "imageViewer",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
     },
 	{
       "name": "ClearParticles",
