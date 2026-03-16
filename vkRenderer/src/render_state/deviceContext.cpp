@@ -418,22 +418,26 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 }
 
 
-void vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const vec2f topCorner, const vec2f bottomCorner, const DrawPass* pass )
+void vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const vec2f offset, const vec2f size, const DrawPass* pass )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
+	const viewport_t& viewport = pass->GetViewport();
+
 	VkViewport vk_viewport{ };
-	vk_viewport.x = topCorner.x;
-	vk_viewport.y = topCorner.y;
-	vk_viewport.width = bottomCorner.x;
-	vk_viewport.height = bottomCorner.y;
+	vk_viewport.x = static_cast<float>( viewport.x );
+	vk_viewport.y = static_cast<float>( viewport.y );
+	vk_viewport.width = static_cast<float>( viewport.width );
+	vk_viewport.height = static_cast<float>( viewport.height );
 	vk_viewport.minDepth = 0.0f;
 	vk_viewport.maxDepth = 1.0f;
 	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
 
 	VkRect2D rect{ };
-	rect.extent.width = static_cast<uint32_t>( fabs( bottomCorner.x - topCorner.x ) );
-	rect.extent.height = static_cast<uint32_t>( fabs( bottomCorner.y - topCorner.y ) );
+	rect.offset.x = static_cast<uint32_t>( Clamp( offset.x, 0.0f, (float)viewport.width ) );
+	rect.offset.y = static_cast<uint32_t>( Clamp( offset.y, 0.0f, (float)viewport.height ) );
+	rect.extent.width = static_cast<uint32_t>( size.x );
+	rect.extent.height = static_cast<uint32_t>( size.y );
 	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
 
 	pipelineObject_t* pipelineObject = nullptr;

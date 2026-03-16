@@ -184,6 +184,19 @@ struct surface_t
 												pass_t pass;														\
 											} passUbo;
 
+#define GLOBAL_BINDS( SET )					GLOBALS_LAYOUT( SET, 0 )												\
+											VIEW_LAYOUT( SET, 1)													\
+											SAMPLER_2D_LAYOUT( SET, 2 )												\
+											SAMPLER_CUBE_LAYOUT( SET, 3 )											\
+											MATERIAL_LAYOUT( SET, 4 )
+
+#define VIEW_BINDS( SET )					MODEL_LAYOUT( SET, 0 )
+
+#define PASS_BINDS( SET, SAMPLER )			LIGHT_LAYOUT( SET, 0 )													\
+											CODE_IMAGE_LAYOUT( SET, 1, SAMPLER )									\
+											CODE_IMAGE_CUBE_LAYOUT( SET, 2 )										\
+											STENCIL_LAYOUT( SET, 3, SAMPLER )
+
 #define MATERIAL_PUSH_CONSTANTS				layout( push_constant ) uniform fragmentPushConstants					\
 											{																		\
 												layout( offset = 0 ) uint objectId;									\
@@ -210,15 +223,9 @@ struct surface_t
 #define VS_LAYOUT_BASIC_IO					VS_IN																	\
 											VS_OUT
 
-#define VS_LAYOUT_STANDARD( SAMPLER )		GLOBALS_LAYOUT( 0, 0 )													\
-											VIEW_LAYOUT( 0, 1)														\
-											SAMPLER_2D_LAYOUT( 0, 2 )												\
-											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-											MATERIAL_LAYOUT( 0, 4 )													\
-											MODEL_LAYOUT( 1, 0 )													\
-											LIGHT_LAYOUT( 2, 0 )													\
-											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
-											STENCIL_LAYOUT( 2, 2, SAMPLER )											\
+#define VS_LAYOUT_STANDARD( SAMPLER )		GLOBAL_BINDS( 0 )														\
+											VIEW_BINDS( 1 )															\
+											PASS_BINDS( 2, SAMPLER )												\
 											MATERIAL_PUSH_CONSTANTS													\
 											VS_IN																	\
 											VS_OUT
@@ -238,26 +245,15 @@ struct surface_t
 #define PS_LAYOUT_BASIC_IO					PS_IN																	\
 											PS_OUT
 
-#define PS_LAYOUT_STANDARD( SAMPLER )		GLOBALS_LAYOUT( 0, 0 )													\
-											VIEW_LAYOUT( 0, 1)														\
-											SAMPLER_2D_LAYOUT( 0, 2 )												\
-											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-											MATERIAL_LAYOUT( 0, 4 )													\
-											MODEL_LAYOUT( 1, 0 )													\
-											LIGHT_LAYOUT( 2, 0 )													\
-											CODE_IMAGE_LAYOUT( 2, 1, SAMPLER )										\
-											CODE_IMAGE_CUBE_LAYOUT( 2, 2 )											\
-											STENCIL_LAYOUT( 2, 3, SAMPLER )											\
+#define PS_LAYOUT_STANDARD( SAMPLER )		GLOBAL_BINDS( 0 )														\
+											VIEW_BINDS( 1 )															\
+											PASS_BINDS( 2, SAMPLER )												\
 											MATERIAL_PUSH_CONSTANTS													\
 											PS_IN																	\
 											PS_OUT
 
 #define PS_LAYOUT_IMAGE_PROCESS( SAMPLER, TYPE )																	\
-											GLOBALS_LAYOUT( 0, 0 )													\
-											VIEW_LAYOUT( 0, 1)														\
-											SAMPLER_2D_LAYOUT( 0, 2 )												\
-											SAMPLER_CUBE_LAYOUT( 0, 3 )												\
-											MATERIAL_LAYOUT( 0, 4 )													\
+											GLOBAL_BINDS( 0 )														\
 											CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
 											CODE_IMAGE_CUBE_LAYOUT( 1, 1 )											\
 											STENCIL_LAYOUT( 1, 2, SAMPLER )											\

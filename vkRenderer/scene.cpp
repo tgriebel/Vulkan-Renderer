@@ -19,8 +19,8 @@ extern Scene* g_scene;
 extern Renderer g_renderer;
 
 #if defined( USE_IMGUI )
-extern imguiControls_t			g_imguiControls;
-extern void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* cmd );
+extern imguiControls_t g_imguiControls;
+extern void AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& callbackData );
 #endif
 extern Window					g_window;
 
@@ -551,8 +551,6 @@ void UpdateScene( Scene* scene )
 		ImGui::Begin( "Image Viewer" );
 		ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ), 0, ImVec2( 200.0f, 200.0f ) );
 
-		ImDrawList* dl = ImGui::GetWindowDrawList();
-
 		ImVec2 pos = ImGui::GetItemRectMin();  // top-left of last item
 		ImVec2 size = ImGui::GetItemRectSize();
 		ImVec2 max = ImGui::GetItemRectMax();  // bottom-right
@@ -574,15 +572,15 @@ void UpdateScene( Scene* scene )
 			visibleSize = ImVec2( visibleMax.x - visibleMin.x, visibleMax.y - visibleMin.y );
 		}
 
-		static imguiImageCallbackData_t data;
+		imguiImageCallbackData_t data;
 		data.progAsset = g_assets.gpuPrograms.Find( "Image2D" );
+		data.image = &g_assets.textureLib.Find( (uint32_t)g_imguiControls.dbgImageId )->Get();
 		data.x = pos.x;
 		data.y = pos.y;
 		data.width = visibleSize.x;
 		data.height = visibleSize.y;
 
-		dl->AddCallback( ImguiImage2DRenderCallback, &data );
-		dl->AddCallback( ImDrawCallback_ResetRenderState, nullptr );
+		AddImguiCallback( ImGui::GetWindowDrawList(), data );
 
 		ImGui::End();
 	}

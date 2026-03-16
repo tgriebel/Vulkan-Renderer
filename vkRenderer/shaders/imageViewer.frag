@@ -32,28 +32,17 @@ PS_LAYOUT_BASIC_IO
 
 struct ImageViewer
 {
-	uint textureId;
+	vec4	scissorRectUv;
+	uint	flags;
 };
 
 PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageViewer )
 
-MATERIAL_PUSH_CONSTANTS
-
 void main()
 {
-	const uint materialId = pushConstants.materialId;
-	const uint textureId0 = imageProcess.textureId;
+	//const bool isCubeImage = bitfieldExtract( imageProcess.flags, 0, 1 ) != 0;
 
-	const uint bitfield = materialUbo.materials[ materialId ].extraData[ 0 ];
+	vec2 uv = ( fragTexCoord.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
 
-	const bool isCodeImage = bitfieldExtract( bitfield, 0, 1 ) != 0;
-
-	outColor = texture( texSampler[ 2 ], fragTexCoord.xy );
-
-	//if( isCodeImage ) {
-	//	outColor = texture( codeSamplers[ textureId0 ], fragTexCoord.xy );
-	//}
-	//else {
-	//	outColor = texture( texSampler[ textureId0 ], fragTexCoord.xy );
-	//}
+	outColor = texture( codeSamplers[ 0 ], uv );
 }

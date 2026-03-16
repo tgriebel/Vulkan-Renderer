@@ -40,7 +40,11 @@ struct imguiTaskRenderData_t
 	const DrawPass*		pass;
 };
 
-static imguiTaskRenderData_t renderTaskData;
+const uint32_t MaxImguiCallbackImages = 32;
+
+static uint32_t pendingCallbackTasks = 0;
+static imguiImageCallbackData_t callbackTasks[ MaxImguiCallbackImages ];
+static imguiTaskRenderData_t renderTaskData; // Push/pop state
 
 
 void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* cmd )
@@ -51,10 +55,25 @@ void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* 
 
 	const hdl_t pipeLine = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset );
 
-	vec2f topCorner = vec2f( callbackData->x, callbackData->y );
-	vec2f bottomCorner = vec2f( callbackData->width, callbackData->height );
+	vec2f offset = vec2f( callbackData->x, callbackData->y );
+	vec2f size = vec2f( callbackData->width, callbackData->height );
 
-	vk_QuadDraw( *renderTaskData.commandContext, pipeLine, topCorner, bottomCorner, renderTaskData.pass );
+	vk_QuadDraw( *renderTaskData.commandContext, pipeLine, offset, size, renderTaskData.pass );
+}
+
+
+void AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& callbackData )
+{
+	if ( pendingCallbackTasks >= MaxImguiCallbackImages ) {
+		return;
+	}
+
+	callbackTasks[ pendingCallbackTasks ] = callbackData;
+
+	dl->AddCallback( ImguiImage2DRenderCallback, &callbackTasks[ pendingCallbackTasks ] );
+	dl->AddCallback( ImDrawCallback_ResetRenderState, nullptr );
+
+	++pendingCallbackTasks;
 }
 
 
@@ -75,12 +94,12 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	m_imagePass->codeImages.Resize( 1 );
 	m_imagePass->codeCubeImages.Resize( 1 );
 
-	for ( uint32_t codeImageIx = 0; codeImageIx < 1; ++codeImageIx ) {
-		m_imagePass->codeImages[ codeImageIx ] = rc.redImage;
+	for ( uint32_t codeImageIx = 0; codeImageIx < 1; ++codeImageIx )
+	{
+		m_imagePass->codeImages[ codeImageIx ] = rc.defaultImage;
 		m_imagePass->codeCubeImages[ codeImageIx ] = rc.defaultImageCube;
 	}
-
-	m_buffer.Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
+	m_buffer.Create( "ImguiCallbackBuffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
 }
 
 
@@ -99,19 +118,38 @@ void ImguiTask::FrameBegin()
 {
 	struct viewerShaderConstants_t : public ImageShaderTask::constants_t
 	{
-		uint32_t textureId;
+		vec4f scissorRectUv;
 	};
 
-	viewerShaderConstants_t constants{};
-	constants.dimensions = vec4f( 100.0f, 100.0f, 1.0f / 100.0f, 1.0f / 100.0f );
-	constants.mipCount = 1;
-	constants.layerCount = 1;
-	constants.textureId = g_imguiControls.dbgImageId; // FIXME: better data flow
+	const viewport_t viewport = m_imguiPass->GetViewport();
 
-	m_buffer.SetPos( 0 );
-	m_buffer.CopyData( &constants, sizeof( constants ) );
+	m_imagePass->codeImages[ 0 ] = rc.redImage;
 
-	m_imagePass->parms->Bind( bind_sourceImages, m_imagePass->codeImages.Count() > 0 ? &m_imagePass->codeImages : &rc.defaultImageArray );
+	Image* image = callbackTasks[ 0 ].image;
+
+	if ( image != nullptr )
+	{
+		viewerShaderConstants_t constants{};
+
+		constants.dimensions = vec4f( image->info.width, image->info.height, 1.0f / image->info.width, 1.0f / image->info.height );
+		constants.level = 0;
+		constants.mipCount = image->info.mipLevels;
+		constants.layerCount = image->info.layers;
+		constants.layer = 0;
+		constants.scissorRectUv = vec4f( callbackTasks[ 0 ].x, callbackTasks[ 0 ].y, callbackTasks[ 0 ].width, callbackTasks[ 0 ].height );
+		
+		constants.scissorRectUv.x *= 1.0f / viewport.width;
+		constants.scissorRectUv.y *= 1.0f / viewport.height;
+		constants.scissorRectUv.z *= 1.0f / viewport.width;
+		constants.scissorRectUv.w *= 1.0f / viewport.height;
+
+		m_buffer.SetPos( 0 );
+		m_buffer.CopyData( &constants, sizeof( constants ) );
+
+		m_imagePass->codeImages[ 0 ] = image;
+	}
+
+	m_imagePass->parms->Bind( bind_sourceImages, &m_imagePass->codeImages );
 	m_imagePass->parms->Bind( bind_sourceCubeImages, m_imagePass->codeCubeImages.Count() > 0 ? m_imagePass->codeCubeImages[ 0 ] : rc.defaultImageCube );
 	m_imagePass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
 	m_imagePass->parms->Bind( bind_imageProcess, &m_buffer );
@@ -169,6 +207,8 @@ void ImguiTask::Execute( CommandContext& cmdContext )
 
 	renderTaskData.commandContext = nullptr;
 	renderTaskData.pass = nullptr;
+
+	pendingCallbackTasks = 0;
 
 	vkCmdEndRenderPass( cmdBuffer );
 #endif

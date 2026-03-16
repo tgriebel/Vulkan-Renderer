@@ -102,12 +102,14 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 	{
 		const ShaderBinding* binding = set->GetBinding( i );
 
-		if( parms.AttachmentChanged( *binding ) == false ) {
-			continue;
-		}
-
 		const ShaderAttachment* attachment = parms.GetAttachment( *binding );
 		assert( attachment != nullptr );
+
+		// FIXME: Image array needs some check for every element
+		// Might be good to have a special image array class that has a dirty bitfield and semantics (e.g cubemaps)
+		if( parms.AttachmentChanged( *binding ) == false && ( attachment->GetSemantic() != bindSemantic_t::IMAGE_ARRAY ) ) {
+			continue;
+		}
 
 		VkWriteDescriptorSet writeInfo = {};
 		writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

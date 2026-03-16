@@ -151,12 +151,12 @@ enum class swapBuffering_t : uint8_t
 struct imguiImageCallbackData_t
 {
 	Asset<GpuProgram>*	progAsset;
+	Image*				image;
 	float				x;
 	float				y;
 	float				width;
 	float				height;
 };
-
 
 struct imguiControls_t
 {

@@ -225,7 +225,7 @@ public:
 	void								ShutdownGPU();
 	void								Resize();
 
-	// Debug Information
+	// Debug
 	uint32_t							OutputImageCount();
 	const Image*						FindOutputImage( const uint32_t id );
 
