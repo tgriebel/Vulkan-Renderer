@@ -170,6 +170,9 @@
     <ClCompile Include="src\draw_passes\debug3dPass.cpp">
       <Filter>Draw Passes</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\imageArray.cpp">
+      <Filter>Binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -328,6 +331,39 @@
     </ClInclude>
     <ClInclude Include="src\render_binding\imageArray.h">
       <Filter>Binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\wireFramePass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\transPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\terrainPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\skyboxPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\shadowPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\postPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\opaquePass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\emissivePass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\depthPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\debug3dPass.h">
+      <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\draw_passes\debug2dPass.h">
+      <Filter>Draw Passes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

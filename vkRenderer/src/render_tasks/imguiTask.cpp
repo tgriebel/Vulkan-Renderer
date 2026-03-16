@@ -25,6 +25,7 @@
 #include "../render_core/renderer.h"
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bindings.h"
+#include "../draw_passes/postPass.h"
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"
@@ -87,9 +88,12 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	m_transitionState.flags.presentAfter = finalizeImage;
 	m_transitionState.flags.store = true;
 
-	m_imagePass = new PostPass( const_cast<FrameBuffer*>( m_imguiPass->GetFrameBuffer() ) );
+	m_imagePass = new PostPass( m_context, const_cast<FrameBuffer*>( m_imguiPass->GetFrameBuffer() ) );
 
 	m_imagePass->parms = m_context->RegisterBindParm( bindset_imageProcess );
+
+	m_imagePass->codeImages.SetRenderContext( m_context );
+	m_imagePass->codeCubeImages.SetRenderContext( m_context );
 
 	m_imagePass->codeImages.Resize( 1 );
 	m_imagePass->codeCubeImages.Resize( 1 );

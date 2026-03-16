@@ -1,11 +1,11 @@
-#include "drawpass.h"
+#include "opaquePass.h"
 #include "../render_binding/bindings.h"
 #include "../globals/renderConstants.h"
 #include "../render_core/renderer.h"
 
 extern renderConstants_t rc;
 
-void OpaquePass::Init( FrameBuffer* frameBuffer )
+void OpaquePass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 {
 	m_name = "Opaque Pass";
 	m_passId = DRAWPASS_OPAQUE;
@@ -14,6 +14,9 @@ void OpaquePass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_TEST;
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
+
+	codeImages.SetRenderContext( renderContext );
+	codeCubeImages.SetRenderContext( renderContext );
 
 	codeImages.Resize( 3 );
 

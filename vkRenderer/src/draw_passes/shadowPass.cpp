@@ -1,11 +1,11 @@
-#include "drawpass.h"
+#include "shadowPass.h"
 #include "../render_binding/bindings.h"
 #include "../globals/renderConstants.h"
 #include "../render_core/renderer.h"
 
 extern renderConstants_t rc;
 
-void ShadowPass::Init( FrameBuffer* frameBuffer )
+void ShadowPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 {
 	m_name = "Shadow Pass";
 	m_passId = DRAWPASS_SHADOW;
@@ -14,6 +14,9 @@ void ShadowPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_TEST;
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_DEPTH_OP_0;
+
+	codeImages.SetRenderContext( renderContext );
+	codeCubeImages.SetRenderContext( renderContext );
 
 	SetFrameBuffer( frameBuffer );
 }

@@ -10,6 +10,19 @@
 #include "../../input.h"
 #include "../render_core/debugMenu.h"
 
+#include "../draw_passes/debug2dPass.h"
+#include "../draw_passes/debug3dPass.h"
+#include "../draw_passes/depthPass.h"
+#include "../draw_passes/emissivePass.h"
+#include "../draw_passes/opaquePass.h"
+#include "../draw_passes/transPass.h"
+#include "../draw_passes/emissivePass.h"
+#include "../draw_passes/shadowPass.h"
+#include "../draw_passes/skyboxPass.h"
+#include "../draw_passes/terrainPass.h"
+#include "../draw_passes/postPass.h"
+#include "../draw_passes/wireFramePass.h"
+
 extern Scene*	g_scene;
 extern Window	g_window;
 
@@ -104,37 +117,37 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			switch( passIx )
 			{
 				case DRAWPASS_SHADOW:
-					passes[ multiViewIndex ][ passIx ] = new ShadowPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new ShadowPass( m_context, fb );
 					break;
 				case DRAWPASS_DEPTH:
-					passes[ multiViewIndex ][ passIx ] = new DepthPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new DepthPass( m_context, fb );
 					break;
 				case DRAWPASS_TERRAIN:
-					passes[ multiViewIndex ][ passIx ] = new TerrainPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new TerrainPass( m_context, fb );
 					break;
 				case DRAWPASS_OPAQUE:
-					passes[ multiViewIndex ][ passIx ] = new OpaquePass( fb );
+					passes[ multiViewIndex ][ passIx ] = new OpaquePass( m_context, fb );
 					break;
 				case DRAWPASS_SKYBOX:
-					passes[ multiViewIndex ][ passIx ] = new SkyboxPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new SkyboxPass( m_context, fb );
 					break;
 				case DRAWPASS_TRANS:
-					passes[ multiViewIndex ][ passIx ] = new TransPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new TransPass( m_context, fb );
 					break;
 				case DRAWPASS_EMISSIVE:
-					passes[ multiViewIndex ][ passIx ] = new EmissivePass( fb );
+					passes[ multiViewIndex ][ passIx ] = new EmissivePass( m_context, fb );
 					break;
 				case DRAWPASS_DEBUG_3D:
-					passes[ multiViewIndex ][ passIx ] = new Debug3dPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new Debug3dPass( m_context, fb );
 					break;
 				case DRAWPASS_DEBUG_WIREFRAME:
-					passes[ multiViewIndex ][ passIx ] = new WireframePass( fb );
+					passes[ multiViewIndex ][ passIx ] = new WireframePass( m_context, fb );
 					break;
 				case DRAWPASS_2D:
-					passes[ multiViewIndex ][ passIx ] = new PostPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new PostPass( m_context, fb );
 					break;
 				case DRAWPASS_DEBUG_2D:
-					passes[ multiViewIndex ][ passIx ] = new Debug2dPass( fb );
+					passes[ multiViewIndex ][ passIx ] = new Debug2dPass( m_context, fb );
 					break;
 			}
 

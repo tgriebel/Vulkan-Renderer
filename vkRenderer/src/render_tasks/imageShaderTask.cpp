@@ -3,6 +3,7 @@
 #include <gfxcore/scene/scene.h>
 #include "../render_core/renderer.h"
 #include "../render_binding/bindings.h"
+#include "../draw_passes/postPass.h"
 
 extern AssetManager g_assets;
 
@@ -79,7 +80,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME; 
 
 			m_fb[ passIndex ].Create( fbInfo );
-			m_passes[ passIndex ] = new PostPass( &m_fb[ passIndex ] );
+			m_passes[ passIndex ] = new PostPass( m_context, &m_fb[ passIndex ] );
 
 			++passIndex;
 		}
@@ -116,7 +117,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			m_fb[ passIndex ].Create( fbInfo );
-			m_passes[ passIndex ] = new PostPass( &m_fb[ passIndex ] );
+			m_passes[ passIndex ] = new PostPass( m_context, &m_fb[ passIndex ] );
 
 			++passIndex;
 		}
@@ -141,6 +142,9 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{		
+		m_passes[ passIndex ]->codeImages.SetRenderContext( m_context );
+		m_passes[ passIndex ]->codeCubeImages.SetRenderContext( m_context );
+
 		m_passes[ passIndex ]->codeImages.Resize( info.inputImages );
 		m_passes[ passIndex ]->codeCubeImages.Resize( info.inputCubeImages );
 

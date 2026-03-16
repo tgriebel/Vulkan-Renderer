@@ -17,7 +17,16 @@ std::string ImageReadbackTask::AsString() const
 
 void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 {
+	m_context = info.context;
+	m_resources = info.resources;
+	m_fileName = info.fileName;
+	m_name = info.name;
+	m_flags = info.flags;
+	m_hasWriteback = false;
 	m_readbackImage = info.img;
+
+	m_imageArray.SetRenderContext( m_context );
+
 	if ( HasFlags( info.flags, CUBEMAP ) == false )
 	{
 		m_imageArray.Resize( 1 );
@@ -45,12 +54,6 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 			m_imageArray[ subView.baseArray ] = &m_cubeViews[ i ];
 		}
 	}
-	m_context = info.context;
-	m_resources = info.resources;
-	m_fileName = info.fileName;
-	m_name = info.name;
-	m_flags = info.flags;
-	m_hasWriteback = false;
 
 	struct writeBackParms_t
 	{

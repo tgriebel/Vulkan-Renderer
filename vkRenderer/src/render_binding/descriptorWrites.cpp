@@ -107,8 +107,15 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 		// FIXME: Image array needs some check for every element
 		// Might be good to have a special image array class that has a dirty bitfield and semantics (e.g cubemaps)
-		if( parms.AttachmentChanged( *binding ) == false && ( attachment->GetSemantic() != bindSemantic_t::IMAGE_ARRAY ) ) {
-			continue;
+		if( parms.AttachmentChanged( *binding ) == false )
+		{
+			if ( attachment->GetSemantic() != bindSemantic_t::IMAGE_ARRAY ) {
+				continue;
+			}
+			const ImageArray& images = *attachment->GetImageArray();
+			if ( images.HasPossibleUpdates() == false ) {
+				continue;
+			}
 		}
 
 		VkWriteDescriptorSet writeInfo = {};

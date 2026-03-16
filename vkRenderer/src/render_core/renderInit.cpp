@@ -51,6 +51,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	InitShaderResources();
 
+	resources.gpuImages2D.SetRenderContext( &renderContext );
+	resources.gpuImagesCube.SetRenderContext( &renderContext );
+
 	resources.gpuImages2D.Resize( MaxImageDescriptors );
 	resources.gpuImagesCube.Resize( MaxImageDescriptors );
 
@@ -692,9 +695,11 @@ void Renderer::InitShaderResources()
 		rc.defaultImage = &g_assets.textureLib.Find( "_default" )->Get();
 		rc.defaultImageCube = &g_assets.textureLib.Find( "_defaultCube" )->Get();
 
+		rc.defaultImageArray.SetRenderContext( &renderContext );
 		rc.defaultImageArray.Resize( 1 );
 		rc.defaultImageArray[ 0 ] = rc.defaultImage;
 
+		rc.defaultImageCubeArray.SetRenderContext( &renderContext );
 		rc.defaultImageCubeArray.Resize( 1 );
 		rc.defaultImageCubeArray[ 0 ] = rc.defaultImageCube;
 	}

@@ -1,11 +1,11 @@
-#include "drawpass.h"
+#include "depthPass.h"
 #include "../render_binding/bindings.h"
 #include "../globals/renderConstants.h"
 #include "../render_core/renderer.h"
 
 extern renderConstants_t rc;
 
-void DepthPass::Init( FrameBuffer* frameBuffer )
+void DepthPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 {
 	m_name = "Depth Pass";
 	m_passId = DRAWPASS_DEPTH;
@@ -17,6 +17,9 @@ void DepthPass::Init( FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_COLOR1_MASK;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
+
+	codeImages.SetRenderContext( renderContext );
+	codeCubeImages.SetRenderContext( renderContext );
 
 	SetFrameBuffer( frameBuffer );
 }

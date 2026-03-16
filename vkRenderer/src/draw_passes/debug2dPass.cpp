@@ -1,17 +1,20 @@
-#include "drawpass.h"
+#include "debug2dPass.h"
 #include "../render_binding/bindings.h"
 #include "../globals/renderConstants.h"
 #include "../render_core/renderer.h"
 
 extern renderConstants_t rc;
 
-void Debug2dPass::Init( FrameBuffer* frameBuffer )
+void Debug2dPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 {
 	m_name = "Debug 2D Pass";
 	m_passId = DRAWPASS_DEBUG_2D;
 
 	m_stateBits = GFX_STATE_NONE;
 	m_stateBits |= GFX_STATE_BLEND_ENABLE;
+
+	codeImages.SetRenderContext( renderContext );
+	codeCubeImages.SetRenderContext( renderContext );
 
 	codeImages.Resize( 2 );
 

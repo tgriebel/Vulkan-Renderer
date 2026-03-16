@@ -24,15 +24,32 @@
 */
 
 #include <GfxCore/asset_types/texture.h>
+#include <SysCore/bitArray.h>
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
 
-class ImageArray : public Array<const Image*, MaxImageDescriptors>
+using BaseImageArray = Array<const Image*, MaxImageDescriptors>;
+
+class ImageArray : public BaseImageArray
 {
 private:
+	uint64_t		m_lastFrameUpdate[ MaxImageDescriptors ];
+	RenderContext*	m_context;
 
 public:
 	ImageArray()
 	{
+		m_context = nullptr;
+
+		memset( m_lastFrameUpdate, 0, MaxImageDescriptors * sizeof( uint64_t ) );
 	}
+
+	void SetRenderContext( RenderContext* context );
+
+	const Image*const& operator[]( uint32_t index ) const;
+
+	const Image*& operator[]( uint32_t index );
+
+	[[nodiscard]]
+	bool HasPossibleUpdates() const;
 };
