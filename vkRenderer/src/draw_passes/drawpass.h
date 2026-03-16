@@ -26,6 +26,7 @@
 #include "../globals/common.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/shaderBinding.h"
+#include "../render_binding/imageArray.h"
 #include "../render_state/frameBuffer.h"
 
 class ResourceContext;
@@ -109,8 +110,8 @@ public:
 
 	void InsertResourceBarriers( CommandContext& cmdContext );
 
-	Array<const Image*, 100>	codeImages;
-	Array<const Image*, 100>	codeCubeImages;
+	ImageArray					codeImages;
+	ImageArray					codeCubeImages;
 	ShaderBindParms*			parms;
 };
 

@@ -30,6 +30,7 @@
 
 class GpuBuffer;
 class GpuImage;
+class ImageArray;
 
 enum class bindType_t
 {

@@ -326,6 +326,9 @@
     <ClInclude Include="shaders\globals_hlsl.h">
       <Filter>Shaders</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_binding\imageArray.h">
+      <Filter>Binding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat">

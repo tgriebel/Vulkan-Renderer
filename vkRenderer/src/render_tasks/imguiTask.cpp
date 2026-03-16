@@ -131,7 +131,7 @@ void ImguiTask::FrameBegin()
 	{
 		viewerShaderConstants_t constants{};
 
-		constants.dimensions = vec4f( image->info.width, image->info.height, 1.0f / image->info.width, 1.0f / image->info.height );
+		constants.dimensions = vec4f( (float)image->info.width, (float)image->info.height, 1.0f / image->info.width, 1.0f / image->info.height );
 		constants.level = 0;
 		constants.mipCount = image->info.mipLevels;
 		constants.layerCount = image->info.layers;

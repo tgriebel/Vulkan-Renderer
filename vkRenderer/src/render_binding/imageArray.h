@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 * MIT License
 *
@@ -21,33 +23,16 @@
 * SOFTWARE.
 */
 
-#pragma once
-#include "../globals/common.h"
-#include "../render_binding/imageArray.h"
 #include <GfxCore/asset_types/texture.h>
+#include "../render_core/gpuImage.h"
+#include "../render_state/deviceContext.h"
 
-struct renderConstants_t
+class ImageArray : public Array<const Image*, MaxImageDescriptors>
 {
-	Image*			redImage;
-	Image*			greenImage;
-	Image*			blueImage;
-	Image*			whiteImage;
-	Image*			blackImage;
-	Image*			lightGreyImage;
-	Image*			darkGreyImage;
-	Image*			brownImage;
-	Image*			cyanImage;
-	Image*			yellowImage;
-	Image*			purpleImage;
-	Image*			orangeImage;
-	Image*			pinkImage;
-	Image*			goldImage;
-	Image*			albImage;
-	Image*			nmlImage;
-	Image*			rghImage;
-	Image*			mtlImage;
-	Image*			defaultImage;
-	Image*			defaultImageCube;
-	ImageArray		defaultImageArray;
-	ImageArray		defaultImageCubeArray;
+private:
+
+public:
+	ImageArray()
+	{
+	}
 };

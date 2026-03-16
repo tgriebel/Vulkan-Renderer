@@ -1,12 +1,1 @@
-﻿  imguiTask.cpp
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_tasks\imguiTask.cpp(134,63): warning C4244: 'argument': conversion from 'uint32_t' to 'const T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\vkRenderer\src\render_tasks\imguiTask.cpp(134,44): warning C4244: 'argument': conversion from 'uint32_t' to 'const T', possible loss of data
-          with
-          [
-              T=float
-          ]
-  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
+﻿  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
