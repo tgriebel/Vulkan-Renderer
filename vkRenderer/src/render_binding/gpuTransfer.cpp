@@ -181,12 +181,12 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 			switch ( texture.info.type )
 			{
 				case IMAGE_TYPE_2D:
-					resources.gpuImages2D[ uploadId ] = &texture;
-					resources.gpuImagesCube[ uploadId ] = firstCube;
+					resources.gpuImages2D.BindIndex( uploadId, &texture );
+					resources.gpuImagesCube.BindIndex( uploadId, firstCube );
 					break;
 				case IMAGE_TYPE_CUBE:
-					resources.gpuImages2D[ uploadId ] = &g_assets.textureLib.GetDefault()->Get();
-					resources.gpuImagesCube[ uploadId ] = &texture;
+					resources.gpuImages2D.BindIndex( uploadId, &g_assets.textureLib.GetDefault()->Get() );
+					resources.gpuImagesCube.BindIndex( uploadId, &texture );
 					break;
 			}
 		}
@@ -194,8 +194,8 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		// Fill defaults
 		for ( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
 		{
-			resources.gpuImages2D[ i ] = &g_assets.textureLib.GetDefault()->Get();
-			resources.gpuImagesCube[ i ] = firstCube;
+			resources.gpuImages2D.BindIndex( i, &g_assets.textureLib.GetDefault()->Get() );
+			resources.gpuImagesCube.BindIndex( i, firstCube );
 		}
 	}
 

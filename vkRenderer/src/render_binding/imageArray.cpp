@@ -6,18 +6,19 @@ void ImageArray::SetRenderContext( RenderContext* context )
 	m_context = context;
 }
 
-const Image* const& ImageArray::operator[]( uint32_t index ) const
-{
-	return BaseImageArray::operator[]( index );
-}
 
-const Image*& ImageArray::operator[]( uint32_t index )
+void ImageArray::BindIndex( const uint32_t index, const Image* image )
 {
 	assert( m_context );
-	m_lastFrameUpdate[ index ] = m_context->FrameNumber(); // Conservative marking since any assignment could set the same pointer
 
-	return BaseImageArray::operator[]( index );
+	if( (*this)[ index ] != image )
+	{
+		m_lastFrameUpdate[ index ] = m_context->FrameNumber(); // Conservative marking since any assignment could set the same pointer
+
+		BaseImageArray::operator[]( index ) = image;
+	}
 }
+
 
 [[nodiscard]]
 bool ImageArray::HasPossibleUpdates() const

@@ -30,7 +30,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 	if ( HasFlags( info.flags, CUBEMAP ) == false )
 	{
 		m_imageArray.Resize( 1 );
-		m_imageArray[ 0 ] = m_readbackImage;
+		m_imageArray.BindIndex( 0, m_readbackImage );
 	}
 	else
 	{
@@ -51,7 +51,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 			m_cubeViews[ i ].Init( m_readbackImage, info, subView, resourceLifeTime_t::TASK );
 
 			// Sort the slices so serialization is ordered 
-			m_imageArray[ subView.baseArray ] = &m_cubeViews[ i ];
+			m_imageArray.BindIndex( subView.baseArray, &m_cubeViews[ i ] );
 		}
 	}
 

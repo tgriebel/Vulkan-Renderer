@@ -100,8 +100,8 @@ void Renderer::ShutdownShaderResources()
 
 	for ( uint32_t i = 0; i < MaxImageDescriptors; ++i )
 	{
-		resources.gpuImages2D[ i ] = nullptr;
-		resources.gpuImagesCube[ i ] = nullptr;
+		resources.gpuImages2D.BindIndex( i, nullptr );
+		resources.gpuImagesCube.BindIndex( i, nullptr );
 	}
 
 	// PSO

@@ -697,11 +697,11 @@ void Renderer::InitShaderResources()
 
 		rc.defaultImageArray.SetRenderContext( &renderContext );
 		rc.defaultImageArray.Resize( 1 );
-		rc.defaultImageArray[ 0 ] = rc.defaultImage;
+		rc.defaultImageArray.BindIndex( 0, rc.defaultImage );
 
 		rc.defaultImageCubeArray.SetRenderContext( &renderContext );
 		rc.defaultImageCubeArray.Resize( 1 );
-		rc.defaultImageCubeArray[ 0 ] = rc.defaultImageCube;
+		rc.defaultImageCubeArray.BindIndex( 0, rc.defaultImageCube );
 	}
 
 	// Buffers

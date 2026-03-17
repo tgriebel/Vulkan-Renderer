@@ -36,8 +36,9 @@ void Debug2dPass::FrameBegin( const ResourceContext* resources )
 		}
 	//	codeImages[ uploadId++ ] = &resources->gpuOutput2D[ i ];
 	}
-	codeImages[ 0 ] = resources->mainColorResolvedImage;
-	codeImages[ 1 ] = resources->depthStencilResolvedImage;
+
+	codeImages.BindIndex( 0, resources->mainColorResolvedImage );
+	codeImages.BindIndex( 1, resources->depthStencilResolvedImage );
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );

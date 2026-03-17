@@ -160,9 +160,9 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		m_passes[ passIndex ]->codeImages.Resize( info.inputImages + multiPassImageCount );
 
 		for ( uint32_t codeImageIx = 0; codeImageIx < m_image2dSlotCount; ++codeImageIx ) {
-			m_passes[ passIndex ]->codeImages[ codeImageIx ] = rc.defaultImage;
+			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
 		}
-		m_passes[ passIndex ]->codeImages[ m_image2dSlotCount ] = m_views[ passIndex - 1 ][ 0 ];
+		m_passes[ passIndex ]->codeImages.BindIndex( m_image2dSlotCount, m_views[ passIndex - 1 ][ 0 ] );
 	}
 }
 
@@ -181,7 +181,7 @@ void ImageShaderTask::SetSourceImage( const uint32_t slot, Image* image )
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
 		if( slot < m_image2dSlotCount ) {
-			m_passes[ passIndex ]->codeImages[ slot ] = image;
+			m_passes[ passIndex ]->codeImages.BindIndex( slot, image );
 		}
 	}
 }
@@ -195,7 +195,7 @@ void ImageShaderTask::SetSourceCubeImage( const uint32_t slot, Image* image )
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
 		if ( slot < m_imageCubeSlotCount ) {
-			m_passes[ passIndex ]->codeCubeImages[ slot ] = image;
+			m_passes[ passIndex ]->codeCubeImages.BindIndex( slot, image );
 		}
 	}
 }

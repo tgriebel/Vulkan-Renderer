@@ -3,7 +3,7 @@
 /*
 * MIT License
 *
-* Copyright( c ) 2023 Thomas Griebel
+* Copyright( c ) 2026 Thomas Griebel
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this softwareand associated documentation files( the "Software" ), to deal
 * in the Software without restriction, including without limitation the rights
@@ -44,11 +44,15 @@ public:
 		memset( m_lastFrameUpdate, 0, MaxImageDescriptors * sizeof( uint64_t ) );
 	}
 
+	const Image* operator[]( uint32_t index ) const
+	{
+		return BaseImageArray::operator[]( index );
+	}
+
+	// This name makes the intent more explicit than [] and allows additional book-keeping easily
+	void BindIndex( const uint32_t index, const Image* image );
+
 	void SetRenderContext( RenderContext* context );
-
-	const Image*const& operator[]( uint32_t index ) const;
-
-	const Image*& operator[]( uint32_t index );
 
 	[[nodiscard]]
 	bool HasPossibleUpdates() const;

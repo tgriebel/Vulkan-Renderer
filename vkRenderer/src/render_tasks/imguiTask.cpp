@@ -100,8 +100,8 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 
 	for ( uint32_t codeImageIx = 0; codeImageIx < 1; ++codeImageIx )
 	{
-		m_imagePass->codeImages[ codeImageIx ] = rc.defaultImage;
-		m_imagePass->codeCubeImages[ codeImageIx ] = rc.defaultImageCube;
+		m_imagePass->codeImages.BindIndex( codeImageIx, rc.defaultImage );
+		m_imagePass->codeCubeImages.BindIndex( codeImageIx, rc.defaultImageCube );
 	}
 	m_buffer.Create( "ImguiCallbackBuffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
 }
@@ -127,7 +127,7 @@ void ImguiTask::FrameBegin()
 
 	const viewport_t viewport = m_imguiPass->GetViewport();
 
-	m_imagePass->codeImages[ 0 ] = rc.redImage;
+	m_imagePass->codeImages.BindIndex( 0, rc.redImage );
 
 	Image* image = callbackTasks[ 0 ].image;
 
@@ -150,7 +150,7 @@ void ImguiTask::FrameBegin()
 		m_buffer.SetPos( 0 );
 		m_buffer.CopyData( &constants, sizeof( constants ) );
 
-		m_imagePass->codeImages[ 0 ] = image;
+		m_imagePass->codeImages.BindIndex( 0, image );
 	}
 
 	m_imagePass->parms->Bind( bind_sourceImages, &m_imagePass->codeImages );

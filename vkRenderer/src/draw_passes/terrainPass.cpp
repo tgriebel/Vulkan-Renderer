@@ -26,9 +26,9 @@ void TerrainPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 
 void TerrainPass::FrameBegin( const ResourceContext* resources )
 {
-	codeImages[ 0 ] = resources->shadowMapImage[ 0 ];
-	codeImages[ 1 ] = resources->shadowMapImage[ 1 ];
-	codeImages[ 2 ] = resources->shadowMapImage[ 2 ];
+	codeImages.BindIndex( 0, resources->shadowMapImage[ 0 ] );
+	codeImages.BindIndex( 1, resources->shadowMapImage[ 1 ] );
+	codeImages.BindIndex( 2, resources->shadowMapImage[ 2 ] );
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
