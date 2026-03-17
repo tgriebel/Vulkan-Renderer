@@ -100,6 +100,7 @@ MakeCVar( bool,		r_computeBrdfLut );
 MakeCVar( char*,	c_scene );
 MakeCVar( char*,	r_cubemapName );
 MakeCVar( bool,		c_bakeAssets );
+MakeCVar( bool,		c_loadBakedAssets );
 MakeCVar( bool,		r_shadows );
 MakeCVar( bool,		r_downsampleScene );
 MakeCVar( bool,		r_autoExposure );
@@ -143,7 +144,7 @@ int main( int argc, char* argv[] )
 		ParseConfig( fileName );
 	}
 
-	if ( c_bakeAssets.GetBool() ) {
+	if ( c_bakeAssets.GetBool() || c_loadBakedAssets.GetBool() == false ) {
 		ToggleBakedLoading( false );
 	}
 

@@ -103,7 +103,7 @@ void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if ( key == GLFW_KEY_LEFT_ALT ) {
 		if ( action != GLFW_RELEASE ) {
-			app->focused = !app->focused;
+			app->mouseLocked = !app->mouseLocked;
 		}
 	}
 }
@@ -129,28 +129,34 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
 	mouse_t& mouse = app->input.GetMouseRef();
 
-	int w, h;
-	app->GetWindowSize( w, h );
-	const vec2f prevNdc = app->GetNdc( mouse.x, mouse.y );
-	const vec2f ndc = app->GetNdc( static_cast<float>( xpos ), static_cast<float>( ypos ) );
+	static double lastX = 0.0;
+	static double lastY = 0.0;
+	static bool firstMove = true;
 
-	static float lastTime = 0.0f;
-	const float time = static_cast<float>( glfwGetTime() );
-	const float deltaTime = ( time - lastTime );
-	lastTime = time;
-	mouse.dx = ( mouse.x - ndc[0] );
-	mouse.dy = ( mouse.y - ndc[1] );
-	mouse.xPrev = mouse.x;
-	mouse.yPrev = mouse.y;
-	mouse.x = ndc[0];
-	mouse.y = ndc[1];
-
-	if ( app->IsFocused() ) {
-		mouse.centered = false;
-		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+	if ( firstMove )
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMove = false;
 		return;
 	}
+
+	mouse.dx += static_cast<float>( xpos - lastX );
+	mouse.dy += static_cast<float>( ypos - lastY );
+
+	lastX = xpos;
+	lastY = ypos;
+
+	if ( app->IsMouseLocked() == false )
+	{
+		//mouse.centered = false;
+		//glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+		//return;
+	}
+
 	glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+	mouse.x = static_cast<float>( xpos );
+	mouse.y = static_cast<float>( ypos );
 	mouse.centered = true;
 }
 
@@ -177,9 +183,9 @@ bool Window::IsOpen() const
 }
 
 
-bool Window::IsFocused() const
+bool Window::IsMouseLocked() const
 {
-	return focused;
+	return mouseLocked;
 }
 
 
@@ -222,7 +228,7 @@ void Window::Init()
 	glfwSetMouseButtonCallback( window, MousePressCallback );
 	glfwSetCursorPosCallback( window, MouseMoveCallback );
 
-	focused = true;
+	mouseLocked = true;
 }
 
 

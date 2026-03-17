@@ -295,10 +295,8 @@ void UpdateScene( Scene* scene )
 	const float dt = scene->DeltaTime();
 	const float cameraSpeed = 5.0f;
 
-	if( g_window.IsFocused() == false )
+	// Key controls
 	{
-		// FIXME: race conditions
-		// Need to do a ping-pong update
 		if ( g_window.input.IsKeyPressed( KEY_D ) ) {
 			scene->mainCamera->Truck( cameraSpeed * dt );
 		}
@@ -351,11 +349,14 @@ void UpdateScene( Scene* scene )
 	scene->mainCamera->SetAspectRatio( g_window.GetWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = g_window.input.GetMouse();
-	if ( mouse.centered )
+	if ( mouse.centered /*&& g_window.IsMouseLocked()*/ )
 	{
-		const float maxSpeed = mouse.speed;
-		const float yawDelta = maxSpeed * mouse.dx;
-		const float pitchDelta = -maxSpeed * mouse.dy;
+		static float smoothDeltaTime = 0.0f;
+		smoothDeltaTime  = 0.9f * smoothDeltaTime + 0.1f * dt;
+
+		const float maxSpeed = mouse.speed * smoothDeltaTime;
+		const float yawDelta = -maxSpeed * mouse.dx;
+		const float pitchDelta = maxSpeed * mouse.dy;
 		scene->mainCamera->Pan( yawDelta );
 		scene->mainCamera->Tilt( pitchDelta );
 	}
@@ -378,51 +379,6 @@ void UpdateScene( Scene* scene )
 	// Skybox
 	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );	
 
-#if defined( USE_IMGUI )
-	if ( g_imguiControls.dbgImageId >= 0 )
-	{
-		/*Entity* ent = scene->FindEntity( "_quadTexDebug" );
-		if( ent != nullptr )
-		{
-			ent->ClearFlag( ENT_FLAG_NO_DRAW );
-
-			const Image* debugImage = &g_assets.textureLib.Find( g_imguiControls.dbgImageId )->Get();
-			if ( debugImage != nullptr )
-			{
-				Asset<Material>* matAsset = g_assets.materialLib.Find( "IMAGE2D" );
-		
-				if( matAsset != nullptr )
-				{
-					struct imageViewerParms_t
-					{
-						uint32_t bitfield;
-					};
-
-					imageViewerParms_t imageViewParms{};
-					if( HasFlags( debugImage->gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_WRITE ) ) {
-						imageViewParms.bitfield = 0x00000001;
-					}
-				
-					Material& mat = matAsset->Get();
-					mat.AddTexture( 0, debugImage->gpuImage->GetId() );
-					mat.SetExtraData( &imageViewParms, sizeof( imageViewerParms_t ) );
-					matAsset->QueueUpload();
-				}
-				ent->SetSortOrder( 1 );
-
-				const imageInfo_t debugImageInfo = debugImage->info;
-				const float aspectRatio = (float)debugImageInfo.width / (float)debugImageInfo.height;
-
-				const float width = g_imguiControls.dbgImageInfo.width;
-				const float height = Min( width / aspectRatio, (float)g_imguiControls.dbgImageInfo.height );
-
-				ent->SetOrigin( vec3f( g_imguiControls.dbgImageInfo.x, g_imguiControls.dbgImageInfo.y, 0.0f ) + 0.5f * vec3f( width, height, 0.0f ) );
-				ent->SetScale( vec3f( width, height, 0.0f ) );
-			}
-		}*/
-	}
-	else
-#endif
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );
 		if ( ent != nullptr ) {
@@ -473,24 +429,37 @@ void UpdateScene( Scene* scene )
 		ImGui::EndTabBar();
 	}
 
-	ImGui::InputInt( "Image Id", &g_imguiControls.dbgImageId );
-	g_imguiControls.dbgImageId = Clamp( g_imguiControls.dbgImageId, -1, int( g_assets.textureLib.Count() - 1 ) );
+	std::vector<const Image*> images;
 
-	Asset<Image>* dbgImageAsset = ( g_imguiControls.dbgImageId >= 0 ) ? g_assets.textureLib.Find( g_imguiControls.dbgImageId ) : nullptr;
-	const Image* dbgImage = ( dbgImageAsset != nullptr ) ? &dbgImageAsset->Get() : nullptr;
-	const char* debugImageName = ( dbgImage != nullptr ) ? dbgImage->gpuImage->GetDebugName() : "";
+	const uint32_t imageCount = g_assets.textureLib.Count();
+	for ( uint32_t i = 0; i < imageCount; ++i )
+	{
+		const Image* img = &g_assets.textureLib.Find( i )->Get();
+		if ( img == nullptr ) {
+			continue;
+		}
+		images.push_back( img );
+	}
+
+	const uint32_t outputImageCount = g_renderer.OutputImageCount();
+	for ( uint32_t i = 0; i < outputImageCount; ++i )
+	{
+		const Image* img = g_renderer.FindOutputImage( i );
+		if ( img == nullptr ) {
+			continue;
+		}
+		images.push_back( img );
+	}
+
+	const char* debugImageName = ( g_imguiControls.dbgImageId >= 0 ) ? images[ g_imguiControls.dbgImageId ]->gpuImage->GetDebugName() : "";
 
 	if ( ImGui::BeginCombo( "Images", debugImageName ) )
 	{
-		const uint32_t dbgImageCount = g_assets.textureLib.Count();
-		for ( uint32_t i = 0; i < dbgImageCount; ++i )
+		const uint32_t imageCount = static_cast<uint32_t>( images.size() );
+		for ( uint32_t i = 0; i < imageCount; ++i )
 		{
-			dbgImage = &g_assets.textureLib.Find( i )->Get();
-			if ( dbgImage == nullptr ) {
-				continue;
-			}
 			const bool selected = ( i == g_imguiControls.dbgImageId );
-			if ( ImGui::Selectable( dbgImage->gpuImage->GetDebugName(), selected ) ) {
+			if ( ImGui::Selectable( images[ i ]->gpuImage->GetDebugName(), selected ) ) {
 				g_imguiControls.dbgImageId = i;
 			}
 			if ( selected ) {
@@ -500,56 +469,28 @@ void UpdateScene( Scene* scene )
 		ImGui::EndCombo();
 	}
 
-	const Image* fbImage = g_renderer.FindOutputImage( g_imguiControls.selectedFrameBufferImageId );
-	const char* debugFbName = ( fbImage != nullptr ) ? fbImage->gpuImage->GetDebugName() : "";
-
-	if ( ImGui::BeginCombo( "FrameBuffers", debugFbName ) )
+	if( g_imguiControls.dbgImageId >= 0 )
 	{
-		const uint32_t outputImageCount = g_renderer.OutputImageCount();
-		for ( uint32_t i = 0; i < outputImageCount; ++i )
-		{
-			fbImage = g_renderer.FindOutputImage( i );
-			if( fbImage == nullptr ) {
-				continue;
-			}
-			const bool selected = ( i == g_imguiControls.selectedFrameBufferImageId );
-			if ( ImGui::Selectable( fbImage->gpuImage->GetDebugName(), selected ) ) {
-				g_imguiControls.selectedFrameBufferImageId = i;
-			}
+		const Image* image = images[ g_imguiControls.dbgImageId ];
 
-			if ( selected ) {
-				ImGui::SetItemDefaultFocus();
+		const float aspect = image->info.width / (float)image->info.height;
+		static float scale = 1.0f;
+
+		ImGui::Begin( "Image Viewer" );
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ), 0, ImVec2( scale * 200.0f, scale * ( 200.0f / aspect ) ) );
+
+		if ( ImGui::IsItemHovered() )
+		{
+			float wheelDelta = io.MouseWheel;
+
+			if ( wheelDelta != 0.0f )
+			{
+				scale += 0.1f * wheelDelta;
 			}
 		}
-		ImGui::EndCombo();
-	}
-
-	char entityName[ 256 ];
-	if ( g_imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, g_assets.modelLib.FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
-	}
-	else {
-		memset( &entityName[ 0 ], 0, 256 );
-	}
-
-	ImGui::Text( "Mouse: (%f, %f)", (float)g_window.input.GetMouse().x, (float)g_window.input.GetMouse().y );
-	ImGui::Text( "Mouse Dt: (%f, %f)", (float)g_window.input.GetMouse().dx, (float)g_window.input.GetMouse().dy );
-	const vec4f cameraOrigin = g_scene->mainCamera->GetOrigin();
-	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
-
-	const vec2f ndc = g_window.GetNdc( g_window.input.GetMouse().x, g_window.input.GetMouse().y );
-
-	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
-	ImGui::Text( "Frame Number: %d", g_renderDebugData.frameNumber );
-	ImGui::SameLine();
-	ImGui::Text( "FPS: %f", 1000.0f / g_renderDebugData.frameTimeMs );
-
-	ImGui::End();
-
-	if ( g_imguiControls.dbgImageId >= 0 )
-	{
-		ImGui::Begin( "Image Viewer" );
-		ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 1.0f ), 0, ImVec2( 200.0f, 200.0f ) );
 
 		ImVec2 pos = ImGui::GetItemRectMin();  // top-left of last item
 		ImVec2 size = ImGui::GetItemRectSize();
@@ -574,7 +515,7 @@ void UpdateScene( Scene* scene )
 
 		imguiImageCallbackData_t data;
 		data.progAsset = g_assets.gpuPrograms.Find( "Image2D" );
-		data.image = &g_assets.textureLib.Find( (uint32_t)g_imguiControls.dbgImageId )->Get();
+		data.image = image;
 		data.x = pos.x;
 		data.y = pos.y;
 		data.width = visibleSize.x;
@@ -584,6 +525,28 @@ void UpdateScene( Scene* scene )
 
 		ImGui::End();
 	}
+
+	char entityName[ 256 ];
+	if ( g_imguiControls.selectedEntityId >= 0 ) {
+		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, g_assets.modelLib.FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
+	}
+	else {
+		memset( &entityName[ 0 ], 0, 256 );
+	}
+
+	ImGui::Text( "Mouse: (%f, %f)", (float)g_window.input.GetMouse().x, (float)g_window.input.GetMouse().y );
+	ImGui::Text( "Mouse Dt: (%f, %f)", (float)g_window.input.GetMouse().dx, (float)g_window.input.GetMouse().dy );
+	const vec4f cameraOrigin = g_scene->mainCamera->GetOrigin();
+	ImGui::Text( "Camera: (%f, %f, %f)", cameraOrigin[ 0 ], cameraOrigin[ 1 ], cameraOrigin[ 2 ] );
+
+	const vec2f ndc = g_window.GetNdc( g_window.input.GetMouse().x, g_window.input.GetMouse().y );
+
+	ImGui::Text( "NDC: (%f, %f )", (float)ndc[ 0 ], (float)ndc[ 1 ] );
+	ImGui::Text( "Frame Number: %d", g_renderDebugData.frameNumber );
+	ImGui::SameLine();
+	ImGui::Text( "FPS: %f", 1000.0f / g_renderDebugData.frameTimeMs );
+
+	ImGui::End();
 #endif
 
 	scene->Update();

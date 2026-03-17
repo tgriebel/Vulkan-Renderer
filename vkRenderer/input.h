@@ -94,8 +94,6 @@ struct mouse_t
 	mouse_t() : speed( 2.0f ),
 		x( 0.0f ),
 		y( 0.0f ),
-		xPrev( 0.0f ),
-		yPrev( 0.0f ),
 		dx( 0.0f ),
 		dy( 0.0f ),
 		leftDown( false ),
@@ -104,10 +102,8 @@ struct mouse_t
 
 	float	x;
 	float	y;
-	float	xPrev;
-	float	yPrev;
-	float	dx; // dx/dt
-	float	dy; // dy/dt
+	float	dx; // dx accumlation per frame
+	float	dy; // dy accumlation per frame
 	float	speed;
 	bool	leftDown;
 	bool	rightDown;
@@ -120,46 +116,39 @@ class Input
 public:
 	Input()
 	{
-		rBufferId = 0;
-		wBufferId = 0;
 		ClearKeyHistory();
 	}
 
 	bool IsKeyPressed( const char key ) {
-		return keys[ rBufferId ][ key ];
+		return keys[ key ];
 	}
 
 	const mouse_t& GetMouse() const {
-		return mouse[ rBufferId ];
+		return mouse;
 	}
 
 	void NewFrame()
 	{
-		rBufferId = wBufferId;
-		wBufferId = ( wBufferId + 1 ) % 2;
-		mouse[ wBufferId ] = mouse[ rBufferId ];
-		mouse[ wBufferId ].dx = 0.0f;
-		mouse[ wBufferId ].dy = 0.0f;
-		memcpy( keys[ wBufferId ], keys[ rBufferId ], 255 );
+		mouse = mouse;
+		mouse.dx = 0.0f;
+		mouse.dy = 0.0f;
+		memcpy( keys, keys, 255 );
 	}
 
 private:
-	mouse_t	mouse[ 2 ];
-	int		rBufferId;
-	int		wBufferId;
-	bool	keys[ 2 ][ 256 ];
+	mouse_t	mouse;
+	bool	keys[ 256 ];
 
 	void SetKey( const char key, const bool value ) {
-		keys[ wBufferId ][ key ] = value;
+		keys[ key ] = value;
 	}
 
 	mouse_t& GetMouseRef() {
-		return mouse[ wBufferId ];
+		return mouse;
 	}
 
 	void ClearKeyHistory() {
-		memset( keys[ 0 ], 0, 255 );
-		memset( keys[ 1 ], 0, 255 );
+		memset( keys, 0, 255 );
 	}
 
 	friend void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );

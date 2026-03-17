@@ -122,17 +122,21 @@ void ImguiTask::FrameBegin()
 {
 	struct viewerShaderConstants_t : public ImageShaderTask::constants_t
 	{
-		vec4f scissorRectUv;
+		vec4f		scissorRectUv;
+		uint32_t	flags;
 	};
 
 	const viewport_t viewport = m_imguiPass->GetViewport();
 
 	m_imagePass->codeImages.BindIndex( 0, rc.redImage );
+	m_imagePass->codeCubeImages.BindIndex( 0, rc.defaultImageCube );
 
-	Image* image = callbackTasks[ 0 ].image;
+	const Image* image = callbackTasks[ 0 ].image;
 
 	if ( image != nullptr )
 	{
+		const bool isCubeImage = ( image->info.type == IMAGE_TYPE_CUBE );
+
 		viewerShaderConstants_t constants{};
 
 		constants.dimensions = vec4f( (float)image->info.width, (float)image->info.height, 1.0f / image->info.width, 1.0f / image->info.height );
@@ -147,14 +151,20 @@ void ImguiTask::FrameBegin()
 		constants.scissorRectUv.z *= 1.0f / viewport.width;
 		constants.scissorRectUv.w *= 1.0f / viewport.height;
 
+		constants.flags = isCubeImage ? 0x01 : 0x00;
+
 		m_buffer.SetPos( 0 );
 		m_buffer.CopyData( &constants, sizeof( constants ) );
 
-		m_imagePass->codeImages.BindIndex( 0, image );
+		if( isCubeImage ) {
+			m_imagePass->codeCubeImages.BindIndex( 0, image );
+		} else {
+			m_imagePass->codeImages.BindIndex( 0, image );
+		}		
 	}
 
 	m_imagePass->parms->Bind( bind_sourceImages, &m_imagePass->codeImages );
-	m_imagePass->parms->Bind( bind_sourceCubeImages, m_imagePass->codeCubeImages.Count() > 0 ? m_imagePass->codeCubeImages[ 0 ] : rc.defaultImageCube );
+	m_imagePass->parms->Bind( bind_sourceCubeImages, m_imagePass->codeCubeImages[ 0 ] );
 	m_imagePass->parms->Bind( bind_imageStencil, &m_resources->stencilImageView );
 	m_imagePass->parms->Bind( bind_imageProcess, &m_buffer );
 

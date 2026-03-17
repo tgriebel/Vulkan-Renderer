@@ -23,7 +23,7 @@ public:
 	void					BeginFrame();
 	void					EndFrame();
 	bool					IsOpen() const;
-	bool					IsFocused() const;
+	bool					IsMouseLocked() const;
 	std::string				OpenFileDialog( const std::string& title, const std::vector<const char*>& filters, const std::string& filterDesc );
 	void					PumpMessages();
 	vec2f					GetNdc( const float x, const float y );
@@ -42,7 +42,7 @@ public:
 
 private:
 	bool					needsImageResize;
-	bool					focused;
+	bool					mouseLocked;
 
 	friend void FramebufferResizeCallback( GLFWwindow* window, int width, int height );
 	friend void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );

@@ -40,9 +40,13 @@ PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageViewer )
 
 void main()
 {
-	//const bool isCubeImage = bitfieldExtract( imageProcess.flags, 0, 1 ) != 0;
+	const bool isCubeImage = bitfieldExtract( imageProcess.flags, 0, 1 ) != 0;
 
 	vec2 uv = ( fragTexCoord.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
 
-	outColor = texture( codeSamplers[ 0 ], uv );
+	if( isCubeImage ) {
+		outColor = texture( codeCubeSamplers[ 0 ], vec3( uv, 0.0f ) );
+	} else {
+		outColor = texture( codeSamplers[ 0 ], uv );
+	}
 }
