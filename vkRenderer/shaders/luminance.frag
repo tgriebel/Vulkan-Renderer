@@ -44,7 +44,7 @@ void main()
 
    const float dtSec = globals.time.w / 1000.0f;
 
-   const float adaptationRate = globals.toneMap.a;
+   const float adaptationRate = globals.toneMapTint.a;
    const float weight = 1.0f - exp( -dtSec * adaptationRate );
 
    // Pattanaik et al: "Time-Dependent Visual Adaptation For Fast Realistic Image Display"

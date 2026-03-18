@@ -110,17 +110,18 @@ void main()
 		hdrColor.rgb = texture( codeSamplers[ textureId0 ], fragTexCoord.xy, 0 ).rgb;
 	}
 
-	//hdrColor.rgb = LuminanceFromRGB( hdrColor.rgb ).xxx;
+	const vec3 tint = globals.toneMapTint.rgb;
+	const float maxLod = float( textureQueryLevels( codeSamplers[ textureId3 ] ) - 1 );
+	const float luminance = textureLod( codeSamplers[ textureId3 ], vec2( 0.5f, 0.5f ), maxLod ).r;
 
-	const vec3 tint = globals.toneMap.rgb;
-	const float luminance = LuminanceFromRGB( textureLod( codeSamplers[ textureId3 ], vec2( 0.5f, 0.5f ), 16 ).rgb );
-	//const float exposure = 1.0f / ( pow( 2.0f, log2( luminance * 8.0f ) ) * 1.2f );// globals.toneMap.a;
-	const float exposure = 0.18f / clamp( luminance, 0.2f, 100.0f );
+	const float middleGrey = globals.exposure.x;
+	const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
+	const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 
-	const vec3 exposureAdjustedColor = hdrColor * exposure;
+	const vec3 exposureAdjustedColor = hdrColor * exposure * tint;
 
 	sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 
-	outColor.rgb = tint * mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
+	outColor.rgb = mix( sceneColor.rgb, vec3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
 	outColor.a = 1.0f;
 }

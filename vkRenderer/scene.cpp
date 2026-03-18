@@ -295,6 +295,9 @@ void UpdateScene( Scene* scene )
 	const float dt = scene->DeltaTime();
 	const float cameraSpeed = 5.0f;
 
+	static float smoothDeltaTime = 0.0f;
+	smoothDeltaTime = 0.9f * smoothDeltaTime + 0.1f * dt;
+
 	// Key controls
 	{
 		if ( g_window.input.IsKeyPressed( KEY_D ) ) {
@@ -349,11 +352,8 @@ void UpdateScene( Scene* scene )
 	scene->mainCamera->SetAspectRatio( g_window.GetWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = g_window.input.GetMouse();
-	if ( mouse.centered /*&& g_window.IsMouseLocked()*/ )
+	if ( mouse.centered )
 	{
-		static float smoothDeltaTime = 0.0f;
-		smoothDeltaTime  = 0.9f * smoothDeltaTime + 0.1f * dt;
-
 		const float maxSpeed = mouse.speed * smoothDeltaTime;
 		const float yawDelta = -maxSpeed * mouse.dx;
 		const float pitchDelta = maxSpeed * mouse.dy;
@@ -579,6 +579,8 @@ void DrawSceneDebugMenu()
 		ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map B", &g_imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map A", &g_imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Exposure Middle-Gray", &g_imguiControls.exposureMidGray, 0.1f, 0.9f );
+		ImGui::InputFloat( "Exposure Adaptation", &g_imguiControls.exposureAdaptation, 0.01f, 5.0f );
 		ImGui::Checkbox( "DoF Enabled", &g_imguiControls.dofEnable );
 		ImGui::SliderFloat( "DoF Focal Depth", &g_imguiControls.dofFocalDepth, 0.0f, 1.0f );
 		ImGui::SliderFloat( "DoF Focal Range", &g_imguiControls.dofFocalRange, 0.0f, 1.0f );

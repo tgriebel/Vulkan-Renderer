@@ -133,6 +133,14 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	static double lastY = 0.0;
 	static bool firstMove = true;
 
+	if ( app->IsMouseLocked() == false )
+	{
+		firstMove = true;
+		mouse.centered = false;
+		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+		return;
+	}
+
 	if ( firstMove )
 	{
 		lastX = xpos;
@@ -146,13 +154,6 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 
 	lastX = xpos;
 	lastY = ypos;
-
-	if ( app->IsMouseLocked() == false )
-	{
-		//mouse.centered = false;
-		//glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
-		//return;
-	}
 
 	glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
 	mouse.x = static_cast<float>( xpos );

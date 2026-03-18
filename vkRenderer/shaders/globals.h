@@ -122,9 +122,10 @@ struct surface_t
 #define GLOBALS_LAYOUT( S, N )				layout( set = S, binding = N ) uniform GlobalConstants					\
 											{																		\
 												vec4        time;													\
-												vec4        generic;												\
+												vec4        generic; /* Debugging or prototyping */					\
 												vec4        shadowParms;											\
-												vec4        toneMap;												\
+												vec4        toneMapTint;											\
+												vec4        exposure;												\
 												vec4        dof;													\
 												uint		numSamples;												\
 												uint		whiteId;												\

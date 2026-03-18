@@ -165,6 +165,8 @@ struct imguiControls_t
 	float				metalnessBias;
 	float				shadowStrength;
 	float				toneMapColor[ 4 ];
+	float				exposureMidGray;
+	float				exposureAdaptation;
 	float				dofFocalDepth;
 	float				dofFocalRange;
 	bool				dofEnable;

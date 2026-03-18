@@ -349,8 +349,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 			copyImageParms_t srcCopy{};
 			srcCopy.baseArray = 0;
 			srcCopy.arrayCount = 1;
+			srcCopy.baseMip = resources.currentLum->info.mipLevels - 1;
 			srcCopy.mipLevels = 1;
-			srcCopy.baseMip = srcCopy.mipLevels - 1;		
 			srcCopy.x = 0;
 			srcCopy.y = 0;
 			srcCopy.z = 0;
@@ -877,6 +877,8 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	g_imguiControls.toneMapColor[ 1 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 2 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 3 ] = 1.0f;
+	g_imguiControls.exposureMidGray = 0.18f;
+	g_imguiControls.exposureAdaptation = 1.00f;
 	g_imguiControls.dofEnable = false;
 	g_imguiControls.dofFocalDepth = 0.01f;
 	g_imguiControls.dofFocalRange = 0.25f;
@@ -1122,11 +1124,14 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
+		resources.mainColorResolvedImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+
 		resources.blurredImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
+		resources.blurredImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Depth-stencil views
@@ -1204,6 +1209,7 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
 		);
+		resources.previousLum->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Luminance MIP-chain
@@ -1224,6 +1230,7 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
 		);
+		resources.currentLum->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 }
 
