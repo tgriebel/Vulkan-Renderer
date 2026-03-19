@@ -4,15 +4,15 @@
 #include "window.h"
 #include <gfxcore/scene/entity.h>
 #include <gfxcore/scene/scene.h>
-#include "src/globals/render_util.h"
+#include "../globals/render_util.h"
 
 #if defined( USE_IMGUI )
-#include "external/imgui/imgui_internal.h"
-#include "external/imgui/imgui.h"
+#include "../../external/imgui/imgui_internal.h"
+#include "../../external/imgui/imgui.h"
 #endif
 
-#include "src/render_core/debugMenu.h"
-#include "src/render_core/renderer.h"
+#include "../render_core/debugMenu.h"
+#include "../render_core/renderer.h"
 
 extern AssetManager g_assets;
 extern Scene* g_scene;

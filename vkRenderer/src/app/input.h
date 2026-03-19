@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/globals/common.h"
+#include "../globals/common.h"
 
 #define KEY( k ) KEY_##k = (#k[0])
 

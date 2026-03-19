@@ -31,7 +31,7 @@
 #include <syscore/systemUtils.h>
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/assetManager.h>
-#include "window.h"
+#include "src/app/window.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
 #include "scenes/sceneParser.h"

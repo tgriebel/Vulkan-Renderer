@@ -22,7 +22,7 @@
 */
 
 #include "nesScene.h"
-#include "../window.h"
+#include "../src/app/window.h"
 
 #include <windows.h> 
 #include <stdio.h>

@@ -2,15 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="vulkinTestApp.cpp">
-      <Filter>app</Filter>
-    </ClCompile>
-    <ClCompile Include="window.cpp">
-      <Filter>app</Filter>
-    </ClCompile>
-    <ClCompile Include="scene.cpp">
-      <Filter>app</Filter>
-    </ClCompile>
     <ClCompile Include="scenes\sceneParser.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
@@ -173,6 +164,15 @@
     <ClCompile Include="src\render_binding\imageArray.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
+    <ClCompile Include="src\app\scene.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\window.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkinTestApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />
@@ -184,12 +184,6 @@
     </ClInclude>
     <ClInclude Include="scenes\chessScene.h">
       <Filter>Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="window.h">
-      <Filter>app</Filter>
-    </ClInclude>
-    <ClInclude Include="input.h">
-      <Filter>app</Filter>
     </ClInclude>
     <ClInclude Include="scenes\sceneParser.h">
       <Filter>Scenes</Filter>
@@ -364,6 +358,12 @@
     </ClInclude>
     <ClInclude Include="src\draw_passes\debug2dPass.h">
       <Filter>Draw Passes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\input.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\app\window.h">
+      <Filter>app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

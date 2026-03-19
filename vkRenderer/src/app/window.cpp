@@ -1,7 +1,7 @@
 #include "window.h"
-#include "src/render_state/deviceContext.h"
+#include "../render_state/deviceContext.h"
 
-#include "external/tinyfiledialogs/tinyfiledialogs.h"
+#include "../../external/tinyfiledialogs/tinyfiledialogs.h"
 
 #if defined( USE_IMGUI )
 #include "../../external/imgui/imgui.h"

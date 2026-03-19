@@ -25,7 +25,7 @@
 
 #include <gfxcore/asset_types/texture.h>
 #include "../globals/common.h"
-#include "../../window.h"
+#include "../app/window.h"
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 #include "../render_core/gpuImage.h"

@@ -25,8 +25,8 @@
 #include "../src/globals/common.h"
 #include "../src/globals/render_util.h"
 #include "../src/io/io.h"
-#include "../window.h"
-#include "../input.h"
+#include "../src/app/window.h"
+#include "../src/app/input.h"
 #include <chess.h>
 #include <commands.h>
 #include <syscore/timer.h>

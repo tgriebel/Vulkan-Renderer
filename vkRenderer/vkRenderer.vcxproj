@@ -188,6 +188,8 @@
     <ClInclude Include="shaders\light.h" />
     <ClInclude Include="shaders\util.h" />
     <ClInclude Include="src\app\cvar.h" />
+    <ClInclude Include="src\app\input.h" />
+    <ClInclude Include="src\app\window.h" />
     <ClInclude Include="src\draw_passes\debug2dPass.h" />
     <ClInclude Include="src\draw_passes\debug3dPass.h" />
     <ClInclude Include="src\draw_passes\depthPass.h" />
@@ -229,10 +231,8 @@
     <ClInclude Include="src\render_tasks\imageProcessTask.h" />
     <ClInclude Include="src\render_tasks\imguiTask.h" />
     <ClInclude Include="src\render_tasks\RenderTask.h" />
-    <ClInclude Include="window.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="GeoBuilder.h" />
-    <ClInclude Include="input.h" />
     <ClInclude Include="shaders\globals.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -246,11 +246,12 @@
     <ClCompile Include="external\imgui\imgui_tables.cpp" />
     <ClCompile Include="external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
-    <ClCompile Include="scene.cpp" />
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
     <ClCompile Include="src\app\cvar.cpp" />
+    <ClCompile Include="src\app\scene.cpp" />
+    <ClCompile Include="src\app\window.cpp" />
     <ClCompile Include="src\draw_passes\debug2dPass.cpp" />
     <ClCompile Include="src\draw_passes\debug3dPass.cpp" />
     <ClCompile Include="src\draw_passes\depthPass.cpp" />
@@ -293,14 +294,13 @@
     <ClCompile Include="src\render_tasks\imageProcessTask.cpp" />
     <ClCompile Include="src\render_tasks\imguiTask.cpp" />
     <ClCompile Include="src\render_tasks\RenderTask.cpp" />
-    <ClCompile Include="window.cpp" />
-    <ClCompile Include="vulkinTestApp.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="vulkinTestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat" />

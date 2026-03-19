@@ -53,8 +53,8 @@
 #include "../globals/render_util.h"
 
 #include "../../GeoBuilder.h"
-#include "../../window.h"
-#include "../../input.h"
+#include "../app/window.h"
+#include "../app/input.h"
 #include "../io/io.h"
 
 #include <gfxcore/io/io.h>

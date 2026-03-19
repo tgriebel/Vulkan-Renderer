@@ -6,8 +6,8 @@
 #include "../../external/imgui/imgui.h"
 #endif
 
-#include "../../window.h"
-#include "../../input.h"
+#include "../app/window.h"
+#include "../app/input.h"
 #include "../render_core/debugMenu.h"
 
 #include "../draw_passes/debug2dPass.h"
