@@ -4,9 +4,9 @@
   "shaders": [
 	{
       "name": "Default",
-      "vs": "defaultVS.spv",
-      "ps": "defaultPS.spv",
-    },
+      "vs": "default",
+      "ps": "default"
+    }
   ],
   "images": [
     {
@@ -36,13 +36,13 @@
 	  "textures": {
 		  "GGX_COLOR_MAP_SLOT" : "grid2.png"
 	  }
-    },
+    }
   ],
   "models": [
   	{
       "name" : "cube",
       "model" : "cube.obj"
-    },
+    }
   ],
   "entities": [
     {
@@ -60,7 +60,7 @@
     },
 	{
       "name" : "grid",
-      "model" : "grid",
-    },
+      "model" : "grid"
+    }
   ]
 }

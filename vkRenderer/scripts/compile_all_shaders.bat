@@ -1,0 +1,1 @@
+python shader_compiler.py ../scenes/

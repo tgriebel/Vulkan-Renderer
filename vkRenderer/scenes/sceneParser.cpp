@@ -692,7 +692,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	assert( assets != nullptr );
 	assert( scene != nullptr );
 
-	std::vector<char> file = ReadTextFile( fileName );
+	std::vector<char> file = ReadTextFile( ScenePath + fileName );
 
 	const int maxTokens = 1024;
 

@@ -14,8 +14,8 @@ from datetime import datetime
 
 # Config
 GLSLANG    = r"C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe"
-SHADER_DIR = "shaders\\"
-OUT_DIR    = "shaders_bin\\"
+SHADER_DIR = "..\\shaders\\"
+OUT_DIR    = "..\\shaders_bin\\"
 LOG_FILE   = "shader_build.log"
 
 FLAG_MAP = {
@@ -43,6 +43,27 @@ class ShaderRecord:
     output : str
     macros : tuple = field( default_factory=tuple )
 
+# Combines all json shaders from all scenes.
+# This way scenes can include specialized shaders and still have them compiled
+def load_all_shaders( directory: Path ) -> dict:
+    all_shaders = []
+    for json_file in directory.glob( "*.json" ):
+        print( f"Loading {json_file.name}" )
+        with open( json_file, "r" ) as f:
+            try:
+                data = json.load( f )
+                if "shaders" in data:
+                    all_shaders.extend( data[ "shaders" ] )
+            except json.JSONDecodeError as e:
+                print( f"WARNING: Failed to parse {json_file.name}: {e}" )
+    return { "shaders": all_shaders }
+    
+def strip_shader_ext( name: str ) -> str:
+    for ext in ( ".vert", ".frag", ".comp" ):
+        if name.endswith( ext ):
+            return name[ :-len( ext ) ]
+    return name
+
 # Produce single file records for each shader type
 def parse_shaders( data ) -> list[ ShaderRecord ]:
     records = []
@@ -52,7 +73,7 @@ def parse_shaders( data ) -> list[ ShaderRecord ]:
         sources = []
         for key in ( "vs", "ps", "cs" ):
             if key in attribs:
-                sources.append( ( shader[ key ], TYPE_EXT[ key ] ) )
+                sources.append( ( strip_shader_ext( shader[ key ] ), TYPE_EXT[ key ] ) )
 
         macros      = []
         perm_suffix = ""
@@ -128,11 +149,18 @@ def main():
     if len( sys.argv ) < 2:
         print( "Usage: python build_shaders.py <shader_json>" )
         sys.exit( 1 )
+        
+    path = Path( sys.argv[ 1 ] )
 
-    json_file = sys.argv[ 1 ]
-    with open( json_file, "r" ) as f:
-        data = json.load( f )
-
+    if path.is_dir():
+        data = load_all_shaders( path )
+    elif path.is_file():
+        with open( path, "r" ) as f:
+            data = json.load( f )
+    else:
+        print( f"ERROR: '{path}' is not a valid file or directory" )
+        sys.exit( 1 )
+    
     records = parse_shaders( data )
     records = deduplicate( records )
 

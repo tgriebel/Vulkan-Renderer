@@ -10,7 +10,7 @@
     {
 	  "name": "EquirectangularSampler",
 	  "vs": "simple",
-	  "ps": "equirectangularSky",
+	  "ps": "equirectangularSky"
     }
   ],
   "images": [
@@ -79,7 +79,7 @@
 	{
 	  "name": "code_assets/chess_specIbl.img",
 	  "type": "CUBE"
-	},
+	}
   ],
   "materials": [
     {
@@ -92,7 +92,7 @@
       "shaders": {
           "DRAWPASS_SHADOW": "Shadow",
           "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque",
+          "DRAWPASS_OPAQUE": "LitOpaque"
       },
 	  "textures": {
 		  "GGX_COLOR_MAP_SLOT" : "sapeli.jpg"
@@ -110,23 +110,23 @@
       "shaders": {
           "DRAWPASS_SKYBOX": "Sky",
 		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      }
+      },
       "textures": {
           "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
           "CUBE_LEFT_SLOT" : "chapel_left.jpg",
           "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
           "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
           "CUBE_FRONT_SLOT" : "chapel_front.jpg",
-          "CUBE_BACK_SLOT" : "chapel_back.jpg",
+          "CUBE_BACK_SLOT" : "chapel_back.jpg"
       }
     },
 	{
       "name": "EquirectangularSky",
       "shaders": {
           "DRAWPASS_SKYBOX": "SkyCube"
-      }
+      },
       "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/chess_env.img",
+          "TEXTURE_SLOT_0" : "code_assets/chess_env.img"
       }
     }
   ],
@@ -169,7 +169,7 @@
     },
 	{
       "name" : "axis",
-      "model" : "axis.obj",
+      "model" : "axis.obj"
     }
   ],
   "entities": [
@@ -199,14 +199,14 @@
 	  "hidden" : "false",
 	  "x" : 0.0,
 	  "y" : 0.0,
-	  "z" : 10.0,
+	  "z" : 10.0
     },
 	{
 	  "name": "gun",
 	  "model": "Cerberus_LP.obj",
 	  "x" : 0.0,
 	  "y" : 0.0,
-	  "z" : 4.0,
-	},
+	  "z" : 4.0
+	}
   ]
 }

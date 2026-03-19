@@ -66,7 +66,7 @@
 	{
 	  "name": "code_assets/chess_specIbl.img",
 	  "type": "CUBE"
-	},
+	}
   ],
   "materials": [
 	{
@@ -116,9 +116,9 @@
       "name": "EquirectangularSky",
       "shaders": {
           "DRAWPASS_SKYBOX": "SkyCube"
-      }
+      },
       "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/chess_env.img",
+          "TEXTURE_SLOT_0" : "code_assets/chess_env.img"
       }
     }
   ],
@@ -166,7 +166,7 @@
 	},
 	{
 	  "name": "gun",
-	  "model": "Cerberus_LP.obj",
+	  "model": "Cerberus_LP.obj"
 	},
 	{
 	  "name": "sphere",
@@ -174,7 +174,7 @@
 	  "hidden": "false",
 	  "x": 10.0,
 	  "y": 10.0,
-	  "z": 10.0,
+	  "z": 10.0
 	}
   ]
 }
