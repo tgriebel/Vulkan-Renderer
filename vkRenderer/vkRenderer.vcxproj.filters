@@ -457,6 +457,12 @@
     <None Include="shaders\noVb.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\bloomDownsample.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\bloomUpsample.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

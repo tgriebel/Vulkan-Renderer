@@ -3,7 +3,7 @@
     {
       "name": "Basic",
       "vs": "simple",
-      "ps": "simple",
+      "ps": "simple"
     },
     {
       "name": "Shadow",
@@ -40,6 +40,11 @@
       "vs": "skybox",
       "ps": "skybox",
 	  "perm": "skycube"
+    },
+	{
+	  "name": "EquirectangularSampler",
+	  "vs": "simple",
+	  "ps": "equirectangularSky"
     },
     {
       "name": "LitDepth",
@@ -156,6 +161,25 @@
       "ps": "luminance",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
-    }
+    },
+	{
+      "name": "BloomDownsample",
+      "vs": "fullscreen",
+      "ps": "bloomDownsample",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
+      "name": "BloomUpsample",
+      "vs": "fullscreen",
+      "ps": "bloomUpsample",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
+	  "name": "LitCRT",
+	  "vs": "simple",
+	  "ps": "crt"
+	}
   ]
 }

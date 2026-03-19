@@ -304,6 +304,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl_compile.bat" />
+    <None Include="shaders\bloomDownsample.frag" />
+    <None Include="shaders\bloomUpsample.frag" />
     <None Include="shaders\clear.comp" />
     <None Include="shaders\computeBrdfLut.frag" />
     <None Include="shaders\crt.frag" />

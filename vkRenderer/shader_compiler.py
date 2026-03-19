@@ -1,69 +1,151 @@
 import os
+import sys
 import json
 import subprocess
+from pathlib import Path
+from dataclasses import dataclass, field
+from datetime import datetime
 
-os.chdir("C:\\Users\\thoma\\source\\repos\\VulkanRenderer-main\\Vulkan-Renderer\\vkRenderer")
+# Parses a json file with shader entries. The entries represent a shaders bound to a given pipeline (both VS and PS, etc)
+# Shaders are tightly coupled this way due to input/output from VS and PS shaders which is why they are collected
+# The compiler, however, works on individual files so this parses the json, redupes individual files, and builds a compile command
+# Claude assisted writing this so there might be some weirdness, but looks reasonable. I don't write enough python to tell
 
-compilerPath = "C:\\VulkanSDK\\1.3.261.0\\Bin\\glslangValidator.exe "
-shaderDir = "shaders\\"
-outDir = "shaders_bin\\"
 
-f = open ('single_shader.json', "r")
-j_string = f.read()
-f.close()
-#print(j_string)
+# Config
+GLSLANG    = r"C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe"
+SHADER_DIR = "shaders\\"
+OUT_DIR    = "shaders_bin\\"
+LOG_FILE   = "shader_build.log"
 
-data = json.loads(j_string)
+FLAG_MAP = {
+    "msaa"    : "USE_MSAA",
+    "skycube" : "USE_CUBE_SAMPLER",
+}
 
-compilerCommands = []
+TYPE_SUFFIX = {
+    "vert" : "VS",
+    "frag" : "PS",
+    "comp" : "CS",
+}
 
-for shaderElement in data['shaders']:
-    attribs = shaderElement.keys()
+# Map from JSON key to file extension
+TYPE_EXT = {
+    "vs" : "vert",
+    "ps" : "frag",
+    "cs" : "comp",
+}
 
-    print(shaderElement)
-    print(attribs)
 
-    macros = ""
-    shaders = []
+@dataclass( frozen=True )
+class ShaderRecord:
+    source : str
+    output : str
+    macros : tuple = field( default_factory=tuple )
 
-    if 'vs' in attribs:
-        shaders.append(shaderElement['vs'])
-    if 'ps' in attribs:
-        shaders.append(shaderElement['ps'])
-    if 'cs' in attribs:
-        shaders.append(shaderElement['cs'])
+# Produce single file records for each shader type
+def parse_shaders( data ) -> list[ ShaderRecord ]:
+    records = []
+    for shader in data[ "shaders" ]:
+        attribs = shader.keys()
 
-    macroSuffix = ""
-    if 'perm' in attribs:
-        perm = shaderElement['perm']
+        sources = []
+        for key in ( "vs", "ps", "cs" ):
+            if key in attribs:
+                sources.append( ( shader[ key ], TYPE_EXT[ key ] ) )
 
-        if "msaa" in perm:
-            macroSuffix += "_msaa"
-            macros += " USE_MSAA"
-        if "skycube" in perm:
-            macroSuffix += "_skycube"
-            macros += " USE_CUBE_SAMPLER"
+        macros      = []
+        perm_suffix = ""
+        perms       = shader.get( "perm", [] )
+        if isinstance( perms, str ):
+            perms = [ perms ]
 
-    for shader in shaders:
-        outFileName = outDir
-        if "vert" in shader:
-            outFileName += shader.removesuffix(".vert") + "VS"
-        if "frag" in shader:
-            outFileName += shader.removesuffix(".frag") + "PS"
-        if "comp" in shader:
-            outFileName += shader.removesuffix(".comp") + "CS"
-        outFileName += macroSuffix
-        outFileName += ".spv"
+        for perm in perms:
+            if perm not in FLAG_MAP:
+                print( f"WARNING: Unknown perm '{perm}'" )
+                continue
+            macros.append( FLAG_MAP[ perm ] )
+            perm_suffix += f"_{perm}"
 
-        args = " -g"
-        if macros != "":
-            args += " --define-macro" + macros
+        for stem, ext in sources:
+            type_suffix = TYPE_SUFFIX.get( ext, "" )
+            source      = f"{stem}.{ext}"
+            output      = f"{OUT_DIR}{stem}{type_suffix}{perm_suffix}.spv"
 
-        compilerCommands.append("-l -V " + shaderDir + shader + " -o " + outFileName + args)
+            records.append( ShaderRecord(
+                source = SHADER_DIR + source,
+                output = output,
+                macros = tuple( macros ),
+            ) )
 
-compilerCommands = set(compilerCommands)
+    return records
 
-for command in compilerCommands:
-    subprocessCmd = compilerPath + command
-    print(subprocessCmd)
-    #subprocess.run(subprocessCmd, shell=True, check=True)
+
+def deduplicate( records: list[ ShaderRecord ] ) -> list[ ShaderRecord ]:
+    seen   = set()
+    result = []
+    for record in records:
+        if record not in seen:
+            seen.add( record )
+            result.append( record )
+    return result
+
+
+def build_command( record: ShaderRecord ) -> list[ str ]:
+    cmd = [ GLSLANG, "-l", "-V", record.source, "-o", record.output, "-g" ]
+    for macro in record.macros:
+        cmd += [ "--define-macro", macro ]
+    return cmd
+
+
+def compile_record( record: ShaderRecord, log ) -> bool:
+    cmd    = build_command( record )
+    if(record.macros):
+        label = f"{record.source} -> {record.output} [{' '.join( record.macros )}]"
+    else:
+        label = f"{record.source} -> {record.output}"
+
+    log.write( f"Compiling {label}\n" )
+    log.write( " ".join( cmd ) + "\n" )
+
+    result = subprocess.run( cmd, capture_output=True, text=True )
+    output = result.stdout + result.stderr
+
+    log.write( output + "\n" )
+
+    if result.returncode != 0:
+        print( f"ERROR: {label}" )
+        print( output )
+        return False
+    else:
+        print( f"OK: {label}" )
+        return True
+
+
+def main():
+    os.chdir( Path( __file__ ).parent )
+
+    if len( sys.argv ) < 2:
+        print( "Usage: python build_shaders.py <shader_json>" )
+        sys.exit( 1 )
+
+    json_file = sys.argv[ 1 ]
+    with open( json_file, "r" ) as f:
+        data = json.load( f )
+
+    records = parse_shaders( data )
+    records = deduplicate( records )
+
+    with open( LOG_FILE, "w" ) as log:
+        log.write( f"Shader build {datetime.now()}\n" )
+        log.write( "================================\n\n" )
+
+        errors = sum( 1 for r in records if not compile_record( r, log ) )
+
+        summary = f"\nBuild failed with {errors} error(s)." if errors else "\nAll shaders compiled successfully."
+        print( summary )
+        log.write( summary + "\n" )
+
+
+if __name__ == "__main__":
+    main()
