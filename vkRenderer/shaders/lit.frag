@@ -117,14 +117,11 @@ void main()
         kD *= 1.0f - metallic;
 
         vec3 numerator      = D * G * F;
-        float denominator   = 4.0f * NoV * NoL + 0.0001;
+        float denominator   = 4.0f * NoV * NoL + 0.0001f;
         vec3 Fr             = numerator / denominator;
 
-        const float spotAngle = dot( L, light.lightDir.xyz );
-        const float spotFov = 0.5f;
-               
         const float attenuation = 1.0f / ( lightDistance * lightDistance );
-        const float spotFalloff = 1.0f; // * smoothstep( 0.5f, 0.8f, spotAngle );
+        const float spotFalloff = 1.0f;
         const vec3 radiance     = attenuation * spotFalloff * light.intensity.rgb;
 
         float shadowing = 1.0f;
@@ -133,22 +130,23 @@ void main()
         {
             const view_t shadowView = viewUbo.views[ shadowViewId ];
 
+            const float shadowBias = 0.001f;
+
             const uint shadowMapTexId = shadowViewId;
             vec4 lsPosition = shadowView.projMat * shadowView.viewMat * vec4( worldPosition.xyz, 1.0f );
             lsPosition.xyz /= lsPosition.w;
 
-            const vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
-            const float bias = 0.001f;
-            const float depth = ( lsPosition.z );
+            lsPosition.z -= shadowBias;
 
+            const vec2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
+            
             if ( length( ndc.xy - vec2( 0.5f ) ) < 0.5f )
             {
-                const float shadowValue = texture( codeSamplers[ shadowMapTexId ], ndc.xy ).r;
-                if ( shadowValue < ( depth - bias ) ) {
-                    shadowing = 1.0f - min( 1.0f, globals.shadowParms.w );
-                }
+                const float shadowMapSample = texture( codeSamplers[ shadowMapTexId ], ndc.xy ).r;
+
+                shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
             } else {
-                shadowing = 1.0f;
+                shadowing = 0.0f; // Assumes spot-light, should be 0.0f for normal lights
             }
         }
 

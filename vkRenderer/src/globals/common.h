@@ -167,6 +167,8 @@ struct imguiControls_t
 	float				toneMapColor[ 4 ];
 	float				exposureMidGray;
 	float				exposureAdaptation;
+	float				exposureWhitePoint;
+	float				exposureDarkLimit;
 	float				dofFocalDepth;
 	float				dofFocalRange;
 	bool				dofEnable;

@@ -43,26 +43,27 @@ const float weights[ weightCount ] = { 0.227027f, 0.1945946f, 0.1216216f, 0.0540
 void main()
 {
     const bool horizontal = ( pass == 0 ) ? true : false;
+    const uint texId = ( pass == 0 ) ? 0 : previousImageId;
     
-    const float lodBias = -16.0f;
+    const float lod = 0.0f;
 
     vec2 offset = dimensions.zw;
-    outColor = vec4( texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb * weights[ 0 ], 1.0f );
+    outColor = vec4( textureLod( codeSamplers[ 0 ], fragTexCoord.xy, lod ).rgb * weights[ 0 ], 1.0f );
 
     if ( horizontal )
     {
         for ( uint i = 1; i < weightCount; ++i )
         {
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( offset.x * i, 0.0 ), lodBias ).rgb * weights[ i ];
-            outColor.rgb += texture( codeSamplers[ 0 ], fragTexCoord.xy - vec2( offset.x * i, 0.0 ), lodBias ).rgb * weights[ i ];
+            outColor.rgb += textureLod( codeSamplers[ texId ], fragTexCoord.xy + vec2( offset.x * i, 0.0 ), lod ).rgb * weights[ i ];
+            outColor.rgb += textureLod( codeSamplers[ texId ], fragTexCoord.xy - vec2( offset.x * i, 0.0 ), lod ).rgb * weights[ i ];
         }
     }
     else
     {
         for ( uint i = 1; i < weightCount; ++i )
         {
-            outColor.rgb += texture( codeSamplers[ previousImageId ], fragTexCoord.xy + vec2( 0.0, offset.y * i ), lodBias ).rgb * weights[ i ];
-            outColor.rgb += texture( codeSamplers[ previousImageId ], fragTexCoord.xy - vec2( 0.0, offset.y * i ), lodBias ).rgb * weights[ i ];
+            outColor.rgb += textureLod( codeSamplers[ texId ], fragTexCoord.xy + vec2( 0.0, offset.y * i ), lod ).rgb * weights[ i ];
+            outColor.rgb += textureLod( codeSamplers[ texId ], fragTexCoord.xy - vec2( 0.0, offset.y * i ), lod ).rgb * weights[ i ];
         }
     }
     outColor.a = 1.0f;
