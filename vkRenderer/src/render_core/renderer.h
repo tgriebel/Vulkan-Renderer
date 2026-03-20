@@ -65,6 +65,7 @@ struct renderConfig_t
 	bool			computeDiffuseIbl;
 	bool			computeSpecularIBL;
 	bool			downsampleScene;
+	bool			bloom;
 	bool			autoExposure;
 	bool			screenshot;
 	bool			gaussianBlur;
@@ -172,6 +173,8 @@ public:
 	ImageView				stencilResolvedImageView;
 	Image*					shadowMapImage[ MaxShadowViews ];
 	Image*					mainColorResolvedImage;
+	Image*					bloomDownsample;
+	Image*					bloomUpsample;
 	Image*					blurredImage;
 	Image*					tempColorImage;
 	Image*					previousLum;
@@ -198,6 +201,8 @@ public:
 		}
 		mainColorResolvedImage = NextImage();
 		blurredImage = NextImage();
+		bloomDownsample = NextImage();
+		bloomUpsample = NextImage();
 		tempColorImage = NextImage();
 		previousLum = NextImage();
 		currentLum = NextImage();

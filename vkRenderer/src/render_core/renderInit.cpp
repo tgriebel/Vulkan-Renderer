@@ -405,6 +405,28 @@ void Renderer::Init( const renderConfig_t& cfg )
 		mipTask = new ImageProcessTask( info );
 	}
 
+	ImageProcessTask* bloomDownsampleTask = nullptr;
+	ImageProcessTask* bloomUpsampleTask = nullptr;
+	if ( config.bloom )
+	{
+		imageProcessCreateInfo_t info{};
+		info.name = "BloomDownsample";
+		info.context = &renderContext;
+		info.resources = &resources;
+		info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
+		info.outputImage = resources.bloomDownsample;
+		info.progressiveSampling = true;
+		info.progName = "BloomDownsample";
+
+		bloomDownsampleTask = new ImageProcessTask( info );
+
+		info.name = "BloomUpsample";
+		info.outputImage = resources.bloomUpsample;
+		info.progName = "BloomUpsample";
+
+		bloomUpsampleTask = new ImageProcessTask( info );
+	}
+
 	ImageProcessTask* mipCubeTask = nullptr;
 	if ( config.useCubeViews )
 	{
@@ -541,6 +563,11 @@ void Renderer::Init( const renderConfig_t& cfg )
 		schedule.Link( copyPreviousLuminance );
 		schedule.Link( luminanceSceneAvg );
 	//	schedule.Link( luminanceFrameAvg );
+	}
+	if( config.bloom )
+	{
+		schedule.Link( bloomDownsampleTask );
+		schedule.Link( bloomUpsampleTask );
 	}
 	if ( config.downsampleScene )
 	{
@@ -1171,6 +1198,41 @@ void Renderer::CreateFramebuffers()
 	{
 		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, resourceLifeTime_t::RESIZE );
 		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, resourceLifeTime_t::RESIZE );
+	}
+
+	// Bloom
+	{
+		uint32_t bloomWidth, bloomHeight;
+		MipDimensions( 1, width, height, &bloomWidth, &bloomHeight );
+
+		imageInfo_t info{};
+		info.width = bloomWidth;
+		info.height = bloomHeight;
+		info.mipLevels = MipCount( bloomWidth, bloomHeight );
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RGBA_16;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		resources.bloomDownsample->Create(
+			info,
+			nullptr,
+			new GpuImage( "bloomDownsample", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+		resources.bloomDownsample->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+
+		info.width = width;
+		info.height = height;
+		info.mipLevels = MipCount( width, height );
+
+		resources.bloomUpsample->Create(
+			info,
+			nullptr,
+			new GpuImage( "bloomUpsample", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+		);
+		resources.bloomUpsample->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Temp image

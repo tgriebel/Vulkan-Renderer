@@ -11,6 +11,12 @@ from datetime import datetime
 # The compiler, however, works on individual files so this parses the json, redupes individual files, and builds a compile command
 # Claude assisted writing this so there might be some weirdness, but looks reasonable. I don't write enough python to tell
 
+# Usage:
+
+# python build_shaders.py scenes/          # full build from directory
+# python build_shaders.py scene.json       # full build from single json
+# python build_shaders.py scene.json resolve.frag   # single shader compile
+
 
 # Config
 GLSLANG    = r"C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe"
@@ -43,6 +49,7 @@ class ShaderRecord:
     output : str
     macros : tuple = field( default_factory=tuple )
 
+
 # Combines all json shaders from all scenes.
 # This way scenes can include specialized shaders and still have them compiled
 def load_all_shaders( directory: Path ) -> dict:
@@ -58,11 +65,13 @@ def load_all_shaders( directory: Path ) -> dict:
                 print( f"WARNING: Failed to parse {json_file.name}: {e}" )
     return { "shaders": all_shaders }
     
+
 def strip_shader_ext( name: str ) -> str:
     for ext in ( ".vert", ".frag", ".comp" ):
         if name.endswith( ext ):
             return name[ :-len( ext ) ]
     return name
+
 
 # Produce single file records for each shader type
 def parse_shaders( data ) -> list[ ShaderRecord ]:
@@ -110,13 +119,29 @@ def deduplicate( records: list[ ShaderRecord ] ) -> list[ ShaderRecord ]:
             seen.add( record )
             result.append( record )
     return result
-
+    
 
 def build_command( record: ShaderRecord ) -> list[ str ]:
     cmd = [ GLSLANG, "-l", "-V", record.source, "-o", record.output, "-g" ]
     for macro in record.macros:
         cmd += [ "--define-macro", macro ]
     return cmd
+
+
+def compile_single_shader_source( source: str, log ) -> bool:
+    path = Path( source )
+    ext  = path.suffix.lstrip( "." )
+    stem = path.stem
+
+    type_suffix = TYPE_SUFFIX.get( ext, "" )
+    output      = f"{OUT_DIR}{stem}{type_suffix}.spv"
+
+    record = ShaderRecord(
+        source = SHADER_DIR + source,
+        output = output,
+        macros = (),
+    )
+    return compile_record( record, log )
 
 
 def compile_record( record: ShaderRecord, log ) -> bool:
@@ -147,29 +172,38 @@ def main():
     os.chdir( Path( __file__ ).parent )
 
     if len( sys.argv ) < 2:
-        print( "Usage: python build_shaders.py <shader_json>" )
+        print( "Usage: python build_shaders.py <shader_json_or_directory_or_shader_file>" )
         sys.exit( 1 )
-        
+
     path = Path( sys.argv[ 1 ] )
 
-    if path.is_dir():
-        data = load_all_shaders( path )
-    elif path.is_file():
-        with open( path, "r" ) as f:
-            data = json.load( f )
-    else:
-        print( f"ERROR: '{path}' is not a valid file or directory" )
-        sys.exit( 1 )
-    
-    records = parse_shaders( data )
-    records = deduplicate( records )
 
     with open( LOG_FILE, "w" ) as log:
         log.write( f"Shader build {datetime.now()}\n" )
         log.write( "================================\n\n" )
+        
+        # Single shader mode - detected by file extension
+        if path.suffix in ( ".vert", ".frag", ".comp" ):
+            success = compile_single_shader_source( str( path.name ), log )
+            summary = "\nAll shaders compiled successfully." if success else "\nBuild failed with 1 error(s)."
+            print( summary )
+            log.write( summary + "\n" )
+            sys.exit( 0 if success else 1 )
 
-        errors = sum( 1 for r in records if not compile_record( r, log ) )
+        # Full build mode
+        if path.is_dir():
+            data = load_all_shaders( path )
+        elif path.is_file():
+            with open( path, "r" ) as f:
+                data = json.load( f )
+        else:
+            print( f"ERROR: '{path}' is not a valid file or directory" )
+            sys.exit( 1 )
 
+        records = parse_shaders( data )
+        records = deduplicate( records )
+
+        errors  = sum( 1 for r in records if not compile_record( r, log ) )
         summary = f"\nBuild failed with {errors} error(s)." if errors else "\nAll shaders compiled successfully."
         print( summary )
         log.write( summary + "\n" )

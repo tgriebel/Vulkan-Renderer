@@ -41,27 +41,37 @@ PS_LAYOUT_IMAGE_PROCESS( sampler2D, ImageShaderTask )
 
 void main()
 {
-	// X: Destination pixel in output MIP
-	// s*: Samples from input MIP
-	//
-	// +-------- +-------- +
-	// |         |         |
-	// |   s0    |   s1    |
-	// |         |         |
-	// +---------X---------+
-	// |         |         |
-	// |   s2    |   s3    |
-	// |         |         |
-	// +---------+---------+
+    // Source: https://learnopengl.com/Guest-Articles/2022/Phys.-Based-Bloom
 
-    const vec2 halfTexel = dimensions.zw * 0.5f; // zw is the reciprocal inverse of the dimensions
+    // The filter kernel is applied with a radius, specified in texture
+    // coordinates, so that the radius will vary across mip resolutions.
+    float x = 0.1f;
+    float y = 0.1f;
 
-    vec3 result = texture( codeSamplers[ 0 ], fragTexCoord.xy ).rgb * 4.0f;
-    result += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( -halfTexel.x, halfTexel.y ) ).rgb;
-    result += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( halfTexel.x, halfTexel.y ) ).rgb;
-    result += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( -halfTexel.x, -halfTexel.y ) ).rgb;
-    result += texture( codeSamplers[ 0 ], fragTexCoord.xy + vec2( halfTexel.x, -halfTexel.y ) ).rgb;
-    result /= 8.0f;
+    // Take 9 samples around current texel:
+    // a - b - c
+    // d - e - f
+    // g - h - i
+    // === ('e' is the current texel) ===
+    vec3 a = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x - x, fragTexCoord.y + y ) ).rgb;
+    vec3 b = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x,     fragTexCoord.y + y ) ).rgb;
+    vec3 c = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x + x, fragTexCoord.y + y ) ).rgb;
 
-    outColor = vec4( result, 1.0f );
+    vec3 d = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x - x, fragTexCoord.y ) ).rgb;
+    vec3 e = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x,     fragTexCoord.y ) ).rgb;
+    vec3 f = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x + x, fragTexCoord.y ) ).rgb;
+
+    vec3 g = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x - x, fragTexCoord.y - y ) ).rgb;
+    vec3 h = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x,     fragTexCoord.y - y ) ).rgb;
+    vec3 i = texture( codeSamplers[ 0 ], vec2( fragTexCoord.x + x, fragTexCoord.y - y ) ).rgb;
+
+    // Apply weighted distribution, by using a 3x3 tent filter:
+    //  1   | 1 2 1 |
+    // -- * | 2 4 2 |
+    // 16   | 1 2 1 |
+    outColor.rgb = e * 4.0;
+    outColor.rgb += ( b + d + f + h ) * 2.0;
+    outColor.rgb += ( a + c + g + i );
+    outColor.rgb *= 1.0 / 16.0;
+    outColor.a = 1.0f;
 }
