@@ -6,15 +6,20 @@
 
 class CVar
 {
-private:
-
+public:
 	enum class Type : uint8_t
 	{
 		BOOL,
 		INT,
+		FLOAT,
 		STRING,
-	} type;
+	};
 
+	static constexpr uint32_t MaxStringLength = 64;
+
+private:
+
+	Type type;
 	std::string name;
 	bool valid;
 
@@ -22,13 +27,19 @@ private:
 	{
 		union {
 			bool		asBool;
-			int			asInt;
-			char		asStr[ 32 ];
+			int32_t		asInt;
+			float		asFloat;
+			char		asStr[ MaxStringLength ];
 		};
 	} value;
 
+	void Init( const char* _name, CVar::Type _type );
+
 public:
-	CVar( const char* _name, const char* _type );
+	CVar( const char* _name, CVar::Type _type, bool value );
+	CVar( const char* _name, CVar::Type _type, int32_t value );
+	CVar( const char* _name, CVar::Type _type, float value );
+	CVar( const char* _name, CVar::Type _type, const char* value );
 
 	inline bool IsBool() const
 	{
@@ -38,6 +49,11 @@ public:
 	inline bool IsInt() const
 	{
 		return type == CVar::Type::INT;
+	}
+
+	inline bool IsFloat() const
+	{
+		return type == CVar::Type::FLOAT;
 	}
 
 	inline bool IsString() const
@@ -60,6 +76,12 @@ public:
 	{
 		assert( type == Type::INT );
 		return value.asInt;
+	}
+
+	float GetFloat() const
+	{
+		assert( type == Type::FLOAT );
+		return value.asFloat;
 	}
 
 	const char* GetString() const
@@ -93,6 +115,16 @@ public:
 		}
 	}
 
+	void Set( const float number )
+	{
+		assert( type == Type::FLOAT );
+		if ( type == Type::FLOAT )
+		{
+			valid = true;
+			value.asFloat = number;
+		}
+	}
+
 	void Set( const char* string )
 	{
 		assert( type == Type::STRING );
@@ -107,4 +139,4 @@ public:
 	static bool ParseCommand( const std::string& command );
 	static CVar* Search( const std::string& searchStr );
 };
-#define MakeCVar(Type, Name) CVar Name = CVar( #Name, #Type );
+#define MakeCVar(TypeName, Name, Value) CVar Name = CVar( #Name, CVar::Type::##TypeName, Value );

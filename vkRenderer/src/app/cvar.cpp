@@ -2,7 +2,7 @@
 
 static std::vector<CVar*> cvarMap;
 
-CVar::CVar( const char* _name, const char* _type )
+void CVar::Init( const char* _name, CVar::Type _type )
 {
 	struct typePair_t
 	{
@@ -10,26 +10,45 @@ CVar::CVar( const char* _name, const char* _type )
 		Type		type;
 	};
 
-	typePair_t types[ 3 ] =
-	{
-		{ "bool",	Type::BOOL },
-		{ "int",	Type::INT },
-		{ "char*",	Type::STRING },
-	};
+	type = _type;
 
-	for ( size_t i = 0; i < 3; ++i )
-	{
-		if ( Equals( std::string( _type ), types[ i ].typeName ) )
-		{
-			type = types[ i ].type;
-			break;
-		}
-	}
 	memset( (void*)&value, 0, sizeof( value ) );
 
 	valid = false;
 	name = ToLower( _name );
 	cvarMap.push_back( this );
+}
+
+
+CVar::CVar( const char* _name, CVar::Type _type, bool _value )
+{
+	Init( _name, _type );
+
+	Set( _value );
+}
+
+
+CVar::CVar( const char* _name, CVar::Type _type, int32_t _value )
+{
+	Init( _name, _type );
+
+	Set( _value );
+}
+
+
+CVar::CVar( const char* _name, CVar::Type _type, const float _value )
+{
+	Init( _name, _type );
+
+	Set( _value );
+}
+
+
+CVar::CVar( const char* _name, CVar::Type _type, const char* _value )
+{
+	Init( _name, _type );
+
+	Set( _value );
 }
 
 
@@ -50,7 +69,6 @@ bool CVar::ParseCommand( const std::string& command )
 
 	std::string cmdStr = command;
 	Trim( cmdStr );
-	ToLower( cmdStr );
 
 	// Flags
 	if ( HasPrefix( cmdStr, "-"s ) )
@@ -60,38 +78,54 @@ bool CVar::ParseCommand( const std::string& command )
 			return false;
 		}
 		v->Set( true );
+
+		return true;
 	}
+
 	// Everything else
+	const size_t offset = cmdStr.find( "=" );
+	if ( offset == std::string::npos || offset == 0 ) {
+		return false;
+	}
+
+	std::string varName = cmdStr.substr( 0, offset );
+	ToLower( cmdStr );
+
+	CVar* v = CVar::Search( varName );
+	if ( v == nullptr ) {
+		return false;
+	}
+
+	// Value is case-sensitive
+	std::string arg = cmdStr.substr( offset + 1 );
+	Trim( arg );
+
+	if ( arg.empty() ) {
+		return false;
+	}
+
+	if ( v->IsBool() )
+	{
+		v->Set( arg == "1" || arg == "true" );
+	}
+	else if ( v->IsInt() )
+	{
+		v->Set( std::stoi( arg ) );
+	}
+	else if ( v->IsFloat() )
+	{
+		v->Set( std::stof( arg ) );
+	}
+	else if ( v->IsString() )
+	{
+		if ( arg.size() >= CVar::MaxStringLength ) {
+			return false;
+		}
+		v->Set( arg.c_str() );
+	}
 	else
 	{
-		const size_t offset = cmdStr.find( "=" );
-		if ( offset == 0 ) {
-			return false;
-		}
-
-		CVar* v = CVar::Search( cmdStr.substr( 0, offset ) );
-		if ( v == nullptr ) {
-			return false;
-		}
-		if ( v->IsBool() )
-		{
-			std::string arg = cmdStr.substr( offset + 1 );
-			if ( arg == "1" || arg == "true" ) {
-				v->Set( true );
-			}
-			else {
-				v->Set( false );
-			}
-		}
-		else if ( v->IsInt() ) {
-			v->Set( std::stoi( cmdStr.substr( offset + 1 ) ) );
-		}
-		else if ( v->IsString() ) {
-			v->Set( cmdStr.substr( offset + 1 ).c_str() );
-		}
-		else {
-			return false;
-		}
+		return false;
 	}
 	return true;
 }

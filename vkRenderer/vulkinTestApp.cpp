@@ -92,20 +92,20 @@ void BakeAssets()
 	baker.Bake();
 }
 
-MakeCVar( bool,		r_cubeCapture );
-MakeCVar( bool,		r_writeCubeCapture );
-MakeCVar( bool,		r_computeDiffuseIbl );
-MakeCVar( bool,		r_computeSpecularIbl );
-MakeCVar( bool,		r_computeBrdfLut );
-MakeCVar( char*,	c_scene );
-MakeCVar( char*,	r_cubemapName );
-MakeCVar( bool,		c_bakeAssets );
-MakeCVar( bool,		c_loadBakedAssets );
-MakeCVar( bool,		r_shadows );
-MakeCVar( bool,		r_downsampleScene );
-MakeCVar( bool,		r_autoExposure );
-MakeCVar( bool,		r_screenshot );
-MakeCVar( bool,		r_gaussianBlur );
+MakeCVar( BOOL,		r_cubeCapture, false );
+MakeCVar( BOOL,		r_writeCubeCapture, false );
+MakeCVar( BOOL,		r_computeDiffuseIbl, false );
+MakeCVar( BOOL,		r_computeSpecularIbl, false );
+MakeCVar( BOOL,		r_computeBrdfLut, false );
+MakeCVar( STRING,	c_scene, "chess.json" );
+MakeCVar( STRING,	r_cubemapName, "chess" );
+MakeCVar( BOOL,		c_bakeAssets, false );
+MakeCVar( BOOL,		c_loadBakedAssets, true );
+MakeCVar( BOOL,		r_shadows, true );
+MakeCVar( BOOL,		r_downsampleScene, true );
+MakeCVar( BOOL,		r_autoExposure, true );
+MakeCVar( BOOL,		r_screenshot, true );
+MakeCVar( BOOL,		r_gaussianBlur, true );
  
 void ParseCmdArgs( const int argc, char* argv[] )
 {
