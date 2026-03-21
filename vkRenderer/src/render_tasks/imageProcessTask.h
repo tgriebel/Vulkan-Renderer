@@ -11,7 +11,7 @@ struct imageProcessCreateInfo_t
 {
 	const char*			name;
 	Image*				outputImage;									// Final output images from the process
-	Image*				sampleImages[ MaxImageProcessSampleImages ];	// Images available to all shaders within the process
+	Image*				resourceImages[ MaxImageProcessSampleImages ];	// Images available to all shaders within the process
 	const char*			progName;										// Shader used by process
 	RenderContext*		context;
 	ResourceContext*	resources;
@@ -51,8 +51,8 @@ private:
 	uint32_t					m_baseMip;
 	uint32_t					m_requestedMipCount;
 	uint32_t					m_taskImageCount;
-	uint32_t					m_sample2dCount;
-	uint32_t					m_sampleCubeCount;
+	uint32_t					m_resource2dCount;
+	uint32_t					m_resourceCubeCount;
 	bool						m_multiPass;
 	bool						m_cubeMip;
 	bool						m_progressiveSampling;					// Chain output to inputs until finished

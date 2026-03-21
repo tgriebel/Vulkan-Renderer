@@ -18,7 +18,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 {
 	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );
 
-	assert( ( info.taskImageCount == 0 ) || ( info.taskImageCount == 1 ) );
+	assert( ( info.taskImageCount == 0 ) || ( info.taskImageCount == 1 ) ); // >1 is fine, but not implemented (mostly due to testing)
 
 	m_dbgName = info.name;
 	m_image = info.outputImage;
@@ -65,24 +65,24 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	// Images that are attached for sampling at all levels
 	for ( uint32_t imageIx = 0; imageIx < MaxImageProcessSampleImages; ++imageIx )
 	{
-		if( info.sampleImages[ imageIx ] == nullptr ) {
+		if( info.resourceImages[ imageIx ] == nullptr ) {
 			continue;
 		}
 
-		if( info.sampleImages[ imageIx ]->info.type == IMAGE_TYPE_2D )
+		if( info.resourceImages[ imageIx ]->info.type == IMAGE_TYPE_2D )
 		{
-			m_resourceImages2d[ m_sample2dCount ] = info.sampleImages[ imageIx ];
-			++m_sample2dCount;
+			m_resourceImages2d[ m_resource2dCount ] = info.resourceImages[ imageIx ];
+			++m_resource2dCount;
 		}
 
-		if ( info.sampleImages[ imageIx ]->info.type == IMAGE_TYPE_CUBE )
+		if ( info.resourceImages[ imageIx ]->info.type == IMAGE_TYPE_CUBE )
 		{
-			m_resourceCubeImages[ m_sampleCubeCount ] = info.sampleImages[ imageIx ];
-			++m_sampleCubeCount;
+			m_resourceCubeImages[ m_resourceCubeCount ] = info.resourceImages[ imageIx ];
+			++m_resourceCubeCount;
 		}
 	}
 
-	assert( m_progressiveSampling || ( m_sample2dCount > 0 ) || ( m_sampleCubeCount > 0 ) ); // Need some source for pixels to downsample
+	assert( m_progressiveSampling || ( m_resource2dCount > 0 ) || ( m_resourceCubeCount > 0 ) ); // Need some source for pixels to downsample
 
 	// Finished because shader resources aren't needed
 	if( m_useApi ) {
@@ -154,8 +154,8 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 	imgProcessInfo.context = m_context;
 	imgProcessInfo.resources = m_resources;
 	imgProcessInfo.passCount = m_multiPass ? 2 : 1;
-	imgProcessInfo.inputCubeImages = m_sampleCubeCount;
-	imgProcessInfo.inputImages = m_sample2dCount + 1; // Index zero always includes the sample source (even when redundant)
+	imgProcessInfo.inputCubeImages = m_resourceCubeCount;
+	imgProcessInfo.inputImages = m_resource2dCount + 1; // Index zero always includes the sample source (even when redundant)
 	imgProcessInfo.layer = remappedLayerId;
 	imgProcessInfo.outputImage = m_image;
 	imgProcessInfo.progHdl = m_progHdl;
@@ -202,7 +202,7 @@ void ImageProcessTask::FrameBegin()
 			{
 				shaderTask->SetSourceImage( 0, sourceImage );
 
-				for ( uint32_t imageIx = 0; imageIx < m_sample2dCount; ++imageIx ) {
+				for ( uint32_t imageIx = 0; imageIx < m_resource2dCount; ++imageIx ) {
 					shaderTask->SetSourceImage( imageIx + 1, m_resourceImages2d[ imageIx ] );
 				}
 			}

@@ -204,7 +204,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 			imageProcessCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
 			info.progName = "DiffuseIBL";
-			info.sampleImages[ 0 ] = resources.cubeFbColorImage;
+			info.resourceImages[ 0 ] = resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.baseMip = 0;
@@ -254,7 +254,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			imageProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
-			info.sampleImages[ 0 ] = resources.cubeFbColorImage;
+			info.resourceImages[ 0 ] = resources.cubeFbColorImage;
 			info.context = &renderContext;
 			info.resources = &resources;
 			info.progName = "preCalculatedSpecularIbl";
@@ -332,7 +332,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 		info.outputImage = resources.blurredImage;
 		info.progName = "SeparableGaussianBlur";
-		info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
+		info.resourceImages[ 0 ] = resources.mainColorResolvedImage;
 		info.baseMip = 0;
 
 		gaussianTask = new ImageProcessTask( info );
@@ -379,8 +379,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 			info.name = "LuminanceDownsample";
 			info.context = &renderContext;
 			info.resources = &resources;
-			info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
-			info.sampleImages[ 1 ] = resources.previousLum;
+			info.resourceImages[ 0 ] = resources.mainColorResolvedImage;
+			info.resourceImages[ 1 ] = resources.previousLum;
 			info.outputImage = resources.currentLum;
 			info.mipCount = resources.currentLum->info.mipLevels;
 			info.progressiveSampling = true;
@@ -413,7 +413,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "BloomDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
+		info.resourceImages[ 0 ] = resources.mainColorResolvedImage;
 		info.outputImage = resources.bloomDownsample;
 		info.mipCount = 4;
 		info.progressiveSampling = true;
@@ -425,7 +425,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.outputImage = resources.bloomUpsample;
 		info.upsampleProcess = true;
 		info.seedFromFirstResourceImageLastMIP = true;
-		info.sampleImages[ 0 ] = resources.bloomDownsample;
+		info.resourceImages[ 0 ] = resources.bloomDownsample;
 		info.progName = "BloomUpsample";
 
 		bloomUpsampleTask = new ImageProcessTask( info );
