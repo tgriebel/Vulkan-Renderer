@@ -77,6 +77,7 @@ void main()
     const uint textureId1 = material.textureId1;
     const uint textureId2 = material.textureId2;
     const uint textureId3 = material.textureId3;
+    const uint textureId4 = material.textureId4;
 
 	const mat4 viewMat = view.viewMat;
 	const vec3 forward = -normalize( vec3( viewMat[ 0 ][ 2 ], viewMat[ 1 ][ 2 ], viewMat[ 2 ][ 2 ] ) );
@@ -118,7 +119,10 @@ void main()
 	const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
 	const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 
-	const vec3 exposureAdjustedColor = hdrColor * exposure * tint;
+	const vec3 bloom = textureLod( codeSamplers[ textureId4 ], fragTexCoord.xy, 0 ).rgb;
+	const vec3 bloomHdr = mix( hdrColor, bloom, 0.004f );
+
+	const vec3 exposureAdjustedColor = bloomHdr * exposure * tint;
 
 	sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 

@@ -45,8 +45,9 @@ void main()
 
     // The filter kernel is applied with a radius, specified in texture
     // coordinates, so that the radius will vary across mip resolutions.
-    float x = 0.1f;
-    float y = 0.1f;
+    float filterRadius = 0.005f;
+    float x = filterRadius;
+    float y = filterRadius;
 
     // Take 9 samples around current texel:
     // a - b - c

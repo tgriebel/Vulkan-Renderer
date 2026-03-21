@@ -16,7 +16,7 @@ void PostPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 	codeImages.SetRenderContext( renderContext );
 	codeCubeImages.SetRenderContext( renderContext );
 
-	codeImages.Resize( 4 );
+	codeImages.Resize( 5 );
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -28,6 +28,7 @@ void PostPass::FrameBegin( const ResourceContext* resources )
 	codeImages.BindIndex( 1, resources->depthStencilResolvedImage );
 	codeImages.BindIndex( 2, resources->blurredImage );
 	codeImages.BindIndex( 3, resources->currentLum );
+	codeImages.BindIndex( 4, resources->bloomUpsample );
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );
