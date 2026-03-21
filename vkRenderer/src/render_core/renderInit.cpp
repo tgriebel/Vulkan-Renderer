@@ -415,6 +415,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 		info.sampleImages[ 0 ] = resources.mainColorResolvedImage;
 		info.outputImage = resources.bloomDownsample;
+		info.mipCount = 4;
 		info.progressiveSampling = true;
 		info.progName = "BloomDownsample";
 
@@ -422,6 +423,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		info.name = "BloomUpsample";
 		info.outputImage = resources.bloomUpsample;
+		info.upsampleProcess = true;
+		info.seedFromFirstResourceImageLastMIP = true;
+		info.sampleImages[ 0 ] = resources.bloomDownsample;
 		info.progName = "BloomUpsample";
 
 		bloomUpsampleTask = new ImageProcessTask( info );

@@ -41,92 +41,105 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 
 	m_context->scratchMemory.AdjustOffset( 0, 0 );
 
-	m_requestedMipCount = info.mipCount;
 	m_cubeMip = ( m_image->info.type == IMAGE_TYPE_CUBE );
-	m_mipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : Min( m_requestedMipCount, m_image->info.mipLevels );
 	m_layers = m_cubeMip ? 6 : 1;
 
-	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
+	m_requestedMipCount = info.mipCount;
 	m_baseMip = info.baseMip;
+	m_mipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : m_requestedMipCount;
+	// Clamp [1, mipLevels]
+	m_mipLevels = Clamp( m_mipLevels - m_baseMip, m_baseMip + 1, m_image->info.mipLevels );
+
+	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
 	m_multiPass = info.multiPass;
 	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
 	m_progressiveSampling = info.progressiveSampling;
+	m_processLowToHigh = info.upsampleProcess;
+	m_seedFromFirstResourceImageLastMIP = info.seedFromFirstResourceImageLastMIP;
 
+	// With progressive sampling, the image processes chains MIP views from the same image resource
+	// Input and output images are *technically* the same, but views resolve this conflict
+	// Since the views refer to subresources
+	const bool createViewForFirstSampleImage = m_progressiveSampling;
+
+	// Images that are attached for sampling at all levels
 	for ( uint32_t imageIx = 0; imageIx < MaxImageProcessSampleImages; ++imageIx )
 	{
 		if( info.sampleImages[ imageIx ] == nullptr ) {
 			continue;
 		}
 
-		if( info.sampleImages[ m_sample2dCount ]->info.type == IMAGE_TYPE_2D )
+		if( info.sampleImages[ imageIx ]->info.type == IMAGE_TYPE_2D )
 		{
-			m_sample2dImages[ m_sample2dCount ] = info.sampleImages[ imageIx ];
+			m_resourceImages2d[ m_sample2dCount ] = info.sampleImages[ imageIx ];
 			++m_sample2dCount;
 		}
 
-		if ( info.sampleImages[ m_sampleCubeCount ]->info.type == IMAGE_TYPE_CUBE )
+		if ( info.sampleImages[ imageIx ]->info.type == IMAGE_TYPE_CUBE )
 		{
-			m_sampleCubeImages[ m_sampleCubeCount ] = info.sampleImages[ imageIx ];
+			m_resourceCubeImages[ m_sampleCubeCount ] = info.sampleImages[ imageIx ];
 			++m_sampleCubeCount;
 		}
 	}
 
 	assert( m_progressiveSampling || ( m_sample2dCount > 0 ) || ( m_sampleCubeCount > 0 ) ); // Need some source for pixels to downsample
 
-	if( m_useApi == false )
+	// Finished because shader resources aren't needed
+	if( m_useApi ) {
+		return;
+	}
+
+	// Set-up shader resources
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
-		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+		if( m_cubeMip )
 		{
-			if( m_cubeMip )
+			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
+			camera.SetFov( Radians( 90.0f ) );
+			camera.SetAspectRatio( 1.0f );
+
+			switch ( layerId )
 			{
-				Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-				camera.SetFov( Radians( 90.0f ) );
-				camera.SetAspectRatio( 1.0f );
-
-				switch ( layerId )
-				{
-				case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
-				case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
-				case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
-				case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
-				case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
-				case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
-				}
-
-				mat4x4f& viewMatrix = m_viewMatrices[ layerId ];
-
-				//for ( uint32_t j = 0; j < 4; ++j ) {
-				//	for ( uint32_t i = 0; i < 4; ++i ) {
-				//		viewMatrix[ j ][ i ] = i + j * 4;
-				//	}
-				//}
-
-				viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
-				viewMatrix[ 3 ][ 3 ] = 0.0f;
+			case IMAGE_CUBE_FACE_X_POS:	camera.Pan( 0.0f * PI );	break;
+			case IMAGE_CUBE_FACE_Y_POS:	camera.Pan( 0.5f * PI );	break;
+			case IMAGE_CUBE_FACE_X_NEG:	camera.Pan( 1.0f * PI );	break;
+			case IMAGE_CUBE_FACE_Y_NEG:	camera.Pan( 1.5f * PI );	break;
+			case IMAGE_CUBE_FACE_Z_POS:	camera.Tilt( -0.5f * PI );	break;
+			case IMAGE_CUBE_FACE_Z_NEG:	camera.Tilt( 0.5f * PI );	break;
 			}
 
-			const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
+			mat4x4f& viewMatrix = m_viewMatrices[ layerId ];
 
-			// If the sample and output images are the same, we need a view for the first image to start the process
-			if ( m_progressiveSampling )
-			{
-				imageSubResourceView_t view{};
-				view.baseArray = remappedLayerId;
-				view.arrayCount = 1;
-				view.baseMip = m_baseMip == 0 ? 0 : m_baseMip - 1;
-				view.mipLevels = 1;
+			viewMatrix = camera.GetViewMatrix().Transpose(); // FIXME: row/column-order
+			viewMatrix[ 3 ][ 3 ] = 0.0f;
+		}
 
-				imageInfo_t imageInfo = m_image->info;
-				imageInfo.type = IMAGE_TYPE_2D;
+		const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
 
-				m_baseViews[ layerId ].Init( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
-			}
+		// Need a unique view so input/output subresources don't overlap
+		if ( createViewForFirstSampleImage )
+		{
+			const uint32_t adjustedMipLevel = m_seedFromFirstResourceImageLastMIP ? ( m_mipLevels - m_baseMip - 1 ) : Max( 0, static_cast<int32_t>( m_baseMip ) - 1 );
 
-			// Image Process for writing each MIP
-			for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel )
-			{
-				m_imgProcesses[ layerId ][ mipLevel ] = CreateImageShaderTask( layerId, mipLevel );
-			}
+			const Image* seedImage = m_seedFromFirstResourceImageLastMIP ? m_resourceImages2d[ 0 ] : m_image;
+
+			imageSubResourceView_t sourceSubresource{};
+			sourceSubresource.baseArray = remappedLayerId;
+			sourceSubresource.arrayCount = 1;
+			sourceSubresource.baseMip = adjustedMipLevel;
+			sourceSubresource.mipLevels = 1;
+
+			imageInfo_t imageInfo = seedImage->info;
+			imageInfo.type = IMAGE_TYPE_2D;
+
+			m_baseViews[ layerId ].Init( seedImage, imageInfo, sourceSubresource, resourceLifeTime_t::RESIZE );
+		}
+
+		// Image Process for writing each MIP
+		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel )
+		{
+			const uint32_t adjustedMipLevel = m_processLowToHigh ? ( m_mipLevels - mipLevel - 1 ) : mipLevel;
+			m_imgProcesses[ layerId ][ mipLevel ] = CreateImageShaderTask( layerId, adjustedMipLevel );
 		}
 	}
 }
@@ -168,23 +181,29 @@ void ImageProcessTask::FrameBegin()
 	// Can lock to base view
 	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
-		Image* sourceImage = ( m_baseMip > 0 ) ? &m_baseViews[ layerId ] : m_sample2dImages[ 0 ];
+		Image* sourceImage = nullptr;
+		
+		if( ( m_baseMip > 0 ) || m_seedFromFirstResourceImageLastMIP ) {
+			sourceImage = &m_baseViews[ layerId ];
+		} else {
+			sourceImage = m_resourceImages2d[ 0 ];
+		}
 
 		// Chain mip level N as sample image for mip level N + 1
 		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel )
 		{
 			ImageShaderTask* shaderTask = m_imgProcesses[ layerId ][ mipLevel ];
 
-			if( m_sampleCubeImages[ 0 ] != nullptr )
+			if( m_resourceCubeImages[ 0 ] != nullptr )
 			{
-				shaderTask->SetSourceCubeImage( 0, m_sampleCubeImages[ 0 ] );
+				shaderTask->SetSourceCubeImage( 0, m_resourceCubeImages[ 0 ] );
 			}
 			else
 			{
 				shaderTask->SetSourceImage( 0, sourceImage );
 
 				for ( uint32_t imageIx = 0; imageIx < m_sample2dCount; ++imageIx ) {
-					shaderTask->SetSourceImage( imageIx + 1, m_sample2dImages[ imageIx ] );
+					shaderTask->SetSourceImage( imageIx + 1, m_resourceImages2d[ imageIx ] );
 				}
 			}
 
@@ -252,10 +271,6 @@ void ImageProcessTask::Resize()
 			m_baseViews[ layerId ].Resize();
 		}
 
-		if ( m_progressiveSampling ) {
-			m_baseViews[ layerId ].Resize();
-		}
-
 		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel ) {
 			m_imgProcesses[ layerId ][ mipLevel ]->Resize();
 		}
@@ -302,14 +317,14 @@ void ImageProcessTask::Execute( CommandContext& cmdContext )
 	}
 	else
 	{
-		static const char* faceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
+		static const char* debugFaceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
 
 		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 		{
 			const uint32_t writeLayer = m_imgProcesses[ layerId ][ m_baseMip ]->GetOutputImage()->subResourceView.baseArray;
 
 			if( m_cubeMip ) {
-				cmdContext.MarkerBeginRegion( faceNames[ writeLayer ], ColorToVector( ColorPurple ) );
+				cmdContext.MarkerBeginRegion( debugFaceNames[ writeLayer ], ColorToVector( ColorPurple ) );
 			}
 
 			uint32_t mipLevel = m_baseMip;

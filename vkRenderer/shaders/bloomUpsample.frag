@@ -69,9 +69,9 @@ void main()
     //  1   | 1 2 1 |
     // -- * | 2 4 2 |
     // 16   | 1 2 1 |
-    outColor.rgb = e * 4.0;
-    outColor.rgb += ( b + d + f + h ) * 2.0;
+    outColor.rgb = e * 4.0f;
+    outColor.rgb += ( b + d + f + h ) * 2.0f;
     outColor.rgb += ( a + c + g + i );
-    outColor.rgb *= 1.0 / 16.0;
+    outColor.rgb *= 1.0f / 16.0f;
     outColor.a = 1.0f;
 }

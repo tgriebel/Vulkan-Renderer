@@ -6,23 +6,26 @@
 
 static const uint32_t MaxImageProcessSampleImages = 3;
 
+// Used for chained multi-pass processes such as MIP generation and downsampling
 struct imageProcessCreateInfo_t
 {
 	const char*			name;
-	Image*				outputImage;
-	Image*				sampleImages[ MaxImageProcessSampleImages ];
-	const char*			progName;
+	Image*				outputImage;									// Final output images from the process
+	Image*				sampleImages[ MaxImageProcessSampleImages ];	// Images available to all shaders within the process
+	const char*			progName;										// Shader used by process
 	RenderContext*		context;
 	ResourceContext*	resources;
 
-	uint32_t			baseMip;
-	uint32_t			mipCount;
+	uint32_t			baseMip;										// Lowest MIP index to write to the output
+	uint32_t			mipCount;										// Number of MIPs to process from the base MIP. 0 ignores this parameters and processes all levels from baseMIP
 	uint32_t			taskImageCount;
 	imageInfo_t*		createInfos;
 
-	bool				useAPI;
+	bool				useAPI;											// Use the API for MIP generation
 	bool				multiPass;
 	bool				progressiveSampling;
+	bool				upsampleProcess;
+	bool				seedFromFirstResourceImageLastMIP;				// Hack to force the first pass to sample from the first sample image
 };
 
 
@@ -34,8 +37,8 @@ private:
 
 	hdl_t						m_progHdl;
 	Image*						m_image;
-	Image*						m_sample2dImages[ MaxImageProcessSampleImages ];
-	Image*						m_sampleCubeImages[ MaxImageProcessSampleImages ];
+	Image*						m_resourceImages2d[ MaxImageProcessSampleImages ];
+	Image*						m_resourceCubeImages[ MaxImageProcessSampleImages ];
 	std::string					m_dbgName;
 	RenderContext*				m_context;
 	ResourceContext*			m_resources;
@@ -52,7 +55,9 @@ private:
 	uint32_t					m_sampleCubeCount;
 	bool						m_multiPass;
 	bool						m_cubeMip;
-	bool						m_progressiveSampling;
+	bool						m_progressiveSampling;					// Chain output to inputs until finished
+	bool						m_processLowToHigh;						// Used for upscaling
+	bool						m_seedFromFirstResourceImageLastMIP;	// Hack until flow controls are cleaned up. Getting core functionality right first though
 	bool						m_useApi;
 
 	ImageShaderTask* CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel );
