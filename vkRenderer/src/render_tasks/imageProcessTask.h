@@ -10,6 +10,7 @@ static const uint32_t MaxImageProcessSampleImages = 3;
 struct imageProcessCreateInfo_t
 {
 	const char*			name;
+	Image*				sourceImage;									// Input image to start the process. Same as outputImage when null
 	Image*				outputImage;									// Final output images from the process
 	Image*				resourceImages[ MaxImageProcessSampleImages ];	// Images available to all shaders within the process
 	const char*			progName;										// Shader used by process
@@ -22,10 +23,9 @@ struct imageProcessCreateInfo_t
 	imageInfo_t*		createInfos;
 
 	bool				useAPI;											// Use the API for MIP generation
-	bool				multiPass;
-	bool				progressiveSampling;
-	bool				upsampleProcess;
-	bool				seedFromFirstResourceImageLastMIP;				// Hack to force the first pass to sample from the first sample image
+	bool				multiPass;										// Runs sequential shader passes (e.g. Separable Gaussian Blur)
+	bool				progressiveSampling;							// Chains output to input (e.g. any MIP chain generation)
+	bool				upsampleProcess;								// Process from lower res MIP to higher
 };
 
 
@@ -55,9 +55,9 @@ private:
 	uint32_t					m_resourceCubeCount;
 	bool						m_multiPass;
 	bool						m_cubeMip;
+	bool						m_useResource;
 	bool						m_progressiveSampling;					// Chain output to inputs until finished
-	bool						m_processLowToHigh;						// Used for upscaling
-	bool						m_seedFromFirstResourceImageLastMIP;	// Hack until flow controls are cleaned up. Getting core functionality right first though
+	bool						m_upsampleProcess;						// Used for upscaling
 	bool						m_useApi;
 
 	ImageShaderTask* CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel );

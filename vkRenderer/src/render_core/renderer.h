@@ -173,8 +173,7 @@ public:
 	ImageView				stencilResolvedImageView;
 	Image*					shadowMapImage[ MaxShadowViews ];
 	Image*					mainColorResolvedImage;
-	Image*					bloomDownsample;
-	Image*					bloomUpsample;
+	Image*					bloom;
 	Image*					blurredImage;
 	Image*					tempColorImage;
 	Image*					previousLum;
@@ -201,8 +200,7 @@ public:
 		}
 		mainColorResolvedImage = NextImage();
 		blurredImage = NextImage();
-		bloomDownsample = NextImage();
-		bloomUpsample = NextImage();
+		bloom = NextImage();
 		tempColorImage = NextImage();
 		previousLum = NextImage();
 		currentLum = NextImage();

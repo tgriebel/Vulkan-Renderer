@@ -28,7 +28,7 @@ void PostPass::FrameBegin( const ResourceContext* resources )
 	codeImages.BindIndex( 1, resources->depthStencilResolvedImage );
 	codeImages.BindIndex( 2, resources->blurredImage );
 	codeImages.BindIndex( 3, resources->currentLum );
-	codeImages.BindIndex( 4, resources->bloomUpsample );
+	codeImages.BindIndex( 4, resources->bloom );
 
 	parms->Bind( bind_lightBuffer, &resources->lightParms );
 	parms->Bind( bind_imageCodeArray, &codeImages );

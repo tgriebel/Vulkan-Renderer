@@ -45,22 +45,15 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_layers = m_cubeMip ? 6 : 1;
 
 	m_requestedMipCount = info.mipCount;
-	m_baseMip = info.baseMip;
-	m_mipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : m_requestedMipCount;
-	// Clamp [1, mipLevels]
-	m_mipLevels = Clamp( m_mipLevels - m_baseMip, m_baseMip + 1, m_image->info.mipLevels );
+	m_baseMip = info.baseMip; // TODO: Need to adjust when `m_baseMip` is 0 but the source is also 0 and same image
+	m_mipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : ( m_baseMip + m_requestedMipCount );
+	m_mipLevels = Clamp( m_mipLevels, m_baseMip + 1, m_image->info.mipLevels ); // Clamp [1, mipLevels]
 
 	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
 	m_multiPass = info.multiPass;
 	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
 	m_progressiveSampling = info.progressiveSampling;
-	m_processLowToHigh = info.upsampleProcess;
-	m_seedFromFirstResourceImageLastMIP = info.seedFromFirstResourceImageLastMIP;
-
-	// With progressive sampling, the image processes chains MIP views from the same image resource
-	// Input and output images are *technically* the same, but views resolve this conflict
-	// Since the views refer to subresources
-	const bool createViewForFirstSampleImage = m_progressiveSampling;
+	m_upsampleProcess = info.upsampleProcess;
 
 	// Images that are attached for sampling at all levels
 	for ( uint32_t imageIx = 0; imageIx < MaxImageProcessSampleImages; ++imageIx )
@@ -82,7 +75,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 		}
 	}
 
-	assert( m_progressiveSampling || ( m_resource2dCount > 0 ) || ( m_resourceCubeCount > 0 ) ); // Need some source for pixels to downsample
+	assert( m_progressiveSampling || ( info.sourceImage > 0 ) || ( m_resource2dCount > 0 ) || ( m_resourceCubeCount > 0 ) ); // Need some source for pixels to downsample
 
 	// Finished because shader resources aren't needed
 	if( m_useApi ) {
@@ -116,29 +109,28 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 
 		const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
 
-		// Need a unique view so input/output subresources don't overlap
-		if ( createViewForFirstSampleImage )
+		// Need a unique view to ensure input/output subresources don't overlap.
 		{
-			const uint32_t adjustedMipLevel = m_seedFromFirstResourceImageLastMIP ? ( m_mipLevels - m_baseMip - 1 ) : Max( 0, static_cast<int32_t>( m_baseMip ) - 1 );
+			const uint32_t firstSampledMip = m_upsampleProcess ? ( m_mipLevels - m_baseMip ) : Max( 0, static_cast<int32_t>( m_baseMip ) - 1 );
 
-			const Image* seedImage = m_seedFromFirstResourceImageLastMIP ? m_resourceImages2d[ 0 ] : m_image;
+			const Image* sourceImage = ( info.sourceImage != nullptr ) ? info.sourceImage : m_image;
 
 			imageSubResourceView_t sourceSubresource{};
 			sourceSubresource.baseArray = remappedLayerId;
 			sourceSubresource.arrayCount = 1;
-			sourceSubresource.baseMip = adjustedMipLevel;
+			sourceSubresource.baseMip = firstSampledMip;
 			sourceSubresource.mipLevels = 1;
 
-			imageInfo_t imageInfo = seedImage->info;
+			imageInfo_t imageInfo = sourceImage->info;
 			imageInfo.type = IMAGE_TYPE_2D;
 
-			m_baseViews[ layerId ].Init( seedImage, imageInfo, sourceSubresource, resourceLifeTime_t::RESIZE );
+			m_baseViews[ layerId ].Init( sourceImage, imageInfo, sourceSubresource, resourceLifeTime_t::RESIZE );
 		}
 
 		// Image Process for writing each MIP
 		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel )
 		{
-			const uint32_t adjustedMipLevel = m_processLowToHigh ? ( m_mipLevels - mipLevel - 1 ) : mipLevel;
+			const uint32_t adjustedMipLevel = m_upsampleProcess ? ( m_mipLevels - mipLevel - 1 ) : mipLevel;
 			m_imgProcesses[ layerId ][ mipLevel ] = CreateImageShaderTask( layerId, adjustedMipLevel );
 		}
 	}
@@ -183,7 +175,8 @@ void ImageProcessTask::FrameBegin()
 	{
 		Image* sourceImage = nullptr;
 		
-		if( ( m_baseMip > 0 ) || m_seedFromFirstResourceImageLastMIP ) {
+		// FIXME: cleanup
+		if( ( m_baseMip > 0 ) || m_upsampleProcess ) {
 			sourceImage = &m_baseViews[ layerId ];
 		} else {
 			sourceImage = m_resourceImages2d[ 0 ];
@@ -236,7 +229,7 @@ void ImageProcessTask::FrameEnd()
 void ImageProcessTask::Resize()
 {
 	const uint32_t newMipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : Min( m_requestedMipCount, m_image->info.mipLevels );
-	if ( m_useApi == false )
+	if ( m_useApi )
 	{
 		m_mipLevels = newMipLevels;
 		return;
@@ -314,27 +307,26 @@ void ImageProcessTask::Execute( CommandContext& cmdContext )
 	{
 		Transition( &cmdContext, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
 		GenerateMipmaps( &cmdContext, *m_image );
+		return;
 	}
-	else
-	{
-		static const char* debugFaceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
 
-		for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+	{
+		const bool useMarker = m_cubeMip;
+		if( useMarker )
 		{
+			static const char* debugFaceNames[ 6 ] = { "X+", "X-", "Y+", "Y-", "Z+", "Z-" };
 			const uint32_t writeLayer = m_imgProcesses[ layerId ][ m_baseMip ]->GetOutputImage()->subResourceView.baseArray;
 
-			if( m_cubeMip ) {
-				cmdContext.MarkerBeginRegion( debugFaceNames[ writeLayer ], ColorToVector( ColorPurple ) );
-			}
+			cmdContext.MarkerBeginRegion( debugFaceNames[ writeLayer ], ColorToVector( ColorPurple ) );
+		}
+		
+		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel ) {
+			m_imgProcesses[ layerId ][ mipLevel ]->Execute( cmdContext );
+		}
 
-			uint32_t mipLevel = m_baseMip;
-			for ( ; mipLevel < m_mipLevels; ++mipLevel ) {
-				m_imgProcesses[ layerId ][ mipLevel ]->Execute( cmdContext );
-			}
-
-			if ( m_cubeMip ) {
-				cmdContext.MarkerEndRegion();
-			}
+		if ( useMarker ) {
+			cmdContext.MarkerEndRegion();
 		}
 	}
 

@@ -413,8 +413,9 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "BloomDownsample";
 		info.context = &renderContext;
 		info.resources = &resources;
-		info.resourceImages[ 0 ] = resources.mainColorResolvedImage;
-		info.outputImage = resources.bloomDownsample;
+		info.sourceImage = resources.mainColorResolvedImage;
+		info.outputImage = resources.bloom;
+		info.baseMip = 1;
 		info.mipCount = 4;
 		info.progressiveSampling = true;
 		info.progName = "BloomDownsample";
@@ -422,10 +423,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 		bloomDownsampleTask = new ImageProcessTask( info );
 
 		info.name = "BloomUpsample";
-		info.outputImage = resources.bloomUpsample;
+		info.sourceImage = resources.bloom;
+		info.outputImage = resources.bloom; // Overwrite the previous downsampled values with upsampled ones
+		info.baseMip = 0;
 		info.upsampleProcess = true;
-		info.seedFromFirstResourceImageLastMIP = true;
-		info.resourceImages[ 0 ] = resources.bloomDownsample;
 		info.progName = "BloomUpsample";
 
 		bloomUpsampleTask = new ImageProcessTask( info );
@@ -1206,13 +1207,10 @@ void Renderer::CreateFramebuffers()
 
 	// Bloom
 	{
-		uint32_t bloomWidth, bloomHeight;
-		MipDimensions( 1, width, height, &bloomWidth, &bloomHeight );
-
 		imageInfo_t info{};
-		info.width = bloomWidth;
-		info.height = bloomHeight;
-		info.mipLevels = MipCount( bloomWidth, bloomHeight );
+		info.width = width;
+		info.height = height;
+		info.mipLevels = MipCount( width, height );
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_RGBA_16;
@@ -1220,23 +1218,12 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.bloomDownsample->Create(
+		resources.bloom->Create(
 			info,
 			nullptr,
-			new GpuImage( "bloomDownsample", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "bloom", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
 		);
-		resources.bloomDownsample->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-
-		info.width = width;
-		info.height = height;
-		info.mipLevels = MipCount( width, height );
-
-		resources.bloomUpsample->Create(
-			info,
-			nullptr,
-			new GpuImage( "bloomUpsample", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
-		);
-		resources.bloomUpsample->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
+		resources.bloom->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Temp image
