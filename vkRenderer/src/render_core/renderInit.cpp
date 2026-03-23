@@ -165,7 +165,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 
 		info.fbImages.name = "BackBufferFB";
-		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
+		info.fbImages.lifetime = resourceLifeTime_t::RESIZE;
 		info.fbImages.swapBuffering = swapBuffering_t::MULTI_FRAME;
 		info.fbImages.color0 = g_swapChain.GetBackBuffer();
 
@@ -584,7 +584,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	schedule.Link( new RenderTask( view2Ds[0], DRAWPASS_2D, DRAWPASS_2D ) );
 	schedule.Link( new ImguiTask( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], &renderContext, &resources, false ) );
-	schedule.Link( new RenderTask( view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) );
+	schedule.Link( new RenderTask( view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) ); // FIXME: Causes framebuffer resize issue due to multiple calls to Resize()
 	schedule.Link( new ComputeTask( "ClearParticles", &particleState ) );
 
 	schedule.AsString();
