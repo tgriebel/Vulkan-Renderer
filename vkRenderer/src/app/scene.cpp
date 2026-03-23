@@ -343,13 +343,13 @@ void UpdateScene( Scene* scene )
 			scene->mainCamera->Tilt( 0.5f * PI );
 		}
 		if ( g_window.input.IsKeyPressed( KEY_ADD ) ) {
-			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ) );
+			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ), g_window.GetWindowFrameBufferAspect() );
 		}
 		if ( g_window.input.IsKeyPressed( KEY_SUB ) ) {
-			scene->mainCamera->SetFov( scene->mainCamera->GetFov() - Radians( 0.1f ) );
+			scene->mainCamera->SetFov( scene->mainCamera->GetFov() - Radians( 0.1f ), g_window.GetWindowFrameBufferAspect() );
 		}
 	}
-	scene->mainCamera->SetAspectRatio( g_window.GetWindowFrameBufferAspect() );
+	scene->mainCamera->SetFov( scene->mainCamera->GetFov(), g_window.GetWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( mouse.centered )

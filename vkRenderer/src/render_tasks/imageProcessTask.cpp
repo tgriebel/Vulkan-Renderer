@@ -88,8 +88,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 		if( m_cubeMip )
 		{
 			Camera camera = Camera( vec4f( 0.0f, 0.0f, 0.0f, 0.0f ) );
-			camera.SetFov( Radians( 90.0f ) );
-			camera.SetAspectRatio( 1.0f );
+			camera.SetFov( Radians( 90.0f ), 1.0f );
 
 			switch ( layerId )
 			{

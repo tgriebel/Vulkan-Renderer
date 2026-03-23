@@ -490,8 +490,7 @@ void Renderer::CommitLight( const light_t& light )
 			Camera shadowCam;
 			shadowCam = Camera( light.pos, MatrixFromVector( light.dir.xyz.Reverse() ) );
 			shadowCam.SetClip( 0.1f, 1000.0f );
-			shadowCam.SetFov( Radians( 90.0f ) );
-			shadowCam.SetAspectRatio( ( ShadowMapWidth / (float)ShadowMapHeight ) );
+			shadowCam.SetFov( Radians( 90.0f ), ( ShadowMapWidth / (float)ShadowMapHeight ) );
 
 			shadowViews[ shadowCount ]->SetCamera( shadowCam, false );
 		}
