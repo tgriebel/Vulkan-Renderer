@@ -170,15 +170,15 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h" />
-    <ClInclude Include="external\imgui\backends\imgui_impl_vulkan.h" />
-    <ClInclude Include="external\imgui\imconfig.h" />
-    <ClInclude Include="external\imgui\imgui.h" />
-    <ClInclude Include="external\imgui\imgui_internal.h" />
-    <ClInclude Include="external\imgui\imstb_rectpack.h" />
-    <ClInclude Include="external\imgui\imstb_textedit.h" />
-    <ClInclude Include="external\imgui\imstb_truetype.h" />
-    <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h" />
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\external\imgui\imconfig.h" />
+    <ClInclude Include="..\external\imgui\imgui.h" />
+    <ClInclude Include="..\external\imgui\imgui_internal.h" />
+    <ClInclude Include="..\external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\external\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\external\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\external\tinyfiledialogs\tinyfiledialogs.h" />
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="scenes\nesScene.h" />
     <ClInclude Include="scenes\sceneParser.h" />
@@ -238,14 +238,14 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="external\imgui\backends\imgui_impl_glfw.cpp" />
-    <ClCompile Include="external\imgui\backends\imgui_impl_vulkan.cpp" />
-    <ClCompile Include="external\imgui\imgui.cpp" />
-    <ClCompile Include="external\imgui\imgui_demo.cpp" />
-    <ClCompile Include="external\imgui\imgui_draw.cpp" />
-    <ClCompile Include="external\imgui\imgui_tables.cpp" />
-    <ClCompile Include="external\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c" />
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\external\imgui\imgui.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\external\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />

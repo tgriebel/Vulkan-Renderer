@@ -17,7 +17,9 @@ public:
 	}
 
 	GLFWwindow*				window;
+#ifdef USE_VULKAN
 	VkSurfaceKHR			vk_surface;
+#endif
 	Input					input;
 	void					Init();
 	void					BeginFrame();

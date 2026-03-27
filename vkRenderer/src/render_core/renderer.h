@@ -40,7 +40,9 @@ class Window;
 class SwapChain;
 class Scene;
 
+#ifdef USE_VULKAN
 using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
+#endif
 using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 using bindSetMap_t = std::unordered_map<uint64_t, ShaderBindSet>;
 
@@ -304,7 +306,9 @@ private:
 	// Update/Upload
 	void								BeginUploadCommands( UploadContext& uploadContext );
 	void								EndUploadCommands( UploadContext& uploadContext );
+#ifdef USE_VULKAN
 	void								CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
+#endif
 
 	void								UploadAssets();
 	void								UpdateTextureData( CommandContext* cmdCommand );

@@ -7,8 +7,8 @@
 #include "../globals/render_util.h"
 
 #if defined( USE_IMGUI )
-#include "../../external/imgui/imgui_internal.h"
-#include "../../external/imgui/imgui.h"
+#include "../../../external/imgui/imgui_internal.h"
+#include "../../../external/imgui/imgui.h"
 #endif
 
 #include "../render_core/debugMenu.h"

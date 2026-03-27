@@ -13,9 +13,9 @@ renderDebugData_t g_renderDebugData;
 #include "../globals/render_util.h"
 
 #if defined( USE_IMGUI )
-#include "../../external/imgui/imgui.h"
-#include "../../external/imgui/backends/imgui_impl_glfw.h"
-#include "../../external/imgui/backends/imgui_impl_vulkan.h"
+#include "../../../external/imgui/imgui.h"
+#include "../../../external/imgui/backends/imgui_impl_glfw.h"
+#include "../../../external/imgui/backends/imgui_impl_vulkan.h"
 
 #include "debugMenu.h"
 

@@ -8,28 +8,28 @@
     <ClCompile Include="scenes\chessScene.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\imgui.cpp">
+    <ClCompile Include="..\external\imgui\imgui.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\imgui_demo.cpp">
+    <ClCompile Include="..\external\imgui\imgui_demo.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\imgui_draw.cpp">
+    <ClCompile Include="..\external\imgui\imgui_draw.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\imgui_tables.cpp">
+    <ClCompile Include="..\external\imgui\imgui_tables.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\imgui_widgets.cpp">
+    <ClCompile Include="..\external\imgui\imgui_widgets.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\backends\imgui_impl_glfw.cpp">
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_glfw.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\imgui\backends\imgui_impl_vulkan.cpp">
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_vulkan.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="external\tinyfiledialogs\tinyfiledialogs.c">
+    <ClCompile Include="..\external\tinyfiledialogs\tinyfiledialogs.c">
       <Filter>external\tinyfiledialogs</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\renderCommand.cpp">
@@ -188,31 +188,31 @@
     <ClInclude Include="scenes\sceneParser.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\imconfig.h">
+    <ClInclude Include="..\external\imgui\imconfig.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\imgui.h">
+    <ClInclude Include="..\external\imgui\imgui.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\imgui_internal.h">
+    <ClInclude Include="..\external\imgui\imgui_internal.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\imstb_rectpack.h">
+    <ClInclude Include="..\external\imgui\imstb_rectpack.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\imstb_textedit.h">
+    <ClInclude Include="..\external\imgui\imstb_textedit.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\imstb_truetype.h">
+    <ClInclude Include="..\external\imgui\imstb_truetype.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\backends\imgui_impl_glfw.h">
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_glfw.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\imgui\backends\imgui_impl_vulkan.h">
+    <ClInclude Include="..\external\imgui\backends\imgui_impl_vulkan.h">
       <Filter>external\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="external\tinyfiledialogs\tinyfiledialogs.h">
+    <ClInclude Include="..\external\tinyfiledialogs\tinyfiledialogs.h">
       <Filter>external\tinyfiledialogs</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\renderer.h">

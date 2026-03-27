@@ -64,8 +64,10 @@ public:
 	uint64_t		GetBaseOffset() const;
 	uint64_t		GetElementSize() const;
 	uint64_t		GetElementSizeAligned() const;
+#ifdef USE_VULKAN
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
+#endif
 	void			Create( const bufferCreateInfo_t info );
 	void			Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
 	void			Destroy();
@@ -82,7 +84,9 @@ protected:
 	struct buffer_t
 	{
 		Allocation			alloc;
+#ifdef USE_VULKAN
 		VkBuffer			buffer;
+#endif
 		uint64_t			baseOffset;
 		uint64_t			offset;
 	};

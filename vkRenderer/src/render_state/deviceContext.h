@@ -29,12 +29,14 @@ class Window;
 class ImageView;
 class FrameBuffer;
 
+#ifdef USE_VULKAN
 struct swapChainInfo_t
 {
 	VkSurfaceCapabilitiesKHR		capabilities;
 	std::vector<VkSurfaceFormatKHR>	formats;
 	std::vector<VkPresentModeKHR>	presentModes;
 };
+#endif
 
 
 struct copyImageParms_t
@@ -96,6 +98,7 @@ public:
 
 extern DeviceContext context;
 
+#ifdef USE_VULKAN
 #define VK_CHECK_RESULT( f )																			\
 {																										\
 	VkResult res = (f);																					\
@@ -105,6 +108,7 @@ extern DeviceContext context;
 		assert(res == VK_SUCCESS);																		\
 	}																									\
 }
+#endif
 
 struct imageInfo_t;
 struct imageSubResourceView_t;
@@ -115,6 +119,7 @@ class DrawPass;
 
 enum imageSamples_t : uint8_t;
 
+#ifdef USE_VULKAN
 bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
 bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
 QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
@@ -139,3 +144,4 @@ std::string			vk_BuildObjectName( const char* typeName, const char* baseName, in
 void				vk_SetObjectName( const uint64_t handle, VkObjectType objectType, const char* name );
 void				vk_MarkerSetObjectTag( uint64_t object, VkDebugReportObjectTypeEXT objectType, uint64_t name, size_t tagSize, const void* tag );
 void				vk_MarkerSetObjectName( uint64_t object, VkDebugReportObjectTypeEXT objectType, const char* name );
+#endif

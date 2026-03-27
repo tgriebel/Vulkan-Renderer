@@ -3,7 +3,7 @@
 #include "../render_binding/bindings.h"
 
 #if defined( USE_IMGUI )
-#include "../../external/imgui/imgui.h"
+#include "../../../external/imgui/imgui.h"
 #endif
 
 #include "../app/window.h"

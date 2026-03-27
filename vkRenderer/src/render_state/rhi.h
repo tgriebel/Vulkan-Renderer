@@ -56,12 +56,17 @@ static_assert( sizeof( renderPassTransition_t ) == 1, "Bits overflowed" );
 static const uint32_t PassPermBits = 6;
 static const uint32_t PassPermCount = ( 1 << PassPermBits );
 
+#ifdef USE_VULKAN
 static const uint32_t VkPassBitsSize = 16;
+#endif
 
+#ifdef USE_VULKAN
 struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
 void vk_ClearRenderPassCache();
+#endif
 
+#ifdef USE_VULKAN
 struct vk_formatTableEntry_t
 {
 	imageFmt_t	imgFmt;
@@ -247,3 +252,4 @@ static VkShaderStageFlagBits vk_GetStageFlags( const bindStateFlag_t flags )
 	}
 	return VkShaderStageFlagBits( vkFlags );
 }
+#endif // USE_VULKAN

@@ -1,11 +1,11 @@
 #include "window.h"
 #include "../render_state/deviceContext.h"
 
-#include "../../external/tinyfiledialogs/tinyfiledialogs.h"
+#include "../../../external/tinyfiledialogs/tinyfiledialogs.h"
 
 #if defined( USE_IMGUI )
-#include "../../external/imgui/imgui.h"
-#include "../../external/imgui/backends/imgui_impl_glfw.h"
+#include "../../../external/imgui/imgui.h"
+#include "../../../external/imgui/backends/imgui_impl_glfw.h"
 #endif
 
 #define KEY_MAP( k ) { GLFW_KEY_##k, KEY_##k }

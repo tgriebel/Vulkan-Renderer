@@ -69,8 +69,10 @@ class ShaderBindSet;
 struct pipelineObject_t
 {
 	pipelineState_t		state;
+#ifdef USE_VULKAN
 	VkPipeline			pipeline;
 	VkPipelineLayout	pipelineLayout;
+#endif
 	const char*			vsName;
 	const char*			psName;
 	const char*			csName;
@@ -90,7 +92,9 @@ void	ClearPipelineCache();
 void	DestroyPipelineCache();
 bool	GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset );
+#ifdef USE_VULKAN
 void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
+#endif
 hdl_t	CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& prog );
 void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
 void	CreateComputePipeline( const Asset<GpuProgram>& prog );

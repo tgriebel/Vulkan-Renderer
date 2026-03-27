@@ -60,7 +60,7 @@
 #include <gfxcore/io/io.h>
 
 #if defined( USE_IMGUI )
-#include "../../external/imgui/backends/imgui_impl_vulkan.h"
+#include "../../../external/imgui/backends/imgui_impl_vulkan.h"
 #endif
 
 extern Scene* g_scene;

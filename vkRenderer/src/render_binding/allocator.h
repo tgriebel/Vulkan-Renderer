@@ -89,6 +89,7 @@ public:
 		Unbind();
 	}
 
+#ifdef USE_VULKAN
 	AllocatorMemory( VkDeviceMemory& _memory, const uint64_t _size, const uint32_t _type )
 	{
 		m_offset = 0;
@@ -100,11 +101,14 @@ public:
 		vk_memoryTypeIndex = 0;
 		m_memoryRegion = memoryRegion_t::UNKNOWN;
 	}
+#endif
 
 	void					Create( const uint32_t sizeBytes, const memoryRegion_t region, const resourceLifeTime_t lifetime );
 	void					Destroy();
 
+#ifdef USE_VULKAN
 	void					Bind( VkDeviceMemory& _memory, void* memMap, const uint64_t _size, const uint32_t _type );
+#endif
 	void					Unbind();
 	bool					IsMemoryCompatible( const uint32_t memoryType ) const;
 	void*					GetMemoryMapPtr( const allocRecord_t& record ) const;

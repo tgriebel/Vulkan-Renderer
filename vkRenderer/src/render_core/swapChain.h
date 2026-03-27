@@ -31,7 +31,9 @@
 #include "../render_core/gpuImage.h"
 #include "../render_state/frameBuffer.h"
 
+#ifdef USE_VULKAN
 QueueFamilyIndices FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
+#endif
 
 class SwapChain
 {
@@ -49,7 +51,9 @@ private:
 
 public:
 
+#ifdef USE_VULKAN
 	static swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface );
+#endif
 
 	inline imageFmt_t GetBackBufferFormat() const
 	{
