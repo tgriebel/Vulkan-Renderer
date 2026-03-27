@@ -93,6 +93,7 @@ private:
 	int32_t					m_viewBufferId;
 	int32_t					m_surfaceBufferId;
 	uint64_t				m_lastUpdateFrame = ~0u;
+	uint64_t				m_lastResizeFrame = ~0u;
 	bool					m_committed;
 	bool					m_isCubeView;
 	bool					m_clearImage;
@@ -197,6 +198,7 @@ public:
 
 	const void				Commit();
 	bool					IsCommitted() const;
+	bool					NeedsResize() const;
 
 	void					AttachDebugMenu( const debugMenuFuncPtr funcPtr );
 

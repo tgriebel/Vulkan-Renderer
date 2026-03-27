@@ -2,6 +2,7 @@
 #include "frameBuffer.h"
 #include "deviceContext.h"
 #include "rhi.h"
+#include "../render_core/renderer.h"
 #include "../render_core/swapChain.h"
 
 extern SwapChain g_swapChain;
@@ -258,6 +259,12 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		RenderResource::Create( resourceType_t::FRAMEBUFFER, createInfo.lifetime );
 	}
 
+	assert( createInfo.context != nullptr );
+
+	if ( createInfo.context == nullptr ) {
+		throw std::runtime_error( "Framebuffer missing render context." );
+	}
+
 	m_createInfo = createInfo;
 
 	if ( m_bufferCount > 0 ) {
@@ -475,11 +482,25 @@ void FrameBuffer::Destroy()
 	m_bufferCount = 0;
 }
 
+
+bool FrameBuffer::NeedsResize() const
+{
+	return ( m_createInfo.context == nullptr ) || ( m_createInfo.context->FrameNumber() != m_lastResizeFrame );
+}
+
+
 void FrameBuffer::Resize()
 {
-	if( m_createInfo.lifetime == resourceLifeTime_t::RESIZE )
-	{
-		Destroy();
-		Create( m_createInfo );
+	if( m_createInfo.lifetime != resourceLifeTime_t::RESIZE ) { // What if backing images are marked as resize?
+		return;
 	}
+
+	if( NeedsResize() == false ) {
+		return;
+	}
+
+	Destroy();
+	Create( m_createInfo );
+
+	m_lastResizeFrame = m_createInfo.context->FrameNumber();
 }

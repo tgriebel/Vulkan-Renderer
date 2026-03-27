@@ -255,12 +255,13 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 		frameBufferCreateInfo_t fbInfo {};
 		fbInfo.name = info.name;
 		fbInfo.swapBuffering = info.swapBuffering;
+		fbInfo.context = m_context;
 		fbInfo.color0 = m_colorViews[ multiViewIndex ];
 		fbInfo.color1 = m_gBuffer0Views[ multiViewIndex ];
 		fbInfo.color2 = m_gBuffer1Views[ multiViewIndex ];
 		fbInfo.depth = m_depthViews[ multiViewIndex ];
 		fbInfo.stencil = m_stencilViews[ multiViewIndex ];
-			
+		
 		m_framebuffers[ multiViewIndex ]->Create( fbInfo );
 	}
 }
@@ -306,8 +307,18 @@ void RenderView::FrameEnd( const drawPass_t begin, const drawPass_t end )
 }
 
 
+bool RenderView::NeedsResize() const
+{
+	return ( m_context == nullptr ) || ( m_context->FrameNumber() != m_lastResizeFrame );
+}
+
+
 void RenderView::Resize()
 {
+	if( NeedsResize() == false ) {
+		return;
+	}
+
 	CreateFrameBuffers( m_fbSourceImages );
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
@@ -323,6 +334,8 @@ void RenderView::Resize()
 		}
 	}
 	SetViewRect( 0, 0, m_framebuffers[ 0 ]->GetWidth(), m_framebuffers[ 0 ]->GetHeight() );
+
+	m_lastResizeFrame = m_context->FrameNumber();
 }
 
 

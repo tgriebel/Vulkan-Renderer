@@ -73,6 +73,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.isCubeView = ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_CUBE );
 
 		info.fbImages.name = "ShadowFB";
+		info.fbImages.context = &renderContext;
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.depth = resources.shadowMapImage[ i ];
@@ -102,6 +103,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 
 		info.fbImages.name = "MainFB";
+		info.fbImages.context = &renderContext;
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.color0 = resources.mainColorImage;
@@ -135,6 +137,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 		info.isCubeView = true;
 		info.fbImages.name = "CubeFB";
+		info.fbImages.context = &renderContext;
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.color0 = resources.cubeFbColorImage;
@@ -165,6 +168,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.resources = &resources;
 
 		info.fbImages.name = "BackBufferFB";
+		info.fbImages.context = &renderContext;
 		info.fbImages.lifetime = resourceLifeTime_t::RESIZE;
 		info.fbImages.swapBuffering = swapBuffering_t::MULTI_FRAME;
 		info.fbImages.color0 = g_swapChain.GetBackBuffer();
@@ -1050,6 +1054,10 @@ void Renderer::CreateFramebuffers()
 
 	resources.RegisterOutputImages();
 
+	// TODO: Force all FrameBuffers to be resize for now
+	// TODO: Need new function or have resize callback/function that adjusts dimentions if marked as RESIZE
+	const resourceLifeTime_t lifeTime = resourceLifeTime_t::RESIZE;
+
 	// Shadow images
 	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
@@ -1067,7 +1075,7 @@ void Renderer::CreateFramebuffers()
 		resources.shadowMapImage[ shadowIx ]->Create(
 			info,
 			nullptr,
-			new GpuImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -1087,13 +1095,13 @@ void Renderer::CreateFramebuffers()
 		resources.mainColorImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 		
 		resources.gBufferLayerImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
@@ -1103,7 +1111,7 @@ void Renderer::CreateFramebuffers()
 		resources.depthStencilImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -1123,7 +1131,7 @@ void Renderer::CreateFramebuffers()
 		resources.cubeFbColorImage->Create(
 			colorInfo,
 			nullptr,
-			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 
 		resources.cubeFbColorImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
@@ -1136,7 +1144,7 @@ void Renderer::CreateFramebuffers()
 		resources.cubeFbDepthImage->Create(
 			depthInfo,
 			nullptr,
-			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -1156,14 +1164,14 @@ void Renderer::CreateFramebuffers()
 		resources.mainColorResolvedImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 		resources.mainColorResolvedImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 
 		resources.blurredImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 		resources.blurredImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
@@ -1172,11 +1180,11 @@ void Renderer::CreateFramebuffers()
 	{
 		imageInfo_t depthInfo = resources.depthStencilImage->info;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		resources.depthImageView.Init( resources.depthStencilImage, depthInfo, resourceLifeTime_t::RESIZE );
+		resources.depthImageView.Init( resources.depthStencilImage, depthInfo, lifeTime );
 
 		imageInfo_t stencilInfo = resources.depthStencilImage->info;
 		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, resourceLifeTime_t::RESIZE );
+		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, lifeTime );
 	}
 
 	// Resolve depth-stencil image
@@ -1195,14 +1203,14 @@ void Renderer::CreateFramebuffers()
 		resources.depthStencilResolvedImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
 	// Depth-stencil views
 	{
-		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, resourceLifeTime_t::RESIZE );
-		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, resourceLifeTime_t::RESIZE );
+		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, lifeTime );
+		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, lifeTime );
 	}
 
 	// Bloom
@@ -1221,7 +1229,7 @@ void Renderer::CreateFramebuffers()
 		resources.bloom->Create(
 			info,
 			nullptr,
-			new GpuImage( "bloom", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "bloom", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 		resources.bloom->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
@@ -1242,7 +1250,7 @@ void Renderer::CreateFramebuffers()
 		resources.tempColorImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, resourceLifeTime_t::RESIZE )
+			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -1262,7 +1270,7 @@ void Renderer::CreateFramebuffers()
 		resources.previousLum->Create(
 			info,
 			nullptr,
-			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
+			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, lifeTime )
 		);
 		resources.previousLum->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
@@ -1283,7 +1291,7 @@ void Renderer::CreateFramebuffers()
 		resources.currentLum->Create(
 			info,
 			nullptr,
-			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, resourceLifeTime_t::REBOOT )
+			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 		resources.currentLum->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}

@@ -36,6 +36,7 @@ struct frameBufferCreateInfo_t
 {
 	swapBuffering_t		swapBuffering;
 	resourceLifeTime_t	lifetime;
+	RenderContext*		context;
 	const char*			name;
 	Image*				color0;
 	Image*				color1;
@@ -48,6 +49,8 @@ struct frameBufferCreateInfo_t
 		lifetime( resourceLifeTime_t::RESIZE )
 	{
 		name = "";
+
+		context = nullptr;
 
 		color0 = nullptr;
 		color1 = nullptr;
@@ -77,6 +80,7 @@ private:
 	uint32_t					m_dsCount;
 	uint32_t					m_attachmentCount;
 	uint32_t					m_bufferCount;
+	uint64_t					m_lastResizeFrame;
 	bool						m_isBackBuffer;
 
 	swapBuffering_t				m_swapBuffering;
@@ -204,6 +208,8 @@ public:
 		return vk_renderPasses[ transitionState.bits ];
 	}
 #endif
+
+	bool NeedsResize() const;
 
 	void Create( const frameBufferCreateInfo_t& createInfo );
 	void Destroy();

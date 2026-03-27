@@ -111,6 +111,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = m_dbgName.c_str();
+			fbInfo.context = m_context;
 			fbInfo.color0 = m_views[ passIndex ][ 0 ];
 			fbInfo.color1 = m_views[ passIndex ][ 1 ];
 			fbInfo.color2 = m_views[ passIndex ][ 2 ];
