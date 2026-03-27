@@ -1,11 +1,6 @@
-﻿  stdafx.cpp
-  imgui_impl_glfw.cpp
+﻿  imgui_impl_glfw.cpp
   imgui_impl_vulkan.cpp
   imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
   chessScene.cpp
   nesScene.cpp
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: 'APIENTRY': macro redefinition
@@ -21,12 +16,12 @@ C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\external\glfw\in
   emissivePass.cpp
   opaquePass.cpp
   postPass.cpp
-  Generating Code...
-  Compiling...
   shadowPass.cpp
   skyboxPass.cpp
   terrainPass.cpp
   transPass.cpp
+  Generating Code...
+  Compiling...
   wireframePass.cpp
   drawGroup.cpp
   render_util.cpp
@@ -43,12 +38,12 @@ C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\external\glfw\in
   debugMenu.cpp
   gpuImage.cpp
   GpuSync.cpp
-  Generating Code...
-  Compiling...
   renderCommand.cpp
   renderer.cpp
   renderInit.cpp
   renderResource.cpp
+  Generating Code...
+  Compiling...
   renderShutdown.cpp
   renderView.cpp
   swapChain.cpp
