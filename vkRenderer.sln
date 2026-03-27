@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GfxCore", "..\..\GfxCore\Gf
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Chess", "..\..\Chess\Chess\Chess.vcxproj", "{426689D7-93F3-4BED-B582-90F8713FE45D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SysCore", "..\..\SysCore\SysCore\SysCore.vcxproj", "{01728A43-DA97-4BC6-8EDF-F17CB75E7967}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SysCore", "external\SysCore\SysCore.vcxproj", "{01728A43-DA97-4BC6-8EDF-F17CB75E7967}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "..\..\Raytracer-Graphic-Pipeline-master\RayTracer.vcxproj", "{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}"
 EndProject

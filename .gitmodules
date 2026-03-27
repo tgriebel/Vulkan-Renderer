@@ -1,0 +1,3 @@
+[submodule "external/SysCore"]
+	path = external/SysCore
+	url = https://github.com/tgriebel/SysCore.git
