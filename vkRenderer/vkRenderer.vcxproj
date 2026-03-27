@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\;..\..\..\Chess\Chess;..\external;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\GfxCore;..\..\..\Chess\Chess;..\external;..\..\..\Raytracer-Graphic-Pipeline-master;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\..\..\GfxCore\;..\external;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\GfxCore;..\external;..\..\..\Chess\Chess;..\..\..\Raytracer-Graphic-Pipeline-master;..\..\..\nesEmu\wintendo\wintendoCore\include;$(IncludePath)</IncludePath>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup>
@@ -340,7 +340,7 @@
     <ProjectReference Include="..\..\..\Chess\Chess\Chess.vcxproj">
       <Project>{426689d7-93f3-4bed-b582-90f8713fe45d}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\GfxCore\GfxCore.vcxproj">
+    <ProjectReference Include="..\external\GfxCore\GfxCore.vcxproj">
       <Project>{3de9a00c-b04b-43ab-943d-1973c47dece3}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Raytracer-Graphic-Pipeline-master\RayTracer.vcxproj">

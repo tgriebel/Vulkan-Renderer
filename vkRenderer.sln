@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer", "vkRenderer\vkRenderer.vcxproj", "{8596C8E2-5174-4549-90DD-A8A7250C1CBC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GfxCore", "..\..\GfxCore\GfxCore.vcxproj", "{3DE9A00C-B04B-43AB-943D-1973C47DECE3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GfxCore", "external\GfxCore\GfxCore.vcxproj", "{3DE9A00C-B04B-43AB-943D-1973C47DECE3}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Chess", "..\..\Chess\Chess\Chess.vcxproj", "{426689D7-93F3-4BED-B582-90F8713FE45D}"
 EndProject
