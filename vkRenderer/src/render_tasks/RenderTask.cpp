@@ -186,6 +186,7 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 		rect.extent.width = viewport.width;
 		rect.extent.height = viewport.height;
 		vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
+		vkCmdSetLineWidth( cmdBuffer, 1.0f );
 
 		sortKey_t lastKey = {};
 		lastKey.materialId = INVALID_HDL.Get();

@@ -957,7 +957,6 @@ void vk_PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& cr
 	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT;
 	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
 	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-	messageFlags |= VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT;
 
 	createInfo.messageType = messageFlags;
 	createInfo.pfnUserCallback = vk_DebugCallback;
@@ -1141,6 +1140,8 @@ void DeviceContext::Create( Window& window )
 		deviceFeatures.fillModeNonSolid = VK_TRUE;
 		deviceFeatures.sampleRateShading = VK_TRUE;
 		deviceFeatures.pipelineStatisticsQuery = VK_TRUE;
+		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
+		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 		createInfo.pEnabledFeatures = &deviceFeatures;
 
 		std::vector<const char*> enabledExtensions;
