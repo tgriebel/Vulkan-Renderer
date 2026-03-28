@@ -193,7 +193,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	model.surfs.resize( model.surfCount );
 	CopyGeoBuilderResult( gb, model.surfs[ 0 ], model.bounds );
 
-	model.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( "SKY" );
+	model.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( "SKY" );
 
 	return true;
 }
@@ -249,7 +249,7 @@ bool WaterLoader::Load( Asset<Model>& modelAsset )
 	model.surfs.resize( model.surfCount );
 	CopyGeoBuilderResult( gb, model.surfs[ 0 ], model.bounds );
 
-	model.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( "WATER" );
+	model.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( "WATER" );
 
 	return true;
 }
@@ -284,7 +284,7 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
 	outModel.surfs[ 0 ].vertices[ 3 ].uv2 = vec2f( 0.0f, 0.0f );
 
-	outModel.surfs[ 0 ].materialHdl = AssetLibMaterials::Handle( materialName.c_str() );
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
 }
 
 

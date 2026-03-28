@@ -198,7 +198,7 @@ int ParseImageObject( parseState_t& st, void* object )
 		return 0;
 	}
 
-	AssetLibImages& textureLib = st.assets->textureLib;
+	AssetLib<Image>& textureLib = *st.assets->GetLib<Image>();
 
 	bool isLinear = false;
 	char name[TOKEN_LEN] = "";
@@ -317,7 +317,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 		if ( s[ mapIx ][0] == '\0' ) {
 			continue;
 		}
-		material->AddShader( drawPass_t( enumMap[ mapIx ].value ), AssetLibGpuProgram::Handle( s[ mapIx ] ) );
+		material->AddShader( drawPass_t( enumMap[ mapIx ].value ), AssetLib<GpuProgram>::Handle( s[ mapIx ] ) );
 	}
 	return 0;
 }
@@ -390,7 +390,7 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 		if ( s[ mapIx ][0] == '\0' ) {
 			continue;
 		}
-		material->AddTexture( enumMap[ mapIx ].value, AssetLibImages::Handle( s[ mapIx ] ) );
+		material->AddTexture( enumMap[ mapIx ].value, AssetLib<Image>::Handle( s[ mapIx ] ) );
 	}
 	return 0;
 }
@@ -432,12 +432,12 @@ int ParseModelObject( parseState_t& st, void* object )
 	ParseObject( st, objectMap, objectCount );
 
 	if ( strcmp( od.modelName, "_skybox" ) == 0 ) {
-		st.assets->modelLib.AddDeferred( od.name, loader_t( new SkyBoxLoader() ) );
+		st.assets->GetLib<Model>()->AddDeferred( od.name, loader_t( new SkyBoxLoader() ) );
 	}
 	else if ( strcmp( od.modelName, "_terrain" ) == 0 )
 	{
-		hdl_t handle = AssetLibMaterials::Handle( od.s[0] );
-		st.assets->modelLib.AddDeferred( od.name, loader_t( new TerrainLoader( od.i[0], od.i[1], od.f[0], od.f[1], handle ) ) );
+		hdl_t handle = AssetLib<Material>::Handle( od.s[0] );
+		st.assets->GetLib<Model>()->AddDeferred( od.name, loader_t( new TerrainLoader( od.i[0], od.i[1], od.f[0], od.f[1], handle ) ) );
 	}
 	else 
 	{
@@ -446,7 +446,7 @@ int ParseModelObject( parseState_t& st, void* object )
 		loader->SetTexturePath( TexturePath );
 		loader->SetModelName( od.modelName );
 		loader->SetAssetRef( st.assets );
-		st.assets->modelLib.AddDeferred( od.name, loader_t( loader ) );
+		st.assets->GetLib<Model>()->AddDeferred( od.name, loader_t( loader ) );
 	}
 	return st.tx;
 }
@@ -491,25 +491,25 @@ int ParseEntityObject( parseState_t& st, void* object )
 
 	Entity* ent = new Entity();
 	ent->name = name;
-	ent->modelHdl = AssetLibModels::Handle( modelName );
+	ent->modelHdl = AssetLib<Model>::Handle( modelName );
 	
 	if ( strcmp( modelName, "_skybox" ) == 0 ) {
-		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName, loader_t( new SkyBoxLoader() ) );
+		ent->modelHdl = st.assets->GetLib<Model>()->AddDeferred( modelName, loader_t( new SkyBoxLoader() ) );
 	}
-	else if( st.assets->modelLib.Find( ent->modelHdl ) == st.assets->modelLib.GetDefault() )
+	else if( st.assets->GetLib<Model>()->Find( ent->modelHdl ) == st.assets->GetLib<Model>()->GetDefault() )
 	{
 		ModelLoader* loader = new ModelLoader();
 		loader->SetModelPath( ModelPath );
 		loader->SetTexturePath( TexturePath );
 		loader->SetModelName( modelName );
 		loader->SetAssetRef( st.assets );
-		ent->modelHdl = st.assets->modelLib.AddDeferred( modelName, loader_t( loader ) );
+		ent->modelHdl = st.assets->GetLib<Model>()->AddDeferred( modelName, loader_t( loader ) );
 	}
 	ent->SetOrigin( vec3f( x, y, z ) );
 	ent->SetRotation( vec3f( rx, ry, rz ) );
 	ent->SetScale( vec3f( sx, sy, sz ) );
 	if ( strcmp( materialName, "" ) != 0 ) {
-		ent->materialHdl = AssetLibMaterials::Handle( materialName );
+		ent->materialHdl = AssetLib<Material>::Handle( materialName );
 	}
 	if ( hidden ) {
 		ent->SetFlag( ENT_FLAG_NO_DRAW );
@@ -529,7 +529,7 @@ int ParseMaterialObject( parseState_t& st, void* object )
 		return -1;
 	}
 
-	AssetLibMaterials* materials = reinterpret_cast<AssetLibMaterials*>( object );
+	AssetLib<Material>* materials = reinterpret_cast<AssetLib<Material>*>( object );
 
 	Material m;
 	materialParms_t mParms;
@@ -587,7 +587,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 	char bindSet[ TOKEN_LEN ] = "";
 	char perm[ TOKEN_LEN ] = "";
 	shaderFlags_t shaderFlags = shaderFlags_t::NONE;
-	AssetLibGpuProgram* shaders = reinterpret_cast<AssetLibGpuProgram*>( object );
+	AssetLib<GpuProgram>* shaders = reinterpret_cast<AssetLib<GpuProgram>*>( object );
 
 	const uint32_t objectCount = 9;
 	const objectTuple_t objectMap[ objectCount ] =
@@ -755,10 +755,10 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 		{ "envMap", &envMap, &ParseStringObject },
 		{ "diffuseIblMap", &diffuseIblMap, &ParseStringObject },
 		{ "specIblMap", &specIblMap, &ParseStringObject },
-		{ "shaders", &st.assets->gpuPrograms, &ParseShaderObject },
-		{ "images", &st.assets->textureLib, &ParseImageObject },
-		{ "materials", &st.assets->materialLib, &ParseMaterialObject },
-		{ "models", &st.assets->modelLib, &ParseModelObject },
+		{ "shaders", st.assets->GetLib<GpuProgram>(), &ParseShaderObject },
+		{ "images", st.assets->GetLib<Image>(), &ParseImageObject },
+		{ "materials", st.assets->GetLib<Material>(), &ParseMaterialObject },
+		{ "models", st.assets->GetLib<Model>(), &ParseModelObject },
 		{ "entities", &st.scene->entities, &ParseEntityObject },
 	};
 

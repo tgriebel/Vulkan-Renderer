@@ -23,6 +23,7 @@
 
 #include "nesScene.h"
 #include "../src/app/window.h"
+#include "../src/globals/assetDefs.h"
 
 #include <windows.h> 
 #include <stdio.h>
@@ -72,7 +73,7 @@ extern Window g_window;
 
 void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 {
-	Asset<Image>* imageAsset = g_assets.textureLib.Find( texHandle );
+	Asset<Image>* imageAsset = TextureLib().Find( texHandle );
 	Image& texture = imageAsset->Get();
 
 	const uint32_t width = fr.frameBuffer->GetWidth();

@@ -28,9 +28,7 @@
 #include "../render_state/rhi.h"
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
-#include <gfxcore/scene/assetManager.h>
-
-extern AssetManager g_assets;
+#include "../globals/assetDefs.h"
 
 void Renderer::UpdateTextureData( CommandContext* cmdCommand )
 {
@@ -41,7 +39,7 @@ void Renderer::UpdateTextureData( CommandContext* cmdCommand )
 
 	for ( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
-		Asset<Image>* imageAsset = g_assets.textureLib.Find( *it );
+		Asset<Image>* imageAsset = TextureLib().Find( *it );
 		Image& image = imageAsset->Get();
 
 		Transition( cmdCommand, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
@@ -73,7 +71,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 	// 1. Upload Data
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
+		Asset<Image>* textureAsset = TextureLib().Find( *it );
 		if( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -121,7 +119,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 	// 2. Generate MIPS
 	for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
+		Asset<Image>* textureAsset = TextureLib().Find( *it );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -149,7 +147,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		Image* firstCube = nullptr;
 		for ( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 		{
-			Asset<Image>* textureAsset = g_assets.textureLib.Find( *it );
+			Asset<Image>* textureAsset = TextureLib().Find( *it );
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
@@ -164,7 +162,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		// Fill assigned slots
 		for ( uint32_t i = 0; i < imageFreeSlot; ++i )
 		{
-			Asset<Image>* textureAsset = g_assets.textureLib.Find( i );
+			Asset<Image>* textureAsset = TextureLib().Find( i );
 			if ( textureAsset->IsLoaded() == false ) {
 				continue;
 			}
@@ -185,7 +183,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 					resources.gpuImagesCube.BindIndex( uploadId, firstCube );
 					break;
 				case IMAGE_TYPE_CUBE:
-					resources.gpuImages2D.BindIndex( uploadId, &g_assets.textureLib.GetDefault()->Get() );
+					resources.gpuImages2D.BindIndex( uploadId, &TextureLib().GetDefault()->Get() );
 					resources.gpuImagesCube.BindIndex( uploadId, &texture );
 					break;
 			}
@@ -194,7 +192,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		// Fill defaults
 		for ( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
 		{
-			resources.gpuImages2D.BindIndex( i, &g_assets.textureLib.GetDefault()->Get() );
+			resources.gpuImages2D.BindIndex( i, &TextureLib().GetDefault()->Get() );
 			resources.gpuImagesCube.BindIndex( i, firstCube );
 		}
 	}
@@ -206,7 +204,7 @@ void Renderer::UpdateGpuMaterials()
 {
 	for ( auto it = uploadMaterials.begin(); it != uploadMaterials.end(); ++it )
 	{
-		Asset<Material>* matAsset = g_assets.materialLib.Find( *it );
+		Asset<Material>* matAsset = MaterialLib().Find( *it );
 		Material& m = matAsset->Get();
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialBuffer.Count();
@@ -231,7 +229,7 @@ void Renderer::UpdateGpuMaterials()
 				if ( handle.IsValid() )
 				{
 					const hdl_t imageId = m.GetTexture( t );
-					const Asset<Image>* imageAsset = g_assets.textureLib.Find( imageId );
+					const Asset<Image>* imageAsset = TextureLib().Find( imageId );
 					const Image& image = imageAsset->Get();
 					assert( image.gpuImage != nullptr );
 
@@ -269,11 +267,11 @@ void Renderer::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, 
 
 void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 {
-	const uint32_t modelCount = g_assets.modelLib.Count();
+	const uint32_t modelCount = ModelLib().Count();
 
 	for ( uint32_t m = 0; m < modelCount; ++m )
 	{
-		Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
+		Asset<Model>* modelAsset = ModelLib().Find( m );
 		Model& model = modelAsset->Get();
 		if ( modelAsset->IsUploaded() ) {
 			continue;

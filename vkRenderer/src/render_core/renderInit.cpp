@@ -44,6 +44,7 @@
 #endif
 
 #include "debugMenu.h"
+#include "../globals/assetDefs.h"
 
 void Renderer::Init( const renderConfig_t& cfg )
 {
@@ -661,10 +662,10 @@ void Renderer::AssignBindSetsToGpuProgs()
 	const ShaderBindSet& imageProcessBindSet = renderContext.bindSets[ bindset_imageProcess ];
 
 	{
-		const uint32_t programCount = g_assets.gpuPrograms.Count();
+		const uint32_t programCount = GpuProgramLib().Count();
 		for ( uint32_t i = 0; i < programCount; ++i )
 		{
-			GpuProgram& prog = g_assets.gpuPrograms.Find( i )->Get();
+			GpuProgram& prog = GpuProgramLib().Find( i )->Get();
 
 			prog.bindsetCount = 0;
 
@@ -710,26 +711,26 @@ void Renderer::InitShaderResources()
 	materialBuffer.Reset();
 
 	{
-		rc.redImage = &g_assets.textureLib.Find( "_red" )->Get();
-		rc.blueImage = &g_assets.textureLib.Find( "_green" )->Get();
-		rc.greenImage = &g_assets.textureLib.Find( "_blue" )->Get();
-		rc.whiteImage = &g_assets.textureLib.Find( "_white" )->Get();
-		rc.blackImage = &g_assets.textureLib.Find( "_black" )->Get();
-		rc.lightGreyImage = &g_assets.textureLib.Find( "_lightGrey" )->Get();
-		rc.darkGreyImage = &g_assets.textureLib.Find( "_darkGrey" )->Get();
-		rc.brownImage = &g_assets.textureLib.Find( "_brown" )->Get();
-		rc.cyanImage = &g_assets.textureLib.Find( "_cyan" )->Get();
-		rc.yellowImage = &g_assets.textureLib.Find( "_yellow" )->Get();
-		rc.purpleImage = &g_assets.textureLib.Find( "_purple" )->Get();
-		rc.orangeImage = &g_assets.textureLib.Find( "_orange" )->Get();
-		rc.pinkImage = &g_assets.textureLib.Find( "_pink" )->Get();
-		rc.goldImage = &g_assets.textureLib.Find( "_gold" )->Get();
-		rc.albImage = &g_assets.textureLib.Find( "_alb" )->Get();
-		rc.nmlImage = &g_assets.textureLib.Find( "_nml" )->Get();
-		rc.rghImage = &g_assets.textureLib.Find( "_rgh" )->Get();
-		rc.mtlImage = &g_assets.textureLib.Find( "_mtl" )->Get();
-		rc.defaultImage = &g_assets.textureLib.Find( "_default" )->Get();
-		rc.defaultImageCube = &g_assets.textureLib.Find( "_defaultCube" )->Get();
+		rc.redImage = &TextureLib().Find( "_red" )->Get();
+		rc.blueImage = &TextureLib().Find( "_green" )->Get();
+		rc.greenImage = &TextureLib().Find( "_blue" )->Get();
+		rc.whiteImage = &TextureLib().Find( "_white" )->Get();
+		rc.blackImage = &TextureLib().Find( "_black" )->Get();
+		rc.lightGreyImage = &TextureLib().Find( "_lightGrey" )->Get();
+		rc.darkGreyImage = &TextureLib().Find( "_darkGrey" )->Get();
+		rc.brownImage = &TextureLib().Find( "_brown" )->Get();
+		rc.cyanImage = &TextureLib().Find( "_cyan" )->Get();
+		rc.yellowImage = &TextureLib().Find( "_yellow" )->Get();
+		rc.purpleImage = &TextureLib().Find( "_purple" )->Get();
+		rc.orangeImage = &TextureLib().Find( "_orange" )->Get();
+		rc.pinkImage = &TextureLib().Find( "_pink" )->Get();
+		rc.goldImage = &TextureLib().Find( "_gold" )->Get();
+		rc.albImage = &TextureLib().Find( "_alb" )->Get();
+		rc.nmlImage = &TextureLib().Find( "_nml" )->Get();
+		rc.rghImage = &TextureLib().Find( "_rgh" )->Get();
+		rc.mtlImage = &TextureLib().Find( "_mtl" )->Get();
+		rc.defaultImage = &TextureLib().Find( "_default" )->Get();
+		rc.defaultImageCube = &TextureLib().Find( "_defaultCube" )->Get();
 
 		rc.defaultImageArray.SetRenderContext( &renderContext );
 		rc.defaultImageArray.Resize( 1 );
@@ -932,7 +933,7 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 
 void Renderer::BuildPipelines()
 {
-	const uint32_t programCount = g_assets.gpuPrograms.Count();
+	const uint32_t programCount = GpuProgramLib().Count();
 
 	std::vector< Asset<GpuProgram>* > invalidAssets;
 	invalidAssets.reserve( programCount );
@@ -940,7 +941,7 @@ void Renderer::BuildPipelines()
 	// 1. Collect stale shaders	
 	for ( uint32_t progIx = 0; progIx < programCount; ++progIx )
 	{
-		Asset<GpuProgram>* progAsset = g_assets.gpuPrograms.Find( progIx );
+		Asset<GpuProgram>* progAsset = GpuProgramLib().Find( progIx );
 		if ( progAsset == nullptr ) {
 			continue;
 		}
@@ -1050,7 +1051,7 @@ void Renderer::CreateFramebuffers()
 {
 	int width = 0;
 	int height = 0;
-	g_window.GetWindowFrameBufferSize( width, height );
+	g_window.QueryWindowFrameBufferSize( width, height );
 
 	resources.RegisterOutputImages();
 

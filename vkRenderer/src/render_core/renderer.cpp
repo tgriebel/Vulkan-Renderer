@@ -51,6 +51,7 @@
 #include "../render_binding/shaderBinding.h"
 #include "../render_binding/bufferObjects.h"
 #include "../globals/render_util.h"
+#include "../globals/assetDefs.h"
 
 #include "../../GeoBuilder.h"
 #include "../app/window.h"
@@ -113,7 +114,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 	assert( DRAWPASS_COUNT <= Material::MaxMaterialShaders );
 
-	Asset<Model>* modelAsset = g_assets.modelLib.Find( ent.modelHdl );
+	Asset<Model>* modelAsset = ModelLib().Find( ent.modelHdl );
 	Model& model = modelAsset->Get();
 
 	for ( uint32_t i = 0; i < model.surfCount; ++i )
@@ -125,7 +126,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		}
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : model.surfs[ i ].materialHdl;
-		const Asset<Material>* materialAsset = g_assets.materialLib.Find( materialHdl );
+		const Asset<Material>* materialAsset = MaterialLib().Find( materialHdl );
 		const Material& material = materialAsset->Get();
 
 		renderFlags_t renderFlags = NONE;
@@ -183,8 +184,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
-		instance.envMapId = g_assets.textureLib.Find( ent.envMap )->Get().gpuImage->GetId();
-		instance.diffuseIblId = g_assets.textureLib.Find( ent.diffuseIblMap )->Get().gpuImage->GetId();
+		instance.envMapId = TextureLib().Find( ent.envMap )->Get().gpuImage->GetId();
+		instance.diffuseIblId = TextureLib().Find( ent.diffuseIblMap )->Get().gpuImage->GetId();
 
 		surf.uploadId = ( model.uploadId + i );
 		surf.stencilBit = ent.outline ? OutlineStencilBit : 0;
@@ -205,7 +206,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() ) {
-				Asset<Image>* imageAsset = g_assets.textureLib.Find( texHandle );
+				Asset<Image>* imageAsset = TextureLib().Find( texHandle );
 				Image& image = imageAsset->Get();
 				if( image.gpuImage->GetId() < 0 ) {
 					uploadTextures.insert( texHandle );
@@ -223,7 +224,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 
-			Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( material.GetShader( drawPass_t( passIx ) ) );
+			Asset<GpuProgram>* prog = GpuProgramLib().Find( material.GetShader( drawPass_t( passIx ) ) );
 			if ( prog == nullptr ) {
 				continue;
 			}
@@ -270,7 +271,7 @@ void Renderer::ShutdownGPU()
 void Renderer::RecreateSwapChain()
 {
 	int width = 0, height = 0;
-	g_window.GetWindowFrameBufferSize( width, height, true );
+	g_window.QueryWindowFrameBufferSize( width, height, true );
 
 	FlushGPU();
 
@@ -323,10 +324,10 @@ const Image* Renderer::FindOutputImage( const uint32_t id )
 
 void Renderer::UploadAssets()
 {
-	const uint32_t materialCount = g_assets.materialLib.Count();
+	const uint32_t materialCount = MaterialLib().Count();
 	for ( uint32_t i = 0; i < materialCount; ++i )
 	{
-		AssetInterface* materialAsset = g_assets.materialLib.Find( i );
+		AssetInterface* materialAsset = MaterialLib().Find( i );
 		if ( materialAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -336,10 +337,10 @@ void Renderer::UploadAssets()
 		uploadMaterials.insert( materialAsset->Handle() );
 	}
 
-	const uint32_t textureCount = g_assets.textureLib.Count();
+	const uint32_t textureCount = TextureLib().Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		AssetInterface* textureAsset = g_assets.textureLib.Find( i );
+		AssetInterface* textureAsset = TextureLib().Find( i );
 		if ( textureAsset->IsLoaded() == false ) {
 			continue;
 		}
@@ -621,7 +622,7 @@ void Renderer::UpdateBuffers()
 		globals.defaultRoughnessId = rc.rghImage->gpuImage->GetId();
 		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
 		globals.defaultImageId = rc.defaultImage->gpuImage->GetId();
-		globals.brdfLutId = g_assets.textureLib.Find( "code_assets/brdf_lut.img" )->Get().gpuImage->GetId();
+		globals.brdfLutId = TextureLib().Find( "code_assets/brdf_lut.img" )->Get().gpuImage->GetId();
 		globals.isTextured = g_imguiControls.isTextured;
 		
 		globals.shadow2dCount = 0;
@@ -631,8 +632,8 @@ void Renderer::UpdateBuffers()
 			globals.shadow2dCount += ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_2D );
 			globals.shadowCubeCount += ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_CUBE );
 		}
-		globals.textureCount = g_assets.textureLib.Count();
-		globals.materialCount = g_assets.materialLib.Count();
+		globals.textureCount = TextureLib().Count();
+		globals.materialCount = MaterialLib().Count();
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}

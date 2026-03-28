@@ -26,6 +26,7 @@
 #include <map>
 #include "renderer.h"
 #include <gfxcore/scene/entity.h>
+#include "../globals/assetDefs.h"
 
 #include "swapChain.h"
 
@@ -91,10 +92,10 @@ void Renderer::ShutdownShaderResources()
 	RenderResource::Cleanup( resourceLifeTime_t::REBOOT );
 
 	// Images
-	const uint32_t textureCount = g_assets.textureLib.Count();
+	const uint32_t textureCount = TextureLib().Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		const Image& texture = g_assets.textureLib.Find( i )->Get();
+		const Image& texture = TextureLib().Find( i )->Get();
 		delete texture.gpuImage;
 	}
 
@@ -107,10 +108,10 @@ void Renderer::ShutdownShaderResources()
 	// PSO
 	DestroyPipelineCache();
 
-	const uint32_t shaderCount = g_assets.gpuPrograms.Count();
+	const uint32_t shaderCount = GpuProgramLib().Count();
 	for ( uint32_t i = 0; i < shaderCount; ++i )
 	{
-		Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( i );
+		Asset<GpuProgram>* shaderAsset = GpuProgramLib().Find( i );
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 0 ], nullptr );
 		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 1 ], nullptr );
 	}

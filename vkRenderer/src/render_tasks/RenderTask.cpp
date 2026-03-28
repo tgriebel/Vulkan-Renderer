@@ -27,6 +27,7 @@
 #include "../render_core/renderview.h"
 #include "../render_binding/gpuResources.h"
 #include "../render_binding/bindings.h"
+#include "../globals/assetDefs.h"
 
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/imgui.h"
@@ -312,7 +313,7 @@ ComputeTask::ComputeTask( const char* csName, ComputeState* state )
 {
 	m_name = csName;
 	m_state = state;
-	m_progHdl = g_assets.gpuPrograms.RetrieveHdl( csName );
+	m_progHdl = GpuProgramLib().RetrieveHdl( csName );
 }
 
 

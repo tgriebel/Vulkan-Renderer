@@ -1,0 +1,42 @@
+/*
+* MIT License
+*
+* Copyright( c ) 2023 Thomas Griebel
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this softwareand associated documentation files( the "Software" ), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions :
+*
+* The above copyright noticeand this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+#pragma once
+
+#include <gfxcore/scene/assetManager.h>
+#include <gfxcore/asset_types/texture.h>
+#include <gfxcore/asset_types/material.h>
+#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/asset_types/model.h>
+
+typedef AssetLib< Model >			AssetLibModels;
+typedef AssetLib< Image >			AssetLibImages;
+typedef AssetLib< Material >		AssetLibMaterials;
+typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
+
+extern AssetManager g_assets;
+
+inline AssetLib<Model>&			ModelLib()			{ return *g_assets.GetLib<Model>(); }
+inline AssetLib<Image>&			TextureLib()		{ return *g_assets.GetLib<Image>(); }
+inline AssetLib<Material>&		MaterialLib()		{ return *g_assets.GetLib<Material>(); }
+inline AssetLib<GpuProgram>&	GpuProgramLib()		{ return *g_assets.GetLib<GpuProgram>(); }

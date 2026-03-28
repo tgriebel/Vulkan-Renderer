@@ -49,7 +49,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_mipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : ( m_baseMip + m_requestedMipCount );
 	m_mipLevels = Clamp( m_mipLevels, m_baseMip + 1, m_image->info.mipLevels ); // Clamp [1, mipLevels]
 
-	m_progHdl = AssetLibGpuProgram::Handle( info.progName );
+	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
 	m_multiPass = info.multiPass;
 	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
 	m_progressiveSampling = info.progressiveSampling;

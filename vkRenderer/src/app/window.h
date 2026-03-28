@@ -31,8 +31,8 @@ public:
 	vec2f					GetNdc( const float x, const float y );
 	void					GetWindowPosition( int& x, int& y );
 	void					GetWindowSize( int& width, int& height );
-	void					GetWindowFrameBufferSize( int & width, int & height, const bool wait = false );
-	float					GetWindowFrameBufferAspect( const bool wait = false );
+	void					QueryWindowFrameBufferSize( int & width, int & height, const bool wait = false );
+	float					QueryWindowFrameBufferAspect( const bool wait = false );
 	bool					IsResizeRequested() const { return needsImageResize; }
 	void					CompleteImageResize() { needsImageResize = false; }
 	void					RequestImageResize() { needsImageResize = true; }

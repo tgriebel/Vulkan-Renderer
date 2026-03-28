@@ -255,7 +255,7 @@ void Window::GetWindowSize( int& width, int& height )
 }
 
 
-void Window::GetWindowFrameBufferSize( int& width, int& height, const bool wait )
+void Window::QueryWindowFrameBufferSize( int& width, int& height, const bool wait )
 {
 	glfwGetFramebufferSize( window, &width, &height );
 	if( wait )
@@ -269,10 +269,10 @@ void Window::GetWindowFrameBufferSize( int& width, int& height, const bool wait 
 }
 
 
-float Window::GetWindowFrameBufferAspect( const bool wait )
+float Window::QueryWindowFrameBufferAspect( const bool wait )
 {
 	int width, height;
-	GetWindowFrameBufferSize( width, height, wait );
+	QueryWindowFrameBufferSize( width, height, wait );
 	return width / static_cast<float>( height );
 }
 

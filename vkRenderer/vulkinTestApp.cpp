@@ -28,9 +28,9 @@
 #include <chrono>
 #include <mutex>
 #include "src/globals/common.h"
+#include "src/globals/assetDefs.h"
 #include <syscore/systemUtils.h>
 #include <gfxcore/scene/scene.h>
-#include <gfxcore/scene/assetManager.h>
 #include "src/app/window.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
@@ -66,15 +66,15 @@ void CheckReloadAssets()
 #if defined( USE_IMGUI )
 	if ( g_imguiControls.rebuildShaders )
 	{
-		g_assets.gpuPrograms.UnloadAll();
-		g_assets.gpuPrograms.LoadAll( true );
+		GpuProgramLib().UnloadAll();
+		GpuProgramLib().LoadAll( true );
 
 		g_imguiControls.rebuildShaders = false;
 	}
 
 	if( g_imguiControls.shaderHdl != INVALID_HDL )
 	{
-		Asset<GpuProgram>* prog = g_assets.gpuPrograms.Find( g_imguiControls.shaderHdl );
+		Asset<GpuProgram>* prog = GpuProgramLib().Find( g_imguiControls.shaderHdl );
 		prog->Reload( true );
 		g_imguiControls.shaderHdl = INVALID_HDL;
 	}
@@ -85,9 +85,9 @@ void BakeAssets()
 {	
 	AssetBaker baker;
 	baker.AddBakeDirectory( BakePath );
-	baker.AddAssetLib( &g_assets.modelLib, ModelPath, BakedModelExtension );
-	baker.AddAssetLib( &g_assets.materialLib, MaterialPath, BakedMaterialExtension );
-	baker.AddAssetLib( &g_assets.textureLib, TexturePath, BakedTextureExtension );
+	baker.AddAssetLib( &ModelLib(), ModelPath, BakedModelExtension );
+	baker.AddAssetLib( &MaterialLib(), MaterialPath, BakedMaterialExtension );
+	baker.AddAssetLib( &TextureLib(), TexturePath, BakedTextureExtension );
 
 	baker.Bake();
 }
@@ -137,6 +137,11 @@ void ParseConfig( std::string& fileName )
 
 int main( int argc, char* argv[] )
 {
+	g_assets.RegisterLib<Model>( "Model" );
+	g_assets.RegisterLib<Image>( "Image" );
+	g_assets.RegisterLib<Material>( "Material" );
+	g_assets.RegisterLib<GpuProgram>( "Gpu Program" );
+
 	CreateCodeAssets(); // TODO: Check render dependencies, may need to move into render init?
 
 	if( ( argc > 1 ) && HasSuffix( argv[ 1 ], ".ini" ) )
@@ -215,14 +220,14 @@ int main( int argc, char* argv[] )
 				loader->SetTexturePath( dir );
 				loader->SetModelName( file );
 				loader->SetAssetRef( &g_assets );
-				g_assets.modelLib.AddDeferred( modelName.c_str(), loader_t( loader ) );
+				ModelLib().AddDeferred( modelName.c_str(), loader_t( loader ) );
 
 				g_assets.RunLoadLoop();
 				Entity* ent = new Entity();
 				ent->name = path;
 				//ent->SetFlag( ENT_FLAG_DEBUG );
 				g_scene->entities.push_back( ent );
-				g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( modelName.c_str() ), *ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( modelName.c_str() ), *ent );
 
 				g_imguiControls.openModelImportFileDialog = false;
 			}

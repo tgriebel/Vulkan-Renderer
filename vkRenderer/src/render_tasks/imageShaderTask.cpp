@@ -4,8 +4,7 @@
 #include "../render_core/renderer.h"
 #include "../render_binding/bindings.h"
 #include "../draw_passes/postPass.h"
-
-extern AssetManager g_assets;
+#include "../globals/assetDefs.h"
 
 std::string ImageShaderTask::AsString() const
 {
@@ -134,7 +133,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 	m_transitionState.flags.readOnly = true;
 
 	assert( info.progHdl != INVALID_HDL );
-	m_progAsset = g_assets.gpuPrograms.Find( info.progHdl );
+	m_progAsset = GpuProgramLib().Find( info.progHdl );
 
 	uint32_t multiPassImageCount = ( m_passCount > 1 ) ? 1 : 0;
 

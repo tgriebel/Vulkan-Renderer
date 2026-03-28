@@ -2,11 +2,9 @@
 #include "../globals/common.h"
 #include "gpuImage.h"
 #include "debugMenu.h"
-#include <gfxcore/scene/assetManager.h>
+#include "../globals/assetDefs.h"
 #include <gfxcore/scene/scene.h>
 #include <sstream>
-
-extern AssetManager g_assets;
 
 renderDebugData_t g_renderDebugData;
 
@@ -121,7 +119,7 @@ void DebugMenuMaterial( const Material& mat )
 		}
 		else
 		{
-			const char* texName = g_assets.textureLib.FindName( texHdl );
+			const char* texName = TextureLib().FindName( texHdl );
 			ImGui::Text( texName );
 		}
 	}
@@ -210,7 +208,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 			ImGui::SameLine();
 
 			hdl_t texHdl = mat.GetTexture( t );
-			DebugMenuLibComboEdit( label, texHdl, g_assets.textureLib );
+			DebugMenuLibComboEdit( label, texHdl, TextureLib() );
 			mat.AddTexture( t, texHdl );
 		}
 		ImGui::TreePop();
@@ -229,7 +227,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 			}
 			else
 			{
-				const char* shaderName = g_assets.gpuPrograms.FindName( shaderHdl );
+				const char* shaderName = GpuProgramLib().FindName( shaderHdl );
 				ImGui::Text( shaderName );
 			}
 		}
@@ -300,8 +298,8 @@ void DebugMenuModelTreeNode( Asset<Model>* modelAsset )
 					ImGui::Text( "%u", s );
 					ImGui::TableSetColumnIndex( 1 );
 					hdl_t& handle = model.surfs[ s ].materialHdl;
-					std::string modelName = "##" + std::string( g_assets.materialLib.FindName( handle ) );
-					DebugMenuLibComboEdit( modelName, handle, g_assets.materialLib );
+					std::string modelName = "##" + std::string( MaterialLib().FindName( handle ) );
+					DebugMenuLibComboEdit( modelName, handle, MaterialLib() );
 					ImGui::TableSetColumnIndex( 2 );
 					ImGui::Text( "%i", (int)model.surfs[ s ].vertices.size() );
 					ImGui::TableSetColumnIndex( 3 );

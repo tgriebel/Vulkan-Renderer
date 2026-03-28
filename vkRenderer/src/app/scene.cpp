@@ -13,8 +13,7 @@
 
 #include "../render_core/debugMenu.h"
 #include "../render_core/renderer.h"
-
-extern AssetManager g_assets;
+#include "../globals/assetDefs.h"
 extern Scene* g_scene;
 extern Renderer g_renderer;
 
@@ -44,8 +43,8 @@ void CreateCodeAssets()
 			ss << "CODE_COLOR_" << t;
 			std::string s = ss.str();
 
-			hdl_t handle = g_assets.textureLib.Add( s.c_str(), Image() );
-			Image& texture = g_assets.textureLib.Find( handle )->Get();
+			hdl_t handle = TextureLib().Add( s.c_str(), Image() );
+			Image& texture = TextureLib().Find( handle )->Get();
 
 			imageInfo_t info = DefaultImage2dInfo( 256, 240 );
 
@@ -97,8 +96,8 @@ void CreateCodeAssets()
 
 			for ( uint32_t t = 0; t < debugColorCount; ++t )
 			{
-				hdl_t handle = g_assets.textureLib.Add( colorInfo[ t ].name, Image() );
-				Image& texture = g_assets.textureLib.Find( handle )->Get();
+				hdl_t handle = TextureLib().Add( colorInfo[ t ].name, Image() );
+				Image& texture = TextureLib().Find( handle )->Get();
 			
 				rgba8_t pixel = Swizzle( colorInfo[ t ].color.AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 
@@ -110,8 +109,8 @@ void CreateCodeAssets()
 
 		// Default Image - Checkerboard
 		{
-			hdl_t handle = g_assets.textureLib.Add( "_default", Image() );
-			Image& texture = g_assets.textureLib.Find( handle )->Get();
+			hdl_t handle = TextureLib().Add( "_default", Image() );
+			Image& texture = TextureLib().Find( handle )->Get();
 
 			const uint32_t cellSize = 16;
 
@@ -134,12 +133,12 @@ void CreateCodeAssets()
 				}
 			}
 		}
-		g_assets.textureLib.SetDefault( "_default" );
+		TextureLib().SetDefault( "_default" );
 
 		// Default Image Cube - Rainbow
 		{
-			hdl_t handle = g_assets.textureLib.Add( "_defaultCube", Image() );
-			Image& texture = g_assets.textureLib.Find( handle )->Get();
+			hdl_t handle = TextureLib().Add( "_defaultCube", Image() );
+			Image& texture = TextureLib().Find( handle )->Get();
 
 			imageInfo_t info = DefaultImage2dInfo( 1, 1 );
 			info.width = 8;
@@ -182,28 +181,28 @@ void CreateCodeAssets()
 			for ( uint32_t i = 0; i < Material::MaxMaterialTextures; ++i ) {
 				material.AddTexture( i, i );
 			}
-			g_assets.materialLib.Add( "TONEMAP", material );
+			MaterialLib().Add( "TONEMAP", material );
 		}
 
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_DEBUG_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
-			g_assets.materialLib.Add( "IMAGE2D", material );
+			MaterialLib().Add( "IMAGE2D", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLibGpuProgram::Handle( "Debug" ) );
-			g_assets.materialLib.Add( "DEBUG_WIRE", material );
+			MaterialLib().Add( "DEBUG_WIRE", material );
 		}
 
 		{
 			Material material;
 			material.AddShader( DRAWPASS_DEBUG_3D, AssetLibGpuProgram::Handle( "DebugSolid" ) );
-			g_assets.materialLib.Add( "DEBUG_3D", material );
+			MaterialLib().Add( "DEBUG_3D", material );
 		}
-		g_assets.materialLib.SetDefault( "DEBUG_WIRE" );
+		MaterialLib().SetDefault( "DEBUG_WIRE" );
 	}
 
 	// ----------------- MODELS ----------------- //
@@ -211,14 +210,14 @@ void CreateCodeAssets()
 		{
 			Model model;
 			CreateQuadSurface2D( "TONEMAP", model, vec2f( 0.0f, 0.0f ), vec2f( 2.0f ) );
-			g_assets.modelLib.Add( "_postProcessQuad", model );
+			ModelLib().Add( "_postProcessQuad", model );
 		}
 		{
 			Model model;
 			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) );
-			g_assets.modelLib.Add( "_quadTexDebug", model );
+			ModelLib().Add( "_quadTexDebug", model );
 		}
-		g_assets.modelLib.SetDefault( "_quadTexDebug" );
+		ModelLib().SetDefault( "_quadTexDebug" );
 	}
 }
 
@@ -230,8 +229,8 @@ void InitScene( Scene* scene )
 	for ( uint32_t i = 0; i < entCount; ++i ) {
 		scene->CreateEntityBounds( scene->entities[ i ]->modelHdl, *scene->entities[ i ] );
 
-		scene->entities[ i ]->envMap = g_assets.textureLib.RetrieveHdl( scene->envMap.c_str() );
-		scene->entities[ i ]->diffuseIblMap = g_assets.textureLib.RetrieveHdl( scene->diffuseIblMap.c_str() );
+		scene->entities[ i ]->envMap = TextureLib().RetrieveHdl( scene->envMap.c_str() );
+		scene->entities[ i ]->diffuseIblMap = TextureLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
 
 	scene->Init();
@@ -240,14 +239,14 @@ void InitScene( Scene* scene )
 
 	{
 		Entity* ent = new Entity();
-		scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "_postProcessQuad" ), *ent );
+		scene->CreateEntityBounds( ModelLib().RetrieveHdl( "_postProcessQuad" ), *ent );
 		ent->name = "_postProcessQuad";
 		scene->entities.push_back( ent );
 	}
 
 	{
 		Entity* ent = new Entity();
-		scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "_quadTexDebug" ), *ent );
+		scene->CreateEntityBounds( ModelLib().RetrieveHdl( "_quadTexDebug" ), *ent );
 		ent->name = "_quadTexDebug";
 		scene->entities.push_back( ent );
 	}
@@ -343,13 +342,13 @@ void UpdateScene( Scene* scene )
 			scene->mainCamera->Tilt( 0.5f * PI );
 		}
 		if ( g_window.input.IsKeyPressed( KEY_ADD ) ) {
-			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ), g_window.GetWindowFrameBufferAspect() );
+			scene->mainCamera->SetFov( scene->mainCamera->GetFov() + Radians( 0.1f ), g_window.QueryWindowFrameBufferAspect() );
 		}
 		if ( g_window.input.IsKeyPressed( KEY_SUB ) ) {
-			scene->mainCamera->SetFov( scene->mainCamera->GetFov() - Radians( 0.1f ), g_window.GetWindowFrameBufferAspect() );
+			scene->mainCamera->SetFov( scene->mainCamera->GetFov() - Radians( 0.1f ), g_window.QueryWindowFrameBufferAspect() );
 		}
 	}
-	scene->mainCamera->SetFov( scene->mainCamera->GetFov(), g_window.GetWindowFrameBufferAspect() );
+	scene->mainCamera->SetFov( scene->mainCamera->GetFov(), g_window.QueryWindowFrameBufferAspect() );
 
 	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( mouse.centered )
@@ -372,8 +371,8 @@ void UpdateScene( Scene* scene )
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
-		scene->entities[ i ]->envMap = g_assets.textureLib.RetrieveHdl( scene->specIblMap.c_str() );
-		scene->entities[ i ]->diffuseIblMap = g_assets.textureLib.RetrieveHdl( scene->diffuseIblMap.c_str() );
+		scene->entities[ i ]->envMap = TextureLib().RetrieveHdl( scene->specIblMap.c_str() );
+		scene->entities[ i ]->diffuseIblMap = TextureLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
 
 	// Skybox
@@ -431,10 +430,10 @@ void UpdateScene( Scene* scene )
 
 	std::vector<const Image*> images;
 
-	const uint32_t imageCount = g_assets.textureLib.Count();
+	const uint32_t imageCount = TextureLib().Count();
 	for ( uint32_t i = 0; i < imageCount; ++i )
 	{
-		const Image* img = &g_assets.textureLib.Find( i )->Get();
+		const Image* img = &TextureLib().Find( i )->Get();
 		if ( img == nullptr ) {
 			continue;
 		}
@@ -514,7 +513,7 @@ void UpdateScene( Scene* scene )
 		}
 
 		imguiImageCallbackData_t data;
-		data.progAsset = g_assets.gpuPrograms.Find( "Image2D" );
+		data.progAsset = GpuProgramLib().Find( "Image2D" );
 		data.image = image;
 		data.x = pos.x;
 		data.y = pos.y;
@@ -528,7 +527,7 @@ void UpdateScene( Scene* scene )
 
 	char entityName[ 256 ];
 	if ( g_imguiControls.selectedEntityId >= 0 ) {
-		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, g_assets.modelLib.FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
+		sprintf_s( entityName, "%i: %s", g_imguiControls.selectedEntityId, ModelLib().FindName( g_scene->entities[ g_imguiControls.selectedEntityId ]->modelHdl ) );
 	}
 	else {
 		memset( &entityName[ 0 ], 0, 256 );
@@ -599,14 +598,14 @@ void DrawAssetDebugMenu()
 
 	if ( ImGui::BeginTabItem( "Assets" ) )
 	{
-		const uint32_t matCount = g_assets.materialLib.Count();
+		const uint32_t matCount = MaterialLib().Count();
 		if ( ImGui::TreeNode( "Materials", "Materials (%i)", matCount ) )
 		{
 			for ( uint32_t m = 0; m < matCount; ++m )
 			{
-				Asset<Material>* matAsset = g_assets.materialLib.Find( m );
+				Asset<Material>* matAsset = MaterialLib().Find( m );
 				Material& mat = matAsset->Get();
-				const char* matName = g_assets.materialLib.FindName( m );
+				const char* matName = MaterialLib().FindName( m );
 
 				if ( ImGui::TreeNode( matAsset->GetName().c_str() ) )
 				{
@@ -617,33 +616,33 @@ void DrawAssetDebugMenu()
 			}
 			ImGui::TreePop();
 		}
-		const uint32_t modelCount = g_assets.modelLib.Count();
+		const uint32_t modelCount = ModelLib().Count();
 		if ( ImGui::TreeNode( "Models", "Models (%i)", modelCount ) )
 		{
 			for ( uint32_t m = 0; m < modelCount; ++m )
 			{
-				Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
+				Asset<Model>* modelAsset = ModelLib().Find( m );
 				DebugMenuModelTreeNode( modelAsset );
 			}
 			ImGui::TreePop();
 		}
-		const uint32_t texCount = g_assets.textureLib.Count();
+		const uint32_t texCount = TextureLib().Count();
 		if ( ImGui::TreeNode( "Textures", "Textures (%i)", texCount ) )
 		{
 			for ( uint32_t t = 0; t < texCount; ++t )
 			{
-				Asset<Image>* texAsset = g_assets.textureLib.Find( t );
+				Asset<Image>* texAsset = TextureLib().Find( t );
 				DebugMenuTextureTreeNode( texAsset );
 			}
 			ImGui::TreePop();
 		}
 
-		const uint32_t shaderCount = g_assets.gpuPrograms.Count();
+		const uint32_t shaderCount = GpuProgramLib().Count();
 		if ( ImGui::TreeNode( "Shaders", "Shaders (%i)", shaderCount ) )
 		{
 			for ( uint32_t s = 0; s < shaderCount; ++s )
 			{
-				Asset<GpuProgram>* shaderAsset = g_assets.gpuPrograms.Find( s );
+				Asset<GpuProgram>* shaderAsset = GpuProgramLib().Find( s );
 				DebugMenuShaderTreeNode( shaderAsset );
 			}
 			ImGui::TreePop();
@@ -664,7 +663,7 @@ void DrawManipDebugMenu()
 		const char* previewValue = ent->name.c_str();
 		if ( ImGui::BeginCombo( "Entity", previewValue ) )
 		{
-			const uint32_t modelCount = g_assets.modelLib.Count();
+			const uint32_t modelCount = ModelLib().Count();
 			for ( uint32_t e = 0; e < g_scene->EntityCount(); ++e )
 			{
 				Entity* comboEnt = g_scene->FindEntity( e );
@@ -729,19 +728,19 @@ void DrawManipDebugMenu()
 				Entity* boundEnt = new Entity( *ent );
 				boundEnt->name = ent->name + "_bounds";
 				boundEnt->SetFlag( ENT_FLAG_WIREFRAME );
-				boundEnt->materialHdl = g_assets.materialLib.RetrieveHdl( "DEBUG_WIRE" );
+				boundEnt->materialHdl = MaterialLib().RetrieveHdl( "DEBUG_WIRE" );
 				boundEnt->SetOrigin( boundCenter );
 				boundEnt->SetScale( Multiply( vec3f( scale ), vec3f( boundScale[ 0 ], boundScale[ 1 ], boundScale[ 2 ] ) ) );
 				boundEnt->SetRotation( rotation );
 
 				g_scene->entities.push_back( boundEnt );
-				g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( "cube" ), *boundEnt );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( "cube" ), *boundEnt );
 			}
 
 			ImGui::SameLine();
 			if ( ImGui::Button( "Export Model" ) )
 			{
-				Asset<Model>* asset = g_assets.modelLib.Find( ent->modelHdl );
+				Asset<Model>* asset = ModelLib().Find( ent->modelHdl );
 				WriteModel( asset, BakePath + asset->GetName() + BakedModelExtension );
 			}
 			ImGui::SameLine();
@@ -780,13 +779,13 @@ void DrawEntityDebugMenu()
 	{
 		static char name[ 128 ] = {};
 		static uint32_t currentIdx = 0;
-		const char* previewValue = g_assets.modelLib.FindName( currentIdx );
+		const char* previewValue = ModelLib().FindName( currentIdx );
 		if ( ImGui::BeginCombo( "Model", previewValue ) )
 		{
-			const uint32_t modelCount = g_assets.modelLib.Count();
+			const uint32_t modelCount = ModelLib().Count();
 			for ( uint32_t m = 0; m < modelCount; ++m )
 			{
-				Asset<Model>* modelAsset = g_assets.modelLib.Find( m );
+				Asset<Model>* modelAsset = ModelLib().Find( m );
 
 				const bool selected = ( currentIdx == m );
 				if ( ImGui::Selectable( modelAsset->GetName().c_str(), selected ) ) {
@@ -808,7 +807,7 @@ void DrawEntityDebugMenu()
 			ent->name = name;
 			ent->SetFlag( ENT_FLAG_DEBUG );
 			g_scene->entities.push_back( ent );
-			g_scene->CreateEntityBounds( g_assets.modelLib.RetrieveHdl( g_assets.modelLib.FindName( currentIdx ) ), *ent );
+			g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( ModelLib().FindName( currentIdx ) ), *ent );
 		}
 
 		ImGui::EndTabItem();
