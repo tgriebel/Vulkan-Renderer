@@ -859,7 +859,10 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	// Setup Platform/Renderer bindings
+
+#if defined( USE_VULKAN ) && defined( USE_GLFW )
 	ImGui_ImplGlfw_InitForVulkan( g_window.window, true );
+#endif
 
 	ImGui_ImplVulkan_InitInfo vkInfo = {};
 	vkInfo.Instance = context.instance;
@@ -883,21 +886,27 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	transitionState.flags.readOnly = true;
 	transitionState.flags.readAfter = true;
 
+#ifdef USE_VULKAN
 	ImGui_ImplVulkan_Init( &vkInfo, fb->GetVkRenderPass( transitionState ) );
+#endif
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
 	// Upload Fonts
 	{
+#ifdef USE_VULKAN
 		BeginUploadCommands( uploadContext );
 		VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
 		ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
 		EndUploadCommands( uploadContext );
 
 		ImGui_ImplVulkan_DestroyFontUploadObjects();
+#endif
 	}
+#ifdef USE_GLFW
 	ImGui_ImplGlfw_NewFrame();
+#endif
 
 	g_imguiControls.raytraceScene = false;
 	g_imguiControls.rasterizeScene = false;
@@ -926,7 +935,6 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	g_imguiControls.isTextured = true;
 	g_imguiControls.selectedEntityId = -1;
 	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
-
 #endif
 }
 

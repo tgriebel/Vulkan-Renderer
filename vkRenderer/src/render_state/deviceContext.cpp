@@ -989,11 +989,15 @@ bool vk_CheckValidationLayerSupport()
 
 std::vector<const char*> vk_GetRequiredExtensions()
 {
+#ifdef USE_GLFW
 	uint32_t glfwExtensionCount = 0;
 	const char** glfwExtensions;
 	glfwExtensions = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
 
 	std::vector<const char*> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
+#else
+	std::vector<const char*> extensions;
+#endif
 
 	if ( EnableValidationLayers )
 	{
@@ -1037,8 +1041,6 @@ void DeviceContext::Create( Window& window )
 			std::cout << '\t' << extension.extensionName << '\n';
 		}
 
-		uint32_t glfwExtensionCount = 0;
-
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 		if ( EnableValidationLayers )
 		{
@@ -1077,7 +1079,9 @@ void DeviceContext::Create( Window& window )
 
 	// Window Surface
 	{
+#ifdef USE_GLFW
 		window.CreateGlfwSurface( context.instance );
+#endif
 	}
 
 	// Pick physical device
@@ -1369,7 +1373,9 @@ void DeviceContext::Destroy( Window& window )
 		}
 	}
 
+#ifdef USE_GLFW
 	window.DestroyGlfwSurface( context.instance );
+#endif
 	
 	vkDestroyInstance( instance, nullptr );
 }

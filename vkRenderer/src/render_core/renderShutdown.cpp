@@ -80,8 +80,12 @@ void Renderer::Destroy()
 void Renderer::ShutdownImGui()
 {
 #if defined( USE_IMGUI )
+#ifdef USE_VULKAN
 	ImGui_ImplVulkan_Shutdown();
+#endif
+#ifdef USE_GLFW
 	ImGui_ImplGlfw_Shutdown();
+#endif
 	ImGui::DestroyContext();
 #endif
 }

@@ -151,12 +151,15 @@ private:
 		memset( keys, 0, 255 );
 	}
 
+#ifdef USE_GLFW
 	friend void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );
 	friend void MousePressCallback( GLFWwindow* window, int button, int action, int mods );
 	friend void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos );
+#endif
 };
 
-
+#ifdef USE_GLFW
 void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );
 void MousePressCallback( GLFWwindow* window, int button, int action, int mods );
 void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos );
+#endif
