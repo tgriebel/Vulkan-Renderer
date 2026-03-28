@@ -11,12 +11,17 @@ public:
 
 	Window() : needsImageResize( false ) { }
 
-	~Window() {
+	~Window()
+	{
+#ifdef USE_GLFW
 		glfwDestroyWindow( window );
 		glfwTerminate();
+#endif
 	}
 
+#ifdef USE_GLFW
 	GLFWwindow*				window;
+#endif
 #ifdef USE_VULKAN
 	VkSurfaceKHR			vk_surface;
 #endif
@@ -37,7 +42,7 @@ public:
 	void					CompleteImageResize() { needsImageResize = false; }
 	void					RequestImageResize() { needsImageResize = true; }
 
-#ifdef USE_VULKAN
+#if defined( USE_VULKAN ) && defined( USE_GLFW )
 	void					CreateGlfwSurface( const VkInstance instance );
 	void					DestroyGlfwSurface( const VkInstance instance );
 #endif
@@ -46,8 +51,10 @@ private:
 	bool					needsImageResize;
 	bool					mouseLocked;
 
+#ifdef USE_GLFW
 	friend void FramebufferResizeCallback( GLFWwindow* window, int width, int height );
 	friend void KeyCallback( GLFWwindow* window, int key, int scancode, int action, int mods );
 	friend void MousePressCallback( GLFWwindow* window, int button, int action, int mods );
 	friend void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos );
+#endif
 };

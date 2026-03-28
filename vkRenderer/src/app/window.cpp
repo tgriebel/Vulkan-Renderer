@@ -55,6 +55,7 @@ static KeyPair GlfwKeyMap[] =
 	KEY_MAP( Y ),
 	KEY_MAP( Z ),
 
+#ifdef USE_GLFW
 	{ GLFW_KEY_KP_0,		KEY_NUM_0 },
 	{ GLFW_KEY_KP_1,		KEY_NUM_1 },
 	{ GLFW_KEY_KP_2,		KEY_NUM_2 },
@@ -76,10 +77,12 @@ static KeyPair GlfwKeyMap[] =
 	{ GLFW_KEY_RIGHT,		KEY_RIGHT_ARROW },
 	{ GLFW_KEY_UP,			KEY_UP_ARROW },
 	{ GLFW_KEY_DOWN,		KEY_DOWN_ARROW },
+#endif
 };
 
 #undef KEY_MAP
 
+#ifdef USE_GLFW
 void FramebufferResizeCallback( GLFWwindow* window, int width, int height )
 {
 	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
@@ -160,13 +163,14 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	mouse.y = static_cast<float>( ypos );
 	mouse.centered = true;
 }
+#endif
 
 
 void Window::BeginFrame()
 {
 	input.NewFrame();
 
-#if defined( USE_IMGUI )
+#if defined( USE_IMGUI ) && defined( USE_GLFW )
 	ImGui_ImplGlfw_NewFrame();
 #endif
 }
@@ -180,7 +184,9 @@ void Window::EndFrame()
 
 bool Window::IsOpen() const
 {
+#ifdef USE_GLFW
 	return ( glfwWindowShouldClose( window ) == false );
+#endif
 }
 
 
@@ -192,6 +198,7 @@ bool Window::IsMouseLocked() const
 
 std::string Window::OpenFileDialog( const std::string& title, const std::vector<const char*>& filters, const std::string& filterDesc )
 {
+#ifdef USE_TINYFD
 	tinyfd_assumeGraphicDisplay = 1;
 
 	char const* fileFilter[1] = { "*.obj" };
@@ -205,17 +212,23 @@ std::string Window::OpenFileDialog( const std::string& title, const std::vector<
 		0 );
 
 	return ( fileName == nullptr ) ? "" : fileName;
+#else
+	return "";
+#endif
 }
 
 
 void Window::PumpMessages()
 {
+#ifdef USE_GLFW
 	glfwPollEvents();
+#endif
 }
 
 
 void Window::Init()
 {
+#ifdef USE_GLFW
 	glfwInit();
 
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
@@ -228,6 +241,7 @@ void Window::Init()
 	glfwSetKeyCallback( window, KeyCallback );
 	glfwSetMouseButtonCallback( window, MousePressCallback );
 	glfwSetCursorPosCallback( window, MouseMoveCallback );
+#endif
 
 	mouseLocked = true;
 }
@@ -245,18 +259,23 @@ vec2f Window::GetNdc( const float x, const float y )
 
 void Window::GetWindowPosition( int& x, int& y )
 {
+#ifdef USE_GLFW
 	glfwGetWindowPos( window, &x, &y );
+#endif
 }
 
 
 void Window::GetWindowSize( int& width, int& height )
 {
+#ifdef USE_GLFW
 	glfwGetWindowSize( window, &width, &height );
+#endif
 }
 
 
 void Window::QueryWindowFrameBufferSize( int& width, int& height, const bool wait )
 {
+#ifdef USE_GLFW
 	glfwGetFramebufferSize( window, &width, &height );
 	if( wait )
 	{
@@ -266,6 +285,7 @@ void Window::QueryWindowFrameBufferSize( int& width, int& height, const bool wai
 			glfwWaitEvents();
 		}
 	}
+#endif
 }
 
 
@@ -276,7 +296,7 @@ float Window::QueryWindowFrameBufferAspect( const bool wait )
 	return width / static_cast<float>( height );
 }
 
-#ifdef USE_VULKAN
+#if defined( USE_VULKAN ) && defined( USE_GLFW)
 void Window::CreateGlfwSurface( const VkInstance instance )
 {
 	VK_CHECK_RESULT( glfwCreateWindowSurface( instance, window, nullptr, &vk_surface ) );

@@ -28,6 +28,8 @@
 
 #define USE_VULKAN
 #define USE_IMGUI
+#define USE_GLFW
+#define USE_TINYFD
 
 #include <gfxcore/acceleration/aabb.h>
 
