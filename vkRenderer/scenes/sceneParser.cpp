@@ -585,7 +585,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 	char psShader[ TOKEN_LEN ] = "";
 	char csShader[ TOKEN_LEN ] = "";
 	char bindSet[ TOKEN_LEN ] = "";
-	char perm[ TOKEN_LEN ] = "";
+	char perms[ GpuProgramLoader::MaxPermutations ][ TOKEN_LEN ] = {};
 	shaderFlags_t shaderFlags = shaderFlags_t::NONE;
 	AssetLib<GpuProgram>* shaders = reinterpret_cast<AssetLib<GpuProgram>*>( object );
 
@@ -597,7 +597,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 		{ "ps", reinterpret_cast<void*>( psShader ), &ParseStringObject },
 		{ "cs", reinterpret_cast<void*>( csShader ), &ParseStringObject },
 		{ "bindset", reinterpret_cast<void*>( &bindSet ), &ParseStringObject },
-		{ "perm", reinterpret_cast<void*>( &perm ), &ParseStringObject },
+		{ "perm", reinterpret_cast<void*>( &perms[ 0 ] ), &ParseStringObject },
 		{ "sampling_ms", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
 		{ "image_shader", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
 		{ "no_vb", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> },
@@ -610,7 +610,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 	loader->SetBinPath( "shaders_bin/" );
 	loader->AddFilePaths( vsShader, psShader, csShader );
 	loader->SetBindSet( bindSet );
-	loader->SetPerm( perm );
+	loader->AddPerms( perms[ 0 ] );
 	loader->SetFlags( shaderFlags );
 	shaders->AddDeferred( name, Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 
