@@ -19,7 +19,7 @@ from datetime import datetime
 
 
 # Config
-GLSLANG    = r"C:\VulkanSDK\1.3.261.0\Bin\glslangValidator.exe"
+GLSLANG    = str( Path( __file__ ).resolve().parent.parent.parent / "external" / "vulkan" / "Bin" / "glslangValidator.exe" )
 SHADER_DIR = "..\\shaders\\"
 OUT_DIR    = "..\\shaders_bin\\"
 LOG_FILE   = "shader_build.log"
