@@ -24,6 +24,11 @@
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#undef near
+#undef far
 #include <GLFW/glfw3.h>
 
 #define USE_VULKAN
@@ -77,7 +82,7 @@ const uint32_t	DescriptorPoolMaxUniformBuffers	= 1024;
 const uint32_t	DescriptorPoolMaxStorageBuffers	= 1024;
 const uint32_t	DescriptorPoolMaxSamplers		= 3;
 const uint32_t	DescriptorPoolMaxImages			= 1024;
-const uint32_t	DescriptorPoolMaxComboImages	= 1024;
+const uint32_t	DescriptorPoolMaxComboImages	= 4096; // Must account for bindless arrays (MaxImageDescriptors) * MaxFrameStates * num bind set instances
 const uint32_t	DescriptorPoolMaxSets			= ( DescriptorPoolMaxUniformBuffers + DescriptorPoolMaxStorageBuffers + DescriptorPoolMaxImages + DescriptorPoolMaxComboImages );
 const uint32_t	MaxImageDescriptors				= 128;
 const uint32_t	MaxLights						= 128;
