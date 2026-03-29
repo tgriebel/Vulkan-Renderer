@@ -35,8 +35,8 @@ void main()
 	objectPosition	= inPosition;
 	worldPosition	= vec4( inPosition, 1.0f );
     gl_Position		= worldPosition;
-    fragColor		= inColor;
+    color		= inColor;
     fragTexCoord	= inTexCoord;
-	fragNormal		= inNormal;
+	normal		= inNormal;
 	clipPosition	= gl_Position;
 }

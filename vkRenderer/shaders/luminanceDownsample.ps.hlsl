@@ -82,16 +82,16 @@ PS_Output PSMain( PS_Input input )
 
 	if( level == 0 ) // Initial luminance computation: WxH resolution -> square resolution
 	{
-		const float3 sceneColor = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.fragTexCoord.xy ).rgb;
+		const float3 sceneColor = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy ).rgb;
 		const float luminance = dot( sceneColor, float3( 0.2126f, 0.7152f, 0.0722f ) );
 		output.outColor.r = log( max( luminance + 0.0001f, 0.0f ) );
 	}
 	else if( level < ( mipCount - 1 ) ) // Averaged luminance computation
 	{
-		const float s0 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.fragTexCoord.xy + texelSize * float2( -0.5f, -0.5f ) ).r;
-		const float s1 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.fragTexCoord.xy + texelSize * float2( 0.5f, -0.5f ) ).r;
-		const float s2 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.fragTexCoord.xy + texelSize * float2( -0.5f, 0.5f ) ).r;
-		const float s3 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.fragTexCoord.xy + texelSize * float2( 0.5f, 0.5f ) ).r;
+		const float s0 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + texelSize * float2( -0.5f, -0.5f ) ).r;
+		const float s1 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + texelSize * float2( 0.5f, -0.5f ) ).r;
+		const float s2 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + texelSize * float2( -0.5f, 0.5f ) ).r;
+		const float s3 = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + texelSize * float2( 0.5f, 0.5f ) ).r;
 
 		output.outColor.r = ReinhardWeightedAverage( s0, s1, s2, s3 );
 	}

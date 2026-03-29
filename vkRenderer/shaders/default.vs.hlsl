@@ -32,9 +32,9 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	output.objectPosition	= input.inPosition;
 	output.worldPosition	= float4( input.inPosition, 1.0f );
 	output.pos				= output.worldPosition;
-	output.fragColor		= input.inColor;
-	output.fragTexCoord		= input.inTexCoord;
-	output.fragNormal		= input.inNormal;
+	output.color			= input.inColor;
+	output.uv0				= input.inTexCoord;
+	output.normal			= input.inNormal;
 	output.clipPosition		= output.pos;
 
 	return output;

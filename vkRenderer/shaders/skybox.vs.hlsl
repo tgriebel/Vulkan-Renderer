@@ -40,9 +40,9 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	output.worldPosition = mul( surfaces[ output.objectId ].model, float4( position, 1.0f ) );
 	output.pos = mul( view.projMat, mul( view.viewMat, output.worldPosition ) );
 	output.pos.z = 0.0f;
-	output.fragColor = input.inColor;
-	output.fragTexCoord = input.inTexCoord;
-	output.fragNormal = input.inNormal;
+	output.color = input.inColor;
+	output.uv0 = input.inTexCoord;
+	output.normal = input.inNormal;
 	output.clipPosition = output.pos;
 
 	return output;

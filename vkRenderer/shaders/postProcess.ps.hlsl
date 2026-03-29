@@ -80,15 +80,15 @@ PS_Output PSMain( PS_Input input )
     const float3 forward = -normalize( viewMat[2].xyz );
     const float3 up = normalize( viewMat[0].xyz );
     const float3 right = normalize( viewMat[1].xyz );
-    const float3 viewVector = normalize( forward + input.fragTexCoord.x * up + input.fragTexCoord.y * right );
+    const float3 viewVector = normalize( forward + input.uv0.x * up + input.uv0.y * right );
 
-    const int2 pixelLocation = int2( view.dimensions.xy * input.fragTexCoord.xy );
+    const int2 pixelLocation = int2( view.dimensions.xy * input.uv0.xy );
 
     const float stencilCoverage = EdgeOutline( pixelLocation, textureId1 );
 
     float4 sceneColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 
-    const float4 uvColor = float4( input.fragTexCoord.xy, 0.0f, 1.0f );
+    const float4 uvColor = float4( input.uv0.xy, 0.0f, 1.0f );
     const float sceneDepth = codeSamplers[NUI(textureId1)].Load( int3( pixelLocation, 0 ) ).r;
     const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
     const float4 skyColor = float4( cubeSamplers[NUI(textureId0)].Sample( cubeSamplersSt, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
@@ -103,9 +103,9 @@ PS_Output PSMain( PS_Input input )
 
     float3 hdrColor;
     if ( enabled && ( coc < 0.0f ) ) {
-        hdrColor.rgb = codeSamplers[NUI(textureId2)].SampleLevel( codeSamplersSt, input.fragTexCoord.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
+        hdrColor.rgb = codeSamplers[NUI(textureId2)].SampleLevel( codeSamplersSt, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
     } else {
-        hdrColor.rgb = codeSamplers[NUI(textureId0)].Sample( codeSamplersSt, input.fragTexCoord.xy ).rgb;
+        hdrColor.rgb = codeSamplers[NUI(textureId0)].Sample( codeSamplersSt, input.uv0.xy ).rgb;
     }
 
     const float3 tint = globals.toneMapTint.rgb;
@@ -116,7 +116,7 @@ PS_Output PSMain( PS_Input input )
     const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
     const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 
-    const float3 bloom = codeSamplers[NUI(textureId4)].SampleLevel( codeSamplersSt, input.fragTexCoord.xy, 0 ).rgb;
+    const float3 bloom = codeSamplers[NUI(textureId4)].SampleLevel( codeSamplersSt, input.uv0.xy, 0 ).rgb;
     const float3 bloomHdr = lerp( hdrColor, bloom, 0.004f );
 
     const float3 exposureAdjustedColor = bloomHdr * exposure * tint;

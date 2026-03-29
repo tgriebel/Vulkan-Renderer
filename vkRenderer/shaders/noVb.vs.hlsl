@@ -43,13 +43,13 @@ VS_Output VSMain( uint vertexId : SV_VertexID )
 {
 	VS_Output output = (VS_Output)0;
 
-	output.fragTexCoord		= float4( uvs[ vertexId ], 0.0, 0.0 );
+	output.uv0		= float4( uvs[ vertexId ], 0.0, 0.0 );
 	output.pos				= float4( positions[ vertexId ], 0.0f, 0.0f );
 
 	output.objectPosition	= output.pos.xyz;
 	output.worldPosition	= output.pos;
-	output.fragColor		= float4( 1.0f, 1.0f, 1.0f, 1.0f );
-	output.fragNormal		= float3( 0.0f, 0.0f, 1.0f );
+	output.color		= float4( 1.0f, 1.0f, 1.0f, 1.0f );
+	output.normal		= float3( 0.0f, 0.0f, 1.0f );
 	output.clipPosition		= output.pos;
 
 	return output;

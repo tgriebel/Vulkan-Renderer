@@ -162,8 +162,8 @@ float Bar( float pos, float bar ) { pos -= bar; return pos * pos < 4.0 ? 0.0 : 1
 PS_Output PSMain( PS_Input input )
 {
 	PS_Output output = (PS_Output)0;
-    float2 pos = Warp( input.fragTexCoord.xy );
-    output.outColor.rgb = Tri( pos, input ) * Mask( input.fragTexCoord.xy / res );
+    float2 pos = Warp( input.uv0.xy );
+    output.outColor.rgb = Tri( pos, input ) * Mask( input.uv0.xy / res );
     output.outColor.a = 1.0;
     output.outColor.rgb = output.outColor.rgb;
 	return output;

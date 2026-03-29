@@ -61,15 +61,15 @@ PS_Output_MRT PSMain( PS_Input input )
     const float3 cameraOrigin = -mul( invViewMat, float3( viewMat[0][3], viewMat[1][3], viewMat[2][3] ) );
     const float3 modelOrigin = float3( modelMat[0][3], modelMat[1][3], modelMat[2][3] );
 
-    const float4 albedoTex = SrgbToLinear( texSampler[NUI(albedoTexId)].Sample( texSamplerSt, input.fragTexCoord.xy ) );
-    const float3 normalTex = 2.0f * texSampler[NUI(normalTexId)].Sample( texSamplerSt, input.fragTexCoord.xy ).rgb - float3( 1.0f, 1.0f, 1.0f );
-    const float4 roughnessTex = texSampler[NUI(roughnessTexId)].Sample( texSamplerSt, input.fragTexCoord.xy );
-    const float4 metalnessTex = texSampler[NUI(metalnessTexId)].Sample( texSamplerSt, input.fragTexCoord.xy );
+    const float4 albedoTex = SrgbToLinear( texSampler[NUI(albedoTexId)].Sample( texSamplerSt, input.uv0.xy ) );
+    const float3 normalTex = 2.0f * texSampler[NUI(normalTexId)].Sample( texSamplerSt, input.uv0.xy ).rgb - float3( 1.0f, 1.0f, 1.0f );
+    const float4 roughnessTex = texSampler[NUI(roughnessTexId)].Sample( texSamplerSt, input.uv0.xy );
+    const float4 metalnessTex = texSampler[NUI(metalnessTexId)].Sample( texSamplerSt, input.uv0.xy );
 
     const float perceptualRoughness = saturate( globals.generic.x * roughnessTex.r + globals.generic.y );
 
     const float blendFactor = 1.0f;
-    const float3 normal = mul( lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalTex ), blendFactor ), float3x3( input.fragTangent, input.fragBitangent, input.fragTBN2 ) );
+    const float3 normal = mul( lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalTex ), blendFactor ), float3x3( input.tangent, input.bitangent, input.TBN2 ) );
 
     const float3 V = normalize( cameraOrigin.xyz - input.worldPosition.xyz );
     const float3 N = normalize( normal ); // normalize( input.worldPosition.xyz - modelOrigin );
@@ -179,7 +179,7 @@ PS_Output_MRT PSMain( PS_Input input )
     output.outColor.a = material.Tr;
 
     output.outColor1.rgb = 0.5f * ( N + float3( 1.0f, 1.0f, 1.0f ) );
-    //output.outColor1.rgb = float3( input.fragTexCoord.xy, 0.0f );
+    //output.outColor1.rgb = float3( input.uv0.xy, 0.0f );
     output.outColor1.a = 1.0f;
 
     //output.outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
@@ -189,6 +189,6 @@ PS_Output_MRT PSMain( PS_Input input )
 //  output.outColor.rgb += float3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
 //  output.outColor.rgb = envColor.rgb;
 //  output.outColor.rgb = 0.5f * N + float3( 0.5f, 0.5f, 0.5f );
-//  output.outColor.rg = input.fragTexCoord.rb;
+//  output.outColor.rg = input.uv0.rb;
     return output;
 }

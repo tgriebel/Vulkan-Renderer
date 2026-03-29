@@ -50,13 +50,13 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 		T = mul( modelMatrix, float4( T, 0.0f ) ).xyz;
 		N = mul( modelMatrix, float4( N, 0.0f ) ).xyz;
 		B = mul( modelMatrix, float4( B, 0.0f ) ).xyz;
-		output.fragTangent = T;
-		output.fragBitangent = B;
-		output.fragTBN2 = N;
+		output.tangent = T;
+		output.bitangent = B;
+		output.TBN2 = N;
 	}
 
-	output.fragColor = input.inColor;
-	output.fragTexCoord = input.inTexCoord;
+	output.color = input.inColor;
+	output.uv0 = input.inTexCoord;
 	output.clipPosition = output.pos;
 
 	return output;

@@ -41,21 +41,21 @@ PS_Output PSMain( PS_Input input )
     const float3 skyColor = cubeSamplers[NUI(material.textureId0)].Sample( cubeSamplersSt, CubeVector( viewVector ) ).rgb;
     output.outColor.rgb = SrgbToLinear( skyColor );
 #else
-    const float xm = abs( input.fragNormal.x );
-    const float ym = abs( input.fragNormal.y );
-    const float zm = abs( input.fragNormal.z );
+    const float xm = abs( input.normal.x );
+    const float ym = abs( input.normal.y );
+    const float zm = abs( input.normal.z );
     const float majorAxis = max( max( xm, ym ), zm );
 
     uint textureId = 0;
 
     if( majorAxis == xm ) {
-        textureId = ( sign( input.fragNormal.x ) > 0.0f ) ? material.textureId0 : material.textureId1;
+        textureId = ( sign( input.normal.x ) > 0.0f ) ? material.textureId0 : material.textureId1;
     } else if( majorAxis == ym ) {
-        textureId = ( sign( input.fragNormal.y ) > 0.0f ) ? material.textureId5 : material.textureId4;
+        textureId = ( sign( input.normal.y ) > 0.0f ) ? material.textureId5 : material.textureId4;
     } else if( majorAxis == zm ) {
-        textureId = ( sign( input.fragNormal.z ) > 0.0f ) ? material.textureId2 : material.textureId3;
+        textureId = ( sign( input.normal.z ) > 0.0f ) ? material.textureId2 : material.textureId3;
     }
-	output.outColor = SrgbToLinear( texSampler[NUI(textureId)].Sample( texSamplerSt, input.fragTexCoord.xy ) );
+	output.outColor = SrgbToLinear( texSampler[NUI(textureId)].Sample( texSamplerSt, input.uv0.xy ) );
 #endif
     output.outColor.a = 1.0f;
 	return output;

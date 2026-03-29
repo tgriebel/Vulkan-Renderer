@@ -44,7 +44,7 @@ PS_Output_MRT PSMain( PS_Input input )
 {
     PS_Output_MRT output = (PS_Output_MRT)0;
 
-    const int2 pixelLocation = int2( dimensions.xy * input.fragTexCoord.xy );
+    const int2 pixelLocation = int2( dimensions.xy * input.uv0.xy );
 
     output.outColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
     for ( int i = 0; i < int( globals.numSamples ); ++i ) {

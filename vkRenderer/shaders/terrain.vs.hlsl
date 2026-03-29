@@ -69,14 +69,14 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	output.objectPosition = position;
 	output.worldPosition = mul( surfaces[ output.objectId ].model, float4( position, 1.0f ) );
 	output.pos = mul( view.projMat, mul( view.viewMat, output.worldPosition ) );
-	output.fragColor = input.inColor;
-	output.fragTexCoord = input.inTexCoord;
+	output.color = input.inColor;
+	output.uv0 = input.inTexCoord;
 
 	float3x3 modelMat3 = (float3x3)surfaces[ output.objectId ].model;
 	float3x3 tangentMat = GetTerrainTangent( input.inTexCoord.xy );
 	float3 wt0 = mul( modelMat3, tangentMat[0] );
 	float3 wt1 = mul( modelMat3, tangentMat[1] );
-	output.fragNormal = normalize( cross( wt0, wt1 ) );
+	output.normal = normalize( cross( wt0, wt1 ) );
 	output.clipPosition = output.pos;
 
 	return output;

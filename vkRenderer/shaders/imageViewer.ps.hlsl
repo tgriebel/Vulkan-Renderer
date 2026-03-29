@@ -39,7 +39,7 @@ PS_Output PSMain( PS_Input input )
 
 	const bool isCubeImage = ( ( imageProcess.flags >> 0 ) & 1 ) != 0;
 
-	float2 uv = ( input.fragTexCoord.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
+	float2 uv = ( input.uv0.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
 
 	if( isCubeImage ) {
 		output.outColor = codeCubeSamplers[NUI( 0 )].Sample( codeCubeSamplersSt, float3( uv, 0.0f ) );

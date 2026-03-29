@@ -50,7 +50,7 @@ PS_Output PSMain( PS_Input input )
     const float3 viewForward = -normalize( MatCol3( viewMat, 2 ) );
     const float3 viewRight = normalize( MatCol3( viewMat, 0 ) );
     const float3 viewUp = normalize( MatCol3( viewMat, 1 ) );
-    const float3 viewVector = normalize( viewForward + ( 2.0f * input.fragTexCoord.x - 1.0f ) * viewRight + ( 2.0f * input.fragTexCoord.y - 1.0f ) * viewUp );
+    const float3 viewVector = normalize( viewForward + ( 2.0f * input.uv0.x - 1.0f ) * viewRight + ( 2.0f * input.uv0.y - 1.0f ) * viewUp );
 
     float3 up = float3( 0.0, 1.0, 0.0 );
     float3 right = normalize( cross( up, viewVector ) );

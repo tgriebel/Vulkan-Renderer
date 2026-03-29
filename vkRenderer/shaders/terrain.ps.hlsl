@@ -40,9 +40,9 @@ PS_Output PSMain( PS_Input input )
     const uint textureId1 = material.textureId2;
 
     const float maxHeight = globals.generic.x;
-    const float4 blendValue = maxHeight * texSampler[NUI(blendId)].Sample( texSamplerSt, input.fragTexCoord.xy );
-    const float4 texColor0 = SrgbToLinear( texSampler[NUI(textureId0)].Sample( texSamplerSt, input.fragTexCoord.xy ) );
-    const float4 texColor1 = SrgbToLinear( texSampler[NUI(textureId1)].Sample( texSamplerSt, input.fragTexCoord.xy ) );
+    const float4 blendValue = maxHeight * texSampler[NUI(blendId)].Sample( texSamplerSt, input.uv0.xy );
+    const float4 texColor0 = SrgbToLinear( texSampler[NUI(textureId0)].Sample( texSamplerSt, input.uv0.xy ) );
+    const float4 texColor1 = SrgbToLinear( texSampler[NUI(textureId1)].Sample( texSamplerSt, input.uv0.xy ) );
     const float4 texColor = lerp( texColor1, texColor0, smoothstep( 0.0f, 0.4f, blendValue ) );
     output.outColor = AMBIENT * texColor;
 
@@ -52,11 +52,11 @@ PS_Output PSMain( PS_Input input )
         const float spotAngle = dot( lightDist, lights[ i ].lightDir.xyz );
         const float spotFov = 0.5f;
         float4 color = texColor;
-        // color.rgb *= lights[ i ].intensity * max( 0.0f, dot( lightDist, normalize( input.fragNormal ) ) );
+        // color.rgb *= lights[ i ].intensity * max( 0.0f, dot( lightDist, normalize( input.normal ) ) );
 	    color.rgb *= lights[ i ].intensity.rgb * smoothstep( 0.5f, 0.8f, spotAngle );
         output.outColor += color;
     }
-   // output.outColor.rgb = input.fragNormal;
+   // output.outColor.rgb = input.normal;
 
     float visibility = 1.0f;
     const uint shadowMapTexId = 0;

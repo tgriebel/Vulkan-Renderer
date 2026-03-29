@@ -27,22 +27,22 @@ PS_Output PSMain( PS_Input input )
     // - l - m -
     // g - h - i
     // === ('e' is the current texel) ===
-    float3 a = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x - 2.0f * x,   input.fragTexCoord.y + 2 * y ) ).rgb;
-    float3 b = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x,              input.fragTexCoord.y + 2 * y ) ).rgb;
-    float3 c = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x + 2.0f * x,   input.fragTexCoord.y + 2 * y ) ).rgb;
+    float3 a = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x - 2.0f * x,   input.uv0.y + 2 * y ) ).rgb;
+    float3 b = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x,              input.uv0.y + 2 * y ) ).rgb;
+    float3 c = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x + 2.0f * x,   input.uv0.y + 2 * y ) ).rgb;
 
-    float3 d = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x - 2.0f * x,   input.fragTexCoord.y ) ).rgb;
-    float3 e = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x,              input.fragTexCoord.y ) ).rgb;
-    float3 f = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x + 2.0f * x,   input.fragTexCoord.y ) ).rgb;
+    float3 d = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x - 2.0f * x,   input.uv0.y ) ).rgb;
+    float3 e = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x,              input.uv0.y ) ).rgb;
+    float3 f = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x + 2.0f * x,   input.uv0.y ) ).rgb;
 
-    float3 g = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x - 2.0f * x,   input.fragTexCoord.y - 2 * y ) ).rgb;
-    float3 h = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x,              input.fragTexCoord.y - 2 * y ) ).rgb;
-    float3 i = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x + 2.0f * x,   input.fragTexCoord.y - 2 * y ) ).rgb;
+    float3 g = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x - 2.0f * x,   input.uv0.y - 2 * y ) ).rgb;
+    float3 h = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x,              input.uv0.y - 2 * y ) ).rgb;
+    float3 i = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x + 2.0f * x,   input.uv0.y - 2 * y ) ).rgb;
 
-    float3 j = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x - x,          input.fragTexCoord.y + y ) ).rgb;
-    float3 k = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x + x,          input.fragTexCoord.y + y ) ).rgb;
-    float3 l = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x - x,          input.fragTexCoord.y - y ) ).rgb;
-    float3 m = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.fragTexCoord.x + x,          input.fragTexCoord.y - y ) ).rgb;
+    float3 j = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x - x,          input.uv0.y + y ) ).rgb;
+    float3 k = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x + x,          input.uv0.y + y ) ).rgb;
+    float3 l = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x - x,          input.uv0.y - y ) ).rgb;
+    float3 m = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, float2( input.uv0.x + x,          input.uv0.y - y ) ).rgb;
 
     // Apply weighted distribution:
     // 0.5 + 0.125 + 0.125 + 0.125 + 0.125 = 1

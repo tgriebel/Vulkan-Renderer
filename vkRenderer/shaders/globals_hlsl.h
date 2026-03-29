@@ -42,6 +42,10 @@
 
 #define NUI( x ) NonUniformResourceIndex( x )
 
+#define BIND_SLOT( x )      [[vk::location( x )]]
+#define BIND_SET( S, N )    [[vk::binding( N, S )]]
+#define BIND_INLINE         [[vk::push_constant]]
+
 // GLSL mat4[col] returns a column. HLSL mat[row] returns a row.
 // These extract columns from a float4x4, matching GLSL mat[col] semantics.
 float3 MatCol3( float4x4 m, int c ) { return float3( m[0][c], m[1][c], m[2][c] ); }
@@ -169,179 +173,179 @@ struct PushConstants_t
 // Resource binding macros
 // ============================================================
 
-#define IMAGE_CONSTANT_LAYOUT( S, N, TYPE, NAME )                                   \
-    [[vk::binding(N, S)]] cbuffer _ShaderConstants                                  \
-    {                                                                               \
-        float4  dimensions;                                                         \
-        uint    pass;                                                               \
-        uint    previousImageId;                                                    \
-        uint    level;                                                              \
-        uint    layer;                                                              \
-        uint    mipCount;                                                           \
-        uint    layerCount;                                                         \
-        uint    _sc_pad0;                                                           \
-        uint    _sc_pad1;                                                           \
-        TYPE    NAME;                                                               \
+#define IMAGE_CONSTANT_LAYOUT( S, N, TYPE, NAME )                                                                   \
+    BIND_SET( S, N ) cbuffer _ShaderConstants                                                                       \
+    {                                                                                                               \
+        float4  dimensions;                                                                                         \
+        uint    pass;                                                                                               \
+        uint    previousImageId;                                                                                    \
+        uint    level;                                                                                              \
+        uint    layer;                                                                                              \
+        uint    mipCount;                                                                                           \
+        uint    layerCount;                                                                                         \
+        uint    _sc_pad0;                                                                                           \
+        uint    _sc_pad1;                                                                                           \
+        TYPE    NAME;                                                                                               \
     };
 
-#define CONSTANT_LAYOUT( S, N, TYPE, NAME )                                         \
-    [[vk::binding(N, S)]] cbuffer _ShaderConstants { TYPE NAME; };
+#define CONSTANT_LAYOUT( S, N, TYPE, NAME )                                                                         \
+                                                        BIND_SET( S, N ) cbuffer _ShaderConstants { TYPE NAME; };
 
-#define MODEL_LAYOUT( S, N )                                                        \
-    [[vk::binding(N, S)]] StructuredBuffer<surface_t> surfaces;
+#define MODEL_LAYOUT( S, N )                                                                                        \
+                                                        BIND_SET( S, N ) StructuredBuffer<surface_t> surfaces;
 
-#define GLOBALS_LAYOUT( S, N )                                                      \
-    [[vk::binding(N, S)]] ConstantBuffer<Globals_t> globals;
+#define GLOBALS_LAYOUT( S, N )                                                                                      \
+                                                        BIND_SET( S, N ) ConstantBuffer<Globals_t> globals;
 
-#define VIEW_LAYOUT( S, N )                                                         \
-    [[vk::binding(N, S)]] StructuredBuffer<view_t> views;
+#define VIEW_LAYOUT( S, N )                                                                                         \
+                                                        BIND_SET( S, N ) StructuredBuffer<view_t> views;
 
-#define READ_BUFFER_LAYOUT( S, N, TYPE, NAME )                                      \
-    [[vk::binding(N, S)]] StructuredBuffer<TYPE> NAME;
+#define READ_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                      \
+                                                        BIND_SET( S, N ) StructuredBuffer<TYPE> NAME;
 
-#define WRITE_BUFFER_LAYOUT( S, N, TYPE, NAME )                                     \
-    [[vk::binding(N, S)]] RWStructuredBuffer<TYPE> NAME;
+#define WRITE_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                     \
+                                                        BIND_SET( S, N ) RWStructuredBuffer<TYPE> NAME;
 
-#define SAMPLER_2D_LAYOUT( S, N )                                                   \
-    [[vk::binding(N, S)]] Texture2D texSampler[];                                   \
-    [[vk::binding(N, S)]] SamplerState texSamplerSt;
+#define SAMPLER_2D_LAYOUT( S, N )                                                                                   \
+                                                        BIND_SET( S, N ) Texture2D texSampler[];                    \
+                                                        BIND_SET( S, N ) SamplerState texSamplerSt;
 
-#define SAMPLER_CUBE_LAYOUT( S, N )                                                 \
-    [[vk::binding(N, S)]] TextureCube cubeSamplers[];                               \
-    [[vk::binding(N, S)]] SamplerState cubeSamplersSt;
+#define SAMPLER_CUBE_LAYOUT( S, N )                                                                                 \
+                                                        BIND_SET( S, N ) TextureCube cubeSamplers[];                \
+                                                        BIND_SET( S, N ) SamplerState cubeSamplersSt;
 
-#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )                                          \
-    [[vk::binding(N, S)]] TEXTYPE codeSamplers[];                                   \
-    [[vk::binding(N, S)]] SamplerState codeSamplersSt;
+#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )                                                                          \
+                                                        BIND_SET( S, N ) TEXTYPE codeSamplers[];                    \
+                                                        BIND_SET( S, N ) SamplerState codeSamplersSt;
 
-#define CODE_IMAGE_CUBE_LAYOUT( S, N )                                              \
-    [[vk::binding(N, S)]] TextureCube codeCubeSamplers[];                           \
-    [[vk::binding(N, S)]] SamplerState codeCubeSamplersSt;
+#define CODE_IMAGE_CUBE_LAYOUT( S, N )                                                                              \
+                                                        BIND_SET( S, N ) TextureCube codeCubeSamplers[];            \
+                                                        BIND_SET( S, N ) SamplerState codeCubeSamplersSt;
 
-#define STENCIL_LAYOUT( S, N, TEXTYPE )                                             \
-    [[vk::binding(N, S)]] TEXTYPE stencilImage;                                    \
-    [[vk::binding(N, S)]] SamplerState stencilImageSt;
+#define STENCIL_LAYOUT( S, N, TEXTYPE )                                                                             \
+                                                        BIND_SET( S, N ) TEXTYPE stencilImage;                      \
+                                                        BIND_SET( S, N ) SamplerState stencilImageSt;
 
-#define MATERIAL_LAYOUT( S, N )                                                     \
-    [[vk::binding(N, S)]] StructuredBuffer<material_t> materials;
+#define MATERIAL_LAYOUT( S, N )                                                                                     \
+                                                        BIND_SET( S, N ) StructuredBuffer<material_t> materials;
 
-#define LIGHT_LAYOUT( S, N )                                                        \
-    [[vk::binding(N, S)]] StructuredBuffer<light_t> lights;
+#define LIGHT_LAYOUT( S, N )                                                                                        \
+                                                        BIND_SET( S, N ) StructuredBuffer<light_t> lights;
 
-#define PASS_LAYOUT( S, N )                                                         \
-    [[vk::binding(N, S)]] StructuredBuffer<pass_t> passData;
+#define PASS_LAYOUT( S, N )                                                                                         \
+                                                        BIND_SET( S, N ) StructuredBuffer<pass_t> passData;
 
-#define MATERIAL_PUSH_CONSTANTS                                                     \
-    [[vk::push_constant]] PushConstants_t pushConstants;
+#define MATERIAL_PUSH_CONSTANTS                                                                                     \
+                                                        BIND_INLINE PushConstants_t pushConstants;
 
 // ============================================================
 // Compound bind macros
 // ============================================================
 
-#define GLOBAL_BINDS( SET )                                                         \
-    GLOBALS_LAYOUT( SET, 0 )                                                        \
-    VIEW_LAYOUT( SET, 1 )                                                           \
-    SAMPLER_2D_LAYOUT( SET, 2 )                                                     \
-    SAMPLER_CUBE_LAYOUT( SET, 3 )                                                   \
-    MATERIAL_LAYOUT( SET, 4 )
+#define GLOBAL_BINDS( SET )                                                                                         \
+                                                        GLOBALS_LAYOUT( SET, 0 )                                    \
+                                                        VIEW_LAYOUT( SET, 1 )                                       \
+                                                        SAMPLER_2D_LAYOUT( SET, 2 )                                 \
+                                                        SAMPLER_CUBE_LAYOUT( SET, 3 )                               \
+                                                        MATERIAL_LAYOUT( SET, 4 )
 
-#define VIEW_BINDS( SET )               MODEL_LAYOUT( SET, 0 )
+#define VIEW_BINDS( SET )                               MODEL_LAYOUT( SET, 0 )
 
-#define PASS_BINDS( SET, TEXTYPE )                                                  \
-    LIGHT_LAYOUT( SET, 0 )                                                          \
-    CODE_IMAGE_LAYOUT( SET, 1, TEXTYPE )                                            \
-    CODE_IMAGE_CUBE_LAYOUT( SET, 2 )                                                \
-    STENCIL_LAYOUT( SET, 3, TEXTYPE )
+#define PASS_BINDS( SET, TEXTYPE )                                                                                  \
+                                                        LIGHT_LAYOUT( SET, 0 )                                      \
+                                                        CODE_IMAGE_LAYOUT( SET, 1, TEXTYPE )                        \
+                                                        CODE_IMAGE_CUBE_LAYOUT( SET, 2 )                            \
+                                                        STENCIL_LAYOUT( SET, 3, TEXTYPE )
 
 // ============================================================
 // Vertex shader I/O
 // ============================================================
 
-#define VS_IN                                                                       \
-    struct VS_Input                                                                 \
-    {                                                                               \
-        [[vk::location(0)]] float3 inPosition  : POSITION;                         \
-        [[vk::location(1)]] float4 inColor     : COLOR0;                           \
-        [[vk::location(2)]] float3 inNormal    : NORMAL;                           \
-        [[vk::location(3)]] float3 inTangent   : TANGENT;                          \
-        [[vk::location(4)]] float3 inBitangent : BINORMAL;                         \
-        [[vk::location(5)]] float4 inTexCoord  : TEXCOORD0;                        \
+#define VS_IN                                                                                                       \
+    struct VS_Input                                                                                                 \
+    {                                                                                                               \
+        BIND_SLOT(0) float3 inPosition                  : POSITION;                                                 \
+        BIND_SLOT(1) float4 inColor                     : COLOR0;                                                   \
+        BIND_SLOT(2) float3 inNormal                    : NORMAL;                                                   \
+        BIND_SLOT(3) float3 inTangent                   : TANGENT;                                                  \
+        BIND_SLOT(4) float3 inBitangent                 : BINORMAL;                                                 \
+        BIND_SLOT(5) float4 inTexCoord                  : TEXCOORD0;                                                \
     };
 
-#define VS_OUT                                                                      \
-    struct VS_Output                                                                \
-    {                                                                               \
-        float4 pos                                           : SV_Position;         \
-        [[vk::location(0)]] float4 fragColor                 : COLOR0;             \
-        [[vk::location(1)]] float3 fragNormal                : NORMAL;             \
-        [[vk::location(2)]] float3 fragTangent               : TEXCOORD2;          \
-        [[vk::location(3)]] float3 fragBitangent             : TEXCOORD3;          \
-        [[vk::location(4)]] float3 fragTBN2                  : TEXCOORD4;          \
-        [[vk::location(5)]] float4 fragTexCoord              : TEXCOORD5;          \
-        [[vk::location(6)]] float3 objectPosition            : TEXCOORD6;          \
-        [[vk::location(7)]] float4 clipPosition              : TEXCOORD7;          \
-        [[vk::location(8)]] float4 worldPosition             : TEXCOORD8;          \
-        [[vk::location(9)]] nointerpolation uint objectId    : TEXCOORD9;          \
+#define VS_OUT                                                                                                      \
+    struct VS_Output                                                                                                \
+    {                                                                                                               \
+                     float4 pos                         : SV_Position;                                              \
+        BIND_SLOT(0) float4 color                       : COLOR0;                                                   \
+        BIND_SLOT(1) float3 normal                      : NORMAL;                                                   \
+        BIND_SLOT(2) float3 tangent                     : TEXCOORD2;                                                \
+        BIND_SLOT(3) float3 bitangent                   : TEXCOORD3;                                                \
+        BIND_SLOT(4) float3 TBN2                        : TEXCOORD4;                                                \
+        BIND_SLOT(5) float4 uv0                         : TEXCOORD5;                                                \
+        BIND_SLOT(6) float3 objectPosition              : TEXCOORD6;                                                \
+        BIND_SLOT(7) float4 clipPosition                : TEXCOORD7;                                                \
+        BIND_SLOT(8) float4 worldPosition               : TEXCOORD8;                                                \
+        BIND_SLOT(9) nointerpolation uint objectId      : TEXCOORD9;                                                \
     };
 
-#define VS_LAYOUT_BASIC_IO              VS_IN VS_OUT
+#define VS_LAYOUT_BASIC_IO                              VS_IN VS_OUT
 
-#define VS_LAYOUT_STANDARD( TEXTYPE )                                               \
-    GLOBAL_BINDS( 0 )                                                               \
-    VIEW_BINDS( 1 )                                                                 \
-    PASS_BINDS( 2, TEXTYPE )                                                        \
-    MATERIAL_PUSH_CONSTANTS                                                         \
-    VS_IN                                                                           \
-    VS_OUT
+#define VS_LAYOUT_STANDARD( TEXTYPE )                                                                               \
+                                                        GLOBAL_BINDS( 0 )                                           \
+                                                        VIEW_BINDS( 1 )                                             \
+                                                        PASS_BINDS( 2, TEXTYPE )                                    \
+                                                        MATERIAL_PUSH_CONSTANTS                                     \
+                                                        VS_IN                                                       \
+                                                        VS_OUT
 
 // ============================================================
 // Pixel shader I/O
 // ============================================================
 
-#define PS_IN                                                                       \
-    struct PS_Input                                                                 \
-    {                                                                               \
-        float4 pos                                           : SV_Position;         \
-        [[vk::location(0)]] float4 fragColor                 : COLOR0;             \
-        [[vk::location(1)]] float3 fragNormal                : NORMAL;             \
-        [[vk::location(2)]] float3 fragTangent               : TEXCOORD2;          \
-        [[vk::location(3)]] float3 fragBitangent             : TEXCOORD3;          \
-        [[vk::location(4)]] float3 fragTBN2                  : TEXCOORD4;          \
-        [[vk::location(5)]] float4 fragTexCoord              : TEXCOORD5;          \
-        [[vk::location(6)]] float3 objectPosition            : TEXCOORD6;          \
-        [[vk::location(7)]] float4 clipPosition              : TEXCOORD7;          \
-        [[vk::location(8)]] float4 worldPosition             : TEXCOORD8;          \
-        [[vk::location(9)]] nointerpolation uint objectId    : TEXCOORD9;          \
+#define PS_IN                                                                                                       \
+    struct PS_Input                                                                                                 \
+    {                                                                                                               \
+                     float4 pos                         : SV_Position;                                              \
+        BIND_SLOT(0) float4 color                       : COLOR0;                                                   \
+        BIND_SLOT(1) float3 normal                      : NORMAL;                                                   \
+        BIND_SLOT(2) float3 tangent                     : TEXCOORD2;                                                \
+        BIND_SLOT(3) float3 bitangent                   : TEXCOORD3;                                                \
+        BIND_SLOT(4) float3 TBN2                        : TEXCOORD4;                                                \
+        BIND_SLOT(5) float4 uv0                         : TEXCOORD5;                                                \
+        BIND_SLOT(6) float3 objectPosition              : TEXCOORD6;                                                \
+        BIND_SLOT(7) float4 clipPosition                : TEXCOORD7;                                                \
+        BIND_SLOT(8) float4 worldPosition               : TEXCOORD8;                                                \
+        BIND_SLOT(9) nointerpolation uint objectId      : TEXCOORD9;                                                \
     };
 
-#define PS_OUT                                                                      \
-    struct PS_Output                                                                \
-    {                                                                               \
-        float4 outColor : SV_Target0;                                              \
+#define PS_OUT                                                                                                      \
+    struct PS_Output                                                                                                \
+    {                                                                                                               \
+        float4 outColor : SV_Target0;                                                                               \
     };
 
-#define PS_LAYOUT_MRT_1_OUT                                                         \
-    struct PS_Output_MRT                                                            \
-    {                                                                               \
-        float4 outColor  : SV_Target0;                                             \
-        float4 outColor1 : SV_Target1;                                             \
+#define PS_LAYOUT_MRT_1_OUT                                                                                         \
+    struct PS_Output_MRT                                                                                            \
+    {                                                                                                               \
+        float4 outColor  : SV_Target0;                                                                              \
+        float4 outColor1 : SV_Target1;                                                                              \
     };
 
-#define PS_LAYOUT_BASIC_IO              PS_IN PS_OUT
+#define PS_LAYOUT_BASIC_IO                              PS_IN PS_OUT
 
-#define PS_LAYOUT_STANDARD( TEXTYPE )                                               \
-    GLOBAL_BINDS( 0 )                                                               \
-    VIEW_BINDS( 1 )                                                                 \
-    PASS_BINDS( 2, TEXTYPE )                                                        \
-    MATERIAL_PUSH_CONSTANTS                                                         \
-    PS_IN                                                                           \
-    PS_OUT
+#define PS_LAYOUT_STANDARD( TEXTYPE )                                                                               \
+                                                        GLOBAL_BINDS( 0 )                                           \
+                                                        VIEW_BINDS( 1 )                                             \
+                                                        PASS_BINDS( 2, TEXTYPE )                                    \
+                                                        MATERIAL_PUSH_CONSTANTS                                     \
+                                                        PS_IN                                                       \
+                                                        PS_OUT
 
-#define PS_LAYOUT_IMAGE_PROCESS( TEXTYPE, USERTYPE )                                \
-    GLOBAL_BINDS( 0 )                                                               \
-    CODE_IMAGE_LAYOUT( 1, 0, TEXTYPE )                                              \
-    CODE_IMAGE_CUBE_LAYOUT( 1, 1 )                                                  \
-    STENCIL_LAYOUT( 1, 2, TEXTYPE )                                                 \
-    IMAGE_CONSTANT_LAYOUT( 1, 3, USERTYPE, imageProcess )
+#define PS_LAYOUT_IMAGE_PROCESS( TEXTYPE, USERTYPE )                                                                \
+                                                        GLOBAL_BINDS( 0 )                                           \
+                                                        CODE_IMAGE_LAYOUT( 1, 0, TEXTYPE )                          \
+                                                        CODE_IMAGE_CUBE_LAYOUT( 1, 1 )                              \
+                                                        STENCIL_LAYOUT( 1, 2, TEXTYPE )                             \
+                                                        IMAGE_CONSTANT_LAYOUT( 1, 3, USERTYPE, imageProcess )
 
 #endif // GLOBALS_HLSL_H
