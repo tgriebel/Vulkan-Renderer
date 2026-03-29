@@ -179,9 +179,6 @@
     <ClInclude Include="GeoBuilder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="shaders\globals.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="scenes\chessScene.h">
       <Filter>Scenes</Filter>
     </ClInclude>
@@ -266,9 +263,6 @@
     <ClInclude Include="src\render_binding\imageView.h">
       <Filter>Binding</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\light.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="src\render_state\cmdContext.h">
       <Filter>Device Context</Filter>
     </ClInclude>
@@ -281,17 +275,11 @@
     <ClInclude Include="src\globals\drawGroup.h">
       <Filter>Globals</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\color.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="src\render_state\frameBuffer.h">
       <Filter>Device Context</Filter>
     </ClInclude>
     <ClInclude Include="src\draw_passes\drawpass.h">
       <Filter>Draw Passes</Filter>
-    </ClInclude>
-    <ClInclude Include="shaders\util.h">
-      <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\renderResource.h">
       <Filter>Core</Filter>
@@ -319,9 +307,6 @@
     </ClInclude>
     <ClInclude Include="src\render_tasks\imguiTask.h">
       <Filter>Tasks</Filter>
-    </ClInclude>
-    <ClInclude Include="shaders\globals_hlsl.h">
-      <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\imageArray.h">
       <Filter>Binding</Filter>
@@ -367,104 +352,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="glsl_compile.bat">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\skybox.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\skybox.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\lit.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\terrain.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\terrain.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\depth.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\shadow.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\postProcess.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\emissive.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\tree.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\crt.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\clear.comp">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\downsample.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\fullscreen.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\resolve.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\gaussian.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\imagewriteback.comp">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\equirectangularSky.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\preCalculatedDiffuseIBL.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\preCalculatedSpecularIbl.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\computeBrdfLut.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\default.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\default.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\simple.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\simple.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\luminance.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\luminanceDownsample.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\imageViewer.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\noVb.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\bloomDownsample.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="shaders\bloomUpsample.frag">
-      <Filter>Shaders</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Shaders">
       <UniqueIdentifier>{560cce8d-e0a9-4227-bef7-b0e8ec17db07}</UniqueIdentifier>
     </Filter>
@@ -504,5 +391,112 @@
     <Filter Include="Tasks">
       <UniqueIdentifier>{e842c2f5-a20d-4502-bce7-30628c72001e}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="shaders\bloomUpsample.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\clear.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\computeBrdfLut.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\crt.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\default.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\default.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\depth.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\downsample.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\emissive.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\equirectangularSky.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\fullscreen.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\gaussian.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\imageViewer.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\imagewriteback.cs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\lit.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\luminance.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\luminanceDownsample.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\noVb.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\postProcess.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\preCalculatedDiffuseIBL.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\preCalculatedSpecularIbl.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\resolve.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\shadow.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\simple.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\simple.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\skybox.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\skybox.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\terrain.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\terrain.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\tree.vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\bloomDownsample.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\globals_hlsl.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\color_hlsl.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\light_hlsl.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\util_hlsl.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

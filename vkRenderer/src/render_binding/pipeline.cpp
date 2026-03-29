@@ -208,7 +208,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 	vertShaderStageInfo.module = prog.vk_shaders[ 0 ];
-	vertShaderStageInfo.pName = "main";
+	vertShaderStageInfo.pName = "VSMain";
 
 	assert( prog.shaders[ 0].type == shaderType_t::VERTEX );
 
@@ -216,7 +216,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	fragShaderStageInfo.module = prog.vk_shaders[ 1 ];
-	fragShaderStageInfo.pName = "main";
+	fragShaderStageInfo.pName = "PSMain";
 
 	assert( prog.shaders[ 1 ].type == shaderType_t::PIXEL );
 
@@ -503,7 +503,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
 	computeShaderStageInfo.module = prog.vk_shaders[ 0 ];
-	computeShaderStageInfo.pName = "main";
+	computeShaderStageInfo.pName = "CSMain";
 	computeShaderStageInfo.pNext = nullptr;
 
 	VkPushConstantRange pushRanges;

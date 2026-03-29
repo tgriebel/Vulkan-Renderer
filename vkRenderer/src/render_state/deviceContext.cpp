@@ -1174,9 +1174,10 @@ void DeviceContext::Create( Window& window )
 
 		VkPhysicalDeviceDescriptorIndexingFeatures descIndexing;
 		memset( &descIndexing, 0, sizeof( VkPhysicalDeviceDescriptorIndexingFeatures ) );
-		descIndexing.runtimeDescriptorArray = true;
 		descIndexing.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
 		descIndexing.pNext = NULL;
+		descIndexing.runtimeDescriptorArray = true;
+		descIndexing.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 		createInfo.pNext = &descIndexing;
 
 		VK_CHECK_RESULT( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) );
