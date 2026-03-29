@@ -39,7 +39,7 @@
       "name": "SkyCube",
       "vs": "skybox",
       "ps": "skybox",
-	  "perm": "skycube"
+	  "perm": ["skycube"]
     },
 	{
 	  "name": "EquirectangularSampler",
@@ -130,7 +130,7 @@
       "name": "ResolveMSAA",
       "vs": "fullscreen",
       "ps": "resolve",
-	  "perm": "msaa",
+	  "perm": ["msaa", "mrt"],
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },

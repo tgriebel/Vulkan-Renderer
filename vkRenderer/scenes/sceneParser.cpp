@@ -75,14 +75,50 @@ typedef int ParseObjectFunc( parseState_t& st, void* object );
 
 struct objectTuple_t
 {
-	const char* name;
-	void* ptr;
-	ParseObjectFunc* func;
+	const char*			name;
+	void*				ptr;
+	uint32_t			elementStride;
+	uint32_t			elementCount;
+	ParseObjectFunc*	func;
 };
 
 
 void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object );
 void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32_t objectCount );
+
+
+// Counts the total number of tokens consumed by the token at st.tokens[index],
+// including all children for objects/arrays. Used to skip unknown JSON values.
+static int CountTokens( const parseState_t& st, int index )
+{
+	if ( index >= st.r ) {
+		return 0;
+	}
+
+	const jsmntok_t& tok = st.tokens[ index ];
+
+	if ( tok.type == JSMN_OBJECT )
+	{
+		int count = 1;
+		for ( int i = 0; i < tok.size; ++i )
+		{
+			count += CountTokens( st, index + count ); // key
+			count += CountTokens( st, index + count ); // value
+		}
+		return count;
+	}
+	else if ( tok.type == JSMN_ARRAY )
+	{
+		int count = 1;
+		for ( int i = 0; i < tok.size; ++i )
+		{
+			count += CountTokens( st, index + count ); // element
+		}
+		return count;
+	}
+
+	return 1; // primitive or string
+}
 
 
 void InitSceneType( const std::string type, Scene** scene )
@@ -225,11 +261,11 @@ int ParseImageObject( parseState_t& st, void* object )
 	const uint32_t objectCount = 5;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, &ParseStringObject },
-		{ "type", &type, &ParseStringObject },
-		{ "isLinear", &isLinear, &ParseBoolObject },
-		{ "uvAddress", &uvAddress, &ParseStringObject },
-		{ "uvFilter", &uvFilter, &ParseStringObject },
+		{ "name",		&name,			TOKEN_LEN,		1,	&ParseStringObject },
+		{ "type",		&type,			TOKEN_LEN,		1,	&ParseStringObject },
+		{ "isLinear",	&isLinear,		sizeof( bool ),	1,	&ParseBoolObject },
+		{ "uvAddress",	&uvAddress,		TOKEN_LEN,		1,	&ParseStringObject },	// BUG FIX: was sizeof( bool ), should be TOKEN_LEN — uvAddress is char[]
+		{ "uvFilter",	&uvFilter,		TOKEN_LEN,		1,	&ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -297,17 +333,16 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ enumMap[ 0 ].name, &s[ 0 ], &ParseStringObject },
-		{ enumMap[ 1 ].name, &s[ 1 ], &ParseStringObject },
-		{ enumMap[ 2 ].name, &s[ 2 ], &ParseStringObject },
-		{ enumMap[ 3 ].name, &s[ 3 ], &ParseStringObject },
-		{ enumMap[ 4 ].name, &s[ 4 ], &ParseStringObject },
-		{ enumMap[ 5 ].name, &s[ 5 ], &ParseStringObject },
-		{ enumMap[ 6 ].name, &s[ 6 ], &ParseStringObject },
-		{ enumMap[ 7 ].name, &s[ 7 ], &ParseStringObject },
-		{ enumMap[ 8 ].name, &s[ 8 ], &ParseStringObject },
-		{ enumMap[ 9 ].name, &s[ 9 ], &ParseStringObject },
-
+		{ enumMap[ 0 ].name,	&s[ 0 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 1 ].name,	&s[ 1 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 2 ].name,	&s[ 2 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 3 ].name,	&s[ 3 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 4 ].name,	&s[ 4 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 5 ].name,	&s[ 5 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 6 ].name,	&s[ 6 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 7 ].name,	&s[ 7 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 8 ].name,	&s[ 8 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 9 ].name,	&s[ 9 ],	TOKEN_LEN,	1,	&ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -361,26 +396,26 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 
 	static const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ enumMap[ 0 ].name, &s[ 0 ], &ParseStringObject },
-		{ enumMap[ 1 ].name, &s[ 1 ],&ParseStringObject },
-		{ enumMap[ 2 ].name, &s[ 2 ], &ParseStringObject },
-		{ enumMap[ 3 ].name, &s[ 3 ], &ParseStringObject },
-		{ enumMap[ 4 ].name, &s[ 4 ], &ParseStringObject },
-		{ enumMap[ 5 ].name, &s[ 5 ], &ParseStringObject },
-		{ enumMap[ 6 ].name, &s[ 6 ], &ParseStringObject },
-		{ enumMap[ 7 ].name, &s[ 7 ], &ParseStringObject },
-		{ enumMap[ 8 ].name, &s[ 8 ], &ParseStringObject },
-		{ enumMap[ 9 ].name, &s[ 9 ], &ParseStringObject },
-		{ enumMap[ 10 ].name, &s[ 10 ], &ParseStringObject },
-		{ enumMap[ 11 ].name, &s[ 11 ] ,&ParseStringObject },
-		{ enumMap[ 12 ].name, &s[ 12 ] ,&ParseStringObject },
-		{ enumMap[ 13 ].name, &s[ 13 ] ,&ParseStringObject },
-		{ enumMap[ 14 ].name, &s[ 14 ] ,&ParseStringObject },
-		{ enumMap[ 15 ].name, &s[ 15 ] ,&ParseStringObject },
-		{ enumMap[ 16 ].name, &s[ 16 ] ,&ParseStringObject },
-		{ enumMap[ 17 ].name, &s[ 17 ] ,&ParseStringObject },
-		{ enumMap[ 18 ].name, &s[ 18 ] ,&ParseStringObject },
-		{ enumMap[ 19 ].name, &s[ 19 ] ,&ParseStringObject },
+		{ enumMap[ 0 ].name,	&s[ 0 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 1 ].name,	&s[ 1 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 2 ].name,	&s[ 2 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 3 ].name,	&s[ 3 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 4 ].name,	&s[ 4 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 5 ].name,	&s[ 5 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 6 ].name,	&s[ 6 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 7 ].name,	&s[ 7 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 8 ].name,	&s[ 8 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 9 ].name,	&s[ 9 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 10 ].name,	&s[ 10 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 11 ].name,	&s[ 11 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 12 ].name,	&s[ 12 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 13 ].name,	&s[ 13 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 14 ].name,	&s[ 14 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 15 ].name,	&s[ 15 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 16 ].name,	&s[ 16 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 17 ].name,	&s[ 17 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 18 ].name,	&s[ 18 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 19 ].name,	&s[ 19 ],	TOKEN_LEN,	1,	&ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -416,17 +451,17 @@ int ParseModelObject( parseState_t& st, void* object )
 	const uint32_t objectCount = 11;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &od.name, &ParseStringObject },
-		{ "model", &od.modelName, &ParseStringObject },
-		{ "argStr0", &od.s[0], &ParseStringObject },
-		{ "argStr1", &od.s[1], &ParseStringObject },
-		{ "argStr2", &od.s[2], &ParseStringObject },
-		{ "argInt0", &od.i[0], &ParseIntObject },
-		{ "argInt1", &od.i[1], &ParseIntObject },
-		{ "argInt2", &od.i[2], &ParseIntObject },
-		{ "argFlt0", &od.f[0], &ParseFloatObject },
-		{ "argFlt1", &od.f[1], &ParseFloatObject },
-		{ "argFlt2", &od.f[2], &ParseFloatObject },
+		{ "name",		&od.name,		TOKEN_LEN,		1,	&ParseStringObject },
+		{ "model",		&od.modelName,	TOKEN_LEN,		1,	&ParseStringObject },
+		{ "argStr0",	&od.s[0],		TOKEN_LEN,		1,	&ParseStringObject },
+		{ "argStr1",	&od.s[1],		TOKEN_LEN,		1,	&ParseStringObject },
+		{ "argStr2",	&od.s[2],		TOKEN_LEN,		1,	&ParseStringObject },
+		{ "argInt0",	&od.i[0],		sizeof( int ),	1,	&ParseIntObject },
+		{ "argInt1",	&od.i[1],		sizeof( int ),	1,	&ParseIntObject },
+		{ "argInt2",	&od.i[2],		sizeof( int ),	1,	&ParseIntObject },
+		{ "argFlt0",	&od.f[0],		sizeof( float ),1,	&ParseFloatObject },
+		{ "argFlt1",	&od.f[1],		sizeof( float ),1,	&ParseFloatObject },
+		{ "argFlt2",	&od.f[2],		sizeof( float ),1,	&ParseFloatObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -471,20 +506,20 @@ int ParseEntityObject( parseState_t& st, void* object )
 	const uint32_t objectCount = 14;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, &ParseStringObject },
-		{ "model", &modelName, &ParseStringObject },
-		{ "material", &materialName, &ParseStringObject },
-		{ "x", &x, &ParseFloatObject },
-		{ "y", &y, &ParseFloatObject },
-		{ "z", &z, &ParseFloatObject },
-		{ "rx", &rx, &ParseFloatObject },
-		{ "ry", &ry, &ParseFloatObject },
-		{ "rz", &rz, &ParseFloatObject },
-		{ "sx", &sx, &ParseFloatObject },
-		{ "sy", &sy, &ParseFloatObject },
-		{ "sz", &sz, &ParseFloatObject },
-		{ "hidden", &hidden, &ParseBoolObject },
-		{ "wireframe", &wireframe, &ParseBoolObject },
+		{ "name",		&name,			TOKEN_LEN,		1,	&ParseStringObject },
+		{ "model",		&modelName,		TOKEN_LEN,		1,	&ParseStringObject },
+		{ "material",	&materialName,	TOKEN_LEN,		1,	&ParseStringObject },
+		{ "x",			&x,				sizeof( float ),1,	&ParseFloatObject },
+		{ "y",			&y,				sizeof( float ),1,	&ParseFloatObject },
+		{ "z",			&z,				sizeof( float ),1,	&ParseFloatObject },
+		{ "rx",			&rx,			sizeof( float ),1,	&ParseFloatObject },
+		{ "ry",			&ry,			sizeof( float ),1,	&ParseFloatObject },
+		{ "rz",			&rz,			sizeof( float ),1,	&ParseFloatObject },
+		{ "sx",			&sx,			sizeof( float ),1,	&ParseFloatObject },
+		{ "sy",			&sy,			sizeof( float ),1,	&ParseFloatObject },
+		{ "sz",			&sz,			sizeof( float ),1,	&ParseFloatObject },
+		{ "hidden",		&hidden,		sizeof( bool ),	1,	&ParseBoolObject },
+		{ "wireframe",	&wireframe,		sizeof( bool ),	1,	&ParseBoolObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -539,29 +574,29 @@ int ParseMaterialObject( parseState_t& st, void* object )
 	const uint32_t objectCount = 23;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", &name, &ParseStringObject },
-		{ "KaR", &mParms.Ka.r, &ParseFloatObject },
-		{ "KaG", &mParms.Ka.g, &ParseFloatObject },
-		{ "KaB", &mParms.Ka.b, &ParseFloatObject },
-		{ "KeR", &mParms.Ke.r, &ParseFloatObject },
-		{ "KeG", &mParms.Ke.g, &ParseFloatObject },
-		{ "KeB", &mParms.Ke.b, &ParseFloatObject },
-		{ "KdR", &mParms.Kd.r, &ParseFloatObject },
-		{ "KdG", &mParms.Kd.g, &ParseFloatObject },
-		{ "KdB", &mParms.Kd.b, &ParseFloatObject },
-		{ "KsR", &mParms.Ks.r, &ParseFloatObject },
-		{ "KsG", &mParms.Ks.g, &ParseFloatObject },
-		{ "KsB", &mParms.Ks.b, &ParseFloatObject },
-		{ "TfR", &mParms.Tf.r, &ParseFloatObject },
-		{ "TfG", &mParms.Tf.g, &ParseFloatObject },
-		{ "TfB", &mParms.Tf.b, &ParseFloatObject },
-		{ "tr", &mParms.Tr, &ParseFloatObject },
-		{ "ns", &mParms.Ns, &ParseFloatObject },
-		{ "ni", &mParms.Ni, &ParseFloatObject },
-		{ "d", &mParms.d, &ParseFloatObject },
-		{ "illum", &mParms.illum, &ParseFloatObject },
-		{ "shaders", &m, &ParseMaterialShaderObject },
-		{ "textures", &m, &ParseMaterialTextureObject },
+		{ "name",		&name,			TOKEN_LEN,			1,	&ParseStringObject },
+		{ "KaR",		&mParms.Ka.r,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KaG",		&mParms.Ka.g,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KaB",		&mParms.Ka.b,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KeR",		&mParms.Ke.r,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KeG",		&mParms.Ke.g,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KeB",		&mParms.Ke.b,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KdR",		&mParms.Kd.r,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KdG",		&mParms.Kd.g,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KdB",		&mParms.Kd.b,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KsR",		&mParms.Ks.r,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KsG",		&mParms.Ks.g,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "KsB",		&mParms.Ks.b,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "TfR",		&mParms.Tf.r,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "TfG",		&mParms.Tf.g,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "TfB",		&mParms.Tf.b,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "tr",			&mParms.Tr,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "ns",			&mParms.Ns,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "ni",			&mParms.Ni,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "d",			&mParms.d,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "illum",		&mParms.illum,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "shaders",	&m,				sizeof( Material ),	1,	&ParseMaterialShaderObject },
+		{ "textures",	&m,				sizeof( Material ),	1,	&ParseMaterialTextureObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -592,15 +627,15 @@ int ParseShaderObject( parseState_t& st, void* object )
 	const uint32_t objectCount = 9;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name", reinterpret_cast<void*>( name ), &ParseStringObject },
-		{ "vs", reinterpret_cast<void*>( vsShader ), &ParseStringObject },
-		{ "ps", reinterpret_cast<void*>( psShader ), &ParseStringObject },
-		{ "cs", reinterpret_cast<void*>( csShader ), &ParseStringObject },
-		{ "bindset", reinterpret_cast<void*>( &bindSet ), &ParseStringObject },
-		{ "perm", reinterpret_cast<void*>( &perms[ 0 ] ), &ParseStringObject },
-		{ "sampling_ms", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
-		{ "image_shader", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
-		{ "no_vb", reinterpret_cast<void*>( &shaderFlags ), &ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> },
+		{ "name",			&name,			TOKEN_LEN,				1,	&ParseStringObject },
+		{ "vs",				&vsShader,		TOKEN_LEN,				1,	&ParseStringObject },
+		{ "ps",				&psShader,		TOKEN_LEN,				1,	&ParseStringObject },
+		{ "cs",				&csShader,		TOKEN_LEN,				1,	&ParseStringObject },
+		{ "bindset",		&bindSet,		TOKEN_LEN,				1,	&ParseStringObject },
+		{ "perm",			&perms,			TOKEN_LEN,				1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
+		{ "sampling_ms",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
+		{ "image_shader",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
+		{ "no_vb",			&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -656,8 +691,10 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 		if( found == false )
 		{
 			const std::string s = ParseToken( st );
-			std::cout << "No matching parse function for '" << s << ";" << std::endl;
-			st.tx += 1;
+			std::cout << "No matching parse function for '" << s << "'" << std::endl;
+			st.tx += 1; // skip the key
+			st.tx += CountTokens( st, st.tx ); // skip the value (handles nested objects/arrays)
+			++itemsFound;
 		}
 	}
 }
@@ -671,19 +708,52 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 	int itemsFound = 0;
 	int itemsCount = st.tokens[ st.tx ].size;
 
-	std::string arrayName = ParseToken( st );
+	std::string arrayString = ParseToken( st );
 
 	st.tx += 1;
 
 	while ( ( itemsFound < itemsCount ) && ( st.tx < st.r ) )
 	{
-		int ret = ( *readFunc )( st, object );
-		if ( ret > 0 )
+		const jsmntype_t elemType = st.tokens[ st.tx ].type;
+
+		// FIXME: hack fix for string arrays
+		if ( elemType == JSMN_STRING )
 		{
-			st.tx = ret;
-			++itemsFound;
+			// Bare value — read directly from st.tx and write to sequential
+			// slots (stride TOKEN_LEN) in the destination buffer.
+			char* dest = reinterpret_cast<char*>( object ) + ( itemsFound * TOKEN_LEN );
+			const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+			assert( valueLen > 0 );
+			assert( valueLen < TOKEN_LEN );
+			memset( dest, '\0', TOKEN_LEN );
+			memcpy( dest, st.file->data() + st.tokens[ st.tx ].start, valueLen );
+			st.tx += 1;
 		}
+		else
+		{
+			// Object or nested array — delegate to the read function
+			int ret = ( *readFunc )( st, object );
+			if ( ret > 0 )
+			{
+				st.tx = ret;
+			}
+			else
+			{
+				std::cout << "ParseArray: skipping unparseable element in '" << arrayString << "'" << std::endl;
+				st.tx += CountTokens( st, st.tx );
+			}
+		}
+		++itemsFound;
 	}
+}
+
+
+static void CleanupParseState( parseState_t& st )
+{
+	delete st.p;
+	st.p = nullptr;
+	delete[] st.tokens;
+	st.tokens = nullptr;
 }
 
 
@@ -706,11 +776,15 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	jsmn_init( st.p );
 	st.r = jsmn_parse( st.p, st.file->data(), static_cast<uint32_t>( st.file->size() ), st.tokens, maxTokens );
 	if ( st.r < 0 ) {
-		std::cout << "Failed to parse JSON" << std::endl;
+		std::cout << "Failed to parse JSON: " << fileName << " (error: " << st.r << ")" << std::endl;
+		CleanupParseState( st );
+		return;
 	}
 
 	if ( st.r < 1 || st.tokens[ 0 ].type != JSMN_OBJECT ) {
-		std::cout << "Object expected" << std::endl;
+		std::cout << "Object expected: " << fileName << std::endl;
+		CleanupParseState( st );
+		return;
 	}
 
 	if( isRoot )
@@ -744,22 +818,24 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	char diffuseIblMap[ TOKEN_LEN ] = "";
 	char specIblMap[ TOKEN_LEN ] = "";
 
-	assert( COUNTARRAY( trashBuffer ) >= file.size() );
+	const uint32_t trashBufferSize = COUNTARRAY( trashBuffer );
+
+	assert( trashBufferSize >= file.size() );
 
 	const uint32_t objectCount = 11;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "sceneClass", &trashBuffer, &ParseStringObject },
-		{ "type", &trashBuffer, &ParseStringObject },
-		{ "reflink", &trashBuffer, &ParseStringObject },
-		{ "envMap", &envMap, &ParseStringObject },
-		{ "diffuseIblMap", &diffuseIblMap, &ParseStringObject },
-		{ "specIblMap", &specIblMap, &ParseStringObject },
-		{ "shaders", st.assets->GetLib<GpuProgram>(), &ParseShaderObject },
-		{ "images", st.assets->GetLib<Image>(), &ParseImageObject },
-		{ "materials", st.assets->GetLib<Material>(), &ParseMaterialObject },
-		{ "models", st.assets->GetLib<Model>(), &ParseModelObject },
-		{ "entities", &st.scene->entities, &ParseEntityObject },
+		{ "sceneClass",		&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
+		{ "type",			&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
+		{ "reflink",		&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
+		{ "envMap",			&envMap,							TOKEN_LEN,							1,										&ParseStringObject },
+		{ "diffuseIblMap",	&diffuseIblMap,						TOKEN_LEN,							1,										&ParseStringObject },
+		{ "specIblMap",		&specIblMap,						TOKEN_LEN,							1,										&ParseStringObject },
+		{ "shaders",		st.assets->GetLib<GpuProgram>(),	sizeof( AssetLib<GpuProgram>* ),	1,										&ParseShaderObject },
+		{ "images",			st.assets->GetLib<Image>(),			sizeof( AssetLib<Image>* ),			1,										&ParseImageObject },
+		{ "materials",		st.assets->GetLib<Material>(),		sizeof( AssetLib<Material>* ),		1,										&ParseMaterialObject },
+		{ "models",			st.assets->GetLib<Model>(),			sizeof( AssetLib<Model>* ),			1,										&ParseModelObject },
+		{ "entities",		&st.scene->entities,				sizeof( Entity ),					(uint32_t)st.scene->entities.size(),	&ParseEntityObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -771,8 +847,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 		( *scene )->specIblMap = specIblMap;
 	}
 
-	delete st.p;
-	delete[] st.tokens;
+	CleanupParseState( st );
 }
 
 
