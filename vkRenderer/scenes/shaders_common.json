@@ -130,7 +130,7 @@
       "name": "ResolveMSAA",
       "vs": "fullscreen",
       "ps": "resolve",
-	  "perm": ["msaa", "mrt"],
+	  "perm": ["msaa"],
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },

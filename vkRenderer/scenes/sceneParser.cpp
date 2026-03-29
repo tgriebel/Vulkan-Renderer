@@ -135,7 +135,7 @@ void InitSceneType( const std::string type, Scene** scene )
 }
 
 
-std::string ParseToken( parseState_t& st )
+std::string ParseCurrentToken( parseState_t& st )
 {
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 	return std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
@@ -145,15 +145,15 @@ std::string ParseToken( parseState_t& st )
 int ParseStringObject( parseState_t& st, void* value )
 {
 	char* s = reinterpret_cast<char*>( value );
-	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 
 	assert( valueLen > 0 );
 	assert( valueLen < TOKEN_LEN );
 	memset( s, '\0', TOKEN_LEN );
-	memcpy( s, st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	memcpy( s, st.file->data() + st.tokens[ st.tx ].start, valueLen );
 	s[valueLen] = '\0';
 
-	st.tx += 2;
+	st.tx += 1;
 	return 0;
 }
 
@@ -161,11 +161,11 @@ int ParseStringObject( parseState_t& st, void* value )
 int ParseFloatObject( parseState_t& st, void* value )
 {
 	float* f = reinterpret_cast<float*>( value );
-	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
 	*f = std::stof( s );
 
-	st.tx += 2;
+	st.tx += 1;
 	return 0;
 }
 
@@ -173,15 +173,15 @@ template <uint32_t BIT>
 int ParseFlagObject( parseState_t& st, void* value )
 {
 	uint32_t* f = reinterpret_cast<uint32_t*>( value );
-	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
 
 	std::transform( s.begin(), s.end(), s.begin(),
 		[]( unsigned char c ) { return std::tolower( c ); } );
 
 	*f |= ( s == "true" || s == "1" ) ? BIT : false;
 
-	st.tx += 2;
+	st.tx += 1;
 	return 0;
 }
 
@@ -189,15 +189,15 @@ int ParseFlagObject( parseState_t& st, void* value )
 int ParseBoolObject( parseState_t& st, void* value )
 {
 	bool* b = reinterpret_cast<bool*>( value );
-	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
 
 	std::transform( s.begin(), s.end(), s.begin(),
 		[]( unsigned char c ) { return std::tolower( c ); } );
 
 	*b = ( s == "true" || s == "1" ) ? true : false;
 
-	st.tx += 2;
+	st.tx += 1;
 	return 0;
 }
 
@@ -205,12 +205,12 @@ int ParseBoolObject( parseState_t& st, void* value )
 int ParseIntObject( parseState_t& st, void* value )
 {
 	int32_t* i = reinterpret_cast<int32_t*>( value );
-	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
 
 	*i = std::stoi( s );
 
-	st.tx += 2;
+	st.tx += 1;
 	return 0;
 }
 
@@ -218,12 +218,12 @@ int ParseIntObject( parseState_t& st, void* value )
 int ParseUIntObject( parseState_t& st, void* value )
 {
 	uint32_t* u = reinterpret_cast<uint32_t*>( value );
-	const uint32_t valueLen = ( st.tokens[ st.tx + 1 ].end - st.tokens[ st.tx + 1 ].start );
-	std::string s = std::string( st.file->data() + st.tokens[ st.tx + 1 ].start, valueLen );
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
 
 	*u = std::stoul( s );
 
-	st.tx += 2;
+	st.tx += 1;
 	return 0;
 }
 
@@ -673,10 +673,17 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 				continue;
 			}
 
-			if ( st.tokens[ st.tx + 1 ].type == JSMN_ARRAY )
+			const jsmntype_t elemType = st.tokens[ st.tx + 1 ].type;
+
+			if ( elemType == JSMN_ARRAY )
 			{
-				st.tx += 1;
+				st.tx += 1; // Move past key
 				ParseArray( st, objectMap[ mapIx ].func, objectMap[ mapIx ].ptr );
+			}
+			else if( ( elemType == JSMN_PRIMITIVE ) || ( elemType == JSMN_STRING ) )
+			{
+				st.tx += 1; // Move past key
+				( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr );
 			}
 			else
 			{
@@ -690,7 +697,7 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 
 		if( found == false )
 		{
-			const std::string s = ParseToken( st );
+			const std::string s = ParseCurrentToken( st );
 			std::cout << "No matching parse function for '" << s << "'" << std::endl;
 			st.tx += 1; // skip the key
 			st.tx += CountTokens( st, st.tx ); // skip the value (handles nested objects/arrays)
@@ -708,7 +715,7 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 	int itemsFound = 0;
 	int itemsCount = st.tokens[ st.tx ].size;
 
-	std::string arrayString = ParseToken( st );
+	std::string arrayString = ParseCurrentToken( st );
 
 	st.tx += 1;
 
@@ -716,30 +723,20 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 	{
 		const jsmntype_t elemType = st.tokens[ st.tx ].type;
 
-		// FIXME: hack fix for string arrays
-		if ( elemType == JSMN_STRING )
+		if ( ( elemType == JSMN_STRING ) || ( elemType == JSMN_PRIMITIVE ) )
 		{
-			// Bare value — read directly from st.tx and write to sequential
-			// slots (stride TOKEN_LEN) in the destination buffer.
-			char* dest = reinterpret_cast<char*>( object ) + ( itemsFound * TOKEN_LEN );
-			const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
-			assert( valueLen > 0 );
-			assert( valueLen < TOKEN_LEN );
-			memset( dest, '\0', TOKEN_LEN );
-			memcpy( dest, st.file->data() + st.tokens[ st.tx ].start, valueLen );
-			st.tx += 1;
+			( *readFunc )( st, object );
 		}
 		else
 		{
-			// Object or nested array — delegate to the read function
-			int ret = ( *readFunc )( st, object );
+			int32_t ret = ( *readFunc )( st, object );
 			if ( ret > 0 )
 			{
 				st.tx = ret;
 			}
 			else
 			{
-				std::cout << "ParseArray: skipping unparseable element in '" << arrayString << "'" << std::endl;
+				std::cout << "ParseArray: skipping unparseable object element in '" << arrayString << "'" << std::endl;
 				st.tx += CountTokens( st, st.tx );
 			}
 		}
@@ -797,12 +794,12 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 			if ( jsoneq( file.data(), &st.tokens[ st.tx ], "sceneClass" ) == 0 )
 			{
 				st.tx += 1;
-				InitSceneType( ParseToken( st ), scene );
+				InitSceneType( ParseCurrentToken( st ), scene );
 			}
 			else if ( jsoneq( file.data(), &st.tokens[ st.tx ], "reflink" ) == 0 )
 			{
 				st.tx += 1;
-				ParseJson( ParseToken( st ), scene, assets, false );
+				ParseJson( ParseCurrentToken( st ), scene, assets, false );
 			}
 			else {
 				st.tx += 1;
