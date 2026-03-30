@@ -241,7 +241,9 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				const shaderPermId_t permId = ( passIx == DRAWPASS_SKYBOX ) ? shaderPermId_t::SKY_CUBE_SAMPLER : shaderPermId_t::NONE;
 
 				surf.pipelineObject = FindPipelineObject( pass, *prog, permId );
-				if( surf.pipelineObject == INVALID_HDL ) {
+				if( surf.pipelineObject == INVALID_HDL )
+				{
+					CreateGraphicsPipeline( &renderContext, pass, *prog, permId );
 					surf.pipelineObject = FindPipelineObject( pass, *prog, shaderPermId_t::NONE );
 				}
 				assert( surf.pipelineObject != INVALID_HDL );

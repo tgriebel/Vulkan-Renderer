@@ -106,21 +106,6 @@
       }
     },
 	{
-      "name": "SKY",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "Sky",
-		  "DRAWPASS_DEBUG_WIREFRAME": "Debug"
-      },
-      "textures": {
-          "CUBE_RIGHT_SLOT" : "chapel_right.jpg",
-          "CUBE_LEFT_SLOT" : "chapel_left.jpg",
-          "CUBE_TOP_SLOT" : "chapel_top.jpg",	  
-          "CUBE_BOTTOM_SLOT" : "chapel_bottom.jpg",
-          "CUBE_FRONT_SLOT" : "chapel_front.jpg",
-          "CUBE_BACK_SLOT" : "chapel_back.jpg"
-      }
-    },
-	{
       "name": "EquirectangularSky",
       "shaders": {
           "DRAWPASS_SKYBOX": "Sky"
