@@ -1,5 +1,13 @@
 {
   "shaders": [
+  	{
+      "name": "Resolve",
+      "vs": "fullscreen",
+      "ps": "resolve",
+	  "perms": ["msaa", "mrt"],
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
     {
       "name": "Basic",
       "vs": "simple",
@@ -49,17 +57,20 @@
     {
       "name": "LitOpaque",
       "vs": "simple",
-      "ps": "lit"
+      "ps": "lit",
+	  "perms": ["mrt"]
     },
     {
       "name": "LitTree",
       "vs": "tree",
-      "ps": "lit"
+      "ps": "lit",
+	  "perms": ["mrt"]
     },
     {
       "name": "LitTrans",
       "vs": "simple",
-      "ps": "lit"
+      "ps": "lit",
+	  "perms": ["mrt"]
     },
     {
       "name": "Debug",
@@ -111,14 +122,6 @@
       "name": "preCalculatedSpecularIbl",
       "vs": "fullscreen",
       "ps": "preCalculatedSpecularIbl",
-	  "bindset": "bindset_imageProcess",
-	  "image_shader": true
-    },
-	{
-      "name": "Resolve",
-      "vs": "fullscreen",
-      "ps": "resolve",
-	  "perms": ["msaa"],
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },

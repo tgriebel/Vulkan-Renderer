@@ -311,7 +311,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.clear = false;
 		info.resolve = true;
 		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
-		info.permSet = ForceDisableMSAA ? shaderPermId_t::NONE : shaderPermId_t::MSAA;
+		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT;
 		info.outputImage = resources.mainColorResolvedImage;
 		info.outputImage1 = &resources.depthResolvedImageView;
 		info.context = &renderContext;

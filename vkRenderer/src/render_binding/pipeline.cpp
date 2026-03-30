@@ -195,6 +195,10 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
 	state.permSet = permSet;
 
+	if( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
+		state.permSet |= shaderPermId_t::MRT;
+	}
+
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
 	auto it = g_pipelineLib.find( pipelineHdl.Get() );
@@ -208,6 +212,8 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
+
+	assert( prog.shaderCount == 2 );
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -437,7 +443,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{ };
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipelineInfo.stageCount = 2;
+	pipelineInfo.stageCount = ( colorAttachmentCount > 0 ) ? 2 : 1;
 	pipelineInfo.pStages = shaderStages;
 	pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;

@@ -27,12 +27,17 @@
 #include "util_hlsl.h"
 
 PS_LAYOUT_STANDARD( Texture2D )
+
+#ifdef USE_MRT
 PS_LAYOUT_MRT_1_OUT
+#endif
 
+#ifdef USE_MRT
 PS_Output_MRT PSMain( PS_Input input )
+#else
+PS_Output PSMain( PS_Input input )
+#endif
 {
-    PS_Output_MRT output = (PS_Output_MRT)0;
-
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
 
@@ -175,20 +180,33 @@ PS_Output_MRT PSMain( PS_Input input )
     const float3 diffuse = irradiance * albedoColor;
     const float3 ambient = ( kD * diffuse + specular ) * ao;// * material.Ka.rgb;
 
-    output.outColor.rgb = Lo + ambient;
-    output.outColor.a = material.Tr;
+    float4 outColor;
+    outColor.rgb = Lo + ambient;
+    outColor.a = material.Tr;
 
-    output.outColor1.rgb = 0.5f * ( N + float3( 1.0f, 1.0f, 1.0f ) );
-    //output.outColor1.rgb = float3( input.uv0.xy, 0.0f );
-    output.outColor1.a = 1.0f;
+    //outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
+    //outColor.rg = envBRDF.rg;//float3( NoV );
 
-    //output.outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
-    //output.outColor.rg = envBRDF.rg;//float3( NoV );
+//  outColor.rgb = float3( NoV, NoV, NoV );
+//  outColor.rgb += float3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
+//  outColor.rgb = envColor.rgb;
+//  outColor.rgb = 0.5f * N + float3( 0.5f, 0.5f, 0.5f );
+//  outColor.rg = input.uv0.rb;
 
-//    output.outColor.rgb = float3( NoV, NoV, NoV );
-//  output.outColor.rgb += float3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
-//  output.outColor.rgb = envColor.rgb;
-//  output.outColor.rgb = 0.5f * N + float3( 0.5f, 0.5f, 0.5f );
-//  output.outColor.rg = input.uv0.rb;
+#ifdef USE_MRT
+    float4 outColor1;
+    outColor1.rgb = 0.5f * ( N + float3( 1.0f, 1.0f, 1.0f ) );
+    //outColor1.rgb = float3( input.uv0.xy, 0.0f );
+    outColor1.a = 1.0f;
+
+    PS_Output_MRT output = (PS_Output_MRT)0;
+
+    output.outColor = outColor;
+    output.outColor1 = outColor1;
+#else
+    PS_Output output = (PS_Output)0;
+
+    output.outColor = outColor;
+#endif
     return output;
 }

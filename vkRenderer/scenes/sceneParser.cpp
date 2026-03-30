@@ -71,7 +71,7 @@ struct enumString_t
 
 #define MAKE_ENUM_STRING( e ) enumString_t{ #e, e }
 
-typedef int ParseObjectFunc( parseState_t& st, void* object );
+typedef int ParseObjectFunc( parseState_t& st, void* object, uint32_t offset );
 
 struct objectTuple_t
 {
@@ -83,7 +83,7 @@ struct objectTuple_t
 };
 
 
-void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object );
+void ParseArray( parseState_t& st, const objectTuple_t* objectMap );
 void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32_t objectCount );
 
 
@@ -142,9 +142,11 @@ std::string ParseCurrentToken( parseState_t& st )
 }
 
 
-int ParseStringObject( parseState_t& st, void* value )
+int ParseStringObject( parseState_t& st, void* value, uint32_t offset )
 {
-	char* s = reinterpret_cast<char*>( value );
+	assert ( st.tokens[ st.tx ].type == JSMN_STRING );
+
+	char* s = reinterpret_cast<char*>( value ) + offset;
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 
 	assert( valueLen > 0 );
@@ -158,8 +160,11 @@ int ParseStringObject( parseState_t& st, void* value )
 }
 
 
-int ParseFloatObject( parseState_t& st, void* value )
+int ParseFloatObject( parseState_t& st, void* value, uint32_t offset )
 {
+	assert( offset == 0 ); // For arrays, but untested for this type
+	assert( st.tokens[ st.tx ].type == JSMN_PRIMITIVE );
+
 	float* f = reinterpret_cast<float*>( value );
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
@@ -170,8 +175,11 @@ int ParseFloatObject( parseState_t& st, void* value )
 }
 
 template <uint32_t BIT>
-int ParseFlagObject( parseState_t& st, void* value )
+int ParseFlagObject( parseState_t& st, void* value, uint32_t offset )
 {
+	assert( offset == 0 ); // For arrays, but untested for this type
+	assert( st.tokens[ st.tx ].type == JSMN_PRIMITIVE );
+
 	uint32_t* f = reinterpret_cast<uint32_t*>( value );
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
@@ -186,8 +194,11 @@ int ParseFlagObject( parseState_t& st, void* value )
 }
 
 
-int ParseBoolObject( parseState_t& st, void* value )
+int ParseBoolObject( parseState_t& st, void* value, uint32_t offset )
 {
+	assert( offset == 0 ); // For arrays, but untested for this type
+	assert( st.tokens[ st.tx ].type == JSMN_PRIMITIVE || st.tokens[ st.tx ].type == JSMN_STRING );
+
 	bool* b = reinterpret_cast<bool*>( value );
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
@@ -202,8 +213,11 @@ int ParseBoolObject( parseState_t& st, void* value )
 }
 
 
-int ParseIntObject( parseState_t& st, void* value )
+int ParseIntObject( parseState_t& st, void* value, uint32_t offset )
 {
+	assert( offset == 0 ); // For arrays, but untested for this type
+	assert( st.tokens[ st.tx ].type == JSMN_PRIMITIVE );
+
 	int32_t* i = reinterpret_cast<int32_t*>( value );
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
@@ -215,8 +229,11 @@ int ParseIntObject( parseState_t& st, void* value )
 }
 
 
-int ParseUIntObject( parseState_t& st, void* value )
+int ParseUIntObject( parseState_t& st, void* value, uint32_t offset )
 {
+	assert( offset == 0 ); // For arrays, but untested for this type
+	assert( st.tokens[ st.tx ].type == JSMN_PRIMITIVE );
+
 	uint32_t* u = reinterpret_cast<uint32_t*>( value );
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
@@ -228,7 +245,7 @@ int ParseUIntObject( parseState_t& st, void* value )
 }
 
 
-int ParseImageObject( parseState_t& st, void* object )
+int ParseImageObject( parseState_t& st, void* object, uint32_t offset )
 {
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return 0;
@@ -305,7 +322,7 @@ int ParseImageObject( parseState_t& st, void* object )
 }
 
 
-int ParseMaterialShaderObject( parseState_t& st, void* object )
+int ParseMaterialShaderObject( parseState_t& st, void* object, uint32_t offset )
 {
 	st.tx += 1;
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
@@ -358,7 +375,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object )
 }
 
 
-int ParseMaterialTextureObject( parseState_t& st, void* object )
+int ParseMaterialTextureObject( parseState_t& st, void* object, uint32_t offset )
 {
 	st.tx += 1;
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
@@ -431,7 +448,7 @@ int ParseMaterialTextureObject( parseState_t& st, void* object )
 }
 
 
-int ParseModelObject( parseState_t& st, void* object )
+int ParseModelObject( parseState_t& st, void* object, uint32_t offset )
 {
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -487,7 +504,7 @@ int ParseModelObject( parseState_t& st, void* object )
 }
 
 
-int ParseEntityObject( parseState_t& st, void* object )
+int ParseEntityObject( parseState_t& st, void* object, uint32_t offset )
 {
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -558,7 +575,7 @@ int ParseEntityObject( parseState_t& st, void* object )
 }
 
 
-int ParseMaterialObject( parseState_t& st, void* object )
+int ParseMaterialObject( parseState_t& st, void* object, uint32_t offset )
 {
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -609,7 +626,7 @@ int ParseMaterialObject( parseState_t& st, void* object )
 }
 
 
-int ParseShaderObject( parseState_t& st, void* object )
+int ParseShaderObject( parseState_t& st, void* object, uint32_t offset )
 {
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
@@ -685,16 +702,16 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 			if ( elemType == JSMN_ARRAY )
 			{
 				st.tx += 1; // Move past key
-				ParseArray( st, objectMap[ mapIx ].func, objectMap[ mapIx ].ptr );
+				ParseArray( st, &objectMap[ mapIx ] );
 			}
 			else if( ( elemType == JSMN_PRIMITIVE ) || ( elemType == JSMN_STRING ) )
 			{
 				st.tx += 1; // Move past key
-				( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr );
+				( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr, 0 );
 			}
 			else
 			{
-				( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr );
+				( *objectMap[ mapIx ].func )( st, objectMap[ mapIx ].ptr, 0 );
 			}
 
 			++itemsFound;
@@ -714,11 +731,15 @@ void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32
 }
 
 
-void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
+void ParseArray( parseState_t& st, const objectTuple_t* objectMap )
 {
 	if ( st.tokens[ st.tx ].type != JSMN_ARRAY ) {
 		return;
 	}
+
+	ParseObjectFunc* readFunc = objectMap->func;
+	void* object = objectMap->ptr;
+
 	int itemsFound = 0;
 	int itemsCount = st.tokens[ st.tx ].size;
 
@@ -732,11 +753,11 @@ void ParseArray( parseState_t& st, ParseObjectFunc* readFunc, void* object )
 
 		if ( ( elemType == JSMN_STRING ) || ( elemType == JSMN_PRIMITIVE ) )
 		{
-			( *readFunc )( st, object );
+			( *readFunc )( st, object, itemsFound * objectMap->elementStride );
 		}
 		else
 		{
-			int32_t ret = ( *readFunc )( st, object );
+			int32_t ret = ( *readFunc )( st, object, itemsFound * objectMap->elementStride );
 			if ( ret > 0 )
 			{
 				st.tx = ret;

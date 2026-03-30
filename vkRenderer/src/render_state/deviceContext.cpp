@@ -923,6 +923,22 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vk_DebugCallback( VkDebugUtilsMessageSever
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData )
 {
+	// DXC culls input/outputs and Vulkans warns on unused attributes
+	// The shaders are set-up with universal bindings so unused attributes are expected
+	// These are really informational warnings so can be suppressed
+	static const int32_t suppressedIds[] =
+	{
+		(int32_t)0x609A13B,		// UNASSIGNED-CoreValidation-Shader-OutputNotConsumed
+		(int32_t)0xC81AD50E,	// UNASSIGNED-CoreValidation-Shader-InputNotProduced
+	};
+
+	for ( int32_t id : suppressedIds )
+	{
+		if ( pCallbackData->messageIdNumber == id ) {
+			return VK_FALSE;
+		}
+	}
+
 	std::cerr << "[Vulkan Validation - ";
 	if( ( messageType &= VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT ) != 0 ) {
 		std::cerr << "Error";

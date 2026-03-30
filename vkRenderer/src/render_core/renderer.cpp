@@ -234,17 +234,22 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 
+			shaderPermId_t permSet = shaderPermId_t::NONE;
+			if ( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
+				permSet |= shaderPermId_t::MRT;
+			}
+
 			// FIXME: HACK: Temp-hack. Force this perm on for sky boxes until perm selection is built-out
 			// This is the only perm needed at the moment
 			if( passIx == DRAWPASS_SKYBOX )
 			{
-				const shaderPermId_t permId = ( passIx == DRAWPASS_SKYBOX ) ? shaderPermId_t::SKY_CUBE_SAMPLER : shaderPermId_t::NONE;
+				const shaderPermId_t permId = ( passIx == DRAWPASS_SKYBOX ) ? shaderPermId_t::SKY_CUBE_SAMPLER | shaderPermId_t::MRT : shaderPermId_t::MRT;
 
 				surf.pipelineObject = FindPipelineObject( pass, *prog, permId );
 				if( surf.pipelineObject == INVALID_HDL )
 				{
 					CreateGraphicsPipeline( &renderContext, pass, *prog, permId );
-					surf.pipelineObject = FindPipelineObject( pass, *prog, shaderPermId_t::NONE );
+					surf.pipelineObject = FindPipelineObject( pass, *prog, permId );
 				}
 				assert( surf.pipelineObject != INVALID_HDL );
 
@@ -252,7 +257,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			}
 			else
 			{
-				surf.pipelineObject = FindPipelineObject( pass, *prog, shaderPermId_t::NONE );
+				surf.pipelineObject = FindPipelineObject( pass, *prog, permSet );
 				assert( surf.pipelineObject != INVALID_HDL );
 
 				view.drawGroup[ passIx ].Add( surf, instance );
