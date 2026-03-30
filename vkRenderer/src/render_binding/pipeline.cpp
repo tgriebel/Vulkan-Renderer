@@ -145,13 +145,14 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
-hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
+hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	pipelineState_t state = {};
 	state.stateBits = pass->StateBits();
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
+	state.permSet = permSet;
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
@@ -170,6 +171,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
+	//state.permSet = permSet;
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
@@ -184,13 +186,14 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 }
 
 
-hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& progAsset )
+hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	pipelineState_t state = {};
 	state.stateBits = pass->StateBits();
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
+	state.permSet = permSet;
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
@@ -201,24 +204,26 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	const GpuProgram& prog = progAsset.Get();
 
+	const uint32_t permIndex = Min( prog.permCount - 1, static_cast<uint32_t>( permSet ) );
+
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo{ };
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = prog.vk_shaders[ 0 ];
+	vertShaderStageInfo.module = prog.vk_shaders[ permIndex ][ 0 ];
 	vertShaderStageInfo.pName = "VSMain";
 
-	assert( prog.shaders[ 0].type == shaderType_t::VERTEX );
+	assert( prog.shaders[ permIndex ][ 0 ].type == shaderType_t::VERTEX );
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{ };
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = prog.vk_shaders[ 1 ];
+	fragShaderStageInfo.module = prog.vk_shaders[ permIndex ][ 1 ];
 	fragShaderStageInfo.pName = "PSMain";
 
-	assert( prog.shaders[ 1 ].type == shaderType_t::PIXEL );
+	assert( prog.shaders[ permIndex ][ 1 ].type == shaderType_t::PIXEL );
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
@@ -386,7 +391,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "Pipeline Layout (GFX): < " + prog.shaders[ 0 ].binName + " | " + prog.shaders[ 1 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "Pipeline Layout (GFX): < " + prog.shaders[ permIndex ][ 0 ].binName + " | " + prog.shaders[ permIndex ][ 1 ].binName + " >" ).c_str() );
 
 	const bool depthTestEnable = ( ( state.stateBits & GFX_STATE_DEPTH_TEST ) != 0 );
 	const bool depthWriteEnable = ( ( state.stateBits & GFX_STATE_DEPTH_WRITE ) != 0 );
@@ -451,7 +456,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VK_CHECK_RESULT( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE,  ( "Pipeline (GFX): < " + prog.shaders[0].binName + " | " + prog.shaders[1].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE,  ( "Pipeline (GFX): < " + prog.shaders[ 0 ][ 0 ].binName + " | " + prog.shaders[ 0 ][ 1 ].binName + " >" ).c_str() );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 
@@ -502,7 +507,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};
 	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-	computeShaderStageInfo.module = prog.vk_shaders[ 0 ];
+	computeShaderStageInfo.module = prog.vk_shaders[ 0 ][ 0 ];
 	computeShaderStageInfo.pName = "CSMain";
 	computeShaderStageInfo.pNext = nullptr;
 
@@ -520,7 +525,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "PipelineLayout (Compute): < " + prog.shaders[ 0 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "PipelineLayout (Compute): < " + prog.shaders[ 0 ][ 0 ].binName + " >" ).c_str() );
 
 	VkComputePipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -529,11 +534,11 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	pipelineInfo.stage = computeShaderStageInfo;
 	pipelineInfo.pNext = nullptr;
 
-	pipelineObject.csName = prog.shaders->name.c_str();
+	pipelineObject.csName = prog.shaders[ 0 ]->name.c_str();
 
 	VK_CHECK_RESULT( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE, ( "Pipeline (Compute): < " + prog.shaders[ 0 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE, ( "Pipeline (Compute): < " + prog.shaders[ 0 ][ 0 ].binName + " >" ).c_str() );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }

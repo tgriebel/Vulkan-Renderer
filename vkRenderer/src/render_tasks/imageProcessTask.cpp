@@ -50,6 +50,8 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_mipLevels = Clamp( m_mipLevels, m_baseMip + 1, m_image->info.mipLevels ); // Clamp [1, mipLevels]
 
 	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
+	m_permSet = info.permSet;
+
 	m_multiPass = info.multiPass;
 	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
 	m_progressiveSampling = info.progressiveSampling;
@@ -150,6 +152,7 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 	imgProcessInfo.layer = remappedLayerId;
 	imgProcessInfo.outputImage = m_image;
 	imgProcessInfo.progHdl = m_progHdl;
+	imgProcessInfo.permSet = m_permSet;
 
 	// All but the first image need a framebuffer since they are being written to
 	imgProcessInfo.mipLevel = mipLevel;

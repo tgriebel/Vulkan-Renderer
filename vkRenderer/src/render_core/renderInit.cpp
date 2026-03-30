@@ -310,11 +310,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.name = "ResolveMain";
 		info.clear = false;
 		info.resolve = true;
-		if ( ForceDisableMSAA ) {
-			info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
-		} else {
-			info.progHdl = AssetLibGpuProgram::Handle( "ResolveMSAA" );
-		}
+		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
+		info.permSet = ForceDisableMSAA ? shaderPermId_t::NONE : shaderPermId_t::MSAA;
 		info.outputImage = resources.mainColorResolvedImage;
 		info.outputImage1 = &resources.depthResolvedImageView;
 		info.context = &renderContext;
@@ -973,9 +970,15 @@ void Renderer::BuildPipelines()
 	{
 		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
-		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx ) {
-			if ( prog.vk_shaders[ shaderIx ] != VK_NULL_HANDLE ) {
-				vkDestroyShaderModule( context.device, prog.vk_shaders[ shaderIx ], nullptr );
+
+		for ( uint32_t permIx = 0; permIx < prog.permCount; ++permIx )
+		{
+			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+			{
+				if ( prog.vk_shaders[ permIx ][ shaderIx ] != VK_NULL_HANDLE )
+				{
+					vkDestroyShaderModule( context.device, prog.vk_shaders[ permIx ][ shaderIx ], nullptr );
+				}
 			}
 		}
 	}
@@ -985,8 +988,14 @@ void Renderer::BuildPipelines()
 	{
 		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
-		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx ) {
-			prog.vk_shaders[ shaderIx ] = vk_CreateShaderModule( prog.shaders[ shaderIx ].blob, progAsset->GetName().c_str() );
+
+		for ( uint32_t permIx = 0; permIx < prog.permCount; ++permIx )
+		{
+			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+			{
+				const shaderSource_t& shaderSource = prog.shaders[ permIx ][ shaderIx ];
+				prog.vk_shaders[ permIx ][ shaderIx ] = vk_CreateShaderModule( shaderSource.blob, shaderSource.binName.c_str() );
+			}
 		}
 	}
 
@@ -1020,9 +1029,9 @@ void Renderer::BuildPipelines()
 		progAsset->CompleteUpload();
 
 		GpuProgram& prog = progAsset->Get();
-		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
+		if ( prog.shaders[ 0 ][ 0 ].type == shaderType_t::COMPUTE )
 		{
-			assert( prog.shaderCount == 1 );
+		//	assert( prog.shaderCount == 1 );
 			DestroyComputePipeline( *progAsset );
 			continue;
 		}
@@ -1040,7 +1049,7 @@ void Renderer::BuildPipelines()
 		progAsset->CompleteUpload();
 
 		GpuProgram& prog = progAsset->Get();
-		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
+		if ( prog.shaders[ 0 ][ 0 ].type == shaderType_t::COMPUTE )
 		{
 			assert( prog.shaderCount == 1 );
 			CreateComputePipeline( *progAsset );
@@ -1048,8 +1057,12 @@ void Renderer::BuildPipelines()
 		}
 
 		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
-		for ( uint32_t passIx = 0; passIx < passCount; ++passIx ) {
-			CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset );
+		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
+		{
+			// HACK: This is one of the few permutations required currently
+			const shaderPermId_t permId = ( passIx == DRAWPASS_SKYBOX ) ? shaderPermId_t::SKY_CUBE_SAMPLER : shaderPermId_t::NONE;
+
+			CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset, permId );
 		}	
 	}
 }

@@ -4,7 +4,7 @@
 		  "name": "Basic",
 		  "vs": "simple.vert",
 		  "ps": "simple.frag",
-		  "perm": "msaa"
+		  "perms": ["msaa"]
 		},
 		{
 		  "name": "Shadow",

@@ -33,13 +33,8 @@
     {
       "name": "Sky",
       "vs": "skybox",
-      "ps": "skybox"
-    },
-	{
-      "name": "SkyCube",
-      "vs": "skybox",
       "ps": "skybox",
-	  "perm": ["skycube"]
+      "perms": ["skycube"]
     },
 	{
 	  "name": "EquirectangularSampler",
@@ -123,14 +118,7 @@
       "name": "Resolve",
       "vs": "fullscreen",
       "ps": "resolve",
-	  "bindset": "bindset_imageProcess",
-	  "image_shader": true
-    },
-	{
-      "name": "ResolveMSAA",
-      "vs": "fullscreen",
-      "ps": "resolve",
-	  "perm": ["msaa"],
+	  "perms": ["msaa"],
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },

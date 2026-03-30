@@ -3,6 +3,7 @@ import sys
 import json
 import subprocess
 from pathlib import Path
+from itertools import combinations
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -18,17 +19,23 @@ from datetime import datetime
 # python shader_compiler.py -p <permutation>,<permutation> simple.ps.hlsl       # single shader compile (by file)
 
 
-# Config
-BIN_DIR    = Path( __file__ ).resolve().parent.parent.parent / "external" / "vulkan" / "Bin"
+# Config — all paths relative to this script's location
+SCRIPT_DIR = Path( __file__ ).resolve().parent
+BIN_DIR    = SCRIPT_DIR.parent.parent / "external" / "vulkan" / "Bin"
 DXC        = str( BIN_DIR / "dxc.exe" )
 GLSLANG    = str( BIN_DIR / "glslangValidator.exe" )
-SHADER_DIR = "..\\shaders\\"
-OUT_DIR    = "..\\shaders_bin\\"
-LOG_FILE   = "shader_build.log"
+SHADER_DIR = str( SCRIPT_DIR.parent / "shaders" ) + os.sep
+OUT_DIR    = str( SCRIPT_DIR.parent / "shaders_bin" ) + os.sep
+LOG_FILE   = str( SCRIPT_DIR / "shader_build.log" )
+
+# Display paths — relative to script folder for clean log output
+SHADER_DIR_DISPLAY = ".." + os.sep + "shaders" + os.sep
+OUT_DIR_DISPLAY    = ".." + os.sep + "shaders_bin" + os.sep
 
 FLAG_MAP = {
     "msaa"    : "USE_MSAA",
     "skycube" : "USE_CUBE_SAMPLER",
+    "mrt" : "USE_MRT",
 }
 
 # ---- HLSL (DXC) configuration ----
@@ -74,10 +81,11 @@ GLSL_TYPE_SUFFIX = {
 
 @dataclass( frozen=True )
 class ShaderRecord:
-    source : str
-    output : str
-    ext    : str
-    macros : tuple = field( default_factory=tuple )
+    source  : str
+    output  : str
+    ext     : str
+    macros  : tuple  = field( default_factory=tuple )
+    display : str    = ""     # short display label for logs
 
 
 # Combines all json shaders from all scenes.
@@ -122,30 +130,40 @@ def parse_shaders( data ) -> list[ ShaderRecord ]:
             if key in attribs:
                 sources.append( ( strip_shader_ext( shader[ key ] ), type_ext[ key ] ) )
 
-        macros      = []
-        perm_suffix = ""
-        perms       = shader.get( "perm", [] )
+        # Collect valid perms
+        perms = shader.get( "perms", shader.get( "perm", [] ) )
         if isinstance( perms, str ):
             perms = [ perms ]
 
+        valid_perms = []
         for perm in perms:
             if perm not in FLAG_MAP:
                 print( f"WARNING: Unknown perm '{perm}'" )
                 continue
-            macros.append( FLAG_MAP[ perm ] )
-            perm_suffix += f"_{perm}"
+            valid_perms.append( perm )
 
-        for stem, ext in sources:
-            type_suffix = type_sfx.get( ext, "" )
-            source      = f"{stem}.{ext}"
-            output      = f"{OUT_DIR}{stem}{type_suffix}{perm_suffix}.spv"
+        # Generate power set: (), (a,), (b,), (a,b), (a,c), (a,b,c), ...
+        perm_combos = []
+        for r in range( 0, len( valid_perms ) + 1 ):
+            for combo in combinations( valid_perms, r ):
+                perm_combos.append( combo )
 
-            records.append( ShaderRecord(
-                source = SHADER_DIR + source,
-                output = output,
-                ext    = ext,
-                macros = tuple( macros ),
-            ) )
+        for combo in perm_combos:
+            macros      = tuple( FLAG_MAP[ p ] for p in combo )
+            perm_suffix = "".join( f"_{p}" for p in combo )
+
+            for stem, ext in sources:
+                type_suffix = type_sfx.get( ext, "" )
+                source      = f"{stem}.{ext}"
+                out_name    = f"{stem}{type_suffix}{perm_suffix}.spv"
+
+                records.append( ShaderRecord(
+                    source  = SHADER_DIR + source,
+                    output  = OUT_DIR + out_name,
+                    ext     = ext,
+                    macros  = macros,
+                    display = f"{SHADER_DIR_DISPLAY}{source} -> {OUT_DIR_DISPLAY}{out_name}",
+                ) )
 
     return records
 
@@ -206,23 +224,22 @@ def compile_single_shader_source( source: str, perms: tuple, macros: tuple, log 
     for perm in perms:
         perm_suffix += f"_{perm}"
 
-    output = f"{OUT_DIR}{stem}{type_suffix}{perm_suffix}.spv"
+    out_name = f"{stem}{type_suffix}{perm_suffix}.spv"
 
     record = ShaderRecord(
-        source = SHADER_DIR + source,
-        output = output,
-        ext    = ext,
-        macros = macros,
+        source  = SHADER_DIR + source,
+        output  = OUT_DIR + out_name,
+        ext     = ext,
+        macros  = macros,
+        display = f"{SHADER_DIR_DISPLAY}{source} -> {OUT_DIR_DISPLAY}{out_name}",
     )
     return compile_record( record, log )
 
 
 def compile_record( record: ShaderRecord, log ) -> bool:
-    cmd    = build_command( record )
-    if(record.macros):
-        label = f"{record.source} -> {record.output} [{' '.join( record.macros )}]"
-    else:
-        label = f"{record.source} -> {record.output}"
+    cmd   = build_command( record )
+    short = record.display if record.display else f"{record.source} -> {record.output}"
+    label = f"{short} [{' '.join( record.macros )}]" if record.macros else short
 
     log.write( f"Compiling {label}\n" )
     log.write( " ".join( cmd ) + "\n" )
@@ -242,8 +259,6 @@ def compile_record( record: ShaderRecord, log ) -> bool:
 
 
 def main():
-    os.chdir( Path( __file__ ).parent )
-
     # Parse -p/--perm flags and other args from argv
     # Perms are comma-delimited: -p msaa,skycube
     args       = []

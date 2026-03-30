@@ -157,6 +157,7 @@ enum class swapBuffering_t : uint8_t
 struct imguiImageCallbackData_t
 {
 	Asset<GpuProgram>*	progAsset;
+	shaderPermId_t		permSet;
 	const Image*		image;
 	float				x;
 	float				y;

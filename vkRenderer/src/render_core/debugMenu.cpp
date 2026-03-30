@@ -402,16 +402,16 @@ void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset )
 			{
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex( 0 );
-				ImGui::Text( shader.shaders[ i ].name.c_str() );
+				ImGui::Text( shader.shaders[ 0 ][ i ].name.c_str() );
 				ImGui::TableSetColumnIndex( 1 );
-				switch ( shader.shaders[ i ].type )
+				switch ( shader.shaders[ 0 ][ i ].type )
 				{
 				case VERTEX: ImGui::Text( "Vertex" ); break;
 				case PIXEL: ImGui::Text( "Pixel" ); break;
 				case COMPUTE: ImGui::Text( "Compute" ); break;
 				}
 				ImGui::TableSetColumnIndex( 2 );
-				ImGui::Text( "%u", shader.shaders[ i ].blob.size() );
+				ImGui::Text( "%u", shader.shaders[ 0 ][ i ].blob.size() );
 			}
 			if( ImGui::Button( "Reload" ) ) {
 				g_imguiControls.shaderHdl = shaderAsset->Handle();

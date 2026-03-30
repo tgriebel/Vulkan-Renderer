@@ -114,9 +114,9 @@
 	},
 	{
       "name": "EquirectangularSky",
-      "shaders": {
-          "DRAWPASS_SKYBOX": "SkyCube"
-      },
+	  "shaders": {
+		"DRAWPASS_SKYBOX": "equirectangularSky"
+	  },
       "textures": {
           "TEXTURE_SLOT_0" : "code_assets/chess_env.img"
       }

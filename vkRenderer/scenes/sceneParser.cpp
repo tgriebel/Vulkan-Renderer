@@ -264,7 +264,7 @@ int ParseImageObject( parseState_t& st, void* object )
 		{ "name",		&name,			TOKEN_LEN,		1,	&ParseStringObject },
 		{ "type",		&type,			TOKEN_LEN,		1,	&ParseStringObject },
 		{ "isLinear",	&isLinear,		sizeof( bool ),	1,	&ParseBoolObject },
-		{ "uvAddress",	&uvAddress,		TOKEN_LEN,		1,	&ParseStringObject },	// BUG FIX: was sizeof( bool ), should be TOKEN_LEN — uvAddress is char[]
+		{ "uvAddress",	&uvAddress,		TOKEN_LEN,		1,	&ParseStringObject },
 		{ "uvFilter",	&uvFilter,		TOKEN_LEN,		1,	&ParseStringObject },
 	};
 
@@ -615,12 +615,14 @@ int ParseShaderObject( parseState_t& st, void* object )
 		return -1;
 	}
 
+	constexpr static uint32_t UniquePermCount = static_cast<uint32_t>( shaderPermId_t::COUNT );
+
 	char name[ TOKEN_LEN ] = "";
 	char vsShader[ TOKEN_LEN ] = "";
 	char psShader[ TOKEN_LEN ] = "";
 	char csShader[ TOKEN_LEN ] = "";
 	char bindSet[ TOKEN_LEN ] = "";
-	char perms[ GpuProgramLoader::MaxPermutations ][ TOKEN_LEN ] = {};
+	char perms[ UniquePermCount ][ TOKEN_LEN ] = {};
 	shaderFlags_t shaderFlags = shaderFlags_t::NONE;
 	AssetLib<GpuProgram>* shaders = reinterpret_cast<AssetLib<GpuProgram>*>( object );
 
@@ -632,7 +634,7 @@ int ParseShaderObject( parseState_t& st, void* object )
 		{ "ps",				&psShader,		TOKEN_LEN,				1,	&ParseStringObject },
 		{ "cs",				&csShader,		TOKEN_LEN,				1,	&ParseStringObject },
 		{ "bindset",		&bindSet,		TOKEN_LEN,				1,	&ParseStringObject },
-		{ "perm",			&perms,			TOKEN_LEN,				1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
+		{ "perms",			&perms,			TOKEN_LEN,				1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
 		{ "sampling_ms",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
 		{ "image_shader",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
 		{ "no_vb",			&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> },
@@ -643,9 +645,14 @@ int ParseShaderObject( parseState_t& st, void* object )
 	GpuProgramLoader* loader = new GpuProgramLoader();
 	loader->SetSourcePath( "shaders/" );
 	loader->SetBinPath( "shaders_bin/" );
+	loader->SetCompilerPath( "scripts/" );
 	loader->AddFilePaths( vsShader, psShader, csShader );
 	loader->SetBindSet( bindSet );
-	loader->AddPerms( perms[ 0 ] );
+
+	for( uint32_t i = 0; i < UniquePermCount; ++i ) {
+		loader->AddPerm( perms[ i ] );
+	}
+
 	loader->SetFlags( shaderFlags );
 	shaders->AddDeferred( name, Asset<GpuProgram>::loadHandlerPtr_t( loader ) );
 

@@ -34,10 +34,10 @@ void SerializeStruct( Serializer* s, vertex_t& v );
 GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile )
 {
 	GpuProgram program;
-	program.shaders[ 0 ].name = vsFile;
-	program.shaders[ 0 ].blob = ReadBinaryFile( vsFile );
-	program.shaders[ 1 ].name = psFile;
-	program.shaders[ 1 ].blob = ReadBinaryFile( psFile );
+	program.shaders[ 0 ][ 0 ].name = vsFile;
+	program.shaders[ 0 ][ 0 ].blob = ReadBinaryFile( vsFile );
+	program.shaders[ 0 ][ 1 ].name = psFile;
+	program.shaders[ 0 ][ 1 ].blob = ReadBinaryFile( psFile );
 	program.shaderCount = 2;
 	return program;
 }
@@ -46,8 +46,8 @@ GpuProgram LoadProgram( const std::string& vsFile, const std::string& psFile )
 GpuProgram LoadProgram( const std::string& csFile )
 {
 	GpuProgram program;
-	program.shaders[ 0 ].name = csFile;
-	program.shaders[ 0 ].blob = ReadBinaryFile( csFile );
+	program.shaders[ 0 ][ 0 ].name = csFile;
+	program.shaders[ 0 ][ 0 ].blob = ReadBinaryFile( csFile );
 	program.shaderCount = 1;
 	return program;
 }

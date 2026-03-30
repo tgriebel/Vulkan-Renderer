@@ -48,8 +48,9 @@ enum gfxStateBits_t : uint64_t
 	GFX_STATE_BLEND_ENABLE		= ( 1 << 13 ),
 	GFX_STATE_WIREFRAME_ENABLE	= ( 1 << 14 ),
 	GFX_STATE_STENCIL_ENABLE	= ( 1 << 15 ),
-	GFX_STATE_BIT_16			= ( 1 << 16 ),
-	GFX_STATE_BIT_17			= ( 1 << 17 ),
+	GFX_STATE_COLOR_ENABLE		= ( 1 << 16 ),
+	GFX_STATE_BIT_16			= ( 1 << 17 ),
+	GFX_STATE_BIT_17			= ( 1 << 18 ),
 };
 DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 
@@ -60,6 +61,7 @@ struct pipelineState_t
 	imageSamples_t				samplingRate;
 	hdl_t						progHdl;
 	renderAttachmentBits_t		passBits;
+	shaderPermId_t				permSet;
 };
 
 class DrawPass;
@@ -91,11 +93,11 @@ class ShaderBindSet;
 void	ClearPipelineCache();
 void	DestroyPipelineCache();
 bool	GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
-hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset );
+hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet );
 #ifdef USE_VULKAN
 void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
 #endif
-hdl_t	CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& prog );
+hdl_t	CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
 void	CreateComputePipeline( const Asset<GpuProgram>& prog );
 void	DestroyComputePipeline( const Asset<GpuProgram>& prog );

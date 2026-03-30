@@ -22,6 +22,8 @@ struct imageProcessCreateInfo_t
 	uint32_t			taskImageCount;
 	imageInfo_t*		createInfos;
 
+	shaderPermId_t		permSet;										// Shader permutations to use for this shader. Default is empty
+
 	bool				useAPI;											// Use the API for MIP generation
 	bool				multiPass;										// Runs sequential shader passes (e.g. Separable Gaussian Blur)
 	bool				progressiveSampling;							// Chains output to input (e.g. any MIP chain generation)
@@ -36,6 +38,7 @@ private:
 	static const uint32_t MaxLayers = 6;
 
 	hdl_t						m_progHdl;
+	shaderPermId_t				m_permSet;
 	Image*						m_image;
 	Image*						m_resourceImages2d[ MaxImageProcessSampleImages ];
 	Image*						m_resourceCubeImages[ MaxImageProcessSampleImages ];

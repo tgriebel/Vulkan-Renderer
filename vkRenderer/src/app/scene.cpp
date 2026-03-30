@@ -514,6 +514,7 @@ void UpdateScene( Scene* scene )
 
 		imguiImageCallbackData_t data;
 		data.progAsset = GpuProgramLib().Find( "Image2D" );
+		data.permSet = shaderPermId_t::NONE;
 		data.image = image;
 		data.x = pos.x;
 		data.y = pos.y;

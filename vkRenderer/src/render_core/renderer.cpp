@@ -234,10 +234,27 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				continue;
 			}
 
-			surf.pipelineObject = FindPipelineObject( pass, *prog );
-			assert( surf.pipelineObject != INVALID_HDL );
+			// FIXME: HACK: Temp-hack. Force this perm on for sky boxes until perm selection is built-out
+			// This is the only perm needed at the moment
+			if( passIx == DRAWPASS_SKYBOX )
+			{
+				const shaderPermId_t permId = ( passIx == DRAWPASS_SKYBOX ) ? shaderPermId_t::SKY_CUBE_SAMPLER : shaderPermId_t::NONE;
 
-			view.drawGroup[ passIx ].Add( surf, instance );
+				surf.pipelineObject = FindPipelineObject( pass, *prog, permId );
+				if( surf.pipelineObject == INVALID_HDL ) {
+					surf.pipelineObject = FindPipelineObject( pass, *prog, shaderPermId_t::NONE );
+				}
+				assert( surf.pipelineObject != INVALID_HDL );
+
+				view.drawGroup[ passIx ].Add( surf, instance );
+			}
+			else
+			{
+				surf.pipelineObject = FindPipelineObject( pass, *prog, shaderPermId_t::NONE );
+				assert( surf.pipelineObject != INVALID_HDL );
+
+				view.drawGroup[ passIx ].Add( surf, instance );
+			}
 		}
 	}
 }

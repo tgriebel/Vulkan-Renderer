@@ -16,6 +16,7 @@ struct imageShaderCreateInfo_t
 {
 	const char*			name;
 	hdl_t				progHdl;
+	shaderPermId_t		permSet;
 	Image*				outputImage;
 	Image*				outputImage1;
 	Image*				outputImage2;
@@ -59,6 +60,7 @@ private:
 	static const uint32_t	MaxOutputImages = 3;
 
 	Asset<GpuProgram>*		m_progAsset;
+	shaderPermId_t			m_permSet;
 	std::string				m_dbgName;
 	renderPassTransition_t	m_transitionState;
 	vec4f					m_clearColor;

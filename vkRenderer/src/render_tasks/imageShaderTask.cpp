@@ -134,6 +134,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = GpuProgramLib().Find( info.progHdl );
+	m_permSet = info.permSet;
 
 	uint32_t multiPassImageCount = ( m_passCount > 1 ) ? 1 : 0;
 
@@ -322,7 +323,7 @@ void ImageShaderTask::Execute( CommandContext& cmdContext )
 
 		m_passes[ passIndex ]->InsertResourceBarriers( cmdContext );
 
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), m_passes[ passIndex ], *m_progAsset );
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), m_passes[ passIndex ], *m_progAsset, m_permSet );
 
 		vk_RenderImageShader( cmdContext, pipeLineHandle, m_passes[ passIndex ], m_transitionState );
 

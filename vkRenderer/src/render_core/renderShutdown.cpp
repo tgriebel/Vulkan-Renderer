@@ -115,9 +115,14 @@ void Renderer::ShutdownShaderResources()
 	const uint32_t shaderCount = GpuProgramLib().Count();
 	for ( uint32_t i = 0; i < shaderCount; ++i )
 	{
-		Asset<GpuProgram>* shaderAsset = GpuProgramLib().Find( i );
-		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 0 ], nullptr );
-		vkDestroyShaderModule( context.device, shaderAsset->Get().vk_shaders[ 1 ], nullptr );
+		GpuProgram& prog = GpuProgramLib().Find( i )->Get();
+		for ( uint32_t permIx = 0; permIx < prog.permCount; ++permIx )
+		{
+			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+			{
+				vkDestroyShaderModule( context.device, prog.vk_shaders[ permIx ][ shaderIx ], nullptr );
+			}
+		}
 	}
 
 	renderContext.FreeRegisteredBindParms();
