@@ -61,10 +61,10 @@
 	  "d": 1.0,
 	  "illum": 0.0,
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_OPAQUE": "LitOpaque",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
 		"GGX_COLOR_MAP_SLOT": "grid2.png"
@@ -73,10 +73,10 @@
 	{
 	  "name": "TV0",
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_EMISSIVE": "LitCRT",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_EMISSIVE": { "shader": "LitCRT", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
 		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_0"
@@ -85,10 +85,10 @@
 	{
 	  "name": "TV1",
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_EMISSIVE": "LitCRT",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_EMISSIVE": { "shader": "LitCRT", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
 		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_1"
@@ -97,10 +97,10 @@
 	{
 	  "name": "TV2",
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_EMISSIVE": "LitCRT",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_EMISSIVE": { "shader": "LitCRT", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
 		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_2"
@@ -109,10 +109,10 @@
 	{
 	  "name": "TV3",
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_EMISSIVE": "LitCRT",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_EMISSIVE": { "shader": "LitCRT", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
 		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_3"
@@ -121,16 +121,16 @@
 	{
 	  "name": "TERRAIN",
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_OPAQUE": "LitOpaque",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  }
 	},
 	{
 	  "name": "SKY",
 	  "shaders": {
-		"DRAWPASS_SKYBOX": "Sky"
+		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 	  },
 	  "textures": {
 		"CUBE_RIGHT_SLOT": "skybox80s.png",

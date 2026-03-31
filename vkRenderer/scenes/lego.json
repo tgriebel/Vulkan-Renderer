@@ -80,10 +80,10 @@
 	  "d": 1.0,
 	  "illum": 0.0,
 	  "shaders": {
-		"DRAWPASS_SHADOW": "Shadow",
-		"DRAWPASS_DEPTH": "LitDepth",
-		"DRAWPASS_OPAQUE": "LitOpaque",
-		"DRAWPASS_DEBUG_WIREFRAME": "Debug"
+		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+		"DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
 		"GGX_COLOR_MAP_SLOT": "grid.png"
@@ -92,7 +92,7 @@
 	{
 	  "name": "SKY",
 	  "shaders": {
-		"DRAWPASS_SKYBOX": "Sky"
+		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 	  },
 	  "textures": {
 		"CUBE_RIGHT_SLOT": "chapel_right.jpg",

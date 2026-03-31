@@ -90,7 +90,7 @@
 	{
 	  "name": "SKY",
 	  "shaders": {
-		"DRAWPASS_SKYBOX": "Sky"
+		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 	  },
 	  "textures": {
 		"CUBE_RIGHT_SLOT": "chapel_right.jpg",
@@ -104,7 +104,7 @@
 	{
 	  "name": "DEBUG_CUBE",
 	  "shaders": {
-		"DRAWPASS_SKYBOX": "Sky"
+		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 	  },
 	  "textures": {
 		"CUBE_RIGHT_SLOT": "debug_right.jpg",
@@ -118,7 +118,7 @@
 	{
 	  "name": "EquirectangularSky",
 	  "shaders": {
-		"DRAWPASS_SKYBOX": "EquirectangularSampler"
+		"DRAWPASS_SKYBOX": { "shader": "EquirectangularSampler", "perms": [""] }
 	  },
 	  "textures": {
 		"TEXTURE_SLOT_0": "anticChapel_4k.hdr"

@@ -171,7 +171,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
-	//state.permSet = permSet;
+	//state.permSet = permSet; // FIXME
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
@@ -196,7 +196,9 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	state.permSet = permSet;
 
 	if( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
-		state.permSet |= shaderPermId_t::MRT;
+		SetFlags( state.permSet, shaderPermId_t::MRT );
+	} else {
+		ClearFlags( state.permSet, shaderPermId_t::MRT );
 	}
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
@@ -212,6 +214,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
+	pipelineObject.dbgShaderName = progAsset.GetName().c_str();
 
 	assert( prog.shaderCount == 2 );
 
@@ -509,6 +512,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
+	pipelineObject.dbgShaderName = progAsset.GetName().c_str();
 
 	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};
 	computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -539,8 +543,6 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
 	pipelineInfo.stage = computeShaderStageInfo;
 	pipelineInfo.pNext = nullptr;
-
-	pipelineObject.csName = prog.shaders[ 0 ]->name.c_str();
 
 	VK_CHECK_RESULT( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 

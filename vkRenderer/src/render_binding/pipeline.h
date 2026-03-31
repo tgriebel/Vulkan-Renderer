@@ -75,9 +75,7 @@ struct pipelineObject_t
 	VkPipeline			pipeline;
 	VkPipelineLayout	pipelineLayout;
 #endif
-	const char*			vsName;
-	const char*			psName;
-	const char*			csName;
+	const char*			dbgShaderName;
 };
 
 

@@ -90,9 +90,9 @@
       "d": 1.0,
       "illum": 0.0,
       "shaders": {
-          "DRAWPASS_SHADOW": "Shadow",
-          "DRAWPASS_DEPTH": "LitDepth",
-          "DRAWPASS_OPAQUE": "LitOpaque"
+          "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+          "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+          "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] }
       },
 	  "textures": {
 		  "GGX_COLOR_MAP_SLOT" : "sapeli.jpg"
@@ -101,14 +101,14 @@
 	{
       "name": "GlowSquare",
       "shaders": {
-          "DRAWPASS_TRANS": "LitTrans",
-          "DRAWPASS_DEBUG_WIREFRAME": "Debug"
+          "DRAWPASS_TRANS": { "shader": "LitTrans", "perms": [""] },
+          "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
       }
     },
 	{
       "name": "EquirectangularSky",
       "shaders": {
-          "DRAWPASS_SKYBOX": "Sky"
+          "DRAWPASS_SKYBOX": { "shader": "Sky", "perms": ["skycube"] }
       },
       "textures": {
           "TEXTURE_SLOT_0" : "code_assets/chess_env.img"

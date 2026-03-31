@@ -83,6 +83,12 @@ struct objectTuple_t
 };
 
 
+struct drawPassShader_t
+{
+	char		name[ TOKEN_LEN ];
+	char		perms[ (uint32_t)shaderPermId_t::COUNT ][ TOKEN_LEN ];
+};
+
 void ParseArray( parseState_t& st, const objectTuple_t* objectMap );
 void ParseObject( parseState_t& st, const objectTuple_t* objectMap, const uint32_t objectCount );
 
@@ -149,10 +155,12 @@ int ParseStringObject( parseState_t& st, void* value, uint32_t offset )
 	char* s = reinterpret_cast<char*>( value ) + offset;
 	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
 
-	assert( valueLen > 0 );
-	assert( valueLen < TOKEN_LEN );
-	memset( s, '\0', TOKEN_LEN );
-	memcpy( s, st.file->data() + st.tokens[ st.tx ].start, valueLen );
+	if( valueLen > 0 )
+	{
+		assert( valueLen < TOKEN_LEN );
+		memset( s, '\0', TOKEN_LEN );
+		memcpy( s, st.file->data() + st.tokens[ st.tx ].start, valueLen );
+	}
 	s[valueLen] = '\0';
 
 	st.tx += 1;
@@ -322,6 +330,28 @@ int ParseImageObject( parseState_t& st, void* object, uint32_t offset )
 }
 
 
+int ParseDrawPassShaderObject( parseState_t& st, void* value, uint32_t offset )
+{
+	st.tx += 1;
+	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
+		return 0;
+	}
+
+	drawPassShader_t* passState = reinterpret_cast<drawPassShader_t*>( value );
+	memset( passState, 0, sizeof( drawPassShader_t ) );
+
+	const uint32_t objectCount = 2;
+	const objectTuple_t objectMap[ objectCount ] =
+	{
+		{ "shader",		&passState->name,	TOKEN_LEN,	1,	&ParseStringObject },
+		{ "perms",		&passState->perms,	TOKEN_LEN,	1,	&ParseStringObject },
+	};
+
+	ParseObject( st, objectMap, objectCount );
+	return 0;
+}
+
+
 int ParseMaterialShaderObject( parseState_t& st, void* object, uint32_t offset )
 {
 	st.tx += 1;
@@ -332,7 +362,7 @@ int ParseMaterialShaderObject( parseState_t& st, void* object, uint32_t offset )
 	Material* material = reinterpret_cast<Material*>( object );
 
 	const uint32_t objectCount = 10;
-	char s[ objectCount ][TOKEN_LEN] = {};
+	drawPassShader_t drawPassShader[ objectCount ] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
 	{
@@ -350,26 +380,36 @@ int ParseMaterialShaderObject( parseState_t& st, void* object, uint32_t offset )
 
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ enumMap[ 0 ].name,	&s[ 0 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 1 ].name,	&s[ 1 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 2 ].name,	&s[ 2 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 3 ].name,	&s[ 3 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 4 ].name,	&s[ 4 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 5 ].name,	&s[ 5 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 6 ].name,	&s[ 6 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 7 ].name,	&s[ 7 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 8 ].name,	&s[ 8 ],	TOKEN_LEN,	1,	&ParseStringObject },
-		{ enumMap[ 9 ].name,	&s[ 9 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 0 ].name,	&drawPassShader[ 0 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 1 ].name,	&drawPassShader[ 1 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 2 ].name,	&drawPassShader[ 2 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 3 ].name,	&drawPassShader[ 3 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 4 ].name,	&drawPassShader[ 4 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 5 ].name,	&drawPassShader[ 5 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 6 ].name,	&drawPassShader[ 6 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 7 ].name,	&drawPassShader[ 7 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 8 ].name,	&drawPassShader[ 8 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
+		{ enumMap[ 9 ].name,	&drawPassShader[ 9 ],	sizeof( drawPassShader_t ),	1,	&ParseDrawPassShaderObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
 
 	for ( uint32_t mapIx = 0; mapIx < objectCount; ++mapIx )
 	{
-		if ( s[ mapIx ][0] == '\0' ) {
+		if ( drawPassShader[ mapIx ].name[ 0 ] == '\0' ) {
 			continue;
 		}
-		material->AddShader( drawPass_t( enumMap[ mapIx ].value ), AssetLib<GpuProgram>::Handle( s[ mapIx ] ) );
+
+		uint32_t permSet = 0;
+		for ( uint32_t i = 0; i < (uint32_t)shaderPermId_t::COUNT; ++i )
+		{
+			if ( drawPassShader[ mapIx ].perms[ i ][ 0 ] == '\0' ) {
+				break;
+			}
+			permSet |= static_cast<uint32_t>( GetPermId( drawPassShader[ mapIx ].perms[ i ] ) );
+		}
+
+		material->AddShader( drawPass_t( enumMap[ mapIx ].value ), AssetLib<GpuProgram>::Handle( drawPassShader[ mapIx ].name ), permSet );
 	}
 	return 0;
 }

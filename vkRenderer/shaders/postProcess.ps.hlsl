@@ -121,7 +121,7 @@ PS_Output PSMain( PS_Input input )
 
     const float3 exposureAdjustedColor = bloomHdr * exposure * tint;
 
-    sceneColor.rgb = LinearToSrgb( hdrColor );
+    sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 
     output.outColor.rgb = lerp( sceneColor.rgb, float3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
     output.outColor.a = 1.0f;

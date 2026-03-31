@@ -1060,10 +1060,27 @@ void Renderer::BuildPipelines()
 		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
 		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
 		{
-			// HACK: This is one of the few permutations required currently
-			const shaderPermId_t permId = ( passIx == DRAWPASS_SKYBOX ) ? shaderPermId_t::SKY_CUBE_SAMPLER : shaderPermId_t::NONE;
+			CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset );
 
-			CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset, permId );
+			uint32_t permSet = (uint32_t)prog.permSet;
+			if( permSet == 0 ) {
+				continue;
+			}
+
+			uint32_t permBit = 0x01;
+
+			while( permSet != 0 )
+			{	
+				if( ( permSet & permBit ) == 0 )
+				{
+					permBit <<= 1;
+					continue;
+				}
+				permSet &= ~( permSet & permBit );
+				CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset, static_cast<shaderPermId_t>( permBit ) );
+
+				permBit <<= 1;
+			}
 		}	
 	}
 }
