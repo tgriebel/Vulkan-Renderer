@@ -2,9 +2,10 @@
 
 #include <gfxcore/scene/scene.h>
 #include <gfxcore/scene/entity.h>
-
-#include <raytracer/scene.h>
-#include <raytracer/raytrace.h>
+/*
+#include "rt_common.h"
+#include "raytrace.h"
+#include "raster.h"
 
 static RtView rtview;
 static RtScene rtScene;
@@ -83,3 +84,4 @@ static void TraceScene( const bool rasterize = false )
 		bitmap.Write( ss.str() );
 	}
 }
+*/

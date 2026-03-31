@@ -559,12 +559,12 @@ void DrawSceneDebugMenu()
 	if ( ImGui::BeginTabItem( "Debug" ) )
 	{
 		g_imguiControls.rebuildShaders = ImGui::Button( "Reload Shaders" );
-		g_imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
+		//g_imguiControls.rebuildRaytraceScene = ImGui::Button( "Rebuild Raytrace Scene" );
 		ImGui::SameLine();
-		g_imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
-		ImGui::SameLine();
-		g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
-		ImGui::SameLine();
+		//g_imguiControls.raytraceScene = ImGui::Button( "Raytrace Scene" );
+		//ImGui::SameLine();
+		//g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
+		//ImGui::SameLine();
 		g_imguiControls.captureScreenshot = ImGui::Button( "Capture ScreenShot" );
 
 		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );

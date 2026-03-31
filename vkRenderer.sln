@@ -11,8 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Chess", "..\..\Chess\Chess\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SysCore", "external\SysCore\SysCore.vcxproj", "{01728A43-DA97-4BC6-8EDF-F17CB75E7967}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracer", "..\..\Raytracer-Graphic-Pipeline-master\RayTracer.vcxproj", "{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AssetConverter", "AssetConverter\AssetConverter.vcxproj", "{11A9154E-560C-4CEB-AE50-0A0B661612BB}"
 EndProject
 Global
@@ -73,18 +71,6 @@ Global
 		{01728A43-DA97-4BC6-8EDF-F17CB75E7967}.Test (Debug)|x64.Build.0 = Debug|x64
 		{01728A43-DA97-4BC6-8EDF-F17CB75E7967}.Test (Debug)|x86.ActiveCfg = Debug|Win32
 		{01728A43-DA97-4BC6-8EDF-F17CB75E7967}.Test (Debug)|x86.Build.0 = Debug|Win32
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Debug|x64.ActiveCfg = Debug|x64
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Debug|x64.Build.0 = Debug|x64
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Debug|x86.ActiveCfg = Debug|Win32
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Debug|x86.Build.0 = Debug|Win32
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Release|x64.ActiveCfg = Release|x64
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Release|x64.Build.0 = Release|x64
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Release|x86.ActiveCfg = Release|Win32
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Release|x86.Build.0 = Release|Win32
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x64.ActiveCfg = Debug|x64
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x64.Build.0 = Debug|x64
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x86.ActiveCfg = Debug|Win32
-		{5A3A1D7E-43F5-41D1-AF37-D75DFD0DBC49}.Test (Debug)|x86.Build.0 = Debug|Win32
 		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x64.ActiveCfg = Debug|x64
 		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x64.Build.0 = Debug|x64
 		{11A9154E-560C-4CEB-AE50-0A0B661612BB}.Debug|x86.ActiveCfg = Debug|Win32

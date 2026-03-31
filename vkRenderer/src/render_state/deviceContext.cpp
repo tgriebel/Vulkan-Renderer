@@ -1112,6 +1112,8 @@ void DeviceContext::Create( Window& window )
 		std::vector<VkPhysicalDevice> devices( deviceCount );
 		vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
 
+		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
 		for ( const auto& device : devices )
 		{
 			if ( vk_IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
@@ -1155,17 +1157,15 @@ void DeviceContext::Create( Window& window )
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>( queueCreateInfos.size() );
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-		VkPhysicalDeviceFeatures deviceFeatures{ };
-		deviceFeatures.samplerAnisotropy = VK_TRUE;
-		deviceFeatures.fillModeNonSolid = VK_TRUE;
-		deviceFeatures.sampleRateShading = VK_TRUE;
-		deviceFeatures.pipelineStatisticsQuery = VK_TRUE;
-		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
-		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
+		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.features.fillModeNonSolid = VK_TRUE;
+		deviceFeatures.features.sampleRateShading = VK_TRUE;
+		deviceFeatures.features.pipelineStatisticsQuery = VK_TRUE;
+		deviceFeatures.features.vertexPipelineStoresAndAtomics = VK_TRUE;
+		deviceFeatures.features.fragmentStoresAndAtomics = VK_TRUE;
 #ifdef USE_VULKAN_RTX
-		deviceFeatures.shaderStorageImageWriteWithoutFormat = VK_TRUE;
-
-		// Enable features required for ray tracing using feature chaining via pNext		
+		deviceFeatures.features.shaderStorageImageWriteWithoutFormat = VK_TRUE;
+	
 		enabledBufferDeviceAddresFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		enabledBufferDeviceAddresFeatures.bufferDeviceAddress = VK_TRUE;
 
@@ -1177,16 +1177,13 @@ void DeviceContext::Create( Window& window )
 		enabledAccelerationStructureFeatures.accelerationStructure = VK_TRUE;
 		enabledAccelerationStructureFeatures.pNext = &enabledRayTracingPipelineFeatures;
 
-		accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-		VkPhysicalDeviceFeatures2 deviceFeatures2{};
-		deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-		deviceFeatures2.pNext = &accelerationStructureFeatures;
-		vkGetPhysicalDeviceFeatures2( physicalDevice, &deviceFeatures2 );
+		deviceFeatures.pNext = &accelerationStructureFeatures;
+		vkGetPhysicalDeviceFeatures2( physicalDevice, &deviceFeatures );
 
 		createInfo.pNext = &enabledAccelerationStructureFeatures;
 #endif
 
-		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.pEnabledFeatures = &deviceFeatures.features;
 
 		std::vector<const char*> enabledExtensions;
 		for ( auto ext : deviceExtensions )

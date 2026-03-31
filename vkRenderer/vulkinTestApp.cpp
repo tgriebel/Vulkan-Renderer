@@ -267,15 +267,15 @@ int main( int argc, char* argv[] )
 
 #if defined( USE_IMGUI )
 			if ( g_imguiControls.rebuildRaytraceScene ) {
-				BuildRayTraceScene( g_scene );
+			//	BuildRayTraceScene( g_scene );
 			}
 
 			if ( g_imguiControls.raytraceScene ) {
-				TraceScene( false );
+			//	TraceScene( false );
 			}
 
 			if ( g_imguiControls.rasterizeScene ) {
-				TraceScene( true );
+			//	TraceScene( true );
 			}
 #endif
 			
