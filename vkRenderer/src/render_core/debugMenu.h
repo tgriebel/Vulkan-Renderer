@@ -20,7 +20,7 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset );
 void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset );
 void DebugMenuEntityEdit( Scene* scene );
 #ifdef USE_VULKAN
-void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures deviceFeatures );
+void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures2 deviceFeatures );
 #endif
 void DeviceDebugMenu();
 #endif

@@ -60,34 +60,61 @@ class DeviceContext
 public:
 #ifdef USE_VULKAN
 	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector<const char*>		deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	const std::vector<const char*>		deviceExtensions = {	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#ifdef USE_VULKAN_RTX
+																VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+																VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+																VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+																VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME
+#endif
+															};
+
 #endif
 public:
 #ifdef USE_VULKAN
-	VkDevice							device;
-	VkPhysicalDevice					physicalDevice;
-	VkInstance							instance;
-	VkPhysicalDeviceProperties			deviceProperties;
-	VkPhysicalDeviceFeatures			deviceFeatures;
-	VkDebugUtilsMessengerEXT			debugMessenger;
-	VkDescriptorPool					descriptorPool;
-	VkQueryPool							statQueryPool;
-	VkQueryPool							timestampQueryPool;
-	VkQueryPool							occlusionQueryPool;
-	VkQueue								gfxContext;
-	VkQueue								presentQueue;
-	VkQueue								computeContext;
-	VkSampler							bilinearSampler[ 3 ];
-	VkSampler							depthShadowSampler;
-	uint32_t							queueFamilyIndices[ QUEUE_COUNT ];
+	VkDevice											device;
+	VkPhysicalDevice									physicalDevice;
+	VkInstance											instance;
+	VkPhysicalDeviceProperties							deviceProperties;
+	VkPhysicalDeviceFeatures2							deviceFeatures;
+	VkDebugUtilsMessengerEXT							debugMessenger;
+	VkDescriptorPool									descriptorPool;
+	VkQueryPool											statQueryPool;
+	VkQueryPool											timestampQueryPool;
+	VkQueryPool											occlusionQueryPool;
+	VkQueue												gfxContext;
+	VkQueue												presentQueue;
+	VkQueue												computeContext;
+	VkSampler											bilinearSampler[ 3 ];
+	VkSampler											depthShadowSampler;
+	uint32_t											queueFamilyIndices[ QUEUE_COUNT ];
 
-	bool								debugMarkersEnabled = false;
-	PFN_vkDebugMarkerSetObjectTagEXT	fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
-	PFN_vkDebugMarkerSetObjectNameEXT	fnDebugMarkerSetObjectName = VK_NULL_HANDLE;
-	PFN_vkCmdDebugMarkerBeginEXT		fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
-	PFN_vkCmdDebugMarkerEndEXT			fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
-	PFN_vkCmdDebugMarkerInsertEXT		fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
-	PFN_vkSetDebugUtilsObjectNameEXT	fnCmdSetDebugUtilsObjectName = VK_NULL_HANDLE;
+	bool												debugMarkersEnabled = false;
+	PFN_vkDebugMarkerSetObjectTagEXT					fnDebugMarkerSetObjectTag = VK_NULL_HANDLE;
+	PFN_vkDebugMarkerSetObjectNameEXT					fnDebugMarkerSetObjectName = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerBeginEXT						fnCmdDebugMarkerBegin = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerEndEXT							fnCmdDebugMarkerEnd = VK_NULL_HANDLE;
+	PFN_vkCmdDebugMarkerInsertEXT						fnCmdDebugMarkerInsert = VK_NULL_HANDLE;
+	PFN_vkSetDebugUtilsObjectNameEXT					fnCmdSetDebugUtilsObjectName = VK_NULL_HANDLE;
+#ifdef USE_VULKAN_RTX
+	PFN_vkGetBufferDeviceAddressKHR						vkGetBufferDeviceAddressKHR = VK_NULL_HANDLE;
+	PFN_vkCreateAccelerationStructureKHR				vkCreateAccelerationStructureKHR = VK_NULL_HANDLE;
+	PFN_vkDestroyAccelerationStructureKHR				vkDestroyAccelerationStructureKHR = VK_NULL_HANDLE;
+	PFN_vkGetAccelerationStructureBuildSizesKHR			vkGetAccelerationStructureBuildSizesKHR = VK_NULL_HANDLE;
+	PFN_vkGetAccelerationStructureDeviceAddressKHR		vkGetAccelerationStructureDeviceAddressKHR = VK_NULL_HANDLE;
+	PFN_vkCmdBuildAccelerationStructuresKHR				vkCmdBuildAccelerationStructuresKHR = VK_NULL_HANDLE;
+	PFN_vkBuildAccelerationStructuresKHR				vkBuildAccelerationStructuresKHR = VK_NULL_HANDLE;
+	PFN_vkCmdTraceRaysKHR								vkCmdTraceRaysKHR = VK_NULL_HANDLE;
+	PFN_vkGetRayTracingShaderGroupHandlesKHR			vkGetRayTracingShaderGroupHandlesKHR = VK_NULL_HANDLE;
+	PFN_vkCreateRayTracingPipelinesKHR					vkCreateRayTracingPipelinesKHR = VK_NULL_HANDLE;
+
+	VkPhysicalDeviceRayTracingPipelinePropertiesKHR		rayTracingPipelineProperties{};
+	VkPhysicalDeviceAccelerationStructureFeaturesKHR	accelerationStructureFeatures{};
+
+	VkPhysicalDeviceBufferDeviceAddressFeatures			enabledBufferDeviceAddresFeatures{};
+	VkPhysicalDeviceRayTracingPipelineFeaturesKHR		enabledRayTracingPipelineFeatures{};
+	VkPhysicalDeviceAccelerationStructureFeaturesKHR	enabledAccelerationStructureFeatures{};
+#endif
 #endif
 	// "bufferId" flips between double/triple buffers - 0, 1, 2
 	uint32_t							bufferId;

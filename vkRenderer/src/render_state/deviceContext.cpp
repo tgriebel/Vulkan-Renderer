@@ -1117,7 +1117,7 @@ void DeviceContext::Create( Window& window )
 			if ( vk_IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
 			{
 				vkGetPhysicalDeviceProperties( device, &deviceProperties );
-				vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
+				vkGetPhysicalDeviceFeatures2( device, &deviceFeatures );
 				physicalDevice = device;
 				break;
 			}
@@ -1162,6 +1162,30 @@ void DeviceContext::Create( Window& window )
 		deviceFeatures.pipelineStatisticsQuery = VK_TRUE;
 		deviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
 		deviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
+#ifdef USE_VULKAN_RTX
+		deviceFeatures.shaderStorageImageWriteWithoutFormat = VK_TRUE;
+
+		// Enable features required for ray tracing using feature chaining via pNext		
+		enabledBufferDeviceAddresFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+		enabledBufferDeviceAddresFeatures.bufferDeviceAddress = VK_TRUE;
+
+		enabledRayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+		enabledRayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
+		enabledRayTracingPipelineFeatures.pNext = &enabledBufferDeviceAddresFeatures;
+
+		enabledAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		enabledAccelerationStructureFeatures.accelerationStructure = VK_TRUE;
+		enabledAccelerationStructureFeatures.pNext = &enabledRayTracingPipelineFeatures;
+
+		accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		VkPhysicalDeviceFeatures2 deviceFeatures2{};
+		deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		deviceFeatures2.pNext = &accelerationStructureFeatures;
+		vkGetPhysicalDeviceFeatures2( physicalDevice, &deviceFeatures2 );
+
+		createInfo.pNext = &enabledAccelerationStructureFeatures;
+#endif
+
 		createInfo.pEnabledFeatures = &deviceFeatures;
 
 		std::vector<const char*> enabledExtensions;
@@ -1219,6 +1243,26 @@ void DeviceContext::Create( Window& window )
 				break;
 			}
 		}
+
+#ifdef USE_VULKAN_RTX
+		// Get ray tracing pipeline properties, which will be used later on in the sample
+		//rayTracingPipelineProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR;
+		//VkPhysicalDeviceProperties2 deviceProperties2{};
+		//deviceProperties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+		//deviceProperties2.pNext = &rayTracingPipelineProperties;
+		//vkGetPhysicalDeviceProperties2( physicalDevice, &deviceProperties2 );
+
+		vkGetBufferDeviceAddressKHR = reinterpret_cast<PFN_vkGetBufferDeviceAddressKHR>( vkGetDeviceProcAddr( device, "vkGetBufferDeviceAddressKHR" ) );
+		vkCmdBuildAccelerationStructuresKHR = reinterpret_cast<PFN_vkCmdBuildAccelerationStructuresKHR>( vkGetDeviceProcAddr( device, "vkCmdBuildAccelerationStructuresKHR" ) );
+		vkBuildAccelerationStructuresKHR = reinterpret_cast<PFN_vkBuildAccelerationStructuresKHR>( vkGetDeviceProcAddr( device, "vkBuildAccelerationStructuresKHR" ) );
+		vkCreateAccelerationStructureKHR = reinterpret_cast<PFN_vkCreateAccelerationStructureKHR>( vkGetDeviceProcAddr( device, "vkCreateAccelerationStructureKHR" ) );
+		vkDestroyAccelerationStructureKHR = reinterpret_cast<PFN_vkDestroyAccelerationStructureKHR>( vkGetDeviceProcAddr( device, "vkDestroyAccelerationStructureKHR" ) );
+		vkGetAccelerationStructureBuildSizesKHR = reinterpret_cast<PFN_vkGetAccelerationStructureBuildSizesKHR>( vkGetDeviceProcAddr( device, "vkGetAccelerationStructureBuildSizesKHR" ) );
+		vkGetAccelerationStructureDeviceAddressKHR = reinterpret_cast<PFN_vkGetAccelerationStructureDeviceAddressKHR>( vkGetDeviceProcAddr( device, "vkGetAccelerationStructureDeviceAddressKHR" ) );
+		vkCmdTraceRaysKHR = reinterpret_cast<PFN_vkCmdTraceRaysKHR>( vkGetDeviceProcAddr( device, "vkCmdTraceRaysKHR" ) );
+		vkGetRayTracingShaderGroupHandlesKHR = reinterpret_cast<PFN_vkGetRayTracingShaderGroupHandlesKHR>( vkGetDeviceProcAddr( device, "vkGetRayTracingShaderGroupHandlesKHR" ) );
+		vkCreateRayTracingPipelinesKHR = reinterpret_cast<PFN_vkCreateRayTracingPipelinesKHR>( vkGetDeviceProcAddr( device, "vkCreateRayTracingPipelinesKHR" ) );
+#endif
 
 		if ( found )
 		{
@@ -1324,7 +1368,7 @@ void DeviceContext::Create( Window& window )
 	}
 
 	// Query Pool (Statistics)
-	if ( deviceFeatures.pipelineStatisticsQuery )
+	if ( deviceFeatures.features.pipelineStatisticsQuery )
 	{
 		VkQueryPoolCreateInfo queryPoolInfo = {};
 		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;

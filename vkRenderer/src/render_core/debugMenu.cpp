@@ -630,32 +630,32 @@ void DebugMenuEntityEdit( Scene* scene )
 }
 
 
-#define LimitUint( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitUint( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
 
-#define LimitDeviceSize( FIELD )	ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitDeviceSize( FIELD )	ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
 
-#define LimitSizeT( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitSizeT( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%ull", deviceProperties.limits.##FIELD );
 
-#define LimitBool( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitBool( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceProperties.limits.##FIELD );
 
-#define LimitFloat( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitFloat( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%f", deviceProperties.limits.##FIELD );
 
-#define LimitInt( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitInt( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%i", deviceProperties.limits.##FIELD );
 
-#define LimitHex( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
+#define LimitHex( FIELD )			ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
 									ImGui::TableNextColumn();	ImGui::Text( "%X", deviceProperties.limits.##FIELD );
 
-#define FeatureBool( FIELD )		ImGui::TableNextColumn();	ImGui::Text( #FIELD );									\
-									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceFeatures.##FIELD );
+#define FeatureBool( FIELD )		ImGui::TableNextColumn();	ImGui::Text( #FIELD );												\
+									ImGui::TableNextColumn();	ImGui::Text( "%u", deviceFeatures.features.##FIELD );
 
 
-void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures deviceFeatures )
+void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures2 deviceFeatures )
 {
 	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
 

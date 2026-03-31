@@ -81,7 +81,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 		swapBuffering_t::SINGLE_FRAME,
 		resourceLifeTime_t::TASK,
 		1,
-		sizeof( writeBackParms ),
+		2 * sizeof( writeBackParms ),
 		bufferType_t::UNIFORM,
 		m_context->sharedMemory
 	);
