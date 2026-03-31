@@ -224,7 +224,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	vertShaderStageInfo.module = prog.vk_shaders[ permIndex ][ 0 ];
 	vertShaderStageInfo.pName = "VSMain";
 
-	assert( prog.shaders[ permIndex ][ 0 ].type == shaderType_t::VERTEX );
+	assert( prog.shaderBins[ permIndex ][ 0 ].type == shaderType_t::VERTEX );
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{ };
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -232,7 +232,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	fragShaderStageInfo.module = prog.vk_shaders[ permIndex ][ 1 ];
 	fragShaderStageInfo.pName = "PSMain";
 
-	assert( prog.shaders[ permIndex ][ 1 ].type == shaderType_t::PIXEL );
+	assert( prog.shaderBins[ permIndex ][ 1 ].type == shaderType_t::PIXEL );
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
@@ -400,7 +400,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "Pipeline Layout (GFX): < " + prog.shaders[ permIndex ][ 0 ].binName + " | " + prog.shaders[ permIndex ][ 1 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "Pipeline Layout (GFX): < " + prog.shaderBins[ permIndex ][ 0 ].binName + " | " + prog.shaderBins[ permIndex ][ 1 ].binName + " >" ).c_str() );
 
 	const bool depthTestEnable = ( ( state.stateBits & GFX_STATE_DEPTH_TEST ) != 0 );
 	const bool depthWriteEnable = ( ( state.stateBits & GFX_STATE_DEPTH_WRITE ) != 0 );
@@ -465,7 +465,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VK_CHECK_RESULT( vkCreateGraphicsPipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE,  ( "Pipeline (GFX): < " + prog.shaders[ 0 ][ 0 ].binName + " | " + prog.shaders[ 0 ][ 1 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE,  ( "Pipeline (GFX): < " + prog.shaderBins[ 0 ][ 0 ].binName + " | " + prog.shaderBins[ 0 ][ 1 ].binName + " >" ).c_str() );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 
@@ -535,7 +535,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "PipelineLayout (Compute): < " + prog.shaders[ 0 ][ 0 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, ( "PipelineLayout (Compute): < " + prog.shaderBins[ 0 ][ 0 ].binName + " >" ).c_str() );
 
 	VkComputePipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
@@ -546,7 +546,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	VK_CHECK_RESULT( vkCreateComputePipelines( context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipelineObject.pipeline ) );
 
-	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE, ( "Pipeline (Compute): < " + prog.shaders[ 0 ][ 0 ].binName + " >" ).c_str() );
+	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE, ( "Pipeline (Compute): < " + prog.shaderBins[ 0 ][ 0 ].binName + " >" ).c_str() );
 
 	g_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 }

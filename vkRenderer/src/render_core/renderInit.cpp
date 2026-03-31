@@ -993,8 +993,8 @@ void Renderer::BuildPipelines()
 		{
 			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
 			{
-				const shaderSource_t& shaderSource = prog.shaders[ permIx ][ shaderIx ];
-				prog.vk_shaders[ permIx ][ shaderIx ] = vk_CreateShaderModule( shaderSource.blob, shaderSource.binName.c_str() );
+				const shaderBin_t& shaderBin = prog.shaderBins[ permIx ][ shaderIx ];
+				prog.vk_shaders[ permIx ][ shaderIx ] = vk_CreateShaderModule( shaderBin.blob, shaderBin.binName.c_str() );
 			}
 		}
 	}
@@ -1029,7 +1029,7 @@ void Renderer::BuildPipelines()
 		progAsset->CompleteUpload();
 
 		GpuProgram& prog = progAsset->Get();
-		if ( prog.shaders[ 0 ][ 0 ].type == shaderType_t::COMPUTE )
+		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
 		{
 		//	assert( prog.shaderCount == 1 );
 			DestroyComputePipeline( *progAsset );
@@ -1050,7 +1050,7 @@ void Renderer::BuildPipelines()
 		progAsset->CompleteUpload();
 
 		GpuProgram& prog = progAsset->Get();
-		if ( prog.shaders[ 0 ][ 0 ].type == shaderType_t::COMPUTE )
+		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
 		{
 			assert( prog.shaderCount == 1 );
 			CreateComputePipeline( *progAsset );
