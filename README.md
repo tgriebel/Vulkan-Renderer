@@ -16,15 +16,17 @@ Features:
 * Transparents
 * Post-process
 * Multiple shaders (+ hot reloading)
+* Shader permutations
 * Stencil effects
 * Asset and scene management
 * Model instancing
 * Runtime Object manipulation
-* Shader hotswap
 * MSAA
 * Env-maps
+* MRT
 
 To Do:
 * Raytraced reflections
 * Bokeh DoF
 * SSAO
+* Visibility Buffer + Deferred Lighting
