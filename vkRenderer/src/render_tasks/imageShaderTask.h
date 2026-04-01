@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "../globals/common.h"
 #include "../draw_passes/drawpass.h"
 #include "../render_tasks/RenderTask.h"
 

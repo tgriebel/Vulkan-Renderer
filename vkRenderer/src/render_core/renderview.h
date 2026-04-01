@@ -24,7 +24,7 @@
 #pragma once
 #include <cstdint>
 #include <gfxcore/scene/scene.h>
-#include "common.h"
+#include "../globals/common.h"
 #include "../globals/drawGroup.h"
 #include "../draw_passes/drawpass.h"
 

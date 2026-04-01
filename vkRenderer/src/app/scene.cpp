@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../globals/common.h"
 #include <gfxcore/core/util.h>
 #include "io.h"
 #include "window.h"

@@ -27,8 +27,7 @@
 #include "../src/io/io.h"
 #include "../src/app/window.h"
 #include "../src/app/input.h"
-#include <chess.h>
-#include <commands.h>
+#include "Chess.h"
 #include <syscore/timer.h>
 #include <gfxcore/scene/entity.h>
 #include <gfxcore/scene/scene.h>
@@ -59,7 +58,7 @@ class ChessScene : public Scene
 {
 private:
 	gameConfig_t	cfg;
-	Chess			chessEngine;
+	ChessEngine		chessEngine;
 	Entity*			movePieceId = nullptr;
 
 	std::vector< moveAction_t >	actions;
