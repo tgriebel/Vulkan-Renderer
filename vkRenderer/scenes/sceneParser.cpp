@@ -37,20 +37,20 @@
 
 //#define JSMN_PARENT_LINKS
 #include <SysCore/jsmn.h>
-#include "chessScene.h"
-#include "nesScene.h"
 
 static const int TOKEN_LEN = 128;
 
 static uint8_t trashBuffer[ 8192 ];
 
-static int jsoneq( const char* json, jsmntok_t* tok, const char* s ) {
+static int jsoneq( const char* json, jsmntok_t* tok, const char* s )
+{
 	if ( tok->type == JSMN_STRING && (int)strlen( s ) == tok->end - tok->start &&
 		strncmp( json + tok->start, s, tok->end - tok->start ) == 0 ) {
 		return 0;
 	}
 	return -1;
 }
+
 
 struct parseState_t
 {
@@ -63,15 +63,18 @@ struct parseState_t
 	jsmn_parser*		p;
 };
 
+
 struct enumString_t
 {
 	const char* name;
 	int32_t		value;
 };
 
+
 #define MAKE_ENUM_STRING( e ) enumString_t{ #e, e }
 
 typedef int ParseObjectFunc( parseState_t& st, void* object, uint32_t offset );
+
 
 struct objectTuple_t
 {
@@ -124,20 +127,6 @@ static int CountTokens( const parseState_t& st, int index )
 	}
 
 	return 1; // primitive or string
-}
-
-
-void InitSceneType( const std::string type, Scene** scene )
-{
-	if ( type == "chess" ) {
-		*scene = new ChessScene();
-	}
-	else if ( type == "nes" ) {
-		*scene = new NesScene();
-	}
-	else {
-		*scene = new Scene();
-	}
 }
 
 
@@ -822,7 +811,7 @@ static void CleanupParseState( parseState_t& st )
 }
 
 
-void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets, const bool isRoot )
+void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets, sceneInitializerCallback_t* sceneInitializer )
 {
 	assert( assets != nullptr );
 	assert( scene != nullptr );
@@ -852,7 +841,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 		return;
 	}
 
-	if( isRoot )
+	if( sceneInitializer != nullptr )
 	{
 		char stringBuffer[ TOKEN_LEN ] = "";
 
@@ -862,12 +851,12 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 			if ( jsoneq( file.data(), &st.tokens[ st.tx ], "sceneClass" ) == 0 )
 			{
 				st.tx += 1;
-				InitSceneType( ParseCurrentToken( st ), scene );
+				sceneInitializer( ParseCurrentToken( st ), scene );
 			}
 			else if ( jsoneq( file.data(), &st.tokens[ st.tx ], "reflink" ) == 0 )
 			{
 				st.tx += 1;
-				ParseJson( ParseCurrentToken( st ), scene, assets, false );
+				ParseJson( ParseCurrentToken( st ), scene, assets, nullptr );
 			}
 			else {
 				st.tx += 1;
@@ -905,7 +894,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 
 	ParseObject( st, objectMap, objectCount );
 
-	if( isRoot )
+	if( sceneInitializer != nullptr )
 	{
 		( *scene )->envMap = envMap;
 		( *scene )->diffuseIblMap = diffuseIblMap;
@@ -916,11 +905,11 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 }
 
 
-void LoadScene( std::string fileName, Scene** scene, AssetManager* assets )
+void LoadScene( std::string fileName, Scene** scene, AssetManager* assets, sceneInitializerCallback_t* sceneInitializer )
 {
 	{
 		SCOPED_TIMER_PRINT( ParseScene );
-		ParseJson( fileName, scene, assets, true );
+		ParseJson( fileName, scene, assets, sceneInitializer );
 	}
 
 	{

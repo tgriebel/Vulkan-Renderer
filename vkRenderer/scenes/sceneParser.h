@@ -27,4 +27,6 @@
 class Scene;
 class AssetManager;
 
-void LoadScene( std::string fileName, Scene** scene, AssetManager* assets );
+typedef void sceneInitializerCallback_t( const std::string type, Scene** scene );
+
+void LoadScene( std::string fileName, Scene** scene, AssetManager* assets, sceneInitializerCallback_t* sceneInitializer );

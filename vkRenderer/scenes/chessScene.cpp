@@ -135,10 +135,12 @@ void ChessScene::Init()
 			if ( pieceInfo.onBoard == false ) {
 				continue;
 			}
+
 			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
 			CreateEntityBounds( ModelLib().RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
 			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
+
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
 				pieceEnt->materialHdl = MaterialLib().RetrieveHdl( "White.001" );
 			}
@@ -146,6 +148,7 @@ void ChessScene::Init()
 				pieceEnt->SetRotation( vec3f( 0.0f, 0.0f, 180.0f ) );
 				pieceEnt->materialHdl = MaterialLib().RetrieveHdl( "Chess_Black.001" );
 			}
+
 			pieceEnt->name = GetName( pieceInfo ).c_str();
 			pieceEntities.push_back( static_cast<uint32_t>( entities.size() ) );
 			entities.push_back( pieceEnt );
@@ -183,7 +186,8 @@ void ChessScene::Update()
 		PieceEntity* selectedPiece = reinterpret_cast<PieceEntity*>( selectedEntity );
 
 		int selectedActionIx = -1;
-		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
+		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx )
+		{
 			const moveAction_t& action = actions[ actionIx ];
 			if ( ( action.y == GetRankNum( selectedPiece->rank ) ) && ( action.x == GetFileNum( selectedPiece->file ) ) ) {
 				selectedActionIx = actionIx;
@@ -221,7 +225,8 @@ void ChessScene::Update()
 		}
 	}
 
-	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( pieceEntities.size() ); ++entityIx ) {
+	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( pieceEntities.size() ); ++entityIx )
+	{
 		const uint32_t pieceIx = pieceEntities[ entityIx ];
 		PieceEntity* ent = reinterpret_cast<PieceEntity*>( entities[ pieceIx ] );
 		if ( ent == selectedEntity ) {
@@ -237,11 +242,13 @@ void ChessScene::Update()
 		}
 	}
 
-	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( glowEntities.size() ); ++entityIx ) {
+	for ( uint32_t entityIx = 0; entityIx < static_cast<uint32_t>( glowEntities.size() ); ++entityIx )
+	{
 		const uint32_t glowIx = glowEntities[ entityIx ];
 		PieceEntity* ent = reinterpret_cast<PieceEntity*>( FindEntity( glowIx ) );
 		bool validTile = false;
-		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx ) {
+		for ( int actionIx = 0; actionIx < actions.size(); ++actionIx )
+		{
 			const moveAction_t& action = actions[ actionIx ];
 			if ( ( action.y == GetRankNum( ent->rank ) ) && ( action.x == GetFileNum( ent->file ) ) ) {
 				validTile = true;

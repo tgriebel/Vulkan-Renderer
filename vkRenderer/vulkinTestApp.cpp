@@ -41,10 +41,14 @@
 #include "raytracerInterface.h"
 #include "src/app/cvar.h"
 
+#include "scenes/chessScene.h"
+#include "scenes/nesScene.h"
+
 AssetManager						g_assets;
 Scene*								g_scene;
 Renderer							g_renderer;
 Window								g_window;
+
 
 static std::string sceneFile = "chess.json";
 
@@ -57,9 +61,11 @@ void UpdateScene( Scene* scene );
 void InitScene( Scene* scene );
 void ShutdownScene( Scene* scene );
 
+
 void RenderThread()
 {
 }
+
 
 void CheckReloadAssets()
 {
@@ -80,6 +86,7 @@ void CheckReloadAssets()
 	}
 #endif
 }
+
 
 void BakeAssets()
 {	
@@ -108,12 +115,14 @@ MakeCVar( BOOL,		r_autoExposure, true );
 MakeCVar( BOOL,		r_screenshot, true );
 MakeCVar( BOOL,		r_gaussianBlur, true );
  
+
 void ParseCmdArgs( const int argc, char* argv[] )
 {
 	for ( int32_t i = 1; i < argc; ++i ) {
 		CVar::ParseCommand( argv[ i ] );
 	}
 }
+
 
 void ParseConfig( std::string& fileName )
 {
@@ -135,6 +144,21 @@ void ParseConfig( std::string& fileName )
 	file.close();
 }
 
+
+void InitSceneType( const std::string type, Scene** scene )
+{
+	if ( type == "chess" ) {
+		*scene = new ChessScene();
+	}
+	else if ( type == "nes" ) {
+		*scene = new NesScene();
+	}
+	else {
+		*scene = new Scene();
+	}
+}
+
+
 int main( int argc, char* argv[] )
 {
 	g_assets.RegisterLib<Model>( "Model" );
@@ -155,9 +179,9 @@ int main( int argc, char* argv[] )
 	}
 
 	if( c_scene.IsValid() ) {
-		LoadScene( c_scene.GetString(), &g_scene, &g_assets );
+		LoadScene( c_scene.GetString(), &g_scene, &g_assets, InitSceneType );
 	} else {
-		LoadScene( sceneFile, &g_scene, &g_assets );
+		LoadScene( sceneFile, &g_scene, &g_assets, InitSceneType );
 	}
 
 	renderConfig_t config {};
@@ -249,7 +273,7 @@ int main( int argc, char* argv[] )
 				g_assets.Clear();
 
 				CreateCodeAssets();
-				LoadScene( file, &g_scene, &g_assets );
+				LoadScene( file, &g_scene, &g_assets, InitSceneType );
 				InitScene( g_scene );
 		
 				g_renderer.InitGPU();
