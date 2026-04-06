@@ -129,20 +129,20 @@ void MousePressCallback( GLFWwindow* window, int button, int action, int mods )
 
 void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 {
-	Window* app = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
-	mouse_t& mouse = app->input.GetMouseRef();
+	Window* appWindow = reinterpret_cast< Window* >( glfwGetWindowUserPointer( window ) );
+	mouse_t& mouse = appWindow->input.GetMouseRef();
 
 	static double lastX = 0.0;
 	static double lastY = 0.0;
 	static bool firstMove = true;
 
-	if ( app->IsMouseLocked() == false )
-	{
-		firstMove = true;
-		mouse.centered = false;
-		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
-		return;
-	}
+	mouse.x = static_cast<float>( xpos );
+	mouse.y = static_cast<float>( ypos );
+
+	const vec2f ndc = appWindow->GetNdc( mouse.x, mouse.y );
+
+	mouse.xNormalized = ndc.x;
+	mouse.yNormalized = ndc.y;
 
 	if ( firstMove )
 	{
@@ -158,9 +158,15 @@ void MouseMoveCallback( GLFWwindow* window, double xpos, double ypos )
 	lastX = xpos;
 	lastY = ypos;
 
+	if ( appWindow->IsMouseLocked() == false )
+	{
+		firstMove = true;
+		mouse.centered = false;
+		glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+		return;
+	}
+
 	glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
-	mouse.x = static_cast<float>( xpos );
-	mouse.y = static_cast<float>( ypos );
 	mouse.centered = true;
 }
 #endif

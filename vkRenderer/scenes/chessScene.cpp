@@ -174,7 +174,7 @@ void ChessScene::Update()
 	const mouse_t& mouse = g_window.input.GetMouse();
 	if ( ( mouse.centered == false ) && mouse.leftDown )
 	{
-		Ray ray = mainCamera->GetViewRay( vec2f( 0.5f * mouse.x + 0.5f, 0.5f * mouse.y + 0.5f ) );
+		Ray ray = mainCamera->GetViewRay( vec2f( 0.5f * mouse.xNormalized + 0.5f, 0.5f * mouse.yNormalized + 0.5f ) );
 		selectedEntity = GetTracedEntity( ray );
 	}
 

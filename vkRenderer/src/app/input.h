@@ -102,6 +102,8 @@ struct mouse_t
 
 	float	x;
 	float	y;
+	float	xNormalized;
+	float	yNormalized;
 	float	dx; // dx accumlation per frame
 	float	dy; // dy accumlation per frame
 	float	speed;
