@@ -614,15 +614,11 @@ void Renderer::UpdateBuffers()
 #if defined( USE_IMGUI )
 		globals.generic = vec4f( g_imguiControls.roughnessScale, g_imguiControls.roughnessBias, g_imguiControls.metalnessScale, g_imguiControls.metalnessBias );
 		globals.toneMapTint = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
+		globals.bloom = vec4f( g_imguiControls.bloomEnable, g_imguiControls.bloomBlendWeight, 0.0f, 0.0f );
 		globals.exposure = vec4f( g_imguiControls.exposureMidGray, g_imguiControls.exposureAdaptation, g_imguiControls.exposureWhitePoint, g_imguiControls.exposureDarkLimit );
+		globals.exposure2 = vec4f( g_imguiControls.autoExposureEnable ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.dof = vec4f( g_imguiControls.dofEnable ? 1.0f : 0.0f, g_imguiControls.dofFocalDepth, g_imguiControls.dofFocalRange, 0.0f );
-#else
-		globals.generic = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
-		globals.toneMapTint = vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		globals.exposure = vec4f( 0.18f, 1.0f, 1.0f, 1.0f );
-		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, 0.5f );
-		globals.dof = vec4f( 0.0f, 0.0f, 0.0f, 0.0f );
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.whiteId = rc.whiteImage->gpuImage->GetId();

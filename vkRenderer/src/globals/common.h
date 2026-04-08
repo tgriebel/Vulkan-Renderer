@@ -175,6 +175,9 @@ struct imguiControls_t
 	float				metalnessBias;
 	float				shadowStrength;
 	float				toneMapColor[ 4 ];
+	bool				bloomEnable;
+	float				bloomBlendWeight;
+	bool				autoExposureEnable;
 	float				exposureMidGray;
 	float				exposureAdaptation;
 	float				exposureWhitePoint;

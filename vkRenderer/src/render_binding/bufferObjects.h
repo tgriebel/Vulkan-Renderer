@@ -60,7 +60,9 @@ struct globalUboConstants_t
 	vec4f		generic;
 	vec4f		shadowParms;
 	vec4f		toneMapTint;
+	vec4f		bloom;
 	vec4f		exposure;
+	vec4f		exposure2;
 	vec4f		dof;
 	uint32_t	numSamples;
 	uint32_t	whiteId;

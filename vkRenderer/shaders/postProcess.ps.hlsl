@@ -109,17 +109,33 @@ PS_Output PSMain( PS_Input input )
     }
 
     const float3 tint = globals.toneMapTint.rgb;
-    const float maxLod = float( GetTextureLevels( codeSamplers[NUI(textureId3)] ) - 1 );
-    const float luminance = codeSamplers[NUI(textureId3)].SampleLevel( codeSamplersSt, float2( 0.5f, 0.5f ), maxLod ).r;
 
-    const float middleGrey = globals.exposure.x;
+    float3 exposureAdjustedColor = tint;
+
+    if ( globals.bloom.x > 0.0f )
+    {
+        const float3 bloom = codeSamplers[NUI(textureId4)].SampleLevel( codeSamplersSt, input.uv0.xy, 0 ).rgb;
+        const float3 bloomHdr = lerp( hdrColor, bloom, globals.bloom.y );
+
+        exposureAdjustedColor *= bloomHdr;
+    }
+    else
+    {
+        exposureAdjustedColor *= hdrColor;
+    }
+
+    const float middleGrey = globals.exposure.y;
     const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
-    const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 
-    const float3 bloom = codeSamplers[NUI(textureId4)].SampleLevel( codeSamplersSt, input.uv0.xy, 0 ).rgb;
-    const float3 bloomHdr = lerp( hdrColor, bloom, 0.004f );
+    if( globals.exposure2.x == 1.0f )
+    {
+        const float maxLod = float( GetTextureLevels( codeSamplers[ NUI( textureId3 ) ] ) - 1 );
+        const float luminance = codeSamplers[ NUI( textureId3 ) ].SampleLevel( codeSamplersSt, float2( 0.5f, 0.5f ), maxLod ).r;
 
-    const float3 exposureAdjustedColor = bloomHdr * exposure * tint;
+        const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
+
+        exposureAdjustedColor *= exposure;
+    }
 
     sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
 

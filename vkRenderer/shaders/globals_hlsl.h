@@ -144,7 +144,9 @@ struct Globals_t
     float4  generic;
     float4  shadowParms;
     float4  toneMapTint;
+    float4  bloom;
     float4  exposure;
+    float4  exposure2;
     float4  dof;
     uint    numSamples;
     uint    whiteId;

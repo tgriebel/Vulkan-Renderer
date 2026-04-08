@@ -920,6 +920,9 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	g_imguiControls.toneMapColor[ 1 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 2 ] = 1.0f;
 	g_imguiControls.toneMapColor[ 3 ] = 1.0f;
+	g_imguiControls.bloomEnable = true;
+	g_imguiControls.bloomBlendWeight = 0.004f;
+	g_imguiControls.autoExposureEnable = true;
 	g_imguiControls.exposureMidGray = 0.18f;
 	g_imguiControls.exposureAdaptation = 1.0f;
 	g_imguiControls.exposureWhitePoint = 1.0f;

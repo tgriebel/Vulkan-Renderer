@@ -579,6 +579,9 @@ void DrawSceneDebugMenu()
 		ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map B", &g_imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map A", &g_imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
+		ImGui::Checkbox( "Bloom Enabled", &g_imguiControls.bloomEnable );
+		ImGui::InputFloat( "Bloom Blend Weight", &g_imguiControls.bloomBlendWeight, 0.001f, 1.0f );
+		ImGui::Checkbox( "Auto-Exposure Enabled", &g_imguiControls.autoExposureEnable );
 		ImGui::InputFloat( "Exposure Middle-Gray", &g_imguiControls.exposureMidGray, 0.1f, 0.9f );
 		ImGui::InputFloat( "Exposure Adaptation", &g_imguiControls.exposureAdaptation, 0.01f, 5.0f );
 		ImGui::InputFloat( "Exposure WhitePoint", &g_imguiControls.exposureWhitePoint, 0.8f, 1000.0f );
