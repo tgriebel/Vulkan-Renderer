@@ -58,7 +58,7 @@ float3 Fetch( float2 pos, float2 off, PS_Input input )
 
     const uint materialId = pushConstants.materialId;
     const uint textureId0 = materials[ materialId ].textureId0;
-    return SrgbToLinear( texSampler[NUI(textureId0)].SampleBias( texSamplerSt, pos.xy, -16.0 ).rgb );
+    return SrgbToLinear( texSampler[ textureId0 ].SampleBias( texSamplerSt, pos.xy, -16.0 ).rgb );
 }
 
 // Distance in emulated pixels to nearest texel.

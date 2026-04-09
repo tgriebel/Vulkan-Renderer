@@ -66,10 +66,10 @@ PS_Output PSMain( PS_Input input )
     const float3 cameraOrigin = -mul( invViewMat, float3( viewMat[0][3], viewMat[1][3], viewMat[2][3] ) );
     const float3 modelOrigin = float3( modelMat[0][3], modelMat[1][3], modelMat[2][3] );
 
-    const float4 albedoTex = SrgbToLinear( texSampler[NUI(albedoTexId)].Sample( texSamplerSt, input.uv0.xy ) );
-    const float3 normalTex = 2.0f * texSampler[NUI(normalTexId)].Sample( texSamplerSt, input.uv0.xy ).rgb - float3( 1.0f, 1.0f, 1.0f );
-    const float4 roughnessTex = texSampler[NUI(roughnessTexId)].Sample( texSamplerSt, input.uv0.xy );
-    const float4 metalnessTex = texSampler[NUI(metalnessTexId)].Sample( texSamplerSt, input.uv0.xy );
+    const float4 albedoTex = SrgbToLinear( texSampler[albedoTexId].Sample( texSamplerSt, input.uv0.xy ) );
+    const float3 normalTex = 2.0f * texSampler[normalTexId].Sample( texSamplerSt, input.uv0.xy ).rgb - float3( 1.0f, 1.0f, 1.0f );
+    const float4 roughnessTex = texSampler[roughnessTexId].Sample( texSamplerSt, input.uv0.xy );
+    const float4 metalnessTex = texSampler[metalnessTexId].Sample( texSamplerSt, input.uv0.xy );
 
     const float perceptualRoughness = saturate( globals.generic.x * roughnessTex.r + globals.generic.y );
 
@@ -149,7 +149,7 @@ PS_Output PSMain( PS_Input input )
 
             if ( length( ndc.xy - float2( 0.5f, 0.5f ) ) < 0.5f )
             {
-                const float shadowMapSample = codeSamplers[NUI(shadowMapTexId)].Sample( codeSamplersSt, ndc.xy ).r;
+                const float shadowMapSample = codeSamplers[shadowMapTexId].Sample( codeSamplersSt, ndc.xy ).r;
 
                 shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
             } else {
@@ -166,17 +166,17 @@ PS_Output PSMain( PS_Input input )
     const float3 F = F_SchlickRoughness( NoV, F0, perceptualRoughness );
 
     const float3 R = reflect( -V, N );
-    const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[NUI(specularIBL)] ), MaxReflectionLod );
-    const float3 specIBL = cubeSamplers[NUI(specularIBL)].SampleLevel( cubeSamplersSt, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
+    const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[specularIBL] ), MaxReflectionLod );
+    const float3 specIBL = cubeSamplers[specularIBL].SampleLevel( cubeSamplersSt, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
 
-    const float2 envBRDF = texSampler[NUI(brdfLutId)].Sample( texSamplerSt, float2( NoV, perceptualRoughness ) ).rg;
+    const float2 envBRDF = texSampler[brdfLutId].Sample( texSamplerSt, float2( NoV, perceptualRoughness ) ).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 
     float3 kS = F;
     float3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    const float3 irradiance = cubeSamplers[NUI(diffuseIBL)].Sample( cubeSamplersSt, CubeVector( N ) ).rgb;
+    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( cubeSamplersSt, CubeVector( N ) ).rgb;
     const float3 diffuse = irradiance * albedoColor;
     const float3 ambient = ( kD * diffuse + specular ) * ao;// * material.Ka.rgb;
 

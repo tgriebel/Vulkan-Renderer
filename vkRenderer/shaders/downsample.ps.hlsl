@@ -53,11 +53,11 @@ PS_Output PSMain( PS_Input input )
 
     const float2 halfTexel = dimensions.zw * 0.5f; // zw is the reciprocal inverse of the dimensions
 
-    float3 result = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy ).rgb * 4.0f;
-    result += codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + float2( -halfTexel.x, halfTexel.y ) ).rgb;
-    result += codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + float2( halfTexel.x, halfTexel.y ) ).rgb;
-    result += codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + float2( -halfTexel.x, -halfTexel.y ) ).rgb;
-    result += codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy + float2( halfTexel.x, -halfTexel.y ) ).rgb;
+    float3 result = codeSamplers[ 0 ].Sample( codeSamplersSt, input.uv0.xy ).rgb * 4.0f;
+    result += codeSamplers[ 0 ].Sample( codeSamplersSt, input.uv0.xy + float2( -halfTexel.x, halfTexel.y ) ).rgb;
+    result += codeSamplers[ 0 ].Sample( codeSamplersSt, input.uv0.xy + float2( halfTexel.x, halfTexel.y ) ).rgb;
+    result += codeSamplers[ 0 ].Sample( codeSamplersSt, input.uv0.xy + float2( -halfTexel.x, -halfTexel.y ) ).rgb;
+    result += codeSamplers[ 0 ].Sample( codeSamplersSt, input.uv0.xy + float2( halfTexel.x, -halfTexel.y ) ).rgb;
     result /= 8.0f;
 
     output.outColor = float4( result, 1.0f );

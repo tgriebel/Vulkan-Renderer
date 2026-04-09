@@ -61,7 +61,7 @@ PS_Output PSMain( PS_Input input )
 #if 0
     float3 tangentSample = float3( sin( 0.0f ) * cos( 0.0f ), sin( 0.0f ) * sin( 0.0f ), cos( 0.0f ) );
     float3 sampleVec = normalize( tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector );
-    output.outColor = codeCubeSamplers[NUI( 0 )].SampleBias( codeCubeSamplersSt, sampleVec, lodBias );
+    output.outColor = codeCubeSamplers[ 0 ].SampleBias( codeCubeSamplersSt, sampleVec, lodBias );
     // output.outColor.rgb = 0.5f * ( sampleVec + float3( 1.0f, 1.0f, 1.0f ) );
     output.outColor.a = 1.0f;
 #else
@@ -69,7 +69,7 @@ PS_Output PSMain( PS_Input input )
     float3 R = N;
     float3 V = R;
 
-    const int mipLevels = GetTextureLevelsCube( codeCubeSamplers[NUI( 0 )] );
+    const int mipLevels = GetTextureLevelsCube( codeCubeSamplers[ 0 ] );
     const float roughness = level / float( mipLevels - 1 );
 
     const uint SAMPLE_COUNT = 1024u;
@@ -84,7 +84,7 @@ PS_Output PSMain( PS_Input input )
         float NdotL = max( dot( N, L ), 0.0 );
         if ( NdotL > 0.0 )
         {
-            prefilteredColor += codeCubeSamplers[NUI( 0 )].SampleBias( codeCubeSamplersSt, L, lodBias ).rgb * NdotL;
+            prefilteredColor += codeCubeSamplers[ 0 ].SampleBias( codeCubeSamplersSt, L, lodBias ).rgb * NdotL;
             totalWeight += NdotL;
         }
     }

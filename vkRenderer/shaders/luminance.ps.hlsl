@@ -36,8 +36,8 @@ PS_Output PSMain( PS_Input input )
 {
 	PS_Output output = (PS_Output)0;
 
-	const float luminance = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, input.uv0.xy ).r;
-	const float previousLuminance = codeSamplers[NUI( 1 )].Sample( codeSamplersSt, input.uv0.xy ).r;
+	const float luminance = codeSamplers[ 0 ].Sample( codeSamplersSt, input.uv0.xy ).r;
+	const float previousLuminance = codeSamplers[ 1 ].Sample( codeSamplersSt, input.uv0.xy ).r;
 
 	const float dtSec = globals.time.w / 1000.0f;
 

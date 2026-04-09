@@ -29,7 +29,7 @@ PS_LAYOUT_STANDARD( Texture2D )
 
 
 float SampleCoverage( const int2 pos, const uint stencilTextureId ) {
-    return codeSamplers[NUI(stencilTextureId)].Load( int3( pos, 0 ) ).g;
+    return codeSamplers[ stencilTextureId ].Load( int3( pos, 0 ) ).g;
 }
 
 
@@ -89,9 +89,9 @@ PS_Output PSMain( PS_Input input )
     float4 sceneColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 
     const float4 uvColor = float4( input.uv0.xy, 0.0f, 1.0f );
-    const float sceneDepth = codeSamplers[NUI(textureId1)].Load( int3( pixelLocation, 0 ) ).r;
+    const float sceneDepth = codeSamplers[ textureId1 ].Load( int3( pixelLocation, 0 ) ).r;
     const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
-    const float4 skyColor = float4( cubeSamplers[NUI(textureId0)].Sample( cubeSamplersSt, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
+    const float4 skyColor = float4( cubeSamplers[ textureId0 ].Sample( cubeSamplersSt, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
     output.outColor.rgb = float3( 0.0f, 0.0f, 0.0f );
     const bool enabled = globals.dof.x != 0.0f;
@@ -103,9 +103,9 @@ PS_Output PSMain( PS_Input input )
 
     float3 hdrColor;
     if ( enabled && ( coc < 0.0f ) ) {
-        hdrColor.rgb = codeSamplers[NUI(textureId2)].SampleLevel( codeSamplersSt, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
+        hdrColor.rgb = codeSamplers[ textureId2 ].SampleLevel( codeSamplersSt, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
     } else {
-        hdrColor.rgb = codeSamplers[NUI(textureId0)].Sample( codeSamplersSt, input.uv0.xy ).rgb;
+        hdrColor.rgb = codeSamplers[ textureId0 ].Sample( codeSamplersSt, input.uv0.xy ).rgb;
     }
 
     const float3 tint = globals.toneMapTint.rgb;
@@ -114,7 +114,7 @@ PS_Output PSMain( PS_Input input )
 
     if ( globals.bloom.x > 0.0f )
     {
-        const float3 bloom = codeSamplers[NUI(textureId4)].SampleLevel( codeSamplersSt, input.uv0.xy, 0 ).rgb;
+        const float3 bloom = codeSamplers[ textureId4 ].SampleLevel( codeSamplersSt, input.uv0.xy, 0 ).rgb;
         const float3 bloomHdr = lerp( hdrColor, bloom, globals.bloom.y );
 
         exposureAdjustedColor *= bloomHdr;
@@ -129,8 +129,8 @@ PS_Output PSMain( PS_Input input )
 
     if( globals.exposure2.x == 1.0f )
     {
-        const float maxLod = float( GetTextureLevels( codeSamplers[ NUI( textureId3 ) ] ) - 1 );
-        const float luminance = codeSamplers[ NUI( textureId3 ) ].SampleLevel( codeSamplersSt, float2( 0.5f, 0.5f ), maxLod ).r;
+        const float maxLod = float( GetTextureLevels( codeSamplers[ textureId3 ] ) - 1 );
+        const float luminance = codeSamplers[ textureId3  ].SampleLevel( codeSamplersSt, float2( 0.5f, 0.5f ), maxLod ).r;
 
         const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 

@@ -42,9 +42,9 @@ PS_Output PSMain( PS_Input input )
 	float2 uv = ( input.uv0.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
 
 	if( isCubeImage ) {
-		output.outColor = codeCubeSamplers[NUI( 0 )].Sample( codeCubeSamplersSt, float3( uv, 0.0f ) );
+		output.outColor = codeCubeSamplers[ 0 ].Sample( codeCubeSamplersSt, float3( uv, 0.0f ) );
 	} else {
-		output.outColor = codeSamplers[NUI( 0 )].Sample( codeSamplersSt, uv );
+		output.outColor = codeSamplers[ 0 ].Sample( codeSamplersSt, uv );
 	}
 
 	return output;

@@ -31,6 +31,6 @@ PS_Output PSMain( PS_Input input )
     const uint materialId = pushConstants.materialId;
 	const uint textureId0 = materials[ materialId ].textureId0;
 
-	output.outColor = texSampler[NUI(textureId0)].Sample( texSamplerSt, input.uv0.xy );
+	output.outColor = texSampler[ textureId0 ].Sample( texSamplerSt, input.uv0.xy );
 	return output;
 }

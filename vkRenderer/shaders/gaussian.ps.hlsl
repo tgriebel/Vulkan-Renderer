@@ -45,22 +45,22 @@ PS_Output PSMain( PS_Input input )
     const float lod = 0.0f;
 
     float2 offset = dimensions.zw;
-    output.outColor = float4( codeSamplers[NUI( 0 )].SampleLevel( codeSamplersSt, input.uv0.xy, lod ).rgb * weights[ 0 ], 1.0f );
+    output.outColor = float4( codeSamplers[ 0 ].SampleLevel( codeSamplersSt, input.uv0.xy, lod ).rgb * weights[ 0 ], 1.0f );
 
     if ( horizontal )
     {
         for ( uint i = 1; i < weightCount; ++i )
         {
-            output.outColor.rgb += codeSamplers[NUI( texId )].SampleLevel( codeSamplersSt, input.uv0.xy + float2( offset.x * i, 0.0 ), lod ).rgb * weights[ i ];
-            output.outColor.rgb += codeSamplers[NUI( texId )].SampleLevel( codeSamplersSt, input.uv0.xy - float2( offset.x * i, 0.0 ), lod ).rgb * weights[ i ];
+            output.outColor.rgb += codeSamplers[ texId ].SampleLevel( codeSamplersSt, input.uv0.xy + float2( offset.x * i, 0.0 ), lod ).rgb * weights[ i ];
+            output.outColor.rgb += codeSamplers[ texId ].SampleLevel( codeSamplersSt, input.uv0.xy - float2( offset.x * i, 0.0 ), lod ).rgb * weights[ i ];
         }
     }
     else
     {
         for ( uint i = 1; i < weightCount; ++i )
         {
-            output.outColor.rgb += codeSamplers[NUI( texId )].SampleLevel( codeSamplersSt, input.uv0.xy + float2( 0.0, offset.y * i ), lod ).rgb * weights[ i ];
-            output.outColor.rgb += codeSamplers[NUI( texId )].SampleLevel( codeSamplersSt, input.uv0.xy - float2( 0.0, offset.y * i ), lod ).rgb * weights[ i ];
+            output.outColor.rgb += codeSamplers[ texId ].SampleLevel( codeSamplersSt, input.uv0.xy + float2( 0.0, offset.y * i ), lod ).rgb * weights[ i ];
+            output.outColor.rgb += codeSamplers[ texId ].SampleLevel( codeSamplersSt, input.uv0.xy - float2( 0.0, offset.y * i ), lod ).rgb * weights[ i ];
         }
     }
     output.outColor.a = 1.0f;

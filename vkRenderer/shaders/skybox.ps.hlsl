@@ -38,7 +38,7 @@ PS_Output PSMain( PS_Input input )
 
 #ifdef USE_CUBE_SAMPLER
     const float3 viewVector = normalize( input.objectPosition );
-    const float3 skyColor = cubeSamplers[NUI(material.textureId0)].Sample( cubeSamplersSt, CubeVector( viewVector ) ).rgb;
+    const float3 skyColor = cubeSamplers[ material.textureId0 ].Sample( cubeSamplersSt, CubeVector( viewVector ) ).rgb;
     output.outColor.rgb = SrgbToLinear( skyColor );
 #else
     const float xm = abs( input.normal.x );
@@ -55,7 +55,7 @@ PS_Output PSMain( PS_Input input )
     } else if( majorAxis == zm ) {
         textureId = ( sign( input.normal.z ) > 0.0f ) ? material.textureId2 : material.textureId3;
     }
-	output.outColor = SrgbToLinear( texSampler[NUI(textureId)].Sample( texSamplerSt, input.uv0.xy ) );
+	output.outColor = SrgbToLinear( texSampler[ textureId ].Sample( texSamplerSt, input.uv0.xy ) );
 #endif
     output.outColor.a = 1.0f;
 	return output;

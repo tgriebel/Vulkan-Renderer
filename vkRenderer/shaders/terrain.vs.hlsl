@@ -61,7 +61,7 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	const view_t view = views[ viewlId ];
 
 	const uint heightMapId = materials[ materialId ].textureId0;
-	const float heightMapValue = texSampler[ NUI( heightMapId ) ].SampleLevel( texSamplerSt, input.inTexCoord.xy, 0 ).r;
+	const float heightMapValue = texSampler[ heightMapId ].SampleLevel( texSamplerSt, input.inTexCoord.xy, 0 ).r;
 
 	const float maxHeight = globals.generic.x;
 	float3 position = input.inPosition;
