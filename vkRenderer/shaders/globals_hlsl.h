@@ -119,10 +119,8 @@ struct view_t
     float4x4 viewMat;
     float4x4 projMat;
     float4   dimensions;
+    float3   viewOrigin;
     uint     numLights;
-    uint     pad0;
-    uint     pad1;
-    uint     pad2;
 };
 
 struct pass_t

@@ -497,6 +497,8 @@ void RenderView::SetCamera( const Camera& camera, const bool reverseZ, const uin
 
 	m_viewport.near = camera.GetNearClip();
 	m_viewport.far = camera.GetFarClip();
+
+	m_viewOrigin = camera.GetOrigin().xyz;
 }
 
 void RenderView::SetCamera2D( const Camera& camera, const vec4f& frame, const uint32_t multiView )
@@ -511,6 +513,8 @@ void RenderView::SetCamera2D( const Camera& camera, const vec4f& frame, const ui
 
 	m_viewport.near = camera.GetNearClip();
 	m_viewport.far = camera.GetFarClip();
+
+	m_viewOrigin = camera.GetOrigin().xyz;
 }
 
 void RenderView::AttachDebugMenu( const debugMenuFuncPtr funcPtr )

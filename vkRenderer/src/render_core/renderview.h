@@ -80,6 +80,7 @@ private:
 	ShaderBindParms*		m_viewParms;
 	vec4f					m_clearColor;
 	float					m_clearDepth;
+	vec3f					m_viewOrigin;
 	uint32_t				m_clearStencil;
 	renderPassTransition_t	m_transitionState;
 	viewport_t				m_viewport;
@@ -192,6 +193,8 @@ public:
 	int						GetSurfaceBufferId() const; // TODO: Have view own it's surface buffer. Eliminates indexing
 
 	uint32_t				GetMultiViewCount() const;
+
+	inline const vec3f&		GetViewOrigin( const uint32_t multiView = 0 ) const { return m_viewOrigin; }
 
 	const char*				GetName() const;
 	const renderViewRegion_t GetRegion() const;

@@ -661,6 +661,7 @@ void Renderer::UpdateBuffers()
 			const vec2i& frameSize = view.GetFrameSize();
 			viewBuffer.view = view.GetViewMatrix( multiViewIndex );
 			viewBuffer.proj = view.GetProjMatrix( multiViewIndex );
+			viewBuffer.viewOrigin = view.GetViewOrigin();
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
 

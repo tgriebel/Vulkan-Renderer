@@ -57,13 +57,7 @@ PS_Output PSMain( PS_Input input )
 
     const float4x4 modelMat = surfaces[ input.objectId ].model;
     const float4x4 viewMat = view.viewMat;
-    // Extract the transposed upper-left 3x3 manually to avoid DXC transpose()
-    // ambiguity with column-major buffer matrices (-fvk-use-gl-layout).
-    // Each MatCol3 extracts a column of viewMat, which becomes a row of invViewMat.
-    const float3x3 invViewMat = float3x3( MatCol3( viewMat, 0 ),
-                                           MatCol3( viewMat, 1 ),
-                                           MatCol3( viewMat, 2 ) );
-    const float3 cameraOrigin = -mul( invViewMat, float3( viewMat[0][3], viewMat[1][3], viewMat[2][3] ) );
+    const float3 cameraOrigin = view.viewOrigin;
     const float3 modelOrigin = float3( modelMat[0][3], modelMat[1][3], modelMat[2][3] );
 
     const float4 albedoTex = SrgbToLinear( texSampler[albedoTexId].Sample( texSamplerSt, input.uv0.xy ) );
@@ -86,7 +80,7 @@ PS_Output PSMain( PS_Input input )
 
     const int MaxReflectionLod = 4;
 
-    float NoV = max( dot( N, V ), 0.0f );
+    float NoV = saturate( dot( N, V ) );
 
     const float metallic = saturate( globals.generic.z * metalnessTex.r + globals.generic.w );
 
@@ -169,6 +163,8 @@ PS_Output PSMain( PS_Input input )
     const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[specularIBL] ), MaxReflectionLod );
     const float3 specIBL = cubeSamplers[specularIBL].SampleLevel( cubeSamplersSt, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
 
+    // FIXME: something with the `envBRDF` broke with the HLSL conversion
+    // `texSamplerSt` is the wrong sampler to use, this needs a clamp sampler
     const float2 envBRDF = texSampler[brdfLutId].Sample( texSamplerSt, float2( NoV, perceptualRoughness ) ).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 
