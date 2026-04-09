@@ -1,1 +1,52 @@
-﻿  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
+﻿  chessScene.cpp
+  sceneParser.cpp
+  scene.cpp
+  window.cpp
+  debug2dPass.cpp
+  debug3dPass.cpp
+  drawpass.cpp
+  emissivePass.cpp
+  opaquePass.cpp
+  postPass.cpp
+  shadowPass.cpp
+  skyboxPass.cpp
+  terrainPass.cpp
+  transPass.cpp
+  wireframePass.cpp
+  drawGroup.cpp
+  render_util.cpp
+  io.cpp
+  allocator.cpp
+  binding.cpp
+  Generating Code...
+  Compiling...
+  descriptorWrites.cpp
+  gpuResources.cpp
+  gpuTransfer.cpp
+  imageArray.cpp
+  imageView.cpp
+  pipeline.cpp
+  shaderBinding.cpp
+  GpuSync.cpp
+  debugMenu.cpp
+  gpuImage.cpp
+  renderCommand.cpp
+  renderInit.cpp
+  renderResource.cpp
+  renderShutdown.cpp
+  renderView.cpp
+  renderer.cpp
+  swapChain.cpp
+  cmdContext.cpp
+  deviceContext.cpp
+  ImageReadbackTask.cpp
+  Generating Code...
+  Compiling...
+  RenderTask.cpp
+  imageProcessTask.cpp
+  imageShaderTask.cpp
+  imguiTask.cpp
+  vulkinTestApp.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

@@ -89,29 +89,29 @@ struct light_t
 
 struct material_t
 {
-    int    textureId0;
-    int    textureId1;
-    int    textureId2;
-    int    textureId3;
-    int    textureId4;
-    int    textureId5;
-    int    textureId6;
-    int    textureId7;
-    float3 Ka;
-    float  Tr;
-    float3 Ke;
-    float  Ns;
-    float3 Kd;
-    float  Ni;
-    float3 Ks;
-    float  illum;
-    float3 Tf;
-    uint   textured;
-    uint   pad0;
-    uint   pad1;
-    uint   pad2;
-    uint   pad3;
-    uint   extraData[64];
+    int     textureId0;
+    int     textureId1;
+    int     textureId2;
+    int     textureId3;
+    int     textureId4;
+    int     textureId5;
+    int     textureId6;
+    int     textureId7;
+    float3  Ka;
+    float   Tr;
+    float3  Ke;
+    float   Ns;
+    float3  Kd;
+    float   Ni;
+    float3  Ks;
+    float   illum;
+    float3  Tf;
+    uint    textured;
+    float   roughness;
+    float   metalness;
+    uint    pad2;
+    uint    pad3;
+    uint    extraData[64];
 };
 
 struct view_t
