@@ -272,7 +272,7 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 	const uint64_t currentFrame = m_context->FrameNumber();
 	if( m_lastUpdateFrame != currentFrame )
 	{
-		m_viewParms->Bind( bind_modelBuffer, &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
+		m_viewParms->Bind( BINDING_NAME( modelBuffer ), &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
 
 		m_lastUpdateFrame = currentFrame;
 	}

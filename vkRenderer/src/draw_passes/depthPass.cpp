@@ -27,10 +27,10 @@ void DepthPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 
 void DepthPass::FrameBegin( const ResourceContext* resources )
 {
-	parms->Bind( bind_lightBuffer, &resources->lightParms );
-	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageCodeCubeArray, &codeCubeImages );
-	parms->Bind( bind_imageStencil, rc.whiteImage );
+	parms->Bind( BINDING_NAME( lightBuffer ),			&resources->lightParms );
+	parms->Bind( BINDING_NAME( imageCodeArray ),		&codeImages );
+	parms->Bind( BINDING_NAME( imageCodeCubeArray ),	&codeCubeImages );
+	parms->Bind( BINDING_NAME( imageStencil ),			rc.whiteImage );
 }
 
 

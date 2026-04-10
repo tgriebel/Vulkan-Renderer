@@ -40,10 +40,10 @@ void Debug2dPass::FrameBegin( const ResourceContext* resources )
 	codeImages.BindIndex( 0, resources->mainColorResolvedImage );
 	codeImages.BindIndex( 1, resources->depthStencilResolvedImage );
 
-	parms->Bind( bind_lightBuffer, &resources->lightParms );
-	parms->Bind( bind_imageCodeArray, &codeImages );
-	parms->Bind( bind_imageCodeCubeArray, &codeCubeImages );
-	parms->Bind( bind_imageStencil, &resources->stencilResolvedImageView );
+	parms->Bind( BINDING_NAME( lightBuffer ),			&resources->lightParms );
+	parms->Bind( BINDING_NAME( imageCodeArray ),		&codeImages );
+	parms->Bind( BINDING_NAME( imageCodeCubeArray ),	&codeCubeImages );
+	parms->Bind( BINDING_NAME( imageStencil ),			&resources->stencilResolvedImageView );
 }
 
 

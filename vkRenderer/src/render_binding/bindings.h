@@ -9,6 +9,7 @@
 // *********************************************************
 
 #define BINDING( NAME, TYPE, COUNT, FLAGS )	static const ShaderBinding bind_##NAME( #NAME, bindType_t::TYPE, COUNT, FLAGS )
+#define BINDING_NAME( NAME ) bind_##NAME
 
 BINDING( globalsBuffer, CONSTANT_BUFFER, 1, BIND_STATE_ALL );
 
@@ -40,55 +41,55 @@ BINDING( bilinearClampSampler,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 
 static const ShaderBinding g_globalBindings[] =
 {
-	bind_globalsBuffer,
-	bind_viewBuffer,
-	bind_image2DArray,
-	bind_imageCubeArray,
-	bind_materialBuffer,
+	BINDING_NAME( globalsBuffer ),
+	BINDING_NAME( viewBuffer ),
+	BINDING_NAME( image2DArray ),
+	BINDING_NAME( imageCubeArray ),
+	BINDING_NAME( materialBuffer ),
 };
 const uint64_t bindset_global = Hash( "bindset_global" );
 
 
 static const ShaderBinding g_viewBindings[] =
 {
-	bind_modelBuffer,
+	BINDING_NAME( modelBuffer ),
 };
 const uint64_t bindset_view = Hash( "bindset_view" );
 
 
 static const ShaderBinding g_passBindings[] =
 {
-	bind_lightBuffer,
-	bind_imageCodeArray,
-	bind_imageCodeCubeArray,
-	bind_imageStencil
+	BINDING_NAME( lightBuffer ),
+	BINDING_NAME( imageCodeArray ),
+	BINDING_NAME( imageCodeCubeArray ),
+	BINDING_NAME( imageStencil ),
 };
 const uint64_t bindset_pass = Hash( "bindset_pass" );
 
 
 static const ShaderBinding g_particleBindings[] =
 {
-	bind_globalsBuffer,
-	bind_particleWriteBuffer
+	BINDING_NAME( globalsBuffer ),
+	BINDING_NAME( particleWriteBuffer ),
 };
 const uint64_t bindset_particle = Hash( "bindset_particle" );
 
 
 static const ShaderBinding g_computeBindings[] =
 {
-	bind_globalsBuffer,
-	bind_computeImage,
-	bind_computeParms,
-	bind_computeWrite,
+	BINDING_NAME( globalsBuffer ),
+	BINDING_NAME( computeImage ),
+	BINDING_NAME( computeParms ),
+	BINDING_NAME( computeWrite ),
 };
 const uint64_t bindset_compute = Hash( "bindset_compute" );
 
 
 static const ShaderBinding g_imageProcessBindings[] =
 {
-	bind_sourceImages,
-	bind_sourceCubeImages,
-	bind_imageStencil,
-	bind_imageProcess,
+	BINDING_NAME( sourceImages ),
+	BINDING_NAME( sourceCubeImages ),
+	BINDING_NAME( imageStencil ),
+	BINDING_NAME( imageProcess ),
 };
 const uint64_t bindset_imageProcess = Hash( "bindset_imageProcess" );

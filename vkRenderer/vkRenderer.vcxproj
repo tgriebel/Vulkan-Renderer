@@ -281,6 +281,7 @@
     <ClCompile Include="src\render_binding\gpuResources.cpp" />
     <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
     <ClCompile Include="src\render_binding\imageArray.cpp" />
+    <ClCompile Include="src\render_binding\imageSampler.cpp" />
     <ClCompile Include="src\render_binding\imageView.cpp" />
     <ClCompile Include="src\render_binding\pipeline.cpp" />
     <ClCompile Include="src\render_binding\shaderBinding.cpp" />

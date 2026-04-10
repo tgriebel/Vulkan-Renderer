@@ -290,10 +290,10 @@ void ImageShaderTask::FrameBegin()
 		}
 
 		// Set standard binds
-		m_passes[ passIndex ]->parms->Bind( bind_sourceImages,		m_passes[ passIndex ]->codeImages.Count() > 0 ? &m_passes[ passIndex ]->codeImages : &rc.defaultImageArray );
-		m_passes[ passIndex ]->parms->Bind( bind_sourceCubeImages,	m_passes[ passIndex ]->codeCubeImages.Count() > 0 ? m_passes[ passIndex ]->codeCubeImages[ 0 ] : rc.defaultImageCube );
-		m_passes[ passIndex ]->parms->Bind( bind_imageStencil,		&m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
-		m_passes[ passIndex ]->parms->Bind( bind_imageProcess,		&m_buffer[ passIndex ] );
+		m_passes[ passIndex ]->parms->Bind( BINDING_NAME( sourceImages ),		m_passes[ passIndex ]->codeImages.Count() > 0 ? &m_passes[ passIndex ]->codeImages : &rc.defaultImageArray );
+		m_passes[ passIndex ]->parms->Bind( BINDING_NAME( sourceCubeImages ),	m_passes[ passIndex ]->codeCubeImages.Count() > 0 ? m_passes[ passIndex ]->codeCubeImages[ 0 ] : rc.defaultImageCube );
+		m_passes[ passIndex ]->parms->Bind( BINDING_NAME( imageStencil ),		&m_resources->stencilImageView ); // FIXME: allow either special desc sets or null inputs
+		m_passes[ passIndex ]->parms->Bind( BINDING_NAME( imageProcess ),		&m_buffer[ passIndex ] );
 	}
 
 	// std::cout << m_pass->parms->AsString() << std::endl;

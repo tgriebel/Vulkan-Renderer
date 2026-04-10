@@ -173,6 +173,9 @@
     <ClCompile Include="vulkinTestApp.cpp">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\imageSampler.cpp">
+      <Filter>Binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug.h" />

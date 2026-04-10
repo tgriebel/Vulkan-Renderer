@@ -578,15 +578,15 @@ void Renderer::UpdateBindSets()
 {
 	ShaderBindParms* globalParms = renderContext.globalParms;
 
-	globalParms->Bind( bind_globalsBuffer, &resources.globalConstants );
-	globalParms->Bind( bind_viewBuffer, &resources.viewParms );
-	globalParms->Bind( bind_image2DArray, &resources.gpuImages2D );
-	globalParms->Bind( bind_imageCubeArray, &resources.gpuImagesCube );
-	globalParms->Bind( bind_materialBuffer, &resources.materialBuffers );
+	globalParms->Bind( BINDING_NAME( globalsBuffer ), &resources.globalConstants );
+	globalParms->Bind( BINDING_NAME( viewBuffer ), &resources.viewParms );
+	globalParms->Bind( BINDING_NAME( image2DArray ), &resources.gpuImages2D );
+	globalParms->Bind( BINDING_NAME( imageCubeArray ), &resources.gpuImagesCube );
+	globalParms->Bind( BINDING_NAME( materialBuffer ), &resources.materialBuffers );
 
 	{
-		particleState.parms->Bind( bind_globalsBuffer,			&resources.globalConstants );
-		particleState.parms->Bind( bind_particleWriteBuffer,	&resources.particleBuffer );
+		particleState.parms->Bind( BINDING_NAME( globalsBuffer ),		&resources.globalConstants );
+		particleState.parms->Bind( BINDING_NAME( particleWriteBuffer ),	&resources.particleBuffer );
 	}
 }
 

@@ -23,34 +23,34 @@
 * SOFTWARE.
 */
 
-#include <GfxCore/asset_types/texture.h>
-#include "../render_core/gpuImage.h"
+#include "imageSampler.h"
 #include "../render_state/deviceContext.h"
+#include "../render_state/rhi.h"
 
-class ImageSampler : public RenderResource
+void ImageSampler::Init()
 {
-private:
-	uint64_t		m_lastFrameUpdate;
-	RenderContext*	m_context;
-	samplerState_t	m_samplerState;
 #ifdef USE_VULKAN
-	VkSampler		vk_sampler;
+	VkSamplerCreateInfo samplerInfo { };
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.magFilter = VK_FILTER_LINEAR;
+	samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+	VkSamplerAddressMode samplerAddress = vk_GetSamplerAddress( m_samplerState.addrMode );
+
+	samplerInfo.addressModeU = samplerAddress;
+	samplerInfo.addressModeV = samplerAddress;
+	samplerInfo.addressModeW = samplerAddress;
+	samplerInfo.anisotropyEnable = VK_TRUE;
+	samplerInfo.maxAnisotropy = 16.0f;
+	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	samplerInfo.unnormalizedCoordinates = VK_FALSE;
+	samplerInfo.compareEnable = VK_FALSE;
+	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	samplerInfo.minLod = 0.0f;
+	samplerInfo.maxLod = 16.0f;
+	samplerInfo.mipLodBias = 0.0f;
+
+	VK_CHECK_RESULT( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_sampler ) );
 #endif
-
-public:
-	ImageSampler()
-	{
-		m_context = nullptr;
-
-		m_lastFrameUpdate = 0;
-
-		Init();
-	}
-
-	void Init();
-
-	void SetRenderContext(RenderContext* context);
-
-	[[nodiscard]]
-	bool HasPossibleUpdates() const;
-};
+}
