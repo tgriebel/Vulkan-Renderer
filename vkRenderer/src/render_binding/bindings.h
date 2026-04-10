@@ -25,18 +25,19 @@ BINDING( sourceImages,			IMAGE_2D_ARRAY,		3,						BIND_STATE_PS );
 BINDING( sourceCubeImages,		IMAGE_CUBE,			1,						BIND_STATE_PS );
 
 // Raster Resources
-BINDING( viewBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
-BINDING( modelBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
-BINDING( image2DArray,			IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_ALL_GFX );
-BINDING( imageCubeArray,		IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL_GFX );
-BINDING( materialBuffer,		READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
-BINDING( lightBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
-BINDING( passBuffer,			READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
-BINDING( imageCodeArray,		IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL_GFX );
-BINDING( imageCodeCubeArray,	IMAGE_CUBE_ARRAY,	MaxCodeImages,			BIND_STATE_ALL_GFX );
-BINDING( imageStencil,			IMAGE_2D,			1,						BIND_STATE_ALL_GFX );
-BINDING( bilinearWrapSampler,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
-BINDING( bilinearClampSampler,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( viewBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
+BINDING( modelBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
+BINDING( image2DArray,					IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_ALL_GFX );
+BINDING( imageCubeArray,				IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL_GFX );
+BINDING( materialBuffer,				READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
+BINDING( lightBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
+BINDING( passBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
+BINDING( imageCodeArray,				IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL_GFX );
+BINDING( imageCodeCubeArray,			IMAGE_CUBE_ARRAY,	MaxCodeImages,			BIND_STATE_ALL_GFX );
+BINDING( imageStencil,					IMAGE_2D,			1,						BIND_STATE_ALL_GFX );
+BINDING( bilinearWrapSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( bilinearClampEdgeSampler,		IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( bilinearClampBorderSampler,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 
 
 static const ShaderBinding g_globalBindings[] =
@@ -47,7 +48,8 @@ static const ShaderBinding g_globalBindings[] =
 	BINDING_NAME( imageCubeArray ),
 	BINDING_NAME( materialBuffer ),
 	BINDING_NAME( bilinearWrapSampler ),
-	BINDING_NAME( bilinearClampSampler ),
+	BINDING_NAME( bilinearClampEdgeSampler ),
+	BINDING_NAME( bilinearClampBorderSampler ),
 };
 const uint64_t bindset_global = Hash( "bindset_global" );
 

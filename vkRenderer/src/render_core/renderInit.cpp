@@ -58,12 +58,17 @@ void Renderer::Init( const renderConfig_t& cfg )
 	resources.gpuImages2D.Resize( MaxImageDescriptors );
 	resources.gpuImagesCube.Resize( MaxImageDescriptors );
 
-	samplerState_t samplerState;
-	samplerState.addrMode = SAMPLER_ADDRESS_WRAP;
-	samplerState.filter = SAMPLER_FILTER_BILINEAR;
+	// Image samplers
+	{
+		samplerState_t samplerState;
+		samplerState.filter = SAMPLER_FILTER_BILINEAR;
 
-	resources.bilinearSamplerWrap.Init( samplerState, resourceLifeTime_t::REBOOT );
-	resources.bilinearSamplerClamp.Init( samplerState, resourceLifeTime_t::REBOOT );
+		for( uint32_t i = 0; i < SAMPLER_ADDRESS_MODES; ++i ) {
+			samplerState.addrMode = samplerAddress_t( i );
+
+			resources.bilinearSamplers[ samplerState.addrMode ].Init( samplerState, resourceLifeTime_t::REBOOT );
+		}
+	}
 
 	viewCount = 0;
 

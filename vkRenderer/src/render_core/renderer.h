@@ -160,8 +160,8 @@ public:
 	GpuBuffer				particleBuffer;
 	GpuBuffer				defaultUniformBuffer;
 
-	ImageSampler			bilinearSamplerWrap;
-	ImageSampler			bilinearSamplerClamp;
+	ImageSampler			bilinearSamplers[ SAMPLER_ADDRESS_MODES ];
+	ImageSampler			trilinearSamplers[ SAMPLER_ADDRESS_MODES ];
 
 	// TODO: move view-specific data
 	GpuBuffer				viewParms;

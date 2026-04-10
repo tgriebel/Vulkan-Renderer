@@ -165,7 +165,7 @@ PS_Output PSMain( PS_Input input )
 
     // FIXME: something with the `envBRDF` broke with the HLSL conversion
     // `texSamplerSt` is the wrong sampler to use, this needs a clamp sampler
-    const float2 envBRDF = texSampler[brdfLutId].Sample( texSamplerSt, float2( NoV, perceptualRoughness ) ).rg;
+	const float2 envBRDF = texSampler[brdfLutId].Sample( bilinearSamplerClampEdge, float2(NoV, perceptualRoughness)).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 
     float3 kS = F;
