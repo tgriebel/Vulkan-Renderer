@@ -33,6 +33,7 @@ enum class resourceType_t : uint8_t
 	IMAGE_VIEW,
 	FRAMEBUFFER,
 	BINDSET,
+	IMAGE_SAMPLER,
 	COUNT
 };
 

@@ -47,6 +47,7 @@ void Renderer::Destroy()
 	vk_ClearRenderPassCache();
 
 	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
+
 	g_swapChain.Destroy();
 
 	ShutdownImGui();

@@ -1,4 +1,5 @@
-﻿  debug2dPass.cpp
+﻿  scene.cpp
+  debug2dPass.cpp
   debug3dPass.cpp
   depthPass.cpp
   drawpass.cpp
@@ -10,21 +11,27 @@
   terrainPass.cpp
   transPass.cpp
   wireframePass.cpp
-  binding.cpp
+  drawGroup.cpp
   descriptorWrites.cpp
+  gpuTransfer.cpp
+  imageArray.cpp
+  imageSampler.cpp
   pipeline.cpp
-  shaderBinding.cpp
+  renderCommand.cpp
+  Generating Code...
+  Compiling...
   renderInit.cpp
+  renderShutdown.cpp
   renderView.cpp
   renderer.cpp
   cmdContext.cpp
-  Generating Code...
-  Compiling...
   deviceContext.cpp
+  frameBuffer.cpp
   ImageReadbackTask.cpp
   RenderTask.cpp
   imageProcessTask.cpp
   imageShaderTask.cpp
   imguiTask.cpp
+  vulkinTestApp.cpp
   Generating Code...
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

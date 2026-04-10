@@ -212,6 +212,6 @@ public:
 	bool NeedsResize() const;
 
 	void Create( const frameBufferCreateInfo_t& createInfo );
-	void Destroy();
+	void Destroy() override;
 	void Resize();
 };

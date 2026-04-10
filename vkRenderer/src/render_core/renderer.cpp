@@ -578,11 +578,13 @@ void Renderer::UpdateBindSets()
 {
 	ShaderBindParms* globalParms = renderContext.globalParms;
 
-	globalParms->Bind( BINDING_NAME( globalsBuffer ), &resources.globalConstants );
-	globalParms->Bind( BINDING_NAME( viewBuffer ), &resources.viewParms );
-	globalParms->Bind( BINDING_NAME( image2DArray ), &resources.gpuImages2D );
-	globalParms->Bind( BINDING_NAME( imageCubeArray ), &resources.gpuImagesCube );
-	globalParms->Bind( BINDING_NAME( materialBuffer ), &resources.materialBuffers );
+	globalParms->Bind( BINDING_NAME( globalsBuffer ),			&resources.globalConstants );
+	globalParms->Bind( BINDING_NAME( viewBuffer ),				&resources.viewParms );
+	globalParms->Bind( BINDING_NAME( image2DArray ),			&resources.gpuImages2D );
+	globalParms->Bind( BINDING_NAME( imageCubeArray ),			&resources.gpuImagesCube );
+	globalParms->Bind( BINDING_NAME( materialBuffer ),			&resources.materialBuffers );
+	globalParms->Bind( BINDING_NAME( bilinearWrapSampler ),		&resources.bilinearSamplerWrap );
+	globalParms->Bind( BINDING_NAME( bilinearClampSampler ),	&resources.bilinearSamplerClamp );
 
 	{
 		particleState.parms->Bind( BINDING_NAME( globalsBuffer ),		&resources.globalConstants );

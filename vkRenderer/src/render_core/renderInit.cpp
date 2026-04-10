@@ -58,6 +58,13 @@ void Renderer::Init( const renderConfig_t& cfg )
 	resources.gpuImages2D.Resize( MaxImageDescriptors );
 	resources.gpuImagesCube.Resize( MaxImageDescriptors );
 
+	samplerState_t samplerState;
+	samplerState.addrMode = SAMPLER_ADDRESS_WRAP;
+	samplerState.filter = SAMPLER_FILTER_BILINEAR;
+
+	resources.bilinearSamplerWrap.Init( samplerState, resourceLifeTime_t::REBOOT );
+	resources.bilinearSamplerClamp.Init( samplerState, resourceLifeTime_t::REBOOT );
+
 	viewCount = 0;
 
 	ScopedLogTimer timer( "Schedule Build", timerPrecision_t::MICROSECOND, &TimerPrint );

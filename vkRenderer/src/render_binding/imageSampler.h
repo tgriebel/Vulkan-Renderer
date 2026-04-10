@@ -30,8 +30,6 @@
 class ImageSampler : public RenderResource
 {
 private:
-	uint64_t		m_lastFrameUpdate;
-	RenderContext*	m_context;
 	samplerState_t	m_samplerState;
 #ifdef USE_VULKAN
 	VkSampler		vk_sampler;
@@ -40,17 +38,18 @@ private:
 public:
 	ImageSampler()
 	{
-		m_context = nullptr;
-
-		m_lastFrameUpdate = 0;
-
-		Init();
 	}
 
-	void Init();
+	~ImageSampler()
+	{
+		// FIXME: TODO:
+	}
 
-	void SetRenderContext(RenderContext* context);
+#ifdef USE_VULKAN
+	inline const VkSampler GetVkObject() const { return vk_sampler; }
+#endif
 
-	[[nodiscard]]
-	bool HasPossibleUpdates() const;
+	void Init( const samplerState_t& state, const resourceLifeTime_t lifetime );
+
+	void Destroy() override;
 };

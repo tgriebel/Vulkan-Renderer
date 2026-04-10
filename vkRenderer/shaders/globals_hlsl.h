@@ -206,6 +206,8 @@ struct PushConstants_t
 #define WRITE_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                     \
                                                         BIND_SET( S, N ) RWStructuredBuffer<TYPE> NAME;
 
+#define SAMPLER_2D( S, N )								BIND_SET( S, N ) SamplerState bilinearSampler;
+
 #define SAMPLER_2D_LAYOUT( S, N )                                                                                   \
                                                         BIND_SET( S, N ) Texture2D texSampler[];                    \
                                                         BIND_SET( S, N ) SamplerState texSamplerSt;
@@ -247,7 +249,9 @@ struct PushConstants_t
                                                         VIEW_LAYOUT( SET, 1 )                                       \
                                                         SAMPLER_2D_LAYOUT( SET, 2 )                                 \
                                                         SAMPLER_CUBE_LAYOUT( SET, 3 )                               \
-                                                        MATERIAL_LAYOUT( SET, 4 )
+                                                        MATERIAL_LAYOUT( SET, 4 )									\
+                                                        BIND_SET( SET, 5 ) SamplerState bilinearSamplerWrap;		\
+                                                        BIND_SET( SET, 6 ) SamplerState bilinearSamplerClamp;
 
 #define VIEW_BINDS( SET )                               MODEL_LAYOUT( SET, 0 )
 

@@ -274,7 +274,7 @@ public:
 	{}
 
 	void Create( const char* name, const ShaderBinding bindings[], const uint32_t bindCount );
-	void Destroy();
+	void Destroy() override;
 
 #ifdef USE_VULKAN
 	inline VkDescriptorSetLayout GetVkObject() const

@@ -166,5 +166,5 @@ public:
 	}
 
 	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime );
-	virtual void Destroy();
+	virtual void Destroy() override;
 };

@@ -2,11 +2,11 @@
 
 #include "shaderBinding.h"
 
-// *********************** IMPORTANT ***********************
-// 
-// Must mirror changes and recompile all shaders when adjusting bindings
-//
-// *********************************************************
+// ***************************** IMPORTANT ***********************************
+//																			\\
+//	Must mirror changes and recompile all shaders when adjusting bindings	\\
+//																			\\
+// ***************************************************************************
 
 #define BINDING( NAME, TYPE, COUNT, FLAGS )	static const ShaderBinding bind_##NAME( #NAME, bindType_t::TYPE, COUNT, FLAGS )
 #define BINDING_NAME( NAME ) bind_##NAME
@@ -46,6 +46,8 @@ static const ShaderBinding g_globalBindings[] =
 	BINDING_NAME( image2DArray ),
 	BINDING_NAME( imageCubeArray ),
 	BINDING_NAME( materialBuffer ),
+	BINDING_NAME( bilinearWrapSampler ),
+	BINDING_NAME( bilinearClampSampler ),
 };
 const uint64_t bindset_global = Hash( "bindset_global" );
 

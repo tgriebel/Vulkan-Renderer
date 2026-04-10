@@ -206,11 +206,11 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 		{
 			const ImageSampler* sampler = attachment->GetImageSampler();
 			if (sampler == nullptr) {
-			//	sampler = context.bilinearSampler[0]; // FIXME
+				assert( 0 ); // FIXME: Need default
 			}
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
-			info.sampler = context.bilinearSampler[0]; // FIXME
+			info.sampler = sampler->GetVkObject();
 			info.imageView = nullptr;
 
 			assert(info.sampler != nullptr);

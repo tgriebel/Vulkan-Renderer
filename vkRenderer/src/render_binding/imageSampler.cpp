@@ -27,8 +27,14 @@
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 
-void ImageSampler::Init()
+void ImageSampler::Init( const samplerState_t& state, const resourceLifeTime_t lifetime )
 {
+	{
+		m_lifetime = lifetime;
+		RenderResource::Create( resourceType_t::IMAGE_SAMPLER, m_lifetime );
+	}
+	m_samplerState = state;
+
 #ifdef USE_VULKAN
 	VkSamplerCreateInfo samplerInfo { };
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -53,4 +59,10 @@ void ImageSampler::Init()
 
 	VK_CHECK_RESULT( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_sampler ) );
 #endif
+}
+
+
+void ImageSampler::Destroy()
+{
+	vkDestroySampler( context.device, vk_sampler, nullptr );
 }
