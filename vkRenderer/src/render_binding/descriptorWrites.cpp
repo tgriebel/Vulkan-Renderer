@@ -2,13 +2,14 @@
 #include <iterator>
 #include <numeric>
 #include <map>
-#include "../render_core/renderer.h"
-#include "../globals/renderConstants.h"
-#include <gfxcore/scene/scene.h>
-#include <gfxcore/scene/entity.h>
 #include <sstream>
+//#include <gfxcore/scene/scene.h>
+//#include <gfxcore/scene/entity.h>
+#include "../globals/renderConstants.h"
+#include "../render_core/renderer.h"
 #include "../render_core/debugMenu.h"
 #include "../render_core/gpuImage.h"
+#include "../render_binding/imageSampler.h"
 #include "../render_state/rhi.h"
 #include "bindings.h"
 
@@ -200,6 +201,21 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 				}
 			}
 			writeInfo.pImageInfo = infos.data();
+		}
+		else if ( attachment->GetSemantic() == bindSemantic_t::IMAGE_SAMPLER )
+		{
+			const ImageSampler* sampler = attachment->GetImageSampler();
+			if (sampler == nullptr) {
+			//	sampler = context.bilinearSampler[0]; // FIXME
+			}
+
+			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
+			info.sampler = context.bilinearSampler[0]; // FIXME
+			info.imageView = nullptr;
+
+			assert(info.sampler != nullptr);
+
+			writeInfo.pImageInfo = &info;
 		}
 
 		descSetWrites.push_back( writeInfo );

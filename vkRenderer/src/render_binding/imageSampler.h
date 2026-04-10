@@ -30,15 +30,19 @@
 class ImageSampler : public RenderResource
 {
 private:
-	uint64_t		m_lastFrameUpdate[MaxImageDescriptors];
-	RenderContext* m_context;
+	uint64_t		m_lastFrameUpdate;
+	RenderContext*	m_context;
+	samplerState_t	m_samplerState;
+#ifdef USE_VULKAN
+	VkSampler		vk_sampler;
+#endif
 
 public:
 	ImageSampler()
 	{
 		m_context = nullptr;
 
-		memset(m_lastFrameUpdate, 0, MaxImageDescriptors * sizeof(uint64_t));
+		m_lastFrameUpdate = 0;
 	}
 
 	void SetRenderContext(RenderContext* context);

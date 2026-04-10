@@ -324,12 +324,16 @@ std::string ShaderBindParms::AsString() const
 		switch ( attachment->GetSemantic() )
 		{
 			case bindSemantic_t::BUFFER:
+			{
 				ss << "\"" << attachment->GetBuffer()->GetName() << "\"";
-				break;
+			}
+			break;
 
 			case bindSemantic_t::IMAGE:
+			{
 				ss << "\"" << attachment->GetImage()->gpuImage->GetDebugName() << "\"";
-				break;
+			}
+			break;
 
 			case bindSemantic_t::IMAGE_ARRAY:
 			{
@@ -352,6 +356,12 @@ std::string ShaderBindParms::AsString() const
 					ss << "...";
 				}
 				ss << "}";
+			}
+			break;
+
+			case bindSemantic_t::IMAGE_SAMPLER:
+			{
+				ss << "{SAMPLER_FORMAT_NOT_IMPLEMENTED}";
 			}
 			break;
 		}

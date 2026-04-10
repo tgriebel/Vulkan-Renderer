@@ -31,6 +31,7 @@
 class GpuBuffer;
 class GpuImage;
 class ImageArray;
+class ImageSampler;
 
 enum class bindType_t
 {
@@ -182,6 +183,7 @@ private:
 		const GpuBuffer*	buffer;
 		const Image*		image;
 		const ImageArray*	imageArray;
+		const ImageSampler*	imageSampler;
 		const void*			ptr;
 	} u;
 	bindSemantic_t semantic;
@@ -212,6 +214,12 @@ public:
 		semantic = bindSemantic_t::IMAGE_ARRAY;
 	}
 
+	ShaderAttachment( const ImageSampler* imageSampler )
+	{
+		u.imageSampler = imageSampler;
+		semantic = bindSemantic_t::IMAGE_SAMPLER;
+	}
+
 	inline bool operator==( const ShaderAttachment& rhs ) const
 	{
 		return ( u.ptr == rhs.u.ptr );
@@ -240,6 +248,11 @@ public:
 	inline const ImageArray* GetImageArray() const
 	{
 		return ( semantic == bindSemantic_t::IMAGE_ARRAY ) ? u.imageArray : nullptr;
+	}
+
+	inline const ImageSampler* GetImageSampler() const
+	{
+		return ( semantic == bindSemantic_t::IMAGE_SAMPLER ) ? u.imageSampler : nullptr;
 	}
 };
 
