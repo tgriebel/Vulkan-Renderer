@@ -279,7 +279,6 @@ namespace Tomtendo
 #pragma once
 //#include "base.h"
 
-#include "../../stdafx.h"
 #include <stdint.h>
 #include <map>
 

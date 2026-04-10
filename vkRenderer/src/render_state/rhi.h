@@ -224,6 +224,7 @@ static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
 		case bindType_t::WRITE_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		case bindType_t::READ_IMAGE_BUFFER:		return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
 		case bindType_t::WRITE_IMAGE_BUFFER:	return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		case bindType_t::IMAGE_SAMPLER:			return VK_DESCRIPTOR_TYPE_SAMPLER;
 		default: break;
 	}
 	assert( 0 );
@@ -242,11 +243,18 @@ static VkShaderStageFlagBits vk_GetStageFlags( const bindStateFlag_t flags )
 		uint32_t bitFlag = flags & bitMask;
 		switch ( bitFlag )
 		{
-			case BIND_STATE_VS:		vkFlags |= VK_SHADER_STAGE_VERTEX_BIT;		break;
-			case BIND_STATE_PS:		vkFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;	break;
-			case BIND_STATE_CS:		vkFlags |= VK_SHADER_STAGE_COMPUTE_BIT;		break;
+			case BIND_STATE_VS:				vkFlags |= VK_SHADER_STAGE_VERTEX_BIT;				break;
+			case BIND_STATE_PS:				vkFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;			break;
+			case BIND_STATE_ALL_GFX:		vkFlags |= VK_SHADER_STAGE_ALL_GRAPHICS;			break;
+			case BIND_STATE_CS:				vkFlags |= VK_SHADER_STAGE_COMPUTE_BIT;				break;			
+			case BIND_STATE_ANYHIT:			vkFlags |= VK_SHADER_STAGE_ANY_HIT_BIT_KHR;			break;
+			case BIND_STATE_CLOSEST_HIT:	vkFlags |= VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;		break;
+			case BIND_STATE_RAYGEN:			vkFlags |= VK_SHADER_STAGE_RAYGEN_BIT_KHR;			break;
+			case BIND_STATE_MISS:			vkFlags |= VK_SHADER_STAGE_MISS_BIT_KHR;			break;
+			case BIND_STATE_INTERSECTION:	vkFlags |= VK_SHADER_STAGE_INTERSECTION_BIT_KHR;	break;
+	
 			default:
-			case BIND_STATE_ALL:	vkFlags |= VK_SHADER_STAGE_ALL;				break;
+			case BIND_STATE_ALL:		vkFlags |= VK_SHADER_STAGE_ALL;				break;
 		}
 		bitMask <<= 1;
 	}

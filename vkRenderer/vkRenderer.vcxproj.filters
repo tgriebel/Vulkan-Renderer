@@ -350,6 +350,9 @@
     <ClInclude Include="src\app\window.h">
       <Filter>app</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_binding\imageSampler.h">
+      <Filter>Binding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

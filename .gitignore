@@ -54,3 +54,8 @@ vkRenderer/imgui.ini
 vkRenderer/x64/Debug/
 vkRenderer/external/VulkanSDK/1.2.189.2/
 *.nes
+vkRenderer/models/lion-crushing-a-serpent/source/Lion.zip
+vkRenderer/models/lion-crushing-a-serpent/textures/ao.jpg
+vkRenderer/models/lion-crushing-a-serpent/textures/bw10k.jpg
+vkRenderer/models/lion-crushing-a-serpent/textures/nm.jpg
+vkRenderer/models/lion-crushing-a-serpent/textures/sp.jpg

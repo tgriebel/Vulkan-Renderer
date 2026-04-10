@@ -136,7 +136,6 @@ void ShaderBindSet::Create( const char* name, const ShaderBinding bindings[], co
 		layoutBindings[ i ].binding = binding->GetSlot();
 		layoutBindings[ i ].descriptorCount = binding->GetMaxDescriptorCount();
 		layoutBindings[ i ].descriptorType = vk_GetDescriptorType( binding->GetType() );
-		layoutBindings[ i ].pImmutableSamplers = nullptr;
 		layoutBindings[ i ].stageFlags = vk_GetStageFlags( binding->GetBindFlags() );
 	}
 

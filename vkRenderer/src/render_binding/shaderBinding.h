@@ -44,6 +44,7 @@ enum class bindType_t
 	WRITE_BUFFER,
 	READ_IMAGE_BUFFER,
 	WRITE_IMAGE_BUFFER,
+	IMAGE_SAMPLER,
 	COUNT,
 };
 
@@ -59,6 +60,7 @@ static const char* s_bindTypeName[]
 	"Write Buffer",
 	"Read Image Buffer",
 	"Write Image Buffer",
+	"Image Sampler",
 };
 static_assert( COUNTARRAY( s_bindTypeName ) == (uint32_t)bindType_t::COUNT, "Name count mismatches enum." );
 
@@ -69,6 +71,7 @@ enum class bindSemantic_t
 	BUFFER,
 	IMAGE,
 	IMAGE_ARRAY,
+	IMAGE_SAMPLER,
 	COUNT,
 };
 
@@ -78,16 +81,27 @@ static const char* s_bindSemanticName[]
 	"Buffer",
 	"Image",
 	"Image Array",
+	"Image Sampler",
 };
 static_assert( COUNTARRAY( s_bindSemanticName ) == (uint32_t)bindSemantic_t::COUNT, "Name count mismatches enum." );
 
 
 enum bindStateFlag_t
 {
-	BIND_STATE_VS = ( 1 << 0 ),
-	BIND_STATE_PS = ( 1 << 1 ),
-	BIND_STATE_CS = ( 1 << 2 ),
-	BIND_STATE_ALL = ( 1 << 3 ) - 1
+	BIND_STATE_VS			= ( 1 << 0 ),
+	BIND_STATE_PS			= ( 1 << 1 ),
+	BIND_STATE_CS			= ( 1 << 2 ),
+	BIND_STATE_ANYHIT		= ( 1 << 3 ),
+	BIND_STATE_CLOSEST_HIT	= ( 1 << 4 ),
+	BIND_STATE_RAYGEN		= ( 1 << 5 ),
+	BIND_STATE_MISS			= ( 1 << 6 ),
+	BIND_STATE_INTERSECTION	= ( 1 << 7 ),
+
+	BIND_STATE_ALL_GFX	= ( BIND_STATE_VS | BIND_STATE_PS ),
+	BIND_STATE_ALL_RTX	= ( BIND_STATE_ANYHIT | BIND_STATE_CLOSEST_HIT | \
+							BIND_STATE_RAYGEN | BIND_STATE_MISS | BIND_STATE_INTERSECTION ),
+	BIND_STATE_ALL		= ( BIND_STATE_ALL_GFX | BIND_STATE_ALL_RTX | BIND_STATE_CS )
+
 };
 
 
@@ -111,6 +125,9 @@ static inline bindSemantic_t GetBindSemantic( const bindType_t bindType )
 		case bindType_t::IMAGE_2D_ARRAY:
 		case bindType_t::IMAGE_CUBE_ARRAY:
 			return bindSemantic_t::IMAGE_ARRAY;
+
+		case bindType_t::IMAGE_SAMPLER:
+			return bindSemantic_t::IMAGE_SAMPLER;
 	}
 	return bindSemantic_t::UNKNOWN;
 }

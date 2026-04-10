@@ -1340,7 +1340,7 @@ void DeviceContext::Create( Window& window )
 
 	// Descriptor Pool
 	{
-		const uint32_t subPoolCount = 4;
+		const uint32_t subPoolCount = 5;
 
 		VkDescriptorPoolSize poolSizes[ subPoolCount ];
 		poolSizes[ 0 ].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1351,6 +1351,8 @@ void DeviceContext::Create( Window& window )
 		poolSizes[ 2 ].descriptorCount = DescriptorPoolMaxComboImages;
 		poolSizes[ 3 ].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 		poolSizes[ 3 ].descriptorCount = DescriptorPoolMaxImages;
+		poolSizes[ 4 ].type = VK_DESCRIPTOR_TYPE_SAMPLER;
+		poolSizes[ 4 ].descriptorCount = DescriptorPoolMaxSamplers;
 
 		VkDescriptorPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
