@@ -73,8 +73,20 @@ void Renderer::Init( const renderConfig_t& cfg )
 		{
 			samplerState.addrMode = samplerAddress_t( i );
 
+			samplerState.filter = samplerFilter_t::SAMPLER_FILTER_BILINEAR;
 			resources.bilinearSamplers[ samplerState.addrMode ].Init( samplerState, resourceLifeTime_t::REBOOT );
+
+			samplerState.filter = samplerFilter_t::SAMPLER_FILTER_TRILINEAR;
+			resources.trilinearSamplers[ samplerState.addrMode ].Init( samplerState, resourceLifeTime_t::REBOOT );
 		}
+
+		samplerState.borderColor = SAMPLER_BORDER_WHITE;
+		samplerState.borderColorIsFloat = true;
+		samplerState.borderTransparent = false;
+		samplerState.addrMode = samplerAddress_t::SAMPLER_ADDRESS_CLAMP_BORDER;
+		samplerState.maxAniso = 0.0f;
+
+		resources.shadowMapSampler.Init( samplerState, resourceLifeTime_t::REBOOT );
 	}
 
 	viewCount = 0;

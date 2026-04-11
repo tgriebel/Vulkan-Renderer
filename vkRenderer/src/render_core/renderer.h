@@ -162,6 +162,7 @@ public:
 
 	ImageSampler			bilinearSamplers[ SAMPLER_ADDRESS_MODES ];
 	ImageSampler			trilinearSamplers[ SAMPLER_ADDRESS_MODES ];
+	ImageSampler			shadowMapSampler;
 
 	// TODO: move view-specific data
 	GpuBuffer				viewParms;
