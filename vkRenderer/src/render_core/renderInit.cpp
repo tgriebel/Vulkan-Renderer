@@ -62,8 +62,15 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		samplerState_t samplerState;
 		samplerState.filter = SAMPLER_FILTER_BILINEAR;
+		samplerState.borderColor = SAMPLER_BORDER_BLACK;
+		samplerState.borderColorIsFloat = true;
+		samplerState.borderTransparent = false;
+		samplerState.minLod = 0.0f;
+		samplerState.maxLod = 16.0f;
+		samplerState.maxAniso = 16.0f;
 
-		for( uint32_t i = 0; i < SAMPLER_ADDRESS_MODES; ++i ) {
+		for( uint32_t i = 0; i < SAMPLER_ADDRESS_MODES; ++i )
+		{
 			samplerState.addrMode = samplerAddress_t( i );
 
 			resources.bilinearSamplers[ samplerState.addrMode ].Init( samplerState, resourceLifeTime_t::REBOOT );

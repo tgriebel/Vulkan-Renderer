@@ -38,24 +38,26 @@ void ImageSampler::Init( const samplerState_t& state, const resourceLifeTime_t l
 #ifdef USE_VULKAN
 	VkSamplerCreateInfo samplerInfo { };
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-	samplerInfo.magFilter = VK_FILTER_LINEAR;
-	samplerInfo.minFilter = VK_FILTER_LINEAR;
+	samplerInfo.magFilter = ( state.filter != SAMPLER_FILTER_NEAREST ) ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+	samplerInfo.minFilter = ( state.filter != SAMPLER_FILTER_NEAREST ) ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
 
 	VkSamplerAddressMode samplerAddress = vk_GetSamplerAddress( m_samplerState.addrMode );
 
 	samplerInfo.addressModeU = samplerAddress;
 	samplerInfo.addressModeV = samplerAddress;
 	samplerInfo.addressModeW = samplerAddress;
-	samplerInfo.anisotropyEnable = VK_TRUE;
-	samplerInfo.maxAnisotropy = 16.0f;
-	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	samplerInfo.anisotropyEnable = ( state.maxAniso > 0.0f ) ? VK_TRUE : VK_FALSE;
+	samplerInfo.maxAnisotropy = Clamp( state.maxAniso, 1.0f, context.deviceProperties.limits.maxSamplerAnisotropy );
+	samplerInfo.borderColor = vk_GetBorderColor( m_samplerState.borderColor, m_samplerState.borderTransparent, m_samplerState.borderColorIsFloat );
 	samplerInfo.unnormalizedCoordinates = VK_FALSE;
 	samplerInfo.compareEnable = VK_FALSE;
 	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-	samplerInfo.minLod = 0.0f;
-	samplerInfo.maxLod = 16.0f;
+	samplerInfo.mipmapMode = ( state.filter == SAMPLER_FILTER_TRILINEAR ) ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	samplerInfo.minLod = state.minLod;
+	samplerInfo.maxLod = Clamp( state.maxLod, state.minLod, VK_LOD_CLAMP_NONE );
 	samplerInfo.mipLodBias = 0.0f;
+
+	assert( VK_LOD_CLAMP_NONE == 1000.0f ); // Check clamp if asserts
 
 	VK_CHECK_RESULT( vkCreateSampler( context.device, &samplerInfo, nullptr, &vk_sampler ) );
 #endif
