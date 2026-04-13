@@ -18,7 +18,7 @@
 
 static const int TOKEN_LEN = 128;
 
-static uint8_t trashBuffer[ 8192 ];
+static uint8_t trashBuffer[ 131072 ];
 
 static int jsoneq( const char* json, jsmntok_t* tok, const char* s )
 {
@@ -805,7 +805,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 
 	std::vector<char> file = ReadTextFile( ScenePath + fileName );
 
-	const int maxTokens = 1024;
+	const int maxTokens = 8192;
 
 	parseState_t st;
 	st.file = &file;

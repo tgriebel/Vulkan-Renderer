@@ -3,178 +3,1652 @@
   "type": "scene",
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
-  "envMap" : "code_assets/chess_env.img",
-  "diffuseIblMap" : "code_assets/chess_diffuseIbl.img",
-  "specIblMap" : "code_assets/chess_specIbl.img",
+  "envMap": "code_assets/chess_env.img",
+  "diffuseIblMap": "code_assets/chess_diffuseIbl.img",
+  "specIblMap": "code_assets/chess_specIbl.img",
   "images": [
-	{
-	  "name": "checker.png",
-	  "type": "2D"
-	},
-	{
-	  "name": "grid2.png",
-	  "type": "2D"
-	},
-	{
-	  "name": "white.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "black.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_right.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_left.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_top.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_bottom.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_front.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_back.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_low.jpg",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "skybox80s.png",
-	  "type": "2D"
-	},
-	{
-	  "name": "code_assets/chess_env.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chess_diffuseIbl.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chess_specIbl.img",
-	  "type": "CUBE"
-	}
+    {
+      "name": "white.jpg",
+      "type": "2D"
+    },
+    {
+      "name": "code_assets/chess_env.img",
+      "type": "CUBE"
+    },
+    {
+      "name": "code_assets/chess_diffuseIbl.img",
+      "type": "CUBE"
+    },
+    {
+      "name": "code_assets/chess_specIbl.img",
+      "type": "CUBE"
+    }
   ],
   "materials": [
-	{
-	  "name": "Grid",
-	  "KdR": 1.0,
-	  "KdG": 1.0,
-	  "KdB": 1.0,
-	  "tr": 0.0,
-	  "ns": 0.0,
-	  "ni": 0.0,
-	  "d": 1.0,
-	  "illum": 0.0,
-	  "shaders": {
-		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
-		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
-		"DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
-		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
-	  },
-	  "textures": {
-		"GGX_COLOR_MAP_SLOT": "grid2.png"
-	  }
-	},
-	{
-	  "name": "TERRAIN",
-	  "shaders": {
-		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
-		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
-		"DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
-		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
-	  }
-	},
-	{
-	  "name": "SKY",
-	  "shaders": {
-		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
-	  },
-	  "textures": {
-		"CUBE_RIGHT_SLOT": "skybox80s.png",
-		"CUBE_LEFT_SLOT": "skybox80s.png",
-		"CUBE_TOP_SLOT": "skybox80s.png",
-		"CUBE_BOTTOM_SLOT": "skybox80s.png",
-		"CUBE_FRONT_SLOT": "skybox80s.png",
-		"CUBE_BACK_SLOT": "skybox80s.png"
-	  }
-	},
-	{
+    {
       "name": "EquirectangularSky",
-	  "shaders": {
-		"DRAWPASS_SKYBOX": { "shader": "equirectangularSky", "perms": [""] }
-	  },
+      "shaders": {
+        "DRAWPASS_SKYBOX": { "shader": "equirectangularSky", "perms": [""] }
+      },
       "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/chess_env.img"
+        "TEXTURE_SLOT_0": "code_assets/chess_env.img"
+      }
+    },
+    {
+      "name": "PBR_R0_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M0",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.0,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M1",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.1,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M2",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.2,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M3",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.3,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M4",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.4,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M5",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.5,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M6",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.6,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M7",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.7,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M8",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.8,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R0_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.0, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R1_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.1, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R2_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.2, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R3_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.3, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R4_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.4, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R5_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.5, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R6_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.6, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R7_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.7, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R8_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.8, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
+      }
+    },
+    {
+      "name": "PBR_R9_M9",
+      "KdR": 1.0, "KdG": 0.1, "KdB": 0.1,
+      "roughness": 0.9, "metalness": 0.9,
+      "d": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
+        "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
+        "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
+        "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
+      },
+      "textures": {
+        "GGX_COLOR_MAP_SLOT": "white.jpg"
       }
     }
   ],
   "models": [
-	{
-	  "name": "cube",
-	  "model": "cube.obj"
-	},
-	{
-	  "name": "axis",
-	  "model": "axis.obj"
-	},
-	{
-	  "name": "grid",
-	  "model": "_terrain",
-	  "argStr0": "Grid",
-	  "argInt0": 100,
-	  "argInt1": 100,
-	  "argFlt0": 1.0,
-	  "argFlt1": 100.0
-	}
+    {
+      "name": "sphere",
+      "model": "sphere.obj"
+    }
   ],
   "entities": [
-	{
-	  "name": "_skybox",
-	  "model": "_skybox",
-	  "x": 0.0,
-	  "y": 0.0,
-	  "z": 0.0,
-	  "rx": 0.0,
-	  "ry": 0.0,
-	  "rz": 0.0,
-	  "sx": 1.0,
-	  "sy": 1.0,
-	  "sz": 1.0
-	},
-	{
-	  "name": "grid",
-	  "model": "grid"
-	},
-	{
-	  "name": "car",
-	  "model": "911_scene.obj",
-	  "rx": 90.0
-	},
-	{
-	  "name": "gun",
-	  "model": "Cerberus_LP.obj"
-	},
-	{
-	  "name": "sphere",
-	  "model": "sphere.obj",
-	  "hidden": "false",
-	  "x": 10.0,
-	  "y": 10.0,
-	  "z": 10.0
-	}
+    {
+      "name": "_skybox",
+      "model": "_skybox",
+      "material": "EquirectangularSky",
+      "x": 0.0, "y": 0.0, "z": 0.0,
+      "rx": 0.0, "ry": 0.0, "rz": 0.0,
+      "sx": 1.0, "sy": 1.0, "sz": 1.0
+    },
+    { "name": "sphere_R0_M0", "model": "sphere.obj", "material": "PBR_R0_M0", "y": 0.0, "z": 0.0 },
+    { "name": "sphere_R1_M0", "model": "sphere.obj", "material": "PBR_R1_M0", "y": 2.5, "z": 0.0 },
+    { "name": "sphere_R2_M0", "model": "sphere.obj", "material": "PBR_R2_M0", "y": 5.0, "z": 0.0 },
+    { "name": "sphere_R3_M0", "model": "sphere.obj", "material": "PBR_R3_M0", "y": 7.5, "z": 0.0 },
+    { "name": "sphere_R4_M0", "model": "sphere.obj", "material": "PBR_R4_M0", "y": 10.0, "z": 0.0 },
+    { "name": "sphere_R5_M0", "model": "sphere.obj", "material": "PBR_R5_M0", "y": 12.5, "z": 0.0 },
+    { "name": "sphere_R6_M0", "model": "sphere.obj", "material": "PBR_R6_M0", "y": 15.0, "z": 0.0 },
+    { "name": "sphere_R7_M0", "model": "sphere.obj", "material": "PBR_R7_M0", "y": 17.5, "z": 0.0 },
+    { "name": "sphere_R8_M0", "model": "sphere.obj", "material": "PBR_R8_M0", "y": 20.0, "z": 0.0 },
+    { "name": "sphere_R9_M0", "model": "sphere.obj", "material": "PBR_R9_M0", "y": 22.5, "z": 0.0 },
+    { "name": "sphere_R0_M1", "model": "sphere.obj", "material": "PBR_R0_M1", "y": 0.0, "z": 2.5 },
+    { "name": "sphere_R1_M1", "model": "sphere.obj", "material": "PBR_R1_M1", "y": 2.5, "z": 2.5 },
+    { "name": "sphere_R2_M1", "model": "sphere.obj", "material": "PBR_R2_M1", "y": 5.0, "z": 2.5 },
+    { "name": "sphere_R3_M1", "model": "sphere.obj", "material": "PBR_R3_M1", "y": 7.5, "z": 2.5 },
+    { "name": "sphere_R4_M1", "model": "sphere.obj", "material": "PBR_R4_M1", "y": 10.0, "z": 2.5 },
+    { "name": "sphere_R5_M1", "model": "sphere.obj", "material": "PBR_R5_M1", "y": 12.5, "z": 2.5 },
+    { "name": "sphere_R6_M1", "model": "sphere.obj", "material": "PBR_R6_M1", "y": 15.0, "z": 2.5 },
+    { "name": "sphere_R7_M1", "model": "sphere.obj", "material": "PBR_R7_M1", "y": 17.5, "z": 2.5 },
+    { "name": "sphere_R8_M1", "model": "sphere.obj", "material": "PBR_R8_M1", "y": 20.0, "z": 2.5 },
+    { "name": "sphere_R9_M1", "model": "sphere.obj", "material": "PBR_R9_M1", "y": 22.5, "z": 2.5 },
+    { "name": "sphere_R0_M2", "model": "sphere.obj", "material": "PBR_R0_M2", "y": 0.0, "z": 5.0 },
+    { "name": "sphere_R1_M2", "model": "sphere.obj", "material": "PBR_R1_M2", "y": 2.5, "z": 5.0 },
+    { "name": "sphere_R2_M2", "model": "sphere.obj", "material": "PBR_R2_M2", "y": 5.0, "z": 5.0 },
+    { "name": "sphere_R3_M2", "model": "sphere.obj", "material": "PBR_R3_M2", "y": 7.5, "z": 5.0 },
+    { "name": "sphere_R4_M2", "model": "sphere.obj", "material": "PBR_R4_M2", "y": 10.0, "z": 5.0 },
+    { "name": "sphere_R5_M2", "model": "sphere.obj", "material": "PBR_R5_M2", "y": 12.5, "z": 5.0 },
+    { "name": "sphere_R6_M2", "model": "sphere.obj", "material": "PBR_R6_M2", "y": 15.0, "z": 5.0 },
+    { "name": "sphere_R7_M2", "model": "sphere.obj", "material": "PBR_R7_M2", "y": 17.5, "z": 5.0 },
+    { "name": "sphere_R8_M2", "model": "sphere.obj", "material": "PBR_R8_M2", "y": 20.0, "z": 5.0 },
+    { "name": "sphere_R9_M2", "model": "sphere.obj", "material": "PBR_R9_M2", "y": 22.5, "z": 5.0 },
+    { "name": "sphere_R0_M3", "model": "sphere.obj", "material": "PBR_R0_M3", "y": 0.0, "z": 7.5 },
+    { "name": "sphere_R1_M3", "model": "sphere.obj", "material": "PBR_R1_M3", "y": 2.5, "z": 7.5 },
+    { "name": "sphere_R2_M3", "model": "sphere.obj", "material": "PBR_R2_M3", "y": 5.0, "z": 7.5 },
+    { "name": "sphere_R3_M3", "model": "sphere.obj", "material": "PBR_R3_M3", "y": 7.5, "z": 7.5 },
+    { "name": "sphere_R4_M3", "model": "sphere.obj", "material": "PBR_R4_M3", "y": 10.0, "z": 7.5 },
+    { "name": "sphere_R5_M3", "model": "sphere.obj", "material": "PBR_R5_M3", "y": 12.5, "z": 7.5 },
+    { "name": "sphere_R6_M3", "model": "sphere.obj", "material": "PBR_R6_M3", "y": 15.0, "z": 7.5 },
+    { "name": "sphere_R7_M3", "model": "sphere.obj", "material": "PBR_R7_M3", "y": 17.5, "z": 7.5 },
+    { "name": "sphere_R8_M3", "model": "sphere.obj", "material": "PBR_R8_M3", "y": 20.0, "z": 7.5 },
+    { "name": "sphere_R9_M3", "model": "sphere.obj", "material": "PBR_R9_M3", "y": 22.5, "z": 7.5 },
+    { "name": "sphere_R0_M4", "model": "sphere.obj", "material": "PBR_R0_M4", "y": 0.0, "z": 10.0 },
+    { "name": "sphere_R1_M4", "model": "sphere.obj", "material": "PBR_R1_M4", "y": 2.5, "z": 10.0 },
+    { "name": "sphere_R2_M4", "model": "sphere.obj", "material": "PBR_R2_M4", "y": 5.0, "z": 10.0 },
+    { "name": "sphere_R3_M4", "model": "sphere.obj", "material": "PBR_R3_M4", "y": 7.5, "z": 10.0 },
+    { "name": "sphere_R4_M4", "model": "sphere.obj", "material": "PBR_R4_M4", "y": 10.0, "z": 10.0 },
+    { "name": "sphere_R5_M4", "model": "sphere.obj", "material": "PBR_R5_M4", "y": 12.5, "z": 10.0 },
+    { "name": "sphere_R6_M4", "model": "sphere.obj", "material": "PBR_R6_M4", "y": 15.0, "z": 10.0 },
+    { "name": "sphere_R7_M4", "model": "sphere.obj", "material": "PBR_R7_M4", "y": 17.5, "z": 10.0 },
+    { "name": "sphere_R8_M4", "model": "sphere.obj", "material": "PBR_R8_M4", "y": 20.0, "z": 10.0 },
+    { "name": "sphere_R9_M4", "model": "sphere.obj", "material": "PBR_R9_M4", "y": 22.5, "z": 10.0 },
+    { "name": "sphere_R0_M5", "model": "sphere.obj", "material": "PBR_R0_M5", "y": 0.0, "z": 12.5 },
+    { "name": "sphere_R1_M5", "model": "sphere.obj", "material": "PBR_R1_M5", "y": 2.5, "z": 12.5 },
+    { "name": "sphere_R2_M5", "model": "sphere.obj", "material": "PBR_R2_M5", "y": 5.0, "z": 12.5 },
+    { "name": "sphere_R3_M5", "model": "sphere.obj", "material": "PBR_R3_M5", "y": 7.5, "z": 12.5 },
+    { "name": "sphere_R4_M5", "model": "sphere.obj", "material": "PBR_R4_M5", "y": 10.0, "z": 12.5 },
+    { "name": "sphere_R5_M5", "model": "sphere.obj", "material": "PBR_R5_M5", "y": 12.5, "z": 12.5 },
+    { "name": "sphere_R6_M5", "model": "sphere.obj", "material": "PBR_R6_M5", "y": 15.0, "z": 12.5 },
+    { "name": "sphere_R7_M5", "model": "sphere.obj", "material": "PBR_R7_M5", "y": 17.5, "z": 12.5 },
+    { "name": "sphere_R8_M5", "model": "sphere.obj", "material": "PBR_R8_M5", "y": 20.0, "z": 12.5 },
+    { "name": "sphere_R9_M5", "model": "sphere.obj", "material": "PBR_R9_M5", "y": 22.5, "z": 12.5 },
+    { "name": "sphere_R0_M6", "model": "sphere.obj", "material": "PBR_R0_M6", "y": 0.0, "z": 15.0 },
+    { "name": "sphere_R1_M6", "model": "sphere.obj", "material": "PBR_R1_M6", "y": 2.5, "z": 15.0 },
+    { "name": "sphere_R2_M6", "model": "sphere.obj", "material": "PBR_R2_M6", "y": 5.0, "z": 15.0 },
+    { "name": "sphere_R3_M6", "model": "sphere.obj", "material": "PBR_R3_M6", "y": 7.5, "z": 15.0 },
+    { "name": "sphere_R4_M6", "model": "sphere.obj", "material": "PBR_R4_M6", "y": 10.0, "z": 15.0 },
+    { "name": "sphere_R5_M6", "model": "sphere.obj", "material": "PBR_R5_M6", "y": 12.5, "z": 15.0 },
+    { "name": "sphere_R6_M6", "model": "sphere.obj", "material": "PBR_R6_M6", "y": 15.0, "z": 15.0 },
+    { "name": "sphere_R7_M6", "model": "sphere.obj", "material": "PBR_R7_M6", "y": 17.5, "z": 15.0 },
+    { "name": "sphere_R8_M6", "model": "sphere.obj", "material": "PBR_R8_M6", "y": 20.0, "z": 15.0 },
+    { "name": "sphere_R9_M6", "model": "sphere.obj", "material": "PBR_R9_M6", "y": 22.5, "z": 15.0 },
+    { "name": "sphere_R0_M7", "model": "sphere.obj", "material": "PBR_R0_M7", "y": 0.0, "z": 17.5 },
+    { "name": "sphere_R1_M7", "model": "sphere.obj", "material": "PBR_R1_M7", "y": 2.5, "z": 17.5 },
+    { "name": "sphere_R2_M7", "model": "sphere.obj", "material": "PBR_R2_M7", "y": 5.0, "z": 17.5 },
+    { "name": "sphere_R3_M7", "model": "sphere.obj", "material": "PBR_R3_M7", "y": 7.5, "z": 17.5 },
+    { "name": "sphere_R4_M7", "model": "sphere.obj", "material": "PBR_R4_M7", "y": 10.0, "z": 17.5 },
+    { "name": "sphere_R5_M7", "model": "sphere.obj", "material": "PBR_R5_M7", "y": 12.5, "z": 17.5 },
+    { "name": "sphere_R6_M7", "model": "sphere.obj", "material": "PBR_R6_M7", "y": 15.0, "z": 17.5 },
+    { "name": "sphere_R7_M7", "model": "sphere.obj", "material": "PBR_R7_M7", "y": 17.5, "z": 17.5 },
+    { "name": "sphere_R8_M7", "model": "sphere.obj", "material": "PBR_R8_M7", "y": 20.0, "z": 17.5 },
+    { "name": "sphere_R9_M7", "model": "sphere.obj", "material": "PBR_R9_M7", "y": 22.5, "z": 17.5 },
+    { "name": "sphere_R0_M8", "model": "sphere.obj", "material": "PBR_R0_M8", "y": 0.0, "z": 20.0 },
+    { "name": "sphere_R1_M8", "model": "sphere.obj", "material": "PBR_R1_M8", "y": 2.5, "z": 20.0 },
+    { "name": "sphere_R2_M8", "model": "sphere.obj", "material": "PBR_R2_M8", "y": 5.0, "z": 20.0 },
+    { "name": "sphere_R3_M8", "model": "sphere.obj", "material": "PBR_R3_M8", "y": 7.5, "z": 20.0 },
+    { "name": "sphere_R4_M8", "model": "sphere.obj", "material": "PBR_R4_M8", "y": 10.0, "z": 20.0 },
+    { "name": "sphere_R5_M8", "model": "sphere.obj", "material": "PBR_R5_M8", "y": 12.5, "z": 20.0 },
+    { "name": "sphere_R6_M8", "model": "sphere.obj", "material": "PBR_R6_M8", "y": 15.0, "z": 20.0 },
+    { "name": "sphere_R7_M8", "model": "sphere.obj", "material": "PBR_R7_M8", "y": 17.5, "z": 20.0 },
+    { "name": "sphere_R8_M8", "model": "sphere.obj", "material": "PBR_R8_M8", "y": 20.0, "z": 20.0 },
+    { "name": "sphere_R9_M8", "model": "sphere.obj", "material": "PBR_R9_M8", "y": 22.5, "z": 20.0 },
+    { "name": "sphere_R0_M9", "model": "sphere.obj", "material": "PBR_R0_M9", "y": 0.0, "z": 22.5 },
+    { "name": "sphere_R1_M9", "model": "sphere.obj", "material": "PBR_R1_M9", "y": 2.5, "z": 22.5 },
+    { "name": "sphere_R2_M9", "model": "sphere.obj", "material": "PBR_R2_M9", "y": 5.0, "z": 22.5 },
+    { "name": "sphere_R3_M9", "model": "sphere.obj", "material": "PBR_R3_M9", "y": 7.5, "z": 22.5 },
+    { "name": "sphere_R4_M9", "model": "sphere.obj", "material": "PBR_R4_M9", "y": 10.0, "z": 22.5 },
+    { "name": "sphere_R5_M9", "model": "sphere.obj", "material": "PBR_R5_M9", "y": 12.5, "z": 22.5 },
+    { "name": "sphere_R6_M9", "model": "sphere.obj", "material": "PBR_R6_M9", "y": 15.0, "z": 22.5 },
+    { "name": "sphere_R7_M9", "model": "sphere.obj", "material": "PBR_R7_M9", "y": 17.5, "z": 22.5 },
+    { "name": "sphere_R8_M9", "model": "sphere.obj", "material": "PBR_R8_M9", "y": 20.0, "z": 22.5 },
+    { "name": "sphere_R9_M9", "model": "sphere.obj", "material": "PBR_R9_M9", "y": 22.5, "z": 22.5 }
   ]
 }
