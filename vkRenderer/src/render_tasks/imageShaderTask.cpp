@@ -146,8 +146,12 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		m_passes[ passIndex ]->codeImages.SetRenderContext( m_context );
 		m_passes[ passIndex ]->codeCubeImages.SetRenderContext( m_context );
 
-		m_passes[ passIndex ]->codeImages.Resize( info.inputImages );
+		m_passes[ passIndex ]->codeImages.Resize( info.inputImages + multiPassImageCount );
 		m_passes[ passIndex ]->codeCubeImages.Resize( info.inputCubeImages );
+
+		for( uint32_t codeImageIx = 0; codeImageIx < m_image2dSlotCount; ++codeImageIx ) {
+			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
+		}
 
 		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( bindset_imageProcess );
 
@@ -158,11 +162,6 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 	// Attach the previous frame buffers as input for the next pass
 	for ( uint32_t passIndex = 1; passIndex < m_passCount; ++passIndex )
 	{
-		m_passes[ passIndex ]->codeImages.Resize( info.inputImages + multiPassImageCount );
-
-		for ( uint32_t codeImageIx = 0; codeImageIx < m_image2dSlotCount; ++codeImageIx ) {
-			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
-		}
 		m_passes[ passIndex ]->codeImages.BindIndex( m_image2dSlotCount, m_views[ passIndex - 1 ][ 0 ] );
 	}
 }

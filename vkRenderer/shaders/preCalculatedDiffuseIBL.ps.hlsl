@@ -78,7 +78,7 @@ PS_Output PSMain( PS_Input input )
             float3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * viewVector;
             sampleVec = normalize( sampleVec );
 
-            irradiance += codeCubeSamplers[ 0 ].SampleBias( codeCubeSamplersSt, sampleVec, lodBias ).rgb * cos( theta ) * sin( theta );
+			irradiance += codeCubeSamplers[ 0 ].SampleBias( bilinearSamplerClampEdge, sampleVec, lodBias).rgb * cos(theta) * sin(theta);
             nrSamples++;
         }
     }

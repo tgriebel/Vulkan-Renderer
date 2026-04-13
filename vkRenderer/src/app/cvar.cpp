@@ -88,7 +88,7 @@ bool CVar::ParseCommand( const std::string& command )
 		return false;
 	}
 
-	std::string varName = cmdStr.substr( 0, offset );
+	std::string varName = ToLower( cmdStr.substr( 0, offset ) );
 	ToLower( cmdStr );
 
 	CVar* v = CVar::Search( varName );

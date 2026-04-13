@@ -220,13 +220,9 @@ struct PushConstants_t
                                                         BIND_SET( S, N ) TEXTYPE codeSamplers[];                    \
                                                         BIND_SET( S, N ) SamplerState codeSamplersSt;
 
-#define CODE_IMAGE_CUBE_LAYOUT( S, N )                                                                              \
-                                                        BIND_SET( S, N ) TextureCube codeCubeSamplers[];            \
-                                                        BIND_SET( S, N ) SamplerState codeCubeSamplersSt;
+#define CODE_IMAGE_CUBE_LAYOUT( S, N )                  BIND_SET( S, N ) TextureCube codeCubeSamplers[];
 
-#define STENCIL_LAYOUT( S, N, TEXTYPE )                                                                             \
-                                                        BIND_SET( S, N ) TEXTYPE stencilImage;                      \
-                                                        BIND_SET( S, N ) SamplerState stencilImageSt;
+#define STENCIL_LAYOUT( S, N, TEXTYPE )                 BIND_SET( S, N ) TEXTYPE stencilImage;
 
 #define MATERIAL_LAYOUT( S, N )                                                                                     \
                                                         BIND_SET( S, N ) StructuredBuffer<material_t> materials;

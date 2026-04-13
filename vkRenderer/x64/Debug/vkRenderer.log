@@ -1,4 +1,8 @@
-﻿  scene.cpp
+﻿  chessScene.cpp
+  nesScene.cpp
+  sceneParser.cpp
+  scene.cpp
+  window.cpp
   debug2dPass.cpp
   debug3dPass.cpp
   depthPass.cpp
@@ -12,17 +16,32 @@
   transPass.cpp
   wireframePass.cpp
   drawGroup.cpp
-  descriptorWrites.cpp
-  gpuTransfer.cpp
-  imageArray.cpp
-  pipeline.cpp
-  renderCommand.cpp
-  renderInit.cpp
+  render_util.cpp
+  io.cpp
   Generating Code...
   Compiling...
+  allocator.cpp
+  binding.cpp
+  descriptorWrites.cpp
+  gpuResources.cpp
+  gpuTransfer.cpp
+  imageArray.cpp
+  imageSampler.cpp
+  imageView.cpp
+  pipeline.cpp
+  shaderBinding.cpp
+  GpuSync.cpp
+  debugMenu.cpp
+  gpuImage.cpp
+  renderCommand.cpp
+  renderInit.cpp
+  renderResource.cpp
   renderShutdown.cpp
   renderView.cpp
   renderer.cpp
+  swapChain.cpp
+  Generating Code...
+  Compiling...
   cmdContext.cpp
   deviceContext.cpp
   frameBuffer.cpp
@@ -33,4 +52,5 @@
   imguiTask.cpp
   vulkinTestApp.cpp
   Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

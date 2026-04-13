@@ -150,7 +150,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 			}
 
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
-			info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
+			info.sampler = nullptr;
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView( currentBuffer );
 			assert( info.imageView != nullptr );
 

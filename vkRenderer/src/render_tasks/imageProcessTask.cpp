@@ -309,6 +309,8 @@ void ImageProcessTask::Execute( CommandContext& cmdContext )
 	{
 		Transition( &cmdContext, *m_image, GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_DST );
 		GenerateMipmaps( &cmdContext, *m_image );
+
+		cmdContext.MarkerEndRegion();
 		return;
 	}
 
