@@ -90,7 +90,7 @@ enum materialUsage_t : uint32_t
 
 struct materialParms_t
 {
-	materialParms_t() : Tr( 0.0f ), Ns( 0.0f ), Ni( 0.0f ), d( 1.0f ), illum( 0.0f ) {}
+	materialParms_t() : Tr( 0.0f ), Ns( 0.0f ), Ni( 0.0f ), d( 1.0f ), illum( 0.0f ), roughness( 0.0f ), metalness( 1.0f ) {}
 
 	rgb32_t		Ka;
 	rgb32_t		Ke;
@@ -102,13 +102,13 @@ struct materialParms_t
 	float		Ni;
 	float		d;
 	float		illum;
-	//float		roughness;
-	//float		metalness;
-	//float		sheen;
-	//float		clearcoatThickness;
-	//float		clearcoatRoughness;
-	//float		anisotropy;
-	//float		anisotropyRotation;
+	float		roughness;
+	float		metalness;
+	float		sheen;
+	float		clearcoatThickness;
+	float		clearcoatRoughness;
+	float		anisotropy;
+	float		anisotropyRotation;
 };
 
 class Material
