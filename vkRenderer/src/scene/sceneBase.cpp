@@ -21,7 +21,7 @@
 * SOFTWARE.
 */
 
-#include "scene.h"
+#include "sceneBase.h"
 
 #include <gfxcore/primitives/ray.h>
 

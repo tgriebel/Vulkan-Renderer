@@ -30,7 +30,7 @@
 #include "src/globals/common.h"
 #include "src/globals/assetDefs.h"
 #include <syscore/systemUtils.h>
-#include "src/scene/scene.h"
+#include "src/scene/sceneBase.h"
 #include "src/app/window.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"

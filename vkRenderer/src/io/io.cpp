@@ -34,7 +34,7 @@
 
 #include <GfxCore/image/image.h>
 
-#include "../scene/scene.h"
+#include "../scene/sceneBase.h"
 #include "../scene/assetManager.h"
 #include "../asset_types/model.h"
 #include "../asset_types/texture.h"

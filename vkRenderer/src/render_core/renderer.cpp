@@ -28,14 +28,12 @@
 #include <map>
 #include <sstream>
 
-#include "../scene/scene.h"
+#include "../scene/sceneBase.h"
 #include "../scene/entity.h"
 #include <gfxcore/core/assetLib.h>
 #include <gfxcore/primitives/geom.h>
 #include "../asset_types/texture.h"
 #include "../asset_types/gpuProgram.h"
-#include "../scene/scene.h"
-#include "../scene/entity.h"
 #include <gfxcore/math/vector.h>
 
 #include "debugMenu.h"

@@ -2,11 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="scenes\sceneParser.cpp">
-      <Filter>Scenes</Filter>
-    </ClCompile>
     <ClCompile Include="scenes\chessScene.cpp">
-      <Filter>Scenes</Filter>
+      <Filter>Scene Types</Filter>
     </ClCompile>
     <ClCompile Include="..\external\imgui\imgui.cpp">
       <Filter>external\imgui</Filter>
@@ -63,7 +60,7 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="scenes\nesScene.cpp">
-      <Filter>Scenes</Filter>
+      <Filter>Scene Types</Filter>
     </ClCompile>
     <ClCompile Include="src\render_core\gpuImage.cpp">
       <Filter>Core</Filter>
@@ -173,19 +170,36 @@
     <ClCompile Include="src\render_binding\imageSampler.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\asset_types\gpuProgram.cpp" />
-    <ClCompile Include="src\asset_types\material.cpp" />
-    <ClCompile Include="src\asset_types\model.cpp" />
     <ClCompile Include="src\asset_types\texture.cpp" />
-    <ClCompile Include="src\scene\assetBaker.cpp" />
-    <ClCompile Include="src\scene\camera.cpp" />
-    <ClCompile Include="src\scene\entity.cpp" />
-    <ClCompile Include="src\scene\sceneBase.cpp" />
     <ClCompile Include="src\io\serializeClasses.cpp">
       <Filter>IO</Filter>
     </ClCompile>
     <ClCompile Include="src\app\appScene.cpp">
       <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\assetBaker.cpp">
+      <Filter>Baker</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\camera.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\sceneBase.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="scenes\sceneParser.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene\entity.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asset_types\gpuProgram.cpp">
+      <Filter>Asset Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asset_types\material.cpp">
+      <Filter>Asset Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asset_types\model.cpp">
+      <Filter>Asset Classes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -194,10 +208,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="scenes\chessScene.h">
-      <Filter>Scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="scenes\sceneParser.h">
-      <Filter>Scenes</Filter>
+      <Filter>Scene Types</Filter>
     </ClInclude>
     <ClInclude Include="..\external\imgui\imconfig.h">
       <Filter>external\imgui</Filter>
@@ -260,7 +271,7 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="scenes\nesScene.h">
-      <Filter>Scenes</Filter>
+      <Filter>Scene Types</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\gpuImage.h">
       <Filter>Core</Filter>
@@ -308,7 +319,7 @@
       <Filter>Tasks</Filter>
     </ClInclude>
     <ClInclude Include="scenes\tomtendoCore.h">
-      <Filter>Scenes</Filter>
+      <Filter>Scene Types</Filter>
     </ClInclude>
     <ClInclude Include="src\render_tasks\imageShaderTask.h">
       <Filter>Tasks</Filter>
@@ -367,15 +378,7 @@
     <ClInclude Include="src\render_binding\imageSampler.h">
       <Filter>Binding</Filter>
     </ClInclude>
-    <ClInclude Include="src\asset_types\gpuProgram.h" />
-    <ClInclude Include="src\asset_types\material.h" />
-    <ClInclude Include="src\asset_types\model.h" />
     <ClInclude Include="src\asset_types\texture.h" />
-    <ClInclude Include="src\scene\assetBaker.h" />
-    <ClInclude Include="src\scene\assetManager.h" />
-    <ClInclude Include="src\scene\camera.h" />
-    <ClInclude Include="src\scene\entity.h" />
-    <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\io\serializeClasses.h">
       <Filter>IO</Filter>
     </ClInclude>
@@ -387,6 +390,33 @@
     </ClInclude>
     <ClInclude Include="..\external\tiny_obj_loader.h">
       <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\assetBaker.h">
+      <Filter>Baker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\assetManager.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\camera.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\sceneBase.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\sceneParser.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scene\entity.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\gpuProgram.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\material.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\model.h">
+      <Filter>Asset Classes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -423,11 +453,20 @@
     <Filter Include="Device Context">
       <UniqueIdentifier>{52899a06-18bc-47e8-b7e9-c9bf879dc260}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scenes">
-      <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tasks">
       <UniqueIdentifier>{e842c2f5-a20d-4502-bce7-30628c72001e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Baker">
+      <UniqueIdentifier>{ef19525a-4e53-4f96-bfe5-dff889b86375}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{2e0ee268-188c-4e25-b72f-92b687bb3ef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Asset Classes">
+      <UniqueIdentifier>{d5a257b7-c142-4a87-a6ea-e09cd7c4c4ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene Types">
+      <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

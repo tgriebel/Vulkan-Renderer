@@ -30,7 +30,7 @@
 #include "Chess.h"
 #include <syscore/timer.h>
 #include "../src/scene/entity.h"
-#include "../src/scene/scene.h"
+#include "../src/scene/sceneBase.h"
 #include "../src/asset_types/gpuProgram.h"
 #include "../src/asset_types/model.h"
 #include "../src/io/io.h"

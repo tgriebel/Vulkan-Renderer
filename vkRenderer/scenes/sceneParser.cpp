@@ -30,7 +30,7 @@
 #include "../src/globals/render_util.h"
 #include "../src/render_core/gpuImage.h"
 #include "../src/scene/entity.h"
-#include "../src/scene/scene.h"
+#include "../src/scene/sceneBase.h"
 #include "../src/asset_types/gpuProgram.h"
 #include "../src/asset_types/model.h"
 

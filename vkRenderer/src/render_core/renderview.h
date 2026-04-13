@@ -23,7 +23,7 @@
 
 #pragma once
 #include <cstdint>
-#include "../scene/scene.h"
+#include "../scene/sceneBase.h"
 #include "../globals/common.h"
 #include "../globals/drawGroup.h"
 #include "../draw_passes/drawpass.h"

@@ -3,7 +3,7 @@
 #include "io.h"
 #include "window.h"
 #include "../scene/entity.h"
-#include "../scene/scene.h"
+#include "../scene/sceneBase.h"
 #include "../globals/render_util.h"
 
 #if defined( USE_IMGUI )

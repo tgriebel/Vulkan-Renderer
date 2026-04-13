@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "../scene/scene.h"
+#include "../scene/sceneBase.h"
 #include "common.h"
 
 class GpuBuffer;

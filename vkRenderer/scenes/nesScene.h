@@ -25,7 +25,7 @@
 
 #pragma once
 #include "../src/scene/entity.h"
-#include "../src/scene/scene.h"
+#include "../src/scene/sceneBase.h"
 #include <chrono>
 
 class NesScene : public Scene
