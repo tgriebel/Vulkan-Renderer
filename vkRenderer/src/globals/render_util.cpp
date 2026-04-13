@@ -25,11 +25,11 @@
 #include "common.h"
 #include "io.h"
 #include <gfxcore/primitives/geoBuilder.h>
-#include <gfxcore/core/assetLib.h>
 #include "../scene/assetManager.h"
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/texture.h"
 #include "../asset_types/model.h"
+#include "../asset_types/assetLib.h"
 
 extern AssetManager g_assets;
 

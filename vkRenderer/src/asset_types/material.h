@@ -24,12 +24,13 @@
 #pragma once
 
 #include <cinttypes>
-#include <gfxcore/core/common.h>
-#include <gfxcore/math/vector.h>
-#include <gfxcore/math/matrix.h>
-#include <gfxcore/image/color.h>
-#include <gfxcore/core/handle.h>
-#include <gfxcore/core/asset.h>
+#include <GfxCore/core/common.h>
+#include <GfxCore/math/vector.h>
+#include <GfxCore/math/matrix.h>
+#include <GfxCore/image/color.h>
+#include <SysCore/handle.h>
+#include "asset.h"
+
 
 class Serializer;
 

@@ -28,6 +28,7 @@
 #include "../asset_types/material.h"
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/model.h"
+#include "../asset_types/assetLib.h"
 
 typedef AssetLib< Model >			AssetLibModels;
 typedef AssetLib< Image >			AssetLibImages;

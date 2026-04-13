@@ -25,11 +25,11 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <gfxcore/core/handle.h>
-#include <gfxcore/core/asset.h>
-#include <syscore/systemUtils.h>
-#include <syscore/common.h>
+#include <SysCore/handle.h>
+#include <SysCore/systemUtils.h>
+#include <SysCore/common.h>
 
+#include "asset.h"
 #include "../io/io.h"
 
 class ShaderBindSet;

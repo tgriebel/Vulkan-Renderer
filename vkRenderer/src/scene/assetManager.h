@@ -23,8 +23,8 @@
 
 #pragma once
 
-#include <gfxcore/core/assetLib.h>
-#include <gfxcore/core/asset.h>
+#include "../asset_types/asset.h"
+#include "../asset_types/assetLib.h"
 #include <cassert>
 
 class AssetManager

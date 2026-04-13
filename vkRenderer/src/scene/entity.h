@@ -23,9 +23,9 @@
 
 #pragma once
 
-#include <gfxcore/math/matrix.h>
-#include <gfxcore/core/handle.h>
-#include <gfxcore/acceleration/aabb.h>
+#include <GfxCore/math/matrix.h>
+#include <GfxCore/acceleration/aabb.h>
+#include <SysCore/handle.h>
 
 enum entityFlags_t
 {

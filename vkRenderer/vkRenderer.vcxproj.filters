@@ -420,6 +420,15 @@
     <ClInclude Include="src\asset_types\texture.h">
       <Filter>Asset Classes</Filter>
     </ClInclude>
+    <ClInclude Include="src\asset_types\asset.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\assetHandle.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\assetLib.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

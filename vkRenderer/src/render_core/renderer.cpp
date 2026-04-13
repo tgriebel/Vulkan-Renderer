@@ -28,7 +28,6 @@
 #include <map>
 #include <sstream>
 
-#include <gfxcore/core/assetLib.h>
 #include <gfxcore/primitives/geom.h>
 #include <gfxcore/primitives/geoBuilder.h>
 #include <gfxcore/math/vector.h>
@@ -52,6 +51,7 @@
 #include "../scene/entity.h"
 #include "../asset_types/texture.h"
 #include "../asset_types/gpuProgram.h"
+#include "../asset_types/assetLib.h"
 
 #include "../app/window.h"
 #include "../app/input.h"

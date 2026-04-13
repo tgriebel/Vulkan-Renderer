@@ -28,13 +28,13 @@
 
 #include "camera.h"
 #include <gfxcore/core/common.h>
-#include <gfxcore/core/assetLib.h>
 #include <gfxcore/math/vector.h>
 #include <gfxcore/image/color.h>
 #include "../asset_types/texture.h"
 #include "../asset_types/material.h"
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/model.h"
+#include "../asset_types/assetLib.h"
 #include "entity.h"
 #include "assetManager.h"
 

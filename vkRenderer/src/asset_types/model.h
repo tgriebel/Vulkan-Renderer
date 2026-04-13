@@ -25,11 +25,11 @@
 
 #include <cinttypes>
 #include <vector>
-#include <gfxcore/acceleration/aabb.h>
-#include <gfxcore/primitives/geom.h>
-#include <gfxcore/core/handle.h>
-#include <gfxcore/core/asset.h>
+#include <GfxCore/acceleration/aabb.h>
+#include <GfxCore/primitives/geom.h>
+#include <SysCore/handle.h>
 
+#include "asset.h"
 #include "../io/io.h"
 
 class Surface {

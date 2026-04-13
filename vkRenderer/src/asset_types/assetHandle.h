@@ -23,55 +23,57 @@
 
 #pragma once
 
-#include "common.h"
+#include "asset.h"
+#include "assetLib.h"
+#include <GfxCore/core/handle.h>
 
-#include "../asset_types/asset.h"
-#include "../asset_types/model.h"
+template< class AssetType >
+class Asset;
 
-class SkyBoxLoader : public LoadHandler<Model>
+template< class AssetType >
+class AssetHandle
 {
 private:
-	bool Load( Asset<Model>& model );
+	AssetLib<AssetType>*	lib;
+	hdl_t					handle
 public:
-};
-
-
-class TerrainLoader : public LoadHandler<Model>
-{
-private:
-	int width;
-	int height;
-	float cellSize;
-	float uvScale;
-	hdl_t handle;
-	bool Load( Asset<Model>& model );
-public:
-	TerrainLoader( const int _width, const int _height, const float _cellSize, const float _uvScale, const hdl_t _handle )
+	static AssetHandle<AssetType> Invalid()
 	{
-		width = _width;
-		height= _height;
-		cellSize = _cellSize;
-		handle = _handle;
-		uvScale = _uvScale;
+		return AssetHandle<AssetType>();
+	}
+
+	AssetHandle()
+	{
+		lib = nullptr;
+		handle = INVALID_HDL;
+	}
+
+	AssetHandle( hdl_t _handle, AssetLib<AssetType>& _lib ) : handle( _handle ), lib( &lib )
+	{}
+
+	AssetHandle( const AssetHandle<AssetType>& asset )
+	{
+		lib = asset.lib;
+		handle = asset.handle;
+	}
+
+	AssetHandle<AssetType>& operator=( const AssetHandle<AssetType>& rhs )
+	{
+		if ( this != &rhs )
+		{
+			lib = rhs.lib;
+			handle = rhs.handle;
+		}
+		return *this;
+	}
+
+	hdl_t GetHandle() const
+	{
+		return handle;
+	}
+
+	Asset<AssetType>* Resolve()
+	{
+		return ( lib != nullptr ) ? lib.Find( handle ) : nullptr;
 	}
 };
-
-
-class WaterLoader : public LoadHandler<Model>
-{
-private:
-	bool Load( Asset<Model>& model );
-public:
-};
-
-
-class QuadLoader : public LoadHandler<Model>
-{
-private:
-	bool Load( Asset<Model>& model );
-public:
-};
-
-mat4x4f MatrixFromVector( const vec3f& v );
-void MatrixToEulerZYX( const mat4x4f& m, float& a, float& b, float& c );
-void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size );

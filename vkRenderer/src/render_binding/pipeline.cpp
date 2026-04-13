@@ -29,8 +29,8 @@
 #include "../render_state/rhi.h"
 #include "../render_binding/bindings.h"
 #include "shaderBinding.h"
-#include <gfxcore/core/assetLib.h>
 #include "../scene/sceneBase.h"
+#include "../asset_types/assetLib.h"
 
 static std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 

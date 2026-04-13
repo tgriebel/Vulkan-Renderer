@@ -24,7 +24,8 @@
 #pragma once
 
 #include <cstdint>
-#include <gfxcore/core/asset.h>
+
+#include "asset.h"
 
 class GpuImage;
 

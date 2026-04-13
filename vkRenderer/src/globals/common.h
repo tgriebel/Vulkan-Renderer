@@ -56,15 +56,15 @@
 #include <math.h>
 #include <atomic>
 
-#include <gfxcore/math/vector.h>
-#include <gfxcore/core/handle.h>
-#include <gfxcore/image/color.h>
-#include <gfxcore/primitives/geom.h>
-#include <gfxcore/acceleration/aabb.h>
+#include <GfxCore/math/vector.h>
+#include <GfxCore/image/color.h>
+#include <GfxCore/primitives/geom.h>
+#include <GfxCore/acceleration/aabb.h>
 
-#include <syscore/common.h>
-#include <sysCore/array.h>
-#include <syscore/timer.h>
+#include <SysCore/handle.h>
+#include <SysCore/common.h>
+#include <SysCore/array.h>
+#include <SysCore/timer.h>
 
 #include "../asset_types/material.h"
 #include "../scene/camera.h"

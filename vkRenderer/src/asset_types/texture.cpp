@@ -25,12 +25,12 @@
 #include <syscore/systemUtils.h>
 #include <syscore/serializer.h>
 #include <syscore/common.h>
-#include <gfxcore/core/assetLib.h>
 #include <gfxcore/io/serializeClasses.h>
 
 #include "../scene/assetBaker.h"
 #include "../io/serializeClasses.h"
 #include "../io/io.h"
+#include "../asset_types/assetLib.h"
 
 
 void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_t byteCount )

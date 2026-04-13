@@ -11,8 +11,9 @@
 #include "../asset_types/material.h"
 #include "../asset_types/texture.h"
 #include "../asset_types/gpuProgram.h"
-#include <gfxcore/core/assetLib.h>
 #include <gfxcore/io/serializeClasses.h>
+
+#include "../asset_types/assetLib.h"
 
 static std::vector<bakedAssetInfo_t> assetInfo;
 static Serializer* s;
