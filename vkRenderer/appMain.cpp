@@ -38,7 +38,7 @@
 #include <SysCore/systemUtils.h>
 #include "src/scene/assetBaker.h"
 #include <gfxcore/io/serializeClasses.h>
-#include "raytracerInterface.h"
+#include "src/app/raytracerInterface.h"
 #include "src/app/cvar.h"
 
 #include "scenes/chessScene.h"

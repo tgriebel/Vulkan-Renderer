@@ -253,8 +253,6 @@
     <ClInclude Include="src\render_tasks\imageProcessTask.h" />
     <ClInclude Include="src\render_tasks\imguiTask.h" />
     <ClInclude Include="src\render_tasks\RenderTask.h" />
-    <ClInclude Include="debug.h" />
-    <ClInclude Include="GeoBuilder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -331,7 +329,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="vulkinTestApp.cpp" />
+    <ClCompile Include="appMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\external\GfxCore\GfxCore.vcxproj">

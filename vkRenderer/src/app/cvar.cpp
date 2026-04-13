@@ -1,5 +1,7 @@
 #include "cvar.h"
 
+#include <vector>
+
 static std::vector<CVar*> cvarMap;
 
 void CVar::Init( const char* _name, CVar::Type _type )

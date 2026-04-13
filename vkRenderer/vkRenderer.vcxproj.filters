@@ -164,13 +164,9 @@
     <ClCompile Include="src\app\window.cpp">
       <Filter>app</Filter>
     </ClCompile>
-    <ClCompile Include="vulkinTestApp.cpp">
-      <Filter>app</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_binding\imageSampler.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\asset_types\texture.cpp" />
     <ClCompile Include="src\io\serializeClasses.cpp">
       <Filter>IO</Filter>
     </ClCompile>
@@ -201,10 +197,14 @@
     <ClCompile Include="src\asset_types\model.cpp">
       <Filter>Asset Classes</Filter>
     </ClCompile>
+    <ClCompile Include="src\asset_types\texture.cpp">
+      <Filter>Asset Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="appMain.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="debug.h" />
-    <ClInclude Include="GeoBuilder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="scenes\chessScene.h">
@@ -378,7 +378,6 @@
     <ClInclude Include="src\render_binding\imageSampler.h">
       <Filter>Binding</Filter>
     </ClInclude>
-    <ClInclude Include="src\asset_types\texture.h" />
     <ClInclude Include="src\io\serializeClasses.h">
       <Filter>IO</Filter>
     </ClInclude>
@@ -416,6 +415,9 @@
       <Filter>Asset Classes</Filter>
     </ClInclude>
     <ClInclude Include="src\asset_types\model.h">
+      <Filter>Asset Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\texture.h">
       <Filter>Asset Classes</Filter>
     </ClInclude>
   </ItemGroup>

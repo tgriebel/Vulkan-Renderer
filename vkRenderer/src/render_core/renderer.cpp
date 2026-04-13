@@ -28,12 +28,9 @@
 #include <map>
 #include <sstream>
 
-#include "../scene/sceneBase.h"
-#include "../scene/entity.h"
 #include <gfxcore/core/assetLib.h>
 #include <gfxcore/primitives/geom.h>
-#include "../asset_types/texture.h"
-#include "../asset_types/gpuProgram.h"
+#include <gfxcore/primitives/geoBuilder.h>
 #include <gfxcore/math/vector.h>
 
 #include "debugMenu.h"
@@ -51,7 +48,11 @@
 #include "../globals/render_util.h"
 #include "../globals/assetDefs.h"
 
-#include "../../GeoBuilder.h"
+#include "../scene/sceneBase.h"
+#include "../scene/entity.h"
+#include "../asset_types/texture.h"
+#include "../asset_types/gpuProgram.h"
+
 #include "../app/window.h"
 #include "../app/input.h"
 #include "../io/io.h"
