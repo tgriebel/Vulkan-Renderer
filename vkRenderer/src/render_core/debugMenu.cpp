@@ -1,4 +1,3 @@
-
 #include "../globals/common.h"
 #include "gpuImage.h"
 #include "debugMenu.h"
