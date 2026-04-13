@@ -45,7 +45,7 @@ PS_Output PSMain( PS_Input input )
     const float perceptualRoughness = saturate( globals.generic.x * roughnessTex.r + globals.generic.y );
 
     const float blendFactor = 1.0f;
-    const float3 normal = mul( lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalTex ), blendFactor ), float3x3( input.tangent, input.bitangent, input.TBN2 ) );
+	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalTex.x * input.tangent + normalTex.y * input.bitangent + normalTex.z * input.TBN2 ), blendFactor );
 
     const float3 V = normalize( cameraOrigin.xyz - input.worldPosition.xyz );
     const float3 N = normalize( normal ); // normalize( input.worldPosition.xyz - modelOrigin );
@@ -164,7 +164,8 @@ PS_Output PSMain( PS_Input input )
 //  outColor.rgb += float3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
 //  outColor.rgb = envColor.rgb;
 //  outColor.rgb = 0.5f * N + float3( 0.5f, 0.5f, 0.5f );
-//  outColor.rg = input.uv0.rb;
+//	outColor.rgba = float4( input.uv0.xy, 0.0f, 1.0f );
+//	outColor.rgba = float4( albedoTex.rgb, 1.0f);
 
 #ifdef USE_MRT
     float4 outColor1;

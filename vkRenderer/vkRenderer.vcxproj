@@ -210,6 +210,7 @@
     <ClInclude Include="src\scene\assetManager.h" />
     <ClInclude Include="src\scene\camera.h" />
     <ClInclude Include="src\scene\entity.h" />
+    <ClInclude Include="src\scene\mtInterface.h" />
     <ClInclude Include="src\scene\sceneBase.h" />
     <ClInclude Include="src\app\cvar.h" />
     <ClInclude Include="src\app\input.h" />

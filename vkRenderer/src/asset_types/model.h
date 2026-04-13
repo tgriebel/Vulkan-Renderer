@@ -9,7 +9,8 @@
 #include "asset.h"
 #include "../io/io.h"
 
-class Surface {
+class Surface
+{
 public:
 	hdl_t						materialHdl;
 	std::vector<vertex_t>		vertices;

@@ -429,6 +429,9 @@
     <ClInclude Include="src\asset_types\assetLib.h">
       <Filter>Asset Classes</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\mtInterface.h">
+      <Filter>Baker</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

@@ -29,13 +29,20 @@
 #include "../../external/stb_image_write.h"
 #pragma warning(pop)
 
+#define USE_MIKKT
+
+#ifdef USE_MIKKT
+#include "../scene/mtInterface.h"
+#endif
+
 
 bool LoadImage( const char* texturePath, const bool isLinearColor, Image& texture )
 {
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load( texturePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha );
 
-	if( !pixels ) {
+	if( !pixels )
+	{
 		stbi_image_free( pixels );
 		return false;
 	}
@@ -57,7 +64,8 @@ bool LoadImageHDR( const char* texturePath, Image& texture )
 	int texWidth, texHeight, texChannels;
 	float* elements = stbi_loadf( texturePath, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha );
 
-	if( !elements ) {
+	if( !elements )
+	{
 		stbi_image_free( elements );
 		return false;
 	}
@@ -97,8 +105,10 @@ bool LoadCubeMapImage( const char* textureBasePath, const char* ext, Image& text
 
 	int sizeBytes = 0;
 	Image textures2D[ 6 ];
-	for( int i = 0; i < 6; ++i ) {
-		if( LoadImage( paths[ i ].c_str(), false, textures2D[ i ] ) == false ) {
+	for( int i = 0; i < 6; ++i )
+	{
+		if( LoadImage( paths[ i ].c_str(), false, textures2D[ i ] ) == false )
+		{
 			sizeBytes = 0;
 			break;
 		}
@@ -107,8 +117,10 @@ bool LoadCubeMapImage( const char* textureBasePath, const char* ext, Image& text
 		sizeBytes += textures2D[ i ].cpuImage->GetByteCount();
 	}
 
-	if( sizeBytes == 0 ) {
-		for( int i = 0; i < 6; ++i ) {
+	if( sizeBytes == 0 )
+	{
+		for( int i = 0; i < 6; ++i )
+		{
 			delete textures2D[ i ].cpuImage;
 			textures2D[ i ].cpuImage = nullptr;
 		}
@@ -122,14 +134,17 @@ bool LoadCubeMapImage( const char* textureBasePath, const char* ext, Image& text
 	uint8_t* bytes = new uint8_t[ sizeBytes ];
 
 	int byteOffset = 0;
-	for( int i = 0; i < 6; ++i ) {
+	for( int i = 0; i < 6; ++i )
+	{
 		if( ( texWidth != textures2D[ i ].info.width ) ||
 			( texHeight != textures2D[ i ].info.height ) ||
-			( texChannels != textures2D[ i ].info.channels ) ) {
+			( texChannels != textures2D[ i ].info.channels ) )
+		{
 			if( bytes != nullptr ) {
 				delete[] bytes;
 			}
-			for( int j = 0; j < 6; ++j ) {
+			for( int j = 0; j < 6; ++j )
+			{
 				delete textures2D[ i ].cpuImage;
 				textures2D[ i ].cpuImage = nullptr;
 			}
@@ -160,19 +175,23 @@ bool WriteImage( const char* path, const Image& image )
 	std::string ext;
 	SplitFileName( path, fileName, ext );
 
-	if( ext == "png" ) {
+	if( ext == "png" )
+	{
 		const int ret = stbi_write_png( path, image.info.width, image.info.height, image.info.channels, image.cpuImage->Ptr(), image.info.width * image.cpuImage->GetBpp() );
 		return ret == 1;
 	}
-	else if( ext == "jpg" ) {
+	else if( ext == "jpg" )
+	{
 		const int ret = stbi_write_jpg( path, image.info.width, image.info.height, image.info.channels, image.cpuImage->Ptr(), 100 );
 		return ret == 1;
 	}
-	else if( ext == "bmp" ) {
+	else if( ext == "bmp" )
+	{
 		const int ret = stbi_write_bmp( path, image.info.width, image.info.height, image.info.channels, image.cpuImage->Ptr() );
 		return ret == 1;
 	}
-	else if( ext == "hdr" ) {
+	else if( ext == "hdr" )
+{
 		const int ret = stbi_write_hdr( path, image.info.width, image.info.height, image.info.channels, ( float* )image.cpuImage->Ptr() );
 		return ret == 1;
 	}
@@ -191,7 +210,8 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		throw std::runtime_error( warn + err );
 	}
 
-	for( const auto& material : materials ) {
+	for( const auto& material : materials )
+	{
 		const bool isPbr = material.roughness || material.metallic || !material.roughness_texname.empty() || !material.metallic_texname.empty();
 
 		struct loadInfo_t
@@ -202,20 +222,23 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 
 		std::vector<loadInfo_t> supportedTextures;
 
-		if( isPbr ) {
+		if( isPbr )
+		{
 			supportedTextures.push_back( loadInfo_t { material.diffuse_texname, false } );
 			supportedTextures.push_back( loadInfo_t { material.normal_texname, true } );
 			supportedTextures.push_back( loadInfo_t { material.roughness_texname, true } );
 			supportedTextures.push_back( loadInfo_t { material.metallic_texname, true } );
 		}
-		else {
+		else
+		{
 			supportedTextures.push_back( loadInfo_t { material.diffuse_texname, false } );
 			supportedTextures.push_back( loadInfo_t { material.bump_texname, true } );
 			supportedTextures.push_back( loadInfo_t { material.specular_texname, true } );
 		}
 
 		const uint32_t textureCount = static_cast< uint32_t >( supportedTextures.size() );
-		for( uint32_t i = 0; i < textureCount; ++i ) {
+		for( uint32_t i = 0; i < textureCount; ++i )
+		{
 			const std::string& name = supportedTextures[ i ].name;
 			if( name.length() == 0 ) {
 				continue;
@@ -224,18 +247,21 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		}
 
 		Material mat;
-		if( material.dissolve == 1.0f ) {
+		if( material.dissolve == 1.0f )
+		{
 			mat.AddShader( DRAWPASS_SHADOW, AssetLib<GpuProgram>::Handle( "Shadow" ) );
 			mat.AddShader( DRAWPASS_DEPTH, AssetLib<GpuProgram>::Handle( "LitDepth" ) );
 			mat.AddShader( DRAWPASS_OPAQUE, AssetLib<GpuProgram>::Handle( "LitOpaque" ) );
 		}
-		else {
+		else
+		{
 			mat.AddShader( DRAWPASS_TRANS, AssetLib<GpuProgram>::Handle( "LitTrans" ) );
 		}
 		mat.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLib<GpuProgram>::Handle( "Debug" ) );
 		mat.AddShader( DRAWPASS_DEBUG_3D, AssetLib<GpuProgram>::Handle( "DebugSolid" ) );
 
-		if( isPbr ) {
+		if( isPbr )
+		{
 			mat.usage = materialUsage_t::MATERIAL_USAGE_GGX;
 
 			mat.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
@@ -243,7 +269,8 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 			mat.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
 			mat.AddTexture( GGX_METALLIC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 3 ].name.c_str() ) );
 		}
-		else {
+		else
+		{
 			// FIXME: Keep this as PBR for now as materials need to be updated
 			// mat.usage = materialUsage_t::MATERIAL_USAGE_BLINN_PHONG;
 			mat.usage = materialUsage_t::MATERIAL_USAGE_GGX;
@@ -270,7 +297,8 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 	//model.surfs[ 0 ].vertices.reserve( attrib.vertices.size() );
 	model.surfCount = 0;
 	model.surfs.resize( shapes.size() );
-	for( const auto& shape : shapes ) {
+	for( const auto& shape : shapes )
+	{
 		bool hasUv = true;
 
 		std::unordered_map<vertex_t, uint32_t> uniqueVertices {};
@@ -307,7 +335,8 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 			vertex.color[ 2 ] = attrib.colors[ 3 * index.vertex_index + 2 ];
 			vertex.color[ 3 ] = 1.0f;
 
-			if( uniqueVertices.count( vertex ) == 0 ) {
+			if( uniqueVertices.count( vertex ) == 0 )
+			{
 				model.surfs[ model.surfCount ].vertices.push_back( vertex );
 				uniqueVertices[ vertex ] = static_cast< uint32_t >( model.surfs[ model.surfCount ].vertices.size() - 1 );
 			}
@@ -320,8 +349,14 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		const int indexCount = static_cast< int >( model.surfs[ model.surfCount ].indices.size() );
 		assert( ( indexCount % 3 ) == 0 );
 
+#ifdef USE_MIKKT
+		Surface& surface = model.surfs[ model.surfCount ];
+
+		GenerateMikkTangents( surface.vertices, surface.indices );
+#else
 		// Eric Lengyel "Computing Tangent Basis Vectors for an Arbitrary Mesh"
-		for( int i = 0; i < indexCount; i += 3 ) {
+		for( int i = 0; i < indexCount; i += 3 )
+		{
 			int indices[ 3 ];
 			float weights[ 3 ];
 			indices[ 0 ] = model.surfs[ model.surfCount ].indices[ i + 0 ];
@@ -350,17 +385,20 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 			vec2f uvEdgeDt0;
 			vec2f uvEdgeDt1;
 
-			if( hasUv ) {
+			if( hasUv )
+			{
 				uvEdgeDt0 = ( v1.uv - v0.uv );
 				uvEdgeDt1 = ( v2.uv - v0.uv );
 			}
-			else {
+			else
+			{
 				uvEdgeDt0 = vec2f( 1.0f, 0.0f );
 				uvEdgeDt1 = vec2f( 0.0f, 1.0f );
 			}
 
 			const float denom = ( uvEdgeDt0[ 0 ] * uvEdgeDt1[ 1 ] - uvEdgeDt1[ 0 ] * uvEdgeDt0[ 1 ] ) + 0.00001f;
-			if( denom != 0.0f ) {
+			if( denom != 0.0f )
+			{
 				const float r = 1.0f / denom;
 				faceTangent = ( edge0 * uvEdgeDt1[ 1 ] - edge1 * uvEdgeDt0[ 1 ] ) * r;
 				faceBitangent = ( edge1 * uvEdgeDt0[ 0 ] - edge0 * uvEdgeDt1[ 0 ] ) * r;
@@ -377,7 +415,8 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		}
 
 		const int vertexCount = static_cast< int >( model.surfs[ model.surfCount ].vertices.size() );
-		for( int i = 0; i < vertexCount; ++i ) {
+		for( int i = 0; i < vertexCount; ++i )
+		{
 			vertex_t& v = model.surfs[ model.surfCount ].vertices[ i ];
 			FlushDenorms( v.tangent );
 			FlushDenorms( v.bitangent );
@@ -414,9 +453,11 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 			mat3x3f tsMatrix = mat3x3f( tsValues );
 			//assert( tsMatrix.IsOrthonormal( 0.01f ) );
 		}
+#endif
 
 		model.surfs[ model.surfCount ].materialHdl = INVALID_HDL;
-		if( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) ) {
+		if( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) )
+		{
 			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
 			const hdl_t materialHdl = AssetLib<Material>::Handle( materials[ shapeMaterial ].name.c_str() );
 			if( materialHdl.IsValid() ) {

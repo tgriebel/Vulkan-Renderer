@@ -21,12 +21,14 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	// Tangent-space matrix
 	{
 		const float normalSign = ( asuint( input.inTangent.x ) & 0x1 ) > 0 ? -1.0f : 1.0f;
-		float3 T = normalize( float3( asfloat( asuint( input.inTangent.x ) & ~0x1 ), input.inTangent.yz ) );
-		float3 N = normalize( normalSign * cross( input.inTangent, input.inBitangent ) );
-		float3 B = normalize( input.inBitangent );
+		float3 T = float3( asfloat( asuint( input.inTangent.x ) & ~0x1 ), input.inTangent.yz );
+		float3 N = input.inNormal;
+		float3 B = normalSign * cross( N, T );
+		
 		T = mul( modelMatrix, float4( T, 0.0f ) ).xyz;
 		N = mul( modelMatrix, float4( N, 0.0f ) ).xyz;
 		B = mul( modelMatrix, float4( B, 0.0f ) ).xyz;
+		
 		output.tangent = T;
 		output.bitangent = B;
 		output.TBN2 = N;
