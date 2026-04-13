@@ -46,10 +46,6 @@
 #define BIND_SET( S, N )    [[vk::binding( N, S )]]
 #define BIND_INLINE         [[vk::push_constant]]
 
-// GLSL mat4[col] returns a column. HLSL mat[row] returns a row.
-// These extract columns from a float4x4, matching GLSL mat[col] semantics.
-float3 MatCol3( float4x4 m, int c ) { return float3( m[0][c], m[1][c], m[2][c] ); }
-float4 MatCol4( float4x4 m, int c ) { return float4( m[0][c], m[1][c], m[2][c], m[3][c] ); }
 
 int2 GetTextureSize( Texture2D tex, int mipLevel )
 {

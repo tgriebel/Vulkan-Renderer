@@ -619,7 +619,7 @@ void Renderer::UpdateBuffers()
 		globals.toneMapTint = vec4f( g_imguiControls.toneMapColor[ 0 ], g_imguiControls.toneMapColor[ 1 ], g_imguiControls.toneMapColor[ 2 ], g_imguiControls.toneMapColor[ 3 ] );
 		globals.bloom = vec4f( g_imguiControls.bloomEnable, g_imguiControls.bloomBlendWeight, 0.0f, 0.0f );
 		globals.exposure = vec4f( g_imguiControls.exposureMidGray, g_imguiControls.exposureAdaptation, g_imguiControls.exposureWhitePoint, g_imguiControls.exposureDarkLimit );
-		globals.exposure2 = vec4f( g_imguiControls.autoExposureEnable ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
+		globals.exposure2 = vec4f( ( g_imguiControls.autoExposureEnable && config.autoExposure ) ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.dof = vec4f( g_imguiControls.dofEnable ? 1.0f : 0.0f, g_imguiControls.dofFocalDepth, g_imguiControls.dofFocalRange, 0.0f );
 #endif
