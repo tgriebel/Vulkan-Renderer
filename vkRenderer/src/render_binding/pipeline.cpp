@@ -30,7 +30,7 @@
 #include "../render_binding/bindings.h"
 #include "shaderBinding.h"
 #include <gfxcore/core/assetLib.h>
-#include <gfxcore/scene/scene.h>
+#include "../scene/scene.h"
 
 static std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 

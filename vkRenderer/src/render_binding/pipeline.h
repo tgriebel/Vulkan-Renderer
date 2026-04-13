@@ -23,9 +23,10 @@
 
 #pragma once
 
-#include <gfxcore/asset_types/texture.h>
+#include "../asset_types/texture.h"
 #include "../globals/common.h"
 #include "../render_state/rhi.h"
+#include "../asset_types/gpuProgram.h"
 
 class RenderContext;
 

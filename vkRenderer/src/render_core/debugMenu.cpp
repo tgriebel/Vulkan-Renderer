@@ -3,7 +3,7 @@
 #include "gpuImage.h"
 #include "debugMenu.h"
 #include "../globals/assetDefs.h"
-#include <gfxcore/scene/scene.h>
+#include "../scene/scene.h"
 #include <sstream>
 
 renderDebugData_t g_renderDebugData;

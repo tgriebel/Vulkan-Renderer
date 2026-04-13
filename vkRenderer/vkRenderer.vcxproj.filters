@@ -164,9 +164,6 @@
     <ClCompile Include="src\render_binding\imageArray.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\app\scene.cpp">
-      <Filter>app</Filter>
-    </ClCompile>
     <ClCompile Include="src\app\window.cpp">
       <Filter>app</Filter>
     </ClCompile>
@@ -175,6 +172,20 @@
     </ClCompile>
     <ClCompile Include="src\render_binding\imageSampler.cpp">
       <Filter>Binding</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asset_types\gpuProgram.cpp" />
+    <ClCompile Include="src\asset_types\material.cpp" />
+    <ClCompile Include="src\asset_types\model.cpp" />
+    <ClCompile Include="src\asset_types\texture.cpp" />
+    <ClCompile Include="src\scene\assetBaker.cpp" />
+    <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\scene\entity.cpp" />
+    <ClCompile Include="src\scene\sceneBase.cpp" />
+    <ClCompile Include="src\io\serializeClasses.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\app\appScene.cpp">
+      <Filter>app</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -355,6 +366,27 @@
     </ClInclude>
     <ClInclude Include="src\render_binding\imageSampler.h">
       <Filter>Binding</Filter>
+    </ClInclude>
+    <ClInclude Include="src\asset_types\gpuProgram.h" />
+    <ClInclude Include="src\asset_types\material.h" />
+    <ClInclude Include="src\asset_types\model.h" />
+    <ClInclude Include="src\asset_types\texture.h" />
+    <ClInclude Include="src\scene\assetBaker.h" />
+    <ClInclude Include="src\scene\assetManager.h" />
+    <ClInclude Include="src\scene\camera.h" />
+    <ClInclude Include="src\scene\entity.h" />
+    <ClInclude Include="src\scene\scene.h" />
+    <ClInclude Include="src\io\serializeClasses.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\stb_image.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\stb_image_write.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\tiny_obj_loader.h">
+      <Filter>external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

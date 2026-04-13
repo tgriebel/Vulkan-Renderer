@@ -1,10 +1,10 @@
 #pragma once
 
 #include <queue>
-#include <GfxCore/asset_types/material.h>
 #include "../render_core/GpuSync.h"
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/imageView.h"
+#include "../asset_types/material.h"
 
 class CommandContext;
 class GfxContext;

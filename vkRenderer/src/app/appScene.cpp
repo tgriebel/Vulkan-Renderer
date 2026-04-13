@@ -2,8 +2,8 @@
 #include <gfxcore/core/util.h>
 #include "io.h"
 #include "window.h"
-#include <gfxcore/scene/entity.h>
-#include <gfxcore/scene/scene.h>
+#include "../scene/entity.h"
+#include "../scene/scene.h"
 #include "../globals/render_util.h"
 
 #if defined( USE_IMGUI )
@@ -514,7 +514,7 @@ void UpdateScene( Scene* scene )
 
 		imguiImageCallbackData_t data;
 		data.progAsset = GpuProgramLib().Find( "Image2D" );
-		data.permSet = shaderPermId_t::NONE;
+		data.permSet = static_cast<uint32_t>( shaderPermId_t::NONE );
 		data.image = image;
 		data.x = pos.x;
 		data.y = pos.y;

@@ -37,8 +37,6 @@
 #define USE_GLFW
 #define USE_TINYFD
 
-#include <gfxcore/acceleration/aabb.h>
-
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
@@ -61,13 +59,15 @@
 #include <gfxcore/math/vector.h>
 #include <gfxcore/core/handle.h>
 #include <gfxcore/image/color.h>
-#include <gfxcore/asset_types/material.h>
 #include <gfxcore/primitives/geom.h>
-#include <gfxcore/scene/camera.h>
-#include <gfxcore/asset_types/gpuProgram.h>
+#include <gfxcore/acceleration/aabb.h>
+
 #include <syscore/common.h>
 #include <sysCore/array.h>
 #include <syscore/timer.h>
+
+#include "../asset_types/material.h"
+#include "../scene/camera.h"
 
 #ifdef NDEBUG
 const bool EnableValidationLayers = true;
@@ -133,7 +133,11 @@ typedef void ( *debugMenuFuncPtr )( );
 
 class Renderer;
 class Serializer;
+class Image;
+class GpuProgram;
 
+template<class AssetType>
+class Asset;
 
 enum renderFlags_t : uint32_t
 {
@@ -159,7 +163,7 @@ enum class swapBuffering_t : uint8_t
 struct imguiImageCallbackData_t
 {
 	Asset<GpuProgram>*	progAsset;
-	shaderPermId_t		permSet;
+	uint32_t			permSet;
 	const Image*		image;
 	float				x;
 	float				y;

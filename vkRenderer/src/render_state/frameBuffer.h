@@ -28,7 +28,7 @@
 #include "../render_core/gpuImage.h"
 #include "../render_core/renderResource.h"
 #include "rhi.h"
-#include <gfxcore/asset_types/texture.h>
+#include "../asset_types/texture.h"
 #include "../render_binding/imageView.h"
 
 

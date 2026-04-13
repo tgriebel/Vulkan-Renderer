@@ -24,7 +24,7 @@
 #pragma once
 #include "../globals/common.h"
 #include "../render_binding/imageArray.h"
-#include <GfxCore/asset_types/texture.h>
+#include "../asset_types/texture.h"
 
 struct renderConstants_t
 {

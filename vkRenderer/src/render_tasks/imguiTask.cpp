@@ -54,7 +54,7 @@ void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* 
 
 	pipelineObject_t* pipelineObject = nullptr;
 
-	const hdl_t pipeLine = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, callbackData->permSet );
+	const hdl_t pipeLine = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, static_cast<shaderPermId_t>( callbackData->permSet ) );
 
 	vec2f offset = vec2f( callbackData->x, callbackData->y );
 	vec2f size = vec2f( callbackData->width, callbackData->height );

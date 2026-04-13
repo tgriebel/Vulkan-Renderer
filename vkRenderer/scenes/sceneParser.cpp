@@ -29,11 +29,12 @@
 #include "../src/globals/common.h"
 #include "../src/globals/render_util.h"
 #include "../src/render_core/gpuImage.h"
-#include <gfxcore/scene/entity.h>
-#include <gfxcore/scene/scene.h>
-#include <gfxcore/asset_types/gpuProgram.h>
-#include <gfxcore/asset_types/model.h>
-#include <gfxcore/io/io.h>
+#include "../src/scene/entity.h"
+#include "../src/scene/scene.h"
+#include "../src/asset_types/gpuProgram.h"
+#include "../src/asset_types/model.h"
+
+#include "../src/io/io.h"
 
 //#define JSMN_PARENT_LINKS
 #include <SysCore/jsmn.h>
@@ -482,6 +483,8 @@ int ParseModelObject( parseState_t& st, void* object, uint32_t offset )
 	if ( st.tokens[ st.tx ].type != JSMN_OBJECT ) {
 		return -1;
 	}
+
+	using loader_t = Asset<Model>::loadHandlerPtr_t;
 
 	struct modelObjectData_t
 	{

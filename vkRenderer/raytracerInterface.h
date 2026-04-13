@@ -1,7 +1,5 @@
 #pragma once
 
-#include <gfxcore/scene/scene.h>
-#include <gfxcore/scene/entity.h>
 /*
 #include "rt_common.h"
 #include "raytrace.h"

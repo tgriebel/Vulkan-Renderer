@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include <gfxcore/asset_types/texture.h>
+#include "../asset_types/texture.h"
 #include "../globals/common.h"
 #include "../app/window.h"
 #include "../render_state/deviceContext.h"

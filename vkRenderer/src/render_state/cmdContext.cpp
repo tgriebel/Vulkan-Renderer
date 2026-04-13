@@ -20,7 +20,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include <gfxcore/scene/assetManager.h> // FIXME: shouldn't expose this everywhere
+#include "../scene/assetManager.h" // FIXME: shouldn't expose this everywhere
 
 #include "cmdContext.h"
 #include "deviceContext.h"

@@ -1,7 +1,7 @@
 #pragma once
-#include <GfxCore/asset_types/texture.h>
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
+#include "../asset_types/texture.h"
 
 class ImageView : public Image, public RenderResource
 {

@@ -1,6 +1,6 @@
 #include "imageShaderTask.h"
 
-#include <gfxcore/scene/scene.h>
+#include "../scene/scene.h"
 #include "../render_core/renderer.h"
 #include "../render_binding/bindings.h"
 #include "../draw_passes/postPass.h"

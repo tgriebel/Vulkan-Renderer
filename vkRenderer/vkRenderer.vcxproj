@@ -178,7 +178,10 @@
     <ClInclude Include="..\external\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\external\imgui\imstb_textedit.h" />
     <ClInclude Include="..\external\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\external\stb_image.h" />
+    <ClInclude Include="..\external\stb_image_write.h" />
     <ClInclude Include="..\external\tinyfiledialogs\tinyfiledialogs.h" />
+    <ClInclude Include="..\external\tiny_obj_loader.h" />
     <ClInclude Include="scenes\chessScene.h" />
     <ClInclude Include="scenes\nesScene.h" />
     <ClInclude Include="scenes\sceneParser.h" />
@@ -195,6 +198,16 @@
     <FxCompile Include="shaders\util_hlsl.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <ClInclude Include="src\asset_types\gpuProgram.h" />
+    <ClInclude Include="src\asset_types\material.h" />
+    <ClInclude Include="src\asset_types\model.h" />
+    <ClInclude Include="src\asset_types\texture.h" />
+    <ClInclude Include="src\io\serializeClasses.h" />
+    <ClInclude Include="src\scene\assetBaker.h" />
+    <ClInclude Include="src\scene\assetManager.h" />
+    <ClInclude Include="src\scene\camera.h" />
+    <ClInclude Include="src\scene\entity.h" />
+    <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\app\cvar.h" />
     <ClInclude Include="src\app\input.h" />
     <ClInclude Include="src\app\window.h" />
@@ -257,8 +270,17 @@
     <ClCompile Include="scenes\chessScene.cpp" />
     <ClCompile Include="scenes\nesScene.cpp" />
     <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\app\appScene.cpp" />
+    <ClCompile Include="src\asset_types\gpuProgram.cpp" />
+    <ClCompile Include="src\asset_types\material.cpp" />
+    <ClCompile Include="src\asset_types\model.cpp" />
+    <ClCompile Include="src\asset_types\texture.cpp" />
+    <ClCompile Include="src\io\serializeClasses.cpp" />
+    <ClCompile Include="src\scene\assetBaker.cpp" />
+    <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\scene\entity.cpp" />
+    <ClCompile Include="src\scene\sceneBase.cpp" />
     <ClCompile Include="src\app\cvar.cpp" />
-    <ClCompile Include="src\app\scene.cpp" />
     <ClCompile Include="src\app\window.cpp" />
     <ClCompile Include="src\draw_passes\debug2dPass.cpp" />
     <ClCompile Include="src\draw_passes\debug3dPass.cpp" />

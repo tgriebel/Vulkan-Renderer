@@ -22,7 +22,11 @@
 */
 
 #pragma once
+
 #include "common.h"
+
+#include <GfxCore/core/asset.h>
+#include "../asset_types/model.h"
 
 class SkyBoxLoader : public LoadHandler<Model>
 {

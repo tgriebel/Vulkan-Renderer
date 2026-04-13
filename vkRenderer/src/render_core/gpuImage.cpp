@@ -1,8 +1,8 @@
 #include "gpuImage.h"
 
-#include <GfxCore/asset_types/texture.h>
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
+#include "../asset_types/texture.h"
 
 // TODO: move
 #ifdef USE_VULKAN	

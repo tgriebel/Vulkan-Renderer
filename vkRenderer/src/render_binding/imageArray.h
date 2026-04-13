@@ -23,10 +23,10 @@
 * SOFTWARE.
 */
 
-#include <GfxCore/asset_types/texture.h>
 #include <SysCore/bitArray.h>
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
+#include "../asset_types/texture.h"
 
 using BaseImageArray = Array<const Image*, MaxImageDescriptors>;
 

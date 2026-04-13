@@ -29,11 +29,11 @@
 #include "../src/app/input.h"
 #include "Chess.h"
 #include <syscore/timer.h>
-#include <gfxcore/scene/entity.h>
-#include <gfxcore/scene/scene.h>
-#include <gfxcore/asset_types/gpuProgram.h>
-#include <gfxcore/asset_types/model.h>
-#include <gfxcore/io/io.h>
+#include "../src/scene/entity.h"
+#include "../src/scene/scene.h"
+#include "../src/asset_types/gpuProgram.h"
+#include "../src/asset_types/model.h"
+#include "../src/io/io.h"
 #include <algorithm>
 
 class PieceEntity : public Entity {

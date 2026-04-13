@@ -1,6 +1,10 @@
 #pragma once
 
 class Scene;
+class Model;
+
+template<class AssetType>
+class Asset;
 
 struct renderDebugData_t
 {

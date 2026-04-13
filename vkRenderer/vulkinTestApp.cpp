@@ -30,13 +30,13 @@
 #include "src/globals/common.h"
 #include "src/globals/assetDefs.h"
 #include <syscore/systemUtils.h>
-#include <gfxcore/scene/scene.h>
+#include "src/scene/scene.h"
 #include "src/app/window.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
 #include "scenes/sceneParser.h"
 #include <SysCore/systemUtils.h>
-#include <gfxcore/scene/assetBaker.h>
+#include "src/scene/assetBaker.h"
 #include <gfxcore/io/serializeClasses.h>
 #include "raytracerInterface.h"
 #include "src/app/cvar.h"

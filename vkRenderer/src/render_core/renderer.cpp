@@ -28,14 +28,14 @@
 #include <map>
 #include <sstream>
 
-#include <gfxcore/scene/scene.h>
-#include <gfxcore/scene/entity.h>
+#include "../scene/scene.h"
+#include "../scene/entity.h"
 #include <gfxcore/core/assetLib.h>
 #include <gfxcore/primitives/geom.h>
-#include <gfxcore/asset_types/texture.h>
-#include <gfxcore/asset_types/gpuProgram.h>
-#include <gfxcore/scene/scene.h>
-#include <gfxcore/scene/entity.h>
+#include "../asset_types/texture.h"
+#include "../asset_types/gpuProgram.h"
+#include "../scene/scene.h"
+#include "../scene/entity.h"
 #include <gfxcore/math/vector.h>
 
 #include "debugMenu.h"
@@ -57,8 +57,6 @@
 #include "../app/window.h"
 #include "../app/input.h"
 #include "../io/io.h"
-
-#include <gfxcore/io/io.h>
 
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/backends/imgui_impl_vulkan.h"

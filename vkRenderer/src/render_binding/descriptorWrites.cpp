@@ -3,8 +3,8 @@
 #include <numeric>
 #include <map>
 #include <sstream>
-//#include <gfxcore/scene/scene.h>
-//#include <gfxcore/scene/entity.h>
+//#include "../scene/scene.h"
+//#include "../scene/entity.h"
 #include "../globals/renderConstants.h"
 #include "../render_core/renderer.h"
 #include "../render_core/debugMenu.h"

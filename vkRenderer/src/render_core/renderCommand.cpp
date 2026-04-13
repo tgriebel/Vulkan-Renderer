@@ -25,7 +25,7 @@
 #include <iterator>
 #include <map>
 #include "renderer.h"
-#include <gfxcore/scene/entity.h>
+#include "../scene/entity.h"
 
 void Renderer::BeginUploadCommands( UploadContext& uploadContext )
 {
