@@ -191,12 +191,12 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 				if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
 				{
-					info.sampler = context.depthShadowSampler;
+				//	info.sampler = context.depthShadowSampler;
 					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 				}
 				else
 				{
-					info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
+				//	info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
 					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				}
 			}

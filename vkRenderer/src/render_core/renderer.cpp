@@ -561,6 +561,7 @@ void Renderer::UpdateBindSets()
 	globalParms->Bind( BINDING_NAME( bilinearWrapSampler ),			&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_WRAP ]);
 	globalParms->Bind( BINDING_NAME( bilinearClampEdgeSampler ),	&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_CLAMP_EDGE ] );
 	globalParms->Bind( BINDING_NAME( bilinearClampBorderSampler ),	&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_CLAMP_BORDER ] );
+	globalParms->Bind( BINDING_NAME( depthShadowSampler ),			&resources.shadowMapSampler );
 
 	{
 		particleState.parms->Bind( BINDING_NAME( globalsBuffer ),		&resources.globalConstants );

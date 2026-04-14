@@ -59,8 +59,8 @@ const bool		ValidateErrors					= true;
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1024;
 const uint32_t	DescriptorPoolMaxStorageBuffers	= 1024;
 const uint32_t	DescriptorPoolMaxSamplers		= 16;
-const uint32_t	DescriptorPoolMaxImages			= 1024;
-const uint32_t	DescriptorPoolMaxComboImages	= 8192; // Must account for bindless arrays (MaxImageDescriptors) * MaxFrameStates * num bind set instances
+const uint32_t	DescriptorPoolMaxImages			= 4096; // Must account for bindless arrays (MaxImageDescriptors) * MaxFrameStates * num bind set instances
+const uint32_t	DescriptorPoolMaxComboImages	= 0; // Deprecated
 const uint32_t	DescriptorPoolMaxSets			= ( DescriptorPoolMaxUniformBuffers + DescriptorPoolMaxStorageBuffers + \
 													DescriptorPoolMaxImages + DescriptorPoolMaxComboImages + DescriptorPoolMaxSamplers );
 const uint32_t	MaxImageDescriptors				= 128;

@@ -186,16 +186,13 @@ struct PushConstants_t
 #define SAMPLER( S, N, NAME )							BIND_SET( S, N ) SamplerState NAME;
 
 #define SAMPLER_2D_LAYOUT( S, N )                                                                                   \
-                                                        BIND_SET( S, N ) Texture2D texSampler[];                    \
-                                                        BIND_SET( S, N ) SamplerState texSamplerSt;
+                                                        BIND_SET( S, N ) Texture2D texSampler[];
 
 #define SAMPLER_CUBE_LAYOUT( S, N )                                                                                 \
-                                                        BIND_SET( S, N ) TextureCube cubeSamplers[];                \
-                                                        BIND_SET( S, N ) SamplerState cubeSamplersSt;
+                                                        BIND_SET( S, N ) TextureCube cubeSamplers[];
 
 #define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )                                                                          \
-                                                        BIND_SET( S, N ) TEXTYPE codeSamplers[];                    \
-                                                        BIND_SET( S, N ) SamplerState codeSamplersSt;
+                                                        BIND_SET( S, N ) TEXTYPE codeSamplers[];
 
 #define CODE_IMAGE_CUBE_LAYOUT( S, N )                  BIND_SET( S, N ) TextureCube codeCubeSamplers[];
 
@@ -225,7 +222,8 @@ struct PushConstants_t
                                                         MATERIAL_LAYOUT( SET, 4 )									\
                                                         SAMPLER( SET, 5, bilinearSamplerWrap )						\
 														SAMPLER( SET, 6, bilinearSamplerClampEdge )					\
-                                                        SAMPLER( SET, 7, bilinearSamplerClampBorder );
+                                                        SAMPLER( SET, 7, bilinearSamplerClampBorder );				\
+                                                        SAMPLER( SET, 8, depthShadowSampler );
 
 #define VIEW_BINDS( SET )                               MODEL_LAYOUT( SET, 0 )
 

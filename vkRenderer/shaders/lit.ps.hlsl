@@ -138,7 +138,7 @@ PS_Output PSMain( PS_Input input )
 
             if ( length( ndc.xy - float2( 0.5f, 0.5f ) ) < 0.5f )
             {
-                const float shadowMapSample = codeSamplers[ shadowMapTexId ].Sample( bilinearSamplerClampBorder, ndc.xy ).r;
+                const float shadowMapSample = codeSamplers[ shadowMapTexId ].Sample( depthShadowSampler, ndc.xy ).r;
 
                 shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
             } else {
@@ -156,7 +156,7 @@ PS_Output PSMain( PS_Input input )
 
     const float3 R = reflect( -V, N );
     const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[specularIBL] ), MaxReflectionLod );
-    const float3 specIBL = cubeSamplers[specularIBL].SampleLevel( cubeSamplersSt, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
+    const float3 specIBL = cubeSamplers[specularIBL].SampleLevel( bilinearSamplerWrap, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
 
 	const float2 envBRDF = texSampler[brdfLutId].Sample( bilinearSamplerClampEdge, float2(NoV, perceptualRoughness)).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
@@ -165,7 +165,7 @@ PS_Output PSMain( PS_Input input )
     float3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;
 
-    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( cubeSamplersSt, CubeVector( N ) ).rgb;
+    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( bilinearSamplerWrap, CubeVector( N ) ).rgb;
     const float3 diffuse = irradiance * albedoColor;
     const float3 ambient = ( kD * diffuse + specular ) * ao;// * material.Ka.rgb;
 

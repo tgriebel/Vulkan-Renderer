@@ -15,7 +15,7 @@ PS_Output PSMain( PS_Input input )
 
 #ifdef USE_CUBE_SAMPLER
     const float3 viewVector = normalize( input.objectPosition );
-    const float3 skyColor = cubeSamplers[ material.textureId0 ].Sample( cubeSamplersSt, CubeVector( viewVector ) ).rgb;
+    const float3 skyColor = cubeSamplers[ material.textureId0 ].Sample( bilinearSamplerWrap, CubeVector( viewVector ) ).rgb;
     output.outColor.rgb = SrgbToLinear( skyColor );
 #else
     const float xm = abs( input.normal.x );

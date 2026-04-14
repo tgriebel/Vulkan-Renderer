@@ -68,7 +68,7 @@ PS_Output PSMain( PS_Input input )
     const float4 uvColor = float4( input.uv0.xy, 0.0f, 1.0f );
     const float sceneDepth = codeSamplers[ textureId1 ].Load( int3( pixelLocation, 0 ) ).r;
     const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
-    const float4 skyColor = float4( cubeSamplers[ textureId0 ].Sample( cubeSamplersSt, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
+    const float4 skyColor = float4( cubeSamplers[ textureId0 ].Sample( bilinearSamplerWrap, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
     output.outColor.rgb = float3( 0.0f, 0.0f, 0.0f );
     const bool enabled = globals.dof.x != 0.0f;

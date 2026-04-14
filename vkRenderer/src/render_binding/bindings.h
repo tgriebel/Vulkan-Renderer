@@ -38,6 +38,7 @@ BINDING( imageStencil,					IMAGE_2D,			1,						BIND_STATE_ALL_GFX );
 BINDING( bilinearWrapSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 BINDING( bilinearClampEdgeSampler,		IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 BINDING( bilinearClampBorderSampler,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( depthShadowSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 
 
 static const ShaderBinding g_globalBindings[] =
@@ -50,6 +51,7 @@ static const ShaderBinding g_globalBindings[] =
 	BINDING_NAME( bilinearWrapSampler ),
 	BINDING_NAME( bilinearClampEdgeSampler ),
 	BINDING_NAME( bilinearClampBorderSampler ),
+	BINDING_NAME( depthShadowSampler ),
 };
 const uint64_t bindset_global = Hash( "bindset_global" );
 
