@@ -17,9 +17,9 @@ PS_Output PSMain( PS_Input input )
     const uint textureId1 = material.textureId2;
 
     const float maxHeight = globals.generic.x;
-    const float4 blendValue = maxHeight * texSampler[ blendId ].Sample( texSamplerSt, input.uv0.xy );
-    const float4 texColor0 = SrgbToLinear( texSampler[ textureId0 ].Sample( texSamplerSt, input.uv0.xy ) );
-    const float4 texColor1 = SrgbToLinear( texSampler[ textureId1 ].Sample( texSamplerSt, input.uv0.xy ) );
+    const float4 blendValue = maxHeight * texSampler[ blendId ].Sample( bilinearSamplerWrap, input.uv0.xy );
+    const float4 texColor0 = SrgbToLinear( texSampler[ textureId0 ].Sample( bilinearSamplerWrap, input.uv0.xy ) );
+    const float4 texColor1 = SrgbToLinear( texSampler[ textureId1 ].Sample( bilinearSamplerWrap, input.uv0.xy ) );
     const float4 texColor = lerp( texColor1, texColor0, smoothstep( 0.0f, 0.4f, blendValue ) );
     output.outColor = AMBIENT * texColor;
 

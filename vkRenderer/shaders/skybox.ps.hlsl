@@ -32,7 +32,7 @@ PS_Output PSMain( PS_Input input )
     } else if( majorAxis == zm ) {
         textureId = ( sign( input.normal.z ) > 0.0f ) ? material.textureId2 : material.textureId3;
     }
-	output.outColor = SrgbToLinear( texSampler[ textureId ].Sample( texSamplerSt, input.uv0.xy ) );
+	output.outColor = SrgbToLinear( texSampler[ textureId ].Sample( bilinearSamplerWrap, input.uv0.xy ) );
 #endif
     output.outColor.a = 1.0f;
 	return output;

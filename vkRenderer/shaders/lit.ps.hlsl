@@ -45,19 +45,19 @@ PS_Output PSMain( PS_Input input )
 	float2 uv0 = input.uv0.xy;
 	
 	if ( isTextured && albedoTexId >= 0 ) {
-		albedoSample = SrgbToLinear( texSampler[ albedoTexId ].Sample(texSamplerSt, uv0 ) );
+		albedoSample = SrgbToLinear( texSampler[ albedoTexId ].Sample( bilinearSamplerWrap, uv0 ) );
 	}
 
 	if ( isTextured && normalTexId >= 0 ) {
-		normalSample = 2.0f * texSampler[ normalTexId ].Sample( texSamplerSt, uv0 ).rgb - float3( 1.0f, 1.0f, 1.0f );
+		normalSample = 2.0f * texSampler[ normalTexId ].Sample( bilinearSamplerWrap, uv0 ).rgb - float3( 1.0f, 1.0f, 1.0f );
 	}
 
 	if ( isTextured && roughnessTexId >= 0 ) {
-		roughnessSample = texSampler[ roughnessTexId ].Sample( texSamplerSt, uv0 ).r;
+		roughnessSample = texSampler[ roughnessTexId ].Sample( bilinearSamplerWrap, uv0 ).r;
 	}
 
 	if ( isTextured && metalnessTexId >= 0 ) {
-		metalnessSample = texSampler[ metalnessTexId ].Sample( texSamplerSt, uv0 ).r;
+		metalnessSample = texSampler[ metalnessTexId ].Sample( bilinearSamplerWrap, uv0 ).r;
 	}
 
 	const float perceptualRoughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
@@ -138,7 +138,7 @@ PS_Output PSMain( PS_Input input )
 
             if ( length( ndc.xy - float2( 0.5f, 0.5f ) ) < 0.5f )
             {
-                const float shadowMapSample = codeSamplers[shadowMapTexId].Sample( codeSamplersSt, ndc.xy ).r;
+                const float shadowMapSample = codeSamplers[ shadowMapTexId ].Sample( bilinearSamplerClampBorder, ndc.xy ).r;
 
                 shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
             } else {
@@ -158,8 +158,6 @@ PS_Output PSMain( PS_Input input )
     const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[specularIBL] ), MaxReflectionLod );
     const float3 specIBL = cubeSamplers[specularIBL].SampleLevel( cubeSamplersSt, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
 
-    // FIXME: something with the `envBRDF` broke with the HLSL conversion
-    // `texSamplerSt` is the wrong sampler to use, this needs a clamp sampler
 	const float2 envBRDF = texSampler[brdfLutId].Sample( bilinearSamplerClampEdge, float2(NoV, perceptualRoughness)).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 

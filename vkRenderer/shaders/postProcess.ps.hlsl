@@ -107,7 +107,7 @@ PS_Output PSMain( PS_Input input )
     if( globals.exposure2.x == 1.0f )
     {
         const float maxLod = float( GetTextureLevels( codeSamplers[ textureId3 ] ) - 1 );
-        const float luminance = codeSamplers[ textureId3  ].SampleLevel( codeSamplersSt, float2( 0.5f, 0.5f ), maxLod ).r;
+        const float luminance = codeSamplers[ textureId3  ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), maxLod ).r;
 
         const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 
