@@ -147,7 +147,8 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 			if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer[ bufferId ].alloc ) ) {
 				vkBindBufferMemory( context.device, m_buffer[ bufferId ].buffer, bufferMemory.GetVkObject(), m_buffer[ bufferId ].alloc.GetOffset() );
 			} else {
-				throw std::runtime_error( "Buffer could not allocate!" );
+				throw std::runtime_error( "Buffer '" + std::string( name ) + "' [" + std::to_string( bufferId ) + "] could not allocate "
+				+ std::to_string( memRequirements.size ) + " bytes (alignment: " + std::to_string( memRequirements.alignment ) + ")" );
 			}
 
 			vk_SetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_OBJECT_TYPE_BUFFER, vk_BuildObjectName( "Buffer", name, bufferId ).c_str() );
