@@ -210,6 +210,7 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		throw std::runtime_error( warn + err );
 	}
 
+	// Add Materials
 	for( const auto& material : materials )
 	{
 		const bool isPbr = material.roughness || material.metallic || !material.roughness_texname.empty() || !material.metallic_texname.empty();
@@ -291,6 +292,17 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		parms.Ns = material.shininess;
 		parms.Tr = 1.0f - material.dissolve;
 		parms.illum = static_cast< float >( material.illum );
+
+		if( isPbr )
+		{
+			parms.roughness = material.roughness;
+			parms.metalness = material.metallic;
+			parms.sheen = material.sheen;
+			parms.clearcoatThickness = material.clearcoat_thickness;
+			parms.clearcoatRoughness = material.clearcoat_roughness;
+			parms.anisotropy = material.anisotropy;
+			parms.anisotropyRotation = material.anisotropy_rotation;
+		}
 
 		assets.GetLib<Material>()->Add( material.name.c_str(), mat );
 	}
@@ -461,6 +473,11 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		if( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) )
 		{
 			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
+			if( shapeMaterial == -1 )
+			{
+				model.surfs[ model.surfCount ].materialHdl = assets.GetLib<Material>()->GetDefault()->Handle();
+				continue;
+			}
 			const hdl_t materialHdl = AssetLib<Material>::Handle( materials[ shapeMaterial ].name.c_str() );
 			if( materialHdl.IsValid() ) {
 				model.surfs[ model.surfCount ].materialHdl = materialHdl;

@@ -221,7 +221,7 @@ int main( int argc, char* argv[] )
 				loader->SetTexturePath( dir );
 				loader->SetModelName( file );
 				loader->SetAssetRef( &g_assets );
-				ModelLib().AddDeferred( modelName.c_str(), loader_t( loader ) );
+				ModelLib().AddDeferred( file.c_str(), loader_t( loader ) );
 
 				g_assets.RunLoadLoop();
 				Entity* ent = new Entity();
