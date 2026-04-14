@@ -82,7 +82,7 @@ PS_Output PSMain( PS_Input input )
 		const float logLuminance = ReinhardWeightedAverage( s0, s1, s2, s3 );
 		const float luminance = exp( logLuminance );
 
-		const float previousLuminance = codeSamplers[ 2 ].SampleLevel( codeSamplersSt, float2( 0.5f, 0.5f ), 0 ).r; // 1x1 texture
+		const float previousLuminance = codeSamplers[ 2 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), 0 ).r; // 1x1 texture
 		const float dtSec = globals.time.w / 1000.0f;
 		const float adaptationRate = globals.exposure.y;
 		const float weight = 1.0f - exp( -dtSec * adaptationRate );

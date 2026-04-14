@@ -80,9 +80,9 @@ PS_Output PSMain( PS_Input input )
 
     float3 hdrColor;
     if ( enabled && ( coc < 0.0f ) ) {
-        hdrColor.rgb = codeSamplers[ textureId2 ].SampleLevel( codeSamplersSt, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
+        hdrColor.rgb = codeSamplers[ textureId2 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
     } else {
-        hdrColor.rgb = codeSamplers[ textureId0 ].Sample( codeSamplersSt, input.uv0.xy ).rgb;
+        hdrColor.rgb = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
     }
 
     const float3 tint = globals.toneMapTint.rgb;
@@ -91,7 +91,7 @@ PS_Output PSMain( PS_Input input )
 
     if ( globals.bloom.x > 0.0f )
     {
-        const float3 bloom = codeSamplers[ textureId4 ].SampleLevel( codeSamplersSt, input.uv0.xy, 0 ).rgb;
+        const float3 bloom = codeSamplers[ textureId4 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, 0 ).rgb;
         const float3 bloomHdr = lerp( hdrColor, bloom, globals.bloom.y );
 
         exposureAdjustedColor *= bloomHdr;
