@@ -1037,20 +1037,39 @@ void Renderer::BuildPipelines()
 	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
-		progAsset->CompleteUpload();
-
 		GpuProgram& prog = progAsset->Get();
+
 		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
 		{
-		//	assert( prog.shaderCount == 1 );
+			assert( prog.shaderCount == 1 );
 			DestroyComputePipeline( *progAsset );
 			continue;
 		}
 
-		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
-		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
+		const uint32_t passCount = static_cast< uint32_t >( passes.size() );
+		for( uint32_t passIx = 0; passIx < passCount; ++passIx )
 		{
 			DestroyGraphicsPipeline( passes[ passIx ], *progAsset );
+
+			uint32_t permSet = ( uint32_t )prog.permSet;
+			if( permSet == 0 ) {
+				continue;
+			}
+
+			uint32_t permBit = 0x01;
+
+			while( permSet != 0 )
+			{
+				if( ( permSet & permBit ) == 0 )
+				{
+					permBit <<= 1;
+					continue;
+				}
+				permSet &= ~( permSet & permBit );
+				DestroyGraphicsPipeline( passes[ passIx ], *progAsset, static_cast< shaderPermId_t >( permBit ) );
+
+				permBit <<= 1;
+			}
 		}
 	}
 
@@ -1088,7 +1107,8 @@ void Renderer::BuildPipelines()
 					continue;
 				}
 				permSet &= ~( permSet & permBit );
-				CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset, static_cast<shaderPermId_t>( permBit ) );
+
+				CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset, static_cast< shaderPermId_t >( permBit ) );
 
 				permBit <<= 1;
 			}

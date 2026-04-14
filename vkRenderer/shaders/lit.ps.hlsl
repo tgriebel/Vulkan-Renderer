@@ -178,6 +178,7 @@ PS_Output PSMain( PS_Input input )
     //outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
     //outColor.rg = envBRDF.rg;//float3( NoV );
 
+//	outColor.rgb = float3(1.0f, NoV, NoV);
 //  outColor.rgb = float3( NoV, NoV, NoV );
 //  outColor.rgb += float3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
 //  outColor.rgb = envColor.rgb;

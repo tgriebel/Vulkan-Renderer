@@ -213,7 +213,7 @@ public:
 
 	void Unload() override
 	{
-		m_asset = AssetType{};
+	//	m_asset = AssetType{}; // This isn't safe since assets require complex resource management (i.e. deleting API resources)
 		m_loaded = false;
 	}
 

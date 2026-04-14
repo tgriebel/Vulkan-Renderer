@@ -46,6 +46,48 @@ class DrawPass;
 class ShaderBindSet;
 
 
+// TODO: Use the same resource model as Image, ImageView, GpuBuffer, etc
+// Pipeline should init the actual API object and contain it
+class Pipeline
+{
+private:
+	const char*			m_dbgName = "";
+	pipelineState_t		m_hashState = {};
+	const DrawPass*		m_drawPass = nullptr;
+	const GpuProgram*	m_prog = nullptr;
+	shaderPermId_t		m_permSet = shaderPermId_t::NONE;
+
+public:
+
+	Pipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet = shaderPermId_t::NONE );
+
+	inline const pipelineState_t& GetHashState() const
+	{
+		return m_hashState;
+	}
+
+	inline const DrawPass* GetDrawPass() const
+	{
+		return m_drawPass;
+	}
+
+	inline const GpuProgram* GetGpuProgram() const
+	{
+		return m_prog;
+	}
+
+	inline const shaderPermId_t& GetShaderPerm() const
+	{
+		return m_permSet;
+	}
+
+	inline const char* GetDebugName() const
+	{
+		return m_dbgName;
+	}
+};
+
+
 struct pipelineObject_t
 {
 	pipelineState_t		state;
@@ -74,6 +116,6 @@ hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
 #endif
 hdl_t	CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
-void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog );
+void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 void	CreateComputePipeline( const Asset<GpuProgram>& prog );
 void	DestroyComputePipeline( const Asset<GpuProgram>& prog );

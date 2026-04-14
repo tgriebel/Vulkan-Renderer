@@ -122,6 +122,27 @@ bool GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject )
 }
 
 
+Pipeline::Pipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
+{
+	m_hashState.stateBits = pass->StateBits();
+	m_hashState.samplingRate = pass->SampleRate();
+	m_hashState.progHdl = progAsset.Handle();
+	m_hashState.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
+	m_hashState.permSet = permSet;
+
+	if( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
+		SetFlags( m_hashState.permSet, shaderPermId_t::MRT );
+	}
+	else {
+		ClearFlags( m_hashState.permSet, shaderPermId_t::MRT );
+	}
+
+	m_drawPass = pass;
+	m_prog = &progAsset.Get();
+	m_permSet = permSet;
+}
+
+
 hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	pipelineState_t state = {};
@@ -141,14 +162,21 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 }
 
 
-void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset )
+void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	pipelineState_t state = {};
 	state.stateBits = pass->StateBits();
 	state.samplingRate = pass->SampleRate();
 	state.progHdl = progAsset.Handle();
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
-	//state.permSet = permSet; // FIXME
+	state.permSet = permSet;
+
+	if( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
+		SetFlags( state.permSet, shaderPermId_t::MRT );
+	}
+	else{
+		ClearFlags( state.permSet, shaderPermId_t::MRT );
+	}
 
 	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
 
