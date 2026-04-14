@@ -22,11 +22,11 @@ PS_Output PSMain( PS_Input input )
     const material_t material = materials[ materialId ];
 
     const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
-    const uint albedoTexId = ( isTextured && material.textureId0 >= 0 ) ? material.textureId0 : globals.defaultAlbedoId;
-    const uint normalTexId = ( isTextured && material.textureId1 >= 0 ) ? material.textureId1 : globals.defaultNormalId;
+	const uint albedoTexId = material.textureId0;
+	const uint normalTexId = material.textureId1;
     //const uint normalTexId = globals.defaultNormalId;
-    const uint roughnessTexId = ( isTextured && material.textureId2 >= 0 ) ? material.textureId2 : globals.defaultRoughnessId;
-    const uint metalnessTexId = ( isTextured && material.textureId3 >= 0 ) ? material.textureId3 : globals.defaultMetalId;
+	const uint roughnessTexId = material.textureId2;
+	const uint metalnessTexId = material.textureId3;
 
     const float3 diffuseColor = material.Kd.rgb;
     const float3 specularColor = material.Ks.rgb;
@@ -37,15 +37,33 @@ PS_Output PSMain( PS_Input input )
     const float3 cameraOrigin = view.viewOrigin;
     const float3 modelOrigin = float3( modelMat[0][3], modelMat[1][3], modelMat[2][3] );
 
-    const float4 albedoTex = SrgbToLinear( texSampler[albedoTexId].Sample( texSamplerSt, input.uv0.xy ) );
-    const float3 normalTex = 2.0f * texSampler[normalTexId].Sample( texSamplerSt, input.uv0.xy ).rgb - float3( 1.0f, 1.0f, 1.0f );
-    const float4 roughnessTex = texSampler[roughnessTexId].Sample( texSamplerSt, input.uv0.xy );
-    const float4 metalnessTex = texSampler[metalnessTexId].Sample( texSamplerSt, input.uv0.xy );
+	float4 albedoSample = float4( 1.0f, 1.0f, 1.0f, 1.0f );
+	float3 normalSample = float3( 0.0f, 0.0f, 1.0f );
+	float roughnessSample = material.roughness;
+	float metalnessSample = material.metalness;
 
-	const float perceptualRoughness = saturate( globals.generic.x * material.roughness * roughnessTex.r + globals.generic.y);
+	float2 uv0 = input.uv0.xy;
+	
+	if ( isTextured && albedoTexId >= 0 ) {
+		albedoSample = SrgbToLinear( texSampler[ albedoTexId ].Sample(texSamplerSt, uv0 ) );
+	}
+
+	if ( isTextured && normalTexId >= 0 ) {
+		normalSample = 2.0f * texSampler[ normalTexId ].Sample( texSamplerSt, uv0 ).rgb - float3( 1.0f, 1.0f, 1.0f );
+	}
+
+	if ( isTextured && roughnessTexId >= 0 ) {
+		roughnessSample = texSampler[ roughnessTexId ].Sample( texSamplerSt, uv0 ).r;
+	}
+
+	if ( isTextured && metalnessTexId >= 0 ) {
+		metalnessSample = texSampler[ metalnessTexId ].Sample( texSamplerSt, uv0 ).r;
+	}
+
+	const float perceptualRoughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
 
     const float blendFactor = 1.0f;
-	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalTex.x * input.tangent + normalTex.y * input.bitangent + normalTex.z * input.TBN2 ), blendFactor );
+	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalSample.x * input.tangent + normalSample.y * input.bitangent + normalSample.z * input.TBN2), blendFactor );
 
     const float3 V = normalize( cameraOrigin.xyz - input.worldPosition.xyz );
     const float3 N = normalize( normal ); // normalize( input.worldPosition.xyz - modelOrigin );
@@ -59,12 +77,12 @@ PS_Output PSMain( PS_Input input )
 
     float NoV = saturate( dot( N, V ) );
 
-	const float metallic = saturate( globals.generic.z * material.metalness * metalnessTex.r + globals.generic.w );
+	const float metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
 
     //const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;
 
-    const float3 albedoColor = albedoTex.rgb * diffuseColor;
+	const float3 albedoColor = albedoSample.rgb * diffuseColor;
 
     float3 F0 = float3( 0.04f, 0.04f, 0.04f );
     F0 = lerp( F0, albedoColor.rgb, metallic );

@@ -280,15 +280,17 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 			mat.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
 		}
 
-		mat.Kd( rgb32_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] ) );
-		mat.Ks( rgb32_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] ) );
-		mat.Ka( rgb32_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] ) );
-		mat.Ke( rgb32_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] ) );
-		mat.Tf( rgb32_t( material.transmittance[ 0 ], material.transmittance[ 1 ], material.transmittance[ 2 ] ) );
-		mat.Ni( material.ior );
-		mat.Ns( material.shininess );
-		mat.Tr( 1.0f - material.dissolve );
-		mat.Illum( static_cast< float >( material.illum ) );
+		materialParms_t& parms = mat.GetParms();
+
+		parms.Kd = rgb32_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
+		parms.Ks = rgb32_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
+		parms.Ka = rgb32_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
+		parms.Ke = rgb32_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] );
+		parms.Tf = rgb32_t( material.transmittance[ 0 ], material.transmittance[ 1 ], material.transmittance[ 2 ] );
+		parms.Ni = material.ior;
+		parms.Ns = material.shininess;
+		parms.Tr = 1.0f - material.dissolve;
+		parms.illum = static_cast< float >( material.illum );
 
 		assets.GetLib<Material>()->Add( material.name.c_str(), mat );
 	}

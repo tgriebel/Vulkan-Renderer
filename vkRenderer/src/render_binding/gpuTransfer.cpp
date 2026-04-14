@@ -221,15 +221,15 @@ void Renderer::UpdateGpuMaterials()
 
 		const materialParms_t& parms = m.GetParms();
 
-		materialObject.Kd = vec3f( m.Kd().r, m.Kd().g, m.Kd().b );
-		materialObject.Ks = vec3f( m.Ks().r, m.Ks().g, m.Ks().b );
-		materialObject.Ka = vec3f( m.Ka().r, m.Ka().g, m.Ka().b );
-		materialObject.Ke = vec3f( m.Ke().r, m.Ke().g, m.Ke().b );
-		materialObject.Tf = vec3f( m.Tf().r, m.Tf().g, m.Tf().b );
-		materialObject.Tr = m.Tr();
-		materialObject.Ni = m.Ni();
-		materialObject.Ns = m.Ns();
-		materialObject.illum = m.Illum();
+		materialObject.Kd = vec3f( parms.Kd.r, parms.Kd.g, parms.Kd.b );
+		materialObject.Ks = vec3f( parms.Ks.r, parms.Ks.g, parms.Ks.b );
+		materialObject.Ka = vec3f( parms.Ka.r, parms.Ka.g, parms.Ka.b );
+		materialObject.Ke = vec3f( parms.Ke.r, parms.Ke.g, parms.Ke.b );
+		materialObject.Tf = vec3f( parms.Tf.r, parms.Tf.g, parms.Tf.b );
+		materialObject.Tr = parms.Tr;
+		materialObject.Ni = parms.Ni;
+		materialObject.Ns = parms.Ns;
+		materialObject.illum = parms.illum;
 		materialObject.roughness = parms.roughness;
 		materialObject.metalness = parms.metalness;
 		materialObject.sheen = parms.sheen;

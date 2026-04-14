@@ -100,14 +100,16 @@ static bool EditRgb( rgb32_t& rgb )
 
 void DebugMenuMaterial( const Material& mat )
 {
-	ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", mat.Kd().r, mat.Kd().g, mat.Kd().b );
-	ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", mat.Ks().r, mat.Ks().g, mat.Ks().b );
-	ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", mat.Ke().r, mat.Ke().g, mat.Ke().b );
-	ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", mat.Ka().r, mat.Ka().g, mat.Ka().b );
-	ImGui::Text( "Ni: %1.2f", mat.Ni() );
-	ImGui::Text( "Tf: %1.2f", mat.Tf() );
-	ImGui::Text( "Tr: %1.2f", mat.Tr() );
-	ImGui::Text( "illum: %1.2f", mat.Illum() );
+	const materialParms_t& parms = mat.GetParms();
+
+	ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", parms.Kd.r, parms.Kd.g, parms.Kd.b );
+	ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", parms.Ks.r, parms.Ks.g, parms.Ks.b );
+	ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", parms.Ke.r, parms.Ke.g, parms.Ke.b );
+	ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", parms.Ka.r, parms.Ka.g, parms.Ka.b );
+	ImGui::Text( "Ni: %1.2f", parms.Ni );
+	ImGui::Text( "Tf: %1.2f", parms.Tf );
+	ImGui::Text( "Tr: %1.2f", parms.Tr );
+	ImGui::Text( "illum: %1.2f", parms.illum );
 	ImGui::Separator();
 	for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
 	{
@@ -165,9 +167,9 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									ImGui::PushID( ( matAsset->GetName() + "." + #VALUE ).c_str() ); \
 									ImGui::Text( #VALUE );									\
 									ImGui::SameLine();										\
-									rgb32_t rgb = mat.##VALUE();							\
+									rgb32_t rgb = mat.GetParms().##VALUE;					\
 									if( EditRgb( rgb ) ) {									\
-										mat.##VALUE( rgb );									\
+										mat.GetParms().##VALUE = rgb;						\
 										matAsset->QueueUpload();							\
 									}														\
 									ImGui::PopID();											\
@@ -177,9 +179,9 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									ImGui::PushID( ( matAsset->GetName() + "." + #VALUE ).c_str() ); \
 									ImGui::Text( #VALUE );									\
 									ImGui::SameLine();										\
-									float value = mat.##VALUE();							\
+									float value = mat.GetParms().##VALUE;					\
 									if( EditFloat( value ) ) {								\
-										mat.##VALUE( value );								\
+										mat.GetParms().##VALUE = value;						\
 										matAsset->QueueUpload();							\
 									}														\
 									ImGui::PopID();											\
@@ -187,15 +189,22 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 
 	Material& mat = matAsset->Get();
 
-	EditRgbValue(Kd);
-	EditRgbValue(Ks);
-	EditRgbValue(Ke);
-	EditRgbValue(Ka);
-	EditRgbValue(Tf);
-	EditFloatValue(Ni);
+	EditRgbValue( Kd );
+	EditRgbValue( Ks );
+	EditRgbValue( Ke );
+	EditRgbValue( Ka );
+	EditRgbValue( Tf );
+	EditFloatValue( Ni );
 	EditFloatValue( Tr );
-	EditFloatValue( Illum );
-	
+	EditFloatValue( illum );
+	EditFloatValue( roughness );
+	EditFloatValue( metalness );
+	EditFloatValue( sheen );
+	EditFloatValue( clearcoatThickness );
+	EditFloatValue( clearcoatRoughness );
+	EditFloatValue( anisotropy );
+	EditFloatValue( anisotropyRotation );
+
 	if ( ImGui::TreeNode( "Textures" ) )
 	{
 		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )

@@ -177,97 +177,12 @@ public:
 		return extraByteCount;
 	}
 
-	inline const rgb32_t& Kd() const
-	{
-		return p.Kd;
-	}
-
-	inline void Kd( const rgb32_t rgb )
-	{
-		p.Kd = rgb;
-	}
-
-	inline const rgb32_t& Ks() const
-	{
-		return p.Ks;
-	}
-
-	inline void Ks( const rgb32_t rgb )
-	{
-		p.Ks = rgb;
-	}
-
-	inline const rgb32_t& Ke() const
-	{
-		return p.Ke;
-	}
-
-	inline void Ke( const rgb32_t rgb )
-	{
-		p.Ke = rgb;
-	}
-
-	inline const rgb32_t& Ka() const
-	{
-		return p.Ka;
-	}
-
-	inline void Ka( const rgb32_t rgb )
-	{
-		p.Ka = rgb;
-	}
-
-	inline const rgb32_t& Tf() const
-	{
-		return p.Tf;
-	}
-
-	inline void Tf( const rgb32_t rgb )
-	{
-		p.Tf = rgb;
-	}
-
-	inline const float& Tr() const
-	{
-		return p.Tr;
-	}
-
-	inline void Tr( const float rgb )
-	{
-		p.Tr = rgb;
-	}
-
-	inline const float& Ns() const
-	{
-		return p.Ns;
-	}
-
-	inline void Ns( const float rgb )
-	{
-		p.Ns = rgb;
-	}
-
-	inline const float& Ni() const
-	{
-		return p.Ni;
-	}
-
-	inline void Ni( const float rgb )
-	{
-		p.Ni = rgb;
-	}
-
-	inline const float& Illum() const
-	{
-		return p.illum;
-	}
-
-	inline void Illum( const float rgb )
-	{
-		p.illum = rgb;
-	}
-
 	inline const materialParms_t& GetParms() const
+	{
+		return p;
+	}
+
+	inline materialParms_t& GetParms()
 	{
 		return p;
 	}
