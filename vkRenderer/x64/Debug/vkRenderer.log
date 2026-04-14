@@ -1,4 +1,5 @@
-﻿  renderInit.cpp
+﻿  pipeline.cpp
+  renderInit.cpp
   imguiTask.cpp
   appMain.cpp
   Generating Code...
