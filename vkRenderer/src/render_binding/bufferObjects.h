@@ -64,19 +64,26 @@ struct globalUboConstants_t
 
 struct materialBufferObject_t
 {
-	int						textures[ Material::MaxMaterialTextures ];
-	vec3f					Ka;
-	float					Tr;
-	vec3f					Ke;
-	float					Ns;
-	vec3f					Kd;
-	float					Ni;
-	vec3f					Ks;
-	float					illum;
-	vec3f					Tf;
-	uint32_t				textured;
-	uint32_t				pad[ 4 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
-	uint8_t					extra[ Material::MaxExtraDataBytes ];
+	int			textures[ Material::MaxMaterialTextures ];
+	vec3f		Ka;
+	float		Tr;
+	vec3f		Ke;
+	float		Ns;
+	vec3f		Kd;
+	float		Ni;
+	vec3f		Ks;
+	float		illum;
+	vec3f		Tf;
+	float		roughness;
+	float		metalness;
+	float		sheen;
+	float		clearcoatThickness;
+	float		clearcoatRoughness;
+	float		anisotropy;
+	float		anisotropyRotation;
+	uint32_t	textured;
+	uint32_t	pad[ 1 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
+	uint8_t		extra[ Material::MaxExtraDataBytes ];
 };
 
 

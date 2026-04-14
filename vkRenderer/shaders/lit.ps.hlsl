@@ -42,7 +42,7 @@ PS_Output PSMain( PS_Input input )
     const float4 roughnessTex = texSampler[roughnessTexId].Sample( texSamplerSt, input.uv0.xy );
     const float4 metalnessTex = texSampler[metalnessTexId].Sample( texSamplerSt, input.uv0.xy );
 
-    const float perceptualRoughness = saturate( globals.generic.x * roughnessTex.r + globals.generic.y );
+	const float perceptualRoughness = saturate( globals.generic.x * material.roughness * roughnessTex.r + globals.generic.y);
 
     const float blendFactor = 1.0f;
 	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalTex.x * input.tangent + normalTex.y * input.bitangent + normalTex.z * input.TBN2 ), blendFactor );
@@ -59,7 +59,7 @@ PS_Output PSMain( PS_Input input )
 
     float NoV = saturate( dot( N, V ) );
 
-    const float metallic = saturate( globals.generic.z * metalnessTex.r + globals.generic.w );
+	const float metallic = saturate( globals.generic.z * material.metalness * metalnessTex.r + globals.generic.w );
 
     //const float AMBIENT_LIGHT_FACTOR = 0.03f;
     const float ao = 1.0f;

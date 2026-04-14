@@ -79,11 +79,15 @@ struct material_t
     float3  Ks;
     float   illum;
     float3  Tf;
+	float	roughness;
+	float	metalness;
+	float	sheen;
+	float	clearcoatThickness;
+	float	clearcoatRoughness;
+	float	anisotropy;
+	float	anisotropyRotation;
     uint    textured;
-    float   roughness;
-    float   metalness;
-    uint    pad2;
-    uint    pad3;
+    uint    pad0;
     uint    extraData[64];
 };
 

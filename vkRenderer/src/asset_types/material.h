@@ -267,6 +267,11 @@ public:
 		p.illum = rgb;
 	}
 
+	inline const materialParms_t& GetParms() const
+	{
+		return p;
+	}
+
 	inline bool IsTextured() const
 	{
 		return ( textureBitSet > 0 );

@@ -218,6 +218,9 @@ void Renderer::UpdateGpuMaterials()
 				}
 			}
 		}
+
+		const materialParms_t& parms = m.GetParms();
+
 		materialObject.Kd = vec3f( m.Kd().r, m.Kd().g, m.Kd().b );
 		materialObject.Ks = vec3f( m.Ks().r, m.Ks().g, m.Ks().b );
 		materialObject.Ka = vec3f( m.Ka().r, m.Ka().g, m.Ka().b );
@@ -227,6 +230,14 @@ void Renderer::UpdateGpuMaterials()
 		materialObject.Ni = m.Ni();
 		materialObject.Ns = m.Ns();
 		materialObject.illum = m.Illum();
+		materialObject.roughness = parms.roughness;
+		materialObject.metalness = parms.metalness;
+		materialObject.sheen = parms.sheen;
+		materialObject.clearcoatThickness = parms.clearcoatThickness;
+		materialObject.clearcoatRoughness = parms.clearcoatRoughness;
+		materialObject.anisotropy = parms.anisotropy;
+		materialObject.anisotropyRotation = parms.anisotropyRotation;
+
 		materialObject.textured = m.IsTextured();
 
 		m.CopyExtraData( materialObject.extra, m.GetExtraDataByteCount() );
