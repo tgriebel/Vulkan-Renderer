@@ -1,6 +1,1 @@
-﻿  pipeline.cpp
-  renderInit.cpp
-  imguiTask.cpp
-  appMain.cpp
-  Generating Code...
-  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
+﻿  vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe

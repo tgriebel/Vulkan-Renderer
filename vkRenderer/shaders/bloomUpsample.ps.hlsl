@@ -28,17 +28,17 @@ PS_Output PSMain( PS_Input input )
     // d - e - f
     // g - h - i
     // === ('e' is the current texel) ===
-    float3 a = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x - x, input.uv0.y + y ) ).rgb;
-    float3 b = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x,     input.uv0.y + y ) ).rgb;
-    float3 c = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x + x, input.uv0.y + y ) ).rgb;
+    float3 a = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x - x, input.uv0.y + y ) ).rgb;
+    float3 b = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x,     input.uv0.y + y ) ).rgb;
+    float3 c = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x + x, input.uv0.y + y ) ).rgb;
 
-    float3 d = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x - x, input.uv0.y ) ).rgb;
-    float3 e = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x,     input.uv0.y ) ).rgb;
-    float3 f = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x + x, input.uv0.y ) ).rgb;
+    float3 d = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x - x, input.uv0.y ) ).rgb;
+    float3 e = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x,     input.uv0.y ) ).rgb;
+    float3 f = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x + x, input.uv0.y ) ).rgb;
 
-    float3 g = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x - x, input.uv0.y - y ) ).rgb;
-    float3 h = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x,     input.uv0.y - y ) ).rgb;
-    float3 i = codeSamplers[ 0 ].Sample( codeSamplersSt, float2( input.uv0.x + x, input.uv0.y - y ) ).rgb;
+    float3 g = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x - x, input.uv0.y - y ) ).rgb;
+    float3 h = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x,     input.uv0.y - y ) ).rgb;
+    float3 i = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, float2( input.uv0.x + x, input.uv0.y - y ) ).rgb;
 
     // Apply weighted distribution, by using a 3x3 tent filter:
     //  1   | 1 2 1 |
