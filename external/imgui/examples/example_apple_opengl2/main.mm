@@ -1,6 +1,12 @@
 // Dear ImGui: standalone example application for OSX + OpenGL2, using legacy fixed pipeline
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
+
+// Learn about Dear ImGui:
+// - FAQ                  https://dearimgui.com/faq
+// - Getting Started      https://dearimgui.com/getting-started
+// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
+// - Introduction, links and more at the top of imgui.cpp
+
+// FIXME: Multi-viewports is not yet functional in this example. May need backend rework/coordination.
 
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
@@ -41,37 +47,50 @@
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
+
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Setup Platform/Renderer backends
     ImGui_ImplOSX_Init(self);
     ImGui_ImplOpenGL2_Init();
 
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
+    // - If fonts are not explicitly loaded, Dear ImGui will select an embedded font: either AddFontDefaultVector() or AddFontDefaultBitmap().
+    //   This selection is based on (style.FontSizeBase * style.FontScaleMain * style.FontScaleDpi) reaching a small threshold.
+    // - You can load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+    // - If a file cannot be loaded, AddFont functions will return a nullptr. Please handle those errors in your code (e.g. use an assertion, display an error and quit).
     // - Read 'docs/FONTS.md' for more instructions and details.
+    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use FreeType for higher quality font rendering.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    //style.FontSizeBase = 20.0f;
+    //io.Fonts->AddFontDefaultVector();
+    //io.Fonts->AddFontDefaultBitmap();
+    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
+    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf");
+    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf");
+    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf");
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf");
+    //IM_ASSERT(font != nullptr);
 }
 
 -(void)updateAndDrawDemoView
 {
     // Start the Dear ImGui frame
+    ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplOSX_NewFrame(self);
     ImGui::NewFrame();
@@ -104,7 +123,7 @@
         ImGui::SameLine();
         ImGui::Text("counter = %d", counter);
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
         ImGui::End();
     }
 
@@ -130,6 +149,13 @@
     glClear(GL_COLOR_BUFFER_BIT);
 
     ImGui_ImplOpenGL2_RenderDrawData(draw_data);
+
+    // Update and Render additional Platform Windows
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
 
     // Present
     [[self openGLContext] flushBuffer];
@@ -164,9 +190,9 @@
 -(NSWindow*)window
 {
     if (_window != nil)
-        return (_window);
+        return _window;
 
-    NSRect viewRect = NSMakeRect(100.0, 100.0, 100.0 + 1280.0, 100 + 720.0);
+    NSRect viewRect = NSMakeRect(100.0, 100.0, 100.0 + 1280.0, 100 + 800.0);
 
     _window = [[NSWindow alloc] initWithContentRect:viewRect styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:YES];
     [_window setTitle:@"Dear ImGui OSX+OpenGL2 Example"];
@@ -174,7 +200,7 @@
     [_window setOpaque:YES];
     [_window makeKeyAndOrderFront:NSApp];
 
-    return (_window);
+    return _window;
 }
 
 -(void)setupMenu

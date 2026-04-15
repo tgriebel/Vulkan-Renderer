@@ -486,7 +486,17 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	ImGui_ImplGlfw_InitForVulkan( g_window.window, true );
 #endif
 
+	assert( fb != nullptr );
+
+	renderPassTransition_t transitionState {};
+	transitionState.flags.clear = false;
+	transitionState.flags.presentAfter = false;
+	transitionState.flags.presentBefore = false;
+	transitionState.flags.readOnly = true;
+	transitionState.flags.readAfter = true;
+
 	ImGui_ImplVulkan_InitInfo vkInfo = {};
+	vkInfo.ApiVersion = VK_API_VERSION_1_2;
 	vkInfo.Instance = context.instance;
 	vkInfo.PhysicalDevice = context.physicalDevice;
 	vkInfo.Device = context.device;
@@ -498,34 +508,16 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	vkInfo.MinImageCount = MaxFrameStates;
 	vkInfo.ImageCount = MaxFrameStates;
 	vkInfo.CheckVkResultFn = nullptr;
-
-	assert( fb != nullptr );
-
-	renderPassTransition_t transitionState {};
-	transitionState.flags.clear = false;
-	transitionState.flags.presentAfter = false;
-	transitionState.flags.presentBefore = false;
-	transitionState.flags.readOnly = true;
-	transitionState.flags.readAfter = true;
+#ifdef USE_VULKAN
+	vkInfo.PipelineInfoMain.RenderPass = fb->GetVkRenderPass( transitionState );
+#endif
 
 #ifdef USE_VULKAN
-	ImGui_ImplVulkan_Init( &vkInfo, fb->GetVkRenderPass( transitionState ) );
+	ImGui_ImplVulkan_Init( &vkInfo );
 #endif
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
-
-	// Upload Fonts
-	{
-#ifdef USE_VULKAN
-		BeginUploadCommands( uploadContext );
-		VkCommandBuffer commandBuffer = uploadContext.CommandBuffer();
-		ImGui_ImplVulkan_CreateFontsTexture( commandBuffer );
-		EndUploadCommands( uploadContext );
-
-		ImGui_ImplVulkan_DestroyFontUploadObjects();
-#endif
-	}
 #ifdef USE_GLFW
 	ImGui_ImplGlfw_NewFrame();
 #endif

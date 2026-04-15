@@ -374,7 +374,7 @@ int main(int argc, char **argv)
 // Complete program: print "Hello World!" banner, with bugs
 //
 #if 0
-char m_buffer[24<<20];
+char buffer[24<<20];
 unsigned char screen[20][79];
 
 int main(int arg, char **argv)
@@ -384,8 +384,8 @@ int main(int arg, char **argv)
    float scale, xpos=2; // leave a little padding in case the character extends left
    char *text = "Heljo World!"; // intentionally misspelled to show 'lj' brokenness
 
-   fread(m_buffer, 1, 1000000, fopen("c:/windows/fonts/arialbd.ttf", "rb"));
-   stbtt_InitFont(&font, m_buffer, 0);
+   fread(buffer, 1, 1000000, fopen("c:/windows/fonts/arialbd.ttf", "rb"));
+   stbtt_InitFont(&font, buffer, 0);
 
    scale = stbtt_ScaleForPixelHeight(&font, 15);
    stbtt_GetFontVMetrics(&font, &ascent,0,0);
@@ -656,7 +656,7 @@ STBTT_DEF void stbtt_PackSetOversampling(stbtt_pack_context *spc, unsigned int h
 STBTT_DEF void stbtt_PackSetSkipMissingCodepoints(stbtt_pack_context *spc, int skip);
 // If skip != 0, this tells stb_truetype to skip any codepoints for which
 // there is no corresponding glyph. If skip=0, which is the default, then
-// codepoints without a glyph recived the font's "missing character" glyph,
+// codepoints without a glyph received the font's "missing character" glyph,
 // typically an empty box by convention.
 
 STBTT_DEF void stbtt_GetPackedQuad(const stbtt_packedchar *chardata, int pw, int ph,  // same data as above
@@ -886,7 +886,7 @@ STBTT_DEF unsigned char *stbtt_GetCodepointBitmap(const stbtt_fontinfo *info, fl
 // xoff/yoff are the offset it pixel space from the glyph origin to the top-left of the bitmap
 
 STBTT_DEF unsigned char *stbtt_GetCodepointBitmapSubpixel(const stbtt_fontinfo *info, float scale_x, float scale_y, float shift_x, float shift_y, int codepoint, int *width, int *height, int *xoff, int *yoff);
-// the same as stbtt_GetCodepoitnBitmap, but you can specify a subpixel
+// the same as stbtt_GetCodepointBitmap, but you can specify a subpixel
 // shift for the character
 
 STBTT_DEF void stbtt_MakeCodepointBitmap(const stbtt_fontinfo *info, unsigned char *output, int out_w, int out_h, int out_stride, float scale_x, float scale_y, int codepoint);
@@ -4516,8 +4516,8 @@ static int stbtt__compute_crossings_x(float x, float y, int nverts, stbtt_vertex
             q2[0] = (float)x2;
             q2[1] = (float)y2;
             if (equal(q0,q1) || equal(q1,q2)) {
-               x0 = (int)verts[i-1].x;
-               y0 = (int)verts[i-1].y;
+               x0 = (int)verts[i-1].x; //-V1048
+               y0 = (int)verts[i-1].y; //-V1048
                x1 = (int)verts[i  ].x;
                y1 = (int)verts[i  ].y;
                if (y > STBTT_min(y0,y1) && y < STBTT_max(y0,y1) && x > STBTT_min(x0,x1)) {
