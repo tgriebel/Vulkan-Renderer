@@ -1,4 +1,65 @@
-﻿  window.cpp
+﻿  appMain.cpp
+  chessScene.cpp
+  nesScene.cpp
+  sceneParser.cpp
+  appScene.cpp
+  window.cpp
+  gpuProgram.cpp
+  model.cpp
+  texture.cpp
+  debug2dPass.cpp
+  debug3dPass.cpp
+  depthPass.cpp
+  drawpass.cpp
+  emissivePass.cpp
+  opaquePass.cpp
+  postPass.cpp
+  shadowPass.cpp
+  skyboxPass.cpp
+  terrainPass.cpp
+  transPass.cpp
+  Generating Code...
+  Compiling...
+  wireframePass.cpp
+  drawGroup.cpp
+  render_util.cpp
+  io.cpp
+  serializeClasses.cpp
+  binding.cpp
+  descriptorWrites.cpp
+  gpuTransfer.cpp
+  pipeline.cpp
+  shaderBinding.cpp
+  GpuSync.cpp
+  allocator.cpp
+  debugMenu.cpp
+  gpuImage.cpp
+  renderCommand.cpp
+  renderInit.cpp
+  renderResource.cpp
+  renderShutdown.cpp
+  renderView.cpp
+  renderer.cpp
+  Generating Code...
+  Compiling...
+  schedule.cpp
+  swapChain.cpp
+  gpuBuffer.cpp
+  imageArray.cpp
+  imageSampler.cpp
+  imageView.cpp
+  cmdContext.cpp
+  deviceContext.cpp
+  frameBuffer.cpp
+  ImageReadbackTask.cpp
+  RenderTask.cpp
+  imageProcessTask.cpp
+  imageShaderTask.cpp
+  imguiTask.cpp
+  assetBaker.cpp
+  sceneBase.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

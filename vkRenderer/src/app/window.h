@@ -6,6 +6,15 @@
 
 static const char *const ApplicationName = "Extensa";
 
+enum class fullScreenMode_t : int32_t
+{
+	WINDOW					= 0,
+	WINDOW_BORDERLESS		= 1,
+	FULLSCREEN_BORDERLESS	= 2,
+	FULLSCREEN_EXCLUSIVE	= 3,
+};
+
+
 class Window {
 public:
 
@@ -50,6 +59,8 @@ public:
 private:
 	bool					needsImageResize;
 	bool					mouseLocked;
+	int32_t					isBorderless;
+	int32_t					isFullscreen;
 
 #ifdef USE_GLFW
 	friend void FramebufferResizeCallback( GLFWwindow* window, int width, int height );

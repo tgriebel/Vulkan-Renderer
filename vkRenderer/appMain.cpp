@@ -91,6 +91,9 @@ MakeCVar( BOOL,		r_bloom, true );
 MakeCVar( BOOL,		r_autoExposure, true );
 MakeCVar( BOOL,		r_screenshot, true );
 MakeCVar( BOOL,		r_gaussianBlur, true );
+MakeCVar( INT,		r_fullscreenMode, 0 );
+MakeCVar( INT,		r_windowWidth, -1 );
+MakeCVar( INT,		r_windowHeight, -1 );
  
 
 void ParseCmdArgs( const int argc, char* argv[] )

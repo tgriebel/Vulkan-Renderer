@@ -8,6 +8,12 @@
 #include "../../../external/imgui/backends/imgui_impl_glfw.h"
 #endif
 
+#include "cvar.h"
+
+extern CVar r_fullscreenMode;
+extern CVar r_windowWidth;
+extern CVar r_windowHeight;
+
 #define KEY_MAP( k ) { GLFW_KEY_##k, KEY_##k }
 
 struct KeyPair
@@ -243,8 +249,12 @@ void Window::Init()
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode( monitor );
 
-	bool borderless = true;
-	if( borderless )
+	const fullScreenMode_t fullscreenMode = static_cast<fullScreenMode_t>( r_fullscreenMode.GetInt() );
+
+	isFullscreen = ( fullscreenMode == fullScreenMode_t::FULLSCREEN_BORDERLESS ) || ( fullscreenMode == fullScreenMode_t::FULLSCREEN_EXCLUSIVE );
+	isBorderless = ( fullscreenMode == fullScreenMode_t::WINDOW_BORDERLESS ) || ( fullscreenMode == fullScreenMode_t::FULLSCREEN_BORDERLESS );
+
+	if( isBorderless )
 	{		
 		glfwWindowHint( GLFW_DECORATED, GLFW_FALSE );
 		glfwWindowHint( GLFW_RED_BITS, mode->redBits );
@@ -253,10 +263,10 @@ void Window::Init()
 		glfwWindowHint( GLFW_REFRESH_RATE, mode->refreshRate );
 	}
 
-	bool fullscreen = true;
-	if( fullscreen )
+	
+	if( isFullscreen )
 	{
-		if( borderless )
+		if( isBorderless )
 		{
 			window = glfwCreateWindow( mode->width, mode->height, ApplicationName, monitor, nullptr );
 			glfwSetWindowPos( window, 0, 0 );
@@ -268,7 +278,10 @@ void Window::Init()
 	}
 	else
 	{
-		window = glfwCreateWindow( DefaultDisplayWidth, DefaultDisplayHeight, ApplicationName, nullptr, nullptr );
+		const int32_t windowWidth = ( r_windowWidth.GetInt() > 0 ) ? r_windowWidth.GetInt() : DefaultDisplayWidth;
+		const int32_t windowHeight = ( r_windowHeight.GetInt() > 0 ) ? r_windowHeight.GetInt() : DefaultDisplayHeight;
+
+		window = glfwCreateWindow( windowWidth, windowHeight, ApplicationName, nullptr, nullptr );
 	}
 
 	glfwSetWindowUserPointer( window, this );
