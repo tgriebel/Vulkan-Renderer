@@ -68,23 +68,14 @@
     <ClCompile Include="src\render_binding\shaderBinding.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_binding\gpuBuffer.cpp">
-      <Filter>Binding</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_binding\binding.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\descriptorWrites.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_binding\imageView.cpp">
-      <Filter>Binding</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_core\swapChain.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render_binding\allocator.cpp">
-      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_state\cmdContext.cpp">
       <Filter>Device Context</Filter>
@@ -158,14 +149,8 @@
     <ClCompile Include="src\draw_passes\debug3dPass.cpp">
       <Filter>Draw Passes</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_binding\imageArray.cpp">
-      <Filter>Binding</Filter>
-    </ClCompile>
     <ClCompile Include="src\app\window.cpp">
       <Filter>app</Filter>
-    </ClCompile>
-    <ClCompile Include="src\render_binding\imageSampler.cpp">
-      <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\io\serializeClasses.cpp">
       <Filter>IO</Filter>
@@ -202,6 +187,21 @@
     </ClCompile>
     <ClCompile Include="appMain.cpp">
       <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_resources\gpuBuffer.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_core\allocator.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_resources\imageArray.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_resources\imageSampler.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_resources\imageView.cpp">
+      <Filter>Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,12 +243,6 @@
     <ClInclude Include="src\render_core\swapChain.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_binding\allocator.h">
-      <Filter>Binding</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render_binding\gpuBuffer.h">
-      <Filter>Binding</Filter>
-    </ClInclude>
     <ClInclude Include="src\render_binding\pipeline.h">
       <Filter>Binding</Filter>
     </ClInclude>
@@ -283,9 +277,6 @@
       <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\shaderBinding.h">
-      <Filter>Binding</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render_binding\imageView.h">
       <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_state\cmdContext.h">
@@ -333,9 +324,6 @@
     <ClInclude Include="src\render_tasks\imguiTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_binding\imageArray.h">
-      <Filter>Binding</Filter>
-    </ClInclude>
     <ClInclude Include="src\draw_passes\wireFramePass.h">
       <Filter>Draw Passes</Filter>
     </ClInclude>
@@ -374,9 +362,6 @@
     </ClInclude>
     <ClInclude Include="src\app\window.h">
       <Filter>app</Filter>
-    </ClInclude>
-    <ClInclude Include="src\render_binding\imageSampler.h">
-      <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\io\serializeClasses.h">
       <Filter>IO</Filter>
@@ -431,6 +416,21 @@
     </ClInclude>
     <ClInclude Include="src\scene\mtInterface.h">
       <Filter>Baker</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_resources\gpuBuffer.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\allocator.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_resources\imageArray.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_resources\imageSampler.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_resources\imageView.h">
+      <Filter>Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

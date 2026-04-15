@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../globals/common.h"
-#include "../render_binding/gpuBuffer.h"
+#include "../render_resources/gpuBuffer.h"
 #include "../render_core/gpuImage.h"
 #include "../render_core/renderResource.h"
 #include "rhi.h"
 #include "../asset_types/texture.h"
-#include "../render_binding/imageView.h"
+#include "../render_resources/imageView.h"
 
 
 struct frameBufferCreateInfo_t

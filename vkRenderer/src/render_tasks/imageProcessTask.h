@@ -2,7 +2,7 @@
 
 #include "../render_core/renderer.h"
 #include "../render_state/frameBuffer.h"
-#include "../render_binding/imageView.h"
+#include "../render_resources/imageView.h"
 
 static const uint32_t MaxImageProcessSampleImages = 3;
 

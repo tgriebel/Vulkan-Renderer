@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../asset_types/texture.h"
-#include "../render_binding/allocator.h"
+#include "../render_core/allocator.h"
 #include "../render_core/renderResource.h"
 
 struct imageInfo_t;

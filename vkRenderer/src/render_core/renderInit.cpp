@@ -6,7 +6,7 @@
 #include "../render_state/rhi.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/bindings.h"
-#include "../render_binding/imageArray.h"
+#include "../render_resources/imageArray.h"
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/ImageReadbackTask.h"
 #include "../render_tasks/ImageProcessTask.h"

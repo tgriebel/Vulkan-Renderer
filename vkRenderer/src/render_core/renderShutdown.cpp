@@ -4,7 +4,7 @@
 #include "renderer.h"
 #include "../scene/entity.h"
 #include "../globals/assetDefs.h"
-#include "../render_binding/allocator.h"
+#include "../render_core/allocator.h"
 
 #include "swapChain.h"
 

@@ -2,7 +2,7 @@
 #include "../render_core/renderer.h"
 #include "../render_state/cmdContext.h"
 #include "../render_core/renderview.h"
-#include "../render_binding/gpuBuffer.h"
+#include "../render_resources/gpuBuffer.h"
 #include "../render_binding/bindings.h"
 #include "../globals/assetDefs.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "../globals/common.h"
-#include "../render_binding/imageArray.h"
+#include "../render_resources/imageArray.h"
 #include "../asset_types/texture.h"
 
 struct renderConstants_t

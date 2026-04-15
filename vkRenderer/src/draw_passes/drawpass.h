@@ -3,7 +3,7 @@
 #include "../globals/common.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/shaderBinding.h"
-#include "../render_binding/imageArray.h"
+#include "../render_resources/imageArray.h"
 #include "../render_state/frameBuffer.h"
 
 class ResourceContext;

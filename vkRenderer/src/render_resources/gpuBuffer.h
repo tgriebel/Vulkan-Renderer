@@ -1,7 +1,7 @@
 #pragma once
 #include "../globals/common.h"
 #include "../render_core/renderResource.h"
-#include "allocator.h"
+#include "../render_core/allocator.h"
 
 enum class bufferType_t
 {

@@ -4,11 +4,10 @@
 #include "deviceContext.h"
 #include "../render_core/renderer.h"
 #include "../render_binding/pipeline.h"
-#include "../render_binding/imageView.h"
+#include "../render_resources/imageView.h"
 #include "../render_state/frameBuffer.h"
 #include "../render_binding/bufferObjects.h"
 #include "../render_binding/bindings.h"
-#include "../render_binding/imageView.h"
 #include "../render_tasks/imageShaderTask.h"
 
 extern AssetManager g_assets;

@@ -7,7 +7,7 @@
 
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bufferObjects.h"
-#include "../render_binding/imageSampler.h"
+#include "../render_resources/imageSampler.h"
 #include "../render_core/renderview.h"
 #include "../render_core/renderResource.h"
 
