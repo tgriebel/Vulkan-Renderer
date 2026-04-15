@@ -290,6 +290,7 @@ void UpdateScene( Scene* scene )
 
 #if defined( USE_IMGUI )
 	ImGui::NewFrame();
+	ImGui::DockSpaceOverViewport( 0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode );
 #endif
 
 	const float dt = scene->DeltaTime();
@@ -422,12 +423,13 @@ void UpdateScene( Scene* scene )
 		DrawAssetDebugMenu();
 		DrawManipDebugMenu();
 		DrawEntityDebugMenu();
-		DrawOutlinerDebugMenu();
 		DrawDrawGroupDebugMenu();
 		DeviceDebugMenu();
 
 		ImGui::EndTabBar();
 	}
+
+	DrawOutlinerDebugMenu();
 
 	std::vector<const Image*> images;
 
@@ -915,13 +917,12 @@ void DrawDrawGroupDebugMenu()
 void DrawOutlinerDebugMenu()
 {
 #if defined( USE_IMGUI )
-	if ( ImGui::BeginTabItem( "Outliner" ) )
-	{
-		static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
+	ImGui::Begin( "Outliner" );
 
-		DebugMenuEntityEdit( g_scene );
+	static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
-		ImGui::EndTabItem();
-	}
+	DebugMenuEntityEdit( g_scene );
+
+	ImGui::End();
 #endif
 }

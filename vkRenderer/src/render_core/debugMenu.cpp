@@ -61,17 +61,23 @@ void EditVector3Field( vec3f& v, const std::string& label, const float speedSlow
 	{
 		ImGui::TableNextColumn();
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.5f, 0.0f, 0.0f, 1.0f ) );
-		ImGui::InputFloat( "X", &vec[ 0 ], speedSlow, speedFast );
+		ImGui::PushItemWidth( -1 );
+		ImGui::InputFloat( ( "##X" + label ).c_str(), &vec[ 0 ], speedSlow, speedFast );
+		ImGui::PopItemWidth();
 		ImGui::PopStyleColor();
 
 		ImGui::TableNextColumn();
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.0f, 0.5f, 0.0f, 1.0f ) );
-		ImGui::InputFloat( "Y", &vec[ 1 ], speedSlow, speedFast );
+		ImGui::PushItemWidth( -1 );
+		ImGui::InputFloat( ( "##Y" + label ).c_str(), &vec[ 1 ], speedSlow, speedFast );
+		ImGui::PopItemWidth();
 		ImGui::PopStyleColor();
 
 		ImGui::TableNextColumn();
 		ImGui::PushStyleColor( ImGuiCol_Button, ImVec4( 0.0f, 0.0f, 0.5f, 1.0f ) );
-		ImGui::InputFloat( "Z", &vec[ 2 ], speedSlow, speedFast );
+		ImGui::PushItemWidth( -1 );
+		ImGui::InputFloat( ( "##Z" + label ).c_str(), &vec[ 2 ], speedSlow, speedFast );
+		ImGui::PopItemWidth();
 		ImGui::PopStyleColor();
 
 		ImGui::EndTable();
@@ -473,6 +479,9 @@ void DebugMenuEntityEdit( Scene* scene )
 	
 	for ( uint32_t i = 0; i < lightCount; ++i )
 	{
+		if ( i >= scene->lights.size() ) {
+			break;
+		}
 		light_t& light = scene->lights[ i ];
 
 		std::stringstream ss;
@@ -565,7 +574,7 @@ void DebugMenuEntityEdit( Scene* scene )
 
 	static ImGuiTableFlags propertyGridFlags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 
-	ImGui::PushItemWidth( 100 );
+	ImGui::PushItemWidth( -1 );
 	ImGui::PushStyleColor( ImGuiCol_FrameBg, ImVec4( 0.2f, 0.2f, 0.2f, 1.0f ) );
 
 	if( entry.isEntity )
@@ -585,7 +594,7 @@ void DebugMenuEntityEdit( Scene* scene )
 			ImGui::Text( "Origin" );
 			ImGui::TableNextColumn();
 			EditVector3Field( origin, "Origin", 0.1f, 1.0f );
-			
+
 			ImGui::TableNextColumn();
 			ImGui::Text( "Scale" );
 			ImGui::TableNextColumn();
@@ -601,9 +610,9 @@ void DebugMenuEntityEdit( Scene* scene )
 			ent->SetRotation( rotation );
 
 			ImGui::EndTable();
-		}		
+		}
 	}
-	else
+	else if ( entry.id >= 0 && entry.id < static_cast<int32_t>( scene->lights.size() ) )
 	{
 		light_t& light = scene->lights[ entry.id ];
 
@@ -628,7 +637,7 @@ void DebugMenuEntityEdit( Scene* scene )
 			ImGui::TableNextColumn();
 			ImGui::Text( "Intensity" );
 			ImGui::TableNextColumn();
-			ImGui::InputFloat( "##lightIntesity", &light.intensity, 0.1f, 1.0f );
+			ImGui::InputFloat( "##lightIntensity", &light.intensity, 0.1f, 1.0f );
 
 			ImGui::TableNextColumn();
 			ImGui::Text( "Shadow" );

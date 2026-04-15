@@ -480,6 +480,7 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	// Setup Platform/Renderer bindings
 
 #if defined( USE_VULKAN ) && defined( USE_GLFW )
