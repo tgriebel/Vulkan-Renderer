@@ -13,6 +13,7 @@
 
 #include "../render_core/debugMenu.h"
 #include "../render_core/renderer.h"
+#include "../render_binding/allocator.h"
 #include "../globals/assetDefs.h"
 extern Scene* g_scene;
 extern Renderer g_renderer;
@@ -566,6 +567,62 @@ void DrawSceneDebugMenu()
 		//g_imguiControls.rasterizeScene = ImGui::Button( "Rasterize Scene" );
 		//ImGui::SameLine();
 		g_imguiControls.captureScreenshot = ImGui::Button( "Capture ScreenShot" );
+		ImGui::SameLine();
+		if ( ImGui::Button( "Dump VMA Stats" ) )
+		{
+			VmaTotalStatistics stats;
+			vmaCalculateStatistics( AllocatorMemory::GetVmaAllocator(), &stats );
+
+			VkPhysicalDeviceMemoryProperties memProps;
+			vkGetPhysicalDeviceMemoryProperties( context.physicalDevice, &memProps );
+
+			std::cout << "=== VMA Memory Statistics ===" << std::endl;
+			for ( uint32_t i = 0; i < memProps.memoryHeapCount; ++i )
+			{
+				const VmaStatistics& heap = stats.memoryHeap[ i ].statistics;
+				if ( heap.blockCount == 0 ) {
+					continue;
+				}
+
+				const VkMemoryHeapFlags heapFlags = memProps.memoryHeaps[ i ].flags;
+				std::string heapType;
+				if ( heapFlags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT ) { heapType += "DEVICE_LOCAL "; }
+				if ( heapFlags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT ) { heapType += "MULTI_INSTANCE "; }
+				if ( heapType.empty() ) { heapType = "HOST"; }
+
+				std::string memTypeFlags;
+				for ( uint32_t t = 0; t < memProps.memoryTypeCount; ++t )
+				{
+					if ( memProps.memoryTypes[ t ].heapIndex != i ) {
+						continue;
+					}
+					const VkMemoryPropertyFlags flags = memProps.memoryTypes[ t ].propertyFlags;
+					memTypeFlags += "  [Type " + std::to_string( t ) + "]:";
+					if ( flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT )  { memTypeFlags += " DEVICE_LOCAL"; }
+					if ( flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT )  { memTypeFlags += " HOST_VISIBLE"; }
+					if ( flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ) { memTypeFlags += " HOST_COHERENT"; }
+					if ( flags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT )   { memTypeFlags += " HOST_CACHED"; }
+					if ( flags == 0 )                                   { memTypeFlags += " (none)"; }
+					memTypeFlags += "\n";
+				}
+
+				std::cout << "  Heap " << i << " (" << heapType << ") - "
+						  << ( memProps.memoryHeaps[ i ].size / ( 1024 * 1024 ) ) << " MB capacity:" << std::endl;
+				std::cout << "    " << ( heap.allocationBytes / ( 1024 * 1024 ) ) << " MB used / "
+						  << ( heap.blockBytes / ( 1024 * 1024 ) ) << " MB allocated ("
+						  << heap.allocationCount << " allocations, "
+						  << heap.blockCount << " blocks)" << std::endl;
+				std::cout << memTypeFlags;
+			}
+
+			const VmaStatistics& total = stats.total.statistics;
+			std::cout << "  Total: "
+					  << ( total.allocationBytes / ( 1024 * 1024 ) ) << " MB used / "
+					  << ( total.blockBytes / ( 1024 * 1024 ) ) << " MB allocated ("
+					  << total.allocationCount << " allocations, "
+					  << total.blockCount << " blocks)" << std::endl;
+			std::cout << "=============================" << std::endl;
+		}
 
 		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );
 
