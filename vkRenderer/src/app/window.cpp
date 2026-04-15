@@ -240,7 +240,37 @@ void Window::Init()
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
 	glfwWindowHint( GLFW_RESIZABLE, GLFW_TRUE );
 
-	window = glfwCreateWindow( DefaultDisplayWidth, DefaultDisplayHeight, ApplicationName, nullptr, nullptr );
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode( monitor );
+
+	bool borderless = true;
+	if( borderless )
+	{		
+		glfwWindowHint( GLFW_DECORATED, GLFW_FALSE );
+		glfwWindowHint( GLFW_RED_BITS, mode->redBits );
+		glfwWindowHint( GLFW_GREEN_BITS, mode->greenBits );
+		glfwWindowHint( GLFW_BLUE_BITS, mode->blueBits );
+		glfwWindowHint( GLFW_REFRESH_RATE, mode->refreshRate );
+	}
+
+	bool fullscreen = true;
+	if( fullscreen )
+	{
+		if( borderless )
+		{
+			window = glfwCreateWindow( mode->width, mode->height, ApplicationName, monitor, nullptr );
+			glfwSetWindowPos( window, 0, 0 );
+		}
+		else
+		{
+			window = glfwCreateWindow( mode->width, mode->height, ApplicationName, nullptr, nullptr );
+		}
+	}
+	else
+	{
+		window = glfwCreateWindow( DefaultDisplayWidth, DefaultDisplayHeight, ApplicationName, nullptr, nullptr );
+	}
+
 	glfwSetWindowUserPointer( window, this );
 	glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
 	glfwSetFramebufferSizeCallback( window, FramebufferResizeCallback );
