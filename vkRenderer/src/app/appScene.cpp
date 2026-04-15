@@ -459,6 +459,10 @@ void UpdateScene( Scene* scene )
 		for ( uint32_t i = 0; i < imageCount; ++i )
 		{
 			const bool selected = ( i == g_imguiControls.dbgImageId );
+
+			if( _stricmp( images[ i ]->gpuImage->GetDebugName(), "" ) == 0 ) {
+				continue;
+			}
 			if ( ImGui::Selectable( images[ i ]->gpuImage->GetDebugName(), selected ) ) {
 				g_imguiControls.dbgImageId = i;
 			}
