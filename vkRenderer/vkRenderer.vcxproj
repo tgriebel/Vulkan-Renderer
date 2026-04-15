@@ -113,6 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\external\glfw\include;..\external\vulkan\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -235,7 +236,7 @@
     <ClInclude Include="src\render_binding\allocator.h" />
     <ClInclude Include="src\render_binding\bindings.h" />
     <ClInclude Include="src\render_binding\bufferObjects.h" />
-    <ClInclude Include="src\render_binding\gpuResources.h" />
+    <ClInclude Include="src\render_binding\gpuBuffer.h" />
     <ClInclude Include="src\render_binding\imageArray.h" />
     <ClInclude Include="src\render_binding\imageSampler.h" />
     <ClInclude Include="src\render_binding\imageView.h" />
@@ -302,7 +303,7 @@
     <ClCompile Include="src\render_binding\allocator.cpp" />
     <ClCompile Include="src\render_binding\binding.cpp" />
     <ClCompile Include="src\render_binding\descriptorWrites.cpp" />
-    <ClCompile Include="src\render_binding\gpuResources.cpp" />
+    <ClCompile Include="src\render_binding\gpuBuffer.cpp" />
     <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
     <ClCompile Include="src\render_binding\imageArray.cpp" />
     <ClCompile Include="src\render_binding\imageSampler.cpp" />

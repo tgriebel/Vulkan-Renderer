@@ -1,6 +1,6 @@
 #include "shaderBinding.h"
 #include "bindings.h"
-#include "gpuResources.h"
+#include "gpuBuffer.h"
 #include "../render_state/rhi.h"
 #include "../render_core/gpuImage.h"
 #include "../render_binding/imageArray.h"

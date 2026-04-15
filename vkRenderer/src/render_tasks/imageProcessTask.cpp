@@ -2,7 +2,7 @@
 
 #include <SysCore/systemUtils.h>
 
-#include "../render_binding/gpuResources.h"
+#include "../render_binding/gpuBuffer.h"
 #include "../render_binding/bindings.h"
 
 

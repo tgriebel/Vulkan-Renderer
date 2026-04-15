@@ -3,7 +3,7 @@
 #include <SysCore/serializer.h>
 #include <GfxCore/io/serializeClasses.h>
 
-#include "../render_binding/gpuResources.h"
+#include "../render_binding/gpuBuffer.h"
 #include "../render_binding/bindings.h"
 
 

@@ -68,7 +68,7 @@
     <ClCompile Include="src\render_binding\shaderBinding.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_binding\gpuResources.cpp">
+    <ClCompile Include="src\render_binding\gpuBuffer.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
     <ClCompile Include="src\render_binding\binding.cpp">
@@ -246,7 +246,7 @@
     <ClInclude Include="src\render_binding\allocator.h">
       <Filter>Binding</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_binding\gpuResources.h">
+    <ClInclude Include="src\render_binding\gpuBuffer.h">
       <Filter>Binding</Filter>
     </ClInclude>
     <ClInclude Include="src\render_binding\pipeline.h">
@@ -481,6 +481,9 @@
     </Filter>
     <Filter Include="Scene Types">
       <UniqueIdentifier>{e7483fae-7036-4ff0-8d39-67df20baef10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{b6895c32-66f2-43ce-863b-c26fb87b331a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

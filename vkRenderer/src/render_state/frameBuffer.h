@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../globals/common.h"
-#include "../render_binding/gpuResources.h"
+#include "../render_binding/gpuBuffer.h"
 #include "../render_core/gpuImage.h"
 #include "../render_core/renderResource.h"
 #include "rhi.h"

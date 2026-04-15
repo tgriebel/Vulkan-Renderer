@@ -1,4 +1,10 @@
 ﻿  appScene.cpp
+  gpuBuffer.cpp
+  gpuTransfer.cpp
+  shaderBinding.cpp
+  appMain.cpp
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.
