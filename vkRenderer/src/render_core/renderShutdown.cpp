@@ -4,6 +4,7 @@
 #include "renderer.h"
 #include "../scene/entity.h"
 #include "../globals/assetDefs.h"
+#include "../render_binding/allocator.h"
 
 #include "swapChain.h"
 
@@ -48,6 +49,8 @@ void Renderer::Destroy()
 	}
 
 	schedule.Clear();
+
+	AllocatorMemory::DestroyVmaAllocator();
 
 	context.Destroy( g_window );
 	

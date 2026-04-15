@@ -150,6 +150,60 @@ struct samplerState_t
 };
 
 
+inline uint32_t GetBppForFormat( const imageFmt_t format )
+{
+	switch( format )
+	{
+		case IMAGE_FMT_R_8:				return 1;
+		case IMAGE_FMT_R_16:			return 2;
+		case IMAGE_FMT_R_32:			return 4;
+		case IMAGE_FMT_D_16:			return 2;
+		case IMAGE_FMT_D24S8:			return 4;
+		case IMAGE_FMT_D_32:			return 4;
+		case IMAGE_FMT_D_32_S8:			return 8; // Padded
+		case IMAGE_FMT_RGB_8:			return 3;
+		case IMAGE_FMT_RGBA_8:			return 4;
+		case IMAGE_FMT_RGBA_8_UNORM:	return 4;
+		case IMAGE_FMT_ABGR_8:			return 4;
+		case IMAGE_FMT_BGR_8:			return 3;
+		case IMAGE_FMT_BGRA_8:			return 4;
+		case IMAGE_FMT_RG_32:			return 8;
+		case IMAGE_FMT_RGB_16:			return 6;
+		case IMAGE_FMT_RGBA_16:			return 8;
+		case IMAGE_FMT_R11G11B10:		return 4;
+
+		default: return 4;
+	}
+}
+
+
+inline uint32_t GetChannelsForFormat( const imageFmt_t format )
+{
+	switch( format )
+	{
+		case IMAGE_FMT_R_8:				return 1;
+		case IMAGE_FMT_R_16:			return 1;
+		case IMAGE_FMT_R_32:			return 1;
+		case IMAGE_FMT_D_16:			return 1;
+		case IMAGE_FMT_D24S8:			return 2;
+		case IMAGE_FMT_D_32:			return 1;
+		case IMAGE_FMT_D_32_S8:			return 2;
+		case IMAGE_FMT_RGB_8:			return 3;
+		case IMAGE_FMT_RGBA_8:			return 4;
+		case IMAGE_FMT_RGBA_8_UNORM:	return 4;
+		case IMAGE_FMT_ABGR_8:			return 4;
+		case IMAGE_FMT_BGR_8:			return 3;
+		case IMAGE_FMT_BGRA_8:			return 4;
+		case IMAGE_FMT_RG_32:			return 2;
+		case IMAGE_FMT_RGB_16:			return 3;
+		case IMAGE_FMT_RGBA_16:			return 4;
+		case IMAGE_FMT_R11G11B10:		return 3;
+
+		default: return 4;
+	}
+}
+
+
 inline bool operator==( const imageInfo_t& info0, const imageInfo_t& info1 )
 {
 	bool equal =

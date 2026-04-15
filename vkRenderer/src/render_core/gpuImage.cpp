@@ -65,32 +65,37 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 			imageInfo.pNext = &stencilUsage;
 		}
 
+		VmaAllocationCreateInfo allocCreateInfo = {};
+		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+		m_resourceMemoryRegion = memory.GetMemoryRegion();
+
 		const uint32_t bufferCount = GetBufferCount();
 		for ( uint32_t i = 0; i < bufferCount; ++i )
 		{
-			VK_CHECK_RESULT( vkCreateImage( context.device, &imageInfo, nullptr, &vk_image[ i ] ) );
+			VmaAllocation allocation;
+			VmaAllocationInfo allocInfo;
+
+			VkResult result = vmaCreateImage(
+				AllocatorMemory::GetVmaAllocator(),
+				&imageInfo, &allocCreateInfo,
+				&vk_image[ i ],
+				&allocation, &allocInfo );
+
+			if ( result != VK_SUCCESS ) {
+				throw std::runtime_error( "Image '" + std::string( name ) + "' [" + std::to_string( i ) + "] could not allocate "
+					+ std::to_string( imageInfo.extent.width ) + "x" + std::to_string( imageInfo.extent.height )
+					+ " (format: " + std::to_string( imageInfo.format ) + ")" );
+			}
+
+			m_allocation[ i ].m_allocation = allocation;
+			m_allocation[ i ].m_info = allocInfo;
 
 			VkMemoryRequirements memRequirements;
 			vkGetImageMemoryRequirements( context.device, vk_image[ i ], &memRequirements );
+			m_allocation[ i ].m_alignment = memRequirements.alignment;
 
-			//std::cout << "Allocating: " << name << " - " << memRequirements.size << " - " << memory.GetMemoryRegion() << std::endl;
-			//std::cout << "Memory Size Before: " << memory.GetSize() << std::endl;
-
-			m_resourceMemoryRegion = memory.GetMemoryRegion();
-			m_resourceByteCount = memRequirements.size;
-
-			VkMemoryAllocateInfo allocInfo{ };
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = memory.GetVkMemoryType();
-
-			if ( memory.Allocate( memRequirements.alignment, memRequirements.size, m_allocation ) ) {
-				vkBindImageMemory( context.device, vk_image[ i ], memory.GetVkObject(), m_allocation.GetOffset() );
-			} else {
-				throw std::runtime_error( "Buffer could not be allocated!" );
-			}
-
-			//std::cout << "Memory Size After: " << memory.GetSize() << std::endl;
+			m_resourceByteCount = allocInfo.size;
 
 			if ( m_dbgName != "" )
 			{
@@ -117,10 +122,11 @@ void GpuImage::Destroy()
 				vk_view[ i ] = VK_NULL_HANDLE;
 			}
 			if ( vk_image[ i ] != VK_NULL_HANDLE ) {
-				vkDestroyImage( context.device, vk_image[ i ], nullptr );
+				vmaDestroyImage( AllocatorMemory::GetVmaAllocator(), vk_image[ i ], m_allocation[ i ].m_allocation );
 				vk_image[ i ] = VK_NULL_HANDLE;
+				m_allocation[ i ].m_allocation = VK_NULL_HANDLE;
+				m_allocation[ i ].m_info = {};
 			}
 		}
-		m_allocation.Free();
 	}
 }

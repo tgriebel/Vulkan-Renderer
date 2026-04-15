@@ -94,7 +94,6 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 #ifdef USE_VULKAN
 	{
 		VkBufferUsageFlags usage = 0;
-		VkDeviceSize bufferSize = VkDeviceSize( elements ) * elementSizeBytes;
 		VkDeviceSize alignment = elementSizeBytes;
 
 		m_swapBuffering = swapBuffering;
@@ -115,6 +114,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 		} else if ( type == bufferType_t::INDEX ) {
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		} else if ( type == bufferType_t::STAGING ) {
+			alignment = 1;
 			usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		} else {
 			assert(0);
@@ -124,7 +124,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 		m_elementPadding = GpuBuffer::GetAlignedSize( elementSizeBytes, alignment );
 
 		VkDeviceSize stride = m_elementPadding;
-		bufferSize = stride * elements;
+		VkDeviceSize bufferSize = stride * elements;
 
 		VkBufferCreateInfo bufferInfo{ };
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -132,24 +132,32 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 		bufferInfo.usage = usage;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
+		VmaAllocationCreateInfo allocCreateInfo = {};
+		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+		if ( bufferMemory.GetMemoryRegion() == memoryRegion_t::SHARED || type == bufferType_t::STAGING ) {
+			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
+								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		}
+
 		for( uint32_t bufferId = 0; bufferId < m_bufferCount; ++bufferId )
 		{
-			VK_CHECK_RESULT( vkCreateBuffer( context.device, &bufferInfo, nullptr, &m_buffer[ bufferId ].buffer ) );
+			VmaAllocation allocation;
+			VmaAllocationInfo allocInfo;
 
-			VkMemoryRequirements memRequirements;
-			vkGetBufferMemoryRequirements( context.device, m_buffer[ bufferId ].buffer, &memRequirements );
+			VkResult result = vmaCreateBuffer(
+				AllocatorMemory::GetVmaAllocator(),
+				&bufferInfo, &allocCreateInfo,
+				&m_buffer[ bufferId ].buffer,
+				&allocation, &allocInfo );
 
-			VkMemoryAllocateInfo allocInfo{ };
-			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = bufferMemory.GetVkMemoryType();
-
-			if ( bufferMemory.Allocate( memRequirements.alignment, memRequirements.size, m_buffer[ bufferId ].alloc ) ) {
-				vkBindBufferMemory( context.device, m_buffer[ bufferId ].buffer, bufferMemory.GetVkObject(), m_buffer[ bufferId ].alloc.GetOffset() );
-			} else {
+			if ( result != VK_SUCCESS ) {
 				throw std::runtime_error( "Buffer '" + std::string( name ) + "' [" + std::to_string( bufferId ) + "] could not allocate "
-				+ std::to_string( memRequirements.size ) + " bytes (alignment: " + std::to_string( memRequirements.alignment ) + ")" );
+					+ std::to_string( bufferSize ) + " bytes (alignment: " + std::to_string( alignment ) + ")" );
 			}
+
+			m_buffer[ bufferId ].alloc.m_allocation = allocation;
+			m_buffer[ bufferId ].alloc.m_info = allocInfo;
+			m_buffer[ bufferId ].alloc.m_alignment = alignment;
 
 			vk_SetObjectName( (uint64_t)m_buffer[ bufferId ].buffer, VK_OBJECT_TYPE_BUFFER, vk_BuildObjectName( "Buffer", name, bufferId ).c_str() );
 
@@ -172,7 +180,10 @@ void GpuBuffer::Destroy()
 	for ( uint32_t bufferId = 0; bufferId < m_bufferCount; ++bufferId )
 	{
 		if ( m_buffer[ bufferId ].buffer != VK_NULL_HANDLE ) {
-			vkDestroyBuffer( context.device, m_buffer[ bufferId ].buffer, nullptr );
+			vmaDestroyBuffer( AllocatorMemory::GetVmaAllocator(), m_buffer[ bufferId ].buffer, m_buffer[ bufferId ].alloc.m_allocation );
+			m_buffer[ bufferId ].buffer = VK_NULL_HANDLE;
+			m_buffer[ bufferId ].alloc.m_allocation = VK_NULL_HANDLE;
+			m_buffer[ bufferId ].alloc.m_info = {};
 		}
 		m_buffer[ bufferId ].offset = 0;
 	}

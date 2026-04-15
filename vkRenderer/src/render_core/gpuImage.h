@@ -28,7 +28,7 @@ protected:
 #ifdef USE_VULKAN
 	VkImage					vk_image[ MaxFrameStates ];
 	VkImageView				vk_view[ MaxFrameStates ];
-	Allocation				m_allocation;
+	Allocation				m_allocation[ MaxFrameStates ];
 #endif
 	gpuImageStateFlags_t	m_flags;
 	swapBuffering_t			m_swapBuffering;
@@ -67,7 +67,7 @@ public:
 
 	inline uint64_t GetAlignment()
 	{
-		return m_allocation.GetAlignment();
+		return m_allocation[ 0 ].GetAlignment();
 	}
 
 	inline uint32_t GetBufferCount() const

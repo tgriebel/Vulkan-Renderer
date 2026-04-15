@@ -739,7 +739,11 @@ void vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* image, const copyImag
 	regions.resize( copyParms.mipLevels );
 
 	const uint64_t bufferSize = buffer.GetSize();
-	const uint64_t alignmentOffset = buffer.GetAlignedSize( bufferSize, image->gpuImage->GetAlignment() );
+	// bufferOffset must be a multiple of the texel block size (up to 16 bytes for BC/RGBA32F)
+	// https://docs.vulkan.org/spec/latest/chapters/copies.html#VUID-vkCmdCopyBufferToImage-dstImage-07975
+	const uint32_t bpp = GetBppForFormat( image->info.fmt );
+	const uint64_t copyAlignment = Max( context.deviceProperties.limits.optimalBufferCopyOffsetAlignment, static_cast<VkDeviceSize>( bpp ) );
+	const uint64_t alignmentOffset = buffer.GetAlignedSize( bufferSize, copyAlignment );
 	buffer.SetPos( alignmentOffset );
 
 	for( uint32_t mip = 0; mip < copyParms.mipLevels; ++mip )

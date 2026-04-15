@@ -39,7 +39,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 
 	assert( ( m_image->info.type == IMAGE_TYPE_2D ) || ( m_image->info.type == IMAGE_TYPE_CUBE ) );
 
-	m_context->scratchMemory.AdjustOffset( 0, 0 );
+	//m_context->scratchMemory.AdjustOffset( 0, 0 );
 
 	m_cubeMip = ( m_image->info.type == IMAGE_TYPE_CUBE );
 	m_layers = m_cubeMip ? 6 : 1;
