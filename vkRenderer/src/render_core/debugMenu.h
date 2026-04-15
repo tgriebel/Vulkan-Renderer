@@ -16,6 +16,8 @@ struct renderDebugData_t
 
 extern renderDebugData_t g_renderDebugData;
 
+const char* FormatByteSize( const uint64_t bytes );
+
 #if defined( USE_IMGUI )
 void DebugMenuMaterial( const Material& mat );
 void DebugMenuMaterialEdit( Asset<Material>* matAsset );

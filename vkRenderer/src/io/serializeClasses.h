@@ -24,6 +24,10 @@ bool LoadBaked( Asset<T>& asset, bakedAssetInfo_t& info, const std::string& dir,
 
 		asset.Serialize( &s );
 
+		assert( info.name.length() > 0 );
+
+		asset.Rename( info.name );
+
 		info.sizeBytes = s.CurrentSize();
 		info.hash = Library::Handle( info.name.c_str() ).String();
 

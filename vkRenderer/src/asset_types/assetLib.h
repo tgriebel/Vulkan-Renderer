@@ -166,7 +166,7 @@ hdl_t AssetLib< AssetType >::Add( const char* name, const AssetType& asset, cons
 {
 	std::string assetName = name;
 	if( assetName.length() == 0 ) {
-		return INVALID_HDL;
+		throw std::runtime_error( "AssetLib::Add() - asset name is empty!" );
 	}
 	
 	uint64_t hash = Hash( assetName.c_str() );
@@ -201,7 +201,7 @@ hdl_t AssetLib< AssetType >::AddDeferred( const char* name, std::unique_ptr< Loa
 {
 	std::string assetName = name;
 	if ( assetName.length() == 0 ) {
-		return INVALID_HDL;
+		throw std::runtime_error( "AssetLib::AddDeferred() - asset name is empty!" );
 	}
 
 	std::unique_lock<std::mutex> lock( mtx, std::defer_lock );

@@ -822,9 +822,6 @@ void Renderer::CreateFramebuffers()
 			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 
-		resources.cubeFbColorImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-		resources.cubeFbColorImage->sampler.filter = SAMPLER_FILTER_BILINEAR;
-
 		imageInfo_t depthInfo = colorInfo;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		depthInfo.fmt = IMAGE_FMT_D_16;
@@ -854,14 +851,12 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
-		resources.mainColorResolvedImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 
 		resources.blurredImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
-		resources.blurredImage->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Depth-stencil views
@@ -919,7 +914,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "bloom", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
-		resources.bloom->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Temp image
@@ -960,7 +954,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, lifeTime )
 		);
-		resources.previousLum->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 
 	// Luminance MIP-chain
@@ -981,7 +974,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
-		resources.currentLum->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
 	}
 }
 

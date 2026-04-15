@@ -46,6 +46,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	{
 		RenderResource::Create( resourceType_t::IMAGE, lifetime );
 	}
+	assert( name != nullptr && name[0] != '\0' );
 	m_isViewOwned = false;
 	m_info = info;
 	m_flags = flags;

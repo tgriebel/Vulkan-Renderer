@@ -694,6 +694,25 @@ void DrawAssetDebugMenu()
 		const uint32_t texCount = TextureLib().Count();
 		if ( ImGui::TreeNode( "Textures", "Textures (%i)", texCount ) )
 		{
+			uint64_t totalCpuBytes = 0;
+			uint64_t totalGpuBytes = 0;
+			for ( uint32_t t = 0; t < texCount; ++t )
+			{
+				const Image& tex = TextureLib().Find( t )->Get();
+				if ( tex.cpuImage != nullptr ) {
+					totalCpuBytes += tex.cpuImage->GetByteCount();
+				}
+				if ( tex.gpuImage != nullptr ) {
+					totalGpuBytes += tex.gpuImage->GetByteCount();
+				}
+			}
+			ImGui::Text( "CPU: %s", FormatByteSize( totalCpuBytes ) );
+			ImGui::SameLine();
+			ImGui::Text( "  |  GPU: %s", FormatByteSize( totalGpuBytes ) );
+			ImGui::SameLine();
+			ImGui::Text( "  |  Total: %s", FormatByteSize( totalCpuBytes + totalGpuBytes ) );
+			ImGui::Separator();
+
 			for ( uint32_t t = 0; t < texCount; ++t )
 			{
 				Asset<Image>* texAsset = TextureLib().Find( t );

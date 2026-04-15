@@ -35,7 +35,7 @@ private:
 	std::string				m_imageExt;
 	AssetLib<Model>*		m_modelLib;
 	AssetLib<Material>*		m_materialLib;
-	 AssetLib<Image>*		m_imageLib;
+	AssetLib<Image>*		m_imageLib;
 public:
 	AssetBaker() {}
 

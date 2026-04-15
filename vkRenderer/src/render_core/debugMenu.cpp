@@ -18,6 +18,19 @@ renderDebugData_t g_renderDebugData;
 
 extern imguiControls_t g_imguiControls;
 
+const char* FormatByteSize( const uint64_t bytes )
+{
+	static char buffer[ 64 ];
+	if ( bytes >= MB_1 ) {
+		snprintf( buffer, sizeof( buffer ), "%.2f MB", BYTES_TO_MB( bytes ) );
+	} else if ( bytes >= KB_1 ) {
+		snprintf( buffer, sizeof( buffer ), "%.1f KB", BYTES_TO_KB( bytes ) );
+	} else {
+		snprintf( buffer, sizeof( buffer ), "%llu bytes", bytes );
+	}
+	return buffer;
+}
+
 static const int defaultWidth = 100;
 
 struct ImguiStyle
@@ -375,11 +388,19 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 			ImGui::TableNextColumn();	ImGui::Text( "%u", texture.gpuImage->GetId() );
 			ImGui::TableNextRow();
 
-			ImGui::TableNextColumn();	ImGui::Text( "Size(bytes)" );
+			ImGui::TableNextColumn();	ImGui::Text( "CPU Size" );
 			if( texture.cpuImage != nullptr ) {
-				ImGui::TableNextColumn();	ImGui::Text( "%u", texture.cpuImage->GetByteCount() );
+				ImGui::TableNextColumn();	ImGui::Text( "%s", FormatByteSize( texture.cpuImage->GetByteCount() ) );
 			} else {
 				ImGui::TableNextColumn();	ImGui::Text( "No CPU Mem" );
+			}
+			ImGui::TableNextRow();
+
+			ImGui::TableNextColumn();	ImGui::Text( "GPU Size" );
+			if( texture.gpuImage != nullptr ) {
+				ImGui::TableNextColumn();	ImGui::Text( "%s", FormatByteSize( texture.gpuImage->GetByteCount() ) );
+			} else {
+				ImGui::TableNextColumn();	ImGui::Text( "No GPU Mem" );
 			}
 			ImGui::TableNextRow();
 
