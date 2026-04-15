@@ -212,6 +212,11 @@ public:
 	void								ShutdownGPU();
 	void								Resize();
 
+	inline void							SetSchedule( const RenderSchedule* schedule )
+	{
+
+	}
+
 	// Debug
 	uint32_t							OutputImageCount();
 	const Image*						FindOutputImage( const uint32_t id );

@@ -203,6 +203,9 @@
     <ClCompile Include="src\render_resources\imageView.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\schedule.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -431,6 +434,9 @@
     </ClInclude>
     <ClInclude Include="src\render_resources\imageView.h">
       <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\schedule.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
