@@ -206,6 +206,9 @@
     <ClCompile Include="src\render_core\schedule.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\renderContext.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -440,6 +443,9 @@
     </ClInclude>
     <ClInclude Include="src\app\imguiInterface.h">
       <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\renderContext.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
