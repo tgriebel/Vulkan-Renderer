@@ -87,6 +87,7 @@ MakeCVar( STRING,	c_scene, "chess.json" );
 MakeCVar( STRING,	r_cubemapName, "chess" );
 MakeCVar( BOOL,		c_bakeAssets, false );
 MakeCVar( BOOL,		c_loadBakedAssets, true );
+MakeCVar( BOOL,		s_threadedLoad, true );
 MakeCVar( BOOL,		r_shadows, true );
 MakeCVar( BOOL,		r_downsampleScene, true );
 MakeCVar( BOOL,		r_bloom, true );

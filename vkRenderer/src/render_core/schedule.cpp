@@ -31,8 +31,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.createInfos;
 
 			// Temp image
-			{
-				imageInfo_t imgInfo {};
+			imageInfo_t imgInfo {};
+			{				
 				imgInfo.width = 32;
 				imgInfo.height = 32;
 				imgInfo.mipLevels = 1;

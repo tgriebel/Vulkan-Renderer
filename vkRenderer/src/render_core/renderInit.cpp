@@ -768,8 +768,8 @@ void Renderer::CreateFramebuffers()
 	// Cube images
 	{
 		imageInfo_t colorInfo{};
-		colorInfo.width = 512;
-		colorInfo.height = 512;
+		colorInfo.width = 1024;
+		colorInfo.height = 1024;
 		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
 		colorInfo.layers = 6;
 		colorInfo.subsamples = IMAGE_SMP_1;

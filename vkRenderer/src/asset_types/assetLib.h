@@ -10,6 +10,9 @@
 
 #include <SysCore/handle.h>
 #include <GfxCore/core/util.h>
+#include "../app/cvar.h"
+
+extern CVar s_threadedLoad;
 
 class Library
 {
@@ -114,7 +117,7 @@ static inline void ThreadLoad( AssetInterface* asset, const bool rebake = false 
 template< class AssetType >
 void AssetLib< AssetType >::LoadAll( const bool rebake )
 {
-	static bool useThreading = true;
+	const bool useThreading = s_threadedLoad.GetBool();
 
 	std::vector< std::thread > threadPool;
 	threadPool.reserve( pendingLoad.size() );
