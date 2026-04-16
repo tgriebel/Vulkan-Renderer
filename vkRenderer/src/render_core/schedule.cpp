@@ -11,14 +11,10 @@
 #include "../render_tasks/imguiTask.h"
 #include "../globals/assetDefs.h"
 
+static availableTasks_t tasks;
+
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, RenderSchedule* schedule )
 {
-	ImageProcessTask* diffuseIBL = nullptr;
-	ImageReadbackTask* imageDiffuseIblReadbackTask = nullptr;
-
-	ImageProcessTask* specularIBL = nullptr;
-	ImageReadbackTask* imageSpecularIblReadBackTask = nullptr;
-
 	if( config.useCubeViews )
 	{
 		if( config.computeDiffuseIbl )
@@ -52,7 +48,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.createInfos = { &imgInfo };
 			}
 
-			diffuseIBL = new ImageProcessTask( info );
+			tasks.diffuseIBL = new ImageProcessTask( info );
 
 			// Readback
 			{
@@ -60,7 +56,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 				imageReadBackCreateInfo_t info {};
 				info.name = "DiffuseIblReadback";
-				info.img = diffuseIBL->GetOutputImage();
+				info.img = tasks.diffuseIBL->GetOutputImage();
 				info.context = renderContext;
 				info.resources = resources;
 				info.fileName = fileName.c_str();
@@ -68,7 +64,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.flags |= imageReadbackFlags_t::CUBEMAP;
 				info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-				imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
+				tasks.imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
 			}
 		}
 
@@ -98,14 +94,14 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.createInfos = { &imgInfo };
 			}
 
-			specularIBL = new ImageProcessTask( info );
+			tasks.specularIBL = new ImageProcessTask( info );
 
 			{
 				const std::string fileName = std::string( config.cubemapName ) + "_specIbl.img";
 
 				imageReadBackCreateInfo_t info {};
 				info.name = "SpecularIblReadback";
-				info.img = specularIBL->GetOutputImage();
+				info.img = tasks.specularIBL->GetOutputImage();
 				info.context = renderContext;
 				info.resources = resources;
 				info.fileName = fileName.c_str();
@@ -115,12 +111,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.flags |= imageReadbackFlags_t::CUBEMAP;
 				info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-				imageSpecularIblReadBackTask = new ImageReadbackTask( info );
+				tasks.imageSpecularIblReadBackTask = new ImageReadbackTask( info );
 			}
 		}
 	}
 
-	ImageShaderTask* resolve = nullptr;
 	{
 		imageShaderCreateInfo_t info = {};
 		info.name = "ResolveMain";
@@ -134,15 +129,15 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.resources = resources;
 		info.inputImages = 3;
 
-		resolve = new ImageShaderTask( info );
+		tasks.resolve = new ImageShaderTask( info );
 
-		resolve->SetSourceImage( 0, resources->mainColorImage );
-		resolve->SetSourceImage( 1, &resources->depthImageView );
-		resolve->SetSourceImage( 2, &resources->stencilImageView );
+		tasks.resolve->SetSourceImage( 0, resources->mainColorImage );
+		tasks.resolve->SetSourceImage( 1, &resources->depthImageView );
+		tasks.resolve->SetSourceImage( 2, &resources->stencilImageView );
 	}
 
-	ImageProcessTask* gaussianTask = nullptr;
-	if( config.gaussianBlur ) {
+	if( config.gaussianBlur )
+	{
 		imageProcessCreateInfo_t info {};
 		info.name = "Separable Gaussian";
 		info.context = renderContext;
@@ -152,12 +147,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
 		info.baseMip = 0;
 
-		gaussianTask = new ImageProcessTask( info );
+		tasks.gaussianTask = new ImageProcessTask( info );
 	}
 
-
-	CopyImageTask* copyPreviousLuminance = nullptr;
-	ImageProcessTask* luminanceSceneAvg = nullptr;
 
 	if( config.autoExposure )
 	{
@@ -187,7 +179,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			dstCopy.height = 1;
 			dstCopy.depth = 1;
 
-			copyPreviousLuminance = new CopyImageTask( resources->currentLum, srcCopy, resources->previousLum, dstCopy );
+			tasks.copyPreviousLuminance = new CopyImageTask( resources->currentLum, srcCopy, resources->previousLum, dstCopy );
 		}
 
 		// Average scene luminance
@@ -203,11 +195,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.progressiveSampling = true;
 			info.progName = "LuminanceDownsample";
 
-			luminanceSceneAvg = new ImageProcessTask( info );
+			tasks.luminanceSceneAvg = new ImageProcessTask( info );
 		}
 	}
 
-	ImageProcessTask* mipTask = nullptr;
+
 	if( config.downsampleScene )
 	{
 		imageProcessCreateInfo_t info {};
@@ -219,11 +211,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progName = "DownSample";
 		info.baseMip = 1;
 
-		mipTask = new ImageProcessTask( info );
+		tasks.mipTask = new ImageProcessTask( info );
 	}
 
-	ImageProcessTask* bloomDownsampleTask = nullptr;
-	ImageProcessTask* bloomUpsampleTask = nullptr;
+
 	if( config.bloom )
 	{
 		imageProcessCreateInfo_t info {};
@@ -237,7 +228,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progressiveSampling = true;
 		info.progName = "BloomDownsample";
 
-		bloomDownsampleTask = new ImageProcessTask( info );
+		tasks.bloomDownsampleTask = new ImageProcessTask( info );
 
 		info.name = "BloomUpsample";
 		info.sourceImage = resources->bloom;
@@ -246,10 +237,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.upsampleProcess = true;
 		info.progName = "BloomUpsample";
 
-		bloomUpsampleTask = new ImageProcessTask( info );
+		tasks.bloomUpsampleTask = new ImageProcessTask( info );
 	}
 
-	ImageProcessTask* mipCubeTask = nullptr;
+
 	if( config.useCubeViews )
 	{
 		imageProcessCreateInfo_t info {};
@@ -260,10 +251,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progressiveSampling = true;
 		info.baseMip = 1;
 
-		mipCubeTask = new ImageProcessTask( info );
+		tasks.mipCubeTask = new ImageProcessTask( info );
 	}
 
-	ImageReadbackTask* imageCubemapReadBackTask = nullptr;
+
 	if( config.useCubeViews )
 	{
 		const std::string fileName = std::string( config.cubemapName ) + "_env.img";
@@ -280,11 +271,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.flags |= imageReadbackFlags_t::CUBEMAP;
 		info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-		imageCubemapReadBackTask = new ImageReadbackTask( info );
+		tasks.imageCubemapReadBackTask = new ImageReadbackTask( info );
 	}
 
-	ImageShaderTask* brdfLutTask = nullptr;
-	ImageReadbackTask* readbackBrdfLut = nullptr;
+
 	if( config.computeBrdfLut )
 	{
 		{
@@ -310,7 +300,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.createInfos = { &imgInfo };
 			}
 
-			brdfLutTask = new ImageShaderTask( info );
+			tasks.brdfLutTask = new ImageShaderTask( info );
 		}
 
 		{
@@ -318,18 +308,18 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			imageReadBackCreateInfo_t info {};
 			info.name = "BrdfLutReadback";
-			info.img = brdfLutTask->GetOutputImage();
+			info.img = tasks.brdfLutTask->GetOutputImage();
 			info.context = renderContext;
 			info.resources = resources;
 			info.fileName = fileName.c_str();
 			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
 			info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
-			readbackBrdfLut = new ImageReadbackTask( info );
+			tasks.readbackBrdfLut = new ImageReadbackTask( info );
 		}
 	}
 
-	ImageReadbackTask* screenshotReadback = nullptr;
+
 	if( config.screenshot )
 	{
 		imageReadBackCreateInfo_t info {};
@@ -341,7 +331,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.flags |= imageReadbackFlags_t::SCREENSHOT;
 		info.img = resources->mainColorResolvedImage;
 
-		screenshotReadback = new ImageReadbackTask( info );
+		tasks.screenshotReadback = new ImageReadbackTask( info );
 	}
 
 	for( uint32_t i = 0; i < MaxShadowViews; ++i ) {
@@ -353,41 +343,41 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		if( config.computeDiffuseIbl )
 		{
-			schedule->Link( diffuseIBL );
-			schedule->Link( imageDiffuseIblReadbackTask );
+			schedule->Link( tasks.diffuseIBL );
+			schedule->Link( tasks.imageDiffuseIblReadbackTask );
 		}
 		if( config.computeSpecularIBL )
 		{
-			schedule->Link( specularIBL );
-			schedule->Link( imageSpecularIblReadBackTask );
+			schedule->Link( tasks.specularIBL );
+			schedule->Link( tasks.imageSpecularIblReadBackTask );
 		}
-		schedule->Link( mipCubeTask );
-		schedule->Link( imageCubemapReadBackTask );
+		schedule->Link( tasks.mipCubeTask );
+		schedule->Link( tasks.imageCubemapReadBackTask );
 	}
-	if( brdfLutTask ) {
-		schedule->Link( brdfLutTask );
+	if( tasks.brdfLutTask ) {
+		schedule->Link( tasks.brdfLutTask );
 	}
-	if( readbackBrdfLut ) {
-		schedule->Link( readbackBrdfLut );
+	if( tasks.readbackBrdfLut ) {
+		schedule->Link( tasks.readbackBrdfLut );
 	}
-	schedule->Link( resolve );
+	schedule->Link( tasks.resolve );
 
 	if( config.screenshot ) {
-		schedule->Link( screenshotReadback );
+		schedule->Link( tasks.screenshotReadback );
 	}
 	if( config.autoExposure ) {
-		schedule->Link( copyPreviousLuminance );
-		schedule->Link( luminanceSceneAvg );
+		schedule->Link( tasks.copyPreviousLuminance );
+		schedule->Link( tasks.luminanceSceneAvg );
 	}
 	if( config.bloom ) {
-		schedule->Link( bloomDownsampleTask );
-		schedule->Link( bloomUpsampleTask );
+		schedule->Link( tasks.bloomDownsampleTask );
+		schedule->Link( tasks.bloomUpsampleTask );
 	}
 	if( config.downsampleScene ) {
-		schedule->Link( mipTask );
+		schedule->Link( tasks.mipTask );
 	}
 	if( config.gaussianBlur ) {
-		schedule->Link( gaussianTask );
+		schedule->Link( tasks.gaussianTask );
 	}
 	schedule->Link( new RenderTask( viewContext->view2Ds[ 0 ], DRAWPASS_2D, DRAWPASS_2D ) );
 	schedule->Link( new ImguiTask( viewContext->view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], renderContext, resources, false ) );
