@@ -26,10 +26,6 @@ using bindSetMap_t = std::unordered_map<uint64_t, ShaderBindSet>;
 
 #define USE_OPENGL_CONVENTIONS 1
 
-#if defined( USE_IMGUI )
-extern imguiControls_t g_imguiControls;
-#endif
-
 extern Window						g_window;
 extern SwapChain					g_swapChain;
 

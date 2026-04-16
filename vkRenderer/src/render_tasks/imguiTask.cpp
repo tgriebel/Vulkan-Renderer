@@ -9,7 +9,9 @@
 #include "../../../external/imgui/backends/imgui_impl_glfw.h"
 #include "../../../external/imgui/backends/imgui_impl_vulkan.h"
 
-extern imguiControls_t			g_imguiControls;
+#include "../app/imguiInterface.h"
+
+extern imguiControls_t g_imguiControls;
 #endif
 
 struct imguiTaskRenderData_t

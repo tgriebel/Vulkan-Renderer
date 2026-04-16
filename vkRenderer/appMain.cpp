@@ -21,6 +21,8 @@
 #include "scenes/chessScene.h"
 #include "scenes/nesScene.h"
 
+#include "src/app/imguiInterface.h"
+
 AssetManager						g_assets;
 Scene*								g_scene;
 Renderer							g_renderer;

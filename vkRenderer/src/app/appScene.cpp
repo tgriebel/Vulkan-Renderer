@@ -9,12 +9,14 @@
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/imgui_internal.h"
 #include "../../../external/imgui/imgui.h"
+#include "imguiInterface.h"
 #endif
 
 #include "../render_core/debugMenu.h"
 #include "../render_core/renderer.h"
 #include "../render_core/allocator.h"
 #include "../globals/assetDefs.h"
+
 extern Scene* g_scene;
 extern Renderer g_renderer;
 
@@ -271,6 +273,41 @@ void InitScene( Scene* scene )
 		scene->lights[ 2 ].dir = vec4f( 0.0f, 0.0f, -1.0f, 0.0f );
 		scene->lights[ 2 ].color = Color::Blue;
 		scene->lights[ 2 ].flags = LIGHT_FLAGS_SHADOW;
+	}
+
+	{
+		g_imguiControls.raytraceScene = false;
+		g_imguiControls.rasterizeScene = false;
+		g_imguiControls.rebuildRaytraceScene = false;
+		g_imguiControls.rebuildShaders = false;
+		g_imguiControls.shaderHdl = INVALID_HDL;
+		g_imguiControls.heightMapHeight = 1.0f;
+		g_imguiControls.roughnessScale = 1.0f;
+		g_imguiControls.roughnessBias = 0.0f;
+		g_imguiControls.metalnessScale = 1.0f;
+		g_imguiControls.metalnessBias = 0.0f;
+		g_imguiControls.shadowStrength = 0.99f;
+		g_imguiControls.postProcess.toneMapColor[ 0 ] = 1.0f;
+		g_imguiControls.postProcess.toneMapColor[ 1 ] = 1.0f;
+		g_imguiControls.postProcess.toneMapColor[ 2 ] = 1.0f;
+		g_imguiControls.postProcess.toneMapColor[ 3 ] = 1.0f;
+		g_imguiControls.postProcess.bloomEnable = true;
+		g_imguiControls.postProcess.bloomBlendWeight = 0.004f;
+		g_imguiControls.postProcess.autoExposureEnable = true;
+		g_imguiControls.postProcess.exposureMidGray = 0.18f;
+		g_imguiControls.postProcess.exposureAdaptation = 1.0f;
+		g_imguiControls.postProcess.exposureWhitePoint = 1.0f;
+		g_imguiControls.postProcess.exposureDarkLimit = 0.0005f;
+		g_imguiControls.postProcess.caEnable = true;
+		g_imguiControls.postProcess.caIntensity = 0.01f;
+		g_imguiControls.postProcess.dofEnable = false;
+		g_imguiControls.postProcess.dofFocalDepth = 0.01f;
+		g_imguiControls.postProcess.dofFocalRange = 0.25f;
+		g_imguiControls.dbgImageId = -1;
+		g_imguiControls.selectedFrameBufferImageId = -1;
+		g_imguiControls.isTextured = true;
+		g_imguiControls.selectedEntityId = -1;
+		g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
 	}
 }
 
@@ -632,28 +669,30 @@ void DrawSceneDebugMenu()
 
 		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );
 
+		postProcessControls_t& postProcess = g_imguiControls.postProcess;
+
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
 		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.roughnessScale, 0.0f, 1.0f );
 		ImGui::SliderFloat( "Roughness Bias", &g_imguiControls.roughnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Metalness Scale", &g_imguiControls.metalnessScale, 0.0f, 1.0f );
 		ImGui::SliderFloat( "Metalness Bias", &g_imguiControls.metalnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
-		ImGui::InputFloat( "Tone Map R", &g_imguiControls.toneMapColor[ 0 ], 0.1f, 1.0f );
-		ImGui::InputFloat( "Tone Map G", &g_imguiControls.toneMapColor[ 1 ], 0.1f, 1.0f );
-		ImGui::InputFloat( "Tone Map B", &g_imguiControls.toneMapColor[ 2 ], 0.1f, 1.0f );
-		ImGui::InputFloat( "Tone Map A", &g_imguiControls.toneMapColor[ 3 ], 0.1f, 1.0f );
-		ImGui::Checkbox( "Bloom Enabled", &g_imguiControls.bloomEnable );
-		ImGui::InputFloat( "Bloom Blend Weight", &g_imguiControls.bloomBlendWeight, 0.001f, 1.0f );
-		ImGui::Checkbox( "Auto-Exposure Enabled", &g_imguiControls.autoExposureEnable );
-		ImGui::InputFloat( "Exposure Middle-Gray", &g_imguiControls.exposureMidGray, 0.1f, 0.9f );
-		ImGui::InputFloat( "Exposure Adaptation", &g_imguiControls.exposureAdaptation, 0.01f, 5.0f );
-		ImGui::InputFloat( "Exposure WhitePoint", &g_imguiControls.exposureWhitePoint, 0.8f, 1000.0f );
-		ImGui::InputFloat( "Exposure Dark Cutoff", &g_imguiControls.exposureDarkLimit, 0.005f, 0.2f );
-		ImGui::Checkbox( "Chromatic Abberation Enable", &g_imguiControls.caEnable );
-		ImGui::InputFloat( "Chromatic Abberation Intensity", &g_imguiControls.caIntensity, 0.005f, 0.2f );
-		ImGui::Checkbox( "DoF Enabled", &g_imguiControls.dofEnable );
-		ImGui::SliderFloat( "DoF Focal Depth", &g_imguiControls.dofFocalDepth, 0.0f, 1.0f );
-		ImGui::SliderFloat( "DoF Focal Range", &g_imguiControls.dofFocalRange, 0.0f, 1.0f );
+		ImGui::InputFloat( "Tone Map R", &postProcess.toneMapColor[ 0 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Tone Map G", &postProcess.toneMapColor[ 1 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Tone Map B", &postProcess.toneMapColor[ 2 ], 0.1f, 1.0f );
+		ImGui::InputFloat( "Tone Map A", &postProcess.toneMapColor[ 3 ], 0.1f, 1.0f );
+		ImGui::Checkbox( "Bloom Enabled", &postProcess.bloomEnable );
+		ImGui::InputFloat( "Bloom Blend Weight", &postProcess.bloomBlendWeight, 0.001f, 1.0f );
+		ImGui::Checkbox( "Auto-Exposure Enabled", &postProcess.autoExposureEnable );
+		ImGui::InputFloat( "Exposure Middle-Gray", &postProcess.exposureMidGray, 0.1f, 0.9f );
+		ImGui::InputFloat( "Exposure Adaptation", &postProcess.exposureAdaptation, 0.01f, 5.0f );
+		ImGui::InputFloat( "Exposure WhitePoint", &postProcess.exposureWhitePoint, 0.8f, 1000.0f );
+		ImGui::InputFloat( "Exposure Dark Cutoff", &postProcess.exposureDarkLimit, 0.005f, 0.2f );
+		ImGui::Checkbox( "Chromatic Abberation Enable", &postProcess.caEnable );
+		ImGui::InputFloat( "Chromatic Abberation Intensity", &postProcess.caIntensity, 0.005f, 0.2f );
+		ImGui::Checkbox( "DoF Enabled", &postProcess.dofEnable );
+		ImGui::SliderFloat( "DoF Focal Depth", &postProcess.dofFocalDepth, 0.0f, 1.0f );
+		ImGui::SliderFloat( "DoF Focal Range", &postProcess.dofFocalRange, 0.0f, 1.0f );
 		ImGui::EndTabItem();
 	}
 #endif

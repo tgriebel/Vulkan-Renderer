@@ -1,9 +1,6 @@
 #include "chessScene.h"
 #include "../src/globals/assetDefs.h"
 
-#if defined( USE_IMGUI )
-extern imguiControls_t	g_imguiControls;
-#endif
 extern Window			g_window;
 
 struct pieceMappingInfo_t {

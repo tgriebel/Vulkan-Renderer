@@ -199,6 +199,7 @@
     <FxCompile Include="shaders\util_hlsl.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <ClInclude Include="src\app\imguiInterface.h" />
     <ClInclude Include="src\asset_types\asset.h" />
     <ClInclude Include="src\asset_types\assetHandle.h" />
     <ClInclude Include="src\asset_types\assetLib.h" />

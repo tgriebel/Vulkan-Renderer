@@ -6,6 +6,10 @@
 #include "../render_resources/gpuBuffer.h"
 #include "../render_binding/bindings.h"
 
+#include "../app/imguiInterface.h"
+
+extern imguiControls_t g_imguiControls;
+
 
 std::string ImageReadbackTask::AsString() const
 {

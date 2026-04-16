@@ -16,6 +16,8 @@ renderDebugData_t g_renderDebugData;
 
 #include "debugMenu.h"
 
+#include "../app/imguiInterface.h"
+
 extern imguiControls_t g_imguiControls;
 
 const char* FormatByteSize( const uint64_t bytes )

@@ -522,39 +522,6 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 #ifdef USE_GLFW
 	ImGui_ImplGlfw_NewFrame();
 #endif
-
-	g_imguiControls.raytraceScene = false;
-	g_imguiControls.rasterizeScene = false;
-	g_imguiControls.rebuildRaytraceScene = false;
-	g_imguiControls.rebuildShaders = false;
-	g_imguiControls.shaderHdl = INVALID_HDL;
-	g_imguiControls.heightMapHeight = 1.0f;
-	g_imguiControls.roughnessScale = 1.0f;
-	g_imguiControls.roughnessBias = 0.0f;
-	g_imguiControls.metalnessScale = 1.0f;
-	g_imguiControls.metalnessBias = 0.0f;
-	g_imguiControls.shadowStrength = 0.99f;
-	g_imguiControls.toneMapColor[ 0 ] = 1.0f;
-	g_imguiControls.toneMapColor[ 1 ] = 1.0f;
-	g_imguiControls.toneMapColor[ 2 ] = 1.0f;
-	g_imguiControls.toneMapColor[ 3 ] = 1.0f;
-	g_imguiControls.bloomEnable = true;
-	g_imguiControls.bloomBlendWeight = 0.004f;
-	g_imguiControls.autoExposureEnable = true;
-	g_imguiControls.exposureMidGray = 0.18f;
-	g_imguiControls.exposureAdaptation = 1.0f;
-	g_imguiControls.exposureWhitePoint = 1.0f;
-	g_imguiControls.exposureDarkLimit = 0.0005f;
-	g_imguiControls.caEnable = true;
-	g_imguiControls.caIntensity = 0.01f;
-	g_imguiControls.dofEnable = false;
-	g_imguiControls.dofFocalDepth = 0.01f;
-	g_imguiControls.dofFocalRange = 0.25f;
-	g_imguiControls.dbgImageId = -1;
-	g_imguiControls.selectedFrameBufferImageId = -1;
-	g_imguiControls.isTextured = true;
-	g_imguiControls.selectedEntityId = -1;
-	g_imguiControls.selectedModelOrigin = vec3f( 0.0f );
 #endif
 }
 

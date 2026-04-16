@@ -438,6 +438,9 @@
     <ClInclude Include="src\render_core\schedule.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\app\imguiInterface.h">
+      <Filter>app</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
