@@ -9,6 +9,55 @@ PS_LAYOUT_STANDARD( Texture2D )
 PS_LAYOUT_MRT_1_OUT
 #endif
 
+
+float3 DecodeNormal( const float3 normalMapTexel )
+{
+	return ( 2.0f * normalMapTexel - float3( 1.0f, 1.0f, 1.0f ) );	
+}
+
+
+//float ApplyLight( const light_t light, float3 worldPosition )
+//{
+//
+//}
+
+
+float ApplyShadow( const uint shadowViewId, float3 worldPosition )
+{
+	float shadowing = 1.0f; // Assumes spot-light, should be 0.0f for normal lights
+	
+	if ( shadowViewId != 0xFF )
+	{
+		const view_t shadowView = views[ shadowViewId ];
+		
+		const uint shadowMapTexId = shadowViewId;
+		
+		Texture2D shadowMap = codeSamplers[ shadowMapTexId ];
+
+		const float shadowBias = 0.001f;
+	
+		float4 lsPosition = mul( mul( shadowView.projMat, shadowView.viewMat ), float4( worldPosition.xyz, 1.0f ) );
+		lsPosition.xyz /= lsPosition.w;
+
+		lsPosition.z -= shadowBias;
+
+		const float2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
+
+		if ( length( ndc.xy - float2( 0.5f, 0.5f ) ) < 0.5f )
+		{
+			const float shadowMapSample = shadowMap.Sample( depthShadowSampler, ndc.xy ).r;
+
+			shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
+		}
+		else
+		{
+			shadowing = 0.0f;
+		}
+	}
+	return shadowing;
+}
+
+
 #ifdef USE_MRT
 PS_Output_MRT PSMain( PS_Input input )
 #else
@@ -41,23 +90,31 @@ PS_Output PSMain( PS_Input input )
 	float3 normalSample = float3( 0.0f, 0.0f, 1.0f );
 	float roughnessSample = material.roughness;
 	float metalnessSample = material.metalness;
-
+	
 	float2 uv0 = input.uv0.xy;
 	
-	if ( isTextured && albedoTexId >= 0 ) {
-		albedoSample = SrgbToLinear( texSampler[ albedoTexId ].Sample( bilinearSamplerWrap, uv0 ) );
+	if ( isTextured && albedoTexId >= 0 )
+	{
+		Texture2D albedoTex = texSampler[ albedoTexId ];
+		albedoSample = SrgbToLinear( albedoTex.Sample( bilinearSamplerWrap, uv0 ) );
 	}
 
-	if ( isTextured && normalTexId >= 0 ) {
-		normalSample = 2.0f * texSampler[ normalTexId ].Sample( bilinearSamplerWrap, uv0 ).rgb - float3( 1.0f, 1.0f, 1.0f );
+	if ( isTextured && normalTexId >= 0 )
+	{
+		Texture2D normalTex = texSampler[ normalTexId ];
+		normalSample = DecodeNormal( normalTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
 	}
 
-	if ( isTextured && roughnessTexId >= 0 ) {
-		roughnessSample = texSampler[ roughnessTexId ].Sample( bilinearSamplerWrap, uv0 ).r;
+	if ( isTextured && roughnessTexId >= 0 )
+	{
+		Texture2D roughnessTex = texSampler[ roughnessTexId ];
+		roughnessSample = roughnessTex.Sample( bilinearSamplerWrap, uv0 ).r;
 	}
 
-	if ( isTextured && metalnessTexId >= 0 ) {
-		metalnessSample = texSampler[ metalnessTexId ].Sample( bilinearSamplerWrap, uv0 ).r;
+	if ( isTextured && metalnessTexId >= 0 )
+	{
+		Texture2D metalnessTex = texSampler[ metalnessTexId ];
+		metalnessSample = metalnessTex.Sample( bilinearSamplerWrap, uv0 ).r;
 	}
 
 	const float perceptualRoughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
@@ -120,31 +177,9 @@ PS_Output PSMain( PS_Input input )
         const float spotFalloff = 1.0f;
         const float3 radiance   = attenuation * spotFalloff * light.intensity.rgb;
 
-        float shadowing = 1.0f;
         const uint shadowViewId = light.shadowViewId;
-        if ( shadowViewId != 0xFF )
-        {
-            const view_t shadowView = views[ shadowViewId ];
-
-            const float shadowBias = 0.001f;
-
-            const uint shadowMapTexId = shadowViewId;
-            float4 lsPosition = mul( mul( shadowView.projMat, shadowView.viewMat ), float4( input.worldPosition.xyz, 1.0f ) );
-            lsPosition.xyz /= lsPosition.w;
-
-            lsPosition.z -= shadowBias;
-
-            const float2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
-
-            if ( length( ndc.xy - float2( 0.5f, 0.5f ) ) < 0.5f )
-            {
-                const float shadowMapSample = codeSamplers[ shadowMapTexId ].Sample( depthShadowSampler, ndc.xy ).r;
-
-                shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
-            } else {
-                shadowing = 0.0f; // Assumes spot-light, should be 0.0f for normal lights
-            }
-        }
+		
+		const float shadowing = ApplyShadow( shadowViewId, input.worldPosition.xyz );
 
         float3 diffuse = ( ( kD * albedoColor.rgb ) / PI + Fr ) * radiance * NoL;
 

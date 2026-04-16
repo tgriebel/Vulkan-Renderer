@@ -55,7 +55,7 @@ struct imguiControls_t
 	hdl_t					shaderHdl;
 	bool					rebuildShaders;
 	bool					raytraceScene;
-	bool						rasterizeScene;
+	bool					rasterizeScene;
 	bool					rebuildRaytraceScene;
 	bool					openModelImportFileDialog;
 	bool					openSceneFileDialog;

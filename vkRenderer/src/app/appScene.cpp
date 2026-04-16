@@ -27,6 +27,7 @@ extern void AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& ca
 extern Window					g_window;
 
 void DrawSceneDebugMenu();
+void DrawPostProcessDebugMenu();
 void DrawAssetDebugMenu();
 void DrawManipDebugMenu();
 void DrawEntityDebugMenu();
@@ -457,6 +458,7 @@ void UpdateScene( Scene* scene )
 	if ( ImGui::BeginTabBar( "Tabs" ) )
 	{
 		DrawSceneDebugMenu();
+		DrawPostProcessDebugMenu();
 		DrawAssetDebugMenu();
 		DrawManipDebugMenu();
 		DrawEntityDebugMenu();
@@ -669,14 +671,25 @@ void DrawSceneDebugMenu()
 
 		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );
 
-		postProcessControls_t& postProcess = g_imguiControls.postProcess;
-
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
 		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.roughnessScale, 0.0f, 1.0f );
 		ImGui::SliderFloat( "Roughness Bias", &g_imguiControls.roughnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Metalness Scale", &g_imguiControls.metalnessScale, 0.0f, 1.0f );
 		ImGui::SliderFloat( "Metalness Bias", &g_imguiControls.metalnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
+		ImGui::EndTabItem();
+	}
+#endif
+}
+
+
+void DrawPostProcessDebugMenu()
+{
+#if defined( USE_IMGUI )
+	if ( ImGui::BeginTabItem( "Post Process" ) )
+	{
+		postProcessControls_t& postProcess = g_imguiControls.postProcess;
+
 		ImGui::InputFloat( "Tone Map R", &postProcess.toneMapColor[ 0 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map G", &postProcess.toneMapColor[ 1 ], 0.1f, 1.0f );
 		ImGui::InputFloat( "Tone Map B", &postProcess.toneMapColor[ 2 ], 0.1f, 1.0f );
@@ -688,11 +701,12 @@ void DrawSceneDebugMenu()
 		ImGui::InputFloat( "Exposure Adaptation", &postProcess.exposureAdaptation, 0.01f, 5.0f );
 		ImGui::InputFloat( "Exposure WhitePoint", &postProcess.exposureWhitePoint, 0.8f, 1000.0f );
 		ImGui::InputFloat( "Exposure Dark Cutoff", &postProcess.exposureDarkLimit, 0.005f, 0.2f );
-		ImGui::Checkbox( "Chromatic Abberation Enable", &postProcess.caEnable );
-		ImGui::InputFloat( "Chromatic Abberation Intensity", &postProcess.caIntensity, 0.005f, 0.2f );
+		ImGui::Checkbox( "Chromatic Aberration Enable", &postProcess.caEnable );
+		ImGui::InputFloat( "Chromatic Aberration Intensity", &postProcess.caIntensity, 0.005f, 0.2f );
 		ImGui::Checkbox( "DoF Enabled", &postProcess.dofEnable );
 		ImGui::SliderFloat( "DoF Focal Depth", &postProcess.dofFocalDepth, 0.0f, 1.0f );
 		ImGui::SliderFloat( "DoF Focal Range", &postProcess.dofFocalRange, 0.0f, 1.0f );
+
 		ImGui::EndTabItem();
 	}
 #endif
