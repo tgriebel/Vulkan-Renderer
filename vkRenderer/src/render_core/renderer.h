@@ -221,8 +221,8 @@ private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
 	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;
 
-	static const uint32_t				ShadowMapWidth = 1024;
-	static const uint32_t				ShadowMapHeight = 1024;
+	static const uint32_t				ShadowMapWidth = 2048;
+	static const uint32_t				ShadowMapHeight = 2048;
 	static const uint32_t				OutlineStencilBit = 0x01;
 
 	renderConfig_t						config;

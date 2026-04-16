@@ -130,13 +130,15 @@ void ChessScene::Init()
 	}
 
 	const hdl_t diamondHdl = ModelLib().RetrieveHdl( "diamond" );
-	for ( int i = 0; i < MaxLights; ++i )
+
+	const uint32_t sceneLights = MaxLights;
+	for ( uint32_t i = 0; i < sceneLights; ++i )
 	{
 		Entity* ent = new Entity();
 		CreateEntityBounds( diamondHdl, *ent );
 		ent->materialHdl = MaterialLib().RetrieveHdl( "DEBUG_WIRE" );
 		ent->SetFlag( ENT_FLAG_WIREFRAME );
-		ent->name = ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str();
+		ent->name = ( "light" + std::to_string( i ) + "_dbg" ).c_str();
 		entities.push_back( ent );
 	}
 }
@@ -246,7 +248,7 @@ void ChessScene::Update()
 	const uint32_t lightCount = static_cast<uint32_t>( lights.size() );
 	for ( uint32_t i = 0; i < lightCount; ++i )
 	{
-		Entity* debugLight = FindEntity( ( "light" + std::string( { (char)( (int)'0' + i ) } ) + "_dbg" ).c_str() );
+		Entity* debugLight = FindEntity( ( "light" + std::to_string( i ) + "_dbg" ).c_str() );
 		if ( debugLight == nullptr ) {
 			continue;
 		}
