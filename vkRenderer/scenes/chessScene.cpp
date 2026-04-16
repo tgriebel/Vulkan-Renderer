@@ -56,7 +56,7 @@ static std::string GetName( pieceInfo_t& pieceInfo )
 	else {
 		name += "black";
 	}
-	name += "_" + GetModelName( pieceInfo.piece );
+	name += "_" + GetModelName( pieceInfo.pieceType );
 	name += "_" + std::to_string( pieceInfo.instance );
 	return name;
 }
@@ -111,8 +111,8 @@ void ChessScene::Init()
 			}
 
 			PieceEntity* pieceEnt = new PieceEntity( GetFile( j ), GetRank( i ) );
-			CreateEntityBounds( ModelLib().RetrieveHdl( GetModelName( pieceInfo.piece ).c_str() ), *pieceEnt );
-			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.piece, pieceInfo.instance );
+			CreateEntityBounds( ModelLib().RetrieveHdl( GetModelName( pieceInfo.pieceType ).c_str() ), *pieceEnt );
+			pieceEnt->handle = chessEngine.FindPiece( pieceInfo.team, pieceInfo.pieceType, pieceInfo.instance );
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
 
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
@@ -180,7 +180,7 @@ void ChessScene::Update()
 			command_t cmd;
 			cmd.instance = movedPieceInfo.instance;
 			cmd.team = movedPieceInfo.team;
-			cmd.pieceType = movedPieceInfo.piece;
+			cmd.pieceType = movedPieceInfo.pieceType;
 			cmd.x = action.x;
 			cmd.y = action.y;
 
@@ -212,7 +212,7 @@ void ChessScene::Update()
 			ent->outline = false;
 		}
 		const pieceInfo_t info = chessEngine.GetInfo( ent->handle );
-		int x, y;
+		num_t x, y;
 		if ( chessEngine.GetLocation( ent->handle, x, y ) ) {
 			ent->SetOrigin( GetSquareCenterForLocation( GetFile( x ), GetRank( y ) ) );
 		}
