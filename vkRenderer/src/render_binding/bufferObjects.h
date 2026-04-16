@@ -44,6 +44,7 @@ struct globalUboConstants_t
 	vec4f		exposure;
 	vec4f		exposure2;
 	vec4f		dof;
+	vec4f		chromaticAberration;
 	uint32_t	numSamples;
 	uint32_t	whiteId;
 	uint32_t	blackId;

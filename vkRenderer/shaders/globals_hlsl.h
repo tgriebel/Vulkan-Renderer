@@ -123,6 +123,7 @@ struct Globals_t
     float4  exposure;
     float4  exposure2;
     float4  dof;
+	float4  chromaticAberration;
     uint    numSamples;
     uint    whiteId;
     uint    blackId;

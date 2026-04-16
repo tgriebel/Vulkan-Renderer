@@ -649,6 +649,8 @@ void DrawSceneDebugMenu()
 		ImGui::InputFloat( "Exposure Adaptation", &g_imguiControls.exposureAdaptation, 0.01f, 5.0f );
 		ImGui::InputFloat( "Exposure WhitePoint", &g_imguiControls.exposureWhitePoint, 0.8f, 1000.0f );
 		ImGui::InputFloat( "Exposure Dark Cutoff", &g_imguiControls.exposureDarkLimit, 0.005f, 0.2f );
+		ImGui::Checkbox( "Chromatic Abberation Enable", &g_imguiControls.caEnable );
+		ImGui::InputFloat( "Chromatic Abberation Intensity", &g_imguiControls.caIntensity, 0.005f, 0.2f );
 		ImGui::Checkbox( "DoF Enabled", &g_imguiControls.dofEnable );
 		ImGui::SliderFloat( "DoF Focal Depth", &g_imguiControls.dofFocalDepth, 0.0f, 1.0f );
 		ImGui::SliderFloat( "DoF Focal Range", &g_imguiControls.dofFocalRange, 0.0f, 1.0f );

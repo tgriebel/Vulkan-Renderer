@@ -370,7 +370,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			1,
-			sizeof( viewBufferObject_t ),
+			sizeof( globalUboConstants_t ),
 			bufferType_t::UNIFORM,
 			renderContext.sharedMemory
 		);
@@ -545,6 +545,8 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	g_imguiControls.exposureAdaptation = 1.0f;
 	g_imguiControls.exposureWhitePoint = 1.0f;
 	g_imguiControls.exposureDarkLimit = 0.0005f;
+	g_imguiControls.caEnable = true;
+	g_imguiControls.caIntensity = 0.01f;
 	g_imguiControls.dofEnable = false;
 	g_imguiControls.dofFocalDepth = 0.01f;
 	g_imguiControls.dofFocalRange = 0.25f;

@@ -157,21 +157,24 @@ struct imguiControls_t
 	float				metalnessBias;
 	float				shadowStrength;
 	float				toneMapColor[ 4 ];
-	bool				bloomEnable;
 	float				bloomBlendWeight;
-	bool				autoExposureEnable;
 	float				exposureMidGray;
 	float				exposureAdaptation;
 	float				exposureWhitePoint;
 	float				exposureDarkLimit;
 	float				dofFocalDepth;
 	float				dofFocalRange;
-	bool				dofEnable;
+	float				caIntensity;
 	int32_t				dbgImageId;
 	int32_t				selectedFrameBufferImageId;
 	int32_t				selectedEntityId;
-	bool				rebuildShaders;
+	vec3f				selectedModelOrigin;
 	hdl_t				shaderHdl;
+	bool				rebuildShaders;
+	bool				bloomEnable;
+	bool				autoExposureEnable;
+	bool				dofEnable;
+	bool				caEnable;
 	bool				raytraceScene;
 	bool				rasterizeScene;
 	bool				rebuildRaytraceScene;
@@ -180,6 +183,5 @@ struct imguiControls_t
 	bool				reloadScene;
 	bool				captureScreenshot;
 	bool				isTextured;
-	vec3f				selectedModelOrigin;
 };
 #endif

@@ -37,6 +37,72 @@ float EdgeOutline( const int2 pixelLocation, const uint stencilTextureId )
 }
 
 
+float3 ApplyBloom( const Texture2D bloomTexture, const float3 sceneColor, const float2 uv )
+{
+	float3 bloomColor;
+	
+	if ( globals.bloom.x > 0.0f )
+	{
+		const float3 bloom = bloomTexture.SampleLevel( bilinearSamplerClampEdge, uv, 0 ).rgb;
+		const float3 bloomHdr = lerp( sceneColor, bloom, globals.bloom.y );
+
+		bloomColor = bloomHdr;
+	}
+	else
+	{
+		bloomColor = sceneColor;
+	}
+	return bloomColor;
+}
+
+
+float3 ApplyTonemap( const Texture2D luminanceTexture, const float3 sceneColor )
+{
+	float3 tonemapColor = sceneColor;
+	
+	const float middleGrey = globals.exposure.y;
+	const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
+
+	if ( globals.exposure2.x == 1.0f )
+	{
+		const float maxLod = float( GetTextureLevels( luminanceTexture ) - 1 );
+		const float luminance = luminanceTexture.SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), maxLod ).r;
+
+		const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
+
+		tonemapColor *= exposure;
+	}
+	return tonemapColor;
+}
+
+
+float3 ApplyChromaticAberration( const Texture2D sceneTexture, const float3 sceneColor, const float2 uv )
+{
+	float3 caColor;
+	
+	if ( globals.chromaticAberration.x != 0.0f )
+	{
+		const float intensity = globals.chromaticAberration.y;
+
+		const float2 dir = ( uv - 0.5f ); // direction from center
+		const float dist = length( dir );
+
+		const float2 offset = dir * dist * intensity;
+
+		const float r = sceneTexture.Sample( bilinearSamplerClampEdge, uv + offset ).r;
+		const float g = sceneColor.g;
+		const float b = sceneTexture.Sample( bilinearSamplerClampEdge, uv - offset ).b;
+		
+		caColor = float3( r, g, b );
+	}
+	else
+	{
+		caColor = sceneColor;
+	}
+	return caColor;
+}
+
+
 PS_Output PSMain( PS_Input input )
 {
     PS_Output output = (PS_Output)0;
@@ -52,6 +118,10 @@ PS_Output PSMain( PS_Input input )
     const uint textureId2 = material.textureId2;
     const uint textureId3 = material.textureId3;
     const uint textureId4 = material.textureId4;
+
+	Texture2D sceneTexture = codeSamplers[ textureId0 ];
+	Texture2D bloomTexture = codeSamplers[ textureId4 ];
+	Texture2D luminanceTexture = codeSamplers[ textureId3 ];
 
     const float4x4 viewMat = view.viewMat;
     const float3 forward = -normalize( viewMat[2].xyz );
@@ -82,39 +152,45 @@ PS_Output PSMain( PS_Input input )
     if ( enabled && ( coc < 0.0f ) ) {
         hdrColor.rgb = codeSamplers[ textureId2 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
     } else {
-        hdrColor.rgb = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
+        hdrColor.rgb = sceneTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
     }
 
     const float3 tint = globals.toneMapTint.rgb;
 
-    float3 exposureAdjustedColor = tint;
+	float3 finalColor = tint * hdrColor;
 
-    if ( globals.bloom.x > 0.0f )
-    {
-        const float3 bloom = codeSamplers[ textureId4 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, 0 ).rgb;
-        const float3 bloomHdr = lerp( hdrColor, bloom, globals.bloom.y );
+	finalColor = ApplyChromaticAberration( sceneTexture, finalColor, input.uv0.xy );
 
-        exposureAdjustedColor *= bloomHdr;
-    }
-    else
-    {
-        exposureAdjustedColor *= hdrColor;
-    }
+	finalColor = ApplyBloom( bloomTexture, finalColor, input.uv0.xy );
 
-    const float middleGrey = globals.exposure.y;
-    const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
+	finalColor = ApplyTonemap( luminanceTexture, finalColor );
 
-    if( globals.exposure2.x == 1.0f )
-    {
-        const float maxLod = float( GetTextureLevels( codeSamplers[ textureId3 ] ) - 1 );
-        const float luminance = codeSamplers[ textureId3  ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), maxLod ).r;
+	if ( globals.chromaticAberration.x != 0.0f )
+	{
+		const float intensity = globals.chromaticAberration.y;
 
-        const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
+		const float2 dir = ( input.uv0.xy - 0.5f ); // direction from center
+		const float dist = length( dir );
 
-        exposureAdjustedColor *= exposure;
-    }
+		const float2 offset = dir * dist * intensity;
 
-    sceneColor.rgb = LinearToSrgb( exposureAdjustedColor );
+		float r = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + offset ).r;
+		float g = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).g;
+		float b = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy - offset ).b;
+
+		r = ApplyBloom( codeSamplers[textureId4], r.xxx, input.uv0.xy + offset ).x;
+		r = ApplyTonemap( codeSamplers[ textureId3 ], r.xxx ).x;
+
+		g = ApplyBloom( codeSamplers[textureId4], g.xxx, input.uv0.xy ).y;
+		g = ApplyTonemap( codeSamplers[ textureId3 ], g.xxx ).y;
+
+		b = ApplyBloom( codeSamplers[textureId4], b.xxx, input.uv0.xy ).z;
+		b = ApplyTonemap( codeSamplers[ textureId3 ], b.xxx ).z;
+
+		finalColor.rgb = float3( r, g, b );
+	}
+
+	sceneColor.rgb = LinearToSrgb( finalColor );
 
     output.outColor.rgb = lerp( sceneColor.rgb, float3( 0.0f, 1.0f, 0.0f ), stencilCoverage );
     output.outColor.a = 1.0f;

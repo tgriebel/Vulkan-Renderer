@@ -598,6 +598,7 @@ void Renderer::UpdateBuffers()
 		globals.exposure2 = vec4f( ( g_imguiControls.autoExposureEnable && config.autoExposure ) ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.dof = vec4f( g_imguiControls.dofEnable ? 1.0f : 0.0f, g_imguiControls.dofFocalDepth, g_imguiControls.dofFocalRange, 0.0f );
+		globals.chromaticAberration = vec4f( g_imguiControls.caEnable ? 1.0f : 0.0f, g_imguiControls.caIntensity, 0.0f, 0.0f );
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.whiteId = rc.whiteImage->gpuImage->GetId();
