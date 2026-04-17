@@ -237,4 +237,23 @@ public:
 	void SetAssetRef( AssetManager* assetsPtr );
 };
 
+class MaterialLoader : public LoadHandler<Material>
+{
+private:
+	std::string		m_materialPath;
+	std::string		m_texturePath;
+	std::string		m_fileName;
+	AssetManager*	m_assets;
+
+	bool Load( Asset<Material>& materialAsset );
+
+public:
+	MaterialLoader() : m_assets( nullptr ) {}
+
+	void SetMaterialPath( const std::string& path );
+	void SetTexturePath( const std::string& path );
+	void SetFileName( const std::string& fileName );
+	void SetAssetRef( AssetManager* assetsPtr );
+};
+
 using pMatLoader_t = Asset<Material>::loadHandlerPtr_t;

@@ -116,11 +116,11 @@ void ChessScene::Init()
 			pieceEnt->SetFlag( ENT_FLAG_SELECTABLE );
 
 			if ( pieceInfo.team == teamCode_t::WHITE ) {
-				pieceEnt->materialHdl = MaterialLib().RetrieveHdl( "White.001" );
+				pieceEnt->materialHdl = MaterialLib().RetrieveHdl( "ChessWhite" );
 			}
 			else {
 				pieceEnt->SetRotation( vec3f( 0.0f, 0.0f, 180.0f ) );
-				pieceEnt->materialHdl = MaterialLib().RetrieveHdl( "Chess_Black.001" );
+				pieceEnt->materialHdl = MaterialLib().RetrieveHdl( "ChessBlack" );
 			}
 
 			pieceEnt->name = GetName( pieceInfo ).c_str();

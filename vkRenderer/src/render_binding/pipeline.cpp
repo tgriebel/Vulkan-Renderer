@@ -191,6 +191,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
+	pipelineObject.dbgProg = &progAsset.Get();
 	pipelineObject.dbgShaderName = progAsset.GetName().c_str();
 
 	assert( prog.shaderCount == 2 );
@@ -489,6 +490,7 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
+	pipelineObject.dbgProg = &progAsset.Get();
 	pipelineObject.dbgShaderName = progAsset.GetName().c_str();
 
 	VkPipelineShaderStageCreateInfo computeShaderStageInfo {};

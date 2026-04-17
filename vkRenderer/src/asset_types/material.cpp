@@ -5,6 +5,7 @@
 #include "../scene/assetManager.h"
 #include "../scene/assetBaker.h"
 #include "../io/serializeClasses.h"
+#include "../io/io.h"
 #include "texture.h"
 
 bool Material::AddTexture( const uint32_t slot, const hdl_t hdl )
@@ -131,6 +132,37 @@ void BakedMaterialLoader::SetExtName( const std::string& ext )
 
 
 void BakedMaterialLoader::SetAssetRef( AssetManager* assetsPtr )
+{
+	m_assets = assetsPtr;
+}
+
+
+bool MaterialLoader::Load( Asset<Material>& materialAsset )
+{
+	assert( m_assets != nullptr );
+	return LoadMaterial( *m_assets, m_fileName, m_materialPath, m_texturePath, materialAsset.Get() );
+}
+
+
+void MaterialLoader::SetMaterialPath( const std::string& path )
+{
+	m_materialPath = path;
+}
+
+
+void MaterialLoader::SetTexturePath( const std::string& path )
+{
+	m_texturePath = path;
+}
+
+
+void MaterialLoader::SetFileName( const std::string& fileName )
+{
+	m_fileName = fileName;
+}
+
+
+void MaterialLoader::SetAssetRef( AssetManager* assetsPtr )
 {
 	m_assets = assetsPtr;
 }

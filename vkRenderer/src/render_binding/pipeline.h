@@ -96,6 +96,7 @@ struct pipelineObject_t
 	VkPipelineLayout	pipelineLayout;
 #endif
 	const char*			dbgShaderName;
+	const GpuProgram*	dbgProg;
 };
 
 

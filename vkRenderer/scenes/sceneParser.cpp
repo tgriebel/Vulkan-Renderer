@@ -10,6 +10,7 @@
 #include "../src/scene/sceneBase.h"
 #include "../src/asset_types/gpuProgram.h"
 #include "../src/asset_types/model.h"
+#include "../src/asset_types/material.h"
 
 #include "../src/io/io.h"
 
@@ -634,9 +635,26 @@ int ParseMaterialObject( parseState_t& st, void* object, uint32_t offset )
 
 	ParseObject( st, objectMap, objectCount );
 
-	m.SetParms( mParms );
+	std::string fullname = name;
+	std::string fileName;
+	std::string ext;
+	SysCore::SplitFileName( name, fileName, ext );
 
-	materials->Add( name, m );
+	const bool isMtlFile = ( ext == "mtl" );
+	if ( isMtlFile )
+	{
+		MaterialLoader* loader = new MaterialLoader();
+		loader->SetAssetRef( st.assets );
+		loader->SetMaterialPath( ModelPath );
+		loader->SetTexturePath( TexturePath );
+		loader->SetFileName( fullname );
+		materials->AddDeferred( fullname.c_str(), pMatLoader_t( loader ) );
+	}
+	else
+	{
+		m.SetParms( mParms );
+		materials->Add( name, m );
+	}
 
 	return st.tx;
 }

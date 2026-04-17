@@ -199,6 +199,122 @@ bool WriteImage( const char* path, const Image& image )
 }
 
 
+static Material LoadMaterialFromTinyObj( AssetManager& assets, const tinyobj::material_t& material, const std::string& texturePath )
+{
+	Material outMaterial;
+
+	const bool isPbr = material.roughness || material.metallic || !material.roughness_texname.empty() || !material.metallic_texname.empty();
+
+	struct loadInfo_t
+	{
+		const std::string& name;
+		bool isLinear;
+	};
+
+	std::vector<loadInfo_t> supportedTextures;
+
+	if ( isPbr )
+	{
+		supportedTextures.push_back( loadInfo_t{ material.diffuse_texname, false } );
+		supportedTextures.push_back( loadInfo_t{ material.normal_texname, true } );
+		supportedTextures.push_back( loadInfo_t{ material.roughness_texname, true } );
+		supportedTextures.push_back( loadInfo_t{ material.metallic_texname, true } );
+	}
+	else
+	{
+		supportedTextures.push_back( loadInfo_t{ material.diffuse_texname, false } );
+		supportedTextures.push_back( loadInfo_t{ material.bump_texname, true } );
+		supportedTextures.push_back( loadInfo_t{ material.specular_texname, true } );
+	}
+
+	const uint32_t textureCount = static_cast<uint32_t>( supportedTextures.size() );
+	for ( uint32_t i = 0; i < textureCount; ++i )
+	{
+		const std::string& name = supportedTextures[ i ].name;
+		if ( name.length() == 0 ) {
+			continue;
+		}
+		assets.GetLib<Image>()->AddDeferred( name.c_str(), pImgLoader_t( new ImageLoader( texturePath, name, supportedTextures[ i ].isLinear ) ) );
+	}
+
+	if ( material.dissolve == 1.0f )
+	{
+		outMaterial.AddShader( DRAWPASS_SHADOW, AssetLib<GpuProgram>::Handle( "Shadow" ) );
+		outMaterial.AddShader( DRAWPASS_DEPTH, AssetLib<GpuProgram>::Handle( "LitDepth" ) );
+		outMaterial.AddShader( DRAWPASS_OPAQUE, AssetLib<GpuProgram>::Handle( "LitOpaque" ) );
+	}
+	else
+	{
+		outMaterial.AddShader( DRAWPASS_TRANS, AssetLib<GpuProgram>::Handle( "LitTrans" ) );
+	}
+	outMaterial.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLib<GpuProgram>::Handle( "Debug" ) );
+	outMaterial.AddShader( DRAWPASS_DEBUG_3D, AssetLib<GpuProgram>::Handle( "DebugSolid" ) );
+
+	if ( isPbr )
+	{
+		outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
+		outMaterial.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_METALLIC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 3 ].name.c_str() ) );
+	}
+	else
+	{
+		outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
+		outMaterial.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
+	}
+
+	materialParms_t& parms = outMaterial.GetParms();
+	parms.Kd = rgb32_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
+	parms.Ks = rgb32_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
+	parms.Ka = rgb32_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
+	parms.Ke = rgb32_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] );
+	parms.Tf = rgb32_t( material.transmittance[ 0 ], material.transmittance[ 1 ], material.transmittance[ 2 ] );
+	parms.Ni = material.ior;
+	parms.Ns = material.shininess;
+	parms.Tr = 1.0f - material.dissolve;
+	parms.illum = static_cast<float>( material.illum );
+
+	if ( isPbr )
+	{
+		parms.roughness          = material.roughness;
+		parms.metalness          = material.metallic;
+		parms.sheen              = material.sheen;
+		parms.clearcoatThickness = material.clearcoat_thickness;
+		parms.clearcoatRoughness = material.clearcoat_roughness;
+		parms.anisotropy         = material.anisotropy;
+		parms.anisotropyRotation = material.anisotropy_rotation;
+	}
+	return outMaterial;
+}
+
+
+bool LoadMaterial( AssetManager& assets, const std::string& fileName, const std::string& materialPath, const std::string& texturePath, Material& material )
+{
+	std::ifstream matStream( materialPath + fileName );
+	if ( matStream.fail() == true ) {
+		std::cout << "LoadMaterialFile: failed to open " << materialPath + fileName << "\n";
+		return false;
+	}
+
+	std::map<std::string, int> matMap;
+	std::vector<tinyobj::material_t> materials;
+	std::string warn;
+
+	tinyobj::LoadMtl( &matMap, &materials, &matStream, nullptr, &warn );
+	if ( warn.empty() == false ) {
+		std::cout << "LoadMaterialFile warning: " << warn << "\n";
+	}
+
+	// TODO: Load all materials. There's currently just a one-to-one relationship since adding to the asset lib only adds a single material
+	material = LoadMaterialFromTinyObj( assets, materials[ 0 ], texturePath );
+
+	return true;
+}
+
+
 bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model )
 {
 	tinyobj::attrib_t attrib;
@@ -211,100 +327,10 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 	}
 
 	// Add Materials
-	for( const auto& material : materials )
+	for( const auto& objMaterial : materials )
 	{
-		const bool isPbr = material.roughness || material.metallic || !material.roughness_texname.empty() || !material.metallic_texname.empty();
-
-		struct loadInfo_t
-		{
-			const std::string& name;
-			bool isLinear;
-		};
-
-		std::vector<loadInfo_t> supportedTextures;
-
-		if( isPbr )
-		{
-			supportedTextures.push_back( loadInfo_t { material.diffuse_texname, false } );
-			supportedTextures.push_back( loadInfo_t { material.normal_texname, true } );
-			supportedTextures.push_back( loadInfo_t { material.roughness_texname, true } );
-			supportedTextures.push_back( loadInfo_t { material.metallic_texname, true } );
-		}
-		else
-		{
-			supportedTextures.push_back( loadInfo_t { material.diffuse_texname, false } );
-			supportedTextures.push_back( loadInfo_t { material.bump_texname, true } );
-			supportedTextures.push_back( loadInfo_t { material.specular_texname, true } );
-		}
-
-		const uint32_t textureCount = static_cast< uint32_t >( supportedTextures.size() );
-		for( uint32_t i = 0; i < textureCount; ++i )
-		{
-			const std::string& name = supportedTextures[ i ].name;
-			if( name.length() == 0 ) {
-				continue;
-			}
-			assets.GetLib<Image>()->AddDeferred( name.c_str(), pImgLoader_t( new ImageLoader( texturePath, name, supportedTextures[ i ].isLinear ) ) );
-		}
-
-		Material mat;
-		if( material.dissolve == 1.0f )
-		{
-			mat.AddShader( DRAWPASS_SHADOW, AssetLib<GpuProgram>::Handle( "Shadow" ) );
-			mat.AddShader( DRAWPASS_DEPTH, AssetLib<GpuProgram>::Handle( "LitDepth" ) );
-			mat.AddShader( DRAWPASS_OPAQUE, AssetLib<GpuProgram>::Handle( "LitOpaque" ) );
-		}
-		else
-		{
-			mat.AddShader( DRAWPASS_TRANS, AssetLib<GpuProgram>::Handle( "LitTrans" ) );
-		}
-		mat.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLib<GpuProgram>::Handle( "Debug" ) );
-		mat.AddShader( DRAWPASS_DEBUG_3D, AssetLib<GpuProgram>::Handle( "DebugSolid" ) );
-
-		if( isPbr )
-		{
-			mat.usage = materialUsage_t::MATERIAL_USAGE_GGX;
-
-			mat.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
-			mat.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
-			mat.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
-			mat.AddTexture( GGX_METALLIC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 3 ].name.c_str() ) );
-		}
-		else
-		{
-			// FIXME: Keep this as PBR for now as materials need to be updated
-			// mat.usage = materialUsage_t::MATERIAL_USAGE_BLINN_PHONG;
-			mat.usage = materialUsage_t::MATERIAL_USAGE_GGX;
-
-			mat.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
-			mat.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
-			mat.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
-		}
-
-		materialParms_t& parms = mat.GetParms();
-
-		parms.Kd = rgb32_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
-		parms.Ks = rgb32_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
-		parms.Ka = rgb32_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
-		parms.Ke = rgb32_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] );
-		parms.Tf = rgb32_t( material.transmittance[ 0 ], material.transmittance[ 1 ], material.transmittance[ 2 ] );
-		parms.Ni = material.ior;
-		parms.Ns = material.shininess;
-		parms.Tr = 1.0f - material.dissolve;
-		parms.illum = static_cast< float >( material.illum );
-
-		if( isPbr )
-		{
-			parms.roughness = material.roughness;
-			parms.metalness = material.metallic;
-			parms.sheen = material.sheen;
-			parms.clearcoatThickness = material.clearcoat_thickness;
-			parms.clearcoatRoughness = material.clearcoat_roughness;
-			parms.anisotropy = material.anisotropy;
-			parms.anisotropyRotation = material.anisotropy_rotation;
-		}
-
-		assets.GetLib<Material>()->Add( material.name.c_str(), mat );
+		const Material material = LoadMaterialFromTinyObj( assets, objMaterial, texturePath );
+		assets.GetLib<Material>()->Add( objMaterial.name.c_str(), material );
 	}
 
 	uint32_t vertexCnt = 0;

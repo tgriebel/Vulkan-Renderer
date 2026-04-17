@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <iterator>
 #include <string>
+#include <SysCore/common.h>
 #include <SysCore/handle.h>
 #include <GfxCore/core/util.h>
 
@@ -76,7 +77,7 @@ public:
 	AssetInterface( const std::string& _name, const bool _loaded ) :
 		m_name( _name ), m_loaded( _loaded ), m_isDefault( false ), m_uploaded( false ), m_canBake( true )
 	{
-		m_handle = Hash( m_name );
+		m_handle = SysCore::Hash( m_name );
 	}
 
 	virtual loadReturn_t Load( const bool rebake = false ) = 0;

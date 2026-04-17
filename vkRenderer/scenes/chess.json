@@ -79,6 +79,12 @@
   ],
   "materials": [
     {
+      "name": "ChessWhite.mtl"
+    },
+    {
+      "name": "ChessBlack.mtl"
+    },
+    {
       "name": "WHITE_WOOD",
       "tr": 0.0,
       "ns": 0.0,
