@@ -15,8 +15,15 @@ struct bakedAssetInfo_t
 	std::string		name;
 	std::string		hash;
 	std::string		type;
-	std::string		date;
+	std::string		date;		// Unix epoch seconds as string
 	uint32_t		sizeBytes;
+};
+
+struct sourceFile_t
+{
+	std::string		path;
+	std::string		name;
+	std::string		type;
 };
 
 void ToggleBakedLoading( const bool enabled );

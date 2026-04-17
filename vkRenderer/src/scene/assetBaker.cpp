@@ -23,10 +23,23 @@ static void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const 
 {
 	assert( s->GetMode() == serializeMode_t::STORE );
 
-	auto time = std::chrono::system_clock::now();
-	std::time_t date = std::chrono::system_clock::to_time_t( time );
-	char dateCStr[ 128 ];
-	ctime_s( dateCStr, 128, &date );
+	std::string dateStr;
+	int64_t epochSeconds;
+	// Build date string
+	{
+		auto time = std::chrono::system_clock::now();
+		epochSeconds = std::chrono::duration_cast< std::chrono::seconds >( time.time_since_epoch() ).count();
+		const std::time_t timeT = std::chrono::system_clock::to_time_t( time );
+
+		char dateBuf[ 64 ];
+		ctime_s( dateBuf, sizeof( dateBuf ), &timeT );
+		dateStr = dateBuf;
+
+		if( !dateStr.empty() && dateStr.back() == '\n' ) {
+			dateStr.pop_back();
+		}
+	}
+	const std::string bakeDate = std::to_string( epochSeconds ) + " (" + dateStr + ")";
 
 	const uint32_t count = lib.Count();
 	for ( uint32_t i = 0; i < count; ++i )
@@ -41,7 +54,7 @@ static void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const 
 		info.name = asset->GetName();
 		info.hash = asset->Handle().String();
 		info.type = lib.AssetTypeName();
-		info.date = std::string( dateCStr );
+		info.date = bakeDate;
 
 		s->Clear( false );
 		s->SetPosition( 0 );

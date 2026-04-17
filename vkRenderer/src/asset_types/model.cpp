@@ -12,8 +12,12 @@ bool ModelLoader::Load( Asset<Model>& modelAsset )
 
 	const std::string fileName = m_modelName + "." + m_modelExt;
 
+	sourceFile_t modelSource {};
+	modelSource.path = m_modelPath + fileName;
+	modelSource.name = m_modelName;
+
 	bakedAssetInfo_t modelInfo = {};
-	const bool loadedBakedModel = LoadBaked( modelAsset, modelInfo, ".\\baked\\" + m_modelPath, "mdl.bin" );
+	const bool loadedBakedModel = LoadBaked( modelAsset, modelInfo, modelSource, ".\\baked\\" + m_modelPath, "mdl.bin" );
 	if ( loadedBakedModel )
 	{
 		const uint32_t surfCount = static_cast<uint32_t>( model.surfs.size() );

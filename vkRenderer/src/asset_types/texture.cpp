@@ -123,9 +123,12 @@ bool ImageLoader::Load( Asset<Image>& imageAsset )
 
 	image.sampler = m_sampler;
 
-	bakedAssetInfo_t info = {};
-	
-	const bool loadedBaked = LoadBaked( imageAsset, info, ".\\baked\\" + m_basePath, "img.bin" );
+	sourceFile_t imgSource {};
+	imgSource.path = m_basePath + m_fileName + "." + m_ext;
+	imgSource.name = m_fileName;
+
+	bakedAssetInfo_t info {};
+	const bool loadedBaked = LoadBaked( imageAsset, info, imgSource, ".\\baked\\" + m_basePath, "img.bin" );
 	if ( loadedBaked ) {
 		return true;
 	}
@@ -194,8 +197,10 @@ bool BakedImageLoader::Load( Asset<Image>& imageAsset )
 {
 	Image& image = imageAsset.Get();
 
+	sourceFile_t imgSource {};
+
 	bakedAssetInfo_t info = {};
-	const bool loadedBaked = LoadBaked( imageAsset, info, m_basePath, m_ext );
+	const bool loadedBaked = LoadBaked( imageAsset, info, imgSource, m_basePath, m_ext );
 	if ( loadedBaked ) {
 		return true;
 	}
