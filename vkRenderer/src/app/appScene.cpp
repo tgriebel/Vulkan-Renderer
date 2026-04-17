@@ -191,7 +191,7 @@ void CreateCodeAssets()
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
-			material.AddShader( DRAWPASS_DEBUG_2D, AssetLibGpuProgram::Handle( "Image2D" ) );
+			material.AddShader( DRAWPASS_DEBUG_2D, AssetLibGpuProgram::Handle( "Basic" ) );
 			MaterialLib().Add( "IMAGE2D", material );
 		}
 
