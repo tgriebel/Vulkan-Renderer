@@ -236,9 +236,15 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 			ImGui::Text( label.c_str() + 2 );
 			ImGui::SameLine();
 
-			hdl_t texHdl = mat.GetTexture( t );
+			hdl_t originalHdl = mat.GetTexture( t );
+			hdl_t texHdl = originalHdl;
 			DebugMenuLibComboEdit( label, texHdl, TextureLib() );
-			mat.AddTexture( t, texHdl );
+
+			if( texHdl != originalHdl )
+			{
+				mat.AddTexture( t, texHdl );
+				matAsset->QueueUpload();
+			}
 		}
 		ImGui::TreePop();
 	}
