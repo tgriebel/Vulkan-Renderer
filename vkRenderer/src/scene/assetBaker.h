@@ -117,7 +117,8 @@ bool LoadBaked( Asset<T>& asset, bakedAssetInfo_t& info, const sourceFile_t& sou
 		s.NextString( info.type );
 		s.NextString( info.date );
 
-		if( IsBakedAssetFresh( source, info ) == false ) {
+		if( IsBakedAssetFresh( source, info ) == false )
+		{
 			std::cout << "Baked file out-of-date: " << info.name << " source is newer.\n";
 			return false;
 		}
@@ -138,12 +139,14 @@ bool LoadBaked( Asset<T>& asset, bakedAssetInfo_t& info, const sourceFile_t& sou
 		s.Next( byteCount );
 		s.Next( dataHash );
 
-		if( currentHash != dataHash ) {
+		if( currentHash != dataHash )
+		{
 			std::cout << "Baked hash mismatch: " << currentHash << " != " << dataHash << "\n";
 			return false;
 		}
 
-		if( info.sizeBytes != byteCount ) {
+		if( info.sizeBytes != byteCount )
+		{
 			std::cout << "Baked byte size mismatch: " << info.sizeBytes << " != " << byteCount << "\n";
 			return false;
 		}
@@ -152,7 +155,8 @@ bool LoadBaked( Asset<T>& asset, bakedAssetInfo_t& info, const sourceFile_t& sou
 		assert( loaded );
 		return loaded;
 	}
-	else {
+	else
+	{
 		std::cout << "Baked file not found: " << bakedPath << " for asset " << asset.GetName() << "\n";
 	}
 	return false;

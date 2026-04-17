@@ -24,6 +24,56 @@ static std::vector<bakedAssetInfo_t> assetInfo;
 static Serializer* s;
 
 
+static int64_t ToEpochSeconds( const std::chrono::system_clock::time_point& tp )
+{
+	return std::chrono::duration_cast<std::chrono::seconds>( tp.time_since_epoch() ).count();
+}
+
+
+static bool GetFileDateInSeconds( const std::string& path, int64_t& epochSeconds )
+{
+	std::error_code ec;
+	const auto srcFileTime = std::filesystem::last_write_time( path, ec );
+	if( ec ) {
+		return false;
+	}
+
+	const auto clockDelta = srcFileTime - std::filesystem::file_time_type::clock::now();
+	const auto sysTime    = std::chrono::system_clock::now()
+		+ std::chrono::duration_cast<std::chrono::system_clock::duration>( clockDelta );
+
+	epochSeconds = ToEpochSeconds( sysTime );
+	return true;
+}
+
+
+static bool ExtractSecondsFromTimestamp( const std::string& date, int64_t& epochSeconds )
+{
+	epochSeconds = 0;
+	try {
+		epochSeconds = std::stoll( date );
+	}
+	catch( ... ) {
+		return false;
+	}
+	return true;
+}
+
+
+static std::string BuildCurrentSystemTimestamp()
+{
+	const auto now       = std::chrono::system_clock::now();
+	const std::time_t t  = std::chrono::system_clock::to_time_t( now );
+
+	char buf[ 64 ];
+	ctime_s( buf, sizeof( buf ), &t );
+	std::string dateStr( buf );
+	if ( !dateStr.empty() && dateStr.back() == '\n' ) { dateStr.pop_back(); }
+
+	return std::to_string( ToEpochSeconds( now ) ) + " (" + dateStr + ")";
+}
+
+
 bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bakedInfo )
 {
 	// Check if the name mismtaches
@@ -38,25 +88,13 @@ bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bake
 		return true;
 	}
 
-	std::error_code ec;
-	const auto srcFileTime = std::filesystem::last_write_time( source.path, ec );
-	if( ec ) {
-		return false;
-	}
-
 	int64_t bakeEpoch = 0;
-	try {
-		bakeEpoch = std::stoll( bakedInfo.date );
-	}
-	catch( ... ) {
+	ExtractSecondsFromTimestamp( bakedInfo.date, bakeEpoch );
+
+	int64_t srcEpoch;
+	if( GetFileDateInSeconds( source.path, srcEpoch ) == false ) {
 		return false;
 	}
-
-	const auto clockDelta = srcFileTime - std::filesystem::file_time_type::clock::now();
-	const auto srcSysTime = std::chrono::system_clock::now()
-		+ std::chrono::duration_cast< std::chrono::system_clock::duration >( clockDelta );
-	const int64_t srcEpoch = std::chrono::duration_cast< std::chrono::seconds >(
-		srcSysTime.time_since_epoch() ).count();
 
 	return ( srcEpoch <= bakeEpoch );
 }
@@ -67,23 +105,7 @@ static void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const 
 {
 	assert( s->GetMode() == serializeMode_t::STORE );
 
-	std::string bakeDate;
-	// Build date string
-	{
-		auto time = std::chrono::system_clock::now();
-		const int64_t epochSeconds = std::chrono::duration_cast< std::chrono::seconds >( time.time_since_epoch() ).count();
-		const std::time_t timeT = std::chrono::system_clock::to_time_t( time );
-
-		char dateBuf[ 64 ];
-		ctime_s( dateBuf, sizeof( dateBuf ), &timeT );
-		std::string dateStr = dateBuf;
-
-		if( !dateStr.empty() && dateStr.back() == '\n' ) {
-			dateStr.pop_back();
-		}
-
-		bakeDate = std::to_string( epochSeconds ) + " (" + dateStr + ")";
-	}
+	const std::string bakeDate = BuildCurrentSystemTimestamp();
 
 	const uint32_t count = lib.Count();
 	for ( uint32_t i = 0; i < count; ++i )
