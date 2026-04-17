@@ -17,11 +17,12 @@
 #include <gfxcore/io/serializeClasses.h>
 
 #include "../asset_types/assetLib.h"
+#include "../globals/common.h"
+#include "../globals/assetDefs.h"
 
 using namespace SysCore;
 
 static std::vector<bakedAssetInfo_t> assetInfo;
-static Serializer* s;
 
 
 static int64_t ToEpochSeconds( const std::chrono::system_clock::time_point& tp )
@@ -110,8 +111,6 @@ bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bake
 template<class T>
 static void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const std::string& ext )
 {
-	assert( s->GetMode() == serializeMode_t::STORE );
-
 	const std::string bakeDate = BuildCurrentSystemTimestamp();
 
 	const uint32_t count = lib.Count();
@@ -164,7 +163,6 @@ void AssetBaker::AddBakeDirectory( const std::string path )
 
 void AssetBaker::Bake()
 {
-	s = new Serializer( MB( 128 ), serializeMode_t::STORE );
 	assetInfo.reserve(	m_imageLib ? m_imageLib->Count() : 0 +
 						m_materialLib ? m_materialLib->Count() : 0 +
 						m_modelLib ? m_modelLib->Count() : 0 );
@@ -197,6 +195,16 @@ void AssetBaker::Bake()
 		assetFile << asset.name << "," << asset.type << "," << asset.hash << "," << std::to_string( asset.dataHash ) << "," << asset.sizeBytes << "," << asset.date << "\n";
 	}
 	assetFile.close();
+}
 
-	delete s;
+
+void BakeAssets()
+{
+	AssetBaker baker;
+	baker.AddBakeDirectory( BakePath );
+	baker.AddAssetLib( &ModelLib(), ModelPath, BakedModelExtension );
+	baker.AddAssetLib( &MaterialLib(), MaterialPath, BakedMaterialExtension );
+	baker.AddAssetLib( &TextureLib(), TexturePath, BakedTextureExtension );
+
+	baker.Bake();
 }

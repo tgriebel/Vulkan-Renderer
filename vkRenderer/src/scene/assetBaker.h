@@ -40,6 +40,8 @@ bool AreBakedAssetsEnabled();
 
 bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bakedInfo );
 
+void BakeAssets();
+
 class AssetBaker
 {
 private:
@@ -65,20 +67,22 @@ public:
 
 
 template<class T>
-bool StoreBaked( Asset<T>& asset, bakedAssetInfo_t& info, const std::string& path, const std::string& ext )
+static bool StoreBaked( Asset<T>& asset, bakedAssetInfo_t& info, const std::string& path, const std::string& ext )
 {
 	if( asset.CanBake() == false ) {
 		return false;
 	}
 
+	Serializer* s = new Serializer( MB( 128 ), serializeMode_t::STORE );
+
 	info.name = asset.GetName();
 	info.hash = asset.Handle().String();
 
-	s->Clear( false );
 	s->SetPosition( 0 );
 	s->NextString( info.name );
 	s->NextString( info.type );
 	s->NextString( info.date );
+
 	asset.Serialize( s );
 
 	info.sizeBytes = s->CurrentSize();
@@ -91,6 +95,8 @@ bool StoreBaked( Asset<T>& asset, bakedAssetInfo_t& info, const std::string& pat
 	info.dataHash = dataHash;
 
 	s->WriteFile( path + asset.Handle().String() + ext );
+
+	delete s;
 
 	return true;
 }

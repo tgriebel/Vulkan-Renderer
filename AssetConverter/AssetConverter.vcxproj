@@ -24,6 +24,7 @@
     <ProjectGuid>{11a9154e-560c-4ceb-ae50-0a0b661612bb}</ProjectGuid>
     <RootNamespace>AssetConverter</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>AssetBaker</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -72,22 +73,29 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)vkRenderer\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)vkRenderer\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\external\vulkan\Include;..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -101,7 +109,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\external\vulkan\Include;..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +124,8 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\external\vulkan\Include;..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,7 +139,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\external\vulkan\Include;..\external\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +151,28 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetConverter.cpp" />
+    <ClCompile Include="..\vkRenderer\scenes\sceneParser.cpp" />
+    <ClCompile Include="..\vkRenderer\src\scene\assetBaker.cpp" />
+    <ClCompile Include="..\vkRenderer\src\scene\codeAssets.cpp" />
+    <ClCompile Include="..\vkRenderer\src\scene\sceneBase.cpp" />
+    <ClCompile Include="..\vkRenderer\src\scene\entity.cpp" />
+    <ClCompile Include="..\vkRenderer\src\scene\camera.cpp" />
+    <ClCompile Include="..\vkRenderer\src\asset_types\model.cpp" />
+    <ClCompile Include="..\vkRenderer\src\asset_types\material.cpp" />
+    <ClCompile Include="..\vkRenderer\src\asset_types\texture.cpp" />
+    <ClCompile Include="..\vkRenderer\src\asset_types\gpuProgram.cpp" />
+    <ClCompile Include="..\vkRenderer\src\io\io.cpp" />
+    <ClCompile Include="..\vkRenderer\src\io\serializeClasses.cpp" />
+    <ClCompile Include="..\vkRenderer\src\globals\render_util.cpp" />
+    <ClCompile Include="..\vkRenderer\src\app\cvar.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\external\GfxCore\GfxCore.vcxproj">
+      <Project>{3de9a00c-b04b-43ab-943d-1973c47dece3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\external\SysCore\SysCore.vcxproj">
+      <Project>{01728a43-da97-4bc6-8edf-f17cb75e7967}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

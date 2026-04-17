@@ -226,6 +226,7 @@
     <ClInclude Include="src\scene\assetBaker.h" />
     <ClInclude Include="src\scene\assetManager.h" />
     <ClInclude Include="src\scene\camera.h" />
+    <ClInclude Include="src\scene\codeAssets.h" />
     <ClInclude Include="src\scene\entity.h" />
     <ClInclude Include="src\scene\mtInterface.h" />
     <ClInclude Include="src\scene\sceneBase.h" />
@@ -299,6 +300,7 @@
     <ClCompile Include="src\render_resources\imageView.cpp" />
     <ClCompile Include="src\scene\assetBaker.cpp" />
     <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\scene\codeAssets.cpp" />
     <ClCompile Include="src\scene\entity.cpp" />
     <ClCompile Include="src\scene\sceneBase.cpp" />
     <ClCompile Include="src\app\cvar.cpp" />

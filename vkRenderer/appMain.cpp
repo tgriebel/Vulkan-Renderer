@@ -14,6 +14,7 @@
 #include "scenes/sceneParser.h"
 #include <SysCore/systemUtils.h>
 #include "src/scene/assetBaker.h"
+#include "src/scene/codeAssets.h"
 #include <gfxcore/io/serializeClasses.h>
 #include "src/app/raytracerInterface.h"
 #include "src/app/cvar.h"
@@ -37,7 +38,6 @@ static std::string sceneFile = "chess.json";
 imguiControls_t g_imguiControls;
 #endif
 
-void CreateCodeAssets();
 void UpdateScene( Scene* scene );
 void InitScene( Scene* scene );
 void ShutdownScene( Scene* scene );
@@ -68,17 +68,6 @@ void CheckReloadAssets()
 #endif
 }
 
-
-void BakeAssets()
-{	
-	AssetBaker baker;
-	baker.AddBakeDirectory( BakePath );
-	baker.AddAssetLib( &ModelLib(), ModelPath, BakedModelExtension );
-	baker.AddAssetLib( &MaterialLib(), MaterialPath, BakedMaterialExtension );
-	baker.AddAssetLib( &TextureLib(), TexturePath, BakedTextureExtension );
-
-	baker.Bake();
-}
 
 MakeCVar( BOOL,		r_cubeCapture, false );
 MakeCVar( BOOL,		r_writeCubeCapture, false );
