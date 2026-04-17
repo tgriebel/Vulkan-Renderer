@@ -28,6 +28,8 @@ Scene*								g_scene;
 Renderer							g_renderer;
 Window								g_window;
 
+using namespace SysCore;
+
 
 static std::string sceneFile = "chess.json";
 

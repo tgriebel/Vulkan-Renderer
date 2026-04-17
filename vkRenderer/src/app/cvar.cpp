@@ -4,6 +4,8 @@
 
 static std::vector<CVar*> cvarMap;
 
+using namespace SysCore;
+
 void CVar::Init( const char* _name, CVar::Type _type )
 {
 	struct typePair_t

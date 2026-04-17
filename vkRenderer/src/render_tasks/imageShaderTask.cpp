@@ -16,7 +16,7 @@ std::string ImageShaderTask::AsString() const
 
 void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 {
-	ScopedLogTimer timer( "ImageProcessInit", timerPrecision_t::MICROSECOND, &TimerPrint );
+	SCOPED_TIMER_PRINT( ImageProcessInit, MILLISECOND )
 
 	m_dbgName = info.name;
 	m_layer = info.layer;

@@ -173,7 +173,7 @@ bool WriteImage( const char* path, const Image& image )
 {
 	std::string fileName;
 	std::string ext;
-	SplitFileName( path, fileName, ext );
+	SysCore::SplitFileName( path, fileName, ext );
 
 	if( ext == "png" )
 	{

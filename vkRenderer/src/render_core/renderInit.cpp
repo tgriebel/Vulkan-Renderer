@@ -70,8 +70,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	viewCount = 0;
 
-	ScopedLogTimer timer( "Schedule Build", timerPrecision_t::MICROSECOND, &TimerPrint );
-
 	// Shadow Views
 	for ( uint32_t i = 0; i < MaxShadowViews; ++i )
 	{

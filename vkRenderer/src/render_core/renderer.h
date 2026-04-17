@@ -200,7 +200,7 @@ private:
 	RenderSchedule						schedule;
 
 	// Timers
-	Timer								frameTimer;
+	SysCore::Timer						frameTimer;
 
 	// Upload management
 	std::set<hdl_t>						uploadTextures;

@@ -1,5 +1,7 @@
 #include "gpuProgram.h"
 
+using namespace SysCore;
+
 std::string GpuProgramLoader::GetBinName( const std::string& fileName, const shaderPermId_t permSet )
 {
 	std::string name;
@@ -225,7 +227,7 @@ void GpuProgramLoader::SetBinPath( const std::string& path )
 
 void GpuProgramLoader::SetBindSet( const std::string& setName )
 {
-	bindHash = Hash( setName );
+	bindHash = SysCore::Hash( setName );
 }
 
 

@@ -15,6 +15,8 @@ static availableTasks_t tasks;
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, RenderSchedule* schedule )
 {
+	SCOPED_TIMER_PRINT( ScheduleBuild, MILLISECOND )
+
 	if( config.useCubeViews )
 	{
 		if( config.computeDiffuseIbl )

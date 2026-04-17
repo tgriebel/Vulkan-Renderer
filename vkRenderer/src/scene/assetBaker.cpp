@@ -3,6 +3,9 @@
 #include <chrono>
 #include <ctime>
 #include <fstream>
+#include <filesystem>
+#include <chrono>
+#include <syscore/common.h>
 
 #include <SysCore/serializer.h>
 #include <SysCore/systemUtils.h>
@@ -15,62 +18,85 @@
 
 #include "../asset_types/assetLib.h"
 
+using namespace SysCore;
+
 static std::vector<bakedAssetInfo_t> assetInfo;
 static Serializer* s;
+
+
+bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bakedInfo )
+{
+	// Check if the name mismtaches
+	// If there is no source path, the baked asset is referenced and loaded directly
+	const std::string bakedStem = std::filesystem::path( bakedInfo.name ).stem().string();
+
+	if( ( source.name.empty() == false ) && ( bakedStem != source.name ) ) {
+		return false;
+	}
+
+	if( source.path.empty() ) {
+		return true;
+	}
+
+	std::error_code ec;
+	const auto srcFileTime = std::filesystem::last_write_time( source.path, ec );
+	if( ec ) {
+		return false;
+	}
+
+	int64_t bakeEpoch = 0;
+	try {
+		bakeEpoch = std::stoll( bakedInfo.date );
+	}
+	catch( ... ) {
+		return false;
+	}
+
+	const auto clockDelta = srcFileTime - std::filesystem::file_time_type::clock::now();
+	const auto srcSysTime = std::chrono::system_clock::now()
+		+ std::chrono::duration_cast< std::chrono::system_clock::duration >( clockDelta );
+	const int64_t srcEpoch = std::chrono::duration_cast< std::chrono::seconds >(
+		srcSysTime.time_since_epoch() ).count();
+
+	return ( srcEpoch <= bakeEpoch );
+}
+
 
 template<class T>
 static void BakeLibraryAssets( AssetLib<T>& lib, const std::string& path, const std::string& ext )
 {
 	assert( s->GetMode() == serializeMode_t::STORE );
 
-	std::string dateStr;
-	int64_t epochSeconds;
+	std::string bakeDate;
 	// Build date string
 	{
 		auto time = std::chrono::system_clock::now();
-		epochSeconds = std::chrono::duration_cast< std::chrono::seconds >( time.time_since_epoch() ).count();
+		const int64_t epochSeconds = std::chrono::duration_cast< std::chrono::seconds >( time.time_since_epoch() ).count();
 		const std::time_t timeT = std::chrono::system_clock::to_time_t( time );
 
 		char dateBuf[ 64 ];
 		ctime_s( dateBuf, sizeof( dateBuf ), &timeT );
-		dateStr = dateBuf;
+		std::string dateStr = dateBuf;
 
 		if( !dateStr.empty() && dateStr.back() == '\n' ) {
 			dateStr.pop_back();
 		}
+
+		bakeDate = std::to_string( epochSeconds ) + " (" + dateStr + ")";
 	}
-	const std::string bakeDate = std::to_string( epochSeconds ) + " (" + dateStr + ")";
 
 	const uint32_t count = lib.Count();
 	for ( uint32_t i = 0; i < count; ++i )
 	{
-		Asset<T>* asset = lib.Find( i );
-
-		if( asset->CanBake() == false ) {
-			continue;
-		}
+		Asset<T>& asset = *lib.Find( i );
 
 		bakedAssetInfo_t info = {};
-		info.name = asset->GetName();
-		info.hash = asset->Handle().String();
-		info.type = lib.AssetTypeName();
 		info.date = bakeDate;
+		info.type = lib.AssetTypeName();
 
-		s->Clear( false );
-		s->SetPosition( 0 );
-		s->NextString( info.name );
-		s->NextString( info.type );
-		s->NextString( info.date );
-		asset->Serialize( s );
-
-		info.sizeBytes = s->CurrentSize();
-
-		uint32_t byteCount = info.sizeBytes;
-		uint32_t dataHash = s->Hash();
-		s->Next( byteCount );
-		s->Next( dataHash );
-
-		s->WriteFile( path + asset->Handle().String() + ext );
+		if( StoreBaked( asset, info, path, ext ) == false ) {
+			continue;
+		}
 
 		assetInfo.push_back( info );
 	}
@@ -135,11 +161,11 @@ void AssetBaker::Bake()
 	}
 
 	std::ofstream assetFile( m_bakePath + "asset_info.csv", std::ios::out | std::ios::trunc );
-	assetFile << "Name,Type,Asset Hash,Size,Date\n";
+	assetFile << "Name,Type,Asset Hash,Data Hash,Size,Date\n";
 	for ( auto it = assetInfo.begin(); it != assetInfo.end(); ++it )
 	{
 		const bakedAssetInfo_t& asset = *it;
-		assetFile << asset.name << "," << asset.type << "," << asset.hash << "," << asset.sizeBytes << "," << asset.date; // date has an end-line char
+		assetFile << asset.name << "," << asset.type << "," << asset.hash << "," << std::to_string( asset.dataHash ) << "," << asset.sizeBytes << "," << asset.date << "\n";
 	}
 	assetFile.close();
 

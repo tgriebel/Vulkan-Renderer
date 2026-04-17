@@ -1,58 +1,9 @@
 ﻿  appMain.cpp
-  chessScene.cpp
-  nesScene.cpp
-  sceneParser.cpp
-  appScene.cpp
-  cvar.cpp
-  window.cpp
-  gpuProgram.cpp
   material.cpp
   model.cpp
   texture.cpp
-  debug2dPass.cpp
-  debug3dPass.cpp
-  depthPass.cpp
-  drawpass.cpp
-  emissivePass.cpp
-  opaquePass.cpp
-  postPass.cpp
-  shadowPass.cpp
-  skyboxPass.cpp
-  Generating Code...
-  Compiling...
-  terrainPass.cpp
-  transPass.cpp
-  wireframePass.cpp
-  drawGroup.cpp
-  render_util.cpp
-  io.cpp
-  serializeClasses.cpp
-  descriptorWrites.cpp
-  gpuTransfer.cpp
-  pipeline.cpp
-  debugMenu.cpp
-  renderCommand.cpp
-  renderContext.cpp
-  renderInit.cpp
-  renderShutdown.cpp
-  renderView.cpp
-  renderer.cpp
-  schedule.cpp
-  imageArray.cpp
-  cmdContext.cpp
-  Generating Code...
-  Compiling...
-  deviceContext.cpp
-  frameBuffer.cpp
-  ImageReadbackTask.cpp
-  RenderTask.cpp
-  imageProcessTask.cpp
-  imageShaderTask.cpp
-  imguiTask.cpp
   assetBaker.cpp
-  sceneBase.cpp
   Generating Code...
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   vkRenderer.vcxproj -> C:\Users\thoma\source\repos\VulkanRenderer-main\Vulkan-Renderer\x64\Debug\renderer.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

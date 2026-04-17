@@ -11,13 +11,14 @@
 #include <SysCore/handle.h>
 #include <GfxCore/core/util.h>
 #include "../app/cvar.h"
+#include <SysCore/common.h>
 
 extern CVar s_threadedLoad;
 
 class Library
 {
 public:
-	static inline hdl_t					Handle( const char* name ) { return Hash( name ); }
+	static inline hdl_t					Handle( const char* name ) { return SysCore::Hash( name ); }
 	virtual const char*					AssetTypeName() const = 0;
 	virtual void						Clear() = 0;
 	virtual bool						SetDefault( const hdl_t& hdl ) = 0;
@@ -71,7 +72,7 @@ public:
 		return typeName.c_str();
 	}
 
-	static inline hdl_t			Handle( const char* name ) { return ( name == nullptr ) ? INVALID_HDL : Hash( name ); }
+	static inline hdl_t			Handle( const char* name ) { return ( name == nullptr ) ? INVALID_HDL : SysCore::Hash( name ); }
 	void						Clear();
 	bool						SetDefault( const hdl_t& hdl );
 	bool						SetDefault( const char* name );
@@ -172,7 +173,7 @@ hdl_t AssetLib< AssetType >::Add( const char* name, const AssetType& asset, cons
 		throw std::runtime_error( "AssetLib::Add() - asset name is empty!" );
 	}
 	
-	uint64_t hash = Hash( assetName.c_str() );
+	uint64_t hash = SysCore::Hash( assetName.c_str() );
 	
 	std::unique_lock<std::mutex> lock( mtx, std::defer_lock );
 	lock.lock();
@@ -188,7 +189,7 @@ hdl_t AssetLib< AssetType >::Add( const char* name, const AssetType& asset, cons
 			ss << name << "_" << instance;
 			assetName = ss.str();
 		
-			hash = Hash( assetName.c_str() );
+			hash = SysCore::Hash( assetName.c_str() );
 			it = assets.find( hash );
 		}
 	}
@@ -210,7 +211,7 @@ hdl_t AssetLib< AssetType >::AddDeferred( const char* name, std::unique_ptr< Loa
 	std::unique_lock<std::mutex> lock( mtx, std::defer_lock );
 	lock.lock();
 
-	const uint64_t hash = Hash( name );
+	const uint64_t hash = SysCore::Hash( name );
 	auto it = assets.find( hash );
 	if ( it == assets.end() ) {
 		assets[ hash ] = Asset<AssetType>( assetName );
@@ -305,21 +306,21 @@ bool AssetLib< AssetType >::Exists( const hdl_t& hdl ) const
 template< class AssetType >
 bool AssetLib< AssetType >::Exists( const char* name ) const
 {
-	auto it = assets.find( Hash( name ) );
+	auto it = assets.find( SysCore::Hash( name ) );
 	return ( it != assets.end() );
 }
 
 template< class AssetType >
 Asset<AssetType>* AssetLib< AssetType >::Find( const char* name )
 {
-	auto it = assets.find( Hash( name ) );
+	auto it = assets.find( SysCore::Hash( name ) );
 	return ( it != assets.end() ) ? &it->second : GetDefault();
 }
 
 template< class AssetType >
 const Asset<AssetType>* AssetLib< AssetType >::Find( const char* name ) const
 {
-	auto it = assets.find( Hash( name ) );
+	auto it = assets.find( SysCore::Hash( name ) );
 	return ( it != assets.end() ) ? &it->second : GetDefault();
 }
 
@@ -371,7 +372,7 @@ const char* AssetLib< AssetType >::FindName( const uint32_t id ) const
 template< class AssetType >
 hdl_t AssetLib< AssetType >::RetrieveHdl( const char* name ) const
 {
-	const uint64_t hash = Hash( name );
+	const uint64_t hash = SysCore::Hash( name );
 	auto it = assets.find( hash );
 	return ( it != assets.end() ) ? hdl_t( hash ) : INVALID_HDL;
 }

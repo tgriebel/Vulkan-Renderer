@@ -137,7 +137,7 @@ bool ImageLoader::Load( Asset<Image>& imageAsset )
 		Serializer s( MB(32), serializeMode_t::LOAD );
 
 		const std::string path = m_basePath + m_fileName + ".img";
-		if ( FileExists( path ) == false ) {
+		if ( SysCore::FileExists( path ) == false ) {
 			return false;
 		}
 		s.ReadFile( path );
@@ -173,7 +173,7 @@ void ImageLoader::SetBasePath( const std::string& path )
 
 void ImageLoader::SetTextureFile( const std::string& file )
 {
-	SplitFileName( file, m_fileName, m_ext );
+	SysCore::SplitFileName( file, m_fileName, m_ext );
 
 	if( m_ext == "hdr" ) {
 		m_hdr = true;

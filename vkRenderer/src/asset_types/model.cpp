@@ -51,7 +51,7 @@ void ModelLoader::SetModelPath( const std::string& path )
 
 void ModelLoader::SetModelName( const std::string& fileName )
 {
-	SplitFileName( fileName, m_modelName, m_modelExt );
+	SysCore::SplitFileName( fileName, m_modelName, m_modelExt );
 }
 
 

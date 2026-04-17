@@ -803,7 +803,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	assert( assets != nullptr );
 	assert( scene != nullptr );
 
-	std::vector<char> file = ReadTextFile( ScenePath + fileName );
+	std::vector<char> file = SysCore::ReadTextFile( ScenePath + fileName );
 
 	const int maxTokens = 8192;
 
@@ -895,12 +895,12 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 void LoadScene( std::string fileName, Scene** scene, AssetManager* assets, sceneInitializerCallback_t* sceneInitializer )
 {
 	{
-		SCOPED_TIMER_PRINT( ParseScene );
+		SCOPED_TIMER_PRINT( ParseScene, MILLISECOND );
 		ParseJson( fileName, scene, assets, sceneInitializer );
 	}
 
 	{
-		SCOPED_TIMER_PRINT( LoadAssets );
+		SCOPED_TIMER_PRINT( LoadAssets, MILLISECOND );
 		g_assets.RunLoadLoop();
 	}
 }

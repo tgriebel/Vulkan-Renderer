@@ -16,7 +16,7 @@ std::string ImageProcessTask::AsString() const
 
 void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 {
-	ScopedLogTimer timer( "MipImageTaskInit", timerPrecision_t::MICROSECOND, &TimerPrint );
+	SCOPED_TIMER_PRINT( MipImageTaskInit, MICROSECOND )
 
 	assert( ( info.taskImageCount == 0 ) || ( info.taskImageCount == 1 ) ); // >1 is fine, but not implemented (mostly due to testing)
 
