@@ -150,6 +150,33 @@ int ParseFloatObject( parseState_t& st, void* value, uint32_t offset )
 	return 0;
 }
 
+struct vectorObject_t
+{
+	vec3f	v;
+	bool	isSet;
+};
+
+
+// Parses one element of a 3-float camera array ( "vector": [ x, y, z ] ).
+// ParseArray passes offset = elementIndex * sizeof(float).
+int ParseVectorObject( parseState_t& st, void* value, uint32_t offset )
+{
+	assert( st.tokens[ st.tx ].type == JSMN_PRIMITIVE );
+
+	vectorObject_t* vectorObject = reinterpret_cast< vectorObject_t*>( value );
+	const uint32_t elementIndex = offset / sizeof( float );
+	assert( elementIndex < 3 );
+
+	const uint32_t valueLen = ( st.tokens[ st.tx ].end - st.tokens[ st.tx ].start );
+	std::string s = std::string( st.file->data() + st.tokens[ st.tx ].start, valueLen );
+	vectorObject->v[ elementIndex ] = std::stof( s );
+	vectorObject->isSet = true;
+
+	st.tx += 1;
+	return 0;
+}
+
+
 template <uint32_t BIT>
 int ParseFlagObject( parseState_t& st, void* value, uint32_t offset )
 {
@@ -876,12 +903,13 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	char envMap[ TOKEN_LEN ] = "";
 	char diffuseIblMap[ TOKEN_LEN ] = "";
 	char specIblMap[ TOKEN_LEN ] = "";
+	vectorObject_t cameraPosition = { vec3f( 0.0f, 0.0f, 0.0f ), false };
 
 	const uint32_t trashBufferSize = COUNTARRAY( trashBuffer );
 
 	assert( trashBufferSize >= file.size() );
 
-	const uint32_t objectCount = 11;
+	const uint32_t objectCount = 12;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "sceneClass",		&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
@@ -890,6 +918,7 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 		{ "envMap",			&envMap,							TOKEN_LEN,							1,										&ParseStringObject },
 		{ "diffuseIblMap",	&diffuseIblMap,						TOKEN_LEN,							1,										&ParseStringObject },
 		{ "specIblMap",		&specIblMap,						TOKEN_LEN,							1,										&ParseStringObject },
+		{ "camera",			&cameraPosition,					sizeof( float ),					3,										&ParseVectorObject },
 		{ "shaders",		st.assets->GetLib<GpuProgram>(),	sizeof( AssetLib<GpuProgram>* ),	1,										&ParseShaderObject },
 		{ "images",			st.assets->GetLib<Image>(),			sizeof( AssetLib<Image>* ),			1,										&ParseImageObject },
 		{ "materials",		st.assets->GetLib<Material>(),		sizeof( AssetLib<Material>* ),		1,										&ParseMaterialObject },
@@ -904,6 +933,11 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 		( *scene )->envMap = envMap;
 		( *scene )->diffuseIblMap = diffuseIblMap;
 		( *scene )->specIblMap = specIblMap;
+
+		if( cameraPosition.isSet && ( ( *scene )->mainCamera != nullptr ) )
+		{
+			( *scene )->mainCamera->SetPosition( cameraPosition.v );
+		}
 	}
 
 	CleanupParseState( st );
