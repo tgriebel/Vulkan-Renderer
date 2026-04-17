@@ -129,10 +129,6 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 	for ( uint32_t passIx = m_beginPass; passIx <= m_endPass; ++passIx )
 	{
-		if( passIx == DRAWPASS_DEBUG_2D ) {
-			continue; // FIXME: BAD BUG is causing image process shaders to render here
-		}
-
 		DrawPass* pass = m_renderView->passes[ multiViewIndex ][ passIx ];
 		if ( pass == nullptr ) {
 			continue;
