@@ -76,6 +76,11 @@ static std::string BuildCurrentSystemTimestamp()
 
 bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bakedInfo )
 {
+	// No source file (e.g. code-generated asset)
+	if( source.isBakedAsset ) {
+		return true;
+	}
+
 	// Check if the name mismtaches
 	// If there is no source path, the baked asset is referenced and loaded directly
 	const std::string bakedStem = std::filesystem::path( bakedInfo.name ).stem().string();
@@ -91,6 +96,8 @@ bool IsBakedAssetFresh( const sourceFile_t& source, const bakedAssetInfo_t& bake
 	int64_t bakeEpoch = 0;
 	ExtractSecondsFromTimestamp( bakedInfo.date, bakeEpoch );
 
+	// FIXME: Cubemaps use a special convention for source files and can have 6 sources. Need a solution for this
+	// Maybe store list of source paths in baked asset then check each one?
 	int64_t srcEpoch;
 	if( GetFileDateInSeconds( source.path, srcEpoch ) == false ) {
 		return false;

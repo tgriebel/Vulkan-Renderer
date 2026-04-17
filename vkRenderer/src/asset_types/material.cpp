@@ -98,7 +98,8 @@ bool BakedMaterialLoader::Load( Asset<Material>& materialAsset )
 {
 	Material& material = materialAsset.Get();
 
-	sourceFile_t matSource; // No raw source — baked-only material, skip timestamp check
+	sourceFile_t matSource {};
+	matSource.isBakedAsset = true;
 
 	bakedAssetInfo_t info = {};
 	const bool loadedBaked = LoadBaked( materialAsset, info, matSource, ".\\baked\\" + m_assetDir, "mtl.bin" );

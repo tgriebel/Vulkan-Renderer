@@ -31,6 +31,7 @@ struct sourceFile_t
 	std::string		path;
 	std::string		name;
 	std::string		type;
+	bool			isBakedAsset;
 };
 
 void ToggleBakedLoading( const bool enabled );
