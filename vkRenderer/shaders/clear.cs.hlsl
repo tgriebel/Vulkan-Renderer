@@ -1,4 +1,4 @@
-#include "globals_hlsl.h"
+#include "globals.h"
 
 struct Particle
 {

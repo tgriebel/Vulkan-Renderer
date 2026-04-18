@@ -597,19 +597,22 @@
     <FxCompile Include="shaders\bloomDownsample.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\globals_hlsl.h">
+    <FxCompile Include="shaders\globals.h">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\color_hlsl.h">
+    <FxCompile Include="shaders\color.h">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\light_hlsl.h">
+    <FxCompile Include="shaders\light.h">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\util_hlsl.h">
+    <FxCompile Include="shaders\util.h">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\litViewDiffuse.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\brdf.h">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

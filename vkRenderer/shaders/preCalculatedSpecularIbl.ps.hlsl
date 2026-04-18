@@ -1,6 +1,6 @@
-#include "globals_hlsl.h"
-#include "color_hlsl.h"
-#include "light_hlsl.h"
+#include "globals.h"
+#include "color.h"
+#include "light.h"
 
 PS_LAYOUT_BASIC_IO
 

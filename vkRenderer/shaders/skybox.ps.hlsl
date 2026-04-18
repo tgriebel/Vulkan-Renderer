@@ -1,6 +1,6 @@
-#include "globals_hlsl.h"
-#include "color_hlsl.h"
-#include "util_hlsl.h"
+#include "globals.h"
+#include "color.h"
+#include "util.h"
 
 PS_LAYOUT_STANDARD( Texture2D )
 

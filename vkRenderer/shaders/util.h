@@ -1,40 +1,22 @@
-/*
-vec2f PackFloat32( const float unpacked )
+#ifndef UTIL_HLSL_H
+#define UTIL_HLSL_H
+
+// GLSL mat4() fills columns-first; HLSL float4x4() fills rows-first.
+// This is the transposed form so it matches the GLSL glslSpace matrix.
+static const float4x4 glslSpace = float4x4(
+	 0.0f, -1.0f, 0.0f, 0.0f,
+	 0.0f,  0.0f, 1.0f, 0.0f,
+	 1.0f,  0.0f, 0.0f, 0.0f,
+	 0.0f,  0.0f, 0.0f, 0.0f
+);
+
+float3 CubeVector( const float3 v )
 {
-	packFp32_t full;
-	packFp16_t half;
-
-	full.f = unpacked;
-
-	half.fp.sign = full.fp.sign;
-	if ( full.fp.exp > 0x70 ) {
-		half.fp.exp = ( full.fp.exp - 0x70 ); // Implicitly clamps to INF
-	}
-	else {
-		half.fp.exp = 0; // Flush denormals
-	}
-	half.fp.mantissa = full.fp.mantissa >> 13; // Don't round up
-
-	return half.u;
-}
-*/
-
-mat4 glslSpace = mat4(	0.0f, 0.0f, 1.0f, 0.0f,
-						-1.0f, 0.0f, 0.0f, 0.0f,
-						0.0f, 1.0f, 0.0f, 0.0f,
-						0.0f, 0.0f, 0.0f, 0.0f );
-
-vec3 CubeVector( const vec3 v )
-{
-	return vec3( -v.y, v.z, v.x ); // to glsl coordinate space
+	return float3( -v.y, v.z, v.x ); // to glsl coordinate space
 }
 
-float Saturate( const float v )
-{
-	return min( 1.0f, max( 0.0f, v ) );
-}
+// Note: HLSL has built-in saturate() so this is just for reference
+// float Saturate( const float v ) { return saturate( v ); }
+// float3 Saturate( const float3 v ) { return saturate( v ); }
 
-vec3 Saturate( const vec3 v )
-{
-	return vec3( Saturate( v.x ), Saturate( v.y ), Saturate( v.z ) );
-}
+#endif // UTIL_HLSL_H

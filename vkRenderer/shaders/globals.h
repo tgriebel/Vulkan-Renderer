@@ -1,238 +1,328 @@
-#define MaxLights		128
-#define MaxMaterials	256
-#define MaxViews		15
-#define MaxSurfaces		1000
+#ifndef GLOBALS_HLSL_H
+#define GLOBALS_HLSL_H
 
-#define PI				3.14159265359f
+// ============================================================
+// Constants
+// ============================================================
+
+#define MaxLights       128
+#define MaxMaterials    256
+#define MaxViews        15
+#define MaxSurfaces     1000
+
+#define PI              3.14159265359f
+#define AMBIENT         float4( 0.03f, 0.03f, 0.03f, 1.0f )
+
+// ============================================================
+// Convenience
+// ============================================================
+
+#define NUI( x ) NonUniformResourceIndex( x )
+
+#define BIND_SLOT( x )      [[vk::location( x )]]
+#define BIND_SET( S, N )    [[vk::binding( N, S )]]
+#define BIND_INLINE         [[vk::push_constant]]
+
+
+int2 GetTextureSize( Texture2D tex, int mipLevel )
+{
+    uint w, h, levels;
+    tex.GetDimensions( mipLevel, w, h, levels );
+    return int2( w, h );
+}
+
+uint GetTextureLevels( Texture2D tex )
+{
+    uint w, h, levels;
+    tex.GetDimensions( 0, w, h, levels );
+    return levels;
+}
+
+uint GetTextureLevelsCube( TextureCube tex )
+{
+    uint w, h, levels;
+    tex.GetDimensions( 0, w, h, levels );
+    return levels;
+}
+
+// ============================================================
+// Structs
+// ============================================================
 
 struct light_t
 {
-	vec4	lightPos;
-	vec4	intensity;
-	vec4	lightDir;
-	uint	shadowViewId;
-	uint	pad0;
-	uint	pad1;
-	uint	pad2;
+    float4 lightPos;
+    float4 intensity;
+    float4 lightDir;
+    uint   shadowViewId;
+    uint   pad0;
+    uint   pad1;
+    uint   pad2;
 };
 
 struct material_t
 {
-	int		textureId0;
-	int		textureId1;
-	int		textureId2;
-	int		textureId3;
-	int		textureId4;
-	int		textureId5;
-	int		textureId6;
-	int		textureId7;
-	vec3	Ka;
-	float	Tr;
-	vec3	Ke;
-	float	Ns;
-	vec3	Kd;
-	float	Ni;
-	vec3	Ks;
-	float	illum;
-	vec3	Tf;
-	uint	textured;
-	uint	pad0;
-	uint	pad1;
-	uint	pad2;
-	uint	pad3;
-	uint	extraData[ 64 ]; // 256 bytes, aligned on 64 byte boundary
+    int     textureId0;
+    int     textureId1;
+    int     textureId2;
+    int     textureId3;
+    int     textureId4;
+    int     textureId5;
+    int     textureId6;
+    int     textureId7;
+    float3  Ka;
+    float   Tr;
+    float3  Ke;
+    float   Ns;
+    float3  Kd;
+    float   Ni;
+    float3  Ks;
+    float   illum;
+    float3  Tf;
+	float	roughness;
+	float	metalness;
+	float	sheen;
+	float	clearcoatThickness;
+	float	clearcoatRoughness;
+	float	anisotropy;
+	float	anisotropyRotation;
+    uint    textured;
+    uint    pad0;
+    uint    extraData[64];
 };
 
 struct view_t
 {
-	mat4	viewMat;
-	mat4	projMat;
-	vec4	dimensions;
-	uint	numLights;
-	uint	pad0;
-	uint	pad1;
-	uint	pad2;
+    float4x4 viewMat;
+    float4x4 projMat;
+    float4   dimensions;
+    float3   viewOrigin;
+    uint     numLights;
 };
 
 struct pass_t
 {
-	uint	codeImageCount;
+    uint codeImageCount;
 };
 
 struct surface_t
 {
-	mat4	model;
-	uint	diffuseIblCubeId;
-	uint	envCubeId;
-	uint	pad[14];
+    float4x4 model;
+    uint     diffuseIblCubeId;
+    uint     envCubeId;
+    uint     pad[14];
 };
 
+struct Globals_t
+{
+    float4  time;
+    float4  generic;
+    float4  shadowParms;
+    float4  toneMapTint;
+    float4  bloom;
+    float4  exposure;
+    float4  exposure2;
+    float4  dof;
+	float4  chromaticAberration;
+    uint    numSamples;
+    uint    whiteId;
+    uint    blackId;
+    uint    defaultAlbedoId;
+    uint    defaultNormalId;
+    uint    defaultRoughnessId;
+    uint    defaultMetalId;
+    uint    defaultImageId;
+    uint    brdfLutId;
+    uint    isTextured;
+    uint    shadow2dCount;
+    uint    shadowCubeCount;
+    uint    textureCount;
+    uint    materialCount;
+};
 
-#define AMBIENT vec4( 0.03f, 0.03f, 0.03f, 1.0f )
+struct PushConstants_t
+{
+    uint objectId;
+    uint materialId;
+    uint viewId;
+};
 
-#define IMAGE_CONSTANT_LAYOUT( S, N, TYPE, NAME )																	\
-											layout( set = S, binding = N ) uniform ShaderConstants					\
-											{																		\
-												vec4	dimensions;													\
-												uint	pass;														\
-												uint	previousImageId;											\
-												uint	level;														\
-												uint	layer;														\
-												uint	mipCount;													\
-												uint	layerCount;													\
-												uint	pad0;														\
-												uint	pad1; /* 16byte aligned */									\
-												TYPE	NAME;														\
-											};
+// ============================================================
+// Resource binding macros
+// ============================================================
 
-#define CONSTANT_LAYOUT( S, N, TYPE, NAME )																			\
-											layout( set = S, binding = N ) uniform ShaderConstants					\
-											{																		\
-												TYPE	NAME;														\
-											};
+#define IMAGE_CONSTANT_LAYOUT( S, N, TYPE, NAME )                                                                   \
+    BIND_SET( S, N ) cbuffer _ShaderConstants                                                                       \
+    {                                                                                                               \
+        float4  dimensions;                                                                                         \
+        uint    pass;                                                                                               \
+        uint    previousImageId;                                                                                    \
+        uint    level;                                                                                              \
+        uint    layer;                                                                                              \
+        uint    mipCount;                                                                                           \
+        uint    layerCount;                                                                                         \
+        uint    _sc_pad0;                                                                                           \
+        uint    _sc_pad1;                                                                                           \
+        TYPE    NAME;                                                                                               \
+    };
 
-#define MODEL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer UniformBufferObject				\
-											{																		\
-												surface_t	surface[MaxSurfaces];									\
-											} ubo;
+#define CONSTANT_LAYOUT( S, N, TYPE, NAME )                                                                         \
+                                                        BIND_SET( S, N ) cbuffer _ShaderConstants { TYPE NAME; };
 
-#define GLOBALS_LAYOUT( S, N )				layout( set = S, binding = N ) uniform GlobalConstants					\
-											{																		\
-												vec4        time;													\
-												vec4        generic; /* Debugging or prototyping */					\
-												vec4        shadowParms;											\
-												vec4        toneMapTint;											\
-												vec4        exposure;												\
-												vec4        dof;													\
-												uint		numSamples;												\
-												uint		whiteId;												\
-												uint		blackId;												\
-												uint		defaultAlbedoId;										\
-												uint		defaultNormalId;										\
-												uint		defaultRoughnessId;										\
-												uint		defaultMetalId;											\
-												uint		defaultImageId;											\
-												uint		brdfLutId;												\
-												uint		isTextured;												\
-												uint		shadow2dCount;											\
-												uint		shadowCubeCount;										\
-												uint		textureCount;											\
-												uint		materialCount;											\
-											} globals;
+#define MODEL_LAYOUT( S, N )                                                                                        \
+                                                        BIND_SET( S, N ) StructuredBuffer<surface_t> surfaces;
 
-#define VIEW_LAYOUT( S, N )					layout( set = S, binding = N ) buffer ViewUniformBuffer					\
-											{																		\
-												view_t		views[MaxViews];										\
-											} viewUbo;
+#define GLOBALS_LAYOUT( S, N )                                                                                      \
+                                                        BIND_SET( S, N ) ConstantBuffer<Globals_t> globals;
 
-#define READ_BUFFER_LAYOUT( SET, SLOT, TYPE, NAME )																	\
-											layout( std140, set = SET, binding = SLOT ) readonly buffer ReadBuffer##SLOT	\
-											{																		\
-												TYPE		NAME[];													\
-											};
+#define VIEW_LAYOUT( S, N )                                                                                         \
+                                                        BIND_SET( S, N ) StructuredBuffer<view_t> views;
 
-#define WRITE_BUFFER_LAYOUT( SET, SLOT, TYPE, NAME )																\
-											layout( std140, set = SET, binding = SLOT ) buffer WriteBuffer##SLOT	\
-											{																		\
-												TYPE	NAME[];														\
-											};
+#define READ_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                      \
+                                                        BIND_SET( S, N ) StructuredBuffer<TYPE> NAME;
 
-#define SAMPLER_2D_LAYOUT( S, N )			layout( set = S, binding = N ) uniform sampler2D texSampler[];
+#define WRITE_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                     \
+                                                        BIND_SET( S, N ) RWStructuredBuffer<TYPE> NAME;
 
-#define SAMPLER_CUBE_LAYOUT( S, N )			layout( set = S, binding = N ) uniform samplerCube cubeSamplers[];
+#define SAMPLER( S, N, NAME )							BIND_SET( S, N ) SamplerState NAME;
 
-#define CODE_IMAGE_LAYOUT( S, N, SAMPLER )	layout( set = S, binding = N ) uniform SAMPLER codeSamplers[];
+#define SAMPLER_2D_LAYOUT( S, N )                                                                                   \
+                                                        BIND_SET( S, N ) Texture2D texSampler[];
 
-#define CODE_IMAGE_CUBE_LAYOUT( S, N )		layout( set = S, binding = N ) uniform samplerCube codeCubeSamplers[];
+#define SAMPLER_CUBE_LAYOUT( S, N )                                                                                 \
+                                                        BIND_SET( S, N ) TextureCube cubeSamplers[];
 
-#define STENCIL_LAYOUT( S, N, SAMPLER )		layout( set = S, binding = N ) uniform SAMPLER stencilImage;
+#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )                                                                          \
+                                                        BIND_SET( S, N ) TEXTYPE codeSamplers[];
 
-#define MATERIAL_LAYOUT( S, N )				layout( set = S, binding = N ) buffer MaterialBuffer					\
-											{																		\
-												material_t materials[MaxMaterials];									\
-											} materialUbo;
+#define CODE_IMAGE_CUBE_LAYOUT( S, N )                  BIND_SET( S, N ) TextureCube codeCubeSamplers[];
 
-#define LIGHT_LAYOUT( S, N )				layout( set = S, binding = N ) buffer LightBuffer						\
-											{																		\
-												light_t lights[MaxLights];											\
-											} lightUbo;
+#define STENCIL_LAYOUT( S, N, TEXTYPE )                 BIND_SET( S, N ) TEXTYPE stencilImage;
 
-#define PASS_LAYOUT( S, N )					layout( set = S, binding = N ) buffer PassBuffer						\
-											{																		\
-												pass_t pass;														\
-											} passUbo;
+#define MATERIAL_LAYOUT( S, N )                                                                                     \
+                                                        BIND_SET( S, N ) StructuredBuffer<material_t> materials;
 
-#define GLOBAL_BINDS( SET )					GLOBALS_LAYOUT( SET, 0 )												\
-											VIEW_LAYOUT( SET, 1)													\
-											SAMPLER_2D_LAYOUT( SET, 2 )												\
-											SAMPLER_CUBE_LAYOUT( SET, 3 )											\
-											MATERIAL_LAYOUT( SET, 4 )
+#define LIGHT_LAYOUT( S, N )                                                                                        \
+                                                        BIND_SET( S, N ) StructuredBuffer<light_t> lights;
 
-#define VIEW_BINDS( SET )					MODEL_LAYOUT( SET, 0 )
+#define PASS_LAYOUT( S, N )                                                                                         \
+                                                        BIND_SET( S, N ) StructuredBuffer<pass_t> passData;
 
-#define PASS_BINDS( SET, SAMPLER )			LIGHT_LAYOUT( SET, 0 )													\
-											CODE_IMAGE_LAYOUT( SET, 1, SAMPLER )									\
-											CODE_IMAGE_CUBE_LAYOUT( SET, 2 )										\
-											STENCIL_LAYOUT( SET, 3, SAMPLER )
+#define MATERIAL_PUSH_CONSTANTS                                                                                     \
+                                                        BIND_INLINE PushConstants_t pushConstants;
 
-#define MATERIAL_PUSH_CONSTANTS				layout( push_constant ) uniform fragmentPushConstants					\
-											{																		\
-												layout( offset = 0 ) uint objectId;									\
-												layout( offset = 4 ) uint materialId;								\
-												layout( offset = 8 ) uint viewId;									\
-											} pushConstants;
+// ============================================================
+// Compound bind macros
+// ============================================================
 
-#define VS_IN								layout( location = 0 ) in vec3 inPosition;								\
-											layout( location = 1 ) in vec4 inColor;									\
-											layout( location = 2 ) in vec3 inNormal;								\
-											layout( location = 3 ) in vec3 inTangent;								\
-											layout( location = 4 ) in vec3 inBitangent;								\
-											layout( location = 5 ) in vec4 inTexCoord;
+#define GLOBAL_BINDS( SET )                                                                                         \
+                                                        GLOBALS_LAYOUT( SET, 0 )                                    \
+                                                        VIEW_LAYOUT( SET, 1 )                                       \
+                                                        SAMPLER_2D_LAYOUT( SET, 2 )                                 \
+                                                        SAMPLER_CUBE_LAYOUT( SET, 3 )                               \
+                                                        MATERIAL_LAYOUT( SET, 4 )									\
+                                                        SAMPLER( SET, 5, bilinearSamplerWrap )						\
+														SAMPLER( SET, 6, bilinearSamplerClampEdge )					\
+                                                        SAMPLER( SET, 7, bilinearSamplerClampBorder );				\
+                                                        SAMPLER( SET, 8, depthShadowSampler );
 
-#define VS_OUT								layout( location = 0 ) out vec4 fragColor;								\
-											layout( location = 1 ) out vec3 fragNormal;								\
-											layout( location = 2 ) out mat3 fragTangentBasis;						\
-											layout( location = 5 ) out vec4 fragTexCoord;							\
-											layout( location = 6 ) out vec3 objectPosition;							\
-											layout( location = 7 ) out vec4 clipPosition;							\
-											layout( location = 8 ) out vec4 worldPosition;							\
-											layout( location = 9 ) out flat uint objectId;
+#define VIEW_BINDS( SET )                               MODEL_LAYOUT( SET, 0 )
 
-#define VS_LAYOUT_BASIC_IO					VS_IN																	\
-											VS_OUT
+#define PASS_BINDS( SET, TEXTYPE )                                                                                  \
+                                                        LIGHT_LAYOUT( SET, 0 )                                      \
+                                                        CODE_IMAGE_LAYOUT( SET, 1, TEXTYPE )                        \
+                                                        CODE_IMAGE_CUBE_LAYOUT( SET, 2 )                            \
+                                                        STENCIL_LAYOUT( SET, 3, TEXTYPE )
 
-#define VS_LAYOUT_STANDARD( SAMPLER )		GLOBAL_BINDS( 0 )														\
-											VIEW_BINDS( 1 )															\
-											PASS_BINDS( 2, SAMPLER )												\
-											MATERIAL_PUSH_CONSTANTS													\
-											VS_IN																	\
-											VS_OUT
+// ============================================================
+// Vertex shader I/O
+// ============================================================
 
-#define PS_IN								layout( location = 0 ) in vec4 fragColor;								\
-											layout( location = 1 ) in vec3 fragNormal;								\
-											layout( location = 2 ) in mat3 fragTangentBasis;						\
-											layout( location = 5 ) in vec4 fragTexCoord;							\
-											layout( location = 6 ) in vec3 objectPosition;							\
-											layout( location = 7 ) in vec4 clipPosition;							\
-											layout( location = 8 ) in vec4 worldPosition;							\
-											layout( location = 9 ) in flat uint objectId;
+#define VS_IN                                                                                                       \
+    struct VS_Input                                                                                                 \
+    {                                                                                                               \
+        BIND_SLOT(0) float3 inPosition                  : POSITION;                                                 \
+        BIND_SLOT(1) float4 inColor                     : COLOR0;                                                   \
+        BIND_SLOT(2) float3 inNormal                    : NORMAL;                                                   \
+        BIND_SLOT(3) float3 inTangent                   : TANGENT;                                                  \
+        BIND_SLOT(4) float3 inBitangent                 : BINORMAL;                                                 \
+        BIND_SLOT(5) float4 inTexCoord                  : TEXCOORD0;                                                \
+    };
 
-#define PS_OUT								layout( location = 0 ) out vec4 outColor;
-#define PS_LAYOUT_MRT_1_OUT					layout( location = 1 ) out vec4 outColor1;
+#define VS_OUT                                                                                                      \
+    struct VS_Output                                                                                                \
+    {                                                                                                               \
+                     float4 pos                         : SV_Position;                                              \
+        BIND_SLOT(0) float4 color                       : COLOR0;                                                   \
+        BIND_SLOT(1) float3 normal                      : NORMAL;                                                   \
+        BIND_SLOT(2) float3 tangent                     : TEXCOORD2;                                                \
+        BIND_SLOT(3) float3 bitangent                   : TEXCOORD3;                                                \
+        BIND_SLOT(4) float3 TBN2                        : TEXCOORD4;                                                \
+        BIND_SLOT(5) float4 uv0                         : TEXCOORD5;                                                \
+        BIND_SLOT(6) float3 objectPosition              : TEXCOORD6;                                                \
+        BIND_SLOT(7) float4 clipPosition                : TEXCOORD7;                                                \
+        BIND_SLOT(8) float4 worldPosition               : TEXCOORD8;                                                \
+        BIND_SLOT(9) nointerpolation uint objectId      : TEXCOORD9;                                                \
+    };
 
-#define PS_LAYOUT_BASIC_IO					PS_IN																	\
-											PS_OUT
+#define VS_LAYOUT_BASIC_IO                              VS_IN VS_OUT
 
-#define PS_LAYOUT_STANDARD( SAMPLER )		GLOBAL_BINDS( 0 )														\
-											VIEW_BINDS( 1 )															\
-											PASS_BINDS( 2, SAMPLER )												\
-											MATERIAL_PUSH_CONSTANTS													\
-											PS_IN																	\
-											PS_OUT
+#define VS_LAYOUT_STANDARD( TEXTYPE )                                                                               \
+                                                        GLOBAL_BINDS( 0 )                                           \
+                                                        VIEW_BINDS( 1 )                                             \
+                                                        PASS_BINDS( 2, TEXTYPE )                                    \
+                                                        MATERIAL_PUSH_CONSTANTS                                     \
+                                                        VS_IN                                                       \
+                                                        VS_OUT
 
-#define PS_LAYOUT_IMAGE_PROCESS( SAMPLER, TYPE )																	\
-											GLOBAL_BINDS( 0 )														\
-											CODE_IMAGE_LAYOUT( 1, 0, SAMPLER )										\
-											CODE_IMAGE_CUBE_LAYOUT( 1, 1 )											\
-											STENCIL_LAYOUT( 1, 2, SAMPLER )											\
-											IMAGE_CONSTANT_LAYOUT( 1, 3, TYPE, imageProcess )
+// ============================================================
+// Pixel shader I/O
+// ============================================================
+
+#define PS_IN                                                                                                       \
+    struct PS_Input                                                                                                 \
+    {                                                                                                               \
+                     float4 pos                         : SV_Position;                                              \
+        BIND_SLOT(0) float4 color                       : COLOR0;                                                   \
+        BIND_SLOT(1) float3 normal                      : NORMAL;                                                   \
+        BIND_SLOT(2) float3 tangent                     : TEXCOORD2;                                                \
+        BIND_SLOT(3) float3 bitangent                   : TEXCOORD3;                                                \
+        BIND_SLOT(4) float3 TBN2                        : TEXCOORD4;                                                \
+        BIND_SLOT(5) float4 uv0                         : TEXCOORD5;                                                \
+        BIND_SLOT(6) float3 objectPosition              : TEXCOORD6;                                                \
+        BIND_SLOT(7) float4 clipPosition                : TEXCOORD7;                                                \
+        BIND_SLOT(8) float4 worldPosition               : TEXCOORD8;                                                \
+        BIND_SLOT(9) nointerpolation uint objectId      : TEXCOORD9;                                                \
+    };
+
+#define PS_OUT                                                                                                      \
+    struct PS_Output                                                                                                \
+    {                                                                                                               \
+        float4 outColor : SV_Target0;                                                                               \
+    };
+
+#define PS_LAYOUT_MRT_1_OUT                                                                                         \
+    struct PS_Output_MRT                                                                                            \
+    {                                                                                                               \
+        float4 outColor  : SV_Target0;                                                                              \
+        float4 outColor1 : SV_Target1;                                                                              \
+    };
+
+#define PS_LAYOUT_BASIC_IO                              PS_IN PS_OUT
+
+#define PS_LAYOUT_STANDARD( TEXTYPE )                                                                               \
+                                                        GLOBAL_BINDS( 0 )                                           \
+                                                        VIEW_BINDS( 1 )                                             \
+                                                        PASS_BINDS( 2, TEXTYPE )                                    \
+                                                        MATERIAL_PUSH_CONSTANTS                                     \
+                                                        PS_IN                                                       \
+                                                        PS_OUT
+
+#define PS_LAYOUT_IMAGE_PROCESS( TEXTYPE, USERTYPE )                                                                \
+                                                        GLOBAL_BINDS( 0 )                                           \
+                                                        CODE_IMAGE_LAYOUT( 1, 0, TEXTYPE )                          \
+                                                        CODE_IMAGE_CUBE_LAYOUT( 1, 1 )                              \
+                                                        STENCIL_LAYOUT( 1, 2, TEXTYPE )                             \
+                                                        IMAGE_CONSTANT_LAYOUT( 1, 3, USERTYPE, imageProcess )
+
+#endif // GLOBALS_HLSL_H
