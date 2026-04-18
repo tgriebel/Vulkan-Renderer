@@ -55,6 +55,7 @@ public:
 	hdl_t			diffuseIblMap;
 
 	AABB			GetLocalBounds() const;
+	void			ClearBounds();
 	void			ExpandBounds( const AABB& bounds );
 	vec3f			GetOrigin() const;
 	void			SetOrigin( const vec3f& origin );

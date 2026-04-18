@@ -8,6 +8,12 @@ AABB Entity::GetLocalBounds() const
 }
 
 
+void Entity::ClearBounds()
+{
+	bounds.Clear();
+}
+
+
 void Entity::ExpandBounds( const AABB& modelBounds )
 {
 	bounds.Expand( modelBounds.GetMin() );

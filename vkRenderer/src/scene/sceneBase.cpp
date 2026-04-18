@@ -11,6 +11,7 @@ void Scene::CreateEntityBounds( const hdl_t modelHdl, Entity& entity )
 
 	const Model& model = modelLib.Find( modelHdl )->Get();
 	entity.modelHdl = modelHdl.Get();
+	entity.ClearBounds();
 	entity.ExpandBounds( model.bounds );
 }
 

@@ -617,6 +617,32 @@ void DebugMenuEntityEdit( Scene* scene )
 			ent->SetScale( scale );
 			ent->SetRotation( rotation );
 
+			const char* currentModelName = ModelLib().FindName( ent->modelHdl );
+			ImGui::TableNextColumn();
+			ImGui::Text( "Model" );
+			ImGui::TableNextColumn();
+			if ( ImGui::BeginCombo( "##model", currentModelName != nullptr ? currentModelName : "<none>" ) )
+			{
+				const uint32_t modelCount = ModelLib().Count();
+				for ( uint32_t m = 0; m < modelCount; ++m )
+				{
+					const char* modelName = ModelLib().FindName( m );
+					const hdl_t modelHdl  = ModelLib().RetrieveHdl( modelName );
+					const bool selected   = ( modelHdl == ent->modelHdl );
+
+					if ( ImGui::Selectable( modelName, selected ) && !selected )
+					{
+						ent->modelHdl = modelHdl;
+						scene->CreateEntityBounds( modelHdl, *ent );
+					}
+
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+
 			ImGui::EndTable();
 		}
 	}
