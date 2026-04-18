@@ -312,6 +312,81 @@ void CreateSphereSurface( Model& outModel, const std::string& materialName, cons
 }
 
 
+void CreateTorusSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float innerRadius, const float outerRadius )
+{
+	GeoBuilder::torusInfo_t info;
+	info.origin      = origin;
+	info.innerRadius = innerRadius;
+	info.outerRadius = outerRadius;
+
+	GeoBuilder gb;
+	gb.AddTorusSurf( info );
+
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
+
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
+}
+
+
+void CreateCapsuleSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float radius, const float cylinderHeight )
+{
+	GeoBuilder::capsuleInfo_t info;
+	info.origin        = origin;
+	info.radius        = radius;
+	info.cylinderHeight = cylinderHeight;
+
+	GeoBuilder gb;
+	gb.AddCapsuleSurf( info );
+
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
+
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
+}
+
+
+void CreatePyramidSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float baseRadius, const float height, const uint32_t sides )
+{
+	GeoBuilder::pyramidInfo_t info;
+	info.origin     = origin;
+	info.baseRadius = baseRadius;
+	info.height     = height;
+	info.sides      = sides;
+
+	GeoBuilder gb;
+	gb.AddPyramidSurf( info );
+
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
+
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
+}
+
+
+void CreateDiamondSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float radius, const float topHeight, const float bottomHeight, const uint32_t sides )
+{
+	GeoBuilder::diamondInfo_t info;
+	info.origin       = origin;
+	info.radius       = radius;
+	info.topHeight    = topHeight;
+	info.bottomHeight = bottomHeight;
+	info.sides        = sides;
+
+	GeoBuilder gb;
+	gb.AddDiamondSurf( info );
+
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
+
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
+}
+
+
 bool ModelGenLoader::Load( Asset<Model>& model )
 {
 	//CreateQuadSurface2D();

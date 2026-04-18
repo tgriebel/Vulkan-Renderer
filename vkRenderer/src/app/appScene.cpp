@@ -746,7 +746,6 @@ void DrawEntityDebugMenu()
 			}
 		};
 
-		// --- From Loaded Model ---
 		if ( ImGui::CollapsingHeader( "From Loaded Model" ) )
 		{
 			static char name[ 128 ] = {};
@@ -849,6 +848,112 @@ void DrawEntityDebugMenu()
 				ent->name = boxName;
 				g_scene->entities.push_back( ent );
 				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( boxName ), *ent );
+			}
+		}
+
+		if ( ImGui::CollapsingHeader( "Torus" ) )
+		{
+			static char torusName[ 128 ] = {};
+			static uint32_t torusMatIdx = 0;
+			static float torusInnerRadius = 0.5f;
+			static float torusOuterRadius = 1.0f;
+
+			MaterialCombo( "Material##torus", torusMatIdx );
+			ImGui::InputText( "Name##nameTorus", torusName, 128 );
+			ImGui::InputFloat( "Inner Radius##torus", &torusInnerRadius );
+			ImGui::InputFloat( "Outer Radius##torus", &torusOuterRadius );
+
+			if ( ImGui::Button( "Create##torus" ) )
+			{
+				Model model;
+				CreateTorusSurface( model, MaterialLib().FindName( torusMatIdx ), vec3f( 0.0f, 0.0f, 0.0f ), torusInnerRadius, torusOuterRadius );
+				ModelLib().Add( torusName, model );
+
+				Entity* ent = new Entity();
+				ent->name = torusName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( torusName ), *ent );
+			}
+		}
+
+		if ( ImGui::CollapsingHeader( "Capsule" ) )
+		{
+			static char capsuleName[ 128 ] = {};
+			static uint32_t capsuleMatIdx = 0;
+			static float capsuleRadius = 0.5f;
+			static float capsuleCylHeight = 1.0f;
+
+			MaterialCombo( "Material##capsule", capsuleMatIdx );
+			ImGui::InputText( "Name##nameCapsule", capsuleName, 128 );
+			ImGui::SliderFloat( "Radius##capsule", &capsuleRadius, 0.01f, 10.0f );
+			ImGui::SliderFloat( "Cylinder Height##capsule", &capsuleCylHeight, 0.0f, 20.0f );
+
+			if ( ImGui::Button( "Create##capsule" ) )
+			{
+				Model model;
+				CreateCapsuleSurface( model, MaterialLib().FindName( capsuleMatIdx ), vec3f( 0.0f, 0.0f, 0.0f ), capsuleRadius, capsuleCylHeight );
+				ModelLib().Add( capsuleName, model );
+
+				Entity* ent = new Entity();
+				ent->name = capsuleName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( capsuleName ), *ent );
+			}
+		}
+
+		if ( ImGui::CollapsingHeader( "Pyramid" ) )
+		{
+			static char pyramidName[ 128 ] = {};
+			static uint32_t pyramidMatIdx = 0;
+			static float pyramidBaseRadius = 1.0f;
+			static float pyramidHeight = 2.0f;
+			static int   pyramidSides = 4;
+
+			MaterialCombo( "Material##pyramid", pyramidMatIdx );
+			ImGui::InputText( "Name##namePyramid", pyramidName, 128 );
+			ImGui::SliderFloat( "Base Radius##pyramid", &pyramidBaseRadius, 0.01f, 10.0f );
+			ImGui::SliderFloat( "Height##pyramid", &pyramidHeight, 0.01f, 20.0f );
+			ImGui::SliderInt( "Sides##pyramid", &pyramidSides, 3, 16 );
+
+			if ( ImGui::Button( "Create##pyramid" ) )
+			{
+				Model model;
+				CreatePyramidSurface( model, MaterialLib().FindName( pyramidMatIdx ), vec3f( 0.0f, 0.0f, 0.0f ), pyramidBaseRadius, pyramidHeight, static_cast<uint32_t>( pyramidSides ) );
+				ModelLib().Add( pyramidName, model );
+
+				Entity* ent = new Entity();
+				ent->name = pyramidName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( pyramidName ), *ent );
+			}
+		}
+
+		if ( ImGui::CollapsingHeader( "Diamond" ) )
+		{
+			static char diamondName[ 128 ] = {};
+			static uint32_t diamondMatIdx = 0;
+			static float diamondRadius = 1.0f;
+			static float diamondTopHeight = 1.0f;
+			static float diamondBotHeight = 0.5f;
+			static int   diamondSides = 6;
+
+			MaterialCombo( "Material##diamond", diamondMatIdx );
+			ImGui::InputText( "Name##nameDiamond", diamondName, 128 );
+			ImGui::SliderFloat( "Radius##diamond", &diamondRadius, 0.01f, 10.0f );
+			ImGui::SliderFloat( "Top Height##diamond", &diamondTopHeight, 0.01f, 20.0f );
+			ImGui::SliderFloat( "Bottom Height##diamond", &diamondBotHeight, 0.01f, 20.0f );
+			ImGui::SliderInt( "Sides##diamond", &diamondSides, 3, 16 );
+
+			if ( ImGui::Button( "Create##diamond" ) )
+			{
+				Model model;
+				CreateDiamondSurface( model, MaterialLib().FindName( diamondMatIdx ), vec3f( 0.0f, 0.0f, 0.0f ), diamondRadius, diamondTopHeight, diamondBotHeight, static_cast<uint32_t>( diamondSides ) );
+				ModelLib().Add( diamondName, model );
+
+				Entity* ent = new Entity();
+				ent->name = diamondName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( diamondName ), *ent );
 			}
 		}
 

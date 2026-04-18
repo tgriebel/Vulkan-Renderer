@@ -62,3 +62,7 @@ void MatrixToEulerZYX( const mat4x4f& m, float& a, float& b, float& c );
 void CreateQuadSurface2D( Model& outModel, const std::string& materialName, vec2f& origin, vec2f& size );
 void CreateBoxSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float size );
 void CreateSphereSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float radius );
+void CreateTorusSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float innerRadius, const float outerRadius );
+void CreateCapsuleSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float radius, const float cylinderHeight );
+void CreatePyramidSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float baseRadius, const float height, const uint32_t sides );
+void CreateDiamondSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float radius, const float topHeight, const float bottomHeight, const uint32_t sides );
