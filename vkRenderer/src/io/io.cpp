@@ -495,13 +495,11 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		}
 #endif
 
-		model.surfs[ model.surfCount ].materialHdl = INVALID_HDL;
+		model.surfs[ model.surfCount ].materialHdl = assets.GetLib<Material>()->GetDefault()->Handle();
 		if( ( materials.size() > 0 ) && ( shape.mesh.material_ids.size() > 0 ) )
 		{
 			const int shapeMaterial = shape.mesh.material_ids[ 0 ];
-			if( shapeMaterial == -1 )
-			{
-				model.surfs[ model.surfCount ].materialHdl = assets.GetLib<Material>()->GetDefault()->Handle();
+			if( shapeMaterial == -1 ) {
 				continue;
 			}
 			const hdl_t materialHdl = AssetLib<Material>::Handle( materials[ shapeMaterial ].name.c_str() );

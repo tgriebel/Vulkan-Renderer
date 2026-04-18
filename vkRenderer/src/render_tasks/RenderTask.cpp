@@ -194,7 +194,9 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 				if( surface.pipelineObject != pipelineHandle )
 				{
 					GetPipelineObject( surface.pipelineObject, &pipelineObject );
-					if ( pipelineObject == nullptr ) {
+					if ( pipelineObject == nullptr )
+					{
+						assert( 0 );
 						continue;
 					}
 

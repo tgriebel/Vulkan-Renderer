@@ -80,13 +80,6 @@ void ChessScene::Init()
 	chessEngine.Init( cfg );
 	//board.SetEventCallback( &ProcessEvent );
 
-	{
-		Entity* ent = new Entity();
-		CreateEntityBounds( ModelLib().RetrieveHdl( "_skybox" ), *ent );
-		ent->name = "_skybox";
-		entities.push_back( ent );
-	}
-
 	ModelLib().Find( "plane" )->Get().surfs[ 0 ].materialHdl = MaterialLib().RetrieveHdl( "GlowSquare" );
 
 	for ( int i = 0; i < 8; ++i )
@@ -106,7 +99,7 @@ void ChessScene::Init()
 			entities.push_back( squareEnt );
 
 			pieceInfo_t pieceInfo = chessEngine.GetInfo( j, i );
-			if ( pieceInfo.onBoard == false ) {
+			if ( pieceInfo.isPiece == false ) {
 				continue;
 			}
 

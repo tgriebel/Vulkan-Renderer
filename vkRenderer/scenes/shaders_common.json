@@ -54,6 +54,11 @@
       "vs": "simple",
       "ps": "depth"
     },
+	{
+      "name": "LitDiffuse",
+      "vs": "simple",
+      "ps": "litViewDiffuse"
+    },
     {
       "name": "LitOpaque",
       "vs": "simple",

@@ -42,7 +42,7 @@ public:
 };
 
 
-class QuadLoader : public LoadHandler<Model>
+class ModelGenLoader : public LoadHandler<Model>
 {
 private:
 	bool Load( Asset<Model>& model );
@@ -51,4 +51,5 @@ public:
 
 mat4x4f MatrixFromVector( const vec3f& v );
 void MatrixToEulerZYX( const mat4x4f& m, float& a, float& b, float& c );
-void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size );
+void CreateQuadSurface2D( Model& outModel, const std::string& materialName, vec2f& origin, vec2f& size );
+void CreateBoxSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float size );

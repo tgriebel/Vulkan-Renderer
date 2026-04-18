@@ -218,14 +218,18 @@ int main( int argc, char* argv[] )
 				loader->SetTexturePath( dir );
 				loader->SetModelName( file );
 				loader->SetAssetRef( &g_assets );
-				ModelLib().AddDeferred( file.c_str(), loader_t( loader ) );
+
+				const hdl_t modelHdl = ModelLib().AddDeferred( file.c_str(), loader_t( loader ) );
+
+				Entity* ent = new Entity();
+				ent->name = file;
+				
 
 				g_assets.RunLoadLoop();
-				Entity* ent = new Entity();
-				ent->name = path;
+				//ent->materialHdl = 
 				//ent->SetFlag( ENT_FLAG_DEBUG );
 				g_scene->entities.push_back( ent );
-				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( modelName.c_str() ), *ent );
+				g_scene->CreateEntityBounds( modelHdl, *ent );
 
 				g_imguiControls.openModelImportFileDialog = false;
 			}

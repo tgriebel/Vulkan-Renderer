@@ -209,6 +209,7 @@
     <ClCompile Include="src\render_core\renderContext.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene\codeAssets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -447,6 +448,7 @@
     <ClInclude Include="src\render_core\renderContext.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\scene\codeAssets.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -605,6 +607,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\util_hlsl.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\litViewDiffuse.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

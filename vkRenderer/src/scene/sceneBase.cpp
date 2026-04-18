@@ -4,7 +4,12 @@
 
 void Scene::CreateEntityBounds( const hdl_t modelHdl, Entity& entity )
 {
-	const Model& model = g_assets.GetLib<Model>()->Find( modelHdl )->Get();
+	const AssetLib<Model>& modelLib = *g_assets.GetLib<Model>();
+	if( modelLib.Exists( modelHdl ) == false ) {
+		std::cout << "Invalid model handle" << std::endl;
+	}
+
+	const Model& model = modelLib.Find( modelHdl )->Get();
 	entity.modelHdl = modelHdl.Get();
 	entity.ExpandBounds( model.bounds );
 }

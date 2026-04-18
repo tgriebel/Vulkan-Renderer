@@ -93,7 +93,7 @@ void CreateCodeAssets()
 
 		// Default Image - Checkerboard
 		{
-			hdl_t handle = TextureLib().Add( "_default", Image() );
+			hdl_t handle = TextureLib().Add( "_defaultImage", Image() );
 			Image& texture = TextureLib().Find( handle )->Get();
 
 			const uint32_t cellSize = 16;
@@ -117,7 +117,7 @@ void CreateCodeAssets()
 				}
 			}
 		}
-		TextureLib().SetDefault( "_default" );
+		TextureLib().SetDefault( "_defaultImage" );
 
 		// Default Image Cube - Rainbow
 		{
@@ -160,6 +160,13 @@ void CreateCodeAssets()
 	{
 		{
 			Material material;
+			material.usage = MATERIAL_USAGE_GGX;
+			material.AddShader( DRAWPASS_OPAQUE, AssetLibGpuProgram::Handle( "LitDiffuse" ) );
+			MaterialLib().Add( "_defaultMaterial", material );
+		}
+
+		{
+			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
 			for ( uint32_t i = 0; i < Material::MaxMaterialTextures; ++i ) {
@@ -186,21 +193,26 @@ void CreateCodeAssets()
 			material.AddShader( DRAWPASS_DEBUG_3D, AssetLibGpuProgram::Handle( "DebugSolid" ) );
 			MaterialLib().Add( "DEBUG_3D", material );
 		}
-		MaterialLib().SetDefault( "DEBUG_WIRE" );
+		MaterialLib().SetDefault( "_defaultMaterial" );
 	}
 
 	// ----------------- MODELS ----------------- //
 	{
 		{
 			Model model;
-			CreateQuadSurface2D( "TONEMAP", model, vec2f( 0.0f, 0.0f ), vec2f( 2.0f ) );
+			CreateQuadSurface2D( model, "TONEMAP", vec2f( 0.0f, 0.0f ), vec2f( 2.0f ) );
 			ModelLib().Add( "_postProcessQuad", model );
 		}
 		{
 			Model model;
-			CreateQuadSurface2D( "IMAGE2D", model, vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) );
+			CreateQuadSurface2D( model, "IMAGE2D", vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) );
 			ModelLib().Add( "_quadTexDebug", model );
 		}
-		ModelLib().SetDefault( "_quadTexDebug" );
+		{
+			Model model;
+			CreateBoxSurface( model, "_defaultMaterial", vec3f( 0.0f, 0.0f, 0.0f ), 1.0f );
+			ModelLib().Add( "_modelDefault", model );
+		}
+		ModelLib().SetDefault( "_modelDefault" );
 	}
 }

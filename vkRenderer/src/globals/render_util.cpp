@@ -233,7 +233,7 @@ bool WaterLoader::Load( Asset<Model>& modelAsset )
 }
 
 
-void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2f& origin, vec2f& size )
+void CreateQuadSurface2D( Model& outModel, const std::string& materialName, vec2f& origin, vec2f& size )
 {
 	GeoBuilder::planeInfo_t info;
 	info.gridSize = size;
@@ -254,19 +254,47 @@ void CreateQuadSurface2D( const std::string& materialName, Model& outModel, vec2
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
 
 	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 0 ].uv2 = vec2f( 0.0f, 0.0f );
 	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 1 ].uv2 = vec2f( 0.0f, 0.0f );
 	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 1.0f );
-	outModel.surfs[ 0 ].vertices[ 2 ].uv2 = vec2f( 0.0f, 0.0f );
 	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
-	outModel.surfs[ 0 ].vertices[ 3 ].uv2 = vec2f( 0.0f, 0.0f );
+
+	for( int i = 0; i < 4; ++i ) {
+		outModel.surfs[ 0 ].vertices[ i ].uv2 = vec2f( 0.0f, 0.0f );
+	}
 
 	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
 }
 
 
-bool QuadLoader::Load( Asset<Model>& model )
+void CreateBoxSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float size )
+{
+	GeoBuilder gb;
+	gb.AddBoxSurf( origin, size );
+
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
+
+	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
+
+	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 4 ].uv = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 5 ].uv = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 6 ].uv = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 7 ].uv = vec2f( 1.0f, 1.0f );
+
+	for( int i = 0; i < 8; ++i ) {
+		outModel.surfs[ 0 ].vertices[ i ].uv2 = vec2f( 0.0f, 0.0f );
+	}
+
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
+}
+
+
+bool ModelGenLoader::Load( Asset<Model>& model )
 {
 	//CreateQuadSurface2D();
 	return false;
