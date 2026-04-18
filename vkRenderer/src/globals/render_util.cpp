@@ -299,6 +299,7 @@ void CreateSphereSurface( Model& outModel, const std::string& materialName, cons
 	GeoBuilder::sphereInfo_t info;
 	info.origin = origin;
 	info.radius = radius;
+	info.winding = GeoBuilder::WINDING_COUNTER_CLOCKWISE;
 
 	GeoBuilder gb;
 	gb.AddSphereSurf( info );

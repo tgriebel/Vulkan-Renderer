@@ -161,6 +161,7 @@ void CreateCodeAssets()
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_GGX;
+			material.AddShader( DRAWPASS_DEPTH, AssetLibGpuProgram::Handle( "LitDepth" ) );
 			material.AddShader( DRAWPASS_OPAQUE, AssetLibGpuProgram::Handle( "LitDiffuse" ) );
 			MaterialLib().Add( "_defaultMaterial", material );
 		}

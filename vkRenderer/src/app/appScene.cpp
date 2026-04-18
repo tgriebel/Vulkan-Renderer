@@ -727,37 +727,129 @@ void DrawEntityDebugMenu()
 #if defined( USE_IMGUI )
 	if ( ImGui::BeginTabItem( "Create Entity" ) )
 	{
-		static char name[ 128 ] = {};
-		static uint32_t currentIdx = 0;
-		const char* previewValue = ModelLib().FindName( currentIdx );
-		if ( ImGui::BeginCombo( "Model", previewValue ) )
+		auto MaterialCombo = []( const char* label, uint32_t& selectedIdx )
 		{
-			const uint32_t modelCount = ModelLib().Count();
-			for ( uint32_t m = 0; m < modelCount; ++m )
+			if ( ImGui::BeginCombo( label, MaterialLib().FindName( selectedIdx ) ) )
 			{
-				Asset<Model>* modelAsset = ModelLib().Find( m );
-
-				const bool selected = ( currentIdx == m );
-				if ( ImGui::Selectable( modelAsset->GetName().c_str(), selected ) ) {
-					currentIdx = m;
+				const uint32_t matCount = MaterialLib().Count();
+				for ( uint32_t m = 0; m < matCount; ++m )
+				{
+					const bool selected = ( selectedIdx == m );
+					if ( ImGui::Selectable( MaterialLib().FindName( m ), selected ) ) {
+						selectedIdx = m;
+					}
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
 				}
-
-				if ( selected ) {
-					ImGui::SetItemDefaultFocus();
-				}
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
+		};
+
+		// --- From Loaded Model ---
+		if ( ImGui::CollapsingHeader( "From Loaded Model" ) )
+		{
+			static char name[ 128 ] = {};
+			static uint32_t currentIdx = 0;
+
+			if ( ImGui::BeginCombo( "Model##model", ModelLib().FindName( currentIdx ) ) )
+			{
+				const uint32_t modelCount = ModelLib().Count();
+				for ( uint32_t m = 0; m < modelCount; ++m )
+				{
+					const bool selected = ( currentIdx == m );
+					if ( ImGui::Selectable( ModelLib().FindName( m ), selected ) ) {
+						currentIdx = m;
+					}
+					if ( selected ) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::InputText( "Name##nameModel", name, 128 );
+
+			if ( ImGui::Button( "Create##model" ) )
+			{
+				Entity* ent = new Entity();
+				ent->name = name;
+				ent->SetFlag( ENT_FLAG_DEBUG );
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( ModelLib().FindName( currentIdx ) ), *ent );
+			}
 		}
 
-		ImGui::InputText( "Name", name, 128 );
-
-		if ( ImGui::Button( "Create" ) )
+		if ( ImGui::CollapsingHeader( "Plane" ) )
 		{
-			Entity* ent = new Entity();
-			ent->name = name;
-			ent->SetFlag( ENT_FLAG_DEBUG );
-			g_scene->entities.push_back( ent );
-			g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( ModelLib().FindName( currentIdx ) ), *ent );
+			static char planeName[ 128 ] = {};
+			static uint32_t planeMatIdx = 0;
+			static float planeSizeX = 1.0f;
+			static float planeSizeY = 1.0f;
+
+			MaterialCombo( "Material##plane", planeMatIdx );
+			ImGui::InputText( "Name##namePlane", planeName, 128 );
+			ImGui::InputFloat( "Width##plane", &planeSizeX );
+			ImGui::InputFloat( "Height##plane", &planeSizeY );
+
+			if ( ImGui::Button( "Create##plane" ) )
+			{
+				Model model;
+				vec2f origin = vec2f( 0.0f, 0.0f );
+				vec2f size   = vec2f( planeSizeX, planeSizeY );
+				CreateQuadSurface2D( model, MaterialLib().FindName( planeMatIdx ), origin, size );
+				ModelLib().Add( planeName, model );
+
+				Entity* ent = new Entity();
+				ent->name = planeName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( planeName ), *ent );
+			}
+		}
+
+		if ( ImGui::CollapsingHeader( "Sphere" ) )
+		{
+			static char sphereName[ 128 ] = {};
+			static uint32_t sphereMatIdx = 0;
+			static float sphereRadius = 1.0f;
+
+			MaterialCombo( "Material##sphere", sphereMatIdx );
+			ImGui::InputText( "Name##nameSphere", sphereName, 128 );
+			ImGui::InputFloat( "Radius##sphere", &sphereRadius );
+
+			if ( ImGui::Button( "Create##sphere" ) )
+			{
+				Model model;
+				CreateSphereSurface( model, MaterialLib().FindName( sphereMatIdx ), vec3f( 0.0f, 0.0f, 0.0f ), sphereRadius );
+				ModelLib().Add( sphereName, model );
+
+				Entity* ent = new Entity();
+				ent->name = sphereName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( sphereName ), *ent );
+			}
+		}
+
+		if ( ImGui::CollapsingHeader( "Box" ) )
+		{
+			static char boxName[ 128 ] = {};
+			static uint32_t boxMatIdx = 0;
+			static float boxSize = 1.0f;
+
+			MaterialCombo( "Material##box", boxMatIdx );
+			ImGui::InputText( "Name##nameBox", boxName, 128 );
+			ImGui::InputFloat( "Size##box", &boxSize );
+
+			if ( ImGui::Button( "Create##box" ) )
+			{
+				Model model;
+				CreateBoxSurface( model, MaterialLib().FindName( boxMatIdx ), vec3f( 0.0f, 0.0f, 0.0f ), boxSize );
+				ModelLib().Add( boxName, model );
+
+				Entity* ent = new Entity();
+				ent->name = boxName;
+				g_scene->entities.push_back( ent );
+				g_scene->CreateEntityBounds( ModelLib().RetrieveHdl( boxName ), *ent );
+			}
 		}
 
 		ImGui::EndTabItem();
