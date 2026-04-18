@@ -17,16 +17,34 @@ float3 DecodeNormal( const float3 normalMapTexel )
 }
 
 
-float3 ApplyLight( const lightInput_t lightInput, const light_t light )
+lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const light_t light )
 {
-	const float3 N = lightInput.N;
-	const float3 V = lightInput.V;
-	const float NoV = lightInput.NoV;
-	const float perceptualRoughness = lightInput.roughness;
-	const float metallic = lightInput.metallic;
-	const float3 F0 = lightInput.F0;
+	lightingInput_t lightingInput;
 	
-	const float3 lightRay = ( light.lightPos.xyz - lightInput.positionWS );
+	lightingInput.lightRay = ( light.lightPos.xyz - surfaceInput.positionWS );
+	lightingInput.lightDistance = length( lightingInput.lightRay );
+	lightingInput.L = lightingInput.lightRay / lightingInput.lightDistance;
+	lightingInput.H = normalize( surfaceInput.V + lightingInput.L );
+
+	lightingInput.NoL = max( dot( surfaceInput.N, lightingInput.L ), 0.0f );
+	lightingInput.NoH = max( dot( surfaceInput.N, lightingInput.H ), 0.0f );
+	lightingInput.LoH = max( dot( lightingInput.L, lightingInput.H ), 0.0f );
+	lightingInput.HoV = max( dot( lightingInput.H, surfaceInput.V ), 0.0f );
+
+	return lightingInput;
+}
+
+
+float3 ApplyLight( const surfaceInput_t surfaceInput, const light_t light )
+{
+	const float3 N = surfaceInput.N;
+	const float3 V = surfaceInput.V;
+	const float NoV = surfaceInput.NoV;
+	const float perceptualRoughness = surfaceInput.roughness;
+	const float metallic = surfaceInput.metallic;
+	const float3 F0 = surfaceInput.F0;
+	
+	const float3 lightRay = ( light.lightPos.xyz - surfaceInput.positionWS );
 	const float lightDistance = length( lightRay );
 	const float3 L = lightRay / lightDistance;
 	const float3 H = normalize( V + L );
@@ -52,7 +70,7 @@ float3 ApplyLight( const lightInput_t lightInput, const light_t light )
 	const float spotFalloff = 1.0f;
 	const float3 radiance = attenuation * spotFalloff * light.intensity.rgb;
 
-	const float3 diffuse = ( ( kD * lightInput.albedo ) / PI + Fr) * radiance * NoL;
+	const float3 diffuse = ( ( kD * surfaceInput.albedo ) / PI + Fr) * radiance * NoL;
 	
 	return diffuse;
 }
@@ -91,6 +109,20 @@ float ApplyShadow( const uint shadowViewId, float3 worldPosition )
 		}
 	}
 	return shadowing;
+}
+
+
+float3 ApplyClearcoat( const surfaceInput_t surfaceInput, lightingInput_t lightingInput, const float3 baseLayerColor )
+{
+	// Coat specular
+	const float Dc = D_GGX( surfaceInput.ccRoughness, lightingInput.NoH );
+	const float Vc = V_Kelemen( lightingInput.LoH );
+	const float3 Fc = F_Schlick( 0.04f, lightingInput.LoH );
+	const float FcMagnitude = surfaceInput.ccStrength * Fc.x;
+
+	const float coatLobe = surfaceInput.ccStrength * Dc * Vc * Fc.x;
+
+	return ( 1.0f - FcMagnitude ) * baseLayerColor + coatLobe;
 }
 
 
@@ -152,7 +184,7 @@ PS_Output PSMain( PS_Input input )
 		metalnessSample = metalnessTex.Sample( bilinearSamplerWrap, uv0 ).r;
 	}
 
-	lightInput_t lightingInput;
+	surfaceInput_t surfaceInput;
 
     const float normalBlendFactor = 1.0f;
 	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalSample.x * input.tangent + normalSample.y * input.bitangent + normalSample.z * input.TBN2), normalBlendFactor );
@@ -165,16 +197,21 @@ PS_Output PSMain( PS_Input input )
 
 	const float ao = 1.0f;
 
-	lightingInput.N = normalize( normal );
-	lightingInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
-	lightingInput.NoV = saturate( dot( lightingInput.N, lightingInput.V ) );
-	lightingInput.cameraOrigin = view.viewOrigin.xyz;
-	lightingInput.positionWS = input.worldPosition.xyz;
-	lightingInput.albedo = albedoSample.rgb * diffuseColor;
-	lightingInput.roughness = saturate(globals.generic.x * roughnessSample + globals.generic.y);
-	lightingInput.metallic = saturate(globals.generic.z * metalnessSample + globals.generic.w);
-	lightingInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), lightingInput.albedo.rgb, lightingInput.metallic);
+	surfaceInput.N = normalize( normal );
+	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
+	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
+	surfaceInput.cameraOrigin = view.viewOrigin.xyz;
+	surfaceInput.positionWS = input.worldPosition.xyz;
+	surfaceInput.albedo = albedoSample.rgb * diffuseColor;
+	surfaceInput.roughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
+	surfaceInput.metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
+	surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
 
+
+	surfaceInput.ccStrength = 1.0f;
+	surfaceInput.ccRoughness = 1.0f;
+	surfaceInput.ccNormal = normalize( normal + float3( 0.1f, 0.4f, 0.1f ) ); // hack something in
+	
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
 #if 1
@@ -182,29 +219,33 @@ PS_Output PSMain( PS_Input input )
     {
         const light_t light = lights[ i ];
 
-		const float3 diffuse = ApplyLight( lightingInput, light );
+		const lightingInput_t lightingInput = CalculateLightingInput( surfaceInput, light );
 
-		const float shadowing = ApplyShadow( light.shadowViewId, lightingInput.positionWS );
+		float3 diffuse = ApplyLight( surfaceInput, light );
+
+		//diffuse = ApplyClearcoat( surfaceInput, lightingInput, diffuse );
+		
+		const float shadowing = ApplyShadow( light.shadowViewId, surfaceInput.positionWS );
 
         Lo += shadowing * diffuse;
     }
 #endif
 
-    const float3 F = F_SchlickRoughness( lightingInput.NoV, lightingInput.F0, lightingInput.roughness );
+    const float3 F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
 
-    const float3 R = reflect( -lightingInput.V, lightingInput.N );
+    const float3 R = reflect( -surfaceInput.V, surfaceInput.N );
     const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[specularIBL] ), MaxReflectionLod );
-    const float3 specIBL = cubeSamplers[ specularIBL ].SampleLevel( bilinearSamplerWrap, CubeVector( R ), lightingInput.roughness * MipLevels ).rgb;
+    const float3 specIBL = cubeSamplers[ specularIBL ].SampleLevel( bilinearSamplerWrap, CubeVector( R ), surfaceInput.roughness * MipLevels ).rgb;
 
-	const float2 envBRDF = texSampler[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( lightingInput.NoV, lightingInput.roughness ) ).rg;
+	const float2 envBRDF = texSampler[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 
     float3 kS = F;
     float3 kD = 1.0 - kS;
-	kD *= 1.0 - lightingInput.metallic;
+	kD *= 1.0 - surfaceInput.metallic;
 
-    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( bilinearSamplerWrap, CubeVector( lightingInput.N ) ).rgb;
-	const float3 diffuse = irradiance * lightingInput.albedo;
+    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( bilinearSamplerWrap, CubeVector( surfaceInput.N ) ).rgb;
+	const float3 diffuse = irradiance * surfaceInput.albedo;
     const float3 ambient = ( kD * diffuse + specular ) * ao;// * material.Ka.rgb;
 
     float4 outColor;
@@ -219,7 +260,7 @@ PS_Output PSMain( PS_Input input )
 
 #ifdef USE_MRT
     float4 outColor1;
-    outColor1.rgb = 0.5f * ( lightingInput.N + float3( 1.0f, 1.0f, 1.0f ) );
+    outColor1.rgb = 0.5f * ( surfaceInput.N + float3( 1.0f, 1.0f, 1.0f ) );
     //outColor1.rgb = float3( input.uv0.xy, 0.0f );
     outColor1.a = 1.0f;
 
