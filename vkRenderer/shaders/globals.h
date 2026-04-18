@@ -138,6 +138,8 @@ struct Globals_t
     uint    shadowCubeCount;
     uint    textureCount;
     uint    materialCount;
+    uint    useDiffuseIBL;
+    uint    useSpecularIBL;
 };
 
 struct PushConstants_t

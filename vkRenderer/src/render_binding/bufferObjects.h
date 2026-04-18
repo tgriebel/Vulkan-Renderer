@@ -59,6 +59,8 @@ struct globalUboConstants_t
 	uint32_t	shadowCubeCount;
 	uint32_t	textureCount;
 	uint32_t	materialCount;
+	uint32_t	useDiffuseIBL;
+	uint32_t	useSpecularIBL;
 	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
 };
 

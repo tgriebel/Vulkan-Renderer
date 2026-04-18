@@ -38,15 +38,23 @@ struct postProcessControls_t
 };
 
 
+struct pbrControls_t
+{
+	float				roughnessScale;
+	float				roughnessBias;
+	float				metalnessScale;
+	float				metalnessBias;
+	bool				useDiffuseIBL;
+	bool				useSpecularIBL;
+};
+
+
 struct imguiControls_t
 {
 	postProcessControls_t	postProcess;
+	pbrControls_t			pbr;
 
 	float					heightMapHeight;
-	float					roughnessScale;
-	float					roughnessBias;
-	float					metalnessScale;
-	float					metalnessBias;
 	float					shadowStrength;
 	int32_t					dbgImageId;
 	int32_t					selectedFrameBufferImageId;

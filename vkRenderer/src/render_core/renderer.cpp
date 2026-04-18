@@ -596,7 +596,7 @@ void Renderer::UpdateBuffers()
 
 		globals.time = vec4f( elapsedTime, timeIntPart, timeFracPart, renderContext.deltaTimeMs );
 #if defined( USE_IMGUI )
-		globals.generic = vec4f( g_imguiControls.roughnessScale, g_imguiControls.roughnessBias, g_imguiControls.metalnessScale, g_imguiControls.metalnessBias );
+		globals.generic = vec4f( g_imguiControls.pbr.roughnessScale, g_imguiControls.pbr.roughnessBias, g_imguiControls.pbr.metalnessScale, g_imguiControls.pbr.metalnessBias );
 		globals.toneMapTint = vec4f( postProcess.toneMapColor[ 0 ], postProcess.toneMapColor[ 1 ], postProcess.toneMapColor[ 2 ], postProcess.toneMapColor[ 3 ] );
 		globals.bloom = vec4f( postProcess.bloomEnable, postProcess.bloomBlendWeight, 0.0f, 0.0f );
 		globals.exposure = vec4f( postProcess.exposureMidGray, postProcess.exposureAdaptation, postProcess.exposureWhitePoint, postProcess.exposureDarkLimit );
@@ -604,6 +604,8 @@ void Renderer::UpdateBuffers()
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
 		globals.dof = vec4f( postProcess.dofEnable ? 1.0f : 0.0f, postProcess.dofFocalDepth, postProcess.dofFocalRange, 0.0f );
 		globals.chromaticAberration = vec4f( postProcess.caEnable ? 1.0f : 0.0f, postProcess.caIntensity, 0.0f, 0.0f );
+		globals.useDiffuseIBL = g_imguiControls.pbr.useDiffuseIBL ? 1 : 0;
+		globals.useSpecularIBL = g_imguiControls.pbr.useSpecularIBL ? 1 : 0;
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.whiteId = rc.whiteImage->gpuImage->GetId();

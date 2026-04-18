@@ -92,10 +92,12 @@ void InitScene( Scene* scene )
 		g_imguiControls.rebuildShaders = false;
 		g_imguiControls.shaderHdl = INVALID_HDL;
 		g_imguiControls.heightMapHeight = 1.0f;
-		g_imguiControls.roughnessScale = 1.0f;
-		g_imguiControls.roughnessBias = 0.0f;
-		g_imguiControls.metalnessScale = 1.0f;
-		g_imguiControls.metalnessBias = 0.0f;
+		g_imguiControls.pbr.roughnessScale = 1.0f;
+		g_imguiControls.pbr.roughnessBias = 0.0f;
+		g_imguiControls.pbr.metalnessScale = 1.0f;
+		g_imguiControls.pbr.metalnessBias = 0.0f;
+		g_imguiControls.pbr.useDiffuseIBL = true;
+		g_imguiControls.pbr.useSpecularIBL = true;
 		g_imguiControls.shadowStrength = 0.99f;
 		g_imguiControls.postProcess.toneMapColor[ 0 ] = 1.0f;
 		g_imguiControls.postProcess.toneMapColor[ 1 ] = 1.0f;
@@ -479,12 +481,14 @@ void DrawSceneDebugMenu()
 		}
 
 		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );
+		ImGui::Checkbox( "Use Diffuse IBL", &g_imguiControls.pbr.useDiffuseIBL );
+		ImGui::Checkbox( "Use Specular IBL", &g_imguiControls.pbr.useSpecularIBL );
 
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
-		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.roughnessScale, 0.0f, 1.0f );
-		ImGui::SliderFloat( "Roughness Bias", &g_imguiControls.roughnessBias, -1.0f, 1.0f );
-		ImGui::SliderFloat( "Metalness Scale", &g_imguiControls.metalnessScale, 0.0f, 1.0f );
-		ImGui::SliderFloat( "Metalness Bias", &g_imguiControls.metalnessBias, -1.0f, 1.0f );
+		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.pbr.roughnessScale, 0.0f, 1.0f );
+		ImGui::SliderFloat( "Roughness Bias", &g_imguiControls.pbr.roughnessBias, -1.0f, 1.0f );
+		ImGui::SliderFloat( "Metalness Scale", &g_imguiControls.pbr.metalnessScale, 0.0f, 1.0f );
+		ImGui::SliderFloat( "Metalness Bias", &g_imguiControls.pbr.metalnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
 		ImGui::EndTabItem();
 	}

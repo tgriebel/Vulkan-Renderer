@@ -247,7 +247,7 @@ PS_Output PSMain( PS_Input input )
     float3 kD = 1.0 - kS;
 	kD *= 1.0 - surfaceInput.metallic;
 
-	float3 diffuse = AMBIENT * surfaceInput.albedo;
+	float3 diffuse = AMBIENT;
 	if ( globals.useDiffuseIBL )
 	{
 		const float3 irradiance = cubeSamplers[diffuseIBL].Sample(bilinearSamplerWrap, CubeVector(surfaceInput.N)).rgb;
