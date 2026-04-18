@@ -294,6 +294,23 @@ void CreateBoxSurface( Model& outModel, const std::string& materialName, const v
 }
 
 
+void CreateSphereSurface( Model& outModel, const std::string& materialName, const vec3f& origin, const float radius )
+{
+	GeoBuilder::sphereInfo_t info;
+	info.origin = origin;
+	info.radius = radius;
+
+	GeoBuilder gb;
+	gb.AddSphereSurf( info );
+
+	outModel.surfCount = 1;
+	outModel.surfs.resize( outModel.surfCount );
+	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
+
+	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
+}
+
+
 bool ModelGenLoader::Load( Asset<Model>& model )
 {
 	//CreateQuadSurface2D();
