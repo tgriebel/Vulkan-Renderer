@@ -47,4 +47,9 @@ float Fd_Lambert()
 	return 1.0 / PI;
 }
 
+float V_Kelemen( float LoH )
+{
+	return 0.25 / ( LoH * LoH );
+}
+
 #endif

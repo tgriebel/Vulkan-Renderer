@@ -1,6 +1,20 @@
 #ifndef LIGHT_HLSL_H
 #define LIGHT_HLSL_H
 
+
+struct lightInput_t
+{
+	float3	N;
+	float3	V;
+	float3	positionWS;
+	float3	cameraOrigin;
+	float	NoV;
+	float3	albedo;
+	float	roughness;
+	float	metallic;
+	float3	F0;
+};
+
 // https://learnopengl.com/PBR/IBL/Specular-IBL
 float RadicalInverse_VdC( uint bits )
 {
@@ -43,6 +57,22 @@ float3 ImportanceSampleGGX( float2 Xi, float3 N, float roughness )
 float LuminanceFromRGB( const float3 rgb )
 {
     return dot( rgb, float3( 0.30f, 0.59f, 0.11f ) );
+}
+
+float3 ApplyClearcoat( const float3 baseLayerColor, const float clearcoatRoughness )
+{
+	//// Coat specular
+	//float  Dc = D_GGX( clearcoatRoughness, NoH );
+	//float  Vc = V_Kelemen( LoH );
+	//vec3   Fc = F_Schlick( 0.04, LoH );
+	//float  Fc_scalar = clearcoat * Fc.x;
+
+	//float coatLobe = clearcoat * Dc * Vc * Fc.x;
+
+	//// Attenuate base then add coat on top
+	//vec3 result = ( 1.0 - Fc_scalar ) * baseLayerColor + coatLobe;
+
+	return float3( 0.0f, 0.0f, 0.0f );
 }
 
 #endif // LIGHT_HLSL_H

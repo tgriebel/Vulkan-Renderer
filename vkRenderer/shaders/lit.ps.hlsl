@@ -17,10 +17,45 @@ float3 DecodeNormal( const float3 normalMapTexel )
 }
 
 
-//float ApplyLight( const light_t light, float3 worldPosition )
-//{
-//
-//}
+float3 ApplyLight( const lightInput_t lightInput, const light_t light )
+{
+	const float3 N = lightInput.N;
+	const float3 V = lightInput.V;
+	const float NoV = lightInput.NoV;
+	const float perceptualRoughness = lightInput.roughness;
+	const float metallic = lightInput.metallic;
+	const float3 F0 = lightInput.F0;
+	
+	const float3 lightRay = ( light.lightPos.xyz - lightInput.positionWS );
+	const float lightDistance = length( lightRay );
+	const float3 L = lightRay / lightDistance;
+	const float3 H = normalize( V + L );
+
+	const float NoL = max( dot( N, L ), 0.0f);
+	const float NoH = max( dot( N, H ), 0.0f);
+	const float LoH = max( dot( L, H ), 0.0f );
+	const float HoV = max( dot( H, V ), 0.0f);
+
+	const float D = D_GGX( NoH, perceptualRoughness );
+	const float G = G_Smith( NoV, NoL, perceptualRoughness);
+	const float3 F = F_Schlick( HoV, F0 );
+
+	const float3 kS = F;
+	float3 kD = float3( 1.0f, 1.0f, 1.0f ) - kS;
+	kD *= 1.0f - metallic;
+
+	float3 numerator = D * G * F;
+	float denominator = 4.0f * NoV * NoL + 0.0001f;
+	float3 Fr = numerator / denominator;
+
+	const float attenuation = 1.0f / ( lightDistance * lightDistance );
+	const float spotFalloff = 1.0f;
+	const float3 radiance = attenuation * spotFalloff * light.intensity.rgb;
+
+	const float3 diffuse = ( ( kD * lightInput.albedo ) / PI + Fr) * radiance * NoL;
+	
+	return diffuse;
+}
 
 
 float ApplyShadow( const uint shadowViewId, float3 worldPosition )
@@ -84,7 +119,6 @@ PS_Output PSMain( PS_Input input )
 
     const float4x4 modelMat = surfaces[ input.objectId ].model;
     const float4x4 viewMat = view.viewMat;
-    const float3 cameraOrigin = view.viewOrigin;
     const float3 modelOrigin = float3( modelMat[0][3], modelMat[1][3], modelMat[2][3] );
 
 	float4 albedoSample = float4( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -118,14 +152,10 @@ PS_Output PSMain( PS_Input input )
 		metalnessSample = metalnessTex.Sample( bilinearSamplerWrap, uv0 ).r;
 	}
 
-	const float perceptualRoughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
+	lightInput_t lightingInput;
 
-    const float blendFactor = 1.0f;
-	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalSample.x * input.tangent + normalSample.y * input.bitangent + normalSample.z * input.TBN2), blendFactor );
-
-    const float3 V = normalize( cameraOrigin.xyz - input.worldPosition.xyz );
-    const float3 N = normalize( normal ); // normalize( input.worldPosition.xyz - modelOrigin );
-    const float3 viewDiffuse = dot( V, N ).xxx;
+    const float normalBlendFactor = 1.0f;
+	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), normalize( normalSample.x * input.tangent + normalSample.y * input.bitangent + normalSample.z * input.TBN2), normalBlendFactor );
 
     const uint diffuseIBL = surfaces[ input.objectId ].diffuseIblCubeId;
     const uint specularIBL = surfaces[ input.objectId ].envCubeId;
@@ -133,17 +163,17 @@ PS_Output PSMain( PS_Input input )
 
     const int MaxReflectionLod = 4;
 
-    float NoV = saturate( dot( N, V ) );
+	const float ao = 1.0f;
 
-	const float metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
-
-    //const float AMBIENT_LIGHT_FACTOR = 0.03f;
-    const float ao = 1.0f;
-
-	const float3 albedoColor = albedoSample.rgb * diffuseColor;
-
-    float3 F0 = float3( 0.04f, 0.04f, 0.04f );
-    F0 = lerp( F0, albedoColor.rgb, metallic );
+	lightingInput.N = normalize( normal );
+	lightingInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
+	lightingInput.NoV = saturate( dot( lightingInput.N, lightingInput.V ) );
+	lightingInput.cameraOrigin = view.viewOrigin.xyz;
+	lightingInput.positionWS = input.worldPosition.xyz;
+	lightingInput.albedo = albedoSample.rgb * diffuseColor;
+	lightingInput.roughness = saturate(globals.generic.x * roughnessSample + globals.generic.y);
+	lightingInput.metallic = saturate(globals.generic.z * metalnessSample + globals.generic.w);
+	lightingInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), lightingInput.albedo.rgb, lightingInput.metallic);
 
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
@@ -152,57 +182,29 @@ PS_Output PSMain( PS_Input input )
     {
         const light_t light = lights[ i ];
 
-        const float3 lightRay = ( light.lightPos.xyz - input.worldPosition.xyz );
-        const float lightDistance = length( lightRay );
-        const float3 L = lightRay / lightDistance;
-        const float3 H = normalize( V + L );
+		const float3 diffuse = ApplyLight( lightingInput, light );
 
-        const float NoL = max( dot( N, L ), 0.0f );
-        const float NoH = max( dot( N, H ), 0.0f );
-        const float LoH = max( dot( L, H ), 0.0f );
-        const float HoV = max( dot( H, V ), 0.0f );
-
-        const float D   = D_GGX( NoH, perceptualRoughness );
-        const float G   = G_Smith( NoV, NoL, perceptualRoughness );
-        const float3 F  = F_Schlick( HoV, F0 );
-
-        const float3 kS = F;
-        float3 kD = float3( 1.0f, 1.0f, 1.0f ) - kS;
-        kD *= 1.0f - metallic;
-
-        float3 numerator      = D * G * F;
-        float denominator     = 4.0f * NoV * NoL + 0.0001f;
-        float3 Fr             = numerator / denominator;
-
-        const float attenuation = 1.0f / ( lightDistance * lightDistance );
-        const float spotFalloff = 1.0f;
-        const float3 radiance   = attenuation * spotFalloff * light.intensity.rgb;
-
-        const uint shadowViewId = light.shadowViewId;
-		
-		const float shadowing = ApplyShadow( shadowViewId, input.worldPosition.xyz );
-
-        float3 diffuse = ( ( kD * albedoColor.rgb ) / PI + Fr ) * radiance * NoL;
+		const float shadowing = ApplyShadow( light.shadowViewId, lightingInput.positionWS );
 
         Lo += shadowing * diffuse;
     }
 #endif
 
-    const float3 F = F_SchlickRoughness( NoV, F0, perceptualRoughness );
+    const float3 F = F_SchlickRoughness( lightingInput.NoV, lightingInput.F0, lightingInput.roughness );
 
-    const float3 R = reflect( -V, N );
+    const float3 R = reflect( -lightingInput.V, lightingInput.N );
     const int MipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[specularIBL] ), MaxReflectionLod );
-    const float3 specIBL = cubeSamplers[specularIBL].SampleLevel( bilinearSamplerWrap, CubeVector( R ), perceptualRoughness * MipLevels ).rgb;
+    const float3 specIBL = cubeSamplers[ specularIBL ].SampleLevel( bilinearSamplerWrap, CubeVector( R ), lightingInput.roughness * MipLevels ).rgb;
 
-	const float2 envBRDF = texSampler[brdfLutId].Sample( bilinearSamplerClampEdge, float2(NoV, perceptualRoughness)).rg;
+	const float2 envBRDF = texSampler[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( lightingInput.NoV, lightingInput.roughness ) ).rg;
     const float3 specular = specIBL * ( F * envBRDF.x + envBRDF.y );
 
     float3 kS = F;
     float3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;
+	kD *= 1.0 - lightingInput.metallic;
 
-    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( bilinearSamplerWrap, CubeVector( N ) ).rgb;
-    const float3 diffuse = irradiance * albedoColor;
+    const float3 irradiance = cubeSamplers[diffuseIBL].Sample( bilinearSamplerWrap, CubeVector( lightingInput.N ) ).rgb;
+	const float3 diffuse = irradiance * lightingInput.albedo;
     const float3 ambient = ( kD * diffuse + specular ) * ao;// * material.Ka.rgb;
 
     float4 outColor;
@@ -210,19 +212,14 @@ PS_Output PSMain( PS_Input input )
     outColor.a = material.Tr;
 
     //outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
-    //outColor.rg = envBRDF.rg;//float3( NoV );
 
-//	outColor.rgb = float3(1.0f, NoV, NoV);
-//  outColor.rgb = float3( NoV, NoV, NoV );
-//  outColor.rgb += float3( 1.0f, 0.0f, 0.0f ) * pow( 1.0f - NoV, 2.0f );
-//  outColor.rgb = envColor.rgb;
-//  outColor.rgb = 0.5f * N + float3( 0.5f, 0.5f, 0.5f );
+//  outColor.rgb = lightingInput.NoV.xxx;
 //	outColor.rgba = float4( input.uv0.xy, 0.0f, 1.0f );
 //	outColor.rgba = float4( albedoTex.rgb, 1.0f);
 
 #ifdef USE_MRT
     float4 outColor1;
-    outColor1.rgb = 0.5f * ( N + float3( 1.0f, 1.0f, 1.0f ) );
+    outColor1.rgb = 0.5f * ( lightingInput.N + float3( 1.0f, 1.0f, 1.0f ) );
     //outColor1.rgb = float3( input.uv0.xy, 0.0f );
     outColor1.a = 1.0f;
 
