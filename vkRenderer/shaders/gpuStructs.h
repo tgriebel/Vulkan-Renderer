@@ -25,8 +25,19 @@ static_assert( sizeof( mat2x2f ) == 16 );
 static_assert( sizeof( vec4f ) == 16 );
 static_assert( sizeof( vec3f ) == 12 );
 static_assert( sizeof( vec2f ) == 8 );
+
+#define BIND_SLOT( x )
+#define SEMANTIC( x )
 #endif
-// #if SHADER_STRUCTS_HLSL
+
+
+#ifdef SHADER_STRUCTS_HLSL
+#define BIND_SLOT( x )		[[vk::location( x )]]
+#define BIND_SET( S, N )    [[vk::binding( N, S )]]
+#define BIND_INLINE         [[vk::push_constant]]
+#define SEMANTIC( x ) : x
+#endif
+
 
 #define MaxLights					128
 #define MaxMaterials				256
@@ -180,17 +191,15 @@ struct gpuPushConstants_t
 };
 
 
-#ifdef SHADER_STRUCTS_CPP
 struct vsInput_t
-{
-	vec3f pos;
-	vec4f color;
-	vec3f normal;
-	vec3f tangent;
-	vec3f bitangent;
-	vec4f texCoord;
+{ 
+	BIND_SLOT( 0 ) float3 inPosition	SEMANTIC( POSITION );
+	BIND_SLOT( 1 ) float4 inColor		SEMANTIC( COLOR0 );
+	BIND_SLOT( 2 ) float3 inNormal		SEMANTIC( NORMAL );
+	BIND_SLOT( 3 ) float3 inTangent		SEMANTIC( TANGENT );
+	BIND_SLOT( 4 ) float3 inBitangent	SEMANTIC( BINORMAL );
+	BIND_SLOT( 5 ) float4 inTexCoord	SEMANTIC( TEXCOORD0 );
 };
-#endif
 
 
 #ifdef SHADER_STRUCTS_CPP

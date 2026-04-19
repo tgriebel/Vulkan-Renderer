@@ -1,7 +1,5 @@
 #include "globals.h"
 
-VS_LAYOUT_BASIC_IO
-
 static const float2 positions[ 3 ] = {
 	float2( -1.0f, -1.0f ),
 	float2( 3.0f, -1.0f ),
@@ -18,9 +16,9 @@ static const float2 uvs[ 3 ] = {
 // float2( ( vertexId << 1 ) & 2, vertexId & 2 );
 // float4( output.uv0.xy * 2.0f + -1.0f, 0.0f, 1.0f );
 
-VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
+vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
 {
-	VS_Output output = (VS_Output)0;
+	vsOutput_t output = (vsOutput_t) 0;
 
 	output.objectPosition	= float3( positions[ vertexId ].xy, 0.0f );
 	output.worldPosition	= float4( positions[ vertexId ].xy, 0.0, 1.0 );

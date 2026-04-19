@@ -20,37 +20,37 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
 	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, pos );
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inPosition );
 	++attribId;
 
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
 	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, color );
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inColor );
 	++attribId;
 
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
 	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, normal );
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inNormal );
 	++attribId;
 
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
 	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, tangent );
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inTangent );
 	++attribId;
 
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
 	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, bitangent );
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inBitangent );
 	++attribId;
 
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
 	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, texCoord );
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inTexCoord );
 	++attribId;
 
 	assert( attribId == MaxVertexAttribs );

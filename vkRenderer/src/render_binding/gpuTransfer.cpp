@@ -286,15 +286,15 @@ void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 				vertexStream.resize( vertexCount );
 				for ( uint32_t vIx = 0; vIx < vertexCount; ++vIx )
 				{
-					vertexStream[vIx].pos = Trunc<4,1>( surf.vertices[vIx].pos );
-					vertexStream[vIx].color = ColorToVector( surf.vertices[vIx].color );
-					vertexStream[vIx].normal = surf.vertices[vIx].normal;
-					vertexStream[vIx].tangent = surf.vertices[vIx].tangent;
-					vertexStream[vIx].bitangent = surf.vertices[vIx].bitangent;
-					vertexStream[vIx].texCoord[0] = surf.vertices[vIx].uv[0];
-					vertexStream[vIx].texCoord[1] = surf.vertices[vIx].uv[1];
-					vertexStream[vIx].texCoord[2] = surf.vertices[vIx].uv2[0];
-					vertexStream[vIx].texCoord[3] = surf.vertices[vIx].uv2[1];
+					vertexStream[vIx].inPosition = Trunc<4,1>( surf.vertices[vIx].pos );
+					vertexStream[vIx].inColor = ColorToVector( surf.vertices[vIx].color );
+					vertexStream[vIx].inNormal = surf.vertices[vIx].normal;
+					vertexStream[vIx].inTangent = surf.vertices[vIx].tangent;
+					vertexStream[vIx].inBitangent = surf.vertices[vIx].bitangent;
+					vertexStream[vIx].inTexCoord[0] = surf.vertices[vIx].uv[0];
+					vertexStream[vIx].inTexCoord[1] = surf.vertices[vIx].uv[1];
+					vertexStream[vIx].inTexCoord[2] = surf.vertices[vIx].uv2[0];
+					vertexStream[vIx].inTexCoord[3] = surf.vertices[vIx].uv2[1];
 				}
 
 				// Copy stream to staging buffer

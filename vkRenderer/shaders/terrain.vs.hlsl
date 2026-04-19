@@ -27,9 +27,9 @@ float3x3 GetTerrainTangent( float2 uv )
 	return float3x3( bx, by, float3( 0.0f, 0.0f, 1.0f ) );
 }
 
-VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
+vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
 {
-	VS_Output output = (VS_Output)0;
+	vsOutput_t output = (vsOutput_t) 0;
 
 	output.objectId = pushConstants.objectId + instanceIndex;
 	const uint materialId = pushConstants.materialId;
