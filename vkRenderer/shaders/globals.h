@@ -1,26 +1,14 @@
 #ifndef GLOBALS_HLSL_H
 #define GLOBALS_HLSL_H
 
+#include "gpuStructs.h"
+
 // ============================================================
 // Constants
 // ============================================================
 
-#define MaxLights       128
-#define MaxMaterials    256
-#define MaxViews        15
-#define MaxSurfaces     1000
-
 #define PI              3.14159265359f
 #define AMBIENT         float4( 0.03f, 0.03f, 0.03f, 1.0f )
-
-enum ggxTextureSlot_t
-{
-	GGX_ALBEDO_MAP_SLOT = 0,
-	GGX_NORMAL_MAP_SLOT = 1,
-	GGX_ROUGHNESS_MAP_SLOT = 2,
-	GGX_METALLIC_MAP_SLOT = 3,
-	GGX_CLEARCOAT_NML_MAP_SLOT = 4,
-};
 
 // ============================================================
 // Convenience
@@ -69,36 +57,6 @@ struct light_t
     uint   pad2;
 };
 
-struct material_t
-{
-    int     textureId0;
-    int     textureId1;
-    int     textureId2;
-    int     textureId3;
-    int     textureId4;
-    int     textureId5;
-    int     textureId6;
-    int     textureId7;
-    float3  Ka;
-    float   Tr;
-    float3  Ke;
-    float   Ns;
-    float3  Kd;
-    float   Ni;
-    float3  Ks;
-    float   illum;
-    float3  Tf;
-	float	roughness;
-	float	metalness;
-	float	sheen;
-	float	clearcoatThickness;
-	float	clearcoatRoughness;
-	float	anisotropy;
-	float	anisotropyRotation;
-    uint    textured;
-    uint    pad0;
-    uint    extraData[64];
-};
 
 struct view_t
 {
@@ -122,34 +80,6 @@ struct surface_t
     uint     pad[14];
 };
 
-struct Globals_t
-{
-    float4  time;
-    float4  generic;
-    float4  shadowParms;
-    float4  toneMapTint;
-    float4  bloom;
-    float4  exposure;
-    float4  exposure2;
-    float4  dof;
-	float4  chromaticAberration;
-    uint    numSamples;
-    uint    whiteId;
-    uint    blackId;
-    uint    defaultAlbedoId;
-    uint    defaultNormalId;
-    uint    defaultRoughnessId;
-    uint    defaultMetalId;
-    uint    defaultImageId;
-    uint    brdfLutId;
-    uint    isTextured;
-    uint    shadow2dCount;
-    uint    shadowCubeCount;
-    uint    textureCount;
-    uint    materialCount;
-    uint    useDiffuseIBL;
-    uint    useSpecularIBL;
-};
 
 struct PushConstants_t
 {
@@ -184,7 +114,7 @@ struct PushConstants_t
                                                         BIND_SET( S, N ) StructuredBuffer<surface_t> surfaces;
 
 #define GLOBALS_LAYOUT( S, N )                                                                                      \
-                                                        BIND_SET( S, N ) ConstantBuffer<Globals_t> globals;
+                                                        BIND_SET( S, N ) ConstantBuffer<gpuGlobals_t> globals;
 
 #define VIEW_LAYOUT( S, N )                                                                                         \
                                                         BIND_SET( S, N ) StructuredBuffer<view_t> views;
@@ -211,7 +141,7 @@ struct PushConstants_t
 #define STENCIL_LAYOUT( S, N, TEXTYPE )                 BIND_SET( S, N ) TEXTYPE stencilImage;
 
 #define MATERIAL_LAYOUT( S, N )                                                                                     \
-                                                        BIND_SET( S, N ) StructuredBuffer<material_t> materials;
+                                                        BIND_SET( S, N ) StructuredBuffer<gpuMaterial_t> materials;
 
 #define LIGHT_LAYOUT( S, N )                                                                                        \
                                                         BIND_SET( S, N ) StructuredBuffer<light_t> lights;

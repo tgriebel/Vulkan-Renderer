@@ -181,7 +181,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			uploadMaterials.insert( materialHdl );
 		}
 
-		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
+		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t ) {
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() ) {
 				Asset<Image>* imageAsset = TextureLib().Find( texHandle );
@@ -577,7 +577,7 @@ void Renderer::UpdateBuffers()
 {
 	resources.globalConstants.SetPos( 0 );
 	{
-		globalUboConstants_t globals = {};
+		gpuGlobals_t globals = {};
 		static std::chrono::steady_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 		static std::chrono::steady_clock::time_point currentTime = startTime;
 		
@@ -689,7 +689,7 @@ void Renderer::UpdateBuffers()
 	}
 
 	resources.materialBuffers.SetPos( 0 );
-	resources.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( materialBufferObject_t ) * materialBuffer.Count() );
+	resources.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( gpuMaterial_t ) * materialBuffer.Count() );
 
 	resources.lightParms.SetPos( 0 );
 	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );

@@ -173,7 +173,7 @@ void CreateCodeAssets()
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
-			for ( uint32_t i = 0; i < Material::MaxMaterialTextures; ++i ) {
+			for ( uint32_t i = 0; i < MaxMaterialTextures; ++i ) {
 				material.AddTexture( i, i );
 			}
 			MaterialLib().Add( "TONEMAP", material );

@@ -14,6 +14,9 @@
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/imageShaderTask.h"
 
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
+
 #include "renderContext.h"
 
 class Window;
@@ -182,7 +185,7 @@ public:
 
 private:
 	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
-	using materialBufferArray_t		= Array<materialBufferObject_t, MaxMaterials>;
+	using materialBufferArray_t		= Array<gpuMaterial_t, MaxMaterials>;
 
 	static const uint32_t				ShadowMapWidth = 2048;
 	static const uint32_t				ShadowMapHeight = 2048;

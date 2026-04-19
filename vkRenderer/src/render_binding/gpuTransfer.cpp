@@ -185,22 +185,22 @@ void Renderer::UpdateGpuMaterials()
 		Material& m = matAsset->Get();
 		if( m.uploadId < 0 ) {
 			m.uploadId = materialBuffer.Count();
-			materialBuffer.Append( materialBufferObject_t() );
+			materialBuffer.Append( gpuMaterial_t() );
 		}
 		matAsset->CompleteUpload();
 
 		assert( m.uploadId < MaxMaterials );
-		materialBufferObject_t& materialObject = materialBuffer[ m.uploadId ];
+		gpuMaterial_t& materialObject = materialBuffer[ m.uploadId ];
 
 		if( m.usage == MATERIAL_USAGE_CODE )
 		{
-			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t ) {
-				materialObject.textures[ t ] = (int)m.GetTexture( t ).Get();
+			for ( uint32_t t = 0; t < MaxMaterialTextures; ++t ) {
+				materialObject.textureId[ t ] = (int)m.GetTexture( t ).Get();
 			}
 		}
 		else
 		{
-			for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
+			for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
 			{
 				const hdl_t handle = m.GetTexture( t );
 				if ( handle.IsValid() )
@@ -212,9 +212,9 @@ void Renderer::UpdateGpuMaterials()
 
 					const int uploadId = image.gpuImage->GetId();
 					assert( uploadId >= 0 );
-					materialObject.textures[ t ] = uploadId;
+					materialObject.textureId[ t ] = uploadId;
 				} else {
-					materialObject.textures[ t ] = -1;
+					materialObject.textureId[ t ] = -1;
 				}
 			}
 		}
@@ -240,7 +240,7 @@ void Renderer::UpdateGpuMaterials()
 
 		materialObject.textured = m.IsTextured();
 
-		m.CopyExtraData( materialObject.extra, m.GetExtraDataByteCount() );
+		m.CopyExtraData( materialObject.extraData, m.GetExtraDataByteCount() );
 	}
 	uploadMaterials.clear();
 }

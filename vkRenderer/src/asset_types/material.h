@@ -8,6 +8,9 @@
 #include <SysCore/handle.h>
 #include "asset.h"
 
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
+
 
 class Serializer;
 
@@ -52,38 +55,6 @@ enum textureSlot_t : uint32_t
 	TEXTURE_SLOT_7,
 };
 
-enum ggxTextureSlot_t : uint32_t
-{
-	GGX_ALBEDO_MAP_SLOT			= 0,
-	GGX_NORMAL_MAP_SLOT			= 1,
-	GGX_ROUGHNESS_MAP_SLOT		= 2,
-	GGX_METALLIC_MAP_SLOT		= 3,
-	GGX_CLEARCOAT_NML_MAP_SLOT	= 4,
-};
-
-enum blinnPhongTextureSlot_t : uint32_t
-{
-	BLINN_PHONG_COLOR_MAP_SLOT		= 0,
-	BLINN_PHONG_NORMAL_MAP_SLOT		= 1,
-	BLINN_PHONG_SPEC_MAP_SLOT		= 2,
-};
-
-enum cubeTextureSlot_t : uint32_t
-{
-	CUBE_FRONT_SLOT				= 0,
-	CUBE_BACK_SLOT				= 1,
-	CUBE_TOP_SLOT				= 2,
-	CUBE_BOTTOM_SLOT			= 3,
-	CUBE_RIGHT_SLOT				= 4,
-	CUBE_LEFT_SLOT				= 5,
-};
-
-enum hgtTextureSlot_t : uint32_t
-{
-	HGT_HEIGHT_MAP_SLOT,
-	HGT_COLOR_MAP_SLOT0,
-	HGT_COLOR_MAP_SLOT1,
-};
 
 enum materialUsage_t : uint32_t
 {
@@ -123,8 +94,6 @@ class Material
 {
 public:
 	static const uint32_t Version = 1;
-	static const uint32_t MaxMaterialTextures = 8;
-	static const uint32_t MaxExtraDataBytes = 256;
 	static const uint32_t MaxMaterialShaders = DRAWPASS_COUNT;
 
 	int32_t					uploadId;
@@ -132,7 +101,7 @@ public:
 
 private:
 	materialParms_t			p;
-	uint32_t				extraData[ MaxExtraDataBytes ];
+	uint32_t				extraData[ MaxMaterialExtraDataBytes ];
 	uint32_t				extraByteCount;
 	uint16_t				textureBitSet;
 	uint16_t				shaderBitSet;
@@ -158,7 +127,7 @@ public:
 		usage = MATERIAL_USAGE_UNKNOWN;
 
 		extraByteCount = 0;
-		memset( extraData, 0, MaxExtraDataBytes );
+		memset( extraData, 0, MaxMaterialExtraDataBytes );
 	}
 
 	inline void SetParms( const materialParms_t& parms )
@@ -168,7 +137,7 @@ public:
 
 	inline void SetExtraData( void* data, const uint32_t byteCount )
 	{
-		extraByteCount = Min( MaxExtraDataBytes, byteCount );
+		extraByteCount = Min( (uint32_t)MaxMaterialExtraDataBytes, byteCount );
 		memcpy( extraData, data, extraByteCount );
 	}
 

@@ -34,62 +34,6 @@ struct viewBufferObject_t
 };
 
 
-struct globalUboConstants_t
-{
-	vec4f		time;
-	vec4f		generic;
-	vec4f		shadowParms;
-	vec4f		toneMapTint;
-	vec4f		bloom;
-	vec4f		exposure;
-	vec4f		exposure2;
-	vec4f		dof;
-	vec4f		chromaticAberration;
-	uint32_t	numSamples;
-	uint32_t	whiteId;
-	uint32_t	blackId;
-	uint32_t	defaultAlbedoId;
-	uint32_t	defaultNormalId;
-	uint32_t	defaultRoughnessId;
-	uint32_t	defaultMetalId;
-	uint32_t	defaultImageId;
-	uint32_t	brdfLutId;
-	uint32_t	isTextured;
-	uint32_t	shadow2dCount;
-	uint32_t	shadowCubeCount;
-	uint32_t	textureCount;
-	uint32_t	materialCount;
-	uint32_t	useDiffuseIBL;
-	uint32_t	useSpecularIBL;
-	// uint32_t	pad[ 4 ]; // minUniformBufferOffsetAlignment
-};
-
-
-struct materialBufferObject_t
-{
-	int			textures[ Material::MaxMaterialTextures ];
-	vec3f		Ka;
-	float		Tr;
-	vec3f		Ke;
-	float		Ns;
-	vec3f		Kd;
-	float		Ni;
-	vec3f		Ks;
-	float		illum;
-	vec3f		Tf;
-	float		roughness;
-	float		metalness;
-	float		sheen;
-	float		clearcoatThickness;
-	float		clearcoatRoughness;
-	float		anisotropy;
-	float		anisotropyRotation;
-	uint32_t	textured;
-	uint32_t	pad[ 1 ]; // Multiple of minUniformBufferOffsetAlignment (0x40)
-	uint8_t		extra[ Material::MaxExtraDataBytes ];
-};
-
-
 struct lightBufferObject_t
 {
 	vec4f		lightPos;

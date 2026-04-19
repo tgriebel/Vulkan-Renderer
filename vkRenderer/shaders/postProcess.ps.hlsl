@@ -111,13 +111,13 @@ PS_Output PSMain( PS_Input input )
     const uint viewlId = pushConstants.viewId;
 
     const view_t view = views[ viewlId ];
-    const material_t material = materials[ materialId ];
+	const gpuMaterial_t material = materials[materialId];
 
-    const uint textureId0 = material.textureId0;
-    const uint textureId1 = material.textureId1;
-    const uint textureId2 = material.textureId2;
-    const uint textureId3 = material.textureId3;
-    const uint textureId4 = material.textureId4;
+    const uint textureId0 = material.textureId[ 0 ];
+	const uint textureId1 = material.textureId[ 1 ];
+	const uint textureId2 = material.textureId[ 2 ];
+	const uint textureId3 = material.textureId[ 3 ];
+	const uint textureId4 = material.textureId[ 4 ];
 
 	Texture2D sceneTexture = codeSamplers[ textureId0 ];
 	Texture2D bloomTexture = codeSamplers[ textureId4 ];
@@ -178,13 +178,13 @@ PS_Output PSMain( PS_Input input )
 		float g = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).g;
 		float b = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy - offset ).b;
 
-		r = ApplyBloom( codeSamplers[textureId4], r.xxx, input.uv0.xy + offset ).x;
+		r = ApplyBloom( codeSamplers[ textureId4 ], r.xxx, input.uv0.xy + offset ).x;
 		r = ApplyTonemap( codeSamplers[ textureId3 ], r.xxx ).x;
 
-		g = ApplyBloom( codeSamplers[textureId4], g.xxx, input.uv0.xy ).y;
+		g = ApplyBloom( codeSamplers[ textureId4 ], g.xxx, input.uv0.xy ).y;
 		g = ApplyTonemap( codeSamplers[ textureId3 ], g.xxx ).y;
 
-		b = ApplyBloom( codeSamplers[textureId4], b.xxx, input.uv0.xy ).z;
+		b = ApplyBloom( codeSamplers[ textureId4], b.xxx, input.uv0.xy ).z;
 		b = ApplyTonemap( codeSamplers[ textureId3 ], b.xxx ).z;
 
 		finalColor.rgb = float3( r, g, b );

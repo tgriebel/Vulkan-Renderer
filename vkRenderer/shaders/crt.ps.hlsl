@@ -57,7 +57,7 @@ float3 Fetch( float2 pos, float2 off, PS_Input input )
     if ( max( abs( pos.x - 0.5 ), abs( pos.y - 0.5 ) ) > 0.5 ) return float3( 0.0, 0.0, 0.0 );
 
     const uint materialId = pushConstants.materialId;
-    const uint textureId0 = materials[ materialId ].textureId0;
+    const uint textureId0 = materials[ materialId ].textureId[ 0 ];
     return SrgbToLinear( texSampler[ textureId0 ].SampleBias( bilinearSamplerClampEdge, pos.xy, -16.0 ).rgb );
 }
 

@@ -139,14 +139,14 @@ PS_Output PSMain( PS_Input input )
     const uint viewlId = pushConstants.viewId;
 
     const view_t view = views[ viewlId ];
-    const material_t material = materials[ materialId ];
+	const gpuMaterial_t material = materials[materialId];
 
     const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
-	const uint albedoTexId = material.textureId0;
-	const uint normalTexId = material.textureId1;
+	const uint albedoTexId = material.textureId[ 0 ];
+	const uint normalTexId = material.textureId[ 1 ];
     //const uint normalTexId = globals.defaultNormalId;
-	const uint roughnessTexId = material.textureId2;
-	const uint metalnessTexId = material.textureId3;
+	const uint roughnessTexId = material.textureId[ 2 ];
+	const uint metalnessTexId = material.textureId[ 3 ];
 
     const float3 diffuseColor = material.Kd.rgb;
     const float3 specularColor = material.Ks.rgb;

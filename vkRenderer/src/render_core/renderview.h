@@ -5,6 +5,9 @@
 #include "../globals/drawGroup.h"
 #include "../draw_passes/drawpass.h"
 
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
+
 class ResourceContext;
 class RenderContext;
 

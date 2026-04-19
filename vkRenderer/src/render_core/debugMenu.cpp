@@ -132,7 +132,7 @@ void DebugMenuMaterial( const Material& mat )
 	ImGui::Text( "Tr: %1.2f", parms.Tr );
 	ImGui::Text( "illum: %1.2f", parms.illum );
 	ImGui::Separator();
-	for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
+	for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
 	{
 		hdl_t texHdl = mat.GetTexture( t );
 		if ( texHdl.IsValid() == false )
@@ -228,7 +228,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 
 	if ( ImGui::TreeNode( "Textures" ) )
 	{
-		for ( uint32_t t = 0; t < Material::MaxMaterialTextures; ++t )
+		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
 		{
 			std::stringstream ss;
 			ss << "##Image" << t;

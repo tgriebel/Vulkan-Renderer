@@ -10,11 +10,11 @@ PS_Output PSMain( PS_Input input )
     const uint viewlId = pushConstants.viewId;
 
     const view_t view = views[ viewlId ];
-    const material_t material = materials[ materialId ];
+	const gpuMaterial_t material = materials[materialId];
 
-    const uint blendId = material.textureId0;
-    const uint textureId0 = material.textureId1;
-    const uint textureId1 = material.textureId2;
+    const uint blendId = material.textureId[ 0 ];
+    const uint textureId0 = material.textureId[ 1 ];
+    const uint textureId1 = material.textureId[ 2 ];
 
     const float maxHeight = globals.generic.x;
     const float4 blendValue = maxHeight * texSampler[ blendId ].Sample( bilinearSamplerWrap, input.uv0.xy );

@@ -12,7 +12,7 @@ PS_Output PSMain(PS_Input input)
 	const uint viewlId = pushConstants.viewId;
 
 	const view_t view = views[viewlId];
-	const material_t material = materials[materialId];
+	const gpuMaterial_t material = materials[materialId];
 
 	const float4x4 modelMat = surfaces[input.objectId].model;
 	const float4x4 viewMat = view.viewMat;

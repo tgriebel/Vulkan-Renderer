@@ -368,7 +368,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			1,
-			sizeof( globalUboConstants_t ),
+			sizeof( gpuGlobals_t ),
 			bufferType_t::UNIFORM,
 			renderContext.sharedMemory
 		);
@@ -395,7 +395,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			MaxMaterials,
-			sizeof( materialBufferObject_t ),
+			sizeof( gpuMaterial_t ),
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
 		);
