@@ -521,9 +521,6 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 
 bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model )
 {
-	// -------------------------------------------------------------------------
-	// Parse + load buffers
-	// -------------------------------------------------------------------------
 	cgltf_options options = {};
 	cgltf_data* data = nullptr;
 
@@ -537,89 +534,164 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 		return false;
 	}
 
-	// -------------------------------------------------------------------------
-	// Images
-	// Each cgltf_image has either:
-	//   .uri          -- relative path to an external file (nullptr if embedded)
-	//   .buffer_view  -- non-null if image is embedded in the .glb buffer
-	//                    read via: (uint8_t*)bv->buffer->data + bv->offset, length bv->size
-	//   .mime_type    -- "image/png", "image/jpeg", etc.
-	// -------------------------------------------------------------------------
+	// TODO: Images
+	// TODO: Materials
 
-	// TODO: load each image into an Image asset and register with the asset lib
-	//   external:  LoadImage( (texturePath + img.uri).c_str(), isLinear, image )
-	//   embedded:  decode from img.buffer_view using stb_image from memory
-	//   register:  assets.GetLib<Image>()->Add( img.name, image )
+	for ( cgltf_size meshIx = 0; meshIx < data->meshes_count; ++meshIx )
+	{
+		const cgltf_mesh& mesh = data->meshes[ meshIx ];
 
-	// -------------------------------------------------------------------------
-	// Materials
-	// cgltf_material flags: has_pbr_metallic_roughness, has_clearcoat,
-	//                       has_sheen, has_anisotropy, has_transmission, has_ior
-	// cgltf_pbr_metallic_roughness:
-	//   .base_color_texture / .metallic_roughness_texture  (cgltf_texture_view)
-	//   .base_color_factor[4], .metallic_factor, .roughness_factor
-	// cgltf_clearcoat:
-	//   .clearcoat_texture / .clearcoat_roughness_texture / .clearcoat_normal_texture
-	//   .clearcoat_factor, .clearcoat_roughness_factor
-	// cgltf_sheen:
-	//   .sheen_color_texture / .sheen_roughness_texture
-	//   .sheen_color_factor[3], .sheen_roughness_factor
-	// cgltf_anisotropy:
-	//   .anisotropy_texture, .anisotropy_strength, .anisotropy_rotation
-	// cgltf_material:
-	//   .normal_texture, .occlusion_texture, .emissive_texture, .emissive_factor[3]
-	//   .alpha_mode  (cgltf_alpha_mode_opaque / _mask / _blend), .alpha_cutoff
-	//   .double_sided
-	// Texture slot: cgltf_texture_view.texture->image gives the cgltf_image*
-	//               resolve to asset hdl via the image name registered above
-	// -------------------------------------------------------------------------
+		for ( cgltf_size primIx = 0; primIx < mesh.primitives_count; ++primIx )
+		{
+			const cgltf_primitive& prim = mesh.primitives[ primIx ];
 
-	// TODO: translate each cgltf_material to Material
-	//   assign shaders based on alpha_mode (opaque -> shadow+depth+opaque, blend -> trans)
-	//   map base_color_texture   -> GGX_ALBEDO_MAP_SLOT
-	//   map normal_texture       -> GGX_NORMAL_MAP_SLOT
-	//   map metallic_roughness   -> GGX_ROUGHNESS_MAP_SLOT / GGX_METALLIC_MAP_SLOT
-	//   map clearcoat_normal     -> GGX_CLEARCOAT_NML_MAP_SLOT
-	//   pack scalar factors into materialParms_t
-	//   register: assets.GetLib<Material>()->Add( mat.name, material )
+			if ( prim.type != cgltf_primitive_type_triangles ) {
+				continue;
+			}
 
-	// -------------------------------------------------------------------------
-	// Meshes / Surfaces
-	// cgltf_mesh:      .name, .primitives[], .primitives_count
-	// cgltf_primitive: .type (triangles), .indices (accessor*), .material*,
-	//                  .attributes[], .attributes_count
-	// cgltf_attribute: .type (cgltf_attribute_type_position/normal/tangent/
-	//                         texcoord/color), .data (accessor*)
-	// cgltf_accessor:  .count, .type (vec2/vec3/vec4), .component_type
-	//   cgltf_accessor_unpack_floats( accessor, float* out, floatCount )
-	//     -- reads any component format and converts to float; floatCount = count * num_components
-	//   cgltf_accessor_unpack_indices( accessor, void* out, indexSize, indexCount )
-	//     -- reads uint8/16/32 indices into your preferred size
-	// NOTE: glTF tangents are vec4 -- .w = bitangent sign (+1.0 or -1.0)
-	// NOTE: glTF is right-handed Y-up; verify axis convention against your world space
-	// -------------------------------------------------------------------------
+			if ( prim.indices == nullptr ) {
+				continue;
+			}
 
-	// TODO: for each mesh, for each primitive -> one Surface
-	//   scan attributes by type to find POSITION / NORMAL / TANGENT / TEXCOORD_0 / COLOR_0
-	//   unpack floats via cgltf_accessor_unpack_floats into temp buffers, fill vertex_t
-	//   unpack indices via cgltf_accessor_unpack_indices
-	//   if TANGENT attribute absent: run GenerateMikkTangents
-	//   if TANGENT present: extract vec3 + decode sign from .w, skip MikkT
-	//   assign surf.materialHdl from primitive.material->name lookup
+			// Locate attribute accessors
+			const cgltf_accessor* posAccessor      = nullptr;
+			const cgltf_accessor* normalAccessor   = nullptr;
+			const cgltf_accessor* tangentAccessor  = nullptr;
+			const cgltf_accessor* texcoordAccessor = nullptr;
+			const cgltf_accessor* colorAccessor    = nullptr;
 
-	// -------------------------------------------------------------------------
-	// Node hierarchy
-	// cgltf_node: .name, .parent, .children[], .mesh*, .camera*, .light*
-	//   .has_translation / .translation[3]
-	//   .has_rotation    / .rotation[4]  (quaternion xyzw)
-	//   .has_scale       / .scale[3]
-	//   .has_matrix      / .matrix[16]
-	//   cgltf_node_transform_world( node, float[16] ) -- full world-space matrix
-	// Walk data->scene->nodes[] (not data->nodes[] -- scenes filter the root set)
-	// -------------------------------------------------------------------------
+			for ( cgltf_size attrIx = 0; attrIx < prim.attributes_count; ++attrIx )
+			{
+				const cgltf_attribute& attr = prim.attributes[ attrIx ];
+				switch ( attr.type )
+				{
+					case cgltf_attribute_type_position: posAccessor      = attr.data; break;
+					case cgltf_attribute_type_normal:   normalAccessor   = attr.data; break;
+					case cgltf_attribute_type_tangent:  tangentAccessor  = attr.data; break;
+					case cgltf_attribute_type_texcoord: if ( attr.index == 0 ) texcoordAccessor = attr.data; break;
+					case cgltf_attribute_type_color:    if ( attr.index == 0 ) colorAccessor    = attr.data; break;
+					default: break;
+				}
+			}
 
-	// TODO: walk the scene node tree to apply per-instance transforms
-	//   for now, can flatten all meshes without transforms as a first pass
+			if ( posAccessor == nullptr ) {
+				continue;
+			}
+
+			Surface surf;
+
+			const cgltf_size vertexCount = posAccessor->count;
+			surf.vertices.resize( vertexCount );
+
+			// Positions
+			{
+				std::vector<float> tmp( vertexCount * 3 );
+				cgltf_accessor_unpack_floats( posAccessor, tmp.data(), vertexCount * 3 );
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					surf.vertices[ i ].pos = vec4f( tmp[ i * 3 + 0 ], tmp[ i * 3 + 1 ], tmp[ i * 3 + 2 ], 1.0f );
+					surf.centroid += vec3f( surf.vertices[ i ].pos.xyz );
+					model.bounds.Expand( vec3f( surf.vertices[ i ].pos[ 0 ], surf.vertices[ i ].pos[ 1 ], surf.vertices[ i ].pos[ 2 ] ) );
+				}
+			}
+
+			// Normals
+			if ( normalAccessor != nullptr )
+			{
+				std::vector<float> tmp( vertexCount * 3 );
+				cgltf_accessor_unpack_floats( normalAccessor, tmp.data(), vertexCount * 3 );
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					surf.vertices[ i ].normal = vec3f( tmp[ i * 3 + 0 ], tmp[ i * 3 + 1 ], tmp[ i * 3 + 2 ] );
+				}
+			}
+
+			// UVs (glTF origin is top-left, same as Vulkan — no Y-flip)
+			if ( texcoordAccessor != nullptr )
+			{
+				std::vector<float> tmp( vertexCount * 2 );
+				cgltf_accessor_unpack_floats( texcoordAccessor, tmp.data(), vertexCount * 2 );
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					surf.vertices[ i ].uv = vec2f( tmp[ i * 2 + 0 ], tmp[ i * 2 + 1 ] );
+				}
+			}
+
+			// Vertex colors (vec3 or vec4)
+			if ( colorAccessor != nullptr )
+			{
+				const cgltf_size numComponents = cgltf_num_components( colorAccessor->type );
+				std::vector<float> tmp( vertexCount * numComponents );
+				cgltf_accessor_unpack_floats( colorAccessor, tmp.data(), vertexCount * numComponents );
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					surf.vertices[ i ].color[ 0 ] = tmp[ i * numComponents + 0 ];
+					surf.vertices[ i ].color[ 1 ] = tmp[ i * numComponents + 1 ];
+					surf.vertices[ i ].color[ 2 ] = tmp[ i * numComponents + 2 ];
+					surf.vertices[ i ].color[ 3 ] = ( numComponents == 4 ) ? tmp[ i * numComponents + 3 ] : 1.0f;
+				}
+			}
+			else
+			{
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					surf.vertices[ i ].color[ 0 ] = 1.0f;
+					surf.vertices[ i ].color[ 1 ] = 1.0f;
+					surf.vertices[ i ].color[ 2 ] = 1.0f;
+					surf.vertices[ i ].color[ 3 ] = 1.0f;
+				}
+			}
+
+			// Indices
+			{
+				const cgltf_size indexCount = prim.indices->count;
+				surf.indices.resize( indexCount );
+				cgltf_accessor_unpack_indices( prim.indices, surf.indices.data(), sizeof( uint32_t ), indexCount );
+			}
+
+			// Tangents
+			if ( tangentAccessor != nullptr )
+			{
+				// glTF tangents are vec4: xyz = tangent direction, w = bitangent sign
+				std::vector<float> tmp( vertexCount * 4 );
+				cgltf_accessor_unpack_floats( tangentAccessor, tmp.data(), vertexCount * 4 );
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					const float tx   = tmp[ i * 4 + 0 ];
+					const float ty   = tmp[ i * 4 + 1 ];
+					const float tz   = tmp[ i * 4 + 2 ];
+					const float sign = tmp[ i * 4 + 3 ];
+
+					vertex_t& v = surf.vertices[ i ];
+
+					v.bitangent[ 0 ] = sign * ( v.normal[ 1 ] * tz - v.normal[ 2 ] * ty );
+					v.bitangent[ 1 ] = sign * ( v.normal[ 2 ] * tx - v.normal[ 0 ] * tz );
+					v.bitangent[ 2 ] = sign * ( v.normal[ 0 ] * ty - v.normal[ 1 ] * tx );
+
+					union tangentBitPack_t
+					{
+						struct { uint32_t signBit : 1; uint32_t vecBits : 31; };
+						float value;
+					};
+					tangentBitPack_t packed;
+					packed.value   = tx;
+					packed.signBit = ( sign >= 0.0f ) ? 0x00 : 0x01;
+					v.tangent[ 0 ] = packed.value;
+					v.tangent[ 1 ] = ty;
+					v.tangent[ 2 ] = tz;
+				}
+			}
+			else if ( normalAccessor != nullptr )
+			{
+				GenerateMikkTangents( surf.vertices, surf.indices );
+			}
+
+			surf.materialHdl = assets.GetLib<Material>()->GetDefault()->Handle();
+
+			model.surfs.push_back( std::move( surf ) );
+			++model.surfCount;
+		}
+	}
 
 	cgltf_free( data );
 	return true;
