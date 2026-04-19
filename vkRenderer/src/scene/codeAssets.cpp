@@ -162,7 +162,9 @@ void CreateCodeAssets()
 			Material material;
 			material.usage = MATERIAL_USAGE_GGX;
 			material.AddShader( DRAWPASS_DEPTH, AssetLibGpuProgram::Handle( "LitDepth" ) );
+			material.AddShader( DRAWPASS_SHADOW, AssetLibGpuProgram::Handle( "Shadow" ) );
 			material.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLibGpuProgram::Handle( "Debug" ) );
+			material.AddShader( DRAWPASS_DEBUG_3D, AssetLibGpuProgram::Handle( "DebugSolid" ) );
 			material.AddShader( DRAWPASS_OPAQUE, AssetLibGpuProgram::Handle( "LitDiffuse" ) );
 			MaterialLib().Add( "_defaultMaterial", material );
 		}

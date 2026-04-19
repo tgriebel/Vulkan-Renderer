@@ -49,10 +49,10 @@ float3 ApplyLight( const surfaceInput_t surfaceInput, const light_t light )
 	const float3 L = lightRay / lightDistance;
 	const float3 H = normalize( V + L );
 
-	const float NoL = max( dot( N, L ), 0.0f);
-	const float NoH = max( dot( N, H ), 0.0f);
+	const float NoL = max( dot( N, L ), 0.0f );
+	const float NoH = max( dot( N, H ), 0.0f );
 	const float LoH = max( dot( L, H ), 0.0f );
-	const float HoV = max( dot( H, V ), 0.0f);
+	const float HoV = max( dot( H, V ), 0.0f );
 
 	const float D = D_GGX( NoH, perceptualRoughness );
 	const float G = G_Smith( NoV, NoL, perceptualRoughness);
@@ -70,7 +70,7 @@ float3 ApplyLight( const surfaceInput_t surfaceInput, const light_t light )
 	const float spotFalloff = 1.0f;
 	const float3 radiance = attenuation * spotFalloff * light.intensity.rgb;
 
-	const float3 diffuse = ( ( kD * surfaceInput.albedo ) / PI + Fr) * radiance * NoL;
+	const float3 diffuse = ( ( kD * surfaceInput.albedo ) / PI + Fr ) * radiance * NoL;
 	
 	return diffuse;
 }
@@ -94,14 +94,17 @@ float ApplyShadow( const uint shadowViewId, float3 worldPosition )
 		lsPosition.xyz /= lsPosition.w;
 
 		lsPosition.z -= shadowBias;
+		
+		const float2 ndc = 0.5f * lsPosition.xy + 0.5f;
 
-		const float2 ndc = 0.5f * ( ( lsPosition.xy ) + 1.0f );
-
-		if ( length( ndc.xy - float2( 0.5f, 0.5f ) ) < 0.5f )
+		const float spotRadius = 0.3f;
+		const bool withinSpotlight = ( length(ndc.xy - float2( 0.5f, 0.5f ) ) < spotRadius ); // Similar to an SDF. Distance from center below a threshold
+		
+		if ( withinSpotlight )
 		{
 			const float shadowMapSample = shadowMap.Sample( depthShadowSampler, ndc.xy ).r;
 
-			shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f; // Assumes spot-light
+			shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f;
 		}
 		else
 		{

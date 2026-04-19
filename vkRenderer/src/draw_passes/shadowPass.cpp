@@ -14,6 +14,7 @@ void ShadowPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_TEST;
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_DEPTH_OP_0;
+	// m_stateBits |= GFX_STATE_CULL_MODE_FRONT; // can be used to reduce peter-panning, but not used b/c it fails with planes
 
 	codeImages.SetRenderContext( renderContext );
 	codeCubeImages.SetRenderContext( renderContext );
