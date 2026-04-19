@@ -2,8 +2,6 @@
 #include "color.h"
 #include "light.h"
 
-PS_LAYOUT_BASIC_IO
-
 struct BrdfLutConstants
 {
     float dummy;

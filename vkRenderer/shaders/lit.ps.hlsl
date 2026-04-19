@@ -11,30 +11,6 @@ PS_LAYOUT_MRT_1_OUT
 #endif
 
 
-float3 DecodeNormal( const float3 normalMapTexel )
-{
-	return ( 2.0f * normalMapTexel - float3( 1.0f, 1.0f, 1.0f ) );	
-}
-
-
-lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const gpuLight_t light )
-{
-	lightingInput_t lightingInput;
-	
-	lightingInput.lightRay = ( light.lightPos.xyz - surfaceInput.positionWS );
-	lightingInput.lightDistance = length( lightingInput.lightRay );
-	lightingInput.L = lightingInput.lightRay / lightingInput.lightDistance;
-	lightingInput.H = normalize( surfaceInput.V + lightingInput.L );
-
-	lightingInput.NoL = max( dot( surfaceInput.N, lightingInput.L ), 0.0f );
-	lightingInput.NoH = max( dot( surfaceInput.N, lightingInput.H ), 0.0f );
-	lightingInput.LoH = max( dot( lightingInput.L, lightingInput.H ), 0.0f );
-	lightingInput.HoV = max( dot( lightingInput.H, surfaceInput.V ), 0.0f );
-
-	return lightingInput;
-}
-
-
 float3 ApplyLight( const surfaceInput_t surfaceInput, const gpuLight_t light )
 {
 	const float3 N = surfaceInput.N;

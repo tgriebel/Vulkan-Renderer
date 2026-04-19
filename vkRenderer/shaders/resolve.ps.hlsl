@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "color.h"
 
-PS_LAYOUT_BASIC_IO
 #ifdef USE_MRT
 PS_LAYOUT_MRT_1_OUT
 #endif

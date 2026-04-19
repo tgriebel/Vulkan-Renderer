@@ -1,7 +1,5 @@
 #include "globals.h"
 
-PS_LAYOUT_BASIC_IO
-
 PS_Output PSMain( PS_Input input )
 {
 	PS_Output output = (PS_Output)0;

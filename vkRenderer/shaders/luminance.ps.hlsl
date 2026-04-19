@@ -1,7 +1,5 @@
 #include "globals.h"
 
-PS_LAYOUT_BASIC_IO
-
 struct LuminanceConstants
 {
 	float dummy;

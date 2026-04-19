@@ -79,4 +79,21 @@ float LuminanceFromRGB( const float3 rgb )
     return dot( rgb, float3( 0.30f, 0.59f, 0.11f ) );
 }
 
+lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const gpuLight_t light )
+{
+	lightingInput_t lightingInput;
+
+	lightingInput.lightRay = ( light.lightPos.xyz - surfaceInput.positionWS );
+	lightingInput.lightDistance = length( lightingInput.lightRay );
+	lightingInput.L = lightingInput.lightRay / lightingInput.lightDistance;
+	lightingInput.H = normalize( surfaceInput.V + lightingInput.L );
+
+	lightingInput.NoL = max( dot( surfaceInput.N, lightingInput.L ), 0.0f );
+	lightingInput.NoH = max( dot( surfaceInput.N, lightingInput.H ), 0.0f );
+	lightingInput.LoH = max( dot( lightingInput.L, lightingInput.H ), 0.0f );
+	lightingInput.HoV = max( dot( lightingInput.H, surfaceInput.V ), 0.0f );
+
+	return lightingInput;
+}
+
 #endif // LIGHT_HLSL_H

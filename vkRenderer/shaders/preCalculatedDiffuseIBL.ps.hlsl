@@ -1,8 +1,6 @@
 #include "globals.h"
 #include "color.h"
 
-PS_LAYOUT_BASIC_IO
-
 struct DiffuseIblConstants
 {
     float4x4 viewMat;
