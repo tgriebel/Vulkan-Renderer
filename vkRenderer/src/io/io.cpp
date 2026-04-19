@@ -253,7 +253,7 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	if ( isPbr )
 	{
 		outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
-		outMaterial.AddTexture( GGX_DIFFUSE_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_ALBEDO_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_ROUGHNESS_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_METALLIC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 3 ].name.c_str() ) );
@@ -261,7 +261,7 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	else
 	{
 		outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
-		outMaterial.AddTexture( GGX_DIFFUSE_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_ALBEDO_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_ROUGHNESS_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
 	}

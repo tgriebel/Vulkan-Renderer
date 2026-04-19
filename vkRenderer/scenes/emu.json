@@ -67,7 +67,7 @@
 		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
-		"GGX_COLOR_MAP_SLOT": "grid2.png"
+		"GGX_ALBEDO_MAP_SLOT": "grid2.png"
 	  }
 	},
 	{
@@ -79,7 +79,7 @@
 		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
-		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_0"
+		"GGX_ALBEDO_MAP_SLOT": "CODE_COLOR_0"
 	  }
 	},
 	{
@@ -90,9 +90,9 @@
 		"DRAWPASS_EMISSIVE": { "shader": "LitCRT", "perms": [""] },
 		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
-	  "textures": {
-		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_1"
-	  }
+		"textures": {
+			"GGX_ALBEDO_MAP_SLOT": "CODE_COLOR_1"
+		}
 	},
 	{
 	  "name": "TV2",
@@ -103,7 +103,7 @@
 		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
-		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_2"
+		"GGX_ALBEDO_MAP_SLOT": "CODE_COLOR_2"
 	  }
 	},
 	{
@@ -115,7 +115,7 @@
 		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
 	  },
 	  "textures": {
-		"GGX_COLOR_MAP_SLOT": "CODE_COLOR_3"
+		"GGX_ALBEDO_MAP_SLOT": "CODE_COLOR_3"
 	  }
 	},
 	{

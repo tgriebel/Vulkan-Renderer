@@ -97,7 +97,7 @@
           "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] }
       },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "sapeli.jpg"
+		  "GGX_ALBEDO_MAP_SLOT" : "sapeli.jpg"
 	  }
     },
 	{

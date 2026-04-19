@@ -34,7 +34,7 @@
 		  "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
       },
 	  "textures": {
-		  "GGX_COLOR_MAP_SLOT" : "grid2.png"
+		  "GGX_ALBEDO_MAP_SLOT" : "grid2.png"
 	  }
     }
   ],

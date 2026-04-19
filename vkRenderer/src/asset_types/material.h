@@ -63,9 +63,9 @@ enum ggxTextureSlot_t : uint32_t
 
 enum blinnPhongTextureSlot_t : uint32_t
 {
-	GGX_COLOR_MAP_SLOT			= 0,
-	GGX_NORMAL_MAP_SLOT			= 1,
-	GGX_SPEC_MAP_SLOT			= 2,
+	BLINN_PHONG_COLOR_MAP_SLOT		= 0,
+	BLINN_PHONG_NORMAL_MAP_SLOT		= 1,
+	BLINN_PHONG_SPEC_MAP_SLOT		= 2,
 };
 
 enum cubeTextureSlot_t : uint32_t
