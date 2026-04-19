@@ -142,11 +142,11 @@ PS_Output PSMain( PS_Input input )
 	const gpuMaterial_t material = materials[materialId];
 
     const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
-	const uint albedoTexId = material.textureId[ 0 ];
-	const uint normalTexId = material.textureId[ 1 ];
+	const uint albedoTexId = material.textureId[ GGX_ALBEDO_MAP_SLOT ];
+	const uint normalTexId = material.textureId[ GGX_NORMAL_MAP_SLOT ];
     //const uint normalTexId = globals.defaultNormalId;
-	const uint roughnessTexId = material.textureId[ 2 ];
-	const uint metalnessTexId = material.textureId[ 3 ];
+	const uint roughnessTexId = material.textureId[ GGX_ROUGHNESS_MAP_SLOT ];
+	const uint metalnessTexId = material.textureId[ GGX_METALLIC_MAP_SLOT ];
 
     const float3 diffuseColor = material.Kd.rgb;
     const float3 specularColor = material.Ks.rgb;
