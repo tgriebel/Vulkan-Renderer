@@ -100,13 +100,6 @@ struct pipelineObject_t
 };
 
 
-struct pushConstants_t
-{
-	uint32_t objectId;
-	uint32_t materialId;
-	uint32_t viewId;
-};
-
 class ShaderBindSet;
 
 void	ClearPipelineCache();

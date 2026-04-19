@@ -289,9 +289,6 @@
     <ClInclude Include="src\render_state\cmdContext.h">
       <Filter>Device Context</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_binding\bufferObjects.h">
-      <Filter>Binding</Filter>
-    </ClInclude>
     <ClInclude Include="src\render_core\GpuSync.h">
       <Filter>Core</Filter>
     </ClInclude>

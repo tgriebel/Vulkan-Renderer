@@ -10,7 +10,7 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	const uint materialId = pushConstants.materialId;
 	const uint viewlId = pushConstants.viewId;
 
-	const view_t view = views[ viewlId ];
+	const gpuView_t view = views[viewlId];
 
 	float3 position = input.inPosition;
 	output.objectPosition = position;

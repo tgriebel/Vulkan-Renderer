@@ -35,7 +35,7 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	const uint materialId = pushConstants.materialId;
 	const uint viewlId = pushConstants.viewId;
 
-	const view_t view = views[ viewlId ];
+	const gpuView_t view = views[viewlId];
 
 	const uint heightMapId = materials[ materialId ].textureId[ 0 ];
 	const float heightMapValue = texSampler[ heightMapId ].SampleLevel( bilinearSamplerWrap, input.inTexCoord.xy, 0 ).r;

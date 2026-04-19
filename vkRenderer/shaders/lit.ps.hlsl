@@ -17,7 +17,7 @@ float3 DecodeNormal( const float3 normalMapTexel )
 }
 
 
-lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const light_t light )
+lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const gpuLight_t light )
 {
 	lightingInput_t lightingInput;
 	
@@ -35,7 +35,7 @@ lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const
 }
 
 
-float3 ApplyLight( const surfaceInput_t surfaceInput, const light_t light )
+float3 ApplyLight( const surfaceInput_t surfaceInput, const gpuLight_t light )
 {
 	const float3 N = surfaceInput.N;
 	const float3 V = surfaceInput.V;
@@ -82,7 +82,7 @@ float ApplyShadow( const uint shadowViewId, float3 worldPosition )
 	
 	if ( shadowViewId != 0xFF )
 	{
-		const view_t shadowView = views[ shadowViewId ];
+		const gpuView_t shadowView = views[shadowViewId];
 		
 		const uint shadowMapTexId = shadowViewId;
 		
@@ -138,7 +138,7 @@ PS_Output PSMain( PS_Input input )
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
 
-    const view_t view = views[ viewlId ];
+	const gpuView_t view = views[viewlId];
 	const gpuMaterial_t material = materials[materialId];
 
     const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
@@ -219,7 +219,7 @@ PS_Output PSMain( PS_Input input )
 #if 1
     for( int i = 0; i < (int)view.numLights; ++i )
     {
-        const light_t light = lights[ i ];
+		const gpuLight_t light = lights[i];
 
 		const lightingInput_t lightingInput = CalculateLightingInput( surfaceInput, light );
 

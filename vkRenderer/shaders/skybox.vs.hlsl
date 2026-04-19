@@ -9,7 +9,7 @@ VS_Output VSMain( VS_Input input, uint vertexId : SV_VertexID, uint instanceInde
 	output.objectId = pushConstants.objectId;
 	const uint viewlId = pushConstants.viewId;
 
-	const view_t view = views[ viewlId ];
+	const gpuView_t view = views[viewlId];
 
 	const float maxHeight = 1.0f;
 	float3 position = input.inPosition;

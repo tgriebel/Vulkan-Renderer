@@ -214,12 +214,12 @@ void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t mult
 
 			assert( surface.sortKey.materialId < ( 1ull << KeyMaterialBits ) );
 
-			pushConstants_t pushConstants = {};
+			gpuPushConstants_t pushConstants = {};
 			pushConstants.viewId = uint32_t( m_renderView->GetViewBufferId( multiViewIndex ) );
 			pushConstants.objectId = surface.objectOffset + m_renderView->drawGroupOffset[ passIx ];
 			pushConstants.materialId = uint32_t( surface.sortKey.materialId );
 
-			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( pushConstants_t ), &pushConstants );
+			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_ALL, 0, sizeof( gpuPushConstants_t ), &pushConstants );
 
 			vkCmdDrawIndexed( cmdBuffer, upload.indexCount, drawGroup->InstanceCount( surfIx ), upload.firstIndex, upload.vertexOffset, 0 );
 		}	

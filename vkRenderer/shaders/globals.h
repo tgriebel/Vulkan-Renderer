@@ -42,51 +42,6 @@ uint GetTextureLevelsCube( TextureCube tex )
     return levels;
 }
 
-// ============================================================
-// Structs
-// ============================================================
-
-struct light_t
-{
-    float4 lightPos;
-    float4 intensity;
-    float4 lightDir;
-    uint   shadowViewId;
-    uint   pad0;
-    uint   pad1;
-    uint   pad2;
-};
-
-
-struct view_t
-{
-    float4x4 viewMat;
-    float4x4 projMat;
-    float4   dimensions;
-    float3   viewOrigin;
-    uint     numLights;
-};
-
-struct pass_t
-{
-    uint codeImageCount;
-};
-
-struct surface_t
-{
-    float4x4 model;
-    uint     diffuseIblCubeId;
-    uint     envCubeId;
-    uint     pad[14];
-};
-
-
-struct PushConstants_t
-{
-    uint objectId;
-    uint materialId;
-    uint viewId;
-};
 
 // ============================================================
 // Resource binding macros
@@ -111,13 +66,13 @@ struct PushConstants_t
                                                         BIND_SET( S, N ) cbuffer _ShaderConstants { TYPE NAME; };
 
 #define MODEL_LAYOUT( S, N )                                                                                        \
-                                                        BIND_SET( S, N ) StructuredBuffer<surface_t> surfaces;
+                                                        BIND_SET( S, N ) StructuredBuffer<gpuSurface_t> surfaces;
 
 #define GLOBALS_LAYOUT( S, N )                                                                                      \
                                                         BIND_SET( S, N ) ConstantBuffer<gpuGlobals_t> globals;
 
 #define VIEW_LAYOUT( S, N )                                                                                         \
-                                                        BIND_SET( S, N ) StructuredBuffer<view_t> views;
+                                                        BIND_SET( S, N ) StructuredBuffer<gpuView_t> views;
 
 #define READ_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                      \
                                                         BIND_SET( S, N ) StructuredBuffer<TYPE> NAME;
@@ -144,13 +99,13 @@ struct PushConstants_t
                                                         BIND_SET( S, N ) StructuredBuffer<gpuMaterial_t> materials;
 
 #define LIGHT_LAYOUT( S, N )                                                                                        \
-                                                        BIND_SET( S, N ) StructuredBuffer<light_t> lights;
+                                                        BIND_SET( S, N ) StructuredBuffer<gpuLight_t> lights;
 
 #define PASS_LAYOUT( S, N )                                                                                         \
-                                                        BIND_SET( S, N ) StructuredBuffer<pass_t> passData;
+                                                        BIND_SET( S, N ) StructuredBuffer<gpuPass_t> passData;
 
 #define MATERIAL_PUSH_CONSTANTS                                                                                     \
-                                                        BIND_INLINE PushConstants_t pushConstants;
+                                                        BIND_INLINE gpuPushConstants_t pushConstants;
 
 // ============================================================
 // Compound bind macros

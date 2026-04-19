@@ -6,9 +6,11 @@
 #include "../render_binding/pipeline.h"
 #include "../render_resources/imageView.h"
 #include "../render_state/frameBuffer.h"
-#include "../render_binding/bufferObjects.h"
 #include "../render_binding/bindings.h"
 #include "../render_tasks/imageShaderTask.h"
+
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
 
 extern AssetManager g_assets;
 

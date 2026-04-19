@@ -372,7 +372,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 
 	VkPushConstantRange pushRanges;
 	pushRanges.offset = 0;
-	pushRanges.size = sizeof( pushConstants_t );
+	pushRanges.size = sizeof( gpuPushConstants_t );
 	pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
 	pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 

@@ -4,8 +4,10 @@
 #include "../render_core/renderer.h"
 #include "../render_state/rhi.h"
 #include "../render_state/cmdContext.h"
-#include "../render_binding/bufferObjects.h"
 #include "../globals/assetDefs.h"
+
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
 
 void Renderer::UpdateTextureData( CommandContext* cmdCommand )
 {

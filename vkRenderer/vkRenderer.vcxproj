@@ -258,7 +258,6 @@
     <ClInclude Include="src\globals\render_util.h" />
     <ClInclude Include="src\io\io.h" />
     <ClInclude Include="src\render_binding\bindings.h" />
-    <ClInclude Include="src\render_binding\bufferObjects.h" />
     <ClInclude Include="src\render_binding\pipeline.h" />
     <ClInclude Include="src\render_binding\shaderBinding.h" />
     <ClInclude Include="src\render_core\debugMenu.h" />

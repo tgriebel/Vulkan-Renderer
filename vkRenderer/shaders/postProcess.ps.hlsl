@@ -110,7 +110,7 @@ PS_Output PSMain( PS_Input input )
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
 
-    const view_t view = views[ viewlId ];
+	const gpuView_t view = views[viewlId];
 	const gpuMaterial_t material = materials[materialId];
 
     const uint textureId0 = material.textureId[ 0 ];

@@ -10,12 +10,18 @@
 
 #ifdef SHADER_STRUCTS_CPP
 #include <cassert>
+#define float4x4 mat4x4f
+#define float3x3 mat3x3f
+#define float2x2 mat2x2f
 #define float4 vec4f
 #define float3 vec3f
 #define float2 vec2f
 #define uint uint32_t
 #define int int32_t
 
+static_assert( sizeof( mat4x4f ) == 64 );
+static_assert( sizeof( mat3x3f ) == 36 );
+static_assert( sizeof( mat2x2f ) == 16 );
 static_assert( sizeof( vec4f ) == 16 );
 static_assert( sizeof( vec3f ) == 12 );
 static_assert( sizeof( vec2f ) == 8 );
@@ -121,7 +127,76 @@ struct gpuMaterial_t
 };
 
 
+struct gpuLight_t
+{
+	float4 lightPos;
+	float4 intensity;
+	float4 lightDir;
+	uint   shadowViewId;
+	uint   pad0;
+	uint   pad1;
+	uint   pad2;
+};
+
+
+struct gpuView_t
+{
+	float4x4 viewMat;
+	float4x4 projMat;
+	float4   dimensions;
+	float3   viewOrigin;
+	uint     numLights;
+};
+
+
+struct gpuPass_t
+{
+	uint codeImageCount;
+};
+
+
+struct gpuSurface_t
+{
+	float4x4 model;
+	uint     diffuseIblCubeId;
+	uint     envCubeId;
+	uint     pad[ 14 ];
+};
+
+
+struct gpuParticle_t
+{
+	float2	position;
+	float2	velocity;
+	float4	color;
+};
+
+
+struct gpuPushConstants_t
+{
+	uint objectId;
+	uint materialId;
+	uint viewId;
+};
+
+
 #ifdef SHADER_STRUCTS_CPP
+struct vsInput_t
+{
+	vec3f pos;
+	vec4f color;
+	vec3f normal;
+	vec3f tangent;
+	vec3f bitangent;
+	vec4f texCoord;
+};
+#endif
+
+
+#ifdef SHADER_STRUCTS_CPP
+#undef float4x4
+#undef float3x3
+#undef float2x2
 #undef float4
 #undef float3
 #undef float2

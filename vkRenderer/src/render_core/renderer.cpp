@@ -21,7 +21,6 @@
 #include "../render_binding/bindings.h"
 #include "../render_binding/pipeline.h"
 #include "../render_binding/shaderBinding.h"
-#include "../render_binding/bufferObjects.h"
 #include "../globals/render_util.h"
 #include "../globals/assetDefs.h"
 
@@ -39,6 +38,9 @@
 #include "../../../external/imgui/backends/imgui_impl_vulkan.h"
 #include "../app/imguiInterface.h"
 #endif
+
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
 
 extern imguiControls_t g_imguiControls;
 
@@ -460,7 +462,7 @@ void Renderer::CommitLight( const light_t& light )
 		return;
 	}
 
-	lightBufferObject_t lightObject = {};
+	gpuLight_t lightObject = {};
 	lightObject.intensity = light.intensity * ColorToVector( light.color );
 	lightObject.lightDir = light.dir;
 	lightObject.lightPos = light.pos;
@@ -643,11 +645,11 @@ void Renderer::UpdateBuffers()
 		const uint32_t multiViewCount = view.GetMultiViewCount();
 		for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
 		{
-			viewBufferObject_t viewBuffer = {};
+			gpuView_t viewBuffer = {};
 
 			const vec2i& frameSize = view.GetFrameSize();
-			viewBuffer.view = view.GetViewMatrix( multiViewIndex );
-			viewBuffer.proj = view.GetProjMatrix( multiViewIndex );
+			viewBuffer.viewMat = view.GetViewMatrix( multiViewIndex );
+			viewBuffer.projMat = view.GetProjMatrix( multiViewIndex );
 			viewBuffer.viewOrigin = view.GetViewOrigin();
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
@@ -664,7 +666,7 @@ void Renderer::UpdateBuffers()
 		}
 		const uint32_t viewId = view.GetSurfaceBufferId();
 
-		static surfaceBufferObject_t surfBuffer[ MaxSurfaces ];
+		static gpuSurface_t surfBuffer[ MaxSurfaces ];
 
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
@@ -685,14 +687,14 @@ void Renderer::UpdateBuffers()
 		}
 
 		resources.surfParmPartitions[ viewId ].SetPos( 0 );
-		resources.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( surfaceBufferObject_t ) * MaxSurfaces );
+		resources.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
 	}
 
 	resources.materialBuffers.SetPos( 0 );
 	resources.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( gpuMaterial_t ) * materialBuffer.Count() );
 
 	resources.lightParms.SetPos( 0 );
-	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( lightBufferObject_t ) * MaxLights );
+	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( gpuLight_t ) * MaxLights );
 
 	resources.particleBuffer.SetPos( resources.particleBuffer.GetMaxSize() );
 	//state.particleBuffer.CopyData();

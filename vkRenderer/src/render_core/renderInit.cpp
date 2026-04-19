@@ -377,7 +377,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			MaxViews * MaxMultiViews,
-			sizeof( viewBufferObject_t ),
+			sizeof( gpuView_t ),
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
 		);
@@ -386,7 +386,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			MaxViews * MaxSurfaces,
-			sizeof( surfaceBufferObject_t ),
+			sizeof( gpuSurface_t ),
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
 		);
@@ -404,7 +404,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			MaxLights,
-			sizeof( lightBufferObject_t ),
+			sizeof( gpuLight_t ),
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
 		);
@@ -413,7 +413,7 @@ void Renderer::InitShaderResources()
 			swapBuffering_t::MULTI_FRAME,
 			resourceLifeTime_t::REBOOT,
 			MaxParticles,
-			sizeof( particleBufferObject_t ),
+			sizeof( gpuParticle_t ),
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
 		);

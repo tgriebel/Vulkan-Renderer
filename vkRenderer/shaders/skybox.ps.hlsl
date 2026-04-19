@@ -11,7 +11,7 @@ PS_Output PSMain( PS_Input input )
     const uint viewlId = pushConstants.viewId;
 
 	const gpuMaterial_t material = materials[materialId];
-    const view_t view = views[ viewlId ];
+	const gpuView_t view = views[viewlId];
 
 #ifdef USE_CUBE_SAMPLER
     const float3 viewVector = normalize( input.objectPosition );

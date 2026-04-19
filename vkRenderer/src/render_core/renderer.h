@@ -6,7 +6,6 @@
 #include "../globals/renderConstants.h"
 
 #include "../render_state/cmdContext.h"
-#include "../render_binding/bufferObjects.h"
 #include "../render_resources/imageSampler.h"
 #include "../render_core/renderview.h"
 #include "../render_core/renderResource.h"
@@ -18,6 +17,9 @@
 #include "../../shaders/gpuStructs.h"
 
 #include "renderContext.h"
+
+#define SHADER_STRUCTS_CPP
+#include "../../shaders/gpuStructs.h"
 
 class Window;
 class SwapChain;
@@ -184,7 +186,7 @@ public:
 	const Image*						FindOutputImage( const uint32_t id );
 
 private:
-	using committedLightsArray_t	= Array<lightBufferObject_t, MaxLights>;
+	using committedLightsArray_t	= Array<gpuLight_t, MaxLights>;
 	using materialBufferArray_t		= Array<gpuMaterial_t, MaxMaterials>;
 
 	static const uint32_t				ShadowMapWidth = 2048;
