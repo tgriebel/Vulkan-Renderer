@@ -13,6 +13,15 @@
 #define PI              3.14159265359f
 #define AMBIENT         float4( 0.03f, 0.03f, 0.03f, 1.0f )
 
+enum ggxTextureSlot_t
+{
+	GGX_ALBEDO_MAP_SLOT = 0,
+	GGX_NORMAL_MAP_SLOT = 1,
+	GGX_ROUGHNESS_MAP_SLOT = 2,
+	GGX_METALLIC_MAP_SLOT = 3,
+	GGX_CLEARCOAT_NML_MAP_SLOT = 4,
+};
+
 // ============================================================
 // Convenience
 // ============================================================

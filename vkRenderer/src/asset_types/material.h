@@ -54,20 +54,28 @@ enum textureSlot_t : uint32_t
 
 enum ggxTextureSlot_t : uint32_t
 {
-	GGX_COLOR_MAP_SLOT,
-	GGX_NORMAL_MAP_SLOT,
-	GGX_SPEC_MAP_SLOT,
-	GGX_METALLIC_MAP_SLOT,
+	GGX_ALBEDO_MAP_SLOT			= 0,
+	GGX_NORMAL_MAP_SLOT			= 1,
+	GGX_ROUGHNESS_MAP_SLOT		= 2,
+	GGX_METALLIC_MAP_SLOT		= 3,
+	GGX_CLEARCOAT_NML_MAP_SLOT	= 4,
+};
+
+enum blinnPhongTextureSlot_t : uint32_t
+{
+	GGX_COLOR_MAP_SLOT			= 0,
+	GGX_NORMAL_MAP_SLOT			= 1,
+	GGX_SPEC_MAP_SLOT			= 2,
 };
 
 enum cubeTextureSlot_t : uint32_t
 {
-	CUBE_FRONT_SLOT,
-	CUBE_BACK_SLOT,
-	CUBE_TOP_SLOT,
-	CUBE_BOTTOM_SLOT,
-	CUBE_RIGHT_SLOT,
-	CUBE_LEFT_SLOT,
+	CUBE_FRONT_SLOT				= 0,
+	CUBE_BACK_SLOT				= 1,
+	CUBE_TOP_SLOT				= 2,
+	CUBE_BOTTOM_SLOT			= 3,
+	CUBE_RIGHT_SLOT				= 4,
+	CUBE_LEFT_SLOT				= 5,
 };
 
 enum hgtTextureSlot_t : uint32_t

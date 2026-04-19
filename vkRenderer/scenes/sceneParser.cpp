@@ -419,14 +419,16 @@ int ParseMaterialTextureObject( parseState_t& st, void* object, uint32_t offset 
 
 	Material* material = reinterpret_cast<Material*>( object );
 
-	const uint32_t objectCount = 20;
+	const uint32_t objectCount = 22;
 	char s[ objectCount ][TOKEN_LEN] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
 	{
-		MAKE_ENUM_STRING( GGX_COLOR_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_ALBEDO_MAP_SLOT ),
 		MAKE_ENUM_STRING( GGX_NORMAL_MAP_SLOT ),
-		MAKE_ENUM_STRING( GGX_SPEC_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_ROUGHNESS_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_METALLIC_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_CLEARCOAT_NML_MAP_SLOT ),
 		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT0 ),
 		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT1 ),
 		MAKE_ENUM_STRING( HGT_HEIGHT_MAP_SLOT ),

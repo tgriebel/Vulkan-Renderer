@@ -199,7 +199,7 @@ bool WriteImage( const char* path, const Image& image )
 }
 
 
-static Material LoadMaterialFromTinyObj( AssetManager& assets, const tinyobj::material_t& material, const std::string& texturePath )
+static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::material_t& material, const std::string& texturePath )
 {
 	Material outMaterial;
 
@@ -253,17 +253,17 @@ static Material LoadMaterialFromTinyObj( AssetManager& assets, const tinyobj::ma
 	if ( isPbr )
 	{
 		outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
-		outMaterial.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_DIFFUSE_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
-		outMaterial.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_ROUGHNESS_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_METALLIC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 3 ].name.c_str() ) );
 	}
 	else
 	{
 		outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
-		outMaterial.AddTexture( GGX_COLOR_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_DIFFUSE_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 0 ].name.c_str() ) );
 		outMaterial.AddTexture( GGX_NORMAL_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 1 ].name.c_str() ) );
-		outMaterial.AddTexture( GGX_SPEC_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
+		outMaterial.AddTexture( GGX_ROUGHNESS_MAP_SLOT, assets.GetLib<Image>()->RetrieveHdl( supportedTextures[ 2 ].name.c_str() ) );
 	}
 
 	materialParms_t& parms = outMaterial.GetParms();
@@ -309,7 +309,7 @@ bool LoadMaterial( AssetManager& assets, const std::string& fileName, const std:
 	}
 
 	// TODO: Load all materials. There's currently just a one-to-one relationship since adding to the asset lib only adds a single material
-	material = LoadMaterialFromTinyObj( assets, materials[ 0 ], texturePath );
+	material = TranslateObjMaterial( assets, materials[ 0 ], texturePath );
 
 	return true;
 }
@@ -329,7 +329,7 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 	// Add Materials
 	for( const auto& objMaterial : materials )
 	{
-		const Material material = LoadMaterialFromTinyObj( assets, objMaterial, texturePath );
+		const Material material = TranslateObjMaterial( assets, objMaterial, texturePath );
 		assets.GetLib<Material>()->Add( objMaterial.name.c_str(), material );
 	}
 

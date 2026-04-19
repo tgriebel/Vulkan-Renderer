@@ -16,13 +16,21 @@
 #include "assetManager.h"
 
 
+enum lightType_t : uint32_t
+{
+	LIGHT_TYPE_POINT		= 0,
+	LIGHT_TYPE_DIRECTIONAL	= 1,
+	LIGHT_TYPE_SPOT			= 2,
+//	LIGHT_TYPE_AREA			= 3,
+};
+
 enum lightFlags_t : uint16_t
 {
-	LIGHT_FLAGS_NONE = 0,
-	LIGHT_FLAGS_HIDDEN = ( 1 << 0 ),
-	LIGHT_FLAGS_SHADOW = ( 1 << 1 ),
-	LIGHT_FLAGS_POINT = ( 1 << 2 ),
-	LIGHT_FLAGS_ALL = 0XFF,
+	LIGHT_FLAGS_NONE	= 0,
+	LIGHT_FLAGS_HIDDEN	= ( 1 << 0 ),
+	LIGHT_FLAGS_SHADOW	= ( 1 << 1 ),
+	LIGHT_FLAGS_POINT	= ( 1 << 2 ),
+	LIGHT_FLAGS_ALL		= 0XFF,
 };
 DEFINE_ENUM_OPERATORS( lightFlags_t, uint16_t )
 
@@ -33,6 +41,7 @@ struct light_t
 	vec4f			dir;
 	Color			color;
 	float			intensity;
+	lightType_t		type;
 	lightFlags_t	flags;
 };
 
