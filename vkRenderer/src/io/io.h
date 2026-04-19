@@ -22,5 +22,6 @@ bool LoadCubeMapImage( const char* textureBasePath, const char* ext, Image& text
 bool WriteImage( const char* path, const Image& image );
 bool LoadMaterial( AssetManager& assets, const std::string& fileName, const std::string& materialPath, const std::string& texturePath, Material& material );
 bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model );
+bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model );
 bool LoadModel( AssetManager& assets, const hdl_t& hdl, const std::string& bakePath, const std::string& modelPath, const std::string& ext );
 bool WriteModel( Asset<Model>* model, const std::string& fileName );

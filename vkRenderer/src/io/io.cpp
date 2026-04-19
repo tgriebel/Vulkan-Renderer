@@ -23,6 +23,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../external/stb_image.h"
 
+#define CGLTF_IMPLEMENTATION
+#include "../../external/cgltf.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #pragma warning(push)
 #pragma warning(disable : 4996) // sprintf
@@ -509,6 +512,113 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 		}
 		++model.surfCount;
 	}
+	return true;
+}
+
+
+bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model )
+{
+	// -------------------------------------------------------------------------
+	// Parse + load buffers
+	// -------------------------------------------------------------------------
+	cgltf_options options = {};
+	cgltf_data* data = nullptr;
+
+	const std::string filePath = modelPath + fileName;
+	if ( cgltf_parse_file( &options, filePath.c_str(), &data ) != cgltf_result_success ) {
+		return false;
+	}
+
+	if ( cgltf_load_buffers( &options, data, filePath.c_str() ) != cgltf_result_success ) {
+		cgltf_free( data );
+		return false;
+	}
+
+	// -------------------------------------------------------------------------
+	// Images
+	// Each cgltf_image has either:
+	//   .uri          -- relative path to an external file (nullptr if embedded)
+	//   .buffer_view  -- non-null if image is embedded in the .glb buffer
+	//                    read via: (uint8_t*)bv->buffer->data + bv->offset, length bv->size
+	//   .mime_type    -- "image/png", "image/jpeg", etc.
+	// -------------------------------------------------------------------------
+
+	// TODO: load each image into an Image asset and register with the asset lib
+	//   external:  LoadImage( (texturePath + img.uri).c_str(), isLinear, image )
+	//   embedded:  decode from img.buffer_view using stb_image from memory
+	//   register:  assets.GetLib<Image>()->Add( img.name, image )
+
+	// -------------------------------------------------------------------------
+	// Materials
+	// cgltf_material flags: has_pbr_metallic_roughness, has_clearcoat,
+	//                       has_sheen, has_anisotropy, has_transmission, has_ior
+	// cgltf_pbr_metallic_roughness:
+	//   .base_color_texture / .metallic_roughness_texture  (cgltf_texture_view)
+	//   .base_color_factor[4], .metallic_factor, .roughness_factor
+	// cgltf_clearcoat:
+	//   .clearcoat_texture / .clearcoat_roughness_texture / .clearcoat_normal_texture
+	//   .clearcoat_factor, .clearcoat_roughness_factor
+	// cgltf_sheen:
+	//   .sheen_color_texture / .sheen_roughness_texture
+	//   .sheen_color_factor[3], .sheen_roughness_factor
+	// cgltf_anisotropy:
+	//   .anisotropy_texture, .anisotropy_strength, .anisotropy_rotation
+	// cgltf_material:
+	//   .normal_texture, .occlusion_texture, .emissive_texture, .emissive_factor[3]
+	//   .alpha_mode  (cgltf_alpha_mode_opaque / _mask / _blend), .alpha_cutoff
+	//   .double_sided
+	// Texture slot: cgltf_texture_view.texture->image gives the cgltf_image*
+	//               resolve to asset hdl via the image name registered above
+	// -------------------------------------------------------------------------
+
+	// TODO: translate each cgltf_material to Material
+	//   assign shaders based on alpha_mode (opaque -> shadow+depth+opaque, blend -> trans)
+	//   map base_color_texture   -> GGX_ALBEDO_MAP_SLOT
+	//   map normal_texture       -> GGX_NORMAL_MAP_SLOT
+	//   map metallic_roughness   -> GGX_ROUGHNESS_MAP_SLOT / GGX_METALLIC_MAP_SLOT
+	//   map clearcoat_normal     -> GGX_CLEARCOAT_NML_MAP_SLOT
+	//   pack scalar factors into materialParms_t
+	//   register: assets.GetLib<Material>()->Add( mat.name, material )
+
+	// -------------------------------------------------------------------------
+	// Meshes / Surfaces
+	// cgltf_mesh:      .name, .primitives[], .primitives_count
+	// cgltf_primitive: .type (triangles), .indices (accessor*), .material*,
+	//                  .attributes[], .attributes_count
+	// cgltf_attribute: .type (cgltf_attribute_type_position/normal/tangent/
+	//                         texcoord/color), .data (accessor*)
+	// cgltf_accessor:  .count, .type (vec2/vec3/vec4), .component_type
+	//   cgltf_accessor_unpack_floats( accessor, float* out, floatCount )
+	//     -- reads any component format and converts to float; floatCount = count * num_components
+	//   cgltf_accessor_unpack_indices( accessor, void* out, indexSize, indexCount )
+	//     -- reads uint8/16/32 indices into your preferred size
+	// NOTE: glTF tangents are vec4 -- .w = bitangent sign (+1.0 or -1.0)
+	// NOTE: glTF is right-handed Y-up; verify axis convention against your world space
+	// -------------------------------------------------------------------------
+
+	// TODO: for each mesh, for each primitive -> one Surface
+	//   scan attributes by type to find POSITION / NORMAL / TANGENT / TEXCOORD_0 / COLOR_0
+	//   unpack floats via cgltf_accessor_unpack_floats into temp buffers, fill vertex_t
+	//   unpack indices via cgltf_accessor_unpack_indices
+	//   if TANGENT attribute absent: run GenerateMikkTangents
+	//   if TANGENT present: extract vec3 + decode sign from .w, skip MikkT
+	//   assign surf.materialHdl from primitive.material->name lookup
+
+	// -------------------------------------------------------------------------
+	// Node hierarchy
+	// cgltf_node: .name, .parent, .children[], .mesh*, .camera*, .light*
+	//   .has_translation / .translation[3]
+	//   .has_rotation    / .rotation[4]  (quaternion xyzw)
+	//   .has_scale       / .scale[3]
+	//   .has_matrix      / .matrix[16]
+	//   cgltf_node_transform_world( node, float[16] ) -- full world-space matrix
+	// Walk data->scene->nodes[] (not data->nodes[] -- scenes filter the root set)
+	// -------------------------------------------------------------------------
+
+	// TODO: walk the scene node tree to apply per-instance transforms
+	//   for now, can flatten all meshes without transforms as a first pass
+
+	cgltf_free( data );
 	return true;
 }
 

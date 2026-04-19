@@ -31,6 +31,8 @@ bool ModelLoader::Load( Asset<Model>& modelAsset )
 
 	if ( m_modelExt == "obj" ) {
 		return LoadRawModel( *assets, fileName, m_modelPath, m_texturePath, model );
+	} else if ( m_modelExt == "gltf" || m_modelExt == "glb" ) {
+		return LoadRawModelGLTF( *assets, fileName, m_modelPath, m_texturePath, model );
 	} else {
 		return false;
 	}
