@@ -9,15 +9,15 @@ struct surfaceInput_t
 	float3	V;
 	float3	positionWS;
 	float3	cameraOrigin;
-	float	NoV;
+	float3	F0;
 	float3	albedo;
+	float3	ccNormal;
+	float3	emissive;
+	float	NoV;
 	float	roughness;
 	float	metallic;
-	float3	F0;
 	float	ccStrength;	// cc: clear-coat
-	float3	ccNormal;
 	float	ccRoughness;
-	float3	emissive;
 	float	ao;
 };
 
@@ -26,10 +26,11 @@ struct surfaceInput_t
 struct lightingInput_t
 {
 	float3	lightRay;
-	float	lightDistance;
+	float3	intensity;
 	float3	L;
 	float3	H;
 
+	float	lightDistance;
 	float	NoL;
 	float	NoH;
 	float	LoH;
@@ -89,6 +90,7 @@ lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const
 	lightingInput.lightDistance = length( lightingInput.lightRay );
 	lightingInput.L = lightingInput.lightRay / lightingInput.lightDistance;
 	lightingInput.H = normalize( surfaceInput.V + lightingInput.L );
+	lightingInput.intensity = light.intensity.rgb;
 
 	lightingInput.NoL = max( dot( surfaceInput.N, lightingInput.L ), 0.0f );
 	lightingInput.NoH = max( dot( surfaceInput.N, lightingInput.H ), 0.0f );

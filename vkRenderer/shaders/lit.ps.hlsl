@@ -11,44 +11,31 @@ PS_LAYOUT_MRT_1_OUT
 #endif
 
 
-float3 ApplyLight( const surfaceInput_t surfaceInput, const gpuLight_t light )
+float3 ApplyLight( const surfaceInput_t surfaceInput, lightingInput_t lightingInput )
 {
-	const float3 N = surfaceInput.N;
-	const float3 V = surfaceInput.V;
-	const float NoV = surfaceInput.NoV;
 	const float perceptualRoughness = surfaceInput.roughness;
 	const float metallic = surfaceInput.metallic;
 	const float3 F0 = surfaceInput.F0;
-	
-	const float3 lightRay = ( light.lightPos.xyz - surfaceInput.positionWS );
-	const float lightDistance = length( lightRay );
-	const float3 L = lightRay / lightDistance;
-	const float3 H = normalize( V + L );
 
-	const float NoL = max( dot( N, L ), 0.0f );
-	const float NoH = max( dot( N, H ), 0.0f );
-	const float LoH = max( dot( L, H ), 0.0f );
-	const float HoV = max( dot( H, V ), 0.0f );
-
-	const float D = D_GGX( NoH, perceptualRoughness );
-	const float G = G_Smith( NoV, NoL, perceptualRoughness);
-	const float3 F = F_Schlick( HoV, F0 );
+	const float D = D_GGX( lightingInput.NoH, perceptualRoughness );
+	const float G = G_Smith( surfaceInput.NoV, lightingInput.NoL, perceptualRoughness);
+	const float3 F = F_Schlick( lightingInput.HoV, F0 );
 
 	const float3 kS = F;
 	float3 kD = float3( 1.0f, 1.0f, 1.0f ) - kS;
 	kD *= 1.0f - metallic;
 
 	float3 numerator = D * G * F;
-	float denominator = 4.0f * NoV * NoL + 0.0001f;
+	float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.0001f;
 	float3 Fr = numerator / denominator;
 
-	const float attenuation = 1.0f / ( lightDistance * lightDistance );
+	const float attenuation = 1.0f / ( lightingInput.lightDistance * lightingInput.lightDistance );
 	const float spotFalloff = 1.0f;
-	const float3 radiance = attenuation * spotFalloff * light.intensity.rgb;
+	const float3 radiance = attenuation * spotFalloff * lightingInput.intensity;
 
-	const float3 lightingResult = ( ( kD * surfaceInput.albedo ) / PI + Fr ) * radiance * NoL;
+	const float3 Lo = ( ( kD * surfaceInput.albedo ) / PI + Fr ) * radiance * lightingInput.NoL;
 	
-	return lightingResult;
+	return Lo;
 }
 
 
@@ -258,7 +245,7 @@ PS_Output PSMain( PS_Input input )
 
 		const lightingInput_t lightingInput = CalculateLightingInput( surfaceInput, light );
 
-		const float3 diffuse = ApplyLight( surfaceInput, light );
+		const float3 diffuse = ApplyLight( surfaceInput, lightingInput );
 
 		const float3 diffuseCC = ApplyClearcoat( surfaceInput, lightingInput, diffuse );
 		
