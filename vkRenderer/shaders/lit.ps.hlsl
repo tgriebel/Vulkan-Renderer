@@ -83,12 +83,10 @@ float3 ApplyClearcoat(const surfaceInput_t surfaceInput, lightingInput_t lightin
     const float NoH = saturate( dot( surfaceInput.ccNormal, lightingInput.H ) );
     const float NoL = saturate( dot( surfaceInput.ccNormal, lightingInput.L ) );
 
-	const float a = surfaceInput.ccRoughness * surfaceInput.ccRoughness;
-	
 	const float F0 = 0.04f;
 	const float Fc = F0 + ( 1.0f - F0 ) * pow( 1.0f - lightingInput.HoV, 5.0f );
 	
-    const float D = D_GGX( NoH, a );
+    const float D = D_GGX( NoH, surfaceInput.ccRoughness );
 	const float visibility = V_Kelemen( lightingInput.LoH );
 	
     // Clearcoat contribution
@@ -98,6 +96,13 @@ float3 ApplyClearcoat(const surfaceInput_t surfaceInput, lightingInput_t lightin
 	const float attenuation = 1.0f - Fc * surfaceInput.ccStrength;
 
 	return baseColor * attenuation + clearcoat * NoL;
+}
+
+
+float3 Sheen( const float3 sheenColor, const float roughness,
+			  const float NoH, const float NoV, const float NoL )
+{
+    return sheenColor * D_Charlie( NoH, roughness ) * V_Neubelt( NoV, NoL ) * NoL;
 }
 
 
@@ -128,11 +133,6 @@ PS_Output PSMain( PS_Input input )
 	const int anisotropyTexId = material.textureId[ GGX_ANISOTROPY_MAP_SLOT ];
 	const int transmissionTexId = material.textureId[ GGX_TRANSMISSION_MAP_SLOT ];
 
-	//GGX_SHEEN_COLOR_MAP_SLOT - sRGB
-	//GGX_SHEEN_ROUGHNESS_MAP_SLOT - linear
-	//GGX_ANISOTROPY_MAP_SLOT - linear
-	//GGX_TRANSMISSION_MAP_SLOT - linear
-
     const float3 specularColor = material.Ks.rgb;
     const float specularPower = material.Ns;
 
@@ -148,7 +148,11 @@ PS_Output PSMain( PS_Input input )
 	float aoSample = 1.0f;
 	float ccSample = material.clearcoatWeight;
 	float ccRoughnessSample = material.clearcoatRoughness;
-	float3 ccNormal = float3( 0.0f, 0.0f, 1.0f );
+	float3 ccNormalSample = float3( 0.0f, 0.0f, 1.0f );
+	float3 sheenSample = material.sheenColor;
+	float sheenRoughnessSample = material.sheen;
+	float anisotropySample = material.anisotropy;
+	float transmissionSample = material.transmissionFactor;
 	
 	float2 uv0 = input.uv0.xy;
 
@@ -205,7 +209,31 @@ PS_Output PSMain( PS_Input input )
 		if ( ccNormalTexId >= 0 )
 		{
 			Texture2D ccNormalTex = texSampler[ ccNormalTexId ];
-			ccNormal = DecodeNormal( ccNormalTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
+			ccNormalSample = DecodeNormal( ccNormalTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
+		}
+
+		if ( sheenColorTexId >= 0 )
+		{
+			Texture2D sheenTex = texSampler[ sheenColorTexId ];
+			sheenSample = SrgbToLinear( sheenTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
+		}
+
+		if ( sheenRoughnessTexId >= 0 )
+		{
+			Texture2D sheenRoughnessTex = texSampler[ sheenRoughnessTexId ];
+			sheenRoughnessSample = sheenRoughnessTex.Sample(bilinearSamplerWrap, uv0).r;
+		}
+
+		if ( anisotropyTexId >= 0 )
+		{
+			Texture2D anisotropyTex = texSampler[ anisotropyTexId ];
+			anisotropySample = anisotropyTex.Sample( bilinearSamplerWrap, uv0 ).r;
+		}
+
+		if ( transmissionTexId >= 0 )
+		{
+			Texture2D transmissionTex = texSampler[ transmissionTexId ];
+			transmissionSample = transmissionTex.Sample( bilinearSamplerWrap, uv0 ).r;
 		}
 	}
 
@@ -234,7 +262,7 @@ PS_Output PSMain( PS_Input input )
 	
 	surfaceInput.ccStrength = ccSample;
 	surfaceInput.ccRoughness = ccRoughnessSample;
-	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormal, input.tangent, input.bitangent, input.TBN2 ) );
+	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
 	
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
@@ -245,14 +273,14 @@ PS_Output PSMain( PS_Input input )
 
 		const lightingInput_t lightingInput = CalculateLightingInput( surfaceInput, light );
 
-		const float3 diffuse = ApplyLight( surfaceInput, lightingInput );
+		float3 Lo_i = ApplyLight( surfaceInput, lightingInput );
 
-		const float3 diffuseCC = ApplyClearcoat( surfaceInput, lightingInput, diffuse );
+        Lo_i = ApplyClearcoat( surfaceInput, lightingInput, Lo_i );
 		
 		const float shadowing = ApplyShadow( light.shadowViewId, surfaceInput.positionWS );
 
-		Lo += shadowing * diffuseCC;
-	}
+        Lo += shadowing * Lo_i;
+    }
 #endif
 
     const float3 F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );

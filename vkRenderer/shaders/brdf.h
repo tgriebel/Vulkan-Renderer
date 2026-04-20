@@ -124,10 +124,4 @@ float V_Neubelt( const float NoV, const float NoL )
 {
 	return 1.0f / ( 4.0f * ( NoL + NoV - NoL * NoV ) );
 }
-
-float3 Sheen( const float3 sheenColor, const float roughness,
-			  const float NoH, const float NoV, const float NoL )
-{
-	return sheenColor * D_Charlie( NoH, roughness ) * V_Neubelt( NoV, NoL ) * NoL;
-}
 #endif
