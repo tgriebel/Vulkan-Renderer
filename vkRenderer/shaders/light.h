@@ -13,12 +13,18 @@ struct surfaceInput_t
 	float3	albedo;
 	float3	ccNormal;
 	float3	emissive;
+	float3	sheenColor;
 	float	NoV;
 	float	roughness;
 	float	metallic;
 	float	ccStrength;	// cc: clear-coat
 	float	ccRoughness;
 	float	ao;
+	float	sheenRoughness;
+	float	aniso;
+	float	anisoRotation;
+	bool	useClearCoat;
+	bool	useSheen;
 };
 
 
@@ -29,7 +35,7 @@ struct lightingInput_t
 	float3	intensity;
 	float3	L;
 	float3	H;
-
+	float3	Li;
 	float	lightDistance;
 	float	NoL;
 	float	NoH;
@@ -96,6 +102,12 @@ lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const
 	lightingInput.NoH = max( dot( surfaceInput.N, lightingInput.H ), 0.0f );
 	lightingInput.LoH = max( dot( lightingInput.L, lightingInput.H ), 0.0f );
 	lightingInput.HoV = max( dot( lightingInput.H, surfaceInput.V ), 0.0f );
+
+	const float attenuation = 1.0f / ( lightingInput.lightDistance * lightingInput.lightDistance );
+	const float spotFalloff = 1.0f;
+	const float3 radiance = attenuation * spotFalloff * lightingInput.intensity;
+
+	lightingInput.Li = radiance;
 
 	return lightingInput;
 }

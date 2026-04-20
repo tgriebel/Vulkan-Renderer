@@ -1,6 +1,10 @@
 #ifndef BRDF_H
 #define BRDF_H
 
+// General references
+// https ://google.github.io/filament/Filament.md.html
+// https://learnopengl.com/PBR/Theory
+
 // ============================================================
 // GGX
 // ============================================================

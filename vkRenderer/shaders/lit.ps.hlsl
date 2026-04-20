@@ -29,17 +29,13 @@ float3 ApplyLight( const surfaceInput_t surfaceInput, lightingInput_t lightingIn
 	float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.0001f;
 	float3 Fr = numerator / denominator;
 
-	const float attenuation = 1.0f / ( lightingInput.lightDistance * lightingInput.lightDistance );
-	const float spotFalloff = 1.0f;
-	const float3 radiance = attenuation * spotFalloff * lightingInput.intensity;
-
-	const float3 Lo = ( ( kD * surfaceInput.albedo ) / PI + Fr ) * radiance * lightingInput.NoL;
+    const float3 Lo = ( ( kD * surfaceInput.albedo ) / PI + Fr ) * lightingInput.Li * lightingInput.NoL;
 	
 	return Lo;
 }
 
 
-float ApplyShadow( const uint shadowViewId, float3 worldPosition )
+float3 ApplyShadow( const uint shadowViewId, float3 worldPosition, const float3 Lo )
 {
 	float shadowing = 1.0f; // Assumes spot-light, should be 0.0f for normal lights
 	
@@ -74,11 +70,11 @@ float ApplyShadow( const uint shadowViewId, float3 worldPosition )
 			shadowing = 0.0f;
 		}
 	}
-	return shadowing;
+    return ( shadowing * Lo );
 }
 
 
-float3 ApplyClearcoat(const surfaceInput_t surfaceInput, lightingInput_t lightingInput, const float3 baseColor)
+float3 ApplyClearcoat( const surfaceInput_t surfaceInput, lightingInput_t lightingInput, const float3 Lo )
 {
     const float NoH = saturate( dot( surfaceInput.ccNormal, lightingInput.H ) );
     const float NoL = saturate( dot( surfaceInput.ccNormal, lightingInput.L ) );
@@ -87,22 +83,30 @@ float3 ApplyClearcoat(const surfaceInput_t surfaceInput, lightingInput_t lightin
 	const float Fc = F0 + ( 1.0f - F0 ) * pow( 1.0f - lightingInput.HoV, 5.0f );
 	
     const float D = D_GGX( NoH, surfaceInput.ccRoughness );
-	const float visibility = V_Kelemen( lightingInput.LoH );
+    const float Visibility = V_Kelemen( lightingInput.LoH );
 	
     // Clearcoat contribution
-	const float clearcoat = D * visibility * Fc * surfaceInput.ccStrength;
+    const float clearcoat = ( D * Visibility * Fc * surfaceInput.ccStrength );
 
 	// Energy loss from base: attenuate by Fresnel of clearcoat
-	const float attenuation = 1.0f - Fc * surfaceInput.ccStrength;
+    const float attenuation = ( 1.0f - Fc * surfaceInput.ccStrength );
 
-	return baseColor * attenuation + clearcoat * NoL;
+    return ( Lo * attenuation + clearcoat * NoL * lightingInput.Li );
 }
 
 
-float3 Sheen( const float3 sheenColor, const float roughness,
-			  const float NoH, const float NoV, const float NoL )
+float3 ApplySheen( const surfaceInput_t surfaceInput, lightingInput_t lightingInput )
 {
-    return sheenColor * D_Charlie( NoH, roughness ) * V_Neubelt( NoV, NoL ) * NoL;
+    const float NoV = surfaceInput.NoV;
+    const float NoH = lightingInput.NoH;
+    const float NoL = lightingInput.NoL;
+	
+    const float D = D_Charlie( NoH, surfaceInput.sheenRoughness );
+    const float Visibility = V_Neubelt( NoV, NoL );
+
+    const float3 sheen = ( surfaceInput.sheenColor * D * Visibility * NoL );
+	
+    return ( sheen * lightingInput.Li );
 }
 
 
@@ -259,10 +263,13 @@ PS_Output PSMain( PS_Input input )
 	surfaceInput.emissive = emissiveSample;
 	surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
 	surfaceInput.ao = aoSample;
-	
+    surfaceInput.sheenColor = sheenSample;
+    surfaceInput.sheenRoughness = sheenRoughnessSample;
 	surfaceInput.ccStrength = ccSample;
 	surfaceInput.ccRoughness = ccRoughnessSample;
 	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
+    surfaceInput.useClearCoat = ( ccSample > 0.0f );
+    surfaceInput.useSheen = any( sheenSample > 0.0f );
 	
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
@@ -275,11 +282,16 @@ PS_Output PSMain( PS_Input input )
 
 		float3 Lo_i = ApplyLight( surfaceInput, lightingInput );
 
-        Lo_i = ApplyClearcoat( surfaceInput, lightingInput, Lo_i );
+        if ( surfaceInput.useClearCoat ) {
+            Lo_i = ApplyClearcoat( surfaceInput, lightingInput, Lo_i );
+        }
+        if ( surfaceInput.useSheen ) {
+            Lo_i = ApplySheen( surfaceInput, lightingInput );
+        }
 		
-		const float shadowing = ApplyShadow( light.shadowViewId, surfaceInput.positionWS );
+		Lo_i = ApplyShadow( light.shadowViewId, surfaceInput.positionWS, Lo_i );
 
-        Lo += shadowing * Lo_i;
+        Lo += Lo_i;
     }
 #endif
 
