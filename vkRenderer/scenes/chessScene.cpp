@@ -235,7 +235,7 @@ void ChessScene::Update()
 	Asset<Material>* glowMatAsset = MaterialLib().Find( "GlowSquare" );
 	Material& glowMat = glowMatAsset->Get();
 	glowMat.GetParms().Kd = rgb32_t(0.1f, 0.1f, 1.0f);
-	glowMat.GetParms().Tr = 0.5f * cos( 3.0f * time ) + 0.5f;
+	glowMat.GetParms().opacity = 0.5f * cos( 3.0f * time ) + 0.5f;
 	glowMatAsset->QueueUpload();
 
 	const uint32_t lightCount = static_cast<uint32_t>( lights.size() );

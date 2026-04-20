@@ -22,7 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{11a9154e-560c-4ceb-ae50-0a0b661612bb}</ProjectGuid>
-    <RootNamespace>AssetConverter</RootNamespace>
+    <RootNamespace>AssetBaker</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>AssetBaker</ProjectName>
   </PropertyGroup>
@@ -74,20 +74,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)vkRenderer\</LocalDebuggerWorkingDirectory>
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)vkRenderer\</LocalDebuggerWorkingDirectory>
+    <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -150,7 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AssetConverter.cpp" />
+    <ClCompile Include="AssetBakerMain.cpp" />
     <ClCompile Include="..\vkRenderer\scenes\sceneParser.cpp" />
     <ClCompile Include="..\vkRenderer\src\scene\assetBaker.cpp" />
     <ClCompile Include="..\vkRenderer\src\scene\codeAssets.cpp" />

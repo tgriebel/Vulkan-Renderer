@@ -6,7 +6,7 @@
 #include "../draw_passes/drawpass.h"
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 class ResourceContext;
 class RenderContext;

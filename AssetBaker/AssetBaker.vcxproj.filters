@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AssetConverter.cpp">
+    <ClCompile Include="AssetBakerMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\vkRenderer\scenes\sceneParser.cpp">

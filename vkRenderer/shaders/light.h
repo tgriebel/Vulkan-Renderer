@@ -15,8 +15,8 @@ struct surfaceInput_t
 	float	metallic;
 	float3	F0;
 	float	ccStrength;	// cc: clear-coat
+	float3	ccNormal;
 	float	ccRoughness;
-	float	ccNormal;
 };
 
 

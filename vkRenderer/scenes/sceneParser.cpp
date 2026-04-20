@@ -419,7 +419,7 @@ int ParseMaterialTextureObject( parseState_t& st, void* object, uint32_t offset 
 
 	Material* material = reinterpret_cast<Material*>( object );
 
-	const uint32_t objectCount = 22;
+	const uint32_t objectCount = 36;
 	char s[ objectCount ][TOKEN_LEN] = {};
 
 	static const enumString_t enumMap[ objectCount ] =
@@ -428,7 +428,21 @@ int ParseMaterialTextureObject( parseState_t& st, void* object, uint32_t offset 
 		MAKE_ENUM_STRING( GGX_NORMAL_MAP_SLOT ),
 		MAKE_ENUM_STRING( GGX_ROUGHNESS_MAP_SLOT ),
 		MAKE_ENUM_STRING( GGX_METALLIC_MAP_SLOT ),
-		MAKE_ENUM_STRING( GGX_CLEARCOAT_NML_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_METALLIC_ROUGHNESS_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_AO_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_EMISSIVE_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_CC_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_CC_ROUGHNESS_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_CC_NML_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_SHEEN_COLOR_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_SHEEN_ROUGHNESS_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_ANISOTROPY_MAP_SLOT ),
+		MAKE_ENUM_STRING( GGX_TRANSMISSION_MAP_SLOT ),
+		MAKE_ENUM_STRING( BLINN_PHONG_COLOR_MAP_SLOT ),
+		MAKE_ENUM_STRING( BLINN_PHONG_NORMAL_MAP_SLOT ),
+		MAKE_ENUM_STRING( BLINN_PHONG_SPEC_MAP_SLOT ),
+		MAKE_ENUM_STRING( BLINN_PHONG_GLOSS_MAP_SLOT ),
+		MAKE_ENUM_STRING( BLINN_PHONG_EMISSIVE_MAP_SLOT ),
 		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT0 ),
 		MAKE_ENUM_STRING( HGT_COLOR_MAP_SLOT1 ),
 		MAKE_ENUM_STRING( HGT_HEIGHT_MAP_SLOT ),
@@ -440,12 +454,12 @@ int ParseMaterialTextureObject( parseState_t& st, void* object, uint32_t offset 
 		MAKE_ENUM_STRING( TEXTURE_SLOT_5 ),
 		MAKE_ENUM_STRING( TEXTURE_SLOT_6 ),
 		MAKE_ENUM_STRING( TEXTURE_SLOT_7 ),
-		MAKE_ENUM_STRING( CUBE_RIGHT_SLOT ),
-		MAKE_ENUM_STRING( CUBE_LEFT_SLOT ),
-		MAKE_ENUM_STRING( CUBE_TOP_SLOT ),
-		MAKE_ENUM_STRING( CUBE_BOTTOM_SLOT ),
-		MAKE_ENUM_STRING( CUBE_FRONT_SLOT ),
-		MAKE_ENUM_STRING( CUBE_BACK_SLOT ),
+		MAKE_ENUM_STRING( CUBE_RIGHT_MAP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_LEFT_MAP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_TOP_MAP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_BOTTOM_MAP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_FRONT_MAP_SLOT ),
+		MAKE_ENUM_STRING( CUBE_BACK_MAP_SLOT ),
 	};
 
 	static const objectTuple_t objectMap[ objectCount ] =
@@ -470,6 +484,22 @@ int ParseMaterialTextureObject( parseState_t& st, void* object, uint32_t offset 
 		{ enumMap[ 17 ].name,	&s[ 17 ],	TOKEN_LEN,	1,	&ParseStringObject },
 		{ enumMap[ 18 ].name,	&s[ 18 ],	TOKEN_LEN,	1,	&ParseStringObject },
 		{ enumMap[ 19 ].name,	&s[ 19 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 20 ].name,	&s[ 20 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 21 ].name,	&s[ 21 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 22 ].name,	&s[ 22 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 23 ].name,	&s[ 23 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 24 ].name,	&s[ 24 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 25 ].name,	&s[ 25 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 26 ].name,	&s[ 26 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 27 ].name,	&s[ 27 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 28 ].name,	&s[ 28 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 29 ].name,	&s[ 29 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 30 ].name,	&s[ 30 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 31 ].name,	&s[ 31 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 32 ].name,	&s[ 32 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 33 ].name,	&s[ 33 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 34 ].name,	&s[ 34 ],	TOKEN_LEN,	1,	&ParseStringObject },
+		{ enumMap[ 35 ].name,	&s[ 35 ],	TOKEN_LEN,	1,	&ParseStringObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -627,7 +657,7 @@ int ParseMaterialObject( parseState_t& st, void* object, uint32_t offset )
 	char name[ TOKEN_LEN ] = "";
 
 	// TODO: allow parse functions that aren't just primitives. Need objects/array reading
-	const uint32_t objectCount = 30;
+	const uint32_t objectCount = 35;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name",				&name,						TOKEN_LEN,			1,	&ParseStringObject },
@@ -646,18 +676,23 @@ int ParseMaterialObject( parseState_t& st, void* object, uint32_t offset )
 		{ "TfR",				&mParms.Tf.r,				sizeof( float ),	1,	&ParseFloatObject },
 		{ "TfG",				&mParms.Tf.g,				sizeof( float ),	1,	&ParseFloatObject },
 		{ "TfB",				&mParms.Tf.b,				sizeof( float ),	1,	&ParseFloatObject },
-		{ "tr",					&mParms.Tr,					sizeof( float ),	1,	&ParseFloatObject },
+		{ "opacity",			&mParms.opacity,			sizeof( float ),	1,	&ParseFloatObject },
 		{ "ns",					&mParms.Ns,					sizeof( float ),	1,	&ParseFloatObject },
-		{ "ni",					&mParms.Ni,					sizeof( float ),	1,	&ParseFloatObject },
-		{ "d",					&mParms.d,					sizeof( float ),	1,	&ParseFloatObject },
+		{ "ior",				&mParms.ior,				sizeof( float ),	1,	&ParseFloatObject },
 		{ "illum",				&mParms.illum,				sizeof( float ),	1,	&ParseFloatObject },
 		{ "roughness",			&mParms.roughness,			sizeof( float ),	1,	&ParseFloatObject },
 		{ "metalness",			&mParms.metalness,			sizeof( float ),	1,	&ParseFloatObject },
-		{ "sheen",				&mParms.sheen,				sizeof( float ),	1,	&ParseFloatObject },
-		{ "clearcoatThickness",	&mParms.clearcoatThickness,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "clearcoatWeight",	&mParms.clearcoatWeight,	sizeof( float ),	1,	&ParseFloatObject },
 		{ "clearcoatRoughness",	&mParms.clearcoatRoughness,	sizeof( float ),	1,	&ParseFloatObject },
 		{ "anisotropy",			&mParms.anisotropy,			sizeof( float ),	1,	&ParseFloatObject },
 		{ "anisotropyRotation",	&mParms.anisotropyRotation,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "alphaCutoff",		&mParms.alphaCutoff,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "sheenColorR",		&mParms.sheenColor.r,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "sheenColorG",		&mParms.sheenColor.g,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "sheenColorB",		&mParms.sheenColor.b,		sizeof( float ),	1,	&ParseFloatObject },
+		{ "sheen",				&mParms.sheen,				sizeof( float ),	1,	&ParseFloatObject },
+		{ "transmissionFactor",	&mParms.transmissionFactor,	sizeof( float ),	1,	&ParseFloatObject },
+		{ "emissiveStrength",	&mParms.emissiveStrength,	sizeof( float ),	1,	&ParseFloatObject },
 		{ "shaders",			&m,							sizeof( Material ),	1,	&ParseMaterialShaderObject },
 		{ "textures",			&m,							sizeof( Material ),	1,	&ParseMaterialTextureObject },
 	};

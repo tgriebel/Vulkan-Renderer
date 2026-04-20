@@ -226,7 +226,7 @@ PS_Output PSMain( PS_Input input )
     float3 kD = 1.0 - kS;
 	kD *= 1.0 - surfaceInput.metallic;
 
-	float3 diffuse = AMBIENT * surfaceInput.albedo;
+	float3 diffuse = AMBIENT.rgb * surfaceInput.albedo;
 	if ( globals.useDiffuseIBL )
 	{
 		const float3 irradiance = cubeSamplers[diffuseIBL].Sample(bilinearSamplerWrap, CubeVector(surfaceInput.N)).rgb;
@@ -236,7 +236,7 @@ PS_Output PSMain( PS_Input input )
 
     float4 outColor;
     outColor.rgb = Lo + ambient;
-    outColor.a = material.Tr;
+    outColor.a = material.opacity;
 
     //outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
 

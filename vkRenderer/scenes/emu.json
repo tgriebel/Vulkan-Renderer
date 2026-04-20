@@ -55,10 +55,9 @@
 	{
 	  "name": "Grid",
 	  "KdR": 1.0,
-	  "tr": 0.0,
+	  "opacity": 1.0,
 	  "ns": 0.0,
 	  "ni": 0.0,
-	  "d": 1.0,
 	  "illum": 0.0,
 	  "shaders": {
 		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
@@ -133,12 +132,12 @@
 		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 	  },
 	  "textures": {
-		"CUBE_RIGHT_SLOT": "skybox80s.png",
-		"CUBE_LEFT_SLOT": "skybox80s.png",
-		"CUBE_TOP_SLOT": "skybox80s.png",
-		"CUBE_BOTTOM_SLOT": "skybox80s.png",
-		"CUBE_FRONT_SLOT": "skybox80s.png",
-		"CUBE_BACK_SLOT": "skybox80s.png"
+		"CUBE_RIGHT_MAP_SLOT": "skybox80s.png",
+		"CUBE_LEFT_MAP_SLOT": "skybox80s.png",
+		"CUBE_TOP_MAP_SLOT": "skybox80s.png",
+		"CUBE_BOTTOM_MAP_SLOT": "skybox80s.png",
+		"CUBE_FRONT_MAP_SLOT": "skybox80s.png",
+		"CUBE_BACK_MAP_SLOT": "skybox80s.png"
 	  }
 	}
   ],

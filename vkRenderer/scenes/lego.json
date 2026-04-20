@@ -74,10 +74,9 @@
 	  "KdR": 1.0,
 	  "KdG": 1.0,
 	  "KdB": 1.0,
-	  "tr": 0.0,
+	  "opacity": 1.0,
 	  "ns": 0.0,
 	  "ni": 0.0,
-	  "d": 1.0,
 	  "illum": 0.0,
 	  "shaders": {
 		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
@@ -94,13 +93,14 @@
 	  "shaders": {
 		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 	  },
-	  "textures": {
-		"CUBE_RIGHT_SLOT": "chapel_right.jpg",
-		"CUBE_LEFT_SLOT": "chapel_left.jpg",
-		"CUBE_TOP_SLOT": "chapel_top.jpg",
-		"CUBE_BOTTOM_SLOT": "chapel_bottom.jpg",
-		"CUBE_FRONT_SLOT": "chapel_front.jpg",
-		"CUBE_BACK_SLOT": "chapel_back.jpg"
+	  "textures":
+	  {
+		"CUBE_RIGHT_MAP_SLOT": "skybox80s.png",
+		"CUBE_LEFT_MAP_SLOT": "skybox80s.png",
+		"CUBE_TOP_MAP_SLOT": "skybox80s.png",
+		"CUBE_BOTTOM_MAP_SLOT": "skybox80s.png",
+		"CUBE_FRONT_MAP_SLOT": "skybox80s.png",
+		"CUBE_BACK_MAP_SLOT": "skybox80s.png"
 	  }
 	}
   ],

@@ -9,11 +9,17 @@ REM so run the exe from that directory regardless of where the script is called 
 
 set SCRIPT_DIR=%~dp0
 set VK_RENDERER_DIR=%SCRIPT_DIR%..
-set BAKER_EXE=%SCRIPT_DIR%..\..\AssetConverter\x64\Debug\AssetBaker.exe
+set SOLUTION_OUT=%SCRIPT_DIR%..\..\x64
+
+REM Prefer Release; fall back to Debug.
+set BAKER_EXE=%SOLUTION_OUT%\Release\AssetBaker.exe
+if not exist "%BAKER_EXE%" set BAKER_EXE=%SOLUTION_OUT%\Debug\AssetBaker.exe
 
 if not exist "%BAKER_EXE%" (
-    echo AssetBaker not found at: %BAKER_EXE%
-    echo Build the AssetBaker project first ^(Debug^|x64^).
+    echo AssetBaker not found. Expected at one of:
+    echo   %SOLUTION_OUT%\Release\AssetBaker.exe
+    echo   %SOLUTION_OUT%\Debug\AssetBaker.exe
+    echo Build the AssetBaker project first ^(x64^).
     exit /b 1
 )
 

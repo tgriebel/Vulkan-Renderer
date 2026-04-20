@@ -10,7 +10,7 @@
 #include "../render_tasks/imageShaderTask.h"
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 extern AssetManager g_assets;
 

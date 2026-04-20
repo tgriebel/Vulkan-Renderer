@@ -278,26 +278,26 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	parms.Ka = rgb32_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
 	parms.Ke = rgb32_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] );
 	parms.Tf = rgb32_t( material.transmittance[ 0 ], material.transmittance[ 1 ], material.transmittance[ 2 ] );
-	parms.Ni = material.ior;
+	parms.ior = material.ior;
 	parms.Ns = material.shininess;
-	parms.Tr = 1.0f - material.dissolve;
+	parms.opacity = material.dissolve;
 	parms.illum = static_cast<float>( material.illum );
 
 	if ( isPbr )
 	{
-		parms.roughness          = material.roughness;
-		parms.metalness          = material.metallic;
-		parms.sheen              = material.sheen;
-		parms.clearcoatThickness = material.clearcoat_thickness;
-		parms.clearcoatRoughness = material.clearcoat_roughness;
-		parms.anisotropy         = material.anisotropy;
-		parms.anisotropyRotation = material.anisotropy_rotation;
+		parms.roughness				= material.roughness;
+		parms.metalness				= material.metallic;
+		parms.sheen					= material.sheen;
+		parms.clearcoatWeight		= material.clearcoat_thickness;
+		parms.clearcoatRoughness	= material.clearcoat_roughness;
+		parms.anisotropy			= material.anisotropy;
+		parms.anisotropyRotation	= material.anisotropy_rotation;
 	}
 	return outMaterial;
 }
 
 
-bool LoadMaterial( AssetManager& assets, const std::string& fileName, const std::string& materialPath, const std::string& texturePath, Material& material )
+bool LoadMaterialObj( AssetManager& assets, const std::string& fileName, const std::string& materialPath, const std::string& texturePath, Material& material )
 {
 	std::ifstream matStream( materialPath + fileName );
 	if ( matStream.fail() == true ) {
@@ -321,7 +321,7 @@ bool LoadMaterial( AssetManager& assets, const std::string& fileName, const std:
 }
 
 
-bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model )
+bool LoadRawModelModelObj( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model )
 {
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
@@ -519,23 +519,221 @@ bool LoadRawModel( AssetManager& assets, const std::string& fileName, const std:
 }
 
 
+static bool LoadImageFromMemory( const cgltf_image& img, const bool isLinear, Image& outImage )
+{
+	const cgltf_buffer_view* bv = img.buffer_view;
+	if ( bv == nullptr || bv->buffer == nullptr || bv->buffer->data == nullptr ) {
+		return false;
+	}
+
+	const uint8_t* buffer  = static_cast<const uint8_t*>( bv->buffer->data ) + bv->offset;
+	const int      bufSize = static_cast<int>( bv->size );
+
+	int width, height, channels;
+	stbi_uc* pixels = stbi_load_from_memory( buffer, bufSize, &width, &height, &channels, STBI_rgb_alpha );
+	if ( pixels == nullptr ) {
+		return false;
+	}
+
+	imageInfo_t info = DefaultImage2dInfo( width, height );
+	if ( isLinear ) {
+		info.fmt = imageFmt_t::IMAGE_FMT_RGBA_8_UNORM;
+	}
+	outImage.Create( info, pixels, width * height * 4 );
+	stbi_image_free( pixels );
+	return true;
+}
+
+
+static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
+                             const cgltf_texture_view& view, const uint32_t slot,
+                             const cgltf_data* data, const std::vector<std::string>& imageKeys )
+{
+	if ( view.texture == nullptr || view.texture->image == nullptr ) {
+		return;
+	}
+	const cgltf_size imgIdx = static_cast<cgltf_size>( view.texture->image - data->images );
+	outMaterial.AddTexture( slot, assets.GetLib<Image>()->RetrieveHdl( imageKeys[ imgIdx ].c_str() ) );
+}
+
+
+static Material TranslateGltfMaterial( AssetManager& assets, const cgltf_material& mat,
+                                        const cgltf_data* data, const std::vector<std::string>& imageKeys )
+{
+	Material outMaterial;
+
+	if ( mat.alpha_mode == cgltf_alpha_mode_blend )
+	{
+		outMaterial.AddShader( DRAWPASS_TRANS, AssetLib<GpuProgram>::Handle( "LitTrans" ) );
+	}
+	else
+	{
+		outMaterial.AddShader( DRAWPASS_SHADOW, AssetLib<GpuProgram>::Handle( "Shadow" ) );
+		outMaterial.AddShader( DRAWPASS_DEPTH,  AssetLib<GpuProgram>::Handle( "LitDepth" ) );
+		outMaterial.AddShader( DRAWPASS_OPAQUE, AssetLib<GpuProgram>::Handle( "LitOpaque" ) );
+	}
+	outMaterial.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLib<GpuProgram>::Handle( "Debug" ) );
+	outMaterial.AddShader( DRAWPASS_DEBUG_3D,        AssetLib<GpuProgram>::Handle( "DebugSolid" ) );
+
+	outMaterial.usage = materialUsage_t::MATERIAL_USAGE_GGX;
+
+	if ( mat.has_pbr_metallic_roughness )
+	{
+		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.base_color_texture,         GGX_ALBEDO_MAP_SLOT,             data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.metallic_roughness_texture, GGX_METALLIC_ROUGHNESS_MAP_SLOT, data, imageKeys );
+	}
+
+	AddGltfTexture( outMaterial, assets, mat.normal_texture,     GGX_NORMAL_MAP_SLOT,   data, imageKeys );
+	AddGltfTexture( outMaterial, assets, mat.occlusion_texture,  GGX_AO_MAP_SLOT,       data, imageKeys );
+	AddGltfTexture( outMaterial, assets, mat.emissive_texture,   GGX_EMISSIVE_MAP_SLOT, data, imageKeys );
+
+	if ( mat.has_clearcoat )
+	{
+		AddGltfTexture( outMaterial, assets, mat.clearcoat.clearcoat_texture,           GGX_CC_MAP_SLOT,           data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.clearcoat.clearcoat_roughness_texture, GGX_CC_ROUGHNESS_MAP_SLOT, data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.clearcoat.clearcoat_normal_texture,    GGX_CC_NML_MAP_SLOT,       data, imageKeys );
+	}
+
+	if ( mat.has_sheen )
+	{
+		AddGltfTexture( outMaterial, assets, mat.sheen.sheen_color_texture,     GGX_SHEEN_COLOR_MAP_SLOT,     data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.sheen.sheen_roughness_texture, GGX_SHEEN_ROUGHNESS_MAP_SLOT, data, imageKeys );
+	}
+
+	if ( mat.has_anisotropy ) {
+		AddGltfTexture( outMaterial, assets, mat.anisotropy.anisotropy_texture, GGX_ANISOTROPY_MAP_SLOT, data, imageKeys );
+	}
+
+	if ( mat.has_transmission ) {
+		AddGltfTexture( outMaterial, assets, mat.transmission.transmission_texture, GGX_TRANSMISSION_MAP_SLOT, data, imageKeys );
+	}
+
+	materialParms_t& parms = outMaterial.GetParms();
+
+	if ( mat.has_pbr_metallic_roughness )
+	{
+		parms.Kd		= rgb32_t( mat.pbr_metallic_roughness.base_color_factor[ 0 ],
+		                           mat.pbr_metallic_roughness.base_color_factor[ 1 ],
+		                           mat.pbr_metallic_roughness.base_color_factor[ 2 ] );
+		parms.opacity	= mat.pbr_metallic_roughness.base_color_factor[ 3 ];
+		parms.roughness	= mat.pbr_metallic_roughness.roughness_factor;
+		parms.metalness	= mat.pbr_metallic_roughness.metallic_factor;
+	}
+
+	parms.Ke = rgb32_t( mat.emissive_factor[ 0 ], mat.emissive_factor[ 1 ], mat.emissive_factor[ 2 ] );
+
+	if ( mat.has_ior ) {
+		parms.ior = mat.ior.ior;
+	}
+
+	if ( mat.has_clearcoat )
+	{
+		parms.clearcoatWeight = mat.clearcoat.clearcoat_factor;
+		parms.clearcoatRoughness = mat.clearcoat.clearcoat_roughness_factor;
+	}
+
+	if ( mat.has_sheen ) {
+		parms.sheen = mat.sheen.sheen_roughness_factor;
+	}
+
+	if ( mat.has_anisotropy )
+	{
+		parms.anisotropy         = mat.anisotropy.anisotropy_strength;
+		parms.anisotropyRotation = mat.anisotropy.anisotropy_rotation;
+	}
+
+	return outMaterial;
+}
+
+
 bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const std::string& modelPath, const std::string& texturePath, Model& model )
 {
 	cgltf_options options = {};
 	cgltf_data* data = nullptr;
 
 	const std::string filePath = modelPath + fileName;
-	if ( cgltf_parse_file( &options, filePath.c_str(), &data ) != cgltf_result_success ) {
+	if ( cgltf_parse_file( &options, filePath.c_str(), &data ) != cgltf_result_success )
+	{
 		return false;
 	}
 
-	if ( cgltf_load_buffers( &options, data, filePath.c_str() ) != cgltf_result_success ) {
+	if ( cgltf_load_buffers( &options, data, filePath.c_str() ) != cgltf_result_success )
+	{
 		cgltf_free( data );
 		return false;
 	}
 
-	// TODO: Images
-	// TODO: Materials
+	// Pre-scan materials to tag which images are sRGB (base color, emissive).
+	// All others (normal, roughness, metallic, occlusion, clearcoat) are linear.
+	// Build a stable key for every image: uri → name → asset-name-based fallback.
+	// Used consistently in both loading and material texture lookup.
+	std::string modelName, modelExt;
+	SysCore::SplitFileName( fileName, modelName, modelExt );
+
+	std::vector<std::string> imageKeys( data->images_count );
+	for( cgltf_size imgIx = 0; imgIx < data->images_count; ++imgIx )
+	{
+		const cgltf_image& img = data->images[ imgIx ];
+
+		if( img.uri != nullptr ) {
+			imageKeys[ imgIx ] = img.uri;
+		} else if( img.name != nullptr ) {
+			imageKeys[ imgIx ] = img.name;
+		} else {
+			imageKeys[ imgIx ] = modelName + "_img" + std::to_string( imgIx );
+		}
+	}
+
+	// Pre-scan materials to tag which images are sRGB (base color, emissive).
+	// All others (normal, roughness, metallic, occlusion, clearcoat) are linear.
+	std::vector<const cgltf_image*> srgbImages;
+	for ( cgltf_size matIx = 0; matIx < data->materials_count; ++matIx )
+	{
+		const cgltf_material& mat = data->materials[ matIx ];
+		if ( mat.has_pbr_metallic_roughness && mat.pbr_metallic_roughness.base_color_texture.texture != nullptr ) {
+			srgbImages.push_back( mat.pbr_metallic_roughness.base_color_texture.texture->image );
+		}
+		if ( mat.emissive_texture.texture != nullptr ) {
+			srgbImages.push_back( mat.emissive_texture.texture->image );
+		}
+	}
+
+	// Images
+	for ( cgltf_size imgIx = 0; imgIx < data->images_count; ++imgIx )
+	{
+		const cgltf_image& img     = data->images[ imgIx ];
+		const std::string& key     = imageKeys[ imgIx ];
+
+		bool isLinear = true;
+		for ( cgltf_size srgbIx = 0; srgbIx < srgbImages.size(); ++srgbIx )
+		{
+			if ( srgbImages[ srgbIx ] == &img )
+			{
+				isLinear = false;
+				break;
+			}
+		}
+
+		if ( img.uri != nullptr )
+		{
+			assets.GetLib<Image>()->AddDeferred( key.c_str(), pImgLoader_t( new ImageLoader( modelPath, img.uri, isLinear ) ) );
+		}
+		else if ( img.buffer_view != nullptr )
+		{
+			Image embeddedImage;
+			if ( LoadImageFromMemory( img, isLinear, embeddedImage ) ) {
+				assets.GetLib<Image>()->Add( key.c_str(), embeddedImage );
+			}
+		}
+	}
+
+	// Materials
+	for ( cgltf_size matIx = 0; matIx < data->materials_count; ++matIx )
+	{
+		const cgltf_material& mat = data->materials[ matIx ];
+		const std::string matName = ( mat.name != nullptr ) ? mat.name : ( "gltf_material_" + std::to_string( matIx ) );
+		assets.GetLib<Material>()->Add( matName.c_str(), TranslateGltfMaterial( assets, mat, data, imageKeys ) );
+	}
 
 	for ( cgltf_size meshIx = 0; meshIx < data->meshes_count; ++meshIx )
 	{
@@ -565,12 +763,37 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 				const cgltf_attribute& attr = prim.attributes[ attrIx ];
 				switch ( attr.type )
 				{
-					case cgltf_attribute_type_position: posAccessor      = attr.data; break;
-					case cgltf_attribute_type_normal:   normalAccessor   = attr.data; break;
-					case cgltf_attribute_type_tangent:  tangentAccessor  = attr.data; break;
-					case cgltf_attribute_type_texcoord: if ( attr.index == 0 ) texcoordAccessor = attr.data; break;
-					case cgltf_attribute_type_color:    if ( attr.index == 0 ) colorAccessor    = attr.data; break;
-					default: break;
+					case cgltf_attribute_type_position:
+					{
+						posAccessor = attr.data;
+					} break;
+
+					case cgltf_attribute_type_normal:
+					{
+						normalAccessor = attr.data;
+					} break;
+
+					case cgltf_attribute_type_tangent:
+					{
+						tangentAccessor = attr.data;
+					} break;
+
+					case cgltf_attribute_type_texcoord:
+					{
+						if( attr.index == 0 ) {
+							texcoordAccessor = attr.data;
+						}
+					} break;
+
+					case cgltf_attribute_type_color:
+					{
+						if( attr.index == 0 ) {
+							colorAccessor = attr.data;
+						}
+					} break;
+
+					default:
+						break;
 				}
 			}
 
@@ -622,7 +845,9 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 			{
 				const cgltf_size numComponents = cgltf_num_components( colorAccessor->type );
 				std::vector<float> tmp( vertexCount * numComponents );
+
 				cgltf_accessor_unpack_floats( colorAccessor, tmp.data(), vertexCount * numComponents );
+
 				for ( cgltf_size i = 0; i < vertexCount; ++i )
 				{
 					surf.vertices[ i ].color[ 0 ] = tmp[ i * numComponents + 0 ];
@@ -646,6 +871,7 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 			{
 				const cgltf_size indexCount = prim.indices->count;
 				surf.indices.resize( indexCount );
+
 				cgltf_accessor_unpack_indices( prim.indices, surf.indices.data(), sizeof( uint32_t ), indexCount );
 			}
 
@@ -654,7 +880,9 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 			{
 				// glTF tangents are vec4: xyz = tangent direction, w = bitangent sign
 				std::vector<float> tmp( vertexCount * 4 );
+
 				cgltf_accessor_unpack_floats( tangentAccessor, tmp.data(), vertexCount * 4 );
+
 				for ( cgltf_size i = 0; i < vertexCount; ++i )
 				{
 					const float tx   = tmp[ i * 4 + 0 ];
@@ -687,6 +915,17 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 			}
 
 			surf.materialHdl = assets.GetLib<Material>()->GetDefault()->Handle();
+
+			if ( prim.material != nullptr )
+			{
+				const cgltf_size matIndex = static_cast<cgltf_size>( prim.material - data->materials );
+				const std::string matName = ( prim.material->name != nullptr ) ? prim.material->name : ( "gltf_material_" + std::to_string( matIndex ) );
+				const hdl_t matHdl = AssetLib<Material>::Handle( matName.c_str() );
+
+				if ( matHdl.IsValid() ) {
+					surf.materialHdl = matHdl;
+				}
+			}
 
 			model.surfs.push_back( std::move( surf ) );
 			++model.surfCount;

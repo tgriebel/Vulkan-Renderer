@@ -446,7 +446,7 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\codeAssets.h" />
-    <ClInclude Include="shaders\gpuStructs.h">
+    <ClInclude Include="shaders\gpuShared.h">
       <Filter>Shaders</Filter>
     </ClInclude>
   </ItemGroup>

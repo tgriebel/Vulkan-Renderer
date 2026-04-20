@@ -14,12 +14,12 @@
 #include "../render_tasks/imageShaderTask.h"
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 #include "renderContext.h"
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 class Window;
 class SwapChain;

@@ -127,9 +127,9 @@ void DebugMenuMaterial( const Material& mat )
 	ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", parms.Ks.r, parms.Ks.g, parms.Ks.b );
 	ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", parms.Ke.r, parms.Ke.g, parms.Ke.b );
 	ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", parms.Ka.r, parms.Ka.g, parms.Ka.b );
-	ImGui::Text( "Ni: %1.2f", parms.Ni );
+	ImGui::Text( "ior: %1.2f", parms.ior );
 	ImGui::Text( "Tf: %1.2f", parms.Tf );
-	ImGui::Text( "Tr: %1.2f", parms.Tr );
+	ImGui::Text( "Opacity: %1.2f", parms.opacity );
 	ImGui::Text( "illum: %1.2f", parms.illum );
 	ImGui::Separator();
 	for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
@@ -215,16 +215,22 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 	EditRgbValue( Ke );
 	EditRgbValue( Ka );
 	EditRgbValue( Tf );
-	EditFloatValue( Ni );
-	EditFloatValue( Tr );
+	EditRgbValue( sheenColor );
+	EditFloatValue( opacity );
+	EditFloatValue( Ns );
 	EditFloatValue( illum );
+	EditFloatValue( emissiveStrength );
+	EditFloatValue( alphaCutoff );
+	EditFloatValue( ior );
+	EditFloatValue( sheen );
 	EditFloatValue( roughness );
 	EditFloatValue( metalness );
 	EditFloatValue( sheen );
-	EditFloatValue( clearcoatThickness );
+	EditFloatValue( clearcoatWeight );
 	EditFloatValue( clearcoatRoughness );
 	EditFloatValue( anisotropy );
 	EditFloatValue( anisotropyRotation );
+	EditFloatValue( transmissionFactor );
 
 	if ( ImGui::TreeNode( "Textures" ) )
 	{

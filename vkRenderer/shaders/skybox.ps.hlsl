@@ -26,11 +26,11 @@ PS_Output PSMain( PS_Input input )
     uint textureId = 0;
 
     if( majorAxis == xm ) {
-        textureId = ( sign( input.normal.x ) > 0.0f ) ? material.textureId[ CUBE_FRONT_SLOT ] : material.textureId[ CUBE_BACK_SLOT ];
+        textureId = ( sign( input.normal.x ) > 0.0f ) ? material.textureId[ CUBE_FRONT_MAP_SLOT ] : material.textureId[ CUBE_BACK_MAP_SLOT ];
     } else if( majorAxis == ym ) {
-        textureId = ( sign( input.normal.y ) > 0.0f ) ? material.textureId[ CUBE_LEFT_SLOT ] : material.textureId[ CUBE_RIGHT_SLOT ];
+        textureId = ( sign( input.normal.y ) > 0.0f ) ? material.textureId[ CUBE_LEFT_MAP_SLOT ] : material.textureId[ CUBE_RIGHT_MAP_SLOT ];
     } else if( majorAxis == zm ) {
-        textureId = ( sign( input.normal.z ) > 0.0f ) ? material.textureId[ CUBE_TOP_SLOT ] : material.textureId[ CUBE_BOTTOM_SLOT ];
+        textureId = ( sign( input.normal.z ) > 0.0f ) ? material.textureId[ CUBE_TOP_MAP_SLOT ] : material.textureId[ CUBE_BOTTOM_MAP_SLOT ];
     }
 	output.outColor = SrgbToLinear( texSampler[ textureId ].Sample( bilinearSamplerWrap, input.uv0.xy ) );
 #endif

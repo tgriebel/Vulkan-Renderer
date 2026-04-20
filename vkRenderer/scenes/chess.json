@@ -86,10 +86,9 @@
     },
     {
       "name": "WHITE_WOOD",
-      "tr": 0.0,
+      "opacity": 1.0,
       "ns": 0.0,
       "ni": 0.0,
-      "d": 1.0,
       "illum": 0.0,
       "shaders": {
           "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },

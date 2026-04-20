@@ -9,7 +9,7 @@
 #include "asset.h"
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 
 class Serializer;
@@ -69,25 +69,33 @@ enum materialUsage_t : uint32_t
 
 struct materialParms_t
 {
-	materialParms_t() : Tr( 0.0f ), Ns( 0.0f ), Ni( 0.0f ), d( 1.0f ), illum( 0.0f ), roughness( 0.0f ), metalness( 1.0f ) {}
+	materialParms_t() : opacity( 1.0f ), Ns( 0.0f ), ior( 1.5f ),
+						illum( 0.0f ), roughness( 1.0f ), metalness( 0.0f ),
+						sheen( 0.0f ), clearcoatWeight( 0.0f ), clearcoatRoughness( 0.0f ),
+						anisotropy( 0.0f ), anisotropyRotation( 0.0f ), transmissionFactor( 0.0f ),
+						emissiveStrength( 1.0f ), alphaCutoff( 0.5f )
+	{}
 
-	rgb32_t		Ka;
-	rgb32_t		Ke;
-	rgb32_t		Kd;
-	rgb32_t		Ks;
-	rgb32_t		Tf;
-	float		Tr;
-	float		Ns;
-	float		Ni;
-	float		d;
-	float		illum;
-	float		roughness;
-	float		metalness;
-	float		sheen;
-	float		clearcoatThickness;
-	float		clearcoatRoughness;
-	float		anisotropy;
-	float		anisotropyRotation;
+	rgb32_t		Kd;					// Diffuse or albedo
+	float		opacity;			// Opacity
+	rgb32_t		Ka;					// Adhoc blinn-phong ambient (OBJ shading)
+	float		Ns;					// Blinn-phong shininess exponenet
+	rgb32_t		Ke;					// Emissive color
+	float		illum;				// Adhoc blinn-phong illuminance (OBJ shading)
+	rgb32_t		Ks;					// Specular color
+	float		emissiveStrength;	// Emissive strength
+	rgb32_t		Tf;					// Adhoc blinn-phong illuminance (OBJ shading)
+	float		alphaCutoff;		// Alpha-mask
+	rgb32_t		sheenColor;			// Sheen color
+	float		ior;				// Index-of-refraction
+	float		sheen;				// Sheen roughness
+	float		roughness;			// GGX roughness
+	float		metalness;			// GGX metalness
+	float		clearcoatWeight;	// GGX clearcoat intensity
+	float		clearcoatRoughness;	// GGX roughness
+	float		anisotropy;			// GGX anisotrophy
+	float		anisotropyRotation;	// GGX anisotrophy rotation
+	float		transmissionFactor;	// Transmission factor
 };
 
 class Material

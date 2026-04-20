@@ -195,6 +195,7 @@ def build_command( record: ShaderRecord ) -> list[ str ]:
             "-Zi",                          # debug info
             "-HV", "2021",                  # HLSL version
             "-I", SHADER_DIR,               # include path for headers
+            "-WX",                          # warnings as errors
         ]
         for macro in record.macros:
             cmd += [ "-D", macro ]

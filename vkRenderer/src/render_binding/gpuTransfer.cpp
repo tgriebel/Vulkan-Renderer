@@ -7,7 +7,7 @@
 #include "../globals/assetDefs.h"
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 void Renderer::UpdateTextureData( CommandContext* cmdCommand )
 {
@@ -228,17 +228,21 @@ void Renderer::UpdateGpuMaterials()
 		materialObject.Ka = vec3f( parms.Ka.r, parms.Ka.g, parms.Ka.b );
 		materialObject.Ke = vec3f( parms.Ke.r, parms.Ke.g, parms.Ke.b );
 		materialObject.Tf = vec3f( parms.Tf.r, parms.Tf.g, parms.Tf.b );
-		materialObject.Tr = parms.Tr;
-		materialObject.Ni = parms.Ni;
+		materialObject.sheenColor = vec3f( parms.sheenColor.r, parms.sheenColor.g, parms.sheenColor.b );
+		materialObject.opacity = parms.opacity;
 		materialObject.Ns = parms.Ns;
 		materialObject.illum = parms.illum;
+		materialObject.emissiveStrength = parms.emissiveStrength;
+		materialObject.alphaCutoff = parms.alphaCutoff;
+		materialObject.ior = parms.ior;
+		materialObject.sheen = parms.sheen;
 		materialObject.roughness = parms.roughness;
 		materialObject.metalness = parms.metalness;
-		materialObject.sheen = parms.sheen;
-		materialObject.clearcoatThickness = parms.clearcoatThickness;
+		materialObject.clearcoatWeight = parms.clearcoatWeight;
 		materialObject.clearcoatRoughness = parms.clearcoatRoughness;
 		materialObject.anisotropy = parms.anisotropy;
 		materialObject.anisotropyRotation = parms.anisotropyRotation;
+		materialObject.transmissionFactor = parms.transmissionFactor;
 
 		materialObject.textured = m.IsTextured();
 

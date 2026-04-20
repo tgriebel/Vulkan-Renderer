@@ -43,43 +43,54 @@ static_assert( sizeof( vec2f ) == 8 );
 #define MaxMaterials				256
 #define MaxViews					15
 #define MaxSurfaces					1000
-#define MaxMaterialTextures			8
+#define MaxMaterialTextures			16
 #define MaxMaterialExtraDataBytes	256
 
 enum ggxTextureSlot_t
 {
-	GGX_ALBEDO_MAP_SLOT			= 0,
-	GGX_NORMAL_MAP_SLOT			= 1,
-	GGX_ROUGHNESS_MAP_SLOT		= 2,
-	GGX_METALLIC_MAP_SLOT		= 3,
-	GGX_CLEARCOAT_NML_MAP_SLOT	= 4,
+	GGX_ALBEDO_MAP_SLOT				= 0,	// sRGB
+	GGX_NORMAL_MAP_SLOT				= 1,	// linear
+	GGX_ROUGHNESS_MAP_SLOT			= 2,	// linear
+	GGX_METALLIC_MAP_SLOT			= 3,	// linear
+	GGX_METALLIC_ROUGHNESS_MAP_SLOT	= 2,	// linear - packed: <g: roughness, b: metalness>
+	GGX_AO_MAP_SLOT					= 4,	// linear
+	GGX_EMISSIVE_MAP_SLOT			= 5,	// sRGB
+	GGX_CC_MAP_SLOT					= 6,	// linear
+	GGX_CC_ROUGHNESS_MAP_SLOT		= 7,	// linear
+	GGX_CC_NML_MAP_SLOT				= 8,	// linear
+	GGX_SHEEN_COLOR_MAP_SLOT		= 9,	// sRGB
+	GGX_SHEEN_ROUGHNESS_MAP_SLOT	= 10,	// linear
+	GGX_ANISOTROPY_MAP_SLOT			= 11,	// linear
+	GGX_TRANSMISSION_MAP_SLOT		= 12,	// linear
 };
 
 
 enum blinnPhongTextureSlot_t
 {
-	BLINN_PHONG_COLOR_MAP_SLOT	= 0,
-	BLINN_PHONG_NORMAL_MAP_SLOT	= 1,
-	BLINN_PHONG_SPEC_MAP_SLOT	= 2,
+	BLINN_PHONG_COLOR_MAP_SLOT		= 0,	// sRGB
+	BLINN_PHONG_NORMAL_MAP_SLOT		= 1,	// linear
+	BLINN_PHONG_SPEC_MAP_SLOT		= 2,	// linear — specular color
+	BLINN_PHONG_GLOSS_MAP_SLOT		= 3,	// linear — per-pixel shininess (Ns)
+	BLINN_PHONG_EMISSIVE_MAP_SLOT	= 4,	// sRGB
 };
 
 
 enum cubeTextureSlot_t
 {
-	CUBE_FRONT_SLOT				= 0,
-	CUBE_BACK_SLOT				= 1,
-	CUBE_TOP_SLOT				= 2,
-	CUBE_BOTTOM_SLOT			= 3,
-	CUBE_RIGHT_SLOT				= 4,
-	CUBE_LEFT_SLOT				= 5,
+	CUBE_FRONT_MAP_SLOT				= 0,
+	CUBE_BACK_MAP_SLOT				= 1,
+	CUBE_TOP_MAP_SLOT				= 2,
+	CUBE_BOTTOM_MAP_SLOT			= 3,
+	CUBE_RIGHT_MAP_SLOT				= 4,
+	CUBE_LEFT_MAP_SLOT				= 5,
 };
 
 
 enum hgtTextureSlot_t
 {
-	HGT_HEIGHT_MAP_SLOT			= 0,
-	HGT_COLOR_MAP_SLOT0			= 1,
-	HGT_COLOR_MAP_SLOT1			= 2,
+	HGT_HEIGHT_MAP_SLOT					= 0,
+	HGT_COLOR_MAP_SLOT0					= 1,
+	HGT_COLOR_MAP_SLOT1					= 2,
 };
 
 
@@ -115,28 +126,39 @@ struct gpuGlobals_t
 
 struct gpuMaterial_t
 {
-	int     textureId[ MaxMaterialTextures ];
-	float3  Ka;
-	float   Tr;
-	float3  Ke;
-	float   Ns;
 	float3  Kd;
-	float   Ni;
-	float3  Ks;
+	float   opacity;
+	float3  Ka;
+	float   Ns;
+	float3  Ke;
 	float   illum;
+	float3  Ks;
+	float   emissiveStrength;
 	float3  Tf;
+	float	alphaCutoff;
+	float3  sheenColor;
+	float	ior;
+	float	sheen;
 	float	roughness;
 	float	metalness;
-	float	sheen;
-	float	clearcoatThickness;
+	float	clearcoatWeight;
 	float	clearcoatRoughness;
 	float	anisotropy;
 	float	anisotropyRotation;
+	float	transmissionFactor;
+	// 128 bytes
 	uint    textured;
 	uint    pad0;
-	uint    extraData[ MaxMaterialExtraDataBytes ];
+	uint    pad1;
+	uint    pad2;
+	// 144 bytes
+	int     textureId[ MaxMaterialTextures ];
+	// 208 bytes
+	uint    extraData[ MaxMaterialExtraDataBytes / 4 ]; // HLSL doesn't have an 8-bit type
 };
-
+#ifdef SHADER_STRUCTS_CPP
+static_assert( sizeof( gpuMaterial_t ) == 464 );
+#endif
 
 struct gpuLight_t
 {

@@ -40,7 +40,7 @@
 #endif
 
 #define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuStructs.h"
+#include "../../shaders/gpuShared.h"
 
 extern imguiControls_t g_imguiControls;
 

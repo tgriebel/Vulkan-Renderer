@@ -67,24 +67,27 @@ void SerializeStruct( Serializer* s, rgbTuple_t<float>& rgb )
 
 void SerializeStruct( Serializer* s, materialParms_t& p )
 {
-	static_assert( sizeof( materialParms_t ) == 108, "Serialization out-of-date" );
-	SerializeStruct( s, p.Ka );
-	SerializeStruct( s, p.Ke );
+	static_assert( sizeof( materialParms_t ) == 128, "Serialization out-of-date" );
 	SerializeStruct( s, p.Kd );
-	SerializeStruct( s, p.Ks );
-	SerializeStruct( s, p.Tf );
-	s->Next( p.Tr );
+	s->Next( p.opacity );
+	SerializeStruct( s, p.Ka );
 	s->Next( p.Ns );
-	s->Next( p.Ni );
-	s->Next( p.d );
+	SerializeStruct( s, p.Ke );
 	s->Next( p.illum );
+	SerializeStruct( s, p.Ks );
+	s->Next( p.emissiveStrength );
+	SerializeStruct( s, p.Tf );
+	s->Next( p.alphaCutoff );
+	SerializeStruct( s, p.sheenColor );
+	s->Next( p.ior );
+	s->Next( p.sheen );
 	s->Next( p.roughness ); 
 	s->Next( p.metalness ); 
-	s->Next( p.sheen );
-	s->Next( p.clearcoatThickness );
+	s->Next( p.clearcoatWeight );
 	s->Next( p.clearcoatRoughness );
 	s->Next( p.anisotropy );
 	s->Next( p.anisotropyRotation );
+	s->Next( p.transmissionFactor );
 }
 
 

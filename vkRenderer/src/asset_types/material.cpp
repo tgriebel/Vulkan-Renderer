@@ -140,7 +140,7 @@ void BakedMaterialLoader::SetAssetRef( AssetManager* assetsPtr )
 bool MaterialLoader::Load( Asset<Material>& materialAsset )
 {
 	assert( m_assets != nullptr );
-	return LoadMaterial( *m_assets, m_fileName, m_materialPath, m_texturePath, materialAsset.Get() );
+	return LoadMaterialObj( *m_assets, m_fileName, m_materialPath, m_texturePath, materialAsset.Get() );
 }
 
 

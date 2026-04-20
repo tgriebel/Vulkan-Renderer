@@ -2,7 +2,7 @@
 #define GLOBALS_HLSL_H
 
 #define SHADER_STRUCTS_HLSL
-#include "gpuStructs.h"
+#include "gpuShared.h"
 
 // ============================================================
 // Constants
@@ -62,50 +62,37 @@ float3 DecodeNormal( const float3 normalMapTexel )
         TYPE    NAME;                                                                                               \
     };
 
-#define CONSTANT_LAYOUT( S, N, TYPE, NAME )                                                                         \
-                                                        BIND_SET( S, N ) cbuffer _ShaderConstants { TYPE NAME; };
+#define CONSTANT_LAYOUT( S, N, TYPE, NAME )				BIND_SET( S, N ) cbuffer _ShaderConstants { TYPE NAME; };
 
-#define MODEL_LAYOUT( S, N )                                                                                        \
-                                                        BIND_SET( S, N ) StructuredBuffer<gpuSurface_t> surfaces;
+#define MODEL_LAYOUT( S, N )                            BIND_SET( S, N ) StructuredBuffer<gpuSurface_t> surfaces;
 
-#define GLOBALS_LAYOUT( S, N )                                                                                      \
-                                                        BIND_SET( S, N ) ConstantBuffer<gpuGlobals_t> globals;
+#define GLOBALS_LAYOUT( S, N )                          BIND_SET( S, N ) ConstantBuffer<gpuGlobals_t> globals;
 
-#define VIEW_LAYOUT( S, N )                                                                                         \
-                                                        BIND_SET( S, N ) StructuredBuffer<gpuView_t> views;
+#define VIEW_LAYOUT( S, N )                             BIND_SET( S, N ) StructuredBuffer<gpuView_t> views;
 
-#define READ_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                      \
-                                                        BIND_SET( S, N ) StructuredBuffer<TYPE> NAME;
+#define READ_BUFFER_LAYOUT( S, N, TYPE, NAME )          BIND_SET( S, N ) StructuredBuffer<TYPE> NAME;
 
-#define WRITE_BUFFER_LAYOUT( S, N, TYPE, NAME )                                                                     \
-                                                        BIND_SET( S, N ) RWStructuredBuffer<TYPE> NAME;
+#define WRITE_BUFFER_LAYOUT( S, N, TYPE, NAME )         BIND_SET( S, N ) RWStructuredBuffer<TYPE> NAME;
 
 #define SAMPLER( S, N, NAME )							BIND_SET( S, N ) SamplerState NAME;
 
-#define SAMPLER_2D_LAYOUT( S, N )                                                                                   \
-                                                        BIND_SET( S, N ) Texture2D texSampler[];
+#define SAMPLER_2D_LAYOUT( S, N )                       BIND_SET( S, N ) Texture2D texSampler[];
 
-#define SAMPLER_CUBE_LAYOUT( S, N )                                                                                 \
-                                                        BIND_SET( S, N ) TextureCube cubeSamplers[];
+#define SAMPLER_CUBE_LAYOUT( S, N )                     BIND_SET( S, N ) TextureCube cubeSamplers[];
 
-#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )                                                                          \
-                                                        BIND_SET( S, N ) TEXTYPE codeSamplers[];
+#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )              BIND_SET( S, N ) TEXTYPE codeSamplers[];
 
 #define CODE_IMAGE_CUBE_LAYOUT( S, N )                  BIND_SET( S, N ) TextureCube codeCubeSamplers[];
 
 #define STENCIL_LAYOUT( S, N, TEXTYPE )                 BIND_SET( S, N ) TEXTYPE stencilImage;
 
-#define MATERIAL_LAYOUT( S, N )                                                                                     \
-                                                        BIND_SET( S, N ) StructuredBuffer<gpuMaterial_t> materials;
+#define MATERIAL_LAYOUT( S, N )                         BIND_SET( S, N ) StructuredBuffer<gpuMaterial_t> materials;
 
-#define LIGHT_LAYOUT( S, N )                                                                                        \
-                                                        BIND_SET( S, N ) StructuredBuffer<gpuLight_t> lights;
+#define LIGHT_LAYOUT( S, N )                            BIND_SET( S, N ) StructuredBuffer<gpuLight_t> lights;
 
-#define PASS_LAYOUT( S, N )                                                                                         \
-                                                        BIND_SET( S, N ) StructuredBuffer<gpuPass_t> passData;
+#define PASS_LAYOUT( S, N )                             BIND_SET( S, N ) StructuredBuffer<gpuPass_t> passData;
 
-#define MATERIAL_PUSH_CONSTANTS                                                                                     \
-                                                        BIND_INLINE gpuPushConstants_t pushConstants;
+#define MATERIAL_PUSH_CONSTANTS                         BIND_INLINE gpuPushConstants_t pushConstants;
 
 // ============================================================
 // Compound bind macros
