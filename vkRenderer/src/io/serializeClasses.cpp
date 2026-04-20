@@ -68,7 +68,7 @@ void SerializeStruct( Serializer* s, rgbTuple_t<float>& rgb )
 void SerializeStruct( Serializer* s, materialParms_t& p )
 {
 	static_assert( sizeof( materialParms_t ) == 128, "Serialization out-of-date" );
-	SerializeStruct( s, p.Kd );
+	SerializeStruct( s, p.albedo );
 	s->Next( p.opacity );
 	SerializeStruct( s, p.Ka );
 	s->Next( p.Ns );

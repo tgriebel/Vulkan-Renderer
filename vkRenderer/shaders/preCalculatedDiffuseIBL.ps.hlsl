@@ -20,9 +20,9 @@ PS_Output PSMain( PS_Input input )
                                                0.0f, 0.0f, 0.0f, 0.0f ) );
 
 	const float4x4 viewMat = transpose( mul( glslSpace, imageProcess.viewMat ) );
-    const float3 viewForward = -normalize( viewMat[ 2 ] );
-    const float3 viewRight = normalize( viewMat[ 0 ] );
-    const float3 viewUp = normalize( viewMat[ 1 ] );
+    const float3 viewForward = -normalize( viewMat[ 2 ] ).xyz;
+    const float3 viewRight = normalize( viewMat[ 0 ] ).xyz;
+    const float3 viewUp = normalize( viewMat[ 1 ] ).xyz;
     const float3 viewVector = normalize( viewForward + ( 2.0f * input.uv0.x - 1.0f ) * viewRight + ( 2.0f * input.uv0.y - 1.0f ) * viewUp );
 
     float3 up = float3( 0.0, 1.0, 0.0 );

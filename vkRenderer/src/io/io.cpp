@@ -273,7 +273,7 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	}
 
 	materialParms_t& parms = outMaterial.GetParms();
-	parms.Kd = rgb32_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
+	parms.albedo = rgb32_t( material.diffuse[ 0 ], material.diffuse[ 1 ], material.diffuse[ 2 ] );
 	parms.Ks = rgb32_t( material.specular[ 0 ], material.specular[ 1 ], material.specular[ 2 ] );
 	parms.Ka = rgb32_t( material.ambient[ 0 ], material.ambient[ 1 ], material.ambient[ 2 ] );
 	parms.Ke = rgb32_t( material.emission[ 0 ], material.emission[ 1 ], material.emission[ 2 ] );
@@ -579,8 +579,9 @@ static Material TranslateGltfMaterial( AssetManager& assets, const cgltf_materia
 
 	if ( mat.has_pbr_metallic_roughness )
 	{
-		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.base_color_texture,         GGX_ALBEDO_MAP_SLOT,             data, imageKeys );
-		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.metallic_roughness_texture, GGX_METALLIC_ROUGHNESS_MAP_SLOT, data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.base_color_texture,         GGX_ALBEDO_MAP_SLOT,   data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.metallic_roughness_texture, GGX_METALLIC_MAP_SLOT, data, imageKeys );
+		AddGltfTexture( outMaterial, assets, mat.pbr_metallic_roughness.metallic_roughness_texture, GGX_ROUGHNESS_MAP_SLOT, data, imageKeys );
 	}
 
 	AddGltfTexture( outMaterial, assets, mat.normal_texture,     GGX_NORMAL_MAP_SLOT,   data, imageKeys );
@@ -612,7 +613,7 @@ static Material TranslateGltfMaterial( AssetManager& assets, const cgltf_materia
 
 	if ( mat.has_pbr_metallic_roughness )
 	{
-		parms.Kd		= rgb32_t( mat.pbr_metallic_roughness.base_color_factor[ 0 ],
+		parms.albedo	= rgb32_t( mat.pbr_metallic_roughness.base_color_factor[ 0 ],
 		                           mat.pbr_metallic_roughness.base_color_factor[ 1 ],
 		                           mat.pbr_metallic_roughness.base_color_factor[ 2 ] );
 		parms.opacity	= mat.pbr_metallic_roughness.base_color_factor[ 3 ];

@@ -52,7 +52,6 @@ enum ggxTextureSlot_t
 	GGX_NORMAL_MAP_SLOT				= 1,	// linear
 	GGX_ROUGHNESS_MAP_SLOT			= 2,	// linear
 	GGX_METALLIC_MAP_SLOT			= 3,	// linear
-	GGX_METALLIC_ROUGHNESS_MAP_SLOT	= 2,	// linear - packed: <g: roughness, b: metalness>
 	GGX_AO_MAP_SLOT					= 4,	// linear
 	GGX_EMISSIVE_MAP_SLOT			= 5,	// sRGB
 	GGX_CC_MAP_SLOT					= 6,	// linear
@@ -126,7 +125,7 @@ struct gpuGlobals_t
 
 struct gpuMaterial_t
 {
-	float3  Kd;
+	float3  albedo;
 	float   opacity;
 	float3  Ka;
 	float   Ns;

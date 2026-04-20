@@ -43,6 +43,12 @@ float3 DecodeNormal( const float3 normalMapTexel )
 }
 
 
+float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3 B, const float3 N )
+{
+	return normalize( tangentNormal.x * T + tangentNormal.y * B + tangentNormal.z * N );
+}
+
+
 // ============================================================
 // Resource binding macros
 // ============================================================

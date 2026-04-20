@@ -223,7 +223,7 @@ void Renderer::UpdateGpuMaterials()
 
 		const materialParms_t& parms = m.GetParms();
 
-		materialObject.Kd = vec3f( parms.Kd.r, parms.Kd.g, parms.Kd.b );
+		materialObject.albedo = vec3f( parms.albedo.r, parms.albedo.g, parms.albedo.b );
 		materialObject.Ks = vec3f( parms.Ks.r, parms.Ks.g, parms.Ks.b );
 		materialObject.Ka = vec3f( parms.Ka.r, parms.Ka.g, parms.Ka.b );
 		materialObject.Ke = vec3f( parms.Ke.r, parms.Ke.g, parms.Ke.b );

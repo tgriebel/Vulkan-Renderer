@@ -17,6 +17,8 @@ struct surfaceInput_t
 	float	ccStrength;	// cc: clear-coat
 	float3	ccNormal;
 	float	ccRoughness;
+	float3	emissive;
+	float	ao;
 };
 
 

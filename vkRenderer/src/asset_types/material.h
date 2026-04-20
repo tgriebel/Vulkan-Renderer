@@ -76,7 +76,7 @@ struct materialParms_t
 						emissiveStrength( 1.0f ), alphaCutoff( 0.5f )
 	{}
 
-	rgb32_t		Kd;					// Diffuse or albedo
+	rgb32_t		albedo;				// Diffuse or albedo
 	float		opacity;			// Opacity
 	rgb32_t		Ka;					// Adhoc blinn-phong ambient (OBJ shading)
 	float		Ns;					// Blinn-phong shininess exponenet
@@ -123,7 +123,7 @@ public:
 		textureBitSet( 0 ),
 		shaderBitSet( 0 )
 	{
-		p.Kd = rgb32_t( 1.0f, 1.0f, 1.0f );
+		p.albedo = rgb32_t( 1.0f, 1.0f, 1.0f );
 		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
 			textures[ i ] = INVALID_HDL;
 		}

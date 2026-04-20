@@ -123,7 +123,7 @@ void DebugMenuMaterial( const Material& mat )
 {
 	const materialParms_t& parms = mat.GetParms();
 
-	ImGui::Text( "Kd: (%1.2f, %1.2f, %1.2f)", parms.Kd.r, parms.Kd.g, parms.Kd.b );
+	ImGui::Text( "Albedo: (%1.2f, %1.2f, %1.2f)", parms.albedo.r, parms.albedo.g, parms.albedo.b );
 	ImGui::Text( "Ks: (%1.2f, %1.2f, %1.2f)", parms.Ks.r, parms.Ks.g, parms.Ks.b );
 	ImGui::Text( "Ke: (%1.2f, %1.2f, %1.2f)", parms.Ke.r, parms.Ke.g, parms.Ke.b );
 	ImGui::Text( "Ka: (%1.2f, %1.2f, %1.2f)", parms.Ka.r, parms.Ka.g, parms.Ka.b );
@@ -210,7 +210,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 
 	Material& mat = matAsset->Get();
 
-	EditRgbValue( Kd );
+	EditRgbValue( albedo );
 	EditRgbValue( Ks );
 	EditRgbValue( Ke );
 	EditRgbValue( Ka );
