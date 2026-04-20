@@ -115,10 +115,7 @@ bool BakedMaterialLoader::Load( Asset<Material>& materialAsset )
 			if( imgHandle == INVALID_HDL ) {
 				continue;
 			}
-
 			m_assets->GetLib<Image>()->AddDeferred( imgHandle, pImgLoader_t( new BakedImageLoader( ".\\baked\\textures\\", "img.bin" ) ) );
-
-			std::cout << imgHandle.String() << std::endl;
 		}
 		return true;
 	}
