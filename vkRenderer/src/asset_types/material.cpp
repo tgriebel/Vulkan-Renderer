@@ -107,11 +107,18 @@ bool BakedMaterialLoader::Load( Asset<Material>& materialAsset )
 	if ( loadedBaked )
 	{
 		assert( m_assets != nullptr );
-		const uint32_t imgCount = material.TextureCount();
-		for ( uint32_t imageIx = 0; imageIx < imgCount; ++imageIx )
+
+		for ( uint32_t imageIx = 0; imageIx < MaxMaterialTextures; ++imageIx )
 		{
 			const hdl_t imgHandle = material.GetTexture( imageIx );
+
+			if( imgHandle == INVALID_HDL ) {
+				continue;
+			}
+
 			m_assets->GetLib<Image>()->AddDeferred( imgHandle, pImgLoader_t( new BakedImageLoader( ".\\baked\\textures\\", "img.bin" ) ) );
+
+			std::cout << imgHandle.String() << std::endl;
 		}
 		return true;
 	}

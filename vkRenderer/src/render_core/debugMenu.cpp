@@ -158,19 +158,14 @@ void DebugMenuLibComboEdit( const std::string label, hdl_t& currentHdl, const As
 			currentHdl = INVALID_HDL;
 		}
 
-		const uint32_t libCount = lib.Count();
-		for ( uint32_t i = 0; i < libCount; ++i )
+		std::vector<AssetListEntry> assetList;
+		lib.GetAssetList( assetList );
+
+		for ( const AssetListEntry& entry : assetList )
 		{
-			const Asset<AssetType>* asset = lib.Find(i);
-			if( asset == nullptr ) {
-				continue;
-			}
-
-			const hdl_t menuHdl = asset->Handle();
-
-			const bool selected = ( currentHdl == menuHdl );
-			if ( ImGui::Selectable( asset->GetName().c_str(), selected ) ) {
-				currentHdl = menuHdl;
+			const bool selected = ( currentHdl == entry.handle );
+			if ( ImGui::Selectable( entry.name.c_str(), selected ) ) {
+				currentHdl = entry.handle;
 			}
 
 			if ( selected ) {
@@ -179,6 +174,46 @@ void DebugMenuLibComboEdit( const std::string label, hdl_t& currentHdl, const As
 		}
 		ImGui::EndCombo();
 	}
+}
+
+
+static std::string GetShaderTextureName( const Material& material, const uint32_t textureSlot )
+{
+	static const char* ggxDebugName[ 13 ] =
+	{
+		"alb",	// GGX_ALBEDO_MAP_SLOT
+		"nml",	// GGX_NORMAL_MAP_SLOT
+		"rgh",	// GGX_CC_ROUGHNESS_MAP_SLOT
+		"mtl",	// GGX_METALLIC_MAP_SLOT
+		"ao ",	// GGX_AO_MAP_SLOT
+		"em ",	// GGX_EMISSIVE_MAP_SLOT
+		"cc ",	// GGX_CC_MAP_SLOT
+		"ccr",	// GGX_CC_ROUGHNESS_MAP_SLOT
+		"ccn",	// GGX_CC_NML_MAP_SLOT
+		"sh ",	// GGX_SHEEN_COLOR_MAP_SLOT
+		"shr",	// GGX_SHEEN_ROUGHNESS_MAP_SLOT
+		"ani",	// GGX_ANISOTROPY_MAP_SLOT
+		"tr ",	// GGX_TRANSMISSION_MAP_SLOT
+	};
+
+	static const char* blinnPhongDebugName[ 5 ] =
+	{
+		"clr",	// BLINN_PHONG_COLOR_MAP_SLOT
+		"nml",	// BLINN_PHONG_NORMAL_MAP_SLOT
+		"spc",	// BLINN_PHONG_SPEC_MAP_SLOT
+		"gls",	// BLINN_PHONG_GLOSS_MAP_SLOT
+		"em ",	// BLINN_PHONG_EMISSIVE_MAP_SLOT
+	};
+	
+	std::string name = std::to_string( textureSlot ) + ": ";
+
+	switch( material.usage )
+	{
+	case MATERIAL_USAGE_GGX:			name = ( textureSlot >= 13 ? "   " : ggxDebugName[ textureSlot ] ); break;
+	case MATERIAL_USAGE_BLINN_PHONG:	name = ( textureSlot >= 5 ? "   " : blinnPhongDebugName[ textureSlot ] ); break;
+	}
+
+	return name;
 }
 
 
@@ -236,10 +271,14 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 	{
 		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
 		{
-			std::stringstream ss;
-			ss << "##Image" << t;
-			std::string label = ss.str();
-			ImGui::Text( label.c_str() + 2 );
+			if( mat.GetTexture( t ) == INVALID_HDL ) {
+				continue;
+			}
+
+			std::string imageName = GetShaderTextureName( mat, t );
+			std::string label = "##" + imageName;
+
+			ImGui::Text( imageName.c_str() );
 			ImGui::SameLine();
 
 			hdl_t originalHdl = mat.GetTexture( t );

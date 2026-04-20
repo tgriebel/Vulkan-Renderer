@@ -11,15 +11,16 @@ set SCRIPT_DIR=%~dp0
 set VK_RENDERER_DIR=%SCRIPT_DIR%..
 set SOLUTION_OUT=%SCRIPT_DIR%..\..\x64
 
-REM Prefer Release; fall back to Debug.
 set BAKER_EXE=%SOLUTION_OUT%\Release\AssetBaker.exe
-if not exist "%BAKER_EXE%" set BAKER_EXE=%SOLUTION_OUT%\Debug\AssetBaker.exe
+
+REM If the Release exe doesn't exist, kick off a Release build.
+if not exist "%BAKER_EXE%" (
+    call "%SCRIPT_DIR%buildTools.bat"
+    if errorlevel 1 exit /b 1
+)
 
 if not exist "%BAKER_EXE%" (
-    echo AssetBaker not found. Expected at one of:
-    echo   %SOLUTION_OUT%\Release\AssetBaker.exe
-    echo   %SOLUTION_OUT%\Debug\AssetBaker.exe
-    echo Build the AssetBaker project first ^(x64^).
+    echo ERROR: AssetBaker still missing at "%BAKER_EXE%" after build attempt.
     exit /b 1
 )
 

@@ -1,10 +1,12 @@
 #pragma once
+#include <algorithm>
 #include <list>
 #include <unordered_map>
 #include <iterator>
 #include <sstream>
 #include <thread>
 #include <mutex>
+#include <vector>
 
 #include "asset.h"
 
@@ -14,6 +16,12 @@
 #include <SysCore/common.h>
 
 extern CVar s_threadedLoad;
+
+struct AssetListEntry
+{
+	std::string	name;
+	hdl_t		handle;
+};
 
 class Library
 {
@@ -98,6 +106,7 @@ public:
 	const char*					FindName( const hdl_t& hdl ) const;
 	const char*					FindName( const uint32_t id ) const;
 	hdl_t						RetrieveHdl( const char* name ) const;
+	void						GetAssetList( std::vector<AssetListEntry>& outList ) const;
 };
 
 
@@ -375,4 +384,24 @@ hdl_t AssetLib< AssetType >::RetrieveHdl( const char* name ) const
 	const uint64_t hash = SysCore::Hash( name );
 	auto it = assets.find( hash );
 	return ( it != assets.end() ) ? hdl_t( hash ) : INVALID_HDL;
+}
+
+template< class AssetType >
+void AssetLib< AssetType >::GetAssetList( std::vector<AssetListEntry>& outList ) const
+{
+	outList.clear();
+	outList.reserve( assets.size() );
+
+	for ( const auto& kv : assets )
+	{
+		AssetListEntry entry;
+		entry.name   = kv.second.GetName();
+		entry.handle = hdl_t( kv.first );
+		outList.push_back( entry );
+	}
+
+	std::sort( outList.begin(), outList.end(),
+		[]( const AssetListEntry& a, const AssetListEntry& b ) {
+			return a.name < b.name;
+		} );
 }
