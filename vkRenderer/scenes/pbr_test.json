@@ -3,9 +3,9 @@
   "type": "scene",
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
-  "envMap": "code_assets/chess_env.img",
-  "diffuseIblMap": "code_assets/chess_diffuseIbl.img",
-  "specIblMap": "code_assets/chess_specIbl.img",
+  "envMap": "code_assets/chapel_env.img",
+  "diffuseIblMap": "code_assets/chapel_diffuseIbl.img",
+  "specIblMap": "code_assets/chapel_specIbl.img",
   "shaders": [
       {
           "name": "EquirectangularSampler",
@@ -15,15 +15,15 @@
   ],
   "images": [
       {
-          "name": "code_assets/chess_env.img",
+          "name": "code_assets/chapel_env.img",
           "type": "CUBE"
       },
       {
-          "name": "code_assets/chess_diffuseIbl.img",
+          "name": "code_assets/chapel_diffuseIbl.img",
           "type": "CUBE"
       },
       {
-          "name": "code_assets/chess_specIbl.img",
+          "name": "code_assets/chapel_specIbl.img",
           "type": "CUBE"
       }
   ],
@@ -40,7 +40,7 @@
               }
           },
           "textures": {
-              "TEXTURE_SLOT_0": "code_assets/chess_env.img"
+              "TEXTURE_SLOT_0": "code_assets/chapel_env.img"
           }
       },
       {

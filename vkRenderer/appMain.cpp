@@ -75,6 +75,7 @@ MakeCVar( BOOL,		r_computeDiffuseIbl, false );
 MakeCVar( BOOL,		r_computeSpecularIbl, false );
 MakeCVar( BOOL,		r_computeBrdfLut, false );
 MakeCVar( STRING,	c_scene, sceneFile );
+MakeCVar( STRING,	r_hdrCubemapSource, "" );
 MakeCVar( STRING,	r_cubemapName, "chess" );
 MakeCVar( BOOL,		c_bakeAssets, false );
 MakeCVar( BOOL,		c_loadBakedAssets, true );
@@ -133,6 +134,27 @@ void InitSceneType( const std::string type, Scene** scene )
 }
 
 
+void CubeCaptureLoad( Scene* scene )
+{
+	Material cubeHdrMaterial;
+
+	const hdl_t cubemapTextureHdl = AssetLib<GpuProgram>::Handle( r_hdrCubemapSource.GetString() );
+
+	cubeHdrMaterial.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "EquirectangularSampler" ) );
+	cubeHdrMaterial.AddTexture( 0, cubemapTextureHdl );
+
+	g_assets.GetLib<Image>()->AddDeferred( cubemapTextureHdl, pImgLoader_t( new ImageLoader( TexturePath, r_hdrCubemapSource.GetString(), false ) ) );
+
+	const hdl_t materialHdl = g_assets.GetLib<Material>()->Add( "EquirectangularSky", cubeHdrMaterial, true );
+
+	Entity* ent = new Entity();
+	ent->name = "_skybox";
+	ent->materialHdl = materialHdl;
+
+	scene->entities.push_back( ent );
+}
+
+
 int main( int argc, char* argv[] )
 {
 	g_assets.RegisterLib<Model>( "Model" );
@@ -142,10 +164,17 @@ int main( int argc, char* argv[] )
 
 	CreateCodeAssets(); // TODO: Check render dependencies, may need to move into render init?
 
-	if( ( argc > 1 ) && HasSuffix( argv[ 1 ], ".ini" ) )
+	for( int32_t i = 1; i < argc; ++i )
 	{
-		std::string fileName = argv[ 1 ];
-		ParseConfig( fileName );
+		if( HasSuffix( argv[ i ], ".ini" ) )
+		{
+			std::string fileName = argv[ i ];
+			ParseConfig( fileName );
+		}
+		else
+		{
+			CVar::ParseCommand( argv[ i ] );
+		}
 	}
 
 	if ( c_bakeAssets.GetBool() || c_loadBakedAssets.GetBool() == false ) {
@@ -180,6 +209,14 @@ int main( int argc, char* argv[] )
 	{
 		BakeAssets();
 		exit( 0 );
+	}
+
+	const bool precomputeSkycube = ( _stricmp( r_hdrCubemapSource.GetString(), "" ) != 0 );
+	if( precomputeSkycube )
+	{
+		CubeCaptureLoad( g_scene );
+		r_cubeCapture.Set( true );
+		g_assets.RunLoadLoop();
 	}
 
 	g_window.Init();
@@ -288,6 +325,10 @@ int main( int argc, char* argv[] )
 
 			g_scene->AdvanceFrame();
 			g_window.EndFrame();
+
+			if( precomputeSkycube ) {
+				break;
+			}
 		}
 		g_renderer.Shutdown();
 	}

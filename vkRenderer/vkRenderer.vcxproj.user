@@ -3,11 +3,11 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommandArguments>DefaultConfig.ini</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArgumentsHistory>RenderIbl.ini|RenderIBL.ini|DefaultConfig.ini|</LocalDebuggerCommandArgumentsHistory>
+    <LocalDebuggerCommandArgumentsHistory>RenderIbl.ini|RenderIBL.ini|RenderIBL.ini r_cubemapName=hall r_hdrCubemapSource=mirrored_hall_4k.hdr|DefaultConfig.ini|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommandArguments>DefaultConfig.ini</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArgumentsHistory>RenderIBL.ini|DefaultConfig.ini|</LocalDebuggerCommandArgumentsHistory>
+    <LocalDebuggerCommandArgumentsHistory>RenderIBL.ini|DefaultConfig.ini r_cubemapName=hall r_hdrCubemapSource=mirrored_hall_4k.hdr|RenderIBL.ini r_cubemapName=hall r_hdrCubemapSource=mirrored_hall_4k.hdr|DefaultConfig.ini|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
 </Project>

@@ -449,9 +449,6 @@
     <ClInclude Include="shaders\gpuShared.h">
       <Filter>Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="shaders\lightUtil.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -616,6 +613,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\brdf.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\lightUtil.h">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
