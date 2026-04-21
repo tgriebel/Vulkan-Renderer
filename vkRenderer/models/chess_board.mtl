@@ -14,7 +14,7 @@ map_Bump sapeli_normal.jpg
 map_Kd mahony.jpg
 map_Ks gray.jpg
 
-newmtl Material.001
+newmtl ChessBoardBlack
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -23,11 +23,13 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+Pr 0.0
+Pm 0.7
 map_Bump Marble09_nrm.jpg
 map_Kd marble.jpg
 map_Ks Marble09_rgh.jpg
 
-newmtl Material.002
+newmtl ChessBoardWhite
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -36,6 +38,8 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+Pr 0.0
+Pm 0.7
 map_Bump Marble09_nrm.jpg
 map_Kd Marble09_disp.jpg
 map_Ks gray.jpg
