@@ -1,6 +1,10 @@
 #ifndef LIGHT_HLSL_H
 #define LIGHT_HLSL_H
 
+// Three structs here used to represent data respective of the lighting equation
+// surfaceInput_t: Data from the current surface/pixel sample (one per shader invocation)
+// lightingInput_t: Incoming light data to the surface sample (multiple / shader)
+// brdfSample_t: Data from what happens when light interacts with the surface sample
 
 // Surface sample data
 struct surfaceInput_t
@@ -8,7 +12,6 @@ struct surfaceInput_t
 	float3	N;
 	float3	V;
 	float3	positionWS;
-	float3	cameraOrigin;
 	float3	F0;
 	float3	albedo;
 	float3	ccNormal;
@@ -41,6 +44,15 @@ struct lightingInput_t
 	float	NoH;
 	float	LoH;
 	float	HoV;
+};
+
+
+// BRDF surface sample
+struct brdfSample_t
+{
+	float3 Fd;	// Diffuse
+	float3 Fr;	// Specular
+	float3 F;	// Fresnel
 };
 
 

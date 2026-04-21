@@ -10,28 +10,34 @@ PS_LAYOUT_STANDARD( Texture2D )
 PS_LAYOUT_MRT_1_OUT
 #endif
 
+// Evaluate BRDF functions evaluate a particular BRDF at a surface sample
+// Apply* functions modify some BRDF
+// Clearcoat attenuates the base BRDF, Sheen simply adds on top
 
-float3 ApplyLight( const surfaceInput_t surfaceInput, lightingInput_t lightingInput )
+brdfSample_t EvaluateBaseBrdf( const surfaceInput_t surfaceInput, lightingInput_t lightingInput )
 {
 	const float perceptualRoughness = surfaceInput.roughness;
 	const float metallic = surfaceInput.metallic;
 	const float3 F0 = surfaceInput.F0;
 
-	const float D = D_GGX( lightingInput.NoH, perceptualRoughness );
-	const float G = G_Smith( surfaceInput.NoV, lightingInput.NoL, perceptualRoughness);
-	const float3 F = F_Schlick( lightingInput.HoV, F0 );
+	const float Dc = D_GGX( lightingInput.NoH, perceptualRoughness );
+	const float Gc = G_Smith( surfaceInput.NoV, lightingInput.NoL, perceptualRoughness);
+	const float3 Fc = F_Schlick( lightingInput.HoV, F0 );
 
-	const float3 kS = F;
+	const float3 kS = Fc;
 	float3 kD = float3( 1.0f, 1.0f, 1.0f ) - kS;
 	kD *= 1.0f - metallic;
 
-	float3 numerator = D * G * F;
+	float3 numerator = Dc * Gc * Fc;
 	float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.0001f;
-	float3 Fr = numerator / denominator;
-
-    const float3 Lo = ( ( kD * surfaceInput.albedo ) / PI + Fr ) * lightingInput.Li * lightingInput.NoL;
 	
-	return Lo;
+    brdfSample_t brdf;
+	
+    brdf.Fr = numerator / denominator;
+    brdf.Fd = ( kD * surfaceInput.albedo ) / PI;
+    brdf.F = Fc;
+
+	return brdf;
 }
 
 
@@ -74,39 +80,38 @@ float3 ApplyShadow( const uint shadowViewId, float3 worldPosition, const float3 
 }
 
 
-float3 ApplyClearcoat( const surfaceInput_t surfaceInput, lightingInput_t lightingInput, const float3 Lo )
+void ApplyClearcoatBrdf( const surfaceInput_t surfaceInput, lightingInput_t lightingInput, inout brdfSample_t brdf )
 {
     const float NoH = saturate( dot( surfaceInput.ccNormal, lightingInput.H ) );
     const float NoL = saturate( dot( surfaceInput.ccNormal, lightingInput.L ) );
 
 	const float F0 = 0.04f;
-	const float Fc = F0 + ( 1.0f - F0 ) * pow( 1.0f - lightingInput.HoV, 5.0f );
 	
-    const float D = D_GGX( NoH, surfaceInput.ccRoughness );
-    const float Visibility = V_Kelemen( lightingInput.LoH );
+    const float Dc = D_GGX( NoH, surfaceInput.ccRoughness );
+    const float Vc = V_Kelemen( lightingInput.LoH );
+    const float Fc = surfaceInput.ccStrength * F_Schlick( lightingInput.LoH, F0 ).x;
 	
-    // Clearcoat contribution
-    const float clearcoat = ( D * Visibility * Fc * surfaceInput.ccStrength );
+    float clearcoat = ( Dc * Vc ) * Fc;
 
 	// Energy loss from base: attenuate by Fresnel of clearcoat
-    const float attenuation = ( 1.0f - Fc * surfaceInput.ccStrength );
-
-    return ( Lo * attenuation + clearcoat * NoL * lightingInput.Li );
+    const float attenuation = ( 1.0f - Fc );
+	
+    brdf.Fd *= attenuation;
+    brdf.Fr *= attenuation * attenuation;
 }
 
 
-float3 ApplySheen( const surfaceInput_t surfaceInput, lightingInput_t lightingInput )
+void ApplySheenBrdf( const surfaceInput_t surfaceInput, lightingInput_t lightingInput, inout brdfSample_t brdf )
 {
     const float NoV = surfaceInput.NoV;
     const float NoH = lightingInput.NoH;
     const float NoL = lightingInput.NoL;
 	
-    const float D = D_Charlie( NoH, surfaceInput.sheenRoughness );
-    const float Visibility = V_Neubelt( NoV, NoL );
-
-    const float3 sheen = ( surfaceInput.sheenColor * D * Visibility * NoL );
+    const float Dc = D_Charlie( NoH, surfaceInput.sheenRoughness );
+    const float Vc = V_Neubelt( NoV, NoL );
 	
-    return ( sheen * lightingInput.Li );
+    brdf.F += surfaceInput.sheenColor;
+    brdf.Fr += ( Dc * Vc ) * brdf.F;
 }
 
 
@@ -151,7 +156,7 @@ PS_Output PSMain( PS_Input input )
 	float3 emissiveSample = material.emissiveStrength * material.Ke;
 	float aoSample = 1.0f;
 	float ccSample = material.clearcoatWeight;
-	float ccRoughnessSample = material.clearcoatRoughness;
+    float ccRoughnessSample = clamp( material.clearcoatRoughness, 0.089, 1.0 );
 	float3 ccNormalSample = float3( 0.0f, 0.0f, 1.0f );
 	float3 sheenSample = material.sheenColor;
 	float sheenRoughnessSample = material.sheen;
@@ -255,7 +260,6 @@ PS_Output PSMain( PS_Input input )
 	surfaceInput.N = normalize( normal );
 	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
 	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
-	surfaceInput.cameraOrigin = view.viewOrigin.xyz;
 	surfaceInput.positionWS = input.worldPosition.xyz;
 	surfaceInput.albedo = albedoSample;
 	surfaceInput.roughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
@@ -280,14 +284,16 @@ PS_Output PSMain( PS_Input input )
 
 		const lightingInput_t lightingInput = CalculateLightingInput( surfaceInput, light );
 
-		float3 Lo_i = ApplyLight( surfaceInput, lightingInput );
-
+        brdfSample_t brdf = EvaluateBaseBrdf( surfaceInput, lightingInput );
+			
         if ( surfaceInput.useClearCoat ) {
-            Lo_i = ApplyClearcoat( surfaceInput, lightingInput, Lo_i );
+			ApplyClearcoatBrdf( surfaceInput, lightingInput, brdf );
         }
         if ( surfaceInput.useSheen ) {
-            Lo_i = ApplySheen( surfaceInput, lightingInput );
+            ApplySheenBrdf( surfaceInput, lightingInput, brdf );
         }
+		
+        float3 Lo_i = ( brdf.Fd + brdf.Fr ) * lightingInput.Li * lightingInput.NoL;
 		
 		Lo_i = ApplyShadow( light.shadowViewId, surfaceInput.positionWS, Lo_i );
 
