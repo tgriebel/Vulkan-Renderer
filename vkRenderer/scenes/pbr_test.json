@@ -50,7 +50,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -85,7 +85,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -120,7 +120,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -155,7 +155,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -190,7 +190,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -225,7 +225,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -260,7 +260,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -295,7 +295,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -330,7 +330,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -365,7 +365,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -400,7 +400,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -435,7 +435,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -470,7 +470,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -505,7 +505,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -540,7 +540,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -575,7 +575,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.143,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -610,7 +610,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -645,7 +645,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -680,7 +680,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -715,7 +715,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -750,7 +750,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -785,7 +785,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -820,7 +820,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -855,7 +855,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.286,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -890,7 +890,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -925,7 +925,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -960,7 +960,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -995,7 +995,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1030,7 +1030,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1065,7 +1065,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1100,7 +1100,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1135,7 +1135,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.429,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1170,7 +1170,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1205,7 +1205,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1240,7 +1240,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1275,7 +1275,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1310,7 +1310,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1345,7 +1345,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1380,7 +1380,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1415,7 +1415,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.571,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1450,7 +1450,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1485,7 +1485,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1520,7 +1520,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1555,7 +1555,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1590,7 +1590,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1625,7 +1625,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1660,7 +1660,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1695,7 +1695,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.714,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1730,7 +1730,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1765,7 +1765,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1800,7 +1800,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1835,7 +1835,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1870,7 +1870,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1905,7 +1905,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1940,7 +1940,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -1975,7 +1975,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 0.857,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2010,7 +2010,7 @@
           "KdB": 0.01,
           "roughness": 0.0,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2045,7 +2045,7 @@
           "KdB": 0.01,
           "roughness": 0.143,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2080,7 +2080,7 @@
           "KdB": 0.01,
           "roughness": 0.286,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2115,7 +2115,7 @@
           "KdB": 0.01,
           "roughness": 0.429,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2150,7 +2150,7 @@
           "KdB": 0.01,
           "roughness": 0.571,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2185,7 +2185,7 @@
           "KdB": 0.01,
           "roughness": 0.714,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2220,7 +2220,7 @@
           "KdB": 0.01,
           "roughness": 0.857,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",
@@ -2255,7 +2255,7 @@
           "KdB": 0.01,
           "roughness": 1.0,
           "metalness": 1.0,
-          "d": 1.0,
+          "opacity": 1.0,
           "shaders": {
               "DRAWPASS_SHADOW": {
                   "shader": "Shadow",

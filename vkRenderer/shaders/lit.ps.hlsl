@@ -306,10 +306,10 @@ PS_Output PSMain( PS_Input input )
 
 	surfaceInput.N = normalize( normal );
 	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
+	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
     surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
     surfaceInput.F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
-	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
-	surfaceInput.positionWS = input.worldPosition.xyz;
+	surfaceInput.position = input.worldPosition.xyz;
 	
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
@@ -331,7 +331,7 @@ PS_Output PSMain( PS_Input input )
 		
         float3 Lo_i = ( brdf.Fd + brdf.Fr ) * lightingInput.Li * lightingInput.NoL;
 		
-		Lo_i = ApplyShadow( light.shadowViewId, surfaceInput.positionWS, Lo_i );
+		Lo_i = ApplyShadow( light.shadowViewId, surfaceInput.position, Lo_i );
 
         Lo += Lo_i;
     }

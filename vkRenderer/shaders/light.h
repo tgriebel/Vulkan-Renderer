@@ -13,7 +13,7 @@ struct surfaceInput_t
 	float3	V;
 	float3	F;
 	float3	F0;
-	float3	positionWS;
+	float3	position;
 	float3	albedo;
 	float3	ccNormal;
 	float3	emissive;
@@ -105,7 +105,7 @@ lightingInput_t CalculateLightingInput( const surfaceInput_t surfaceInput, const
 {
 	lightingInput_t lightingInput;
 
-	lightingInput.lightRay = ( light.lightPos.xyz - surfaceInput.positionWS );
+	lightingInput.lightRay = ( light.lightPos.xyz - surfaceInput.position );
 	lightingInput.lightDistance = length( lightingInput.lightRay );
 	lightingInput.L = lightingInput.lightRay / lightingInput.lightDistance;
 	lightingInput.H = normalize( surfaceInput.V + lightingInput.L );
