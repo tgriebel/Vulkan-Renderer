@@ -184,7 +184,7 @@ PS_Output PSMain( PS_Input input )
 			ApplyClearcoatBrdf( surfaceInput, lightingInput, brdf );
         }
         if ( surfaceInput.useSheen ) {
-            ApplySheenBrdf( surfaceInput, lightingInput, brdf );
+         //   ApplySheenBrdf( surfaceInput, lightingInput, brdf );
         }
 		
         float3 Lo_i = ( brdf.Fd + brdf.Fr ) * lightingInput.Li * lightingInput.NoL;

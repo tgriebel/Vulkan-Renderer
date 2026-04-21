@@ -2295,463 +2295,393 @@
           "name": "_skybox",
           "model": "_skybox",
           "material": "EquirectangularSky",
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.0,
-          "rx": 0.0,
-          "ry": 0.0,
-          "rz": 0.0,
-          "sx": 1.0,
-          "sy": 1.0,
-          "sz": 1.0
+          "xyz": [ 0.0, 0.0, 0.0 ],
+          "rotation": [ 0.0, 0.0, 0.0 ],
+          "scale": [ 1.0, 1.0, 1.0 ]
       },
       {
           "name": "sphere_R0_M0",
           "model": "sphere.obj",
           "material": "PBR_R0_M0",
-          "y": 0.0,
-          "z": 0.0
+          "xyz": [ 0.0, 0.0, 0.0 ]
       },
       {
           "name": "sphere_R1_M0",
           "model": "sphere.obj",
           "material": "PBR_R1_M0",
-          "y": 2.5,
-          "z": 0.0
+		  "xyz": [ 0.0, 2.5, 0.0 ]
       },
       {
           "name": "sphere_R2_M0",
           "model": "sphere.obj",
           "material": "PBR_R2_M0",
-          "y": 5.0,
-          "z": 0.0
+		  "xyz": [ 0.0, 5.0, 0.0 ]
       },
       {
           "name": "sphere_R3_M0",
           "model": "sphere.obj",
           "material": "PBR_R3_M0",
-          "y": 7.5,
-          "z": 0.0
+		  "xyz": [ 0.0, 7.5, 0.0 ]
       },
       {
           "name": "sphere_R4_M0",
           "model": "sphere.obj",
           "material": "PBR_R4_M0",
-          "y": 10.0,
-          "z": 0.0
+		  "xyz": [ 0.0, 10.0, 0.0 ]
       },
       {
           "name": "sphere_R5_M0",
           "model": "sphere.obj",
           "material": "PBR_R5_M0",
-          "y": 12.5,
-          "z": 0.0
+		  "xyz": [ 0.0, 12.5, 0.0 ]
       },
       {
           "name": "sphere_R6_M0",
           "model": "sphere.obj",
           "material": "PBR_R6_M0",
-          "y": 15.0,
-          "z": 0.0
+		  "xyz": [ 0.0, 15.0, 0.0 ]
       },
       {
           "name": "sphere_R7_M0",
           "model": "sphere.obj",
           "material": "PBR_R7_M0",
-          "y": 17.5,
-          "z": 0.0
+		  "xyz": [ 0.0, 17.5, 0.0 ]
       },
       {
           "name": "sphere_R0_M1",
           "model": "sphere.obj",
           "material": "PBR_R0_M1",
-          "y": 0.0,
-          "z": 2.5
+		  "xyz": [ 0.0, 0.0, 2.5 ]
       },
       {
           "name": "sphere_R1_M1",
           "model": "sphere.obj",
           "material": "PBR_R1_M1",
-          "y": 2.5,
-          "z": 2.5
+		  "xyz": [ 0.0, 2.5, 2.5 ]
       },
       {
           "name": "sphere_R2_M1",
           "model": "sphere.obj",
           "material": "PBR_R2_M1",
-          "y": 5.0,
-          "z": 2.5
+		  "xyz": [ 0.0, 5.0, 2.5 ]
       },
       {
           "name": "sphere_R3_M1",
           "model": "sphere.obj",
           "material": "PBR_R3_M1",
-          "y": 7.5,
-          "z": 2.5
+		  "xyz": [ 0.0, 7.5, 2.5 ]
       },
       {
           "name": "sphere_R4_M1",
           "model": "sphere.obj",
           "material": "PBR_R4_M1",
-          "y": 10.0,
-          "z": 2.5
+		  "xyz": [ 0.0, 10.0, 2.5 ]
       },
       {
           "name": "sphere_R5_M1",
           "model": "sphere.obj",
           "material": "PBR_R5_M1",
-          "y": 12.5,
-          "z": 2.5
+		  "xyz": [ 0.0, 12.5, 2.5 ]
       },
       {
           "name": "sphere_R6_M1",
           "model": "sphere.obj",
           "material": "PBR_R6_M1",
-          "y": 15.0,
-          "z": 2.5
+		  "xyz": [ 0.0, 15.0, 2.5 ]
       },
       {
           "name": "sphere_R7_M1",
           "model": "sphere.obj",
           "material": "PBR_R7_M1",
-          "y": 17.5,
-          "z": 2.5
+		  "xyz": [ 0.0, 17.5, 2.5 ]
       },
       {
           "name": "sphere_R0_M2",
           "model": "sphere.obj",
           "material": "PBR_R0_M2",
-          "y": 0.0,
-          "z": 5.0
+		  "xyz": [ 0.0, 0.0, 5.0 ]
       },
       {
           "name": "sphere_R1_M2",
           "model": "sphere.obj",
           "material": "PBR_R1_M2",
-          "y": 2.5,
-          "z": 5.0
+		  "xyz": [ 0.0, 2.5, 5.0 ]
       },
       {
           "name": "sphere_R2_M2",
           "model": "sphere.obj",
           "material": "PBR_R2_M2",
-          "y": 5.0,
-          "z": 5.0
+		  "xyz": [ 0.0, 5.0, 5.0 ]
       },
       {
           "name": "sphere_R3_M2",
           "model": "sphere.obj",
           "material": "PBR_R3_M2",
-          "y": 7.5,
-          "z": 5.0
+		  "xyz": [ 0.0, 7.5, 5.0 ]
       },
       {
           "name": "sphere_R4_M2",
           "model": "sphere.obj",
           "material": "PBR_R4_M2",
-          "y": 10.0,
-          "z": 5.0
+		  "xyz": [ 0.0, 10.0, 5.0 ]
       },
       {
           "name": "sphere_R5_M2",
           "model": "sphere.obj",
           "material": "PBR_R5_M2",
-          "y": 12.5,
-          "z": 5.0
+		  "xyz": [ 0.0, 12.5, 5.0 ]
       },
       {
           "name": "sphere_R6_M2",
           "model": "sphere.obj",
           "material": "PBR_R6_M2",
-          "y": 15.0,
-          "z": 5.0
+		  "xyz": [ 0.0, 15.0, 5.0 ]
       },
       {
           "name": "sphere_R7_M2",
           "model": "sphere.obj",
           "material": "PBR_R7_M2",
-          "y": 17.5,
-          "z": 5.0
+		  "xyz": [ 0.0, 17.5, 5.0 ]
       },
       {
           "name": "sphere_R0_M3",
           "model": "sphere.obj",
           "material": "PBR_R0_M3",
-          "y": 0.0,
-          "z": 7.5
+          "xyz": [ 0.0, 0.0, 7.5 ]
       },
       {
           "name": "sphere_R1_M3",
           "model": "sphere.obj",
           "material": "PBR_R1_M3",
-          "y": 2.5,
-          "z": 7.5
+          "xyz": [ 0.0, 2.5, 7.5 ]
       },
       {
           "name": "sphere_R2_M3",
           "model": "sphere.obj",
           "material": "PBR_R2_M3",
-          "y": 5.0,
-          "z": 7.5
+          "xyz": [ 0.0, 5.0, 7.5 ]
       },
       {
           "name": "sphere_R3_M3",
           "model": "sphere.obj",
           "material": "PBR_R3_M3",
-          "y": 7.5,
-          "z": 7.5
+          "xyz": [ 0.0, 7.5, 7.5 ]
       },
       {
           "name": "sphere_R4_M3",
           "model": "sphere.obj",
           "material": "PBR_R4_M3",
-          "y": 10.0,
-          "z": 7.5
+          "xyz": [ 0.0, 10.0, 7.5 ]
       },
       {
           "name": "sphere_R5_M3",
           "model": "sphere.obj",
           "material": "PBR_R5_M3",
-          "y": 12.5,
-          "z": 7.5
+          "xyz": [ 0.0, 12.5, 7.5 ]
       },
       {
           "name": "sphere_R6_M3",
           "model": "sphere.obj",
           "material": "PBR_R6_M3",
-          "y": 15.0,
-          "z": 7.5
+          "xyz": [ 0.0, 15.0, 7.5 ]
       },
       {
           "name": "sphere_R7_M3",
           "model": "sphere.obj",
           "material": "PBR_R7_M3",
-          "y": 17.5,
-          "z": 7.5
+          "xyz": [ 0.0, 17.5, 7.5 ]
       },
       {
           "name": "sphere_R0_M4",
           "model": "sphere.obj",
           "material": "PBR_R0_M4",
-          "y": 0.0,
-          "z": 10.0
+          "xyz": [ 0.0, 0.0, 10.0 ]
       },
       {
           "name": "sphere_R1_M4",
           "model": "sphere.obj",
           "material": "PBR_R1_M4",
-          "y": 2.5,
-          "z": 10.0
+          "xyz": [ 0.0, 2.5, 10.0 ]
       },
       {
           "name": "sphere_R2_M4",
           "model": "sphere.obj",
           "material": "PBR_R2_M4",
-          "y": 5.0,
-          "z": 10.0
+          "xyz": [ 0.0, 5.0, 10.0 ]
       },
       {
           "name": "sphere_R3_M4",
           "model": "sphere.obj",
           "material": "PBR_R3_M4",
-          "y": 7.5,
-          "z": 10.0
+          "xyz": [ 0.0, 7.5, 10.0 ]
       },
       {
           "name": "sphere_R4_M4",
           "model": "sphere.obj",
           "material": "PBR_R4_M4",
-          "y": 10.0,
-          "z": 10.0
+          "xyz": [ 0.0, 10.0, 10.0 ]
       },
       {
           "name": "sphere_R5_M4",
           "model": "sphere.obj",
           "material": "PBR_R5_M4",
-          "y": 12.5,
-          "z": 10.0
+          "xyz": [ 0.0, 12.5, 10.0 ]
       },
       {
           "name": "sphere_R6_M4",
           "model": "sphere.obj",
           "material": "PBR_R6_M4",
-          "y": 15.0,
-          "z": 10.0
+          "xyz": [ 0.0, 15.0, 10.0 ]
       },
       {
           "name": "sphere_R7_M4",
           "model": "sphere.obj",
           "material": "PBR_R7_M4",
-          "y": 17.5,
-          "z": 10.0
+          "xyz": [ 0.0, 17.5, 10.0 ]
       },
       {
           "name": "sphere_R0_M5",
           "model": "sphere.obj",
           "material": "PBR_R0_M5",
-          "y": 0.0,
-          "z": 12.5
+          "xyz": [ 0.0, 0.0, 12.5 ]
       },
       {
           "name": "sphere_R1_M5",
           "model": "sphere.obj",
           "material": "PBR_R1_M5",
-          "y": 2.5,
-          "z": 12.5
+          "xyz": [ 0.0, 2.5, 12.5 ]
       },
       {
           "name": "sphere_R2_M5",
           "model": "sphere.obj",
           "material": "PBR_R2_M5",
-          "y": 5.0,
-          "z": 12.5
+          "xyz": [ 0.0, 5.0, 12.5 ]
       },
       {
           "name": "sphere_R3_M5",
           "model": "sphere.obj",
           "material": "PBR_R3_M5",
-          "y": 7.5,
-          "z": 12.5
+          "xyz": [ 0.0, 7.5, 12.5 ]
       },
       {
           "name": "sphere_R4_M5",
           "model": "sphere.obj",
           "material": "PBR_R4_M5",
-          "y": 10.0,
-          "z": 12.5
+          "xyz": [ 0.0, 10.0, 12.5 ]
       },
       {
           "name": "sphere_R5_M5",
           "model": "sphere.obj",
           "material": "PBR_R5_M5",
-          "y": 12.5,
-          "z": 12.5
+          "xyz": [ 0.0, 12.5, 12.5 ]
       },
       {
           "name": "sphere_R6_M5",
           "model": "sphere.obj",
           "material": "PBR_R6_M5",
-          "y": 15.0,
-          "z": 12.5
+          "xyz": [ 0.0, 15.0, 12.5 ]
       },
       {
           "name": "sphere_R7_M5",
           "model": "sphere.obj",
           "material": "PBR_R7_M5",
-          "y": 17.5,
-          "z": 12.5
+          "xyz": [ 0.0, 17.5, 12.5 ]
       },
       {
           "name": "sphere_R0_M6",
           "model": "sphere.obj",
           "material": "PBR_R0_M6",
-          "y": 0.0,
-          "z": 15.0
+          "xyz": [ 0.0, 0.0, 15.0 ]
       },
       {
           "name": "sphere_R1_M6",
           "model": "sphere.obj",
           "material": "PBR_R1_M6",
-          "y": 2.5,
-          "z": 15.0
+          "xyz": [ 0.0, 2.5, 15.0 ]
       },
       {
           "name": "sphere_R2_M6",
           "model": "sphere.obj",
           "material": "PBR_R2_M6",
-          "y": 5.0,
-          "z": 15.0
+          "xyz": [ 0.0, 5.0, 15.0 ]
       },
       {
           "name": "sphere_R3_M6",
           "model": "sphere.obj",
           "material": "PBR_R3_M6",
-          "y": 7.5,
-          "z": 15.0
+          "xyz": [ 0.0, 7.5, 15.0 ]
       },
       {
           "name": "sphere_R4_M6",
           "model": "sphere.obj",
           "material": "PBR_R4_M6",
-          "y": 10.0,
-          "z": 15.0
+          "xyz": [ 0.0, 10.0, 15.0 ]
       },
       {
           "name": "sphere_R5_M6",
           "model": "sphere.obj",
           "material": "PBR_R5_M6",
-          "y": 12.5,
-          "z": 15.0
+          "xyz": [ 0.0, 12.5, 15.0 ]
       },
       {
           "name": "sphere_R6_M6",
           "model": "sphere.obj",
           "material": "PBR_R6_M6",
-          "y": 15.0,
-          "z": 15.0
+          "xyz": [ 0.0, 15.0, 15.0 ]
       },
       {
           "name": "sphere_R7_M6",
           "model": "sphere.obj",
           "material": "PBR_R7_M6",
-          "y": 17.5,
-          "z": 15.0
+          "xyz": [ 0.0, 17.5, 15.0 ]
       },
       {
           "name": "sphere_R0_M7",
           "model": "sphere.obj",
           "material": "PBR_R0_M7",
-          "y": 0.0,
-          "z": 17.5
+          "xyz": [ 0.0, 0.0, 17.5 ]
       },
       {
           "name": "sphere_R1_M7",
           "model": "sphere.obj",
           "material": "PBR_R1_M7",
-          "y": 2.5,
-          "z": 17.5
+          "xyz": [ 0.0, 2.5, 17.5 ]
       },
       {
           "name": "sphere_R2_M7",
           "model": "sphere.obj",
           "material": "PBR_R2_M7",
-          "y": 5.0,
-          "z": 17.5
+          "xyz": [ 0.0, 5.0, 17.5 ]
       },
       {
           "name": "sphere_R3_M7",
           "model": "sphere.obj",
           "material": "PBR_R3_M7",
-          "y": 7.5,
-          "z": 17.5
+          "xyz": [ 0.0, 7.5, 17.5 ]
       },
       {
           "name": "sphere_R4_M7",
           "model": "sphere.obj",
           "material": "PBR_R4_M7",
-          "y": 10.0,
-          "z": 17.5
+          "xyz": [ 0.0, 10.0, 17.5 ]
       },
       {
           "name": "sphere_R5_M7",
           "model": "sphere.obj",
           "material": "PBR_R5_M7",
-          "y": 12.5,
-          "z": 17.5
+          "xyz": [ 0.0, 12.5, 17.5 ]
       },
       {
           "name": "sphere_R6_M7",
           "model": "sphere.obj",
           "material": "PBR_R6_M7",
-          "y": 15.0,
-          "z": 17.5
+          "xyz": [ 0.0, 15.0, 17.5 ]
       },
       {
           "name": "sphere_R7_M7",
           "model": "sphere.obj",
           "material": "PBR_R7_M7",
-          "y": 17.5,
-          "z": 17.5
+          "xyz": [ 0.0, 17.5, 17.5 ]
       }
   ]
 }

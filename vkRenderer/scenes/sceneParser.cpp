@@ -583,28 +583,25 @@ int ParseEntityObject( parseState_t& st, void* object, uint32_t offset )
 	char materialName[ TOKEN_LEN ] = "";
 	std::vector<Entity*>& entities = st.scene->entities;
 
-	float x = 0.0f, y = 0.0f, z = 0.0f;
-	float rx = 0.0f, ry = 0.0f, rz = 0.0f;
-	float sx = 1.0f, sy = 1.0f, sz = 1.0f;
 	bool hidden = false, wireframe = false;
 
-	const uint32_t objectCount = 14;
+	vectorObject_t xyz;
+	vectorObject_t rotation;
+	vectorObject_t scale;
+
+	scale.v = vec3f( 1.0f, 1.0f, 1.0f );
+
+	const uint32_t objectCount = 12;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name",		&name,			TOKEN_LEN,		1,	&ParseStringObject },
-		{ "model",		&modelName,		TOKEN_LEN,		1,	&ParseStringObject },
-		{ "material",	&materialName,	TOKEN_LEN,		1,	&ParseStringObject },
-		{ "x",			&x,				sizeof( float ),1,	&ParseFloatObject },
-		{ "y",			&y,				sizeof( float ),1,	&ParseFloatObject },
-		{ "z",			&z,				sizeof( float ),1,	&ParseFloatObject },
-		{ "rx",			&rx,			sizeof( float ),1,	&ParseFloatObject },
-		{ "ry",			&ry,			sizeof( float ),1,	&ParseFloatObject },
-		{ "rz",			&rz,			sizeof( float ),1,	&ParseFloatObject },
-		{ "sx",			&sx,			sizeof( float ),1,	&ParseFloatObject },
-		{ "sy",			&sy,			sizeof( float ),1,	&ParseFloatObject },
-		{ "sz",			&sz,			sizeof( float ),1,	&ParseFloatObject },
-		{ "hidden",		&hidden,		sizeof( bool ),	1,	&ParseBoolObject },
-		{ "wireframe",	&wireframe,		sizeof( bool ),	1,	&ParseBoolObject },
+		{ "name",		&name,			TOKEN_LEN,			1,	&ParseStringObject },
+		{ "model",		&modelName,		TOKEN_LEN,			1,	&ParseStringObject },
+		{ "material",	&materialName,	TOKEN_LEN,			1,	&ParseStringObject },
+		{ "xyz",		&xyz,			sizeof( float ),	3,	&ParseVectorObject },
+		{ "rotation",	&rotation,		sizeof( float ),	3,	&ParseVectorObject },
+		{ "scale",		&scale,			sizeof( float ),	3,	&ParseVectorObject },
+		{ "hidden",		&hidden,		sizeof( bool ),		1,	&ParseBoolObject },
+		{ "wireframe",	&wireframe,		sizeof( bool ),		1,	&ParseBoolObject },
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -625,9 +622,9 @@ int ParseEntityObject( parseState_t& st, void* object, uint32_t offset )
 		loader->SetAssetRef( st.assets );
 		ent->modelHdl = st.assets->GetLib<Model>()->AddDeferred( modelName, loader_t( loader ) );
 	}
-	ent->SetOrigin( vec3f( x, y, z ) );
-	ent->SetRotation( vec3f( rx, ry, rz ) );
-	ent->SetScale( vec3f( sx, sy, sz ) );
+	ent->SetOrigin( xyz.v );
+	ent->SetRotation( rotation.v );
+	ent->SetScale( scale.v );
 	if ( strcmp( materialName, "" ) != 0 ) {
 		ent->materialHdl = AssetLib<Material>::Handle( materialName );
 	}

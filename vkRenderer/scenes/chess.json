@@ -161,32 +161,28 @@
   "camera": [ -17.0, -1.0, 12.0 ],
   "entities": [
     {
-      "name" : "_skybox",
-      "model" : "_skybox",
-      "material" : "EquirectangularSky",
-	  "x" : 0.0,
-	  "y" : 0.0,
-	  "z" : 0.0,
-	  "rx" : 0.0,
-	  "ry" : 0.0,
-	  "rz" : 0.0,
-	  "sx" : 1.0,
-	  "sy" : 1.0,
-	  "sz" : 1.0
+      "name": "_skybox",
+      "model": "_skybox",
+      "material": "EquirectangularSky",
+      "xyz": [ 0.0, 0.0, 0.0 ],
+      "rx": 0.0,
+      "ry": 0.0,
+      "rz": 0.0,
+      "sx": 1.0,
+      "sy": 1.0,
+      "sz": 1.0
     },
 	{
-      "name" : "chess_board",
-      "model" : "chess_board.obj",
-	  "rz" : 0.0,
-	  "sz" : 1.0
-    },
-	{
-      "name" : "sphere",
-      "model" : "sphere.obj",
-	  "hidden" : "false",
-	  "x" : 0.0,
-	  "y" : 0.0,
-	  "z" : 10.0
+		"name" : "chess_board",
+		"model" : "chess_board.obj",
+		"rz" : 0.0,
+		"sz" : 1.0
+	},
+    {
+      "name": "sphere",
+      "model": "sphere.obj",
+      "hidden": "false",
+      "xyz": [ 0.0, 0.0, 10.0 ]
     }
   ]
 }
