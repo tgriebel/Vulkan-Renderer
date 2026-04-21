@@ -181,13 +181,6 @@
 	  "sz" : 1.0
     },
 	{
-      "name" : "PotOfCoals",
-      "model" : "PotOfCoals.glb",
-	  "sx" : 10.0,
-	  "sy" : 10.0,
-	  "sz" : 10.0
-    },
-	{
       "name" : "sphere",
       "model" : "sphere.obj",
 	  "hidden" : "false",

@@ -1,0 +1,127 @@
+{
+  "sceneClass": "test",
+  "type": "scene",
+  "reflink" : "shaders_common.json",
+  "reflink" : "image_common.json",
+  "envMap" : "code_assets/chess_env.img",
+  "diffuseIblMap" : "code_assets/chess_diffuseIbl.img",
+  "specIblMap" : "code_assets/chess_specIbl.img",
+  "shaders": [
+    {
+	  "name": "EquirectangularSampler",
+	  "vs": "simple",
+	  "ps": "equirectangularSky"
+    }
+  ],
+  "images": [
+    {
+	  "name": "checker.png",
+	  "type": "2D"
+	},
+	{
+	  "name": "code_assets/chess_env.img",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_diffuseIbl.img",
+	  "type": "CUBE"
+	},
+	{
+	  "name": "code_assets/chess_specIbl.img",
+	  "type": "CUBE"
+	}
+  ],
+  "materials": [
+	{
+      "name": "EquirectangularSky",
+      "shaders": {
+          "DRAWPASS_SKYBOX": { "shader": "Sky", "perms": ["skycube"] }
+      },
+      "textures": {
+          "TEXTURE_SLOT_0" : "code_assets/chess_env.img"
+      }
+    }
+  ],
+  "models": [
+  	{
+      "name" : "cube",
+      "model" : "cube.obj"
+    }
+  ],
+  "camera": [ -17.0, -1.0, 12.0 ],
+  "entities": [
+    {
+      "name" : "_skybox",
+      "model" : "_skybox",
+      "material" : "EquirectangularSky",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 0.0,
+	  "rx" : 0.0,
+	  "ry" : 0.0,
+	  "rz" : 0.0,
+	  "sx" : 1.0,
+	  "sy" : 1.0,
+	  "sz" : 1.0
+    },
+	{
+      "name" : "chess_board",
+      "model" : "chess_board.obj",
+	  "rz" : 0.0,
+	  "sz" : 1.0
+    },
+	{
+      "name" : "ToyCar",
+      "model" : "ToyCar.glb",
+	  "x" : 4.5,
+	  "y" : 3.5,
+	  "z" : 1.5,
+	  "sx" : 0.01,
+	  "sy" : 0.01,
+	  "sz" : 0.01,
+	  "rx" : 180.0,
+	  "ry" : 0.0,
+	  "rz" : 180.0
+    },
+	{
+      "name" : "DamagedHelmet",
+      "model" : "DamagedHelmet.glb",
+	  "x" : -1.5,
+	  "y" : 3.5,
+	  "z" : 1.5,
+	  "sx" : 1.0,
+	  "sy" : 1.0,
+	  "sz" : 1.0,
+	  "rx" : 180.0,
+	  "ry" : 0.0,
+	  "rz" : 180.0
+    },
+	{
+      "name" : "AnisotropyBarnLamp",
+      "model" : "AnisotropyBarnLamp.glb",
+	  "sx" : 10.0,
+	  "sy" : 10.0,
+	  "sz" : 10.0,
+	  "rz" : -45.0
+    },
+	{
+      "name" : "PotOfCoals",
+      "model" : "PotOfCoals.glb",
+	  "x" : -3.5,
+	  "y" : 3.5,
+	  "z" : 0.0,
+	  "sx" : 10.0,
+	  "sy" : 10.0,
+	  "sz" : 10.0,
+	  "rz" : -90.0
+    },
+	{
+      "name" : "sphere",
+      "model" : "sphere.obj",
+	  "hidden" : "false",
+	  "x" : 0.0,
+	  "y" : 0.0,
+	  "z" : 10.0
+    }
+  ]
+}
