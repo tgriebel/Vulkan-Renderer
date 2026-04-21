@@ -11,8 +11,9 @@ struct surfaceInput_t
 {
 	float3	N;
 	float3	V;
-	float3	positionWS;
+	float3	F;
 	float3	F0;
+	float3	positionWS;
 	float3	albedo;
 	float3	ccNormal;
 	float3	emissive;
