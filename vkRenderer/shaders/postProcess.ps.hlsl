@@ -1,6 +1,5 @@
 #include "globals.h"
 #include "color.h"
-#include "light.h"
 
 PS_LAYOUT_STANDARD( Texture2D )
 

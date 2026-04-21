@@ -1,6 +1,6 @@
 #include "globals.h"
 #include "color.h"
-#include "light.h"
+#include "lightUtil.h"
 
 struct BrdfLutConstants
 {

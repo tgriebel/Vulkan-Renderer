@@ -1,10 +1,11 @@
 #include "globals.h"
-#include "light.h"
 #include "color.h"
 #include "util.h"
 #include "brdf.h"
 
-PS_LAYOUT_STANDARD( Texture2D )
+PS_LAYOUT_STANDARD( Texture2D ) // Must come before lighting.h
+
+#include "lighting.h"
 
 #ifdef USE_MRT
 PS_LAYOUT_MRT_1_OUT
@@ -160,156 +161,15 @@ PS_Output PSMain( PS_Input input )
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
 
-	const gpuView_t view = views[viewlId];
-	const gpuMaterial_t material = materials[materialId];
-
-    const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
-	const int albedoTexId = material.textureId[ GGX_ALBEDO_MAP_SLOT ];
-	const int normalTexId = material.textureId[ GGX_NORMAL_MAP_SLOT ];
-	const int roughnessTexId = material.textureId[ GGX_ROUGHNESS_MAP_SLOT ];
-	const int metalnessTexId = material.textureId[ GGX_METALLIC_MAP_SLOT ];
-	const int aoTexId = material.textureId[ GGX_AO_MAP_SLOT ];
-	const int emissiveTexId = material.textureId[GGX_EMISSIVE_MAP_SLOT];
-	const int ccTexId = material.textureId[ GGX_CC_MAP_SLOT ];
-	const int ccRoughnessTexId = material.textureId[ GGX_CC_ROUGHNESS_MAP_SLOT ];
-	const int ccNormalTexId = material.textureId[ GGX_CC_NML_MAP_SLOT ];
-	const int sheenColorTexId = material.textureId[ GGX_SHEEN_COLOR_MAP_SLOT ];
-	const int sheenRoughnessTexId = material.textureId[ GGX_SHEEN_ROUGHNESS_MAP_SLOT ];
-	const int anisotropyTexId = material.textureId[ GGX_ANISOTROPY_MAP_SLOT ];
-	const int transmissionTexId = material.textureId[ GGX_TRANSMISSION_MAP_SLOT ];
-
-    const float3 specularColor = material.Ks.rgb;
-    const float specularPower = material.Ns;
-
-    const float4x4 modelMat = surfaces[ input.objectId ].model;
-    const float4x4 viewMat = view.viewMat;
-    const float3 modelOrigin = float3( modelMat[0][3], modelMat[1][3], modelMat[2][3] );
-
-	float3 albedoSample = material.albedo.rgb;
-	float3 normalSample = float3( 0.0f, 0.0f, 1.0f );
-	float roughnessSample = material.roughness;
-	float metalnessSample = material.metalness;
-	float3 emissiveSample = material.emissiveStrength * material.Ke;
-	float aoSample = 1.0f;
-	float ccSample = material.clearcoatWeight;
-    float ccRoughnessSample = clamp( material.clearcoatRoughness, 0.089, 1.0 );
-	float3 ccNormalSample = float3( 0.0f, 0.0f, 1.0f );
-	float3 sheenSample = material.sheenColor;
-	float sheenRoughnessSample = material.sheen;
-	float anisotropySample = material.anisotropy;
-	float transmissionSample = material.transmissionFactor;
-	
-	float2 uv0 = input.uv0.xy;
-
-	if ( isTextured )
-	{
-		if ( albedoTexId >= 0 )
-		{
-			Texture2D albedoTex = texSampler[ albedoTexId ];
-			albedoSample *= SrgbToLinear( albedoTex.Sample( bilinearSamplerWrap, uv0 ) ).rgb;
-		}
-
-		if ( normalTexId >= 0 )
-		{
-			Texture2D normalTex = texSampler[ normalTexId ];
-			normalSample = DecodeNormal( normalTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
-		}
-
-		if ( roughnessTexId >= 0 )
-		{
-			Texture2D roughnessTex = texSampler[ roughnessTexId ];
-			roughnessSample *= roughnessTex.Sample( bilinearSamplerWrap, uv0 ).g;
-		}
-
-		if ( metalnessTexId >= 0 )
-		{
-			Texture2D metalnessTex = texSampler[ metalnessTexId ];
-			metalnessSample *= metalnessTex.Sample( bilinearSamplerWrap, uv0 ).b;
-		}
-
-		if ( aoTexId >= 0 )
-		{
-			Texture2D aoTex = texSampler[ aoTexId ];
-			aoSample *= aoTex.Sample( bilinearSamplerWrap, uv0 ).r;
-		}
-
-		if ( emissiveTexId >= 0 )
-		{
-			Texture2D emissiveTex = texSampler[ emissiveTexId ];
-			emissiveSample *= SrgbToLinear( emissiveTex.Sample( bilinearSamplerWrap, uv0 )  ).rgb;
-		}
-
-		if ( ccTexId >= 0 )
-		{
-			Texture2D ccTex = texSampler[ ccTexId ];
-			ccSample *= ccTex.Sample( bilinearSamplerWrap, uv0 ).r;
-		}
-
-		if ( ccRoughnessTexId >= 0 )
-		{
-			Texture2D ccRoughnessTex = texSampler[ ccRoughnessTexId ];
-			ccRoughnessSample *= ccRoughnessTex.Sample( bilinearSamplerWrap, uv0 ).r;
-		}
-
-		if ( ccNormalTexId >= 0 )
-		{
-			Texture2D ccNormalTex = texSampler[ ccNormalTexId ];
-			ccNormalSample = DecodeNormal( ccNormalTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
-		}
-
-		if ( sheenColorTexId >= 0 )
-		{
-			Texture2D sheenTex = texSampler[ sheenColorTexId ];
-			sheenSample = SrgbToLinear( sheenTex.Sample( bilinearSamplerWrap, uv0 ).rgb );
-		}
-
-		if ( sheenRoughnessTexId >= 0 )
-		{
-			Texture2D sheenRoughnessTex = texSampler[ sheenRoughnessTexId ];
-			sheenRoughnessSample = sheenRoughnessTex.Sample(bilinearSamplerWrap, uv0).r;
-		}
-
-		if ( anisotropyTexId >= 0 )
-		{
-			Texture2D anisotropyTex = texSampler[ anisotropyTexId ];
-			anisotropySample = anisotropyTex.Sample( bilinearSamplerWrap, uv0 ).r;
-		}
-
-		if ( transmissionTexId >= 0 )
-		{
-			Texture2D transmissionTex = texSampler[ transmissionTexId ];
-			transmissionSample = transmissionTex.Sample( bilinearSamplerWrap, uv0 ).r;
-		}
-	}
-
-	surfaceInput_t surfaceInput;
-
-    const float normalBlendFactor = 1.0f;
-	const float3 normal = lerp( float3( 0.0f, 0.0f, 1.0f ), ComputeNormalWS( normalSample, input.tangent, input.bitangent, input.TBN2 ), normalBlendFactor );
+	const gpuView_t view = views[ viewlId ];
+	const gpuMaterial_t material = materials[ materialId ];
+    const gpuSurface_t surface = surfaces[ input.objectId ];
 
     const uint diffuseIBL = surfaces[ input.objectId ].diffuseIblCubeId;
     const uint specularIBL = surfaces[ input.objectId ].envCubeId;
     const uint brdfLutId = globals.brdfLutId;
 	
-    surfaceInput.albedo = albedoSample;
-    surfaceInput.roughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
-    surfaceInput.metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
-    surfaceInput.emissive = emissiveSample;
-    surfaceInput.ao = aoSample;
-    surfaceInput.sheenColor = sheenSample;
-    surfaceInput.sheenRoughness = sheenRoughnessSample;
-    surfaceInput.ccStrength = ccSample;
-    surfaceInput.ccRoughness = ccRoughnessSample;
-    surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
-    surfaceInput.useClearCoat = ( ccSample > 0.0f );
-    surfaceInput.useSheen = any( sheenSample > 0.0f );
-
-	surfaceInput.N = normalize( normal );
-	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
-	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
-    surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
-    surfaceInput.F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
-	surfaceInput.position = input.worldPosition.xyz;
+    const surfaceInput_t surfaceInput = CalculateSurfaceInput( globals, view, surface, material, input );
 	
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
