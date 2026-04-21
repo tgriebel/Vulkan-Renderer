@@ -115,6 +115,42 @@ void ApplySheenBrdf( const surfaceInput_t surfaceInput, lightingInput_t lighting
 }
 
 
+float3 EvaluateDiffuseAmbient( TextureCube diffuseIBL, const surfaceInput_t surfaceInput )
+{
+    float3 kS = surfaceInput.F;
+    float3 kD = 1.0 - kS;
+    kD *= 1.0 - surfaceInput.metallic;
+
+    float3 ambientHemisphere = AMBIENT.rgb * surfaceInput.albedo; // Overriden by IBL if enabled
+    if ( globals.useDiffuseIBL )
+    {
+        const float3 irradiance = diffuseIBL.Sample( bilinearSamplerWrap, CubeVector( surfaceInput.N ) ).rgb;
+        ambientHemisphere = irradiance * surfaceInput.albedo;
+    }
+    kD *= ambientHemisphere;
+	
+    return kD;
+}
+
+
+float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, const surfaceInput_t surfaceInput )
+{
+    const int MaxReflectionLod = 16;
+	
+    float3 specular = float3( 0.0f, 0.0f, 0.0f );
+    if ( globals.useSpecularIBL )
+    {
+        const float3 R = reflect( -surfaceInput.V, surfaceInput.N );
+        const int MipLevels = min( (int)GetTextureLevelsCube( specularIBL ), MaxReflectionLod );
+        const float3 specIBL = specularIBL.SampleLevel( bilinearSamplerWrap, CubeVector( R ), surfaceInput.roughness * MipLevels ).rgb;
+
+        const float2 envBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
+        specular = specIBL * ( surfaceInput.F * envBRDF.x + envBRDF.y );
+    }
+    return specular;
+}
+
+
 #ifdef USE_MRT
 PS_Output_MRT PSMain( PS_Input input )
 #else
@@ -254,26 +290,26 @@ PS_Output PSMain( PS_Input input )
     const uint diffuseIBL = surfaces[ input.objectId ].diffuseIblCubeId;
     const uint specularIBL = surfaces[ input.objectId ].envCubeId;
     const uint brdfLutId = globals.brdfLutId;
-
-    const int MaxReflectionLod = 4;
+	
+    surfaceInput.albedo = albedoSample;
+    surfaceInput.roughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
+    surfaceInput.metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
+    surfaceInput.emissive = emissiveSample;
+    surfaceInput.ao = aoSample;
+    surfaceInput.sheenColor = sheenSample;
+    surfaceInput.sheenRoughness = sheenRoughnessSample;
+    surfaceInput.ccStrength = ccSample;
+    surfaceInput.ccRoughness = ccRoughnessSample;
+    surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
+    surfaceInput.useClearCoat = ( ccSample > 0.0f );
+    surfaceInput.useSheen = any( sheenSample > 0.0f );
 
 	surfaceInput.N = normalize( normal );
 	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );
+    surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
+    surfaceInput.F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
 	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
 	surfaceInput.positionWS = input.worldPosition.xyz;
-	surfaceInput.albedo = albedoSample;
-	surfaceInput.roughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
-	surfaceInput.metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
-	surfaceInput.emissive = emissiveSample;
-	surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
-	surfaceInput.ao = aoSample;
-    surfaceInput.sheenColor = sheenSample;
-    surfaceInput.sheenRoughness = sheenRoughnessSample;
-	surfaceInput.ccStrength = ccSample;
-	surfaceInput.ccRoughness = ccRoughnessSample;
-	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
-    surfaceInput.useClearCoat = ( ccSample > 0.0f );
-    surfaceInput.useSheen = any( sheenSample > 0.0f );
 	
     float3 Lo = float3( 0.0f, 0.0f, 0.0f );
 
@@ -301,30 +337,28 @@ PS_Output PSMain( PS_Input input )
     }
 #endif
 
-    const float3 F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
+    const float3 specularAmbient = EvaluateSpecularAmbient( cubeSamplers[ specularIBL ], texSampler[ brdfLutId ], surfaceInput );
+    const float3 kD = EvaluateDiffuseAmbient( cubeSamplers[ diffuseIBL ], surfaceInput );
+	
+	float3 ccSpecularAmbient = float3( 0.0f, 0.0f, 0.0f );
+	//if ( surfaceInput.useClearCoat )
+	//{
+	//	const float Fc_ibl = ( 0.04f + 0.96f * pow( clamp( 1.0f - surfaceInput.NoV, 0.0f, 1.0f ), 5.0f ) ) * surfaceInput.ccStrength;
 
-	float3 specular = float3( 0.0f, 0.0f, 0.0f );
-	if( globals.useSpecularIBL )
-	{
-		const float3 R = reflect( -surfaceInput.V, surfaceInput.N );
-		const int MipLevels = min((int) GetTextureLevelsCube( cubeSamplers[ specularIBL ] ), MaxReflectionLod );
-		const float3 specIBL = cubeSamplers[ specularIBL ].SampleLevel( bilinearSamplerWrap, CubeVector( R ), surfaceInput.roughness * MipLevels ).rgb;
+	//	//if ( globals.useSpecularIBL )
+	//	{
+	//		const float3 R_cc        = reflect( -surfaceInput.V, surfaceInput.ccNormal );
+	//		const int    ccMipLevels = min( (int)GetTextureLevelsCube( cubeSamplers[ specularIBL ] ), MaxReflectionLod );
+	//		const float3 ccIBL       = cubeSamplers[ specularIBL ].SampleLevel( bilinearSamplerWrap, CubeVector( R_cc ), surfaceInput.ccRoughness * ccMipLevels ).rgb;
+	//		ccSpecularAmbient        = ccIBL * Fc_ibl;
+	//	}
 
-		const float2 envBRDF = texSampler[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
-		specular = specIBL * ( F * envBRDF.x + envBRDF.y );
-	}
+	//	// Attenuate base layers — same energy conservation as direct lighting
+	//	diffuse  *= ( 1.0f - Fc_ibl );
+	//	specular *= ( 1.0f - Fc_ibl ) * ( 1.0f - Fc_ibl );
+	//}
 
-    float3 kS = F;
-    float3 kD = 1.0 - kS;
-	kD *= 1.0 - surfaceInput.metallic;
-
-	float3 diffuse = AMBIENT.rgb * surfaceInput.albedo;
-	if ( globals.useDiffuseIBL )
-	{
-		const float3 irradiance = cubeSamplers[diffuseIBL].Sample(bilinearSamplerWrap, CubeVector( surfaceInput.N ) ).rgb;
-		diffuse = irradiance * surfaceInput.albedo;
-	}
-	const float3 ambient = ( kD * diffuse + specular ) * surfaceInput.ao;
+    const float3 ambient = ( kD + specularAmbient + ccSpecularAmbient ) * surfaceInput.ao;
 
     float4 outColor;
 	outColor.rgb = Lo + ambient + surfaceInput.emissive;
