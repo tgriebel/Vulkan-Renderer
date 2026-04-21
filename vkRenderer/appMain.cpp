@@ -32,7 +32,7 @@ Window								g_window;
 using namespace SysCore;
 
 
-static std::string sceneFile = "chess.json";
+static const char* sceneFile = "chess.json";
 
 #if defined( USE_IMGUI )
 imguiControls_t g_imguiControls;
@@ -74,7 +74,7 @@ MakeCVar( BOOL,		r_writeCubeCapture, false );
 MakeCVar( BOOL,		r_computeDiffuseIbl, false );
 MakeCVar( BOOL,		r_computeSpecularIbl, false );
 MakeCVar( BOOL,		r_computeBrdfLut, false );
-MakeCVar( STRING,	c_scene, "chess.json" );
+MakeCVar( STRING,	c_scene, sceneFile );
 MakeCVar( STRING,	r_cubemapName, "chess" );
 MakeCVar( BOOL,		c_bakeAssets, false );
 MakeCVar( BOOL,		c_loadBakedAssets, true );

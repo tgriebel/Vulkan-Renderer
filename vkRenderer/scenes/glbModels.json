@@ -19,15 +19,15 @@
 	  "type": "2D"
 	},
 	{
-	  "name": "code_assets/chess_env.img",
+	  "name": "code_assets/hall_env.img",
 	  "type": "CUBE"
 	},
 	{
-	  "name": "code_assets/chess_diffuseIbl.img",
+	  "name": "code_assets/hall_diffuseIbl.img",
 	  "type": "CUBE"
 	},
 	{
-	  "name": "code_assets/chess_specIbl.img",
+	  "name": "code_assets/hall_specIbl.img",
 	  "type": "CUBE"
 	}
   ],
@@ -38,7 +38,7 @@
           "DRAWPASS_SKYBOX": { "shader": "Sky", "perms": ["skycube"] }
       },
       "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/chess_env.img"
+          "TEXTURE_SLOT_0" : "code_assets/hall_env.img"
       }
     }
   ],
@@ -50,68 +50,52 @@
   ],
   "camera": [ -17.0, -1.0, 12.0 ],
   "entities": [
-		{
-			"name": "_skybox",
-			"model": "_skybox",
-			"material": "EquirectangularSky",
-			"xyz": [ 0.0, 0.0, 0.0 ],
-			"rx": 0.0,
-			"ry": 0.0,
-			"rz": 0.0,
-			"sx": 1.0,
-			"sy": 1.0,
-			"sz": 1.0
-		},
-		{
-			"name" : "chess_board",
-			"model" : "chess_board.obj",
-			"rz" : 0.0,
-			"sz" : 1.0
-		},
-		{
-			"name" : "ToyCar",
-			"model": "ToyCar.glb",
-			"xyz": [ 4.5, 3.5, 1.5 ],
-			"sx" : 0.01,
-			"sy" : 0.01,
-			"sz" : 0.01,
-			"rx" : 180.0,
-			"ry" : 0.0,
-			"rz" : 180.0
-		},
-		{
-			"name" : "DamagedHelmet",
-			"model": "DamagedHelmet.glb",
-			"xyz": [ -1.5, 3.5, 1.5 ],
-			"sx" : 1.0,
-			"sy" : 1.0,
-			"sz" : 1.0,
-			"rx" : 180.0,
-			"ry" : 0.0,
-			"rz" : 180.0
-		},
-		{
-			"name" : "AnisotropyBarnLamp",
-			"model" : "AnisotropyBarnLamp.glb",
-			"sx" : 10.0,
-			"sy" : 10.0,
-			"sz" : 10.0,
-			"rz" : -45.0
-		},
-		{
-			"name" : "PotOfCoals",
-			"model": "PotOfCoals.glb",
-			"xyz": [ -3.5, 3.5, 0.0 ],
-			"sx" : 10.0,
-			"sy" : 10.0,
-			"sz" : 10.0,
-			"rz" : -90.0
-		},
-		{
-			"name" : "sphere",
-			"model" : "sphere.obj",
-			"hidden": "false",
-			"xyz": [ 0.0, 0.0, 10.0 ]
-		}
+	{
+		"name": "_skybox",
+		"model": "_skybox",
+		"material": "EquirectangularSky",
+		"xyz": [ 0.0, 0.0, 0.0 ],
+		"rotation": [ 0.0, 0.0, 0.0 ],
+		"scale": [ 1.0, 1.0, 1.0 ]
+	},
+	{
+		"name" : "chess_board",
+		"model" : "chess_board.obj",
+		"rotation": [ 0.0, 0.0, 0.0 ],
+		"scale": [ 1.0, 1.0, 1.0 ]
+	},
+	{
+		"name" : "ToyCar",
+		"model": "ToyCar.glb",
+		"xyz": [ 4.5, 3.5, 1.5 ],
+		"rotation": [ 180.0, 0.0, 180.0 ],
+		"scale": [ 0.01, 0.01, 0.01 ]
+	},
+	{
+		"name" : "DamagedHelmet",
+		"model": "DamagedHelmet.glb",
+		"xyz": [ -1.5, 3.5, 1.5 ],
+		"rotation": [ 180.0, 0.0, 180.0 ],
+		"scale": [ 0.01, 0.01, 0.01 ]
+	},
+	{
+		"name" : "AnisotropyBarnLamp",
+		"model" : "AnisotropyBarnLamp.glb",
+		"rotation": [ 0.0, 0.0, -45.0 ],
+		"scale": [ 10.0, 10.0, 10.0 ]
+	},
+	{
+		"name" : "PotOfCoals",
+		"model": "PotOfCoals.glb",
+		"xyz": [ -3.5, 3.5, 0.0 ],
+		"rotation": [ 0.0, 0.0, -90.0 ],
+		"scale": [ 10.0, 10.0, 10.0 ]
+	},
+	{
+		"name" : "sphere",
+		"model" : "sphere.obj",
+		"hidden": "false",
+		"xyz": [ 0.0, 0.0, 10.0 ]
+	}
   ]
 }

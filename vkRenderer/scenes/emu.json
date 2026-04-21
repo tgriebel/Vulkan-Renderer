@@ -199,65 +199,47 @@
   ],
   "entities": [
 	{
-	  "name": "_skybox",
+		"name": "_skybox",
 		"model": "_skybox",
 		"x": [ 0.0, 0.0, 0.0 ],
-	  "rx": 0.0,
-	  "ry": 0.0,
-	  "rz": 0.0,
-	  "sx": 1.0,
-	  "sy": 1.0,
-	  "sz": 1.0
+		"rotation": [ 0.0, 0.0, 0.0 ],
+		"scale": [ 1.0, 1.0, 1.0 ]
 	},
 	{
 	  "name": "grid",
 	  "model": "grid"
 	},
 	{
-	  "name": "tv_0",
+		"name": "tv_0",
 		"model": "tubetv",
 		"xyz": [ 2.460, -0.180, 2.0 ],
-	  "sx": 0.015,
-	  "sy": 0.015,
-	  "sz": 0.015,
-	  "rx": 90.0,
-	  "rz": -90.0
+		"rotation": [ 0.0, 00.0, -90.0 ],
+		"scale": [ 0.015, 0.015, 0.015 ]
 	},
 	{
-	  "name": "plane0",
-	  "model": "plane0",
-	  "x": 2.0,
-	  "y": 1.5,
-	  "z": 2.0,
-	  "rx": 90.0,
-	  "rz": -90.0
+		"name": "plane0",
+		"model": "plane0",
+		"xyz": [ 2.0, 1.5, 2.0 ],
+		"rotation": [ 0.0, 90.0, -90.0 ],
+		"scale": [ 1.0, 1.0, 1.0 ]
 	},
 	{
-	  "name": "plane1",
-	  "model": "plane1",
-	  "x": 2.0,
-	  "y": 0.0,
-	  "z": 2.0,
-	  "rx": 90.0,
-	  "rz": -90.0
+		"name": "plane1",
+		"model": "plane1",
+		"xyz": [ 2.0, 0.0, 2.0 ],
+		"rotation": [ 0.0, 90.0, -90.0 ]
 	},
 	{
-	  "name": "plane2",
-	  "model": "plane2",
-	  "x": 2.0,
-	  "y": -1.5,
-	  "z": 2.0,
-	  "rx": 90.0,
-	  "rz": -90.0
+		"name": "plane2",
+		"model": "plane2",
+		"xyz": [ 2.0, -1.5, 2.0 ],
+		"rotation": [ 0.0, 90.0, -90.0 ]
 	},
 	{
-	  "name": "plane3",
-	  "model": "plane3",
-	  "x": 2.0,
-	  "y": -3.0,
-	  "z": 2.0,
-	  "rx": 90.0,
-	  "rz": -90.0
+		"name": "plane3",
+		"model": "plane3",
+		"xyz": [ 2.0, -3.0, 2.0 ],
+		"rotation": [ 0.0, 90.0, -90.0 ]
 	},
 	{
 	  "name": "sphere",

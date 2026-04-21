@@ -165,18 +165,14 @@
       "model": "_skybox",
       "material": "EquirectangularSky",
       "xyz": [ 0.0, 0.0, 0.0 ],
-      "rx": 0.0,
-      "ry": 0.0,
-      "rz": 0.0,
-      "sx": 1.0,
-      "sy": 1.0,
-      "sz": 1.0
+      "rotation": [ 0.0, 0.0, 0.0 ],
+      "scale": [ 1.0, 1.0, 01.0 ]
     },
 	{
 		"name" : "chess_board",
 		"model" : "chess_board.obj",
-		"rz" : 0.0,
-		"sz" : 1.0
+		"rotation": [ 0.0, 0.0, 0.0 ],
+		"scale": [ 1.0, 1.0, 01.0 ]
 	},
     {
       "name": "sphere",

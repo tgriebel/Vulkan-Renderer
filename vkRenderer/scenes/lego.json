@@ -129,32 +129,24 @@
   ],
   "entities": [
 	{
-	  "name": "_skybox",
-		"model": "_skybox",
-		"xyz": [ 0.0, 0.0, 0.0 ],
-	  "rx": 0.0,
-	  "ry": 0.0,
-	  "rz": 0.0,
-	  "sx": 1.0,
-	  "sy": 1.0,
-	  "sz": 1.0
+		"name": "_skybox",
+		"model": "_skybox"
 	},
 	{
 	  "name": "grid",
 	  "model": "grid"
 	},
 	{
-	  "name": "spyrius",
-	  "model": "spyrius_lego.obj",
-	  "rz": 0.0,
-	  "sx": 0.01,
-	  "sy": 0.01,
-	  "sz": 0.01
+		"name": "spyrius",
+		"model": "spyrius_lego.obj",
+		"xyz": [ 0.0, 0.0, 0.0 ],
+		"rotation": [ 0.0, 0.0, 0.0 ],
+		"scale": [ 0.01, 0.01, 0.01 ]
 	},
 	{
-	  "name": "sphere",
-	  "model": "sphere.obj",
-	  "hidden": "true"
+		"name": "sphere",
+		"model": "sphere.obj",
+		"hidden": "true"
 	}
   ]
 }

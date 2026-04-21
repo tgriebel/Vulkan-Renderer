@@ -47,16 +47,7 @@
   "entities": [
     {
       "name" : "_skybox",
-      "model" : "_skybox",
-	  "x" : 0.0,
-	  "y" : 0.0,
-	  "z" : 0.0,
-	  "rx" : 0.0,
-	  "ry" : 0.0,
-	  "rz" : 0.0,
-	  "sx" : 1.0,
-	  "sy" : 1.0,
-	  "sz" : 1.0
+      "model" : "_skybox"
     },
 	{
       "name" : "grid",
