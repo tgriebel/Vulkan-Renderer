@@ -104,15 +104,10 @@ void ApplyClearcoatBrdf( const surfaceInput_t surfaceInput, lightingInput_t ligh
 
 void ApplySheenBrdf( const surfaceInput_t surfaceInput, lightingInput_t lightingInput, inout brdfSample_t brdf )
 {
-    const float NoV = surfaceInput.NoV;
-    const float NoH = lightingInput.NoH;
-    const float NoL = lightingInput.NoL;
-	
-    const float Dc = D_Charlie( NoH, surfaceInput.sheenRoughness );
-    const float Vc = V_Neubelt( NoV, NoL );
-	
-    brdf.F += surfaceInput.sheenColor;
-    brdf.Fr += ( Dc * Vc ) * brdf.F;
+    const float Dc = D_Charlie( lightingInput.NoH, surfaceInput.sheenRoughness );
+    const float Vc = V_Neubelt( surfaceInput.NoV, lightingInput.NoL );
+
+    brdf.Fr += surfaceInput.sheenColor * Dc * Vc;
 }
 
 
@@ -184,7 +179,7 @@ PS_Output PSMain( PS_Input input )
 			ApplyClearcoatBrdf( surfaceInput, lightingInput, brdf );
         }
         if ( surfaceInput.useSheen ) {
-         //   ApplySheenBrdf( surfaceInput, lightingInput, brdf );
+            ApplySheenBrdf( surfaceInput, lightingInput, brdf );
         }
 		
         float3 Lo_i = ( brdf.Fd + brdf.Fr ) * lightingInput.Li * lightingInput.NoL;
@@ -222,11 +217,37 @@ PS_Output PSMain( PS_Input input )
 	outColor.rgb = Lo + ambient + surfaceInput.emissive;
     outColor.a = material.opacity;
 
-    //outColor.rgb = 0.5f * normalTex + float3( 0.5f, 0.5f, 0.5f );
+//#define ALBEDO_DEBUG
+//#define ROPUGHNESS_DEBUG
+//#define METALLIC_DEBUG
+//#define NML_DEBUG
+//#define UV_DEBUG
+//#define SHEEN_COLOR_DEBUG
+//#define SHEEN_ROUGHNESS_DEBUG
+//#define AO_DEBUG
+//#define EMISSIVE_DEBUG
+    
+#ifdef ALBEDO_DEBUG
+    outColor.rgb = surfaceInput.albedo;
+#elif defined( ROPUGHNESS_DEBUG )
+    outColor.rgb = surfaceInput.roughness;
+#elif defined( METALLIC_DEBUG )
+    outColor.rgb = surfaceInput.metallic;
+#elif defined( NML_DEBUG )
+    outColor.rgb = 0.5f * surfaceInput.N + float3( 0.5f, 0.5f, 0.5f );
+#elif defined( UV_DEBUG )
+    outColor.rgb = float3( input.uv0.xy, 0.0f );
+#elif defined( EMISSIVE_DEBUG )
+    outColor.rgb = surfaceInput.emissive;
+#elif defined( SHEEN_COLOR_DEBUG )
+    outColor.rgb = surfaceInput.sheenColor;
+#elif defined( SHEEN_ROUGHNESS_DEBUG )
+    outColor.rgb = surfaceInput.sheenRoughness;
+#elif defined( AO_DEBUG )
+    outColor.rgb = surfaceInput.ao.rrr;
+#endif
 
 //  outColor.rgb = lightingInput.NoV.xxx;
-//	outColor.rgba = float4( input.uv0.xy, 0.0f, 1.0f );
-//	outColor.rgba = float4( albedoTex.rgb, 1.0f);
 
 #ifdef USE_MRT
     float4 outColor1;

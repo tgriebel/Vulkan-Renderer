@@ -42,7 +42,7 @@ float3 ImportanceSampleGGX( float2 Xi, float3 N, float roughness )
 
 float LuminanceFromRGB( const float3 rgb )
 {
-	return dot( rgb, float3( 0.30f, 0.59f, 0.11f ) );
+	return dot( rgb, float3( 0.2126f, 0.7152f, 0.0722f ) );
 }
 
 #endif
