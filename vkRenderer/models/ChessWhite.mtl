@@ -13,5 +13,5 @@ illum 2
 Pr 0.4
 Pm 0.0
 map_Kd Louro_Freijo_diffuse.png
-map_bump Louro_Freijo_normal.png
-map_Ks Louro_Freijo_Specular.png
+map_Bump Louro_Freijo_normal.png
+map_Pr Louro_Freijo_Specular.png

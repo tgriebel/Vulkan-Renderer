@@ -222,7 +222,7 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	if ( isPbr )
 	{
 		supportedTextures.push_back( loadInfo_t{ material.diffuse_texname, false } );
-		supportedTextures.push_back( loadInfo_t{ material.normal_texname, true } );
+		supportedTextures.push_back( loadInfo_t{ material.bump_texname, true } );
 		supportedTextures.push_back( loadInfo_t{ material.roughness_texname, true } );
 		supportedTextures.push_back( loadInfo_t{ material.metallic_texname, true } );
 	}

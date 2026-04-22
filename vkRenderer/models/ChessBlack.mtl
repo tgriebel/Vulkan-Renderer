@@ -13,5 +13,5 @@ illum 2
 Pr 0.4
 Pm 0.0
 map_Kd NORUS-Diffuse.jpg
-map_bump NORUS-Normal.jpg
-map_Ks NORUS-Bump.jpg
+map_Bump NORUS-Normal.jpg
+map_Pr NORUS-Bump.jpg
