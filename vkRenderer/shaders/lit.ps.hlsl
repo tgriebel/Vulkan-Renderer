@@ -217,37 +217,56 @@ PS_Output PSMain( PS_Input input )
 	outColor.rgb = Lo + ambient + surfaceInput.emissive;
     outColor.a = material.opacity;
 
-//#define ALBEDO_DEBUG
-//#define ROPUGHNESS_DEBUG
-//#define METALLIC_DEBUG
-//#define NML_DEBUG
-//#define UV_DEBUG
-//#define SHEEN_COLOR_DEBUG
-//#define SHEEN_ROUGHNESS_DEBUG
-//#define AO_DEBUG
-//#define EMISSIVE_DEBUG
+#define DEBUG_LIGHTING
     
-#ifdef ALBEDO_DEBUG
-    outColor.rgb = surfaceInput.albedo;
-#elif defined( ROPUGHNESS_DEBUG )
-    outColor.rgb = surfaceInput.roughness;
-#elif defined( METALLIC_DEBUG )
-    outColor.rgb = surfaceInput.metallic;
-#elif defined( NML_DEBUG )
-    outColor.rgb = 0.5f * surfaceInput.N + float3( 0.5f, 0.5f, 0.5f );
-#elif defined( UV_DEBUG )
-    outColor.rgb = float3( input.uv0.xy, 0.0f );
-#elif defined( EMISSIVE_DEBUG )
-    outColor.rgb = surfaceInput.emissive;
-#elif defined( SHEEN_COLOR_DEBUG )
-    outColor.rgb = surfaceInput.sheenColor;
-#elif defined( SHEEN_ROUGHNESS_DEBUG )
-    outColor.rgb = surfaceInput.sheenRoughness;
-#elif defined( AO_DEBUG )
-    outColor.rgb = surfaceInput.ao.rrr;
+#ifdef DEBUG_LIGHTING
+    
+    switch ( globals.debugLightingMode )
+    {
+        case DEBUG_ALBEDO:
+            outColor.rgb = surfaceInput.albedo;
+            break;
+        
+        case DEBUG_ROUGHNESS:
+            outColor.rgb = surfaceInput.roughness;
+            break;
+        
+        case DEBUG_METALLIC:
+            outColor.rgb = surfaceInput.metallic;
+            break;
+        
+        case DEBUG_TBN_NORMAL:
+            outColor.rgb = 0.5f * surfaceInput.tangentNormal + float3( 0.5f, 0.5f, 0.5f );
+            break;
+        
+        case DEBUG_NORMAL:
+            outColor.rgb = 0.5f * surfaceInput.N + float3( 0.5f, 0.5f, 0.5f );
+            break;
+        
+        case DEBUG_INPUT_UV:
+            outColor.rgb = float3( input.uv0.xy, 0.0f );
+            break;
+        
+        case DEBUG_EMISSIVE:
+            outColor.rgb = surfaceInput.emissive;
+            break;
+        
+        case DEBUG_SHEENCOLOR:
+            outColor.rgb = surfaceInput.sheenColor;
+            break;
+        
+        case DEBUG_SHEENROUGHNESS:
+            outColor.rgb = surfaceInput.sheenRoughness;
+            break;
+        
+        case DEBUG_AO:
+            outColor.rgb = surfaceInput.ao.rrr;
+            break;
+        
+        default:
+            break;
+    }
 #endif
-
-//  outColor.rgb = lightingInput.NoV.xxx;
 
 #ifdef USE_MRT
     float4 outColor1;

@@ -96,33 +96,51 @@ enum hgtTextureSlot_t
 };
 
 
+enum gpuDebugLightingMode_t
+{
+	DEBUG_NONE = -1,
+	DEBUG_ALBEDO,
+	DEBUG_ROUGHNESS,
+	DEBUG_METALLIC,
+	DEBUG_TBN_NORMAL,
+	DEBUG_NORMAL,
+	DEBUG_INPUT_UV,
+	DEBUG_EMISSIVE,
+	DEBUG_SHEENCOLOR,
+	DEBUG_SHEENROUGHNESS,
+	DEBUG_AO,
+	DEBUG_LIGHTING_COUNT,
+};
+
+
 struct gpuGlobals_t
 {
-	float4  time;
-	float4  generic;
-	float4  shadowParms;
-	float4  toneMapTint;
-	float4  bloom;
-	float4  exposure;
-	float4  exposure2;
-	float4  dof;
-	float4  chromaticAberration;
-	uint    numSamples;
-	uint    whiteId;
-	uint    blackId;
-	uint    defaultAlbedoId;
-	uint    defaultNormalId;
-	uint    defaultRoughnessId;
-	uint    defaultMetalId;
-	uint    defaultImageId;
-	uint    brdfLutId;
-	uint    isTextured;
-	uint    shadow2dCount;
-	uint    shadowCubeCount;
-	uint    textureCount;
-	uint    materialCount;
-	uint    useDiffuseIBL;
-	uint    useSpecularIBL;
+	float4	time;
+	float4	generic;
+	float4	shadowParms;
+	float4	toneMapTint;
+	float4	bloom;
+	float4	exposure;
+	float4	exposure2;
+	float4	dof;
+	float4	chromaticAberration;
+	uint	numSamples;
+	uint	whiteId;
+	uint	blackId;
+	uint	defaultAlbedoId;
+	uint	defaultNormalId;
+	uint	defaultRoughnessId;
+	uint	defaultMetalId;
+	uint	defaultImageId;
+	uint	brdfLutId;
+	uint	isTextured;
+	uint	shadow2dCount;
+	uint	shadowCubeCount;
+	uint	textureCount;
+	uint	materialCount;
+	uint	useDiffuseIBL;
+	uint	useSpecularIBL;
+	gpuDebugLightingMode_t debugLightingMode;
 };
 
 

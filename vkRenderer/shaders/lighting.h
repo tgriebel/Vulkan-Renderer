@@ -20,6 +20,7 @@ struct surfaceInput_t
 	float3	ccNormal;
 	float3	emissive;
 	float3	sheenColor;
+	float3	tangentNormal;
 	float	NoV;
 	float	roughness;
 	float	metallic;
@@ -242,7 +243,9 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
 	surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
 	surfaceInput.F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
+	
 	surfaceInput.position = input.worldPosition.xyz;
+	surfaceInput.tangentNormal = normalSample;
 
 	return surfaceInput;
 }

@@ -114,6 +114,7 @@ void InitScene( Scene* scene )
 		g_imguiControls.pbr.metalnessBias = 0.0f;
 		g_imguiControls.pbr.useDiffuseIBL = true;
 		g_imguiControls.pbr.useSpecularIBL = true;
+		g_imguiControls.pbr.debugLightingMode = DEBUG_NONE;
 		g_imguiControls.shadowStrength = 0.99f;
 		g_imguiControls.postProcess.toneMapColor[ 0 ] = 1.0f;
 		g_imguiControls.postProcess.toneMapColor[ 1 ] = 1.0f;
@@ -496,6 +497,8 @@ void DrawSceneDebugMenu()
 		ImGui::Checkbox( "Is Textured", &g_imguiControls.isTextured );
 		ImGui::Checkbox( "Use Diffuse IBL", &g_imguiControls.pbr.useDiffuseIBL );
 		ImGui::Checkbox( "Use Specular IBL", &g_imguiControls.pbr.useSpecularIBL );
+
+		ImGui::SliderInt( "DebugLightingMode", &g_imguiControls.pbr.debugLightingMode, -1, gpuDebugLightingMode_t::DEBUG_LIGHTING_COUNT - 1 );
 
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
 		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.pbr.roughnessScale, 0.0f, 1.0f );

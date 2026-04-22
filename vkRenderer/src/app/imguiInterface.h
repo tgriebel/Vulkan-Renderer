@@ -40,12 +40,14 @@ struct postProcessControls_t
 
 struct pbrControls_t
 {
-	float				roughnessScale;
-	float				roughnessBias;
-	float				metalnessScale;
-	float				metalnessBias;
-	bool				useDiffuseIBL;
-	bool				useSpecularIBL;
+	float	roughnessScale;
+	float	roughnessBias;
+	float	metalnessScale;
+	float	metalnessBias;
+	bool	useDiffuseIBL;
+	bool	useSpecularIBL;
+
+	int32_t	debugLightingMode;
 };
 
 

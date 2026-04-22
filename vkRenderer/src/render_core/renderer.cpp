@@ -608,6 +608,7 @@ void Renderer::UpdateBuffers()
 		globals.chromaticAberration = vec4f( postProcess.caEnable ? 1.0f : 0.0f, postProcess.caIntensity, 0.0f, 0.0f );
 		globals.useDiffuseIBL = g_imguiControls.pbr.useDiffuseIBL ? 1 : 0;
 		globals.useSpecularIBL = g_imguiControls.pbr.useSpecularIBL ? 1 : 0;
+		globals.debugLightingMode = static_cast<gpuDebugLightingMode_t>( g_imguiControls.pbr.debugLightingMode );
 #endif
 		globals.numSamples = vk_GetSampleCount( config.mainColorSubSamples );
 		globals.whiteId = rc.whiteImage->gpuImage->GetId();
