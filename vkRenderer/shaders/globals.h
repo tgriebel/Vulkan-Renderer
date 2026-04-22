@@ -22,12 +22,14 @@ int2 GetTextureSize( Texture2D tex, int mipLevel )
     return int2( w, h );
 }
 
+
 uint GetTextureLevels( Texture2D tex )
 {
     uint w, h, levels;
     tex.GetDimensions( 0, w, h, levels );
     return levels;
 }
+
 
 uint GetTextureLevelsCube( TextureCube tex )
 {
@@ -46,6 +48,12 @@ float3 DecodeNormal( const float3 normalMapTexel )
 float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3 B, const float3 N )
 {
 	return normalize( tangentNormal.x * T + tangentNormal.y * B + tangentNormal.z * N );
+}
+
+
+float3 ClampColorFp16( const float3 color )
+{
+	return min( color, 65504.0f );
 }
 
 
