@@ -136,22 +136,14 @@ void InitSceneType( const std::string type, Scene** scene )
 
 void CubeCaptureLoad( Scene* scene )
 {
-	Material cubeHdrMaterial;
-
 	const hdl_t cubemapTextureHdl = AssetLib<GpuProgram>::Handle( r_hdrCubemapSource.GetString() );
 
-	cubeHdrMaterial.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "EquirectangularSampler" ) );
-	cubeHdrMaterial.AddTexture( 0, cubemapTextureHdl );
+	g_assets.GetLib<Image>()->AddDeferred( r_hdrCubemapSource.GetString(), pImgLoader_t( new ImageLoader( TexturePath, r_hdrCubemapSource.GetString(), false ) ) );
 
-	g_assets.GetLib<Image>()->AddDeferred( cubemapTextureHdl, pImgLoader_t( new ImageLoader( TexturePath, r_hdrCubemapSource.GetString(), false ) ) );
+	Material& material = g_assets.GetLib<Material>()->Find( "EquirectangularSky" )->Get();
 
-	const hdl_t materialHdl = g_assets.GetLib<Material>()->Add( "EquirectangularSky", cubeHdrMaterial, true );
-
-	Entity* ent = new Entity();
-	ent->name = "_skybox";
-	ent->materialHdl = materialHdl;
-
-	scene->entities.push_back( ent );
+	material.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "EquirectangularSampler" ) );
+	material.AddTexture( 0, cubemapTextureHdl );
 }
 
 
@@ -215,7 +207,7 @@ int main( int argc, char* argv[] )
 	if( precomputeSkycube )
 	{
 		CubeCaptureLoad( g_scene );
-		r_cubeCapture.Set( true );
+	//	r_cubeCapture.Set( true );
 		g_assets.RunLoadLoop();
 	}
 
@@ -327,7 +319,7 @@ int main( int argc, char* argv[] )
 			g_window.EndFrame();
 
 			if( precomputeSkycube ) {
-				break;
+			//	break;
 			}
 		}
 		g_renderer.Shutdown();

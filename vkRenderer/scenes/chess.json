@@ -166,13 +166,13 @@
       "material": "EquirectangularSky",
       "xyz": [ 0.0, 0.0, 0.0 ],
       "rotation": [ 0.0, 0.0, 0.0 ],
-      "scale": [ 1.0, 1.0, 01.0 ]
+      "scale": [ 1.0, 1.0, 1.0 ]
     },
 	{
 		"name" : "chess_board",
 		"model" : "chess_board.obj",
 		"rotation": [ 0.0, 0.0, 0.0 ],
-		"scale": [ 1.0, 1.0, 01.0 ]
+		"scale": [ 1.0, 1.0, 1.0 ]
 	},
     {
       "name": "sphere",

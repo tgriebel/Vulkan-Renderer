@@ -34,14 +34,6 @@
 	{
 	  "name": "debug_back.jpg",
 	  "type": "2D"
-	},
-	{
-	  "name": "code_assets/hdrEnvmap.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "mirrored_hall_4k.hdr",
-	  "type": "2D"
 	}
   ],
   "materials": [
@@ -58,8 +50,20 @@
 			"CUBE_FRONT_MAP_SLOT": "debug_front.jpg",
 			"CUBE_BACK_MAP_SLOT": "debug_back.jpg"
 		}
+	},
+	{
+	  "name": "EquirectangularSky",
+	  "shaders": {
+		"DRAWPASS_SKYBOX": { "shader": "EquirectangularSampler", "perms": [""] }
+	  }
 	}
   ],
   "camera": [ 0.0, 0.0, 0.0 ],
-  "entities": []
+  "entities": [
+  	{
+	  "name": "_skybox",
+	  "model": "_skybox",
+	  "material": "EquirectangularSky"
+	}
+  ]
 }

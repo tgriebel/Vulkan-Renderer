@@ -128,7 +128,7 @@ public:
 	void Set( const char* string )
 	{
 		assert( type == Type::STRING );
-		assert( strlen( string ) < 32 );
+		assert( strlen( string ) < MaxStringLength );
 		if ( type == Type::STRING )
 		{
 			valid = true;
