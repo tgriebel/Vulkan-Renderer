@@ -91,7 +91,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	float ccRoughnessSample = clamp( material.clearcoatRoughness, 0.089, 1.0 );
 	float3 ccNormalSample = float3( 0.0f, 0.0f, 1.0f );
 	float3 sheenSample = material.sheenColor;
-	float sheenRoughnessSample = material.sheen;
+	float sheenRoughnessSample = clamp( material.sheenRoughness, 0.07f, 1.0f );
 	float anisotropySample = material.anisotropy;
 	float transmissionSample = material.transmissionFactor;
 
@@ -194,7 +194,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	surfaceInput.ccRoughness = ccRoughnessSample;
 	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
 	surfaceInput.useClearCoat = ( ccSample > 0.0f );
-	surfaceInput.useSheen = any( sheenSample > 0.0f );
+	surfaceInput.useSheen = any( sheenSample > 0.0f ) && ( sheenRoughnessSample > 0.0f );
 
 	surfaceInput.N = normalize( normal );
 	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );

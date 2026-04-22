@@ -686,7 +686,7 @@ int ParseMaterialObject( parseState_t& st, void* object, uint32_t offset )
 		{ "sheenColorR",		&mParms.sheenColor.r,		sizeof( float ),	1,	&ParseFloatObject },
 		{ "sheenColorG",		&mParms.sheenColor.g,		sizeof( float ),	1,	&ParseFloatObject },
 		{ "sheenColorB",		&mParms.sheenColor.b,		sizeof( float ),	1,	&ParseFloatObject },
-		{ "sheen",				&mParms.sheen,				sizeof( float ),	1,	&ParseFloatObject },
+		{ "sheen",				&mParms.sheenRoughness,				sizeof( float ),	1,	&ParseFloatObject },
 		{ "transmissionFactor",	&mParms.transmissionFactor,	sizeof( float ),	1,	&ParseFloatObject },
 		{ "emissiveStrength",	&mParms.emissiveStrength,	sizeof( float ),	1,	&ParseFloatObject },
 		{ "shaders",			&m,							sizeof( Material ),	1,	&ParseMaterialShaderObject },

@@ -80,7 +80,7 @@ void SerializeStruct( Serializer* s, materialParms_t& p )
 	s->Next( p.alphaCutoff );
 	SerializeStruct( s, p.sheenColor );
 	s->Next( p.ior );
-	s->Next( p.sheen );
+	s->Next( p.sheenRoughness );
 	s->Next( p.roughness ); 
 	s->Next( p.metalness ); 
 	s->Next( p.clearcoatWeight );

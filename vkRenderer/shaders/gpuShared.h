@@ -123,40 +123,49 @@ struct gpuGlobals_t
 };
 
 
+struct gpuUvTransform_t
+{
+	float2 scale;
+	float2 offset;
+};
+
+
 struct gpuMaterial_t
 {
-	float3  albedo;
-	float   opacity;
-	float3  Ka;
-	float   Ns;
-	float3  Ke;
-	float   illum;
-	float3  Ks;
-	float   emissiveStrength;
-	float3  Tf;
-	float	alphaCutoff;
-	float3  sheenColor;
-	float	ior;
-	float	sheen;
-	float	roughness;
-	float	metalness;
-	float	clearcoatWeight;
-	float	clearcoatRoughness;
-	float	anisotropy;
-	float	anisotropyRotation;
-	float	transmissionFactor;
+	float3				albedo;
+	float				opacity;
+	float3				Ka;
+	float				Ns;
+	float3				Ke;
+	float				illum;
+	float3				Ks;
+	float				emissiveStrength;
+	float3				Tf;
+	float				alphaCutoff;
+	float3				sheenColor;
+	float				ior;
+	float				sheenRoughness;
+	float				roughness;
+	float				metalness;
+	float				clearcoatWeight;
+	float				clearcoatRoughness;
+	float				anisotropy;
+	float				anisotropyRotation;
+	float				transmissionFactor;
 	// 128 bytes
-	uint    textured;
-	uint    pad0;
-	uint    pad1;
-	uint    pad2;
+	uint				textured;
+	uint				pad0;
+	uint				pad1;
+	uint				pad2;
 	// 144 bytes
-	int     textureId[ MaxMaterialTextures ];
+	int					textureId[ MaxMaterialTextures ];
 	// 208 bytes
+	gpuUvTransform_t	uvTransform[ MaxMaterialTextures ];
+	// 464 bytes
 	uint    extraData[ MaxMaterialExtraDataBytes / 4 ]; // HLSL doesn't have an 8-bit type
 };
 #ifdef SHADER_STRUCTS_CPP
-static_assert( sizeof( gpuMaterial_t ) == 464 );
+static_assert( sizeof( gpuMaterial_t ) == 720 );
 #endif
 
 struct gpuLight_t

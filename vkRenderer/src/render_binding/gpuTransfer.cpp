@@ -235,7 +235,7 @@ void Renderer::UpdateGpuMaterials()
 		materialObject.emissiveStrength = parms.emissiveStrength;
 		materialObject.alphaCutoff = parms.alphaCutoff;
 		materialObject.ior = parms.ior;
-		materialObject.sheen = parms.sheen;
+		materialObject.sheenRoughness = parms.sheenRoughness;
 		materialObject.roughness = parms.roughness;
 		materialObject.metalness = parms.metalness;
 		materialObject.clearcoatWeight = parms.clearcoatWeight;

@@ -257,10 +257,9 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 	EditFloatValue( emissiveStrength );
 	EditFloatValue( alphaCutoff );
 	EditFloatValue( ior );
-	EditFloatValue( sheen );
 	EditFloatValue( roughness );
 	EditFloatValue( metalness );
-	EditFloatValue( sheen );
+	EditFloatValue( sheenRoughness );
 	EditFloatValue( clearcoatWeight );
 	EditFloatValue( clearcoatRoughness );
 	EditFloatValue( anisotropy );

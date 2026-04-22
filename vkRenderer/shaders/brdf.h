@@ -137,6 +137,6 @@ float D_Charlie( const float NoH, const float roughness )
 
 float V_Neubelt( const float NoV, const float NoL )
 {
-	return 1.0f / ( 4.0f * ( NoL + NoV - NoL * NoV ) );
+	return saturate( 1.0f / ( 4.0f * ( NoL + NoV - NoL * NoV ) + 0.00001f ) );
 }
 #endif

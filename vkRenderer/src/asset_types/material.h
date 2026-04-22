@@ -71,7 +71,7 @@ struct materialParms_t
 {
 	materialParms_t() : opacity( 1.0f ), Ns( 0.0f ), ior( 1.5f ),
 						illum( 0.0f ), roughness( 1.0f ), metalness( 0.0f ),
-						sheen( 0.0f ), clearcoatWeight( 0.0f ), clearcoatRoughness( 0.0f ),
+						sheenRoughness( 0.0f ), clearcoatWeight( 0.0f ), clearcoatRoughness( 0.0f ),
 						anisotropy( 0.0f ), anisotropyRotation( 0.0f ), transmissionFactor( 0.0f ),
 						emissiveStrength( 1.0f ), alphaCutoff( 0.5f )
 	{}
@@ -88,7 +88,7 @@ struct materialParms_t
 	float		alphaCutoff;		// Alpha-mask
 	rgb32_t		sheenColor;			// Sheen color
 	float		ior;				// Index-of-refraction
-	float		sheen;				// Sheen roughness
+	float		sheenRoughness;				// Sheen roughness
 	float		roughness;			// GGX roughness
 	float		metalness;			// GGX metalness
 	float		clearcoatWeight;	// GGX clearcoat intensity

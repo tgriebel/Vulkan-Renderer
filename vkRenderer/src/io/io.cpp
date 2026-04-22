@@ -287,7 +287,7 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	{
 		parms.roughness				= material.roughness;
 		parms.metalness				= material.metallic;
-		parms.sheen					= material.sheen;
+		parms.sheenRoughness					= material.sheen;
 		parms.clearcoatWeight		= material.clearcoat_thickness;
 		parms.clearcoatRoughness	= material.clearcoat_roughness;
 		parms.anisotropy			= material.anisotropy;
@@ -654,7 +654,7 @@ static Material TranslateGltfMaterial( AssetManager& assets, const cgltf_materia
 		parms.sheenColor = rgb32_t( mat.sheen.sheen_color_factor[ 0 ],
 									mat.sheen.sheen_color_factor[ 1 ],
 									mat.sheen.sheen_color_factor[ 2 ] );
-		parms.sheen = mat.sheen.sheen_roughness_factor;
+		parms.sheenRoughness = mat.sheen.sheen_roughness_factor;
 	}
 
 	if ( mat.has_anisotropy )

@@ -30,7 +30,7 @@ brdfSample_t EvaluateBaseBrdf( const surfaceInput_t surfaceInput, lightingInput_
 	kD *= 1.0f - metallic;
 
 	float3 numerator = Dc * Gc * Fc;
-	float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.0001f;
+	float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.00001f;
 	
     brdfSample_t brdf;
 	
