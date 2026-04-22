@@ -1,4 +1,6 @@
 #include "globals.h"
+#include "color.h"
+#include "lightUtil.h"
 
 struct ImageShaderTask
 {
@@ -8,29 +10,10 @@ struct ImageShaderTask
 };
 
 
-float3 PowVec3( float3 v, float p )
-{
-    return float3( pow( v.x, p ), pow( v.y, p ), pow( v.z, p ) );
-}
-
-
-const float invGamma = 1.0 / 2.2;
-float3 ToSRGB( float3 v )
-{
-    return PowVec3( v, invGamma );
-}
-
-
-float RGBToLuminance( float3 col )
-{
-    return dot( col, float3( 0.2126f, 0.7152f, 0.0722f ) );
-}
-
-
 float KarisAverage( float3 col )
 {
     // Formula is 1 / (1 + luma)
-    float luma = RGBToLuminance( ToSRGB( col ) ) * 0.25f;
+    float luma = LuminanceFromRGB( LinearToSrgb( col ) ) * 0.25f;
     return 1.0f / ( 1.0f + luma );
 }
 
