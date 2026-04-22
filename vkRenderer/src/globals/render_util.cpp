@@ -171,7 +171,7 @@ bool SkyBoxLoader::Load( Asset<Model>& modelAsset )
 	model.surfs.resize( model.surfCount );
 	CopyGeoBuilderResult( gb, model.surfs[ 0 ], model.bounds );
 
-	model.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( "SKY" );
+	model.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( "_sky" );
 
 	return true;
 }

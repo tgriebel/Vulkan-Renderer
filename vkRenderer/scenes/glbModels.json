@@ -3,9 +3,7 @@
   "type": "scene",
   "reflink" : "shaders_common.json",
   "reflink" : "image_common.json",
-  "envMap" : "code_assets/chapel_env.img",
-  "diffuseIblMap" : "code_assets/chapel_diffuseIbl.img",
-  "specIblMap" : "code_assets/chapel_specIbl.img",
+  "skyName" : "ferndalestudio",
   "shaders": [
     {
 	  "name": "EquirectangularSampler",
@@ -17,18 +15,6 @@
     {
 	  "name": "checker.png",
 	  "type": "2D"
-	},
-	{
-	  "name": "code_assets/chapel_env.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chapel_diffuseIbl.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chapel_specIbl.img",
-	  "type": "CUBE"
 	}
   ],
   "materials": [
@@ -76,7 +62,7 @@
 		"model": "DamagedHelmet.glb",
 		"xyz": [ -1.5, 3.5, 1.5 ],
 		"rotation": [ 180.0, 0.0, 180.0 ],
-		"scale": [ 0.01, 0.01, 0.01 ]
+		"scale": [ 1.0, 1.0, 1.0 ]
 	},
 	{
 		"name" : "AnisotropyBarnLamp",

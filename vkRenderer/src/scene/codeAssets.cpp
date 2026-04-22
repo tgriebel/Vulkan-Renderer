@@ -197,6 +197,13 @@ void CreateCodeAssets()
 			material.AddShader( DRAWPASS_DEBUG_3D, AssetLibGpuProgram::Handle( "DebugSolid" ) );
 			MaterialLib().Add( "DEBUG_3D", material );
 		}
+
+		{
+			Material material;
+			material.AddShader( DRAWPASS_SKYBOX, AssetLibGpuProgram::Handle( "Sky" ), (uint32_t)shaderPermId_t::SKY_CUBE_SAMPLER );
+			MaterialLib().Add( "_sky", material );
+		}
+
 		MaterialLib().SetDefault( "_defaultMaterial" );
 	}
 

@@ -1,81 +1,33 @@
 {
   "sceneClass": "chess",
   "type": "scene",
-  "reflink" : "shaders_common.json",
-  "reflink" : "image_common.json",
-  "envMap" : "code_assets/chapel_env.img",
-  "diffuseIblMap" : "code_assets/chapel_diffuseIbl.img",
-  "specIblMap" : "code_assets/chapel_specIbl.img",
+  "reflink": "shaders_common.json",
+  "reflink": "image_common.json",
+  "skyName": "chapel",
   "shaders": [
     {
-	  "name": "EquirectangularSampler",
-	  "vs": "simple",
-	  "ps": "equirectangularSky"
+      "name": "EquirectangularSampler",
+      "vs": "simple",
+      "ps": "equirectangularSky"
     }
   ],
   "images": [
     {
-	  "name": "checker.png",
-	  "type": "2D"
-	},
-	{
-	  "name": "sapeli.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "white.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "black.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_right.jpg",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
-	},
-	{
-	  "name": "chapel_left.jpg",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
-	},
-	{
-	  "name": "chapel_top.jpg",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
-	},
-	{
-	  "name": "chapel_bottom.jpg",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
-	},
-	{
-	  "name": "chapel_front.jpg",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
-	},
-	{
-	  "name": "chapel_back.jpg",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
-	},
-	{
-	  "name": "chapel_low.jpg",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chapel_env.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chapel_diffuseIbl.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chapel_specIbl.img",
-	  "type": "CUBE"
-	}
+      "name": "checker.png",
+      "type": "2D"
+    },
+    {
+      "name": "sapeli.jpg",
+      "type": "2D"
+    },
+    {
+      "name": "white.jpg",
+      "type": "2D"
+    },
+    {
+      "name": "black.jpg",
+      "type": "2D"
+    }
   ],
   "materials": [
     {
@@ -91,89 +43,99 @@
       "ior": 0.0,
       "illum": 0.0,
       "shaders": {
-          "DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
-          "DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
-          "DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] }
-      },
-	  "textures": {
-		  "GGX_ALBEDO_MAP_SLOT" : "sapeli.jpg"
-	  }
-    },
-	{
-      "name": "GlowSquare",
-      "shaders": {
-          "DRAWPASS_TRANS": { "shader": "LitTrans", "perms": [""] },
-          "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
-      }
-    },
-	{
-      "name": "EquirectangularSky",
-      "shaders": {
-          "DRAWPASS_SKYBOX": { "shader": "Sky", "perms": ["skycube"] }
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [ "" ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [ "" ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [ "" ]
+        }
       },
       "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/chapel_env.img"
+        "GGX_ALBEDO_MAP_SLOT": "sapeli.jpg"
+      }
+    },
+    {
+      "name": "GlowSquare",
+      "shaders": {
+        "DRAWPASS_TRANS": {
+          "shader": "LitTrans",
+          "perms": [ "" ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [ "" ]
+        }
+      }
+    },
+    {
+      "name": "EquirectangularSky",
+      "shaders": {
+        "DRAWPASS_SKYBOX": {
+          "shader": "Sky",
+          "perms": [ "skycube" ]
+        }
+      },
+      "textures": {
+        "TEXTURE_SLOT_0": "chapel_env.img"
       }
     }
   ],
   "models": [
-  	{
-      "name" : "cube",
-      "model" : "cube.obj"
+    {
+      "name": "cube",
+      "model": "cube.obj"
     },
-	{
-      "name" : "diamond",
-      "model" : "diamond.obj"
+    {
+      "name": "diamond",
+      "model": "diamond.obj"
     },
-	{
-      "name" : "pawn",
-      "model" : "pawn.obj"
+    {
+      "name": "pawn",
+      "model": "pawn.obj"
     },
-	{
-      "name" : "rook",
-      "model" : "rook.obj"
+    {
+      "name": "rook",
+      "model": "rook.obj"
     },
-	{
-      "name" : "knight",
-      "model" : "knight.obj"
+    {
+      "name": "knight",
+      "model": "knight.obj"
     },
-	{
-      "name" : "bishop",
-      "model" : "bishop.obj"
+    {
+      "name": "bishop",
+      "model": "bishop.obj"
     },
-	{
-      "name" : "king",
-      "model" : "king.obj"
+    {
+      "name": "king",
+      "model": "king.obj"
     },
-	{
-      "name" : "queen",
-      "model" : "queen.obj"
+    {
+      "name": "queen",
+      "model": "queen.obj"
     },
-	{
-      "name" : "plane",
-      "model" : "plane.obj"
+    {
+      "name": "plane",
+      "model": "plane.obj"
     },
-	{
-      "name" : "axis",
-      "model" : "axis.obj"
+    {
+      "name": "axis",
+      "model": "axis.obj"
     }
   ],
   "camera": [ -17.0, -1.0, 12.0 ],
   "entities": [
     {
-      "name": "_skybox",
-      "model": "_skybox",
-      "material": "EquirectangularSky",
-      "xyz": [ 0.0, 0.0, 0.0 ],
+      "name": "chess_board",
+      "model": "chess_board.obj",
       "rotation": [ 0.0, 0.0, 0.0 ],
       "scale": [ 1.0, 1.0, 1.0 ]
     },
-	{
-		"name" : "chess_board",
-		"model" : "chess_board.obj",
-		"rotation": [ 0.0, 0.0, 0.0 ],
-		"scale": [ 1.0, 1.0, 1.0 ]
-	},
     {
       "name": "sphere",
       "model": "sphere.obj",

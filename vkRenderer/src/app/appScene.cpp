@@ -64,6 +64,22 @@ void InitScene( Scene* scene )
 		scene->entities.push_back( ent );
 	}
 
+	// Sky Entity
+	{
+		hdl_t skyBox = ModelLib().AddDeferred( "_skybox", loader_t( new SkyBoxLoader() ) );
+		Asset<Model>* skyModelAsset = ModelLib().Find( skyBox );
+		skyModelAsset->Load();
+
+		Material& skyMaterial = MaterialLib().Find( "_sky" )->Get();
+		skyMaterial.AddTexture( 0, TextureLib().RetrieveHdl( scene->envMap.c_str() ) );
+
+		Entity* ent = new Entity();
+		scene->CreateEntityBounds( ModelLib().RetrieveHdl( "_skybox" ), *ent );
+		ent->name = "_sky";
+		ent->SetFlag( ENT_FLAG_CAMERA_LOCKED );
+		scene->entities.push_back( ent );
+	}
+
 	{
 		scene->lights.resize( 3 );
 		scene->lights[ 0 ].pos = vec4f( 0.0f, 0.0f, 6.0f, 0.0f );
@@ -225,9 +241,6 @@ void UpdateScene( Scene* scene )
 		scene->entities[ i ]->envMap = TextureLib().RetrieveHdl( scene->specIblMap.c_str() );
 		scene->entities[ i ]->diffuseIblMap = TextureLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
-
-	// Skybox
-	scene->FindEntity( "_skybox" )->SetFlag( ENT_FLAG_CAMERA_LOCKED );	
 
 	{
 		Entity* ent = scene->FindEntity( "_quadTexDebug" );

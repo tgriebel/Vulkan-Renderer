@@ -1,152 +1,152 @@
 {
-  "sceneClass": "lego",
-  "type": "scene",
-  "reflink": "shaders_common.json",
-  "reflink": "image_common.json",
-  "envMap" : "code_assets/chess_env.img",
-  "diffuseIblMap" : "code_assets/chess_diffuseIbl.img",
-  "specIblMap" : "code_assets/chess_specIbl.img",
-  "images": [
-	{
-	  "name": "checker.png",
-	  "type": "2D"
-	},
-	{
-	  "name": "sapeli.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "white.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "black.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "grid.png",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_right.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_left.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_top.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_bottom.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_front.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_back.jpg",
-	  "type": "2D"
-	},
-	{
-	  "name": "chapel_low.jpg",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chess_env.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chess_diffuseIbl.img",
-	  "type": "CUBE"
-	},
-	{
-	  "name": "code_assets/chess_specIbl.img",
-	  "type": "CUBE"
-	}
-  ],
-  "materials": [
-	{
-	  "name": "Grid",
-	  "KdR": 1.0,
-	  "KdG": 1.0,
-	  "KdB": 1.0,
-	  "opacity": 1.0,
-	  "ns": 0.0,
-	  "ior": 0.0,
-	  "illum": 0.0,
-	  "shaders": {
-		"DRAWPASS_SHADOW": { "shader": "Shadow", "perms": [""] },
-		"DRAWPASS_DEPTH": { "shader": "LitDepth", "perms": [""] },
-		"DRAWPASS_OPAQUE": { "shader": "LitOpaque", "perms": [""] },
-		"DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
-	  },
-	  "textures": {
-		"GGX_ALBEDO_MAP_SLOT": "grid.png"
-	  }
-	},
-	{
-	  "name": "SKY",
-	  "shaders": {
-		"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
-	  },
-	  "textures":
-	  {
-		"CUBE_RIGHT_MAP_SLOT": "skybox80s.png",
-		"CUBE_LEFT_MAP_SLOT": "skybox80s.png",
-		"CUBE_TOP_MAP_SLOT": "skybox80s.png",
-		"CUBE_BOTTOM_MAP_SLOT": "skybox80s.png",
-		"CUBE_FRONT_MAP_SLOT": "skybox80s.png",
-		"CUBE_BACK_MAP_SLOT": "skybox80s.png"
-	  }
-	}
-  ],
-  "models": [
-	{
-	  "name": "cube",
-	  "model": "cube.obj"
-	},
-	{
-	  "name": "plane",
-	  "model": "plane.obj"
-	},
-	{
-	  "name": "axis",
-	  "model": "axis.obj"
-	},
-	{
-	  "name": "grid",
-	  "model": "_terrain",
-	  "argStr0": "Grid",
-	  "argInt0": 100,
-	  "argInt1": 100,
-	  "argFlt0": 1.0,
-	  "argFlt1": 100.0
-	}
-  ],
-  "entities": [
-	{
-		"name": "_skybox",
-		"model": "_skybox"
-	},
-	{
-	  "name": "grid",
-	  "model": "grid"
-	},
-	{
-		"name": "spyrius",
-		"model": "spyrius_lego.obj",
-		"xyz": [ 0.0, 0.0, 0.0 ],
-		"rotation": [ 0.0, 0.0, 0.0 ],
-		"scale": [ 0.01, 0.01, 0.01 ]
-	},
-	{
-		"name": "sphere",
-		"model": "sphere.obj",
-		"hidden": "true"
-	}
-  ]
+	"sceneClass": "lego",
+	"type": "scene",
+	"reflink": "shaders_common.json",
+	"reflink": "image_common.json",
+	"skyName": "chapel",
+	"images": [
+		{
+			"name": "checker.png",
+			"type": "2D"
+		},
+		{
+			"name": "sapeli.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "white.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "black.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "grid.png",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_right.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_left.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_top.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_bottom.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_front.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_back.jpg",
+			"type": "2D"
+		},
+		{
+			"name": "chapel_low.jpg",
+			"type": "CUBE"
+		}
+	],
+	"materials": [
+		{
+			"name": "Grid",
+			"KdR": 1.0,
+			"KdG": 1.0,
+			"KdB": 1.0,
+			"opacity": 1.0,
+			"ns": 0.0,
+			"ior": 0.0,
+			"illum": 0.0,
+			"shaders": {
+				"DRAWPASS_SHADOW": {
+					"shader": "Shadow",
+					"perms": [ "" ]
+				},
+				"DRAWPASS_DEPTH": {
+					"shader": "LitDepth",
+					"perms": [ "" ]
+				},
+				"DRAWPASS_OPAQUE": {
+					"shader": "LitOpaque",
+					"perms": [ "" ]
+				},
+				"DRAWPASS_DEBUG_WIREFRAME": {
+					"shader": "Debug",
+					"perms": [ "" ]
+				}
+			},
+			"textures": {
+				"GGX_ALBEDO_MAP_SLOT": "grid.png"
+			}
+		},
+		{
+			"name": "SKY",
+			"shaders": {
+				"DRAWPASS_SKYBOX": {
+					"shader": "Sky",
+					"perms": [ "" ]
+				}
+			},
+			"textures": {
+				"CUBE_RIGHT_MAP_SLOT": "skybox80s.png",
+				"CUBE_LEFT_MAP_SLOT": "skybox80s.png",
+				"CUBE_TOP_MAP_SLOT": "skybox80s.png",
+				"CUBE_BOTTOM_MAP_SLOT": "skybox80s.png",
+				"CUBE_FRONT_MAP_SLOT": "skybox80s.png",
+				"CUBE_BACK_MAP_SLOT": "skybox80s.png"
+			}
+		}
+	],
+	"models": [
+		{
+			"name": "cube",
+			"model": "cube.obj"
+		},
+		{
+			"name": "plane",
+			"model": "plane.obj"
+		},
+		{
+			"name": "axis",
+			"model": "axis.obj"
+		},
+		{
+			"name": "grid",
+			"model": "_terrain",
+			"argStr0": "Grid",
+			"argInt0": 100,
+			"argInt1": 100,
+			"argFlt0": 1.0,
+			"argFlt1": 100.0
+		}
+	],
+	"entities": [
+		{
+			"name": "_skybox",
+			"model": "_skybox"
+		},
+		{
+			"name": "grid",
+			"model": "grid"
+		},
+		{
+			"name": "spyrius",
+			"model": "spyrius_lego.obj",
+			"xyz": [ 0.0, 0.0, 0.0 ],
+			"rotation": [ 0.0, 0.0, 0.0 ],
+			"scale": [ 0.01, 0.01, 0.01 ]
+		},
+		{
+			"name": "sphere",
+			"model": "sphere.obj",
+			"hidden": "true"
+		}
+	]
 }

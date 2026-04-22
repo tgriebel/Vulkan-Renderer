@@ -142,7 +142,7 @@ void CubeCaptureLoad( Scene* scene )
 
 	g_assets.GetLib<Image>()->AddDeferred( r_hdrCubemapSource.GetString(), pImgLoader_t( new ImageLoader( TexturePath, r_hdrCubemapSource.GetString(), false ) ) );
 
-	Material& material = g_assets.GetLib<Material>()->Find( "EquirectangularSky" )->Get();
+	Material& material = g_assets.GetLib<Material>()->Find( "_sky" )->Get();
 
 	material.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "EquirectangularSampler" ) );
 	material.AddTexture( 0, cubemapTextureHdl );

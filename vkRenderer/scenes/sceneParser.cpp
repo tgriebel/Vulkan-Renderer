@@ -933,24 +933,21 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 	st.tx = 0;
 	st.scene = *scene;
 
-	char envMap[ TOKEN_LEN ] = "";
-	char diffuseIblMap[ TOKEN_LEN ] = "";
-	char specIblMap[ TOKEN_LEN ] = "";
+	char skyName[ TOKEN_LEN ] = "";
+
 	vectorObject_t cameraPosition = { vec3f( 0.0f, 0.0f, 0.0f ), false };
 
 	const uint32_t trashBufferSize = COUNTARRAY( trashBuffer );
 
 	assert( trashBufferSize >= file.size() );
 
-	const uint32_t objectCount = 12;
+	const uint32_t objectCount = 10;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "sceneClass",		&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
 		{ "type",			&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
 		{ "reflink",		&trashBuffer,						trashBufferSize,					1,										&ParseStringObject },
-		{ "envMap",			&envMap,							TOKEN_LEN,							1,										&ParseStringObject },
-		{ "diffuseIblMap",	&diffuseIblMap,						TOKEN_LEN,							1,										&ParseStringObject },
-		{ "specIblMap",		&specIblMap,						TOKEN_LEN,							1,										&ParseStringObject },
+		{ "skyName",		&skyName,							TOKEN_LEN,							1,										&ParseStringObject },
 		{ "camera",			&cameraPosition,					sizeof( float ),					3,										&ParseVectorObject },
 		{ "shaders",		st.assets->GetLib<GpuProgram>(),	sizeof( AssetLib<GpuProgram>* ),	1,										&ParseShaderObject },
 		{ "images",			st.assets->GetLib<Image>(),			sizeof( AssetLib<Image>* ),			1,										&ParseImageObject },
@@ -963,10 +960,35 @@ void ParseJson( const std::string& fileName, Scene** scene, AssetManager* assets
 
 	if( sceneInitializer != nullptr )
 	{
-		( *scene )->envMap = envMap;
-		( *scene )->diffuseIblMap = diffuseIblMap;
-		( *scene )->specIblMap = specIblMap;
+		std::string skyBaseName = std::string( skyName );
 
+		const bool hasSky = ( skyBaseName.empty() == false );
+
+		if( hasSky )
+		{
+			const uint32_t skyImageCount = 3;
+
+			const std::string codeImagePath = TexturePath + CodeAssetPath;
+			const std::string skyImages[ skyImageCount ] =
+			{
+				skyBaseName + "_env.img",
+				skyBaseName + "_diffuseIbl.img",
+				skyBaseName + "_specIbl.img"
+			};
+
+			( *scene )->envMap = skyImages[ 0 ];
+			( *scene )->diffuseIblMap = skyImages[ 1 ];
+			( *scene )->specIblMap = skyImages[ 2 ];
+
+			for( uint32_t skyImageIx = 0; skyImageIx < skyImageCount; ++skyImageIx )
+			{
+				st.assets->GetLib<Image>()->AddDeferred(
+					skyImages[ skyImageIx ].c_str(),
+					pImgLoader_t( new ImageLoader( codeImagePath, skyImages[ skyImageIx ], false ) )
+				);
+			}
+		}
+		
 		if( cameraPosition.isSet && ( ( *scene )->mainCamera != nullptr ) )
 		{
 			( *scene )->mainCamera->SetPosition( cameraPosition.v );

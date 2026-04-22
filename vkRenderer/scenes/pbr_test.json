@@ -3,2685 +3,2662 @@
   "type": "scene",
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
-  "envMap": "code_assets/ferndalestudio_env.img",
-  "diffuseIblMap": "code_assets/ferndalestudio_diffuseIbl.img",
-  "specIblMap": "code_assets/ferndalestudio_specIbl.img",
+  "skyName": "ferndalestudio",
   "shaders": [
-      {
-          "name": "EquirectangularSampler",
-          "vs": "simple",
-          "ps": "equirectangularSky"
-      }
+    {
+      "name": "EquirectangularSampler",
+      "vs": "simple",
+      "ps": "equirectangularSky"
+    }
   ],
-  "images": [
-      {
-          "name": "code_assets/ferndalestudio_env.img",
-          "type": "CUBE"
-      },
-      {
-          "name": "code_assets/ferndalestudio_diffuseIbl.img",
-          "type": "CUBE"
-      },
-      {
-          "name": "code_assets/ferndalestudio_specIbl.img",
-          "type": "CUBE"
-      }
-  ],
+  "images": [],
   "camera": [ -25.0, 5.0, 10.0 ],
   "materials": [
-      {
-          "name": "EquirectangularSky",
-          "shaders": {
-              "DRAWPASS_SKYBOX": {
-                  "shader": "Sky",
-                  "perms": [
-                      "skycube"
-                  ]
-              }
-          },
-          "textures": {
-              "TEXTURE_SLOT_0": "code_assets/ferndalestudio_env.img"
-          }
-      },
-      {
-          "name": "PBR_R0_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M0",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M1",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.143,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M2",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.286,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M3",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.429,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M4",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.571,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M5",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.714,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M6",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 0.857,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R0_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.0,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R1_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.143,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R2_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.286,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R3_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.429,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R4_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.571,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R5_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.714,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R6_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 0.857,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
-      },
-      {
-          "name": "PBR_R7_M7",
-          "KdR": 0.5,
-          "KdG": 0.01,
-          "KdB": 0.01,
-          "roughness": 1.0,
-          "metalness": 1.0,
-          "opacity": 1.0,
-          "shaders": {
-              "DRAWPASS_SHADOW": {
-                  "shader": "Shadow",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEPTH": {
-                  "shader": "LitDepth",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_OPAQUE": {
-                  "shader": "LitOpaque",
-                  "perms": [
-                      ""
-                  ]
-              },
-              "DRAWPASS_DEBUG_WIREFRAME": {
-                  "shader": "Debug",
-                  "perms": [
-                      ""
-                  ]
-              }
-          }
+    {
+      "name": "EquirectangularSky",
+      "shaders": {
+        "DRAWPASS_SKYBOX": {
+          "shader": "Sky",
+          "perms": [
+            "skycube"
+          ]
+        }
+      },
+      "textures": {
+        "TEXTURE_SLOT_0": "code_assets/ferndalestudio_env.img"
       }
+    },
+    {
+      "name": "PBR_R0_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M0",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M1",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.143,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M2",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.286,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M3",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.429,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M4",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.571,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M5",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.714,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M6",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 0.857,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R0_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.0,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R1_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.143,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R2_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.286,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R3_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.429,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R4_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.571,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R5_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.714,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R6_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 0.857,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "PBR_R7_M7",
+      "KdR": 0.5,
+      "KdG": 0.01,
+      "KdB": 0.01,
+      "roughness": 1.0,
+      "metalness": 1.0,
+      "opacity": 1.0,
+      "shaders": {
+        "DRAWPASS_SHADOW": {
+          "shader": "Shadow",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEPTH": {
+          "shader": "LitDepth",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_OPAQUE": {
+          "shader": "LitOpaque",
+          "perms": [
+            ""
+          ]
+        },
+        "DRAWPASS_DEBUG_WIREFRAME": {
+          "shader": "Debug",
+          "perms": [
+            ""
+          ]
+        }
+      }
+    }
   ],
   "models": [
-      {
-          "name": "sphere",
-          "model": "sphere.obj"
-      }
+    {
+      "name": "sphere",
+      "model": "sphere.obj"
+    }
   ],
   "entities": [
-      {
-          "name": "_skybox",
-          "model": "_skybox",
-          "material": "EquirectangularSky",
-          "xyz": [ 0.0, 0.0, 0.0 ],
-          "rotation": [ 0.0, 0.0, 0.0 ],
-          "scale": [ 1.0, 1.0, 1.0 ]
-      },
-      {
-          "name": "sphere_R0_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M0",
-          "xyz": [ 0.0, 0.0, 0.0 ]
-      },
-      {
-          "name": "sphere_R1_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M0",
-		  "xyz": [ 0.0, 2.5, 0.0 ]
-      },
-      {
-          "name": "sphere_R2_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M0",
-		  "xyz": [ 0.0, 5.0, 0.0 ]
-      },
-      {
-          "name": "sphere_R3_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M0",
-		  "xyz": [ 0.0, 7.5, 0.0 ]
-      },
-      {
-          "name": "sphere_R4_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M0",
-		  "xyz": [ 0.0, 10.0, 0.0 ]
-      },
-      {
-          "name": "sphere_R5_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M0",
-		  "xyz": [ 0.0, 12.5, 0.0 ]
-      },
-      {
-          "name": "sphere_R6_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M0",
-		  "xyz": [ 0.0, 15.0, 0.0 ]
-      },
-      {
-          "name": "sphere_R7_M0",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M0",
-		  "xyz": [ 0.0, 17.5, 0.0 ]
-      },
-      {
-          "name": "sphere_R0_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M1",
-		  "xyz": [ 0.0, 0.0, 2.5 ]
-      },
-      {
-          "name": "sphere_R1_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M1",
-		  "xyz": [ 0.0, 2.5, 2.5 ]
-      },
-      {
-          "name": "sphere_R2_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M1",
-		  "xyz": [ 0.0, 5.0, 2.5 ]
-      },
-      {
-          "name": "sphere_R3_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M1",
-		  "xyz": [ 0.0, 7.5, 2.5 ]
-      },
-      {
-          "name": "sphere_R4_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M1",
-		  "xyz": [ 0.0, 10.0, 2.5 ]
-      },
-      {
-          "name": "sphere_R5_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M1",
-		  "xyz": [ 0.0, 12.5, 2.5 ]
-      },
-      {
-          "name": "sphere_R6_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M1",
-		  "xyz": [ 0.0, 15.0, 2.5 ]
-      },
-      {
-          "name": "sphere_R7_M1",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M1",
-		  "xyz": [ 0.0, 17.5, 2.5 ]
-      },
-      {
-          "name": "sphere_R0_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M2",
-		  "xyz": [ 0.0, 0.0, 5.0 ]
-      },
-      {
-          "name": "sphere_R1_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M2",
-		  "xyz": [ 0.0, 2.5, 5.0 ]
-      },
-      {
-          "name": "sphere_R2_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M2",
-		  "xyz": [ 0.0, 5.0, 5.0 ]
-      },
-      {
-          "name": "sphere_R3_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M2",
-		  "xyz": [ 0.0, 7.5, 5.0 ]
-      },
-      {
-          "name": "sphere_R4_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M2",
-		  "xyz": [ 0.0, 10.0, 5.0 ]
-      },
-      {
-          "name": "sphere_R5_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M2",
-		  "xyz": [ 0.0, 12.5, 5.0 ]
-      },
-      {
-          "name": "sphere_R6_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M2",
-		  "xyz": [ 0.0, 15.0, 5.0 ]
-      },
-      {
-          "name": "sphere_R7_M2",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M2",
-		  "xyz": [ 0.0, 17.5, 5.0 ]
-      },
-      {
-          "name": "sphere_R0_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M3",
-          "xyz": [ 0.0, 0.0, 7.5 ]
-      },
-      {
-          "name": "sphere_R1_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M3",
-          "xyz": [ 0.0, 2.5, 7.5 ]
-      },
-      {
-          "name": "sphere_R2_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M3",
-          "xyz": [ 0.0, 5.0, 7.5 ]
-      },
-      {
-          "name": "sphere_R3_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M3",
-          "xyz": [ 0.0, 7.5, 7.5 ]
-      },
-      {
-          "name": "sphere_R4_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M3",
-          "xyz": [ 0.0, 10.0, 7.5 ]
-      },
-      {
-          "name": "sphere_R5_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M3",
-          "xyz": [ 0.0, 12.5, 7.5 ]
-      },
-      {
-          "name": "sphere_R6_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M3",
-          "xyz": [ 0.0, 15.0, 7.5 ]
-      },
-      {
-          "name": "sphere_R7_M3",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M3",
-          "xyz": [ 0.0, 17.5, 7.5 ]
-      },
-      {
-          "name": "sphere_R0_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M4",
-          "xyz": [ 0.0, 0.0, 10.0 ]
-      },
-      {
-          "name": "sphere_R1_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M4",
-          "xyz": [ 0.0, 2.5, 10.0 ]
-      },
-      {
-          "name": "sphere_R2_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M4",
-          "xyz": [ 0.0, 5.0, 10.0 ]
-      },
-      {
-          "name": "sphere_R3_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M4",
-          "xyz": [ 0.0, 7.5, 10.0 ]
-      },
-      {
-          "name": "sphere_R4_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M4",
-          "xyz": [ 0.0, 10.0, 10.0 ]
-      },
-      {
-          "name": "sphere_R5_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M4",
-          "xyz": [ 0.0, 12.5, 10.0 ]
-      },
-      {
-          "name": "sphere_R6_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M4",
-          "xyz": [ 0.0, 15.0, 10.0 ]
-      },
-      {
-          "name": "sphere_R7_M4",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M4",
-          "xyz": [ 0.0, 17.5, 10.0 ]
-      },
-      {
-          "name": "sphere_R0_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M5",
-          "xyz": [ 0.0, 0.0, 12.5 ]
-      },
-      {
-          "name": "sphere_R1_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M5",
-          "xyz": [ 0.0, 2.5, 12.5 ]
-      },
-      {
-          "name": "sphere_R2_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M5",
-          "xyz": [ 0.0, 5.0, 12.5 ]
-      },
-      {
-          "name": "sphere_R3_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M5",
-          "xyz": [ 0.0, 7.5, 12.5 ]
-      },
-      {
-          "name": "sphere_R4_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M5",
-          "xyz": [ 0.0, 10.0, 12.5 ]
-      },
-      {
-          "name": "sphere_R5_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M5",
-          "xyz": [ 0.0, 12.5, 12.5 ]
-      },
-      {
-          "name": "sphere_R6_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M5",
-          "xyz": [ 0.0, 15.0, 12.5 ]
-      },
-      {
-          "name": "sphere_R7_M5",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M5",
-          "xyz": [ 0.0, 17.5, 12.5 ]
-      },
-      {
-          "name": "sphere_R0_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M6",
-          "xyz": [ 0.0, 0.0, 15.0 ]
-      },
-      {
-          "name": "sphere_R1_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M6",
-          "xyz": [ 0.0, 2.5, 15.0 ]
-      },
-      {
-          "name": "sphere_R2_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M6",
-          "xyz": [ 0.0, 5.0, 15.0 ]
-      },
-      {
-          "name": "sphere_R3_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M6",
-          "xyz": [ 0.0, 7.5, 15.0 ]
-      },
-      {
-          "name": "sphere_R4_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M6",
-          "xyz": [ 0.0, 10.0, 15.0 ]
-      },
-      {
-          "name": "sphere_R5_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M6",
-          "xyz": [ 0.0, 12.5, 15.0 ]
-      },
-      {
-          "name": "sphere_R6_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M6",
-          "xyz": [ 0.0, 15.0, 15.0 ]
-      },
-      {
-          "name": "sphere_R7_M6",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M6",
-          "xyz": [ 0.0, 17.5, 15.0 ]
-      },
-      {
-          "name": "sphere_R0_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R0_M7",
-          "xyz": [ 0.0, 0.0, 17.5 ]
-      },
-      {
-          "name": "sphere_R1_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R1_M7",
-          "xyz": [ 0.0, 2.5, 17.5 ]
-      },
-      {
-          "name": "sphere_R2_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R2_M7",
-          "xyz": [ 0.0, 5.0, 17.5 ]
-      },
-      {
-          "name": "sphere_R3_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R3_M7",
-          "xyz": [ 0.0, 7.5, 17.5 ]
-      },
-      {
-          "name": "sphere_R4_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R4_M7",
-          "xyz": [ 0.0, 10.0, 17.5 ]
-      },
-      {
-          "name": "sphere_R5_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R5_M7",
-          "xyz": [ 0.0, 12.5, 17.5 ]
-      },
-      {
-          "name": "sphere_R6_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R6_M7",
-          "xyz": [ 0.0, 15.0, 17.5 ]
-      },
-      {
-          "name": "sphere_R7_M7",
-          "model": "sphere.obj",
-          "material": "PBR_R7_M7",
-          "xyz": [ 0.0, 17.5, 17.5 ]
-      }
+    {
+      "name": "sphere_R0_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M0",
+      "xyz": [ 0.0, 0.0, 0.0 ]
+    },
+    {
+      "name": "sphere_R1_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M0",
+      "xyz": [ 0.0, 2.5, 0.0 ]
+    },
+    {
+      "name": "sphere_R2_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M0",
+      "xyz": [ 0.0, 5.0, 0.0 ]
+    },
+    {
+      "name": "sphere_R3_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M0",
+      "xyz": [ 0.0, 7.5, 0.0 ]
+    },
+    {
+      "name": "sphere_R4_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M0",
+      "xyz": [ 0.0, 10.0, 0.0 ]
+    },
+    {
+      "name": "sphere_R5_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M0",
+      "xyz": [ 0.0, 12.5, 0.0 ]
+    },
+    {
+      "name": "sphere_R6_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M0",
+      "xyz": [ 0.0, 15.0, 0.0 ]
+    },
+    {
+      "name": "sphere_R7_M0",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M0",
+      "xyz": [ 0.0, 17.5, 0.0 ]
+    },
+    {
+      "name": "sphere_R0_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M1",
+      "xyz": [ 0.0, 0.0, 2.5 ]
+    },
+    {
+      "name": "sphere_R1_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M1",
+      "xyz": [ 0.0, 2.5, 2.5 ]
+    },
+    {
+      "name": "sphere_R2_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M1",
+      "xyz": [ 0.0, 5.0, 2.5 ]
+    },
+    {
+      "name": "sphere_R3_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M1",
+      "xyz": [ 0.0, 7.5, 2.5 ]
+    },
+    {
+      "name": "sphere_R4_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M1",
+      "xyz": [ 0.0, 10.0, 2.5 ]
+    },
+    {
+      "name": "sphere_R5_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M1",
+      "xyz": [ 0.0, 12.5, 2.5 ]
+    },
+    {
+      "name": "sphere_R6_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M1",
+      "xyz": [ 0.0, 15.0, 2.5 ]
+    },
+    {
+      "name": "sphere_R7_M1",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M1",
+      "xyz": [ 0.0, 17.5, 2.5 ]
+    },
+    {
+      "name": "sphere_R0_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M2",
+      "xyz": [ 0.0, 0.0, 5.0 ]
+    },
+    {
+      "name": "sphere_R1_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M2",
+      "xyz": [ 0.0, 2.5, 5.0 ]
+    },
+    {
+      "name": "sphere_R2_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M2",
+      "xyz": [ 0.0, 5.0, 5.0 ]
+    },
+    {
+      "name": "sphere_R3_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M2",
+      "xyz": [ 0.0, 7.5, 5.0 ]
+    },
+    {
+      "name": "sphere_R4_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M2",
+      "xyz": [ 0.0, 10.0, 5.0 ]
+    },
+    {
+      "name": "sphere_R5_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M2",
+      "xyz": [ 0.0, 12.5, 5.0 ]
+    },
+    {
+      "name": "sphere_R6_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M2",
+      "xyz": [ 0.0, 15.0, 5.0 ]
+    },
+    {
+      "name": "sphere_R7_M2",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M2",
+      "xyz": [ 0.0, 17.5, 5.0 ]
+    },
+    {
+      "name": "sphere_R0_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M3",
+      "xyz": [ 0.0, 0.0, 7.5 ]
+    },
+    {
+      "name": "sphere_R1_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M3",
+      "xyz": [ 0.0, 2.5, 7.5 ]
+    },
+    {
+      "name": "sphere_R2_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M3",
+      "xyz": [ 0.0, 5.0, 7.5 ]
+    },
+    {
+      "name": "sphere_R3_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M3",
+      "xyz": [ 0.0, 7.5, 7.5 ]
+    },
+    {
+      "name": "sphere_R4_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M3",
+      "xyz": [ 0.0, 10.0, 7.5 ]
+    },
+    {
+      "name": "sphere_R5_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M3",
+      "xyz": [ 0.0, 12.5, 7.5 ]
+    },
+    {
+      "name": "sphere_R6_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M3",
+      "xyz": [ 0.0, 15.0, 7.5 ]
+    },
+    {
+      "name": "sphere_R7_M3",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M3",
+      "xyz": [ 0.0, 17.5, 7.5 ]
+    },
+    {
+      "name": "sphere_R0_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M4",
+      "xyz": [ 0.0, 0.0, 10.0 ]
+    },
+    {
+      "name": "sphere_R1_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M4",
+      "xyz": [ 0.0, 2.5, 10.0 ]
+    },
+    {
+      "name": "sphere_R2_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M4",
+      "xyz": [ 0.0, 5.0, 10.0 ]
+    },
+    {
+      "name": "sphere_R3_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M4",
+      "xyz": [ 0.0, 7.5, 10.0 ]
+    },
+    {
+      "name": "sphere_R4_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M4",
+      "xyz": [ 0.0, 10.0, 10.0 ]
+    },
+    {
+      "name": "sphere_R5_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M4",
+      "xyz": [ 0.0, 12.5, 10.0 ]
+    },
+    {
+      "name": "sphere_R6_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M4",
+      "xyz": [ 0.0, 15.0, 10.0 ]
+    },
+    {
+      "name": "sphere_R7_M4",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M4",
+      "xyz": [ 0.0, 17.5, 10.0 ]
+    },
+    {
+      "name": "sphere_R0_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M5",
+      "xyz": [ 0.0, 0.0, 12.5 ]
+    },
+    {
+      "name": "sphere_R1_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M5",
+      "xyz": [ 0.0, 2.5, 12.5 ]
+    },
+    {
+      "name": "sphere_R2_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M5",
+      "xyz": [ 0.0, 5.0, 12.5 ]
+    },
+    {
+      "name": "sphere_R3_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M5",
+      "xyz": [ 0.0, 7.5, 12.5 ]
+    },
+    {
+      "name": "sphere_R4_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M5",
+      "xyz": [ 0.0, 10.0, 12.5 ]
+    },
+    {
+      "name": "sphere_R5_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M5",
+      "xyz": [ 0.0, 12.5, 12.5 ]
+    },
+    {
+      "name": "sphere_R6_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M5",
+      "xyz": [ 0.0, 15.0, 12.5 ]
+    },
+    {
+      "name": "sphere_R7_M5",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M5",
+      "xyz": [ 0.0, 17.5, 12.5 ]
+    },
+    {
+      "name": "sphere_R0_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M6",
+      "xyz": [ 0.0, 0.0, 15.0 ]
+    },
+    {
+      "name": "sphere_R1_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M6",
+      "xyz": [ 0.0, 2.5, 15.0 ]
+    },
+    {
+      "name": "sphere_R2_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M6",
+      "xyz": [ 0.0, 5.0, 15.0 ]
+    },
+    {
+      "name": "sphere_R3_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M6",
+      "xyz": [ 0.0, 7.5, 15.0 ]
+    },
+    {
+      "name": "sphere_R4_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M6",
+      "xyz": [ 0.0, 10.0, 15.0 ]
+    },
+    {
+      "name": "sphere_R5_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M6",
+      "xyz": [ 0.0, 12.5, 15.0 ]
+    },
+    {
+      "name": "sphere_R6_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M6",
+      "xyz": [ 0.0, 15.0, 15.0 ]
+    },
+    {
+      "name": "sphere_R7_M6",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M6",
+      "xyz": [ 0.0, 17.5, 15.0 ]
+    },
+    {
+      "name": "sphere_R0_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R0_M7",
+      "xyz": [ 0.0, 0.0, 17.5 ]
+    },
+    {
+      "name": "sphere_R1_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R1_M7",
+      "xyz": [ 0.0, 2.5, 17.5 ]
+    },
+    {
+      "name": "sphere_R2_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R2_M7",
+      "xyz": [ 0.0, 5.0, 17.5 ]
+    },
+    {
+      "name": "sphere_R3_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R3_M7",
+      "xyz": [ 0.0, 7.5, 17.5 ]
+    },
+    {
+      "name": "sphere_R4_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R4_M7",
+      "xyz": [ 0.0, 10.0, 17.5 ]
+    },
+    {
+      "name": "sphere_R5_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R5_M7",
+      "xyz": [ 0.0, 12.5, 17.5 ]
+    },
+    {
+      "name": "sphere_R6_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R6_M7",
+      "xyz": [ 0.0, 15.0, 17.5 ]
+    },
+    {
+      "name": "sphere_R7_M7",
+      "model": "sphere.obj",
+      "material": "PBR_R7_M7",
+      "xyz": [ 0.0, 17.5, 17.5 ]
+    }
   ]
 }
