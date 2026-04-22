@@ -114,6 +114,7 @@ private:
 	uint16_t				textureBitSet;
 	uint16_t				shaderBitSet;
 
+	mat2x4f					uvTransforms[ MaxMaterialTextures ];
 	hdl_t					textures[ MaxMaterialTextures ];
 	hdl_t					shaders[ MaxMaterialShaders ];
 	uint32_t				shaderPerms[ MaxMaterialShaders ];	// Per-pass permutation bitmask (maps to shaderPermId_t)
@@ -124,8 +125,10 @@ public:
 		shaderBitSet( 0 )
 	{
 		p.albedo = rgb32_t( 1.0f, 1.0f, 1.0f );
-		for ( int i = 0; i < MaxMaterialTextures; ++i ) {
+		for ( int i = 0; i < MaxMaterialTextures; ++i )
+		{
 			textures[ i ] = INVALID_HDL;
+			uvTransforms[ i ] = mat2x4f::Identity();
 		}
 		for ( int i = 0; i < MaxMaterialShaders; ++i ) {
 			shaders[ i ] = INVALID_HDL;
@@ -177,13 +180,15 @@ public:
 		return ( textureBitSet > 0 );
 	}
 
-	bool		AddTexture( const uint32_t slot, const hdl_t hdl );
-	hdl_t		GetTexture( const uint32_t slot ) const;
-	uint32_t	TextureCount() const;
-	bool		AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms = 0 );
-	hdl_t		GetShader( const drawPass_t pass ) const;
-	uint32_t	GetShaderPerms( const drawPass_t pass ) const;
-	uint32_t	ShaderCount() const;
+	bool			AddTexture( const uint32_t slot, const hdl_t hdl );
+	hdl_t			GetTexture( const uint32_t slot ) const;
+	uint32_t		TextureCount() const;
+	bool			AssignUvTransform( const uint32_t slot, const vec2f& scale, const vec2f& offset, const float& rotationRadians );
+	void			GetPackedUvTransform( const uint32_t slot, mat2x4f& outMatrix ) const;
+	bool			AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms = 0 );
+	hdl_t			GetShader( const drawPass_t pass ) const;
+	uint32_t		GetShaderPerms( const drawPass_t pass ) const;
+	uint32_t		ShaderCount() const;
 
 	void Serialize( Serializer* serializer );
 };

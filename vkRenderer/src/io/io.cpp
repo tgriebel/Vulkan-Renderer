@@ -545,33 +545,6 @@ static bool LoadImageFromMemory( const cgltf_image& img, const bool isLinear, Im
 }
 
 
-// TEMP stub — promote to material.h / gpuShared.h once plumbing lands.
-// KHR_texture_transform (glTF): CCW rotation around origin, applied as scale → rotate → translate.
-struct uvTransform_t
-{
-	float offset[ 2 ];
-	float rotation;   // radians, CCW
-	float scale[ 2 ];
-};
-
-
-// Fills outTransform from a cgltf_texture_view's KHR_texture_transform, if present.
-// Returns false if the view has no transform — caller can skip writing.
-static bool ExtractUvTransform( const cgltf_texture_view& view, uvTransform_t& outTransform )
-{
-	if ( view.has_transform == 0 ) {
-		return false;
-	}
-
-	outTransform.offset[ 0 ] = view.transform.offset[ 0 ];
-	outTransform.offset[ 1 ] = view.transform.offset[ 1 ];
-	outTransform.rotation    = view.transform.rotation;
-	outTransform.scale[ 0 ]  = view.transform.scale[ 0 ];
-	outTransform.scale[ 1 ]  = view.transform.scale[ 1 ];
-	return true;
-}
-
-
 static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
                              const cgltf_texture_view& view, const uint32_t slot,
                              const cgltf_data* data, const std::vector<std::string>& imageKeys )
@@ -580,17 +553,23 @@ static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
 		return;
 	}
 
-	uvTransform_t uvXform{};
-	if ( ExtractUvTransform( view, uvXform ) )
-	{
-		// TODO: plumb uvXform onto the material for this slot, e.g.:
-		//   outMaterial.SetUvTransform( slot, uvXform );
-		// For now the extracted data is discarded after this point.
-		(void)uvXform;
-	}
-
 	const cgltf_size imgIdx = static_cast<cgltf_size>( view.texture->image - data->images );
 	outMaterial.AddTexture( slot, assets.GetLib<Image>()->RetrieveHdl( imageKeys[ imgIdx ].c_str() ) );
+
+	if( view.has_transform != 0 )
+	{
+		vec2f offset;
+		vec2f scale;
+		float rotation; // Radians - CCW
+
+		offset.x = view.transform.offset[ 0 ];
+		offset.y = view.transform.offset[ 1 ];
+		scale.x = view.transform.scale[ 0 ];
+		scale.y = view.transform.scale[ 1 ];
+		rotation = view.transform.rotation;
+
+		outMaterial.AssignUvTransform( slot, scale, offset, rotation );
+	}
 }
 
 

@@ -168,6 +168,7 @@ void Material::Serialize( Serializer* s )
 	SerializeStruct( s, p );
 	s->Next( textureBitSet );
 	s->Next( shaderBitSet );
+	SerializeArray( s, uvTransforms, MaxMaterialTextures );
 	SerializeArray( s, textures, MaxMaterialTextures );
 	SerializeArray( s, shaders, MaxMaterialShaders );
 }

@@ -44,6 +44,40 @@ uint32_t Material::TextureCount() const
 }
 
 
+bool Material::AssignUvTransform( const uint32_t slot, const vec2f& scale, const vec2f& offset, const float& rotationRadians )
+{
+	if( slot >= MaxMaterialTextures )
+	{
+		return false;
+	}
+	
+	const float c = cosf( rotationRadians );
+	const float s = sinf( rotationRadians );
+
+	mat2x4f& transform = uvTransforms[ slot ];
+
+	transform[ 0 ][ 0 ] = c * scale.x;
+	transform[ 0 ][ 1 ] = -s * scale.y;
+	transform[ 0 ][ 2 ] = offset.x;
+	transform[ 1 ][ 0 ] = s * scale.x;
+	transform[ 1 ][ 1 ] = c * scale.y;
+	transform[ 1 ][ 2 ] = offset.y;
+	
+	return true;
+}
+
+
+void Material::GetPackedUvTransform( const uint32_t slot, mat2x4f& outMatrix ) const
+{
+	if( slot >= MaxMaterialTextures )
+	{
+		outMatrix = mat2x4f::Identity();
+		return;
+	}
+	outMatrix = uvTransforms[ slot ];
+}
+
+
 bool Material::AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms )
 {
 	const uint32_t slot = uint32_t( pass );

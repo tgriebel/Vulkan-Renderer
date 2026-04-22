@@ -13,6 +13,7 @@
 #define float4x4 mat4x4f
 #define float3x3 mat3x3f
 #define float2x2 mat2x2f
+#define float2x4 mat2x4f
 #define float4 vec4f
 #define float3 vec3f
 #define float2 vec2f
@@ -22,12 +23,14 @@
 static_assert( sizeof( mat4x4f ) == 64 );
 static_assert( sizeof( mat3x3f ) == 36 );
 static_assert( sizeof( mat2x2f ) == 16 );
+static_assert( sizeof( mat2x4f ) == 32 );
 static_assert( sizeof( vec4f ) == 16 );
 static_assert( sizeof( vec3f ) == 12 );
 static_assert( sizeof( vec2f ) == 8 );
 
 #define BIND_SLOT( x )
 #define SEMANTIC( x )
+#define row_major
 #endif
 
 
@@ -123,13 +126,6 @@ struct gpuGlobals_t
 };
 
 
-struct gpuUvTransform_t
-{
-	float2 scale;
-	float2 offset;
-};
-
-
 struct gpuMaterial_t
 {
 	float3				albedo;
@@ -154,18 +150,16 @@ struct gpuMaterial_t
 	float				transmissionFactor;
 	// 128 bytes
 	uint				textured;
-	uint				pad0;
-	uint				pad1;
-	uint				pad2;
-	// 144 bytes
+	uint				pad[ 15 ];
+	// 192 bytes
 	int					textureId[ MaxMaterialTextures ];
-	// 208 bytes
-	gpuUvTransform_t	uvTransform[ MaxMaterialTextures ];
-	// 464 bytes
-	uint    extraData[ MaxMaterialExtraDataBytes / 4 ]; // HLSL doesn't have an 8-bit type
+	// 256 bytes
+	row_major float2x4	uvTransform[ MaxMaterialTextures ]; // The last column is unused, padded for 16byte-alignment
+	// 768 bytes
+	uint				extraData[ MaxMaterialExtraDataBytes / 4 ]; // HLSL doesn't have an 8-bit type
 };
 #ifdef SHADER_STRUCTS_CPP
-static_assert( sizeof( gpuMaterial_t ) == 720 );
+static_assert( sizeof( gpuMaterial_t ) == 1024 );
 #endif
 
 struct gpuLight_t
@@ -236,11 +230,15 @@ struct vsInput_t
 #undef float4x4
 #undef float3x3
 #undef float2x2
+#undef float2x4
 #undef float4
 #undef float3
 #undef float2
 #undef uint
 #undef int
+#undef BIND_SLOT
+#undef SEMANTIC
+#undef row_major
 #endif
 
 #endif

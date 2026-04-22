@@ -59,6 +59,43 @@ struct brdfSample_t
 };
 
 
+float4 SampleTexture( const gpuMaterial_t material, const int textureId, const float2 uv )
+{
+	if( textureId >= 0 )
+	{
+		const float2 transformedUv = uv;// mul( material.uvTransform[ textureId ], float4( uv.xy, 1.0f, 0.0f ) );
+
+		return texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv );
+
+	}
+	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
+}
+
+
+float4 SampleTextureSrgb( const gpuMaterial_t material, const int textureId, const float2 uv )
+{
+	if( textureId >= 0 )
+	{
+		const float2 transformedUv = uv;// mul( material.uvTransform[ textureId ], float4( uv.xy, 1.0f, 0.0f ) );
+
+		return SrgbToLinear( texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
+	}
+	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
+}
+
+
+float3 SampleTextureNormal( const gpuMaterial_t material, const int textureId, const float2 uv )
+{
+	if( textureId >= 0 )
+	{
+		const float2 transformedUv = uv;// mul( material.uvTransform[ textureId ], float4( uv.xy, 1.0f, 0.0f ) );
+
+		return DecodeNormal( texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
+	}
+	return float3( 0.0f, 0.0f, 1.0f );
+}
+
+
 surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_t view, const gpuSurface_t surface, const gpuMaterial_t material, const PS_Input input )
 {
 	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
@@ -95,10 +132,14 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	float anisotropySample = material.anisotropy;
 	float transmissionSample = material.transmissionFactor;
 
-	float2 uv0 = input.uv0.xy;
+	const float2 uv0 = input.uv0.xy;
 
 	if( isTextured )
 	{
+		//albedoSample *= SampleTextureSrgb( material, albedoTexId, uv0 ).rgb;
+
+		//normalSample = SampleTextureNormal( material, normalTexId, uv0 ).xyz;
+
 		if( albedoTexId >= 0 )
 		{
 			Texture2D albedoTex = texSampler[ albedoTexId ];

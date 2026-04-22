@@ -221,6 +221,10 @@ void Renderer::UpdateGpuMaterials()
 			}
 		}
 
+		for( uint32_t t = 0; t < MaxMaterialTextures; ++t ) {
+			m.GetPackedUvTransform( t, materialObject.uvTransform[ t ] );
+		}
+
 		const materialParms_t& parms = m.GetParms();
 
 		materialObject.albedo = vec3f( parms.albedo.r, parms.albedo.g, parms.albedo.b );
