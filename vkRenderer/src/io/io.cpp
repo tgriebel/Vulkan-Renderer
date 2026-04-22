@@ -552,6 +552,22 @@ static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
 	if ( view.texture == nullptr || view.texture->image == nullptr ) {
 		return;
 	}
+
+	//if( textureInfo.HasMember( "extensions" ) )
+	//{
+	//	const auto& ext = textureInfo[ "extensions" ];
+	//	if( ext.HasMember( "KHR_texture_transform" ) )
+	//	{
+	//		const auto& xform = ext[ "KHR_texture_transform" ];
+	//		uvTransform_t t;
+	//		if( xform.HasMember( "scale" ) )
+	//			t.scale = { xform[ "scale" ][ 0 ], xform[ "scale" ][ 1 ] };
+	//		if( xform.HasMember( "offset" ) )
+	//			t.offset = { xform[ "offset" ][ 0 ], xform[ "offset" ][ 1 ] };
+	//		parms.uvTransforms[ slot ] = t;
+	//	}
+	//}
+
 	const cgltf_size imgIdx = static_cast<cgltf_size>( view.texture->image - data->images );
 	outMaterial.AddTexture( slot, assets.GetLib<Image>()->RetrieveHdl( imageKeys[ imgIdx ].c_str() ) );
 }
@@ -633,7 +649,11 @@ static Material TranslateGltfMaterial( AssetManager& assets, const cgltf_materia
 		parms.clearcoatRoughness = mat.clearcoat.clearcoat_roughness_factor;
 	}
 
-	if ( mat.has_sheen ) {
+	if ( mat.has_sheen )
+	{
+		parms.sheenColor = rgb32_t( mat.sheen.sheen_color_factor[ 0 ],
+									mat.sheen.sheen_color_factor[ 1 ],
+									mat.sheen.sheen_color_factor[ 2 ] );
 		parms.sheen = mat.sheen.sheen_roughness_factor;
 	}
 
