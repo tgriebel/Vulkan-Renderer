@@ -765,9 +765,12 @@ void Renderer::CreateFramebuffers()
 
 	// Cube images
 	{
+		extern CVar r_cubeWidth;
+		extern CVar r_cubeHeight;
+
 		imageInfo_t colorInfo{};
-		colorInfo.width = 1024;
-		colorInfo.height = 1024;
+		colorInfo.width = r_cubeWidth.GetInt();
+		colorInfo.height = r_cubeHeight.GetInt();
 		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
 		colorInfo.layers = 6;
 		colorInfo.subsamples = IMAGE_SMP_1;

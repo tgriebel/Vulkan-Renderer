@@ -89,6 +89,8 @@ MakeCVar( BOOL,		r_gaussianBlur, true );
 MakeCVar( INT,		r_fullscreenMode, 0 );
 MakeCVar( INT,		r_windowWidth, -1 );
 MakeCVar( INT,		r_windowHeight, -1 );
+MakeCVar( INT,		r_cubeWidth, 1024 );
+MakeCVar( INT,		r_cubeHeight, 1024 );
  
 
 void ParseCmdArgs( const int argc, char* argv[] )

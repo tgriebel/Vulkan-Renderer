@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>DefaultConfig.ini</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>RenderIBL.ini r_hdrCubemapSource=anticChapel_4k.hdr r_cubemapName=chapel</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArgumentsHistory>RenderIbl.ini|RenderIBL.ini|RenderIBL.ini r_cubemapName=hall r_hdrCubemapSource=mirrored_hall_4k.hdr|RenderIBL.ini r_hdrCubemapSource=anticChapel_4k.hdr r_cubemapName=chapel|DefaultConfig.ini|</LocalDebuggerCommandArgumentsHistory>
+    <LocalDebuggerCommandArgumentsHistory>RenderIbl.ini|RenderIBL.ini|RenderIBL.ini r_cubemapName=hall r_hdrCubemapSource=mirrored_hall_4k.hdr|DefaultConfig.ini|RenderIBL.ini r_hdrCubemapSource=anticChapel_4k.hdr r_cubemapName=chapel|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommandArguments>DefaultConfig.ini</LocalDebuggerCommandArguments>
