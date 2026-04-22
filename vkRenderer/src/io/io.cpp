@@ -545,6 +545,33 @@ static bool LoadImageFromMemory( const cgltf_image& img, const bool isLinear, Im
 }
 
 
+// TEMP stub — promote to material.h / gpuShared.h once plumbing lands.
+// KHR_texture_transform (glTF): CCW rotation around origin, applied as scale → rotate → translate.
+struct uvTransform_t
+{
+	float offset[ 2 ];
+	float rotation;   // radians, CCW
+	float scale[ 2 ];
+};
+
+
+// Fills outTransform from a cgltf_texture_view's KHR_texture_transform, if present.
+// Returns false if the view has no transform — caller can skip writing.
+static bool ExtractUvTransform( const cgltf_texture_view& view, uvTransform_t& outTransform )
+{
+	if ( view.has_transform == 0 ) {
+		return false;
+	}
+
+	outTransform.offset[ 0 ] = view.transform.offset[ 0 ];
+	outTransform.offset[ 1 ] = view.transform.offset[ 1 ];
+	outTransform.rotation    = view.transform.rotation;
+	outTransform.scale[ 0 ]  = view.transform.scale[ 0 ];
+	outTransform.scale[ 1 ]  = view.transform.scale[ 1 ];
+	return true;
+}
+
+
 static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
                              const cgltf_texture_view& view, const uint32_t slot,
                              const cgltf_data* data, const std::vector<std::string>& imageKeys )
@@ -553,20 +580,14 @@ static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
 		return;
 	}
 
-	//if( textureInfo.HasMember( "extensions" ) )
-	//{
-	//	const auto& ext = textureInfo[ "extensions" ];
-	//	if( ext.HasMember( "KHR_texture_transform" ) )
-	//	{
-	//		const auto& xform = ext[ "KHR_texture_transform" ];
-	//		uvTransform_t t;
-	//		if( xform.HasMember( "scale" ) )
-	//			t.scale = { xform[ "scale" ][ 0 ], xform[ "scale" ][ 1 ] };
-	//		if( xform.HasMember( "offset" ) )
-	//			t.offset = { xform[ "offset" ][ 0 ], xform[ "offset" ][ 1 ] };
-	//		parms.uvTransforms[ slot ] = t;
-	//	}
-	//}
+	uvTransform_t uvXform{};
+	if ( ExtractUvTransform( view, uvXform ) )
+	{
+		// TODO: plumb uvXform onto the material for this slot, e.g.:
+		//   outMaterial.SetUvTransform( slot, uvXform );
+		// For now the extracted data is discarded after this point.
+		(void)uvXform;
+	}
 
 	const cgltf_size imgIdx = static_cast<cgltf_size>( view.texture->image - data->images );
 	outMaterial.AddTexture( slot, assets.GetLib<Image>()->RetrieveHdl( imageKeys[ imgIdx ].c_str() ) );
@@ -691,6 +712,22 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 	std::string modelName, modelExt;
 	SysCore::SplitFileName( fileName, modelName, modelExt );
 
+	// Pre-scan textures to find a name per image (first named texture wins).
+	// Many glTF exports leave image.name empty but set texture.name, so this
+	// provides a more semantic fallback than the "_img<idx>" convention.
+	std::vector<const char*> textureNameForImage( data->images_count, nullptr );
+	for( cgltf_size texIx = 0; texIx < data->textures_count; ++texIx )
+	{
+		const cgltf_texture& tex = data->textures[ texIx ];
+		if( tex.image == nullptr || tex.name == nullptr ) {
+			continue;
+		}
+		const cgltf_size imgIx = static_cast<cgltf_size>( tex.image - data->images );
+		if( textureNameForImage[ imgIx ] == nullptr ) {
+			textureNameForImage[ imgIx ] = tex.name;
+		}
+	}
+
 	std::vector<std::string> imageKeys( data->images_count );
 	for( cgltf_size imgIx = 0; imgIx < data->images_count; ++imgIx )
 	{
@@ -700,6 +737,8 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 			imageKeys[ imgIx ] = img.uri;
 		} else if( img.name != nullptr ) {
 			imageKeys[ imgIx ] = img.name;
+		} else if( textureNameForImage[ imgIx ] != nullptr ) {
+			imageKeys[ imgIx ] = textureNameForImage[ imgIx ];
 		} else {
 			imageKeys[ imgIx ] = modelName + "_img" + std::to_string( imgIx );
 		}
