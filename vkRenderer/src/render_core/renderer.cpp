@@ -351,6 +351,10 @@ void Renderer::UploadAssets()
 		for( uint32_t m = 0; m < modelCount; ++m )
 		{
 			Asset<Model>* modelAsset = ModelLib().Find( m );
+			if( modelAsset->IsLoaded() == false )
+			{
+				continue;
+			}
 
 			if( modelAsset->IsUploaded() )
 			{
@@ -375,23 +379,30 @@ void Renderer::UploadAssets()
 
 	geometry.stagingBuffer.SetPos( 0 );
 	textureStagingBuffer.SetPos( 0 );
-	uploadContext.Begin();
 
-	UploadModelsToGPU( &uploadContext );
+	// Upload queue commands
+	{
+		
+		uploadContext.Begin();
+		uploadContext.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
 
-	UploadTextures( &uploadContext );
+		UploadModelsToGPU( &uploadContext );
 
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
+		UploadTextures( &uploadContext );
 
-	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
+		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
+		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
 
-	uploadContext.End();
-	uploadContext.Submit();
+		Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
-	UpdateGpuMaterials();
+		uploadContext.MarkerEndRegion();
 
+		uploadContext.End();
+		uploadContext.Submit();
+
+		UpdateGpuMaterials();
+	}
 	FlushGPU();
 }
 

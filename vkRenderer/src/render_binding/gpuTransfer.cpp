@@ -118,6 +118,8 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 			continue;
 		}
 		GenerateMipmaps( cmdCommand, texture );
+
+		textureAsset->CompleteUpload();
 	}
 
 	// 3. Add to resource type lists

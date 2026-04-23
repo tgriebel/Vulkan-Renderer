@@ -204,8 +204,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 	}
 	view2Ds[ 0 ]->Commit();
 
-	UploadAssets();
-
 	InitImGui( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ]->GetFrameBuffer() );
 
 	RenderViewContext viewContext;
@@ -215,6 +213,8 @@ void Renderer::Init( const renderConfig_t& cfg )
 	viewContext.view2Ds = &view2Ds[0];
 
 	BuildSceneSchedule( config, &renderContext, &resources, &viewContext, &schedule );
+
+	UploadAssets();
 }
 
 
