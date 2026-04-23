@@ -314,30 +314,60 @@ const Image* Renderer::FindOutputImage( const uint32_t id )
 
 void Renderer::UploadAssets()
 {
-	const uint32_t materialCount = MaterialLib().Count();
-	for ( uint32_t i = 0; i < materialCount; ++i )
+	// Assign upload indices for all scene assets
 	{
-		AssetInterface* materialAsset = MaterialLib().Find( i );
-		if ( materialAsset->IsLoaded() == false ) {
-			continue;
+		const uint32_t materialCount = MaterialLib().Count();
+		for( uint32_t i = 0; i < materialCount; ++i )
+		{
+			AssetInterface* materialAsset = MaterialLib().Find( i );
+			if( materialAsset->IsLoaded() == false )
+			{
+				continue;
+			}
+			if( materialAsset->IsUploaded() )
+			{
+				continue;
+			}
+			uploadMaterials.insert( materialAsset->Handle() );
 		}
-		if ( materialAsset->IsUploaded() ) {
-			continue;
-		}
-		uploadMaterials.insert( materialAsset->Handle() );
-	}
 
-	const uint32_t textureCount = TextureLib().Count();
-	for ( uint32_t i = 0; i < textureCount; ++i )
-	{
-		AssetInterface* textureAsset = TextureLib().Find( i );
-		if ( textureAsset->IsLoaded() == false ) {
-			continue;
+		const uint32_t textureCount = TextureLib().Count();
+		for( uint32_t i = 0; i < textureCount; ++i )
+		{
+			AssetInterface* textureAsset = TextureLib().Find( i );
+			if( textureAsset->IsLoaded() == false )
+			{
+				continue;
+			}
+			if( textureAsset->IsUploaded() )
+			{
+				continue;
+			}
+			uploadTextures.insert( textureAsset->Handle() );
 		}
-		if ( textureAsset->IsUploaded() ) {
-			continue;
+
+		const uint32_t modelCount = ModelLib().Count();
+
+		for( uint32_t m = 0; m < modelCount; ++m )
+		{
+			Asset<Model>* modelAsset = ModelLib().Find( m );
+
+			if( modelAsset->IsUploaded() )
+			{
+				continue;
+			}
+			Model& model = modelAsset->Get();
+			if( model.uploadId != -1 )
+			{
+				continue;
+			}
+
+			for( uint32_t i = 0; i < model.surfCount; ++i )
+			{
+				model.uploadId = geometry.surfUploads.Count();
+				geometry.surfUploads.Grow( model.surfCount );
+			}
 		}
-		uploadTextures.insert( textureAsset->Handle() );
 	}
 
 	ClearPipelineCache();
