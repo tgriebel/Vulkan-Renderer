@@ -276,12 +276,12 @@ PS_Output PSMain( PS_Input input )
 
     PS_Output_MRT output = (PS_Output_MRT)0;
 
-    output.outColor = outColor;
-    output.outColor1 = outColor1;
+    output.outColor = ClampColorFp16( outColor );
+    output.outColor1 = ClampColorFp16( outColor1 );
 #else
     PS_Output output = (PS_Output)0;
 
-    output.outColor = outColor;
+    output.outColor = ClampColorFp16( outColor );
 #endif
     return output;
 }
