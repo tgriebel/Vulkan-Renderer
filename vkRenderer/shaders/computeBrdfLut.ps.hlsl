@@ -75,7 +75,7 @@ PS_Output PSMain( PS_Input input )
 {
     PS_Output output = (PS_Output)0;
 
-    float2 integratedBRDF = IntegrateBRDF( input.uv0.x, 1.0f - input.uv0.y );
+    float2 integratedBRDF = IntegrateBRDF( input.uv0.x, input.uv0.y );
     output.outColor.r = integratedBRDF.x;
     output.outColor.g = integratedBRDF.y;
     output.outColor.b = 0.0f;

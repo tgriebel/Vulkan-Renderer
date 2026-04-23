@@ -138,7 +138,7 @@ float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, cons
         const int MipLevels = (int)GetTextureLevelsCube( specularIBL ) - 1;
         const float3 specIBL = specularIBL.SampleLevel( bilinearSamplerWrap, CubeVector( R ), surfaceInput.roughness * MipLevels ).rgb;
 
-        const float2 envBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
+        const float2 envBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).xy;
         specular = specIBL * ( surfaceInput.F * envBRDF.x + envBRDF.y );
     }
     return specular;
@@ -261,6 +261,12 @@ PS_Output PSMain( PS_Input input )
         
         case DEBUG_AO:
             outColor.rgb = surfaceInput.ao.rrr;
+            break;
+        
+                
+        case DEBUG_BRDF_LUT:
+            outColor.rg = texSampler[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
+            outColor.b = 0.0f;
             break;
         
         default:

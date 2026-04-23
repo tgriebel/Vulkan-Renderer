@@ -3,7 +3,7 @@
   "type": "scene",
   "reflink" : "shaders_common.json",
   "reflink" : "image_common.json",
-  "skyName" : "chapel",
+  "skyName" : "ferndalestudio",
   "shaders": [
     {
 	  "name": "EquirectangularSampler",
@@ -11,19 +11,9 @@
 	  "ps": "equirectangularSky"
     }
   ],
-  "images": [
-    {
-	  "name": "checker.png",
-	  "type": "2D"
-	}
-  ],
+  "images": [],
   "materials": [],
-  "models": [
-  	{
-      "name" : "cube",
-      "model" : "cube.obj"
-    }
-  ],
+  "models": [],
   "camera": [ -17.0, -1.0, 12.0 ],
   "entities": [
 	{

@@ -15,20 +15,6 @@
   "camera": [ -25.0, 5.0, 10.0 ],
   "materials": [
     {
-      "name": "EquirectangularSky",
-      "shaders": {
-        "DRAWPASS_SKYBOX": {
-          "shader": "Sky",
-          "perms": [
-            "skycube"
-          ]
-        }
-      },
-      "textures": {
-        "TEXTURE_SLOT_0": "code_assets/ferndalestudio_env.img"
-      }
-    },
-    {
       "name": "PBR_R0_M0",
       "KdR": 0.5,
       "KdG": 0.01,
