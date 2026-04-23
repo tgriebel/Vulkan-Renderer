@@ -168,17 +168,20 @@ struct gpuMaterial_t
 	float				transmissionFactor;
 	// 128 bytes
 	uint				textured;
-	uint				pad[ 15 ];
-	// 192 bytes
+	uint				pad[ 3 ];
+	// 144 bytes
 	int					textureId[ MaxMaterialTextures ];
-	// 256 bytes
-	row_major float2x4	uvTransform[ MaxMaterialTextures ]; // The last column is unused, padded for 16byte-alignment
-	// 768 bytes
+	// 208 bytes
+	float2x2			uvTransform[ MaxMaterialTextures ];
+	// 464 bytes
+	float2				uvOffset[ MaxMaterialTextures ];
+	// 576 bytes
 	uint				extraData[ MaxMaterialExtraDataBytes / 4 ]; // HLSL doesn't have an 8-bit type
 };
 #ifdef SHADER_STRUCTS_CPP
-static_assert( sizeof( gpuMaterial_t ) == 1024 );
+static_assert( sizeof( gpuMaterial_t ) == 848 );
 #endif
+
 
 struct gpuLight_t
 {

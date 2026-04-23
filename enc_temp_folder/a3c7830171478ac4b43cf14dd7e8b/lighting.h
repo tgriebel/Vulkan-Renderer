@@ -64,7 +64,7 @@ float4 SampleTexture( const gpuMaterial_t material, const int textureId, const f
 {
 	if( textureId >= 0 )
 	{
-		const float2 transformedUv = uv.xy;// mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
+		const float2 transformedUv = mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
 
 		return texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv );
 
@@ -77,7 +77,7 @@ float4 SampleTextureSrgb( const gpuMaterial_t material, const int textureId, con
 {
 	if( textureId >= 0 )
 	{
-		const float2 transformedUv = uv.xy;// mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
+		const float2 transformedUv = mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
 
 		return SrgbToLinear( texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
 	}
@@ -89,7 +89,7 @@ float3 SampleTextureNormal( const gpuMaterial_t material, const int textureId, c
 {
 	if( textureId >= 0 )
 	{
-		const float2 transformedUv = uv.xy;// mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
+		const float2 transformedUv = mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
 
 		return DecodeNormal( texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
 	}

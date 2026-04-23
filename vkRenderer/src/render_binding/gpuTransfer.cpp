@@ -222,7 +222,7 @@ void Renderer::UpdateGpuMaterials()
 		}
 
 		for( uint32_t t = 0; t < MaxMaterialTextures; ++t ) {
-			m.GetPackedUvTransform( t, materialObject.uvTransform[ t ] );
+			m.GetUvTransform( t, materialObject.uvTransform[ t ], materialObject.uvOffset[ t ] );
 		}
 
 		const materialParms_t& parms = m.GetParms();

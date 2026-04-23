@@ -114,7 +114,8 @@ private:
 	uint16_t				textureBitSet;
 	uint16_t				shaderBitSet;
 
-	mat2x4f					uvTransforms[ MaxMaterialTextures ];
+	mat2x2f					uvTransforms[ MaxMaterialTextures ];
+	vec2f					uvOffset[ MaxMaterialTextures ];
 	hdl_t					textures[ MaxMaterialTextures ];
 	hdl_t					shaders[ MaxMaterialShaders ];
 	uint32_t				shaderPerms[ MaxMaterialShaders ];	// Per-pass permutation bitmask (maps to shaderPermId_t)
@@ -128,7 +129,8 @@ public:
 		for ( int i = 0; i < MaxMaterialTextures; ++i )
 		{
 			textures[ i ] = INVALID_HDL;
-			uvTransforms[ i ] = mat2x4f::Identity();
+			uvTransforms[ i ] = mat2x2f::Identity();
+			uvOffset[ i ] = vec2f( 0.0f, 0.0f );
 		}
 		for ( int i = 0; i < MaxMaterialShaders; ++i ) {
 			shaders[ i ] = INVALID_HDL;
@@ -184,7 +186,7 @@ public:
 	hdl_t			GetTexture( const uint32_t slot ) const;
 	uint32_t		TextureCount() const;
 	bool			AssignUvTransform( const uint32_t slot, const vec2f& scale, const vec2f& offset, const float& rotationRadians );
-	void			GetPackedUvTransform( const uint32_t slot, mat2x4f& outMatrix ) const;
+	void			GetUvTransform( const uint32_t slot, mat2x2f& outTransform, vec2f& outOffset ) const;
 	bool			AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms = 0 );
 	hdl_t			GetShader( const drawPass_t pass ) const;
 	uint32_t		GetShaderPerms( const drawPass_t pass ) const;
