@@ -43,7 +43,9 @@ struct renderConfig_t
 	const char*		cubemapName;
 	bool			present;
 	bool			useCubeViews;
+	bool			cubeDownsample;
 	bool			writeCubeViews;
+	bool			computeEnvMap;
 	bool			computeDiffuseIbl;
 	bool			computeSpecularIBL;
 	bool			downsampleScene;

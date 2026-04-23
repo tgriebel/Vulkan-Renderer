@@ -243,7 +243,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 
 
-	if( config.useCubeViews )
+	if( config.cubeDownsample )
 	{
 		imageProcessCreateInfo_t info {};
 		info.name = "CubeDownsample";
@@ -257,7 +257,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 
 
-	if( config.useCubeViews )
+	if( config.computeEnvMap )
 	{
 		const std::string fileName = std::string( config.cubemapName ) + "_env.img";
 
@@ -353,8 +353,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			schedule->Link( tasks.specularIBL );
 			schedule->Link( tasks.imageSpecularIblReadBackTask );
 		}
-		schedule->Link( tasks.mipCubeTask );
-		schedule->Link( tasks.imageCubemapReadBackTask );
+		if( config.computeEnvMap )
+		{
+			schedule->Link( tasks.mipCubeTask );
+			schedule->Link( tasks.imageCubemapReadBackTask );
+		}
 	}
 	if( tasks.brdfLutTask ) {
 		schedule->Link( tasks.brdfLutTask );

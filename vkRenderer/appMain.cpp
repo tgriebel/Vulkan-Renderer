@@ -69,11 +69,12 @@ void CheckReloadAssets()
 }
 
 
-MakeCVar( BOOL,		r_cubeCapture, false );
 MakeCVar( BOOL,		r_writeCubeCapture, false );
+MakeCVar( BOOL,		r_computeEnvMap, false );
 MakeCVar( BOOL,		r_computeDiffuseIbl, false );
 MakeCVar( BOOL,		r_computeSpecularIbl, false );
 MakeCVar( BOOL,		r_computeBrdfLut, false );
+MakeCVar( BOOL,		r_exitAfterJobComplete, false );
 MakeCVar( STRING,	c_scene, sceneFile );
 MakeCVar( STRING,	r_hdrCubemapSource, "" );
 MakeCVar( STRING,	r_cubemapName, "chess" );
@@ -182,10 +183,12 @@ int main( int argc, char* argv[] )
 	}
 
 	renderConfig_t config {};
-	config.useCubeViews = r_cubeCapture.GetBool() || r_computeDiffuseIbl.GetBool() || r_computeSpecularIbl.GetBool();
-	config.writeCubeViews = r_writeCubeCapture.GetBool() || r_computeDiffuseIbl.GetBool() || r_computeSpecularIbl.GetBool();
+	config.useCubeViews = r_computeEnvMap.GetBool() || r_computeDiffuseIbl.GetBool() || r_computeSpecularIbl.GetBool();
+	config.writeCubeViews = r_writeCubeCapture.GetBool();
+	config.computeEnvMap = r_computeEnvMap.GetBool();
 	config.computeDiffuseIbl = r_computeDiffuseIbl.GetBool();
 	config.computeSpecularIBL = r_computeSpecularIbl.GetBool();
+	config.cubeDownsample = r_computeEnvMap.GetBool() || r_computeDiffuseIbl.GetBool() || r_computeSpecularIbl.GetBool();
 	config.shadows = r_shadows.GetBool();
 	config.downsampleScene = r_downsampleScene.GetBool();
 	config.bloom = r_bloom.GetBool();
@@ -209,7 +212,6 @@ int main( int argc, char* argv[] )
 	if( precomputeSkycube )
 	{
 		CubeCaptureLoad( g_scene );
-	//	r_cubeCapture.Set( true );
 		g_assets.RunLoadLoop();
 	}
 
@@ -320,8 +322,8 @@ int main( int argc, char* argv[] )
 			g_scene->AdvanceFrame();
 			g_window.EndFrame();
 
-			if( precomputeSkycube ) {
-			//	break;
+			if( precomputeSkycube && r_exitAfterJobComplete.GetBool() ) {
+				break;
 			}
 		}
 		g_renderer.Shutdown();
