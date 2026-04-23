@@ -17,17 +17,7 @@
 	  "type": "2D"
 	}
   ],
-  "materials": [
-	{
-      "name": "EquirectangularSky",
-      "shaders": {
-          "DRAWPASS_SKYBOX": { "shader": "Sky", "perms": ["skycube"] }
-      },
-      "textures": {
-          "TEXTURE_SLOT_0" : "code_assets/chapel_env.img"
-      }
-    }
-  ],
+  "materials": [],
   "models": [
   	{
       "name" : "cube",
@@ -36,14 +26,6 @@
   ],
   "camera": [ -17.0, -1.0, 12.0 ],
   "entities": [
-	{
-		"name": "_skybox",
-		"model": "_skybox",
-		"material": "EquirectangularSky",
-		"xyz": [ 0.0, 0.0, 0.0 ],
-		"rotation": [ 0.0, 0.0, 0.0 ],
-		"scale": [ 1.0, 1.0, 1.0 ]
-	},
 	{
 		"name" : "chess_board",
 		"model" : "chess_board.obj",
@@ -73,9 +55,9 @@
 	{
 		"name" : "SheenChair",
 		"model" : "SheenChair.glb",
-		"xyz": [ 0.0, 3.5, 1.5 ],
-		"rotation": [ 0.0, 0.0, -45.0 ],
-		"scale": [ 0.1, 0.1, 0.1 ]
+		"xyz": [ 0.0, -4.5, 0.0 ],
+		"rotation": [ 90.0, 0.0, -90.0 ],
+		"scale": [ 5.0, 5.0, 5.0 ]
 	},
 	{
 		"name" : "PotOfCoals",

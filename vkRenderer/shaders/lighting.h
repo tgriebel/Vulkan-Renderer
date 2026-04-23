@@ -60,38 +60,44 @@ struct brdfSample_t
 };
 
 
-float4 SampleTexture( const gpuMaterial_t material, const int textureId, const float2 uv )
+float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv )
 {
-	if( textureId >= 0 )
-	{
-		const float2 transformedUv = uv.xy;// mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
+	const int textureUploadId = material.textureId[ materialTextureSlot ];
 
-		return texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv );
+	if( textureUploadId >= 0 )
+	{
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv.xy ) + material.uvOffset[ materialTextureSlot ];
+
+		return texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv );
 
 	}
 	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
 }
 
 
-float4 SampleTextureSrgb( const gpuMaterial_t material, const int textureId, const float2 uv )
+float4 SampleTextureSrgb( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv )
 {
-	if( textureId >= 0 )
-	{
-		const float2 transformedUv = uv.xy;// mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
+	const int textureUploadId = material.textureId[ materialTextureSlot ];
 
-		return SrgbToLinear( texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
+	if( textureUploadId >= 0 )
+	{
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv.xy ) + material.uvOffset[ materialTextureSlot ];
+
+		return SrgbToLinear( texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
 	}
 	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
 }
 
 
-float3 SampleTextureNormal( const gpuMaterial_t material, const int textureId, const float2 uv )
+float3 SampleTextureNormal( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv )
 {
-	if( textureId >= 0 )
-	{
-		const float2 transformedUv = uv.xy;// mul( material.uvTransform[ textureId ], uv.xy ) + material.uvOffset[ textureId ];
+	const int textureUploadId = material.textureId[ materialTextureSlot ];
 
-		return DecodeNormal( texSampler[ textureId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
+	if( textureUploadId >= 0 )
+	{
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv.xy ) + material.uvOffset[ materialTextureSlot ];
+
+		return DecodeNormal( texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
 	}
 	return float3( 0.0f, 0.0f, 1.0f );
 }
@@ -99,21 +105,6 @@ float3 SampleTextureNormal( const gpuMaterial_t material, const int textureId, c
 
 surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_t view, const gpuSurface_t surface, const gpuMaterial_t material, const PS_Input input )
 {
-	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
-	const int albedoTexId = material.textureId[ GGX_ALBEDO_MAP_SLOT ];
-	const int normalTexId = material.textureId[ GGX_NORMAL_MAP_SLOT ];
-	const int roughnessTexId = material.textureId[ GGX_ROUGHNESS_MAP_SLOT ];
-	const int metalnessTexId = material.textureId[ GGX_METALLIC_MAP_SLOT ];
-	const int aoTexId = material.textureId[ GGX_AO_MAP_SLOT ];
-	const int emissiveTexId = material.textureId[ GGX_EMISSIVE_MAP_SLOT ];
-	const int ccTexId = material.textureId[ GGX_CC_MAP_SLOT ];
-	const int ccRoughnessTexId = material.textureId[ GGX_CC_ROUGHNESS_MAP_SLOT ];
-	const int ccNormalTexId = material.textureId[ GGX_CC_NML_MAP_SLOT ];
-	const int sheenColorTexId = material.textureId[ GGX_SHEEN_COLOR_MAP_SLOT ];
-	const int sheenRoughnessTexId = material.textureId[ GGX_SHEEN_ROUGHNESS_MAP_SLOT ];
-	const int anisotropyTexId = material.textureId[ GGX_ANISOTROPY_MAP_SLOT ];
-	const int transmissionTexId = material.textureId[ GGX_TRANSMISSION_MAP_SLOT ];
-
 	const float3 specularColor = material.Ks.rgb;
 	const float specularPower = material.Ns;
 
@@ -135,33 +126,35 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 
 	const float2 uv0 = input.uv0.xy;
 
+	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
+
 	if( isTextured )
 	{
-		albedoSample *= SampleTextureSrgb( material, albedoTexId, uv0 ).rgb;
+		albedoSample *= SampleTextureSrgb( material, GGX_ALBEDO_MAP_SLOT, uv0 ).rgb;
 
-		normalSample = SampleTextureNormal( material, normalTexId, uv0 ).xyz;
+		normalSample = SampleTextureNormal( material, GGX_NORMAL_MAP_SLOT, uv0 ).xyz;
 
-		roughnessSample *= SampleTexture( material, roughnessTexId, uv0 ).g;
+		roughnessSample *= SampleTexture( material, GGX_ROUGHNESS_MAP_SLOT, uv0 ).g;
 
-		metalnessSample *= SampleTexture( material, metalnessTexId, uv0 ).b;
+		metalnessSample *= SampleTexture( material, GGX_METALLIC_MAP_SLOT, uv0 ).b;
 
-		aoSample *= SampleTexture( material, aoTexId, uv0 ).r;
+		aoSample *= SampleTexture( material, GGX_AO_MAP_SLOT, uv0 ).r;
 
-		emissiveSample *= SampleTextureSrgb( material, emissiveTexId, uv0 ).rgb;
+		emissiveSample *= SampleTextureSrgb( material, GGX_EMISSIVE_MAP_SLOT, uv0 ).rgb;
 
-		ccSample *= SampleTexture( material, ccTexId, uv0 ).r;
+		ccSample *= SampleTexture( material, GGX_CC_MAP_SLOT, uv0 ).r;
 
-		ccRoughnessSample *= SampleTexture( material, ccRoughnessTexId, uv0 ).r;
+		ccRoughnessSample *= SampleTexture( material, GGX_CC_ROUGHNESS_MAP_SLOT, uv0 ).r;
 
-		ccNormalSample *= SampleTextureNormal( material, ccNormalTexId, uv0 ).xyz;
+		ccNormalSample *= SampleTextureNormal( material, GGX_CC_NML_MAP_SLOT, uv0 ).xyz;
 
-		sheenSample *= SampleTextureSrgb( material, sheenColorTexId, uv0 ).rgb;
+		sheenSample *= SampleTextureSrgb( material, GGX_SHEEN_COLOR_MAP_SLOT, uv0 ).rgb;
 
-		sheenRoughnessSample *= SampleTexture( material, sheenRoughnessTexId, uv0 ).r;
+		sheenRoughnessSample *= SampleTexture( material, GGX_SHEEN_ROUGHNESS_MAP_SLOT, uv0 ).r;
 
-		anisotropySample *= SampleTexture( material, anisotropyTexId, uv0 ).r;
+		anisotropySample *= SampleTexture( material, GGX_ANISOTROPY_MAP_SLOT, uv0 ).r;
 
-		transmissionSample *= SampleTexture( material, transmissionTexId, uv0 ).r;
+		transmissionSample *= SampleTexture( material, GGX_TRANSMISSION_MAP_SLOT, uv0 ).r;
 	}
 
 	const float normalBlendFactor = 1.0f;
