@@ -38,7 +38,7 @@ vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIn
 	const gpuView_t view = views[viewlId];
 
 	const uint heightMapId = materials[ materialId ].textureId[ 0 ];
-	const float heightMapValue = texSampler[ heightMapId ].SampleLevel( bilinearSamplerWrap, input.inTexCoord.xy, 0 ).r;
+	const float heightMapValue = texSampler[ heightMapId ].SampleLevel( bilinearSamplerWrap, input.uv0.xy, 0 ).r;
 
 	const float maxHeight = globals.generic.x;
 	float3 position = input.inPosition;
@@ -47,10 +47,11 @@ vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIn
 	output.worldPosition = mul( surfaces[ output.objectId ].model, float4( position, 1.0f ) );
 	output.pos = mul( view.projMat, mul( view.viewMat, output.worldPosition ) );
 	output.color = input.inColor;
-	output.uv0 = input.inTexCoord;
+	output.uv0 = input.uv0;
+	output.uv1 = input.uv1;
 
 	float3x3 modelMat3 = (float3x3)surfaces[ output.objectId ].model;
-	float3x3 tangentMat = GetTerrainTangent( input.inTexCoord.xy );
+	float3x3 tangentMat = GetTerrainTangent( input.uv0.xy );
 	float3 wt0 = mul( modelMat3, tangentMat[0] );
 	float3 wt1 = mul( modelMat3, tangentMat[1] );
 	output.normal = normalize( cross( wt0, wt1 ) );

@@ -35,7 +35,8 @@ vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIn
 	}
 
 	output.color = input.inColor;
-	output.uv0 = input.inTexCoord;
+	output.uv0 = input.uv0;
+	output.uv1 = input.uv1;
 	output.clipPosition = output.pos;
 
 	return output;

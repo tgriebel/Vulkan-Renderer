@@ -33,11 +33,38 @@
 		"scale": [ 1.0, 1.0, 1.0 ]
 	},
 	{
+		"name" : "ToyCar",
+		"model": "ToyCar.glb",
+		"xyz": [ 4.5, 3.5, 1.5 ],
+		"rotation": [ 180.0, 0.0, 180.0 ],
+		"scale": [ 0.01, 0.01, 0.01 ]
+	},
+	{
+		"name" : "DamagedHelmet",
+		"model": "DamagedHelmet.glb",
+		"xyz": [ -1.5, 3.5, 1.5 ],
+		"rotation": [ 180.0, 0.0, 180.0 ],
+		"scale": [ 1.0, 1.0, 1.0 ]
+	},
+	{
+		"name" : "AnisotropyBarnLamp",
+		"model" : "AnisotropyBarnLamp.glb",
+		"rotation": [ 0.0, 0.0, -45.0 ],
+		"scale": [ 10.0, 10.0, 10.0 ]
+	},
+	{
 		"name" : "SheenChair",
 		"model" : "SheenChair.glb",
 		"xyz": [ 0.0, -4.5, 0.0 ],
 		"rotation": [ 90.0, 0.0, -90.0 ],
 		"scale": [ 5.0, 5.0, 5.0 ]
+	},
+	{
+		"name" : "PotOfCoals",
+		"model": "PotOfCoals.glb",
+		"xyz": [ -3.5, 3.5, 0.0 ],
+		"rotation": [ 0.0, 0.0, -90.0 ],
+		"scale": [ 10.0, 10.0, 10.0 ]
 	},
 	{
 		"name" : "sphere",

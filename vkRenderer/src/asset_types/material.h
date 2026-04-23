@@ -132,6 +132,7 @@ public:
 			textures[ i ] = INVALID_HDL;
 			uvTransforms[ i ] = mat2x2f::Identity();
 			uvOffset[ i ] = vec2f( 0.0f, 0.0f );
+			uvChannel[ i ] = 0;
 		}
 		for ( int i = 0; i < MaxMaterialShaders; ++i ) {
 			shaders[ i ] = INVALID_HDL;

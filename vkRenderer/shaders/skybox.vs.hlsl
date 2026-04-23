@@ -18,7 +18,8 @@ vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIn
 	output.pos = mul( view.projMat, mul( view.viewMat, output.worldPosition ) );
 	output.pos.z = 0.0f;
 	output.color = input.inColor;
-	output.uv0 = input.inTexCoord;
+	output.uv0 = input.uv0;
+	output.uv1 = input.uv1;
 	output.normal = input.inNormal;
 	output.clipPosition = output.pos;
 

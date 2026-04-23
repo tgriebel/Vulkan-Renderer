@@ -349,7 +349,9 @@ bool LoadRawModelModelObj( AssetManager& assets, const std::string& fileName, co
 
 		std::unordered_map<vertex_t, uint32_t> uniqueVertices {};
 		std::unordered_map< uint32_t, uint32_t > indexFaceCount {};
-		for( const auto& index : shape.mesh.indices ) {
+
+		for( const auto& index : shape.mesh.indices )
+		{
 			vertex_t vertex { };
 
 			vertex.pos[ 0 ] = attrib.vertices[ 3 * index.vertex_index + 0 ];
@@ -360,16 +362,26 @@ bool LoadRawModelModelObj( AssetManager& assets, const std::string& fileName, co
 
 			model.bounds.Expand( vec3f( vertex.pos[ 0 ], vertex.pos[ 1 ], vertex.pos[ 2 ] ) );
 
-			vertex.uv[ 0 ] = 0.0f;
-			vertex.uv[ 1 ] = 0.0f;
-			vertex.uv2[ 0 ] = 0.0f;
-			vertex.uv2[ 1 ] = 0.0f;
-			if( index.texcoord_index >= 0 ) {
-				vertex.uv[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
-				vertex.uv[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
+			vertex.uv0[ 0 ] = 0.0f;
+			vertex.uv0[ 1 ] = 0.0f;
+			vertex.uv1[ 0 ] = 0.0f;
+			vertex.uv1[ 1 ] = 0.0f;
+
+			// This is written this way for backwards compatibility
+			// GLTF is the default import format now
+			// UV channel should be selected by the material, not vertex index
+
+			hasUv = ( index.texcoord_index < 0 );
+
+			if( index.texcoord_index >= 0 )
+			{
+				vertex.uv0[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
+				vertex.uv0[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
 			}
-			else {
-				hasUv = false;
+			if( index.texcoord_index >= 1 )
+			{
+				vertex.uv1[ 0 ] = attrib.texcoords[ 2 * index.texcoord_index + 0 ];
+				vertex.uv1[ 1 ] = 1.0f - attrib.texcoords[ 2 * index.texcoord_index + 1 ];
 			}
 
 			vertex.normal[ 0 ] = attrib.normals[ 3 * index.normal_index + 0 ];
@@ -796,8 +808,9 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 			const cgltf_accessor* posAccessor      = nullptr;
 			const cgltf_accessor* normalAccessor   = nullptr;
 			const cgltf_accessor* tangentAccessor  = nullptr;
-			const cgltf_accessor* texcoordAccessor = nullptr;
-			const cgltf_accessor* colorAccessor    = nullptr;
+			const cgltf_accessor* texcoordAccessor  = nullptr;
+			const cgltf_accessor* texcoord1Accessor = nullptr;
+			const cgltf_accessor* colorAccessor     = nullptr;
 
 			for ( cgltf_size attrIx = 0; attrIx < prim.attributes_count; ++attrIx )
 			{
@@ -823,6 +836,8 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 					{
 						if( attr.index == 0 ) {
 							texcoordAccessor = attr.data;
+						} else if ( attr.index == 1 ) {
+							texcoord1Accessor = attr.data;
 						}
 					} break;
 
@@ -877,7 +892,17 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 				cgltf_accessor_unpack_floats( texcoordAccessor, tmp.data(), vertexCount * 2 );
 				for ( cgltf_size i = 0; i < vertexCount; ++i )
 				{
-					surf.vertices[ i ].uv = vec2f( tmp[ i * 2 + 0 ], tmp[ i * 2 + 1 ] );
+					surf.vertices[ i ].uv0 = vec2f( tmp[ i * 2 + 0 ], tmp[ i * 2 + 1 ] );
+				}
+			}
+
+			if ( texcoord1Accessor != nullptr )
+			{
+				std::vector<float> tmp( vertexCount * 2 );
+				cgltf_accessor_unpack_floats( texcoord1Accessor, tmp.data(), vertexCount * 2 );
+				for ( cgltf_size i = 0; i < vertexCount; ++i )
+				{
+					surf.vertices[ i ].uv1 = vec2f( tmp[ i * 2 + 0 ], tmp[ i * 2 + 1 ] );
 				}
 			}
 

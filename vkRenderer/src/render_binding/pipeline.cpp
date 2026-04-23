@@ -11,7 +11,7 @@
 
 static std::unordered_map< uint64_t, pipelineObject_t > g_pipelineLib;
 
-static const uint32_t MaxVertexAttribs = 6;
+static const uint32_t MaxVertexAttribs = 7;
 static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertexAttributeDescriptions()
 {
 	uint32_t attribId = 0;
@@ -49,8 +49,14 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 
 	attributeDescriptions[ attribId ].binding = 0;
 	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inTexCoord );
+	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32_SFLOAT;
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, uv0 );
+	++attribId;
+
+	attributeDescriptions[ attribId ].binding = 0;
+	attributeDescriptions[ attribId ].location = attribId;
+	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32_SFLOAT;
+	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, uv1 );
 	++attribId;
 
 	assert( attribId == MaxVertexAttribs );

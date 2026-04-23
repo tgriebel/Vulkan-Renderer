@@ -48,6 +48,7 @@ static_assert( sizeof( vec2f ) == 8 );
 #define MaxSurfaces					1000
 #define MaxMaterialTextures			16
 #define MaxMaterialExtraDataBytes	256
+#define MaxTextureUVs				2
 
 enum ggxTextureSlot_t
 {
@@ -245,7 +246,8 @@ struct vsInput_t
 	BIND_SLOT( 2 ) float3 inNormal		SEMANTIC( NORMAL );
 	BIND_SLOT( 3 ) float3 inTangent		SEMANTIC( TANGENT );
 	BIND_SLOT( 4 ) float3 inBitangent	SEMANTIC( BINORMAL );
-	BIND_SLOT( 5 ) float4 inTexCoord	SEMANTIC( TEXCOORD0 );
+	BIND_SLOT( 5 ) float2 uv0			SEMANTIC( TEXCOORD0 );
+	BIND_SLOT( 6 ) float2 uv1			SEMANTIC( TEXCOORD1 );
 };
 
 

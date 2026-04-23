@@ -300,10 +300,10 @@ void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 					vertexStream[vIx].inNormal = surf.vertices[vIx].normal;
 					vertexStream[vIx].inTangent = surf.vertices[vIx].tangent;
 					vertexStream[vIx].inBitangent = surf.vertices[vIx].bitangent;
-					vertexStream[vIx].inTexCoord[0] = surf.vertices[vIx].uv[0];
-					vertexStream[vIx].inTexCoord[1] = surf.vertices[vIx].uv[1];
-					vertexStream[vIx].inTexCoord[2] = surf.vertices[vIx].uv2[0];
-					vertexStream[vIx].inTexCoord[3] = surf.vertices[vIx].uv2[1];
+					vertexStream[vIx].uv0.x = surf.vertices[vIx].uv0.x;
+					vertexStream[vIx].uv0.y = surf.vertices[vIx].uv0.y;
+					vertexStream[vIx].uv1.x = surf.vertices[vIx].uv1.x;
+					vertexStream[vIx].uv1.y = surf.vertices[vIx].uv1.y;
 				}
 
 				// Copy stream to staging buffer

@@ -70,8 +70,8 @@ static void CopyGeoBuilderResult( const GeoBuilder& gb, Surface& surf, AABB& bou
 		vert.normal = vec3f( v.normal[ 0 ], v.normal[ 1 ], v.normal[ 2 ] );
 		vert.tangent = vec3f( v.tangent[ 0 ], v.tangent[ 1 ], v.tangent[ 2 ] );
 		vert.bitangent = vec3f( v.bitangent[ 0 ], v.bitangent[ 1 ], v.bitangent[ 2 ] );
-		vert.uv = vec2f( v.texCoord[ 0 ], v.texCoord[ 1 ] );
-		vert.uv2 = vec2f( 0.0f, 0.0f );
+		vert.uv0 = vec2f( v.texCoord[ 0 ], v.texCoord[ 1 ] );
+		vert.uv1 = vec2f( 0.0f, 0.0f );
 
 		surf.vertices.push_back( vert );
 		bounds.Expand( vert.pos.xyz );
@@ -253,13 +253,13 @@ void CreateQuadSurface2D( Model& outModel, const std::string& materialName, vec2
 	outModel.surfs.resize( outModel.surfCount );
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
 
-	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 1.0f );
-	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].uv0 = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].uv0 = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].uv0 = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].uv0 = vec2f( 1.0f, 1.0f );
 
 	for( int i = 0; i < 4; ++i ) {
-		outModel.surfs[ 0 ].vertices[ i ].uv2 = vec2f( 0.0f, 0.0f );
+		outModel.surfs[ 0 ].vertices[ i ].uv1 = vec2f( 0.0f, 0.0f );
 	}
 
 	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );
@@ -275,19 +275,19 @@ void CreateBoxSurface( Model& outModel, const std::string& materialName, const v
 	outModel.surfs.resize( outModel.surfCount );
 	CopyGeoBuilderResult( gb, outModel.surfs[ 0 ], outModel.bounds );
 
-	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].uv0 = vec2f( 0.0f, 0.0f );
 
-	outModel.surfs[ 0 ].vertices[ 0 ].uv = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 1 ].uv = vec2f( 1.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 2 ].uv = vec2f( 0.0f, 1.0f );
-	outModel.surfs[ 0 ].vertices[ 3 ].uv = vec2f( 1.0f, 1.0f );
-	outModel.surfs[ 0 ].vertices[ 4 ].uv = vec2f( 0.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 5 ].uv = vec2f( 1.0f, 0.0f );
-	outModel.surfs[ 0 ].vertices[ 6 ].uv = vec2f( 0.0f, 1.0f );
-	outModel.surfs[ 0 ].vertices[ 7 ].uv = vec2f( 1.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 0 ].uv0 = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 1 ].uv0 = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 2 ].uv0 = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 3 ].uv0 = vec2f( 1.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 4 ].uv0 = vec2f( 0.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 5 ].uv0 = vec2f( 1.0f, 0.0f );
+	outModel.surfs[ 0 ].vertices[ 6 ].uv0 = vec2f( 0.0f, 1.0f );
+	outModel.surfs[ 0 ].vertices[ 7 ].uv0 = vec2f( 1.0f, 1.0f );
 
 	for( int i = 0; i < 8; ++i ) {
-		outModel.surfs[ 0 ].vertices[ i ].uv2 = vec2f( 0.0f, 0.0f );
+		outModel.surfs[ 0 ].vertices[ i ].uv1 = vec2f( 0.0f, 0.0f );
 	}
 
 	outModel.surfs[ 0 ].materialHdl = AssetLib<Material>::Handle( materialName.c_str() );

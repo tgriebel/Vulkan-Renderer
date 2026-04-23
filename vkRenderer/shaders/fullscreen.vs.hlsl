@@ -24,7 +24,8 @@ vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIn
 	output.worldPosition	= float4( positions[ vertexId ].xy, 0.0, 1.0 );
 	output.pos				= output.worldPosition;
 	output.color			= float4( 1.0f, 1.0f, 1.0f, 1.0f );
-	output.uv0				= float4( uvs[ vertexId ], 0.0, 0.0 );
+	output.uv0				= uvs[ vertexId ];
+	output.uv1				= float2( 0.0, 0.0 );
 	output.normal			= float3( 0.0f, 0.0f, 1.0f );
 	output.clipPosition		= output.pos;
 

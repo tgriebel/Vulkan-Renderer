@@ -48,8 +48,8 @@ static void MikkGetTexCoord( const SMikkTSpaceContext* ctx, float outUV[], int f
 {
 	MikkUserData* data = static_cast< MikkUserData* >( ctx->m_pUserData );
 	const vertex_t& v = data->vertices[ data->indices[ face * 3 + vert ] ];
-	outUV[ 0 ] = v.uv[ 0 ];
-	outUV[ 1 ] = v.uv[ 1 ];
+	outUV[ 0 ] = v.uv0[ 0 ];
+	outUV[ 1 ] = v.uv0[ 1 ];
 }
 
 
