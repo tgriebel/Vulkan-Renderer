@@ -568,7 +568,9 @@ static void AddGltfTexture( Material& outMaterial, AssetManager& assets,
 		scale.y = view.transform.scale[ 1 ];
 		rotation = view.transform.rotation;
 
-		outMaterial.AssignUvTransform( slot, scale, offset, rotation );
+		const uint32_t uvChannel = ( view.transform.has_texcoord ) ? view.transform.texcoord : 0;
+
+		outMaterial.AssignUvTransform( slot, uvChannel, scale, offset, rotation );
 	}
 }
 

@@ -60,13 +60,14 @@ struct brdfSample_t
 };
 
 
-float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv )
+float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
 {
 	const int textureUploadId = material.textureId[ materialTextureSlot ];
+	const uint channel = material.uvChannel[ materialTextureSlot ];
 
 	if( textureUploadId >= 0 )
 	{
-		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv.xy ) + material.uvOffset[ materialTextureSlot ];
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[materialTextureSlot];
 
 		return texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv );
 
@@ -75,13 +76,14 @@ float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlo
 }
 
 
-float4 SampleTextureSrgb( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv )
+float4 SampleTextureSrgb( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
 {
 	const int textureUploadId = material.textureId[ materialTextureSlot ];
+	const uint channel = material.uvChannel[ materialTextureSlot ];
 
 	if( textureUploadId >= 0 )
 	{
-		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv.xy ) + material.uvOffset[ materialTextureSlot ];
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
 
 		return SrgbToLinear( texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
 	}
@@ -89,13 +91,14 @@ float4 SampleTextureSrgb( const gpuMaterial_t material, const int materialTextur
 }
 
 
-float3 SampleTextureNormal( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv )
+float3 SampleTextureNormal( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
 {
 	const int textureUploadId = material.textureId[ materialTextureSlot ];
+	const uint channel = material.uvChannel[ materialTextureSlot ];
 
 	if( textureUploadId >= 0 )
 	{
-		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv.xy ) + material.uvOffset[ materialTextureSlot ];
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
 
 		return DecodeNormal( texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
 	}
@@ -124,7 +127,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	float anisotropySample = material.anisotropy;
 	float transmissionSample = material.transmissionFactor;
 
-	const float2 uv0 = input.uv0.xy;
+	const float2 uv0[ 2 ] = { input.uv0.xy, input.uv0.xy };
 
 	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
 

@@ -116,6 +116,7 @@ private:
 
 	mat2x2f					uvTransforms[ MaxMaterialTextures ];
 	vec2f					uvOffset[ MaxMaterialTextures ];
+	uint32_t				uvChannel[ MaxMaterialTextures ];
 	hdl_t					textures[ MaxMaterialTextures ];
 	hdl_t					shaders[ MaxMaterialShaders ];
 	uint32_t				shaderPerms[ MaxMaterialShaders ];	// Per-pass permutation bitmask (maps to shaderPermId_t)
@@ -185,8 +186,8 @@ public:
 	bool			AddTexture( const uint32_t slot, const hdl_t hdl );
 	hdl_t			GetTexture( const uint32_t slot ) const;
 	uint32_t		TextureCount() const;
-	bool			AssignUvTransform( const uint32_t slot, const vec2f& scale, const vec2f& offset, const float& rotationRadians );
-	void			GetUvTransform( const uint32_t slot, mat2x2f& outTransform, vec2f& outOffset ) const;
+	bool			AssignUvTransform( const uint32_t slot, const uint32_t uvChannel, const vec2f& scale, const vec2f& offset, const float& rotationRadians );
+	void			GetUvTransform( const uint32_t slot, uint32_t& channel, mat2x2f& outTransform, vec2f& outOffset ) const;
 	bool			AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms = 0 );
 	hdl_t			GetShader( const drawPass_t pass ) const;
 	uint32_t		GetShaderPerms( const drawPass_t pass ) const;

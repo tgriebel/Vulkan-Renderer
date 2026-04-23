@@ -44,7 +44,7 @@ uint32_t Material::TextureCount() const
 }
 
 
-bool Material::AssignUvTransform( const uint32_t slot, const vec2f& scale, const vec2f& offset, const float& rotationRadians )
+bool Material::AssignUvTransform( const uint32_t slot, const uint32_t channel, const vec2f& scale, const vec2f& offset, const float& rotationRadians )
 {
 	if( slot >= MaxMaterialTextures )
 	{
@@ -64,21 +64,25 @@ bool Material::AssignUvTransform( const uint32_t slot, const vec2f& scale, const
 
 	o[ 0 ] = offset.x;
 	o[ 1 ] = offset.y;
+
+	uvChannel[ slot ] = channel;
 	
 	return true;
 }
 
 
-void Material::GetUvTransform( const uint32_t slot, mat2x2f& outTransform, vec2f& outOffset ) const
+void Material::GetUvTransform( const uint32_t slot, uint32_t& channel, mat2x2f& outTransform, vec2f& outOffset ) const
 {
 	if( slot >= MaxMaterialTextures )
 	{
 		outTransform = mat2x2f::Identity();
 		outOffset = vec2f( 0.0f, 0.0f );
+		channel = 0;
 		return;
 	}
 	outTransform = uvTransforms[ slot ];
 	outOffset = uvOffset[ slot ];
+	channel = uvChannel[ slot ];
 }
 
 

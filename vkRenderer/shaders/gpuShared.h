@@ -175,11 +175,13 @@ struct gpuMaterial_t
 	float2x2			uvTransform[ MaxMaterialTextures ];
 	// 464 bytes
 	float2				uvOffset[ MaxMaterialTextures ];
-	// 576 bytes
+	// 592 bytes
+	uint				uvChannel[ MaxMaterialTextures ];
+	// 656
 	uint				extraData[ MaxMaterialExtraDataBytes / 4 ]; // HLSL doesn't have an 8-bit type
 };
 #ifdef SHADER_STRUCTS_CPP
-static_assert( sizeof( gpuMaterial_t ) == 848 );
+static_assert( sizeof( gpuMaterial_t ) == 912 );
 #endif
 
 
