@@ -4,6 +4,8 @@
 #include "../render_binding/bindings.h"
 #include "../draw_passes/postPass.h"
 
+#include "imageShaderTask.h"
+
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/imgui.h"
 #include "../../../external/imgui/backends/imgui_impl_glfw.h"

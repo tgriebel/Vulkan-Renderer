@@ -1,21 +1,19 @@
 #include "io.h"
 
-#include <map>
-#include <deque>
 #include <string>
-#include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 
-#include <syscore/serializer.h>
 #include <syscore/common.h>
+#include <syscore/serializer.h>
 
 #include <GfxCore/image/image.h>
 
-#include "../scene/sceneBase.h"
-#include "../scene/assetManager.h"
-#include "../asset_types/model.h"
-#include "../asset_types/texture.h"
 #include "../asset_types/material.h"
+#include "../asset_types/model.h"
+#include "../scene/assetManager.h"
+
+#include "../asset_types/texture.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../external/tiny_obj_loader.h"
@@ -739,15 +737,15 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 
 	// Pre-scan materials to tag which images are sRGB (base color, emissive).
 	// All others (normal, roughness, metallic, occlusion, clearcoat) are linear.
-	std::vector<const cgltf_image*> srgbImages;
+	std::unordered_set<const cgltf_image*> srgbImages;
 	for ( cgltf_size matIx = 0; matIx < data->materials_count; ++matIx )
 	{
 		const cgltf_material& mat = data->materials[ matIx ];
 		if ( mat.has_pbr_metallic_roughness && mat.pbr_metallic_roughness.base_color_texture.texture != nullptr ) {
-			srgbImages.push_back( mat.pbr_metallic_roughness.base_color_texture.texture->image );
+			srgbImages.insert( mat.pbr_metallic_roughness.base_color_texture.texture->image );
 		}
 		if ( mat.emissive_texture.texture != nullptr ) {
-			srgbImages.push_back( mat.emissive_texture.texture->image );
+			srgbImages.insert( mat.emissive_texture.texture->image );
 		}
 	}
 
@@ -757,15 +755,7 @@ bool LoadRawModelGLTF( AssetManager& assets, const std::string& fileName, const 
 		const cgltf_image& img     = data->images[ imgIx ];
 		const std::string& key     = imageKeys[ imgIx ];
 
-		bool isLinear = true;
-		for ( cgltf_size srgbIx = 0; srgbIx < srgbImages.size(); ++srgbIx )
-		{
-			if ( srgbImages[ srgbIx ] == &img )
-			{
-				isLinear = false;
-				break;
-			}
-		}
+		const bool isLinear = ( srgbImages.count( &img ) == 0 );
 
 		if ( img.uri != nullptr )
 		{

@@ -4,7 +4,7 @@
 
 #include "../render_resources/gpuBuffer.h"
 #include "../render_binding/bindings.h"
-
+#include "imageShaderTask.h"
 
 std::string ImageProcessTask::AsString() const
 {

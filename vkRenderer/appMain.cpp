@@ -1,9 +1,6 @@
 #include "stdafx.h"
 
-#include <map>
 #include <thread>
-#include <chrono>
-#include <mutex>
 #include "src/globals/common.h"
 #include "src/globals/assetDefs.h"
 #include <syscore/systemUtils.h>
@@ -12,11 +9,8 @@
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
 #include "scenes/sceneParser.h"
-#include <SysCore/systemUtils.h>
 #include "src/scene/assetBaker.h"
 #include "src/scene/codeAssets.h"
-#include <gfxcore/io/serializeClasses.h>
-#include "src/app/raytracerInterface.h"
 #include "src/app/cvar.h"
 
 #include "scenes/chessScene.h"

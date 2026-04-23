@@ -1,15 +1,11 @@
 #include "schedule.h"
 
-#include "../scene/entity.h"
-#include "../render_state/rhi.h"
-#include "../render_binding/pipeline.h"
-#include "../render_binding/bindings.h"
-#include "../render_resources/imageArray.h"
-#include "../render_tasks/RenderTask.h"
-#include "../render_tasks/ImageReadbackTask.h"
-#include "../render_tasks/ImageProcessTask.h"
-#include "../render_tasks/imguiTask.h"
 #include "../globals/assetDefs.h"
+#include "../render_tasks/ImageShaderTask.h"
+#include "../render_tasks/ImageProcessTask.h"
+#include "../render_tasks/ImageReadbackTask.h"
+#include "../render_tasks/RenderTask.h"
+#include "../render_tasks/imguiTask.h"
 
 static availableTasks_t tasks;
 

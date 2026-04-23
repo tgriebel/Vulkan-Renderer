@@ -11,15 +11,11 @@
 #include "../render_core/renderResource.h"
 
 #include "../render_tasks/RenderTask.h"
-#include "../render_tasks/imageShaderTask.h"
 
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
 
 #include "renderContext.h"
-
-#define SHADER_STRUCTS_CPP
-#include "../../shaders/gpuShared.h"
 
 class Window;
 class SwapChain;
