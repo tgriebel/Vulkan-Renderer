@@ -7,7 +7,6 @@
 #include <syscore/serializer.h>
 
 #include "../globals/common.h"
-#include "../asset_types/gpuProgram.h"
 
 class Image;
 class Model;

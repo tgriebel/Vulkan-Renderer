@@ -11,6 +11,7 @@
 
 #include "../asset_types/material.h"
 #include "../asset_types/model.h"
+#include "../asset_types/gpuProgram.h"
 #include "../scene/assetManager.h"
 
 #include "../asset_types/texture.h"

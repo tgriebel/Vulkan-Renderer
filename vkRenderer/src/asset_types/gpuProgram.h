@@ -7,7 +7,6 @@
 #include <SysCore/common.h>
 
 #include "asset.h"
-#include "../io/io.h"
 
 class ShaderBindSet;
 class Serializer;

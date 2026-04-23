@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../globals/common.h"
+#include "../asset_types/gpuProgram.h"
 #include "../draw_passes/drawpass.h"
 #include "../render_tasks/RenderTask.h"
 

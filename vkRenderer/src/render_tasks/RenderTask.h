@@ -1,10 +1,8 @@
 #pragma once
 
-#include <queue>
 #include "../render_core/GpuSync.h"
 #include "../render_state/frameBuffer.h"
 #include "../render_resources/imageView.h"
-#include "../asset_types/material.h"
 
 class CommandContext;
 class GfxContext;

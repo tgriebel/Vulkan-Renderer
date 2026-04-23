@@ -3,7 +3,6 @@
 #include <SysCore/timer.h>
 
 #include "../globals/common.h"
-#include "../globals/renderConstants.h"
 
 #include "../render_state/cmdContext.h"
 #include "../render_core/renderview.h"
