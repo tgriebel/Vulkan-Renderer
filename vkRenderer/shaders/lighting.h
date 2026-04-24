@@ -34,6 +34,7 @@ struct surfaceInput_t
 	float	anisoRotation;
 	bool	useClearCoat;
 	bool	useSheen;
+	bool	useAniso;
 };
 
 
@@ -220,6 +221,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
 	surfaceInput.useClearCoat = ( ccSample > 0.0f );
 	surfaceInput.useSheen = any( sheenSample > 0.0f ) && ( sheenRoughnessSample > 0.0f );
+	surfaceInput.useAniso = ( surfaceInput.aniso != 0.0f );
 
 	surfaceInput.N = normalize( normal );
 	surfaceInput.V = normalize( view.viewOrigin.xyz - input.worldPosition.xyz );

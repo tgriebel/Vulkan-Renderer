@@ -48,24 +48,30 @@ brdfSample_t EvaluateAnisoBrdf( const surfaceInput_t surfaceInput, lightingInput
     const float metallic = surfaceInput.metallic;
     const float3 F0 = surfaceInput.F0;
     
-    float anisotropy = 1.0f; // TODO
-    float at = max( perceptualRoughness * ( 1.0 + anisotropy ), 0.001 ); // TODO
-    float ab = max( perceptualRoughness * ( 1.0 - anisotropy ), 0.001 ); // TODO
+    float sinRot, cosRot;
+    sincos( surfaceInput.anisoRotation, sinRot, cosRot );
+    const float3 T = cosRot * surfaceInput.T + sinRot * surfaceInput.B;
+    const float3 B = -sinRot * surfaceInput.T + cosRot * surfaceInput.B;
+    
+    // Roughness split along tangent (at) and bitangent (ab)
+    const float2 anisoR = AnisoRoughness( perceptualRoughness, surfaceInput.aniso );
+    const float at = anisoR.x;
+    const float ab = anisoR.y;
+    
+    // Project V and L onto the anisotropic tangent frame
+    const float ToV = dot( T, surfaceInput.V );
+    const float BoV = dot( B, surfaceInput.V );
+    const float ToL = dot( T, lightingInput.L );
+    const float BoL = dot( B, lightingInput.L );
 
-    const float Dc = D_GGX_Aniso( lightingInput.NoH, lightingInput.H, surfaceInput.T, surfaceInput.B, at, ab );
-    //const float Gc = G_Smith( surfaceInput.NoV, lightingInput.NoL, perceptualRoughness );
+    const float Dc = D_GGX_Aniso( lightingInput.NoH, lightingInput.H, T, B, at, ab );
+    const float Gc = V_SmithGGXCorrelated_Aniso( at, ab, ToV, BoV, ToL, BoL, surfaceInput.NoV, lightingInput.NoL );
     const float3 Fc = F_Schlick( lightingInput.HoV, F0 );
 
-    const float3 kS = Fc;
-    float3 kD = float3( 1.0f, 1.0f, 1.0f ) - kS;
-    kD *= 1.0f - metallic;
+    float3 kD = ( float3( 1.0f, 1.0f, 1.0f ) - Fc ) * ( 1.0f - metallic );
 
-    float3 numerator = Dc;// * Gc * Fc;
-    float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.00001f;
-	
     brdfSample_t brdf;
-	
-    brdf.Fr = numerator / denominator;
+    brdf.Fr = Dc * Gc * Fc;
     brdf.Fd = ( kD * surfaceInput.albedo ) / PI;
     brdf.F = Fc;
 
@@ -139,7 +145,14 @@ void ApplySheenBrdf( const surfaceInput_t surfaceInput, lightingInput_t lighting
     const float Dc = D_Charlie( lightingInput.NoH, surfaceInput.sheenRoughness );
     const float Vc = V_Neubelt( surfaceInput.NoV, lightingInput.NoL );
 
-    brdf.Fr += surfaceInput.sheenColor * Dc * Vc;
+    const float3 sheenLobe = surfaceInput.sheenColor * Dc * Vc;
+    
+    const float sheenMax = max( surfaceInput.sheenColor.r, max( surfaceInput.sheenColor.g, surfaceInput.sheenColor.b ) );
+    const float sheenScaling = 1.0f - sheenMax * 0.157f; // TODO: replace magic number with another BRDF LUT
+
+    brdf.Fd *= sheenScaling;
+    brdf.Fr *= sheenScaling;
+    brdf.Fr += sheenLobe;
 }
 
 
@@ -205,8 +218,14 @@ PS_Output PSMain( PS_Input input )
 
 		const lightingInput_t lightingInput = CalculateLightingInput( surfaceInput, light );
 
-        brdfSample_t brdf = EvaluateBaseBrdf( surfaceInput, lightingInput );
-			
+        brdfSample_t brdf;
+        
+        if ( surfaceInput.useAniso ) {
+            brdf = EvaluateAnisoBrdf( surfaceInput, lightingInput );
+        } else {
+            brdf = EvaluateBaseBrdf( surfaceInput, lightingInput );
+        }
+	
         if ( surfaceInput.useClearCoat ) {
 			ApplyClearcoatBrdf( surfaceInput, lightingInput, brdf );
         }
