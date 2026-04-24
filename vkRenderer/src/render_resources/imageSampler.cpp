@@ -29,8 +29,8 @@ void ImageSampler::Init( const samplerState_t& state, const resourceLifeTime_t l
 	samplerInfo.maxAnisotropy = Clamp( state.maxAniso, 1.0f, context.deviceProperties.limits.maxSamplerAnisotropy );
 	samplerInfo.borderColor = vk_GetBorderColor( m_samplerState.borderColor, m_samplerState.borderTransparent, m_samplerState.borderColorIsFloat );
 	samplerInfo.unnormalizedCoordinates = VK_FALSE;
-	samplerInfo.compareEnable = VK_FALSE;
-	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+	samplerInfo.compareEnable = state.pcf ? VK_TRUE : VK_FALSE;
+	samplerInfo.compareOp = state.pcf ? VK_COMPARE_OP_LESS : VK_COMPARE_OP_ALWAYS;
 	samplerInfo.mipmapMode = ( state.filter == SAMPLER_FILTER_TRILINEAR ) ? VK_SAMPLER_MIPMAP_MODE_LINEAR : VK_SAMPLER_MIPMAP_MODE_NEAREST;
 	samplerInfo.minLod = state.minLod;
 	samplerInfo.maxLod = Clamp( state.maxLod, state.minLod, VK_LOD_CLAMP_NONE );

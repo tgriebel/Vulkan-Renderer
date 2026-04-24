@@ -87,7 +87,6 @@ float3 ApplyShadow( const uint shadowViewId, float3 worldPosition, const float3 
 
 		const float shadowBias = 0.001f;
 	
-        // Light Space Position
 		float4 lsPosition = mul( mul( shadowView.projMat, shadowView.viewMat ), float4( worldPosition.xyz, 1.0f ) );
 		lsPosition.xyz /= lsPosition.w;
 
@@ -100,9 +99,10 @@ float3 ApplyShadow( const uint shadowViewId, float3 worldPosition, const float3 
 		
 		if ( withinSpotlight )
 		{
-            const float shadowMapSample = shadowMap.SampleCmpLevelZero( depthShadowSampler, ndc.xy, lsPosition.z );
+            const float shadowMapSample = ShadowPCF( shadowMap, depthShadowSampler, lsPosition.xyz, 1.0f, worldPosition.xy ).r;
+			//const float shadowMapSample = shadowMap.Sample( depthShadowSampler, ndc.xy ).r;
 
-			shadowing = shadowMapSample * globals.shadowParms.w;
+			shadowing = ( lsPosition.z < shadowMapSample ) ? globals.shadowParms.w : 0.0f;
 		}
 		else
 		{

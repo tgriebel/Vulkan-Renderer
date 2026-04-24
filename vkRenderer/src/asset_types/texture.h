@@ -147,6 +147,7 @@ struct samplerState_t
 	float					maxLod;
 	bool					borderTransparent;
 	bool					borderColorIsFloat;
+	bool					pcf;
 };
 
 

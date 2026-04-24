@@ -62,6 +62,47 @@ struct brdfSample_t
 };
 
 
+const float2 PoissonDisk[ 16 ] =
+{
+	float2( -0.94201624, -0.39906216 ),
+	float2( 0.94558609, -0.76890725 ),
+	float2( -0.094184101, -0.92938870 ),
+	float2( 0.34495938, 0.29387760 ),
+	float2( -0.91588581, 0.45771432 ),
+	float2( -0.81544232, -0.87912464 ),
+	float2( -0.38277543, 0.27676845 ),
+	float2( 0.97484398, 0.75648379 ),
+	float2( 0.44323325, -0.97511554 ),
+	float2( 0.53742981, -0.47373420 ),
+	float2( -0.26496911, -0.41893023 ),
+	float2( 0.79197514, 0.19090188 ),
+	float2( -0.24188840, 0.99706507 ),
+	float2( -0.81409955, 0.91437590 ),
+	float2( 0.19984126, 0.78641367 ),
+	float2( 0.14383161, -0.14100790 )
+};
+
+
+float ShadowPCF( Texture2D shadowMap, SamplerComparisonState samp,
+	float3 shadowCoord, float radius, float2 seed )
+{
+	float angle = frac( sin( dot( seed, float2( 12.9898f, 78.233f ) ) ) * 43758.5453f ) * 6.28318f;
+	float2x2 rot = float2x2( cos( angle ), -sin( angle ), sin( angle ), cos( angle ) );
+
+	float texelSize = 1.0f / 2048.0f;
+	float shadow = 0.0f;
+
+	[unroll]
+	for( int i = 0; i < 16; ++i )
+	{
+		float2 offset = mul( rot, PoissonDisk[ i ] ) * radius * texelSize;
+		shadow += shadowMap.SampleCmpLevelZero( samp, shadowCoord.xy + offset, shadowCoord.z );
+	}
+
+	return shadow / 16.0f;
+}
+
+
 float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
 {
 	const int textureUploadId = material.textureId[ materialTextureSlot ];

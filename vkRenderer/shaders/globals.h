@@ -84,6 +84,8 @@ float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3
 
 #define SAMPLER( S, N, NAME )							BIND_SET( S, N ) SamplerState NAME;
 
+#define SAMPLER_COMP( S, N, NAME )						BIND_SET( S, N ) SamplerComparisonState NAME;
+
 #define SAMPLER_2D_LAYOUT( S, N )                       BIND_SET( S, N ) Texture2D texSampler[];
 
 #define SAMPLER_CUBE_LAYOUT( S, N )                     BIND_SET( S, N ) TextureCube cubeSamplers[];
@@ -115,7 +117,7 @@ float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3
                                                         SAMPLER( SET, 5, bilinearSamplerWrap )						\
 														SAMPLER( SET, 6, bilinearSamplerClampEdge )					\
                                                         SAMPLER( SET, 7, bilinearSamplerClampBorder );				\
-                                                        SAMPLER( SET, 8, depthShadowSampler );
+                                                        SAMPLER_COMP( SET, 8, depthShadowSampler );
 
 #define VIEW_BINDS( SET )                               MODEL_LAYOUT( SET, 0 )
 

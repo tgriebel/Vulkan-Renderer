@@ -64,6 +64,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		samplerState.borderTransparent = false;
 		samplerState.addrMode = samplerAddress_t::SAMPLER_ADDRESS_CLAMP_BORDER;
 		samplerState.maxAniso = 0.0f;
+		samplerState.pcf = true;
 
 		resources.shadowMapSampler.Init( samplerState, resourceLifeTime_t::REBOOT );
 	}
