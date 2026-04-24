@@ -1,6 +1,8 @@
 #ifndef BRDF_H
 #define BRDF_H
 
+#include "util.h"
+
 // General references
 // https ://google.github.io/filament/Filament.md.html
 // https://learnopengl.com/PBR/Theory
@@ -94,23 +96,27 @@ float2 AnisoRoughness( const float roughness, const float anisotropy )
 	);
 }
 
-float D_GGX_Aniso( const float NoH, const float ToH, const float BoH,
-				   const float alphaT, const float alphaB )
+
+float D_GGX_Aniso(	const float NoH, const float3 h, const float3 t,
+					const float3 b, const float at, const float ab )
 {
-	float a = ToH / alphaT;
-	float b = BoH / alphaB;
-	float c = a * a + b * b + NoH * NoH;
-	return 1.0f / ( PI * alphaT * alphaB * c * c );
+	const float ToH = dot( t, h );
+	const float BoH = dot( b, h );
+	const float a2 = at * ab;
+	const float3 v = float3( ab * ToH, at * BoH, a2 * NoH );
+	const float v2 = dot( v, v );
+	const float w2 = a2 / v2;
+	return ( a2 * w2 * w2 * ( 1.0f / PI ) );
 }
 
-float V_SmithGGX_Aniso( const float NoV, const float NoL,
-						 const float ToV, const float BoV,
-						 const float ToL, const float BoL,
-						 const float alphaT, const float alphaB )
+
+float V_SmithGGXCorrelated_Aniso(	float at, float ab, float ToV, float BoV,
+									float ToL, float BoL, float NoV, float NoL )
 {
-	float lambdaV = NoL * length( float3( alphaT * ToV, alphaB * BoV, NoV ) );
-	float lambdaL = NoV * length( float3( alphaT * ToL, alphaB * BoL, NoL ) );
-	return 0.5f / ( lambdaV + lambdaL );
+	const float lambdaV = NoL * length( float3( at * ToV, ab * BoV, NoV ) );
+	const float lambdaL = NoV * length( float3( at * ToL, ab * BoL, NoL ) );
+	const float v = 0.5f / ( lambdaV + lambdaL );
+	return ClampColorFp16( v );
 }
 
 // ============================================================

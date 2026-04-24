@@ -15,6 +15,8 @@ struct surfaceInput_t
 	float3	V;
 	float3	F;
 	float3	F0;
+	float3	T;
+	float3	B;
 	float3	position;
 	float3	albedo;
 	float3	ccNormal;
@@ -183,6 +185,8 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	surfaceInput.NoV = saturate( dot( surfaceInput.N, surfaceInput.V ) );
 	surfaceInput.F0 = lerp( float3( 0.04f, 0.04f, 0.04f ), surfaceInput.albedo.rgb, surfaceInput.metallic );
 	surfaceInput.F = F_SchlickRoughness( surfaceInput.NoV, surfaceInput.F0, surfaceInput.roughness );
+	surfaceInput.T = input.tangent;
+	surfaceInput.B = input.bitangent;
 	
 	surfaceInput.position = input.worldPosition.xyz;
 	surfaceInput.tangentNormal = normalSample;

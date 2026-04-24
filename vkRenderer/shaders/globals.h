@@ -51,18 +51,6 @@ float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3
 }
 
 
-float3 ClampColorFp16( const float3 color )
-{
-	return clamp( color, 0.0f, 65504.0f );
-}
-
-
-float4 ClampColorFp16( const float4 color )
-{
-	return clamp( color, 0.0f, 65504.0f );
-}
-
-
 // ============================================================
 // Resource binding macros
 // ============================================================

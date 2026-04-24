@@ -41,6 +41,37 @@ brdfSample_t EvaluateBaseBrdf( const surfaceInput_t surfaceInput, lightingInput_
 	return brdf;
 }
 
+// FIXME: temp BS
+brdfSample_t EvaluateAnisoBrdf( const surfaceInput_t surfaceInput, lightingInput_t lightingInput )
+{
+    const float perceptualRoughness = surfaceInput.roughness;
+    const float metallic = surfaceInput.metallic;
+    const float3 F0 = surfaceInput.F0;
+    
+    float anisotropy = 1.0f; // TODO
+    float at = max( perceptualRoughness * ( 1.0 + anisotropy ), 0.001 ); // TODO
+    float ab = max( perceptualRoughness * ( 1.0 - anisotropy ), 0.001 ); // TODO
+
+    const float Dc = D_GGX_Aniso( lightingInput.NoH, lightingInput.H, surfaceInput.T, surfaceInput.B, at, ab );
+    //const float Gc = G_Smith( surfaceInput.NoV, lightingInput.NoL, perceptualRoughness );
+    const float3 Fc = F_Schlick( lightingInput.HoV, F0 );
+
+    const float3 kS = Fc;
+    float3 kD = float3( 1.0f, 1.0f, 1.0f ) - kS;
+    kD *= 1.0f - metallic;
+
+    float3 numerator = Dc;// * Gc * Fc;
+    float denominator = 4.0f * surfaceInput.NoV * lightingInput.NoL + 0.00001f;
+	
+    brdfSample_t brdf;
+	
+    brdf.Fr = numerator / denominator;
+    brdf.Fd = ( kD * surfaceInput.albedo ) / PI;
+    brdf.F = Fc;
+
+    return brdf;
+}
+
 
 float3 ApplyShadow( const uint shadowViewId, float3 worldPosition, const float3 Lo )
 {
