@@ -213,11 +213,11 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 	surfaceInput.roughness = saturate( globals.generic.x * roughnessSample + globals.generic.y );
 	surfaceInput.metallic = saturate( globals.generic.z * metalnessSample + globals.generic.w );
 	surfaceInput.emissive = emissiveSample;
-	surfaceInput.ao = aoSample;
-	surfaceInput.sheenColor = sheenSample;
-	surfaceInput.sheenRoughness = sheenRoughnessSample;
-	surfaceInput.ccStrength = ccSample;
-	surfaceInput.ccRoughness = ccRoughnessSample;
+	surfaceInput.ao = saturate( aoSample );
+	surfaceInput.sheenColor = saturate( sheenSample );
+	surfaceInput.sheenRoughness = saturate( sheenRoughnessSample );
+	surfaceInput.ccStrength = saturate( ccSample );
+	surfaceInput.ccRoughness = saturate( ccRoughnessSample );
 	surfaceInput.ccNormal = normalize( ComputeNormalWS( ccNormalSample, input.tangent, input.bitangent, input.TBN2 ) );
 	surfaceInput.useClearCoat = ( ccSample > 0.0f );
 	surfaceInput.useSheen = any( sheenSample > 0.0f ) && ( sheenRoughnessSample > 0.0f );

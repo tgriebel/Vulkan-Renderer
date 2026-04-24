@@ -150,6 +150,7 @@ void ApplySheenBrdf( const surfaceInput_t surfaceInput, lightingInput_t lighting
     const float sheenMax = max( surfaceInput.sheenColor.r, max( surfaceInput.sheenColor.g, surfaceInput.sheenColor.b ) );
     const float sheenScaling = 1.0f - sheenMax * 0.157f; // TODO: replace magic number with another BRDF LUT
 
+    // Need to attenuate base energy
     brdf.Fd *= sheenScaling;
     brdf.Fr *= sheenScaling;
     brdf.Fr += sheenLobe;
@@ -167,6 +168,14 @@ float3 EvaluateDiffuseAmbient( TextureCube diffuseIBL, const surfaceInput_t surf
     {
         const float3 irradiance = diffuseIBL.Sample( bilinearSamplerWrap, CubeVector( surfaceInput.N ) ).rgb;
         ambientHemisphere = irradiance * surfaceInput.albedo;
+        
+        if ( surfaceInput.useClearCoat )
+        {
+            const float F0_cc = 0.04f;
+            const float ccNoV = saturate( dot( surfaceInput.ccNormal, surfaceInput.V ) );
+            const float Fc = surfaceInput.ccStrength * F_Schlick( ccNoV, F0_cc.xxx ).x;
+            kD *= ( 1.0f - Fc );
+        }
     }
     kD *= ambientHemisphere;
 	
@@ -185,7 +194,23 @@ float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, cons
 
         const float2 envBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).xy;
         specular = specIBL * ( surfaceInput.F * envBRDF.x + envBRDF.y );
-    }
+    
+        if ( surfaceInput.useClearCoat )
+        {
+            const float ccNov = saturate( dot( surfaceInput.ccNormal, surfaceInput.V ) );
+        
+            const float3 ccR = reflect( -surfaceInput.V, surfaceInput.ccNormal );          
+            const float3 ccSpecIBL = specularIBL.SampleLevel( bilinearSamplerWrap, CubeVector( ccR ), surfaceInput.ccRoughness * MipLevels ).rgb;
+    
+            const float2 ccEnvBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( ccNov, surfaceInput.ccRoughness ) ).xy;
+            
+            const float F0_cc = 0.04f;
+            const float F_IBL = surfaceInput.ccStrength * ( F0_cc * ccEnvBRDF.x + ccEnvBRDF.y );
+            
+            specular *= ( 1.0f - F_IBL ) * ( 1.0f - F_IBL );
+            specular += ccSpecIBL * F_IBL;
+        }
+    } 
     return specular;
 }
 
@@ -241,28 +266,10 @@ PS_Output PSMain( PS_Input input )
     }
 #endif
 
-    float3 kD = EvaluateDiffuseAmbient( cubeSamplers[ diffuseIBL ], surfaceInput );
-    float3 specularAmbient = EvaluateSpecularAmbient( cubeSamplers[ specularIBL ], texSampler[ brdfLutId ], surfaceInput );
-	
-	float3 ccSpecularAmbient = float3( 0.0f, 0.0f, 0.0f );
-    if ( surfaceInput.useClearCoat )
-    {
-        const float Fc_ibl = ( 0.04f + 0.96f * pow( clamp( 1.0f - surfaceInput.NoV, 0.0f, 1.0f ), 5.0f ) ) * surfaceInput.ccStrength;
+    const float3 kD = EvaluateDiffuseAmbient( cubeSamplers[ diffuseIBL ], surfaceInput );
+    const float3 specularAmbient = EvaluateSpecularAmbient( cubeSamplers[ specularIBL ], texSampler[ brdfLutId ], surfaceInput );
 
-		if ( globals.useSpecularIBL )
-		{
-            const float3 R_cc = reflect( -surfaceInput.V, surfaceInput.ccNormal );
-            const int ccMipLevels = (int)GetTextureLevelsCube( cubeSamplers[ specularIBL ] ) -1;
-            const float3 ccIBL = cubeSamplers[ specularIBL ].SampleLevel( bilinearSamplerWrap, CubeVector( R_cc ), surfaceInput.ccRoughness * ccMipLevels ).rgb;
-            ccSpecularAmbient = ccIBL * Fc_ibl;
-        }
-
-		// Attenuate base layers — same energy conservation as direct lighting
-        kD *= ( 1.0f - Fc_ibl );
-        specularAmbient *= ( 1.0f - Fc_ibl ) * ( 1.0f - Fc_ibl );
-    }
-
-    const float3 ambient = ( kD + specularAmbient + ccSpecularAmbient ) * surfaceInput.ao;
+    const float3 ambient = ( kD + specularAmbient ) * surfaceInput.ao;
 
     float4 outColor;
 	outColor.rgb = Lo + ambient + surfaceInput.emissive;
