@@ -3,7 +3,7 @@
   "type": "scene",
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
-  "skyName": "chapel",
+  "skyName": "ferndalestudio",
   "shaders": [
     {
       "name": "EquirectangularSampler",
