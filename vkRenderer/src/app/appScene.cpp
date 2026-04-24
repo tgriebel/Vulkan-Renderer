@@ -498,7 +498,30 @@ void DrawSceneDebugMenu()
 		ImGui::Checkbox( "Use Diffuse IBL", &g_imguiControls.pbr.useDiffuseIBL );
 		ImGui::Checkbox( "Use Specular IBL", &g_imguiControls.pbr.useSpecularIBL );
 
-		ImGui::SliderInt( "DebugLightingMode", &g_imguiControls.pbr.debugLightingMode, -1, gpuDebugLightingMode_t::DEBUG_LIGHTING_COUNT - 1 );
+		const std::string selectedDebugName = GetLightingDebugModeName( static_cast<gpuDebugLightingMode_t>( g_imguiControls.pbr.debugLightingMode ) );
+
+		if( ImGui::BeginCombo( "Debug Lighting Mode", selectedDebugName.c_str() ) )
+		{
+			const uint32_t modeCount = gpuDebugLightingMode_t::DEBUG_LIGHTING_COUNT;
+			for( uint32_t menuIx = 0; menuIx < modeCount; ++menuIx )
+			{
+				const std::string debugName = GetLightingDebugModeName( static_cast<gpuDebugLightingMode_t>( menuIx ) );
+
+				const bool selected = ( g_imguiControls.pbr.debugLightingMode == menuIx );
+				if( ImGui::Selectable( debugName.c_str(), selected ) )
+				{
+					g_imguiControls.pbr.debugLightingMode = menuIx;
+				}
+
+				if( selected )
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+
+		//ImGui::SliderInt( "DebugLightingMode", &g_imguiControls.pbr.debugLightingMode, -1, gpuDebugLightingMode_t::DEBUG_LIGHTING_COUNT - 1 );
 
 		ImGui::InputFloat( "Heightmap Height", &g_imguiControls.heightMapHeight, 0.1f, 1.0f );
 		ImGui::SliderFloat( "Roughness Scale", &g_imguiControls.pbr.roughnessScale, 0.0f, 1.0f );

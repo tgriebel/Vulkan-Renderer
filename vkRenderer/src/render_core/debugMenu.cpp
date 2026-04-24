@@ -177,7 +177,7 @@ void DebugMenuLibComboEdit( const std::string label, hdl_t& currentHdl, const As
 }
 
 
-static std::string GetShaderTextureName( const Material& material, const uint32_t textureSlot )
+std::string GetShaderTextureName( const Material& material, const uint32_t textureSlot )
 {
 	static const char* ggxDebugName[ 13 ] =
 	{
@@ -214,6 +214,27 @@ static std::string GetShaderTextureName( const Material& material, const uint32_
 	}
 
 	return name;
+}
+
+
+std::string GetLightingDebugModeName( const gpuDebugLightingMode_t mode )
+{
+	switch( mode )
+	{
+		case DEBUG_NONE:			return "<none>";
+		case DEBUG_ALBEDO:			return "albedo";
+		case DEBUG_ROUGHNESS:		return "roughness";
+		case DEBUG_METALLIC:		return "metallic";
+		case DEBUG_TBN_NORMAL:		return "Tangent Normal";
+		case DEBUG_NORMAL:			return "Normal";
+		case DEBUG_INPUT_UV:		return "UV";
+		case DEBUG_EMISSIVE:		return "Emissive";
+		case DEBUG_SHEENCOLOR:		return "SheenColor";
+		case DEBUG_SHEENROUGHNESS:	return "SheenRoughness";
+		case DEBUG_AO:				return "AO";
+		case DEBUG_BRDF_LUT:		return "BRDF";
+	}
+	return "<unknown>";
 }
 
 

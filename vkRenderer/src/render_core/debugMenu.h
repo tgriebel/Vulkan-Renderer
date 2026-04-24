@@ -21,6 +21,8 @@ const char* FormatByteSize( const uint64_t bytes );
 #if defined( USE_IMGUI )
 void DebugMenuMaterial( const Material& mat );
 void DebugMenuMaterialEdit( Asset<Material>* matAsset );
+std::string GetShaderTextureName( const Material& material, const uint32_t textureSlot );
+std::string GetLightingDebugModeName( const gpuDebugLightingMode_t mode );
 void DebugMenuModelTreeNode( Asset<Model>* modelAsset );
 void DebugMenuTextureTreeNode( Asset<Image>* texAsset );
 void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset );
