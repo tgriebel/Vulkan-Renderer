@@ -39,7 +39,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	// Image samplers
 	{
-		samplerState_t samplerState;
+		samplerState_t samplerState{};
 		samplerState.filter = SAMPLER_FILTER_BILINEAR;
 		samplerState.borderColor = SAMPLER_BORDER_BLACK;
 		samplerState.borderColorIsFloat = true;
