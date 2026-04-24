@@ -99,7 +99,7 @@ enum hgtTextureSlot_t
 
 enum gpuDebugLightingMode_t
 {
-	DEBUG_NONE = -1,
+	DEBUG_NONE,
 	DEBUG_ALBEDO,
 	DEBUG_ROUGHNESS,
 	DEBUG_METALLIC,

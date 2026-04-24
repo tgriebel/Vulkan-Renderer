@@ -221,7 +221,7 @@ std::string GetLightingDebugModeName( const gpuDebugLightingMode_t mode )
 {
 	switch( mode )
 	{
-		case DEBUG_NONE:			return "<none>";
+		case DEBUG_NONE:			return "defaultLit";
 		case DEBUG_ALBEDO:			return "albedo";
 		case DEBUG_ROUGHNESS:		return "roughness";
 		case DEBUG_METALLIC:		return "metallic";
