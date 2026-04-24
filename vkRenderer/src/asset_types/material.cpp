@@ -86,6 +86,42 @@ void Material::GetUvTransform( const uint32_t slot, uint32_t& channel, mat2x2f& 
 }
 
 
+void Material::TranslateToGpuMaterial( gpuMaterial_t& gpuMaterial )
+{
+	for( uint32_t t = 0; t < MaxMaterialTextures; ++t )
+	{
+		GetUvTransform( t, gpuMaterial.uvChannel[ t ], gpuMaterial.uvTransform[ t ], gpuMaterial.uvOffset[ t ] );
+	}
+
+	const materialParms_t& parms = GetParms();
+
+	gpuMaterial.albedo = vec3f( parms.albedo.r, parms.albedo.g, parms.albedo.b );
+	gpuMaterial.Ks = vec3f( parms.Ks.r, parms.Ks.g, parms.Ks.b );
+	gpuMaterial.Ka = vec3f( parms.Ka.r, parms.Ka.g, parms.Ka.b );
+	gpuMaterial.Ke = vec3f( parms.Ke.r, parms.Ke.g, parms.Ke.b );
+	gpuMaterial.Tf = vec3f( parms.Tf.r, parms.Tf.g, parms.Tf.b );
+	gpuMaterial.sheenColor = vec3f( parms.sheenColor.r, parms.sheenColor.g, parms.sheenColor.b );
+	gpuMaterial.opacity = parms.opacity;
+	gpuMaterial.Ns = parms.Ns;
+	gpuMaterial.illum = parms.illum;
+	gpuMaterial.emissiveStrength = parms.emissiveStrength;
+	gpuMaterial.alphaCutoff = parms.alphaCutoff;
+	gpuMaterial.ior = parms.ior;
+	gpuMaterial.sheenRoughness = parms.sheenRoughness;
+	gpuMaterial.roughness = parms.roughness;
+	gpuMaterial.metalness = parms.metalness;
+	gpuMaterial.clearcoatWeight = parms.clearcoatWeight;
+	gpuMaterial.clearcoatRoughness = parms.clearcoatRoughness;
+	gpuMaterial.anisotropy = parms.anisotropy;
+	gpuMaterial.anisotropyRotation = parms.anisotropyRotation;
+	gpuMaterial.transmissionFactor = parms.transmissionFactor;
+
+	gpuMaterial.textured = IsTextured();
+
+	CopyExtraData( gpuMaterial.extraData, GetExtraDataByteCount() );
+}
+
+
 bool Material::AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms )
 {
 	const uint32_t slot = uint32_t( pass );

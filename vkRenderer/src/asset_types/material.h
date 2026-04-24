@@ -11,7 +11,6 @@
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
 
-
 class Serializer;
 
 struct lightInput_t
@@ -189,6 +188,7 @@ public:
 	uint32_t		TextureCount() const;
 	bool			AssignUvTransform( const uint32_t slot, const uint32_t uvChannel, const vec2f& scale, const vec2f& offset, const float& rotationRadians );
 	void			GetUvTransform( const uint32_t slot, uint32_t& channel, mat2x2f& outTransform, vec2f& outOffset ) const;
+	void			TranslateToGpuMaterial( gpuMaterial_t& gpuMaterial );
 	bool			AddShader( const drawPass_t pass, const hdl_t hdl, const uint32_t perms = 0 );
 	hdl_t			GetShader( const drawPass_t pass ) const;
 	uint32_t		GetShaderPerms( const drawPass_t pass ) const;

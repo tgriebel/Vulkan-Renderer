@@ -194,20 +194,23 @@ void Renderer::UpdateGpuMaterials()
 		matAsset->CompleteUpload();
 
 		assert( m.uploadId < MaxMaterials );
+
 		gpuMaterial_t& materialObject = materialBuffer[ m.uploadId ];
 
+		// TODO: move texture assignment, should use general helper function
 		if( m.usage == MATERIAL_USAGE_CODE )
 		{
-			for ( uint32_t t = 0; t < MaxMaterialTextures; ++t ) {
+			for( uint32_t t = 0; t < MaxMaterialTextures; ++t )
+			{
 				materialObject.textureId[ t ] = (int)m.GetTexture( t ).Get();
 			}
 		}
 		else
 		{
-			for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
+			for( uint32_t t = 0; t < MaxMaterialTextures; ++t )
 			{
 				const hdl_t handle = m.GetTexture( t );
-				if ( handle.IsValid() )
+				if( handle.IsValid() )
 				{
 					const hdl_t imageId = m.GetTexture( t );
 					const Asset<Image>* imageAsset = TextureLib().Find( imageId );
@@ -217,43 +220,15 @@ void Renderer::UpdateGpuMaterials()
 					const int uploadId = image.gpuImage->GetId();
 					assert( uploadId >= 0 );
 					materialObject.textureId[ t ] = uploadId;
-				} else {
+				}
+				else
+				{
 					materialObject.textureId[ t ] = -1;
 				}
 			}
 		}
 
-		for( uint32_t t = 0; t < MaxMaterialTextures; ++t )
-		{
-			m.GetUvTransform( t, materialObject.uvChannel[ t ], materialObject.uvTransform[ t ], materialObject.uvOffset[ t ] );
-		}
-
-		const materialParms_t& parms = m.GetParms();
-
-		materialObject.albedo = vec3f( parms.albedo.r, parms.albedo.g, parms.albedo.b );
-		materialObject.Ks = vec3f( parms.Ks.r, parms.Ks.g, parms.Ks.b );
-		materialObject.Ka = vec3f( parms.Ka.r, parms.Ka.g, parms.Ka.b );
-		materialObject.Ke = vec3f( parms.Ke.r, parms.Ke.g, parms.Ke.b );
-		materialObject.Tf = vec3f( parms.Tf.r, parms.Tf.g, parms.Tf.b );
-		materialObject.sheenColor = vec3f( parms.sheenColor.r, parms.sheenColor.g, parms.sheenColor.b );
-		materialObject.opacity = parms.opacity;
-		materialObject.Ns = parms.Ns;
-		materialObject.illum = parms.illum;
-		materialObject.emissiveStrength = parms.emissiveStrength;
-		materialObject.alphaCutoff = parms.alphaCutoff;
-		materialObject.ior = parms.ior;
-		materialObject.sheenRoughness = parms.sheenRoughness;
-		materialObject.roughness = parms.roughness;
-		materialObject.metalness = parms.metalness;
-		materialObject.clearcoatWeight = parms.clearcoatWeight;
-		materialObject.clearcoatRoughness = parms.clearcoatRoughness;
-		materialObject.anisotropy = parms.anisotropy;
-		materialObject.anisotropyRotation = parms.anisotropyRotation;
-		materialObject.transmissionFactor = parms.transmissionFactor;
-
-		materialObject.textured = m.IsTextured();
-
-		m.CopyExtraData( materialObject.extraData, m.GetExtraDataByteCount() );
+		m.TranslateToGpuMaterial( materialObject );
 	}
 	uploadMaterials.clear();
 }
