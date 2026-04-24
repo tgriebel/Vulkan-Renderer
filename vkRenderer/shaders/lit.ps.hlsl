@@ -169,12 +169,23 @@ float3 EvaluateDiffuseAmbient( TextureCube diffuseIBL, const surfaceInput_t surf
         const float3 irradiance = diffuseIBL.Sample( bilinearSamplerWrap, CubeVector( surfaceInput.N ) ).rgb;
         ambientHemisphere = irradiance * surfaceInput.albedo;
         
+        // Based on CC IBL note in: https://google.github.io/filament/Filament.md.html
         if ( surfaceInput.useClearCoat )
         {
-            const float F0_cc = 0.04f;
+            const float3 clearcoatF0 = float3( 0.04f, 0.04f, 0.04f );
             const float ccNoV = saturate( dot( surfaceInput.ccNormal, surfaceInput.V ) );
-            const float Fc = surfaceInput.ccStrength * F_Schlick( ccNoV, F0_cc.xxx ).x;
-            kD *= ( 1.0f - Fc );
+            float3 clearCoatF = surfaceInput.ccStrength * F_SchlickRoughness( ccNoV, clearcoatF0, surfaceInput.ccRoughness );
+            kD *= ( 1.0f - clearCoatF );
+        }
+        
+        if ( surfaceInput.useSheen )
+        {
+            const float sheenMax = max( surfaceInput.sheenColor.r, max( surfaceInput.sheenColor.g, surfaceInput.sheenColor.b ) );
+            const float sheenScaling = 1.0f - sheenMax * 0.157f; // TODO: replace magic number with another BRDF LUT
+            kD *= sheenScaling;
+
+            const float3 sheenIrradiance = diffuseIBL.Sample( bilinearSamplerWrap, CubeVector( surfaceInput.N ) ).rgb;
+            kD += surfaceInput.sheenColor * sheenIrradiance;
         }
     }
     kD *= ambientHemisphere;
@@ -195,20 +206,19 @@ float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, cons
         const float2 envBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).xy;
         specular = specIBL * ( surfaceInput.F * envBRDF.x + envBRDF.y );
     
+        // Based on CC IBL note in: https://google.github.io/filament/Filament.md.html
         if ( surfaceInput.useClearCoat )
         {
-            const float ccNov = saturate( dot( surfaceInput.ccNormal, surfaceInput.V ) );
+            const float ccNoV = saturate( dot( surfaceInput.ccNormal, surfaceInput.V ) );
         
             const float3 ccR = reflect( -surfaceInput.V, surfaceInput.ccNormal );          
             const float3 ccSpecIBL = specularIBL.SampleLevel( bilinearSamplerWrap, CubeVector( ccR ), surfaceInput.ccRoughness * MipLevels ).rgb;
     
-            const float2 ccEnvBRDF = brdfLUT.Sample( bilinearSamplerClampEdge, float2( ccNov, surfaceInput.ccRoughness ) ).xy;
-            
-            const float F0_cc = 0.04f;
-            const float F_IBL = surfaceInput.ccStrength * ( F0_cc * ccEnvBRDF.x + ccEnvBRDF.y );
-            
-            specular *= ( 1.0f - F_IBL ) * ( 1.0f - F_IBL );
-            specular += ccSpecIBL * F_IBL;
+            const float3 clearcoatF0 = float3( 0.04f, 0.04f, 0.04f );
+            float3 clearCoatF = surfaceInput.ccStrength * F_SchlickRoughness( ccNoV, clearcoatF0, surfaceInput.ccRoughness );
+
+            specular *= ( 1.0f - clearCoatF ) * ( 1.0f - clearCoatF );
+            specular += clearCoatF * ccSpecIBL;
         }
     } 
     return specular;
