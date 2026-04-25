@@ -65,22 +65,6 @@ struct ComputeState
 };
 
 
-// Bundle of all resources needed to represent geometry on the GPU
-class GeometryContext
-{
-public:
-	using surfUploadArray_t	= Array<surfaceUpload_t, MaxSurfaces * MaxViews>;
-
-	GpuBuffer			stagingBuffer;
-	GpuBuffer			vb;
-	GpuBuffer			ib;
-	surfUploadArray_t	surfUploads;
-
-	uint32_t			vbBufElements = 0;
-	uint32_t			ibBufElements = 0;
-};
-
-
 class Renderer
 {
 public:
