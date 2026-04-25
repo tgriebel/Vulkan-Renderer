@@ -433,7 +433,7 @@ void Renderer::InitShaderResources()
 			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
 
-		geometry.vb.Create(
+		uploader.geometry.vb.Create(
 			"VB",
 			swapBuffering_t::SINGLE_FRAME,
 			resourceLifeTime_t::REBOOT,
@@ -442,7 +442,7 @@ void Renderer::InitShaderResources()
 			bufferType_t::VERTEX,
 			renderContext.localMemory
 		);
-		geometry.ib.Create(
+		uploader.geometry.ib.Create(
 			"IB",
 			swapBuffering_t::SINGLE_FRAME,
 			resourceLifeTime_t::REBOOT,
@@ -452,7 +452,7 @@ void Renderer::InitShaderResources()
 			renderContext.localMemory
 		);
 
-		geometry.stagingBuffer.Create(
+		uploader.geometry.stagingBuffer.Create(
 			"Geo Staging",
 			swapBuffering_t::SINGLE_FRAME,
 			resourceLifeTime_t::REBOOT,

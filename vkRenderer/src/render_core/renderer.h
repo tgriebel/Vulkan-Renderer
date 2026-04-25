@@ -123,7 +123,6 @@ private:
 	GpuSemaphore						uploadFinishedSemaphore;
 
 	// Shader resources
-	GeometryContext						geometry;
 	ResourceContext						resources;
 	materialBufferArray_t				materialBuffer;
 	committedLightsArray_t				committedLights;

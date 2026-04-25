@@ -49,6 +49,8 @@ private:
 	std::set<hdl_t>		updateTextures;
 
 public:
+	GeometryContext		geometry;
+
 	void				Boot( RenderContext* context, ResourceContext* resources );
 	void				Shutdown();
 

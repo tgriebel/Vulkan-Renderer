@@ -77,7 +77,7 @@ void Renderer::Commit( const Scene* scene )
 		{
 			view.drawGroup[ passIx ].Sort();
 			view.drawGroup[ passIx ].Merge();
-			view.drawGroup[ passIx ].AssignGeometryResources( &geometry );
+			view.drawGroup[ passIx ].AssignGeometryResources( &uploader.geometry );
 
 			view.drawGroupOffset[ passIx ] = drawGroupOffset;
 			drawGroupOffset += view.drawGroup[ passIx ].InstanceCount();
@@ -102,8 +102,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 	{
 		if( model.uploadId == -1 )
 		{
-			model.uploadId = geometry.surfUploads.Count();
-			geometry.surfUploads.Grow( model.surfCount );
+			model.uploadId = uploader.geometry.surfUploads.Count();
+			uploader.geometry.surfUploads.Grow( model.surfCount );
 		}
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : model.surfs[ i ].materialHdl;
@@ -251,8 +251,8 @@ void Renderer::ShutdownGPU()
 
 	uploader.Shutdown();
 
-	geometry.vbBufElements = 0;
-	geometry.ibBufElements = 0;
+	uploader.geometry.vbBufElements = 0;
+	uploader.geometry.ibBufElements = 0;
 }
 
 
@@ -357,8 +357,8 @@ void Renderer::UploadAssets()
 
 			for( uint32_t i = 0; i < model.surfCount; ++i )
 			{
-				model.uploadId = geometry.surfUploads.Count();
-				geometry.surfUploads.Grow( model.surfCount );
+				model.uploadId = uploader.geometry.surfUploads.Count();
+				uploader.geometry.surfUploads.Grow( model.surfCount );
 			}
 		}
 	}
@@ -366,7 +366,7 @@ void Renderer::UploadAssets()
 	ClearPipelineCache();
 	BuildPipelines();
 
-	geometry.stagingBuffer.SetPos( 0 );
+	uploader.geometry.stagingBuffer.SetPos( 0 );
 
 	// Upload queue commands
 	{
@@ -403,7 +403,7 @@ void Renderer::Render()
 
 	BuildPipelines();
 
-	geometry.stagingBuffer.SetPos( 0 );
+	uploader.geometry.stagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
 	UploadModelsToGPU( &uploadContext );
