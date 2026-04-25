@@ -235,6 +235,7 @@
     <ClInclude Include="src\io\serializeClasses.h" />
     <ClInclude Include="src\render_core\allocator.h" />
     <ClInclude Include="src\render_core\renderContext.h" />
+    <ClInclude Include="src\render_core\renderUploader.h" />
     <ClInclude Include="src\render_core\schedule.h" />
     <ClInclude Include="src\render_resources\gpuBuffer.h" />
     <ClInclude Include="src\render_resources\imageArray.h" />
@@ -309,6 +310,7 @@
     <ClCompile Include="src\io\serializeClasses.cpp" />
     <ClCompile Include="src\render_core\allocator.cpp" />
     <ClCompile Include="src\render_core\renderContext.cpp" />
+    <ClCompile Include="src\render_core\renderUploader.cpp" />
     <ClCompile Include="src\render_core\schedule.cpp" />
     <ClCompile Include="src\render_resources\gpuBuffer.cpp" />
     <ClCompile Include="src\render_resources\imageArray.cpp" />
