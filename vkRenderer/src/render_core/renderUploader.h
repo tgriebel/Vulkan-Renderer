@@ -10,7 +10,7 @@ class ResourceContext;
 class RenderUploader
 {
 private:
-	uint32_t			imageFreeSlot = 0;
+	uint32_t			imageFreeSlot;
 	GpuBuffer			textureStagingBuffer;
 
 	RenderContext*		renderContext;

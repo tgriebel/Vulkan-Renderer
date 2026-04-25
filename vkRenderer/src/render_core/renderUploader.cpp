@@ -1,5 +1,6 @@
 #include "renderUploader.h"
 #include "renderer.h"
+#include "resourceContext.h"
 
 void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 {

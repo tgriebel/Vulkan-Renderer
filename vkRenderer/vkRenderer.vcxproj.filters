@@ -213,6 +213,9 @@
     <ClCompile Include="src\render_core\renderUploader.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_core\resourceContext.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -453,6 +456,9 @@
       <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\render_core\renderUploader.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_core\resourceContext.h">
       <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
