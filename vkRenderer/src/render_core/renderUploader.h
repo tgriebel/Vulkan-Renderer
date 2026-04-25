@@ -58,4 +58,9 @@ public:
 
 	void				UpdateTextureData( CommandContext* cmdCommand );
 	void				UploadTextures( CommandContext* cmdCommand );
+	void				UploadModelsToGPU( CommandContext* cmdCommand );
+
+#ifdef USE_VULKAN
+	void				CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
+#endif
 };

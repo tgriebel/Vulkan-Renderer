@@ -235,7 +235,7 @@ void Renderer::UpdateGpuMaterials()
 	uploadMaterials.clear();
 }
 
-void Renderer::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
+void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
 	VkCommandBuffer commandBuffer = cmdCommand->CommandBuffer();
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
@@ -243,7 +243,7 @@ void Renderer::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, 
 	dstBuffer.Allocate( copyRegion.size );
 }
 
-void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
+void RenderUploader::UploadModelsToGPU( CommandContext* cmdCommand )
 {
 	const uint32_t modelCount = ModelLib().Count();
 
@@ -261,10 +261,10 @@ void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 		for ( uint32_t s = 0; s < model.surfCount; ++s )
 		{
 			Surface& surf = model.surfs[ s ];	
-			surfaceUpload_t& upload = uploader.geometry.surfUploads[ model.uploadId + s ];
+			surfaceUpload_t& upload = geometry.surfUploads[ model.uploadId + s ];
 
-			upload.vertexOffset = uploader.geometry.vbBufElements;
-			upload.firstIndex = uploader.geometry.ibBufElements;
+			upload.vertexOffset = geometry.vbBufElements;
+			upload.firstIndex = geometry.ibBufElements;
 
 			// Upload Vertex Buffer
 			{
@@ -290,17 +290,17 @@ void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 
 				VkBufferCopy vbCopyRegion{ };
 				vbCopyRegion.size = vbCopySize;
-				vbCopyRegion.srcOffset = uploader.geometry.stagingBuffer.GetSize();
-				vbCopyRegion.dstOffset = uploader.geometry.vb.GetSize();
+				vbCopyRegion.srcOffset = geometry.stagingBuffer.GetSize();
+				vbCopyRegion.dstOffset = geometry.vb.GetSize();
 			
-				uploader.geometry.stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
+				geometry.stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
 
-				CopyGpuBuffer( cmdCommand, uploader.geometry.stagingBuffer, uploader.geometry.vb, vbCopyRegion );
+				CopyGpuBuffer( cmdCommand, geometry.stagingBuffer, geometry.vb, vbCopyRegion );
 
 				upload.vertexCount = vertexCount;
-				uploader.geometry.vbBufElements += vertexCount;
+				geometry.vbBufElements += vertexCount;
 
-				assert( uploader.geometry.vbBufElements < MaxVertices );
+				assert( geometry.vbBufElements < MaxVertices );
 			}
 
 			// Upload Index Buffer
@@ -310,17 +310,17 @@ void Renderer::UploadModelsToGPU( CommandContext* cmdCommand )
 
 				VkBufferCopy ibCopyRegion{ };
 				ibCopyRegion.size = ibCopySize;
-				ibCopyRegion.srcOffset = uploader.geometry.stagingBuffer.GetSize();
-				ibCopyRegion.dstOffset = uploader.geometry.ib.GetSize();
-				CopyGpuBuffer( cmdCommand, uploader.geometry.stagingBuffer, uploader.geometry.ib, ibCopyRegion );
+				ibCopyRegion.srcOffset = geometry.stagingBuffer.GetSize();
+				ibCopyRegion.dstOffset = geometry.ib.GetSize();
+				CopyGpuBuffer( cmdCommand, geometry.stagingBuffer, geometry.ib, ibCopyRegion );
 
-				uploader.geometry.stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
+				geometry.stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 
 				const uint32_t indexCount = static_cast<uint32_t>( surf.indices.size() );
 				upload.indexCount = indexCount;
-				uploader.geometry.ibBufElements += indexCount;
+				geometry.ibBufElements += indexCount;
 
-				assert( uploader.geometry.ibBufElements < MaxIndices );
+				assert( geometry.ibBufElements < MaxIndices );
 			}
 		}
 		modelAsset->CompleteUpload();

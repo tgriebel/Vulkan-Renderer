@@ -374,7 +374,7 @@ void Renderer::UploadAssets()
 		uploadContext.Begin();
 		uploadContext.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
 
-		UploadModelsToGPU( &uploadContext );
+		uploader.UploadModelsToGPU( &uploadContext );
 
 		uploader.UploadTextures( &uploadContext );
 
@@ -406,7 +406,7 @@ void Renderer::Render()
 	uploader.geometry.stagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
-	UploadModelsToGPU( &uploadContext );
+	uploader.UploadModelsToGPU( &uploadContext );
 
 	uploader.UploadTextures( &uploadContext );
 	uploader.UpdateTextureData( &uploadContext );

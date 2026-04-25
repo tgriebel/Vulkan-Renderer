@@ -155,13 +155,9 @@ private:
 	// Update/Upload
 	void								BeginUploadCommands( UploadContext& uploadContext );
 	void								EndUploadCommands( UploadContext& uploadContext );
-#ifdef USE_VULKAN
-	void								CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
-#endif
 
 	void								UploadAssets();
 	void								UpdateGpuMaterials();
-	void								UploadModelsToGPU( CommandContext* cmdCommand );
 	void								UpdateBindSets();
 	void								UpdateBuffers();
 	void								UpdateFrameDescSet();
