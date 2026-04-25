@@ -53,6 +53,58 @@ renderConstants_t rc;
 static ImGui_ImplVulkanH_Window imguiMainWindowData;
 #endif
 
+
+void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
+{
+	imageFreeSlot = 0;
+
+	renderContext = context;
+	resourceContext = resources;
+
+	textureStagingBuffer.Create(
+		"Texture Staging",
+		swapBuffering_t::SINGLE_FRAME,
+		resourceLifeTime_t::REBOOT,
+		1,
+		MaxTexturingUploadMemory,
+		bufferType_t::STAGING,
+		renderContext->sharedMemory
+	);
+}
+
+
+void RenderUploader::Shutdown()
+{
+	imageFreeSlot = 0;
+}
+
+
+void RenderUploader::UploadImage( Asset<Image>* imageAsset )
+{
+	if( imageAsset->IsLoaded() == false ) {
+		return;
+	}
+	if( imageAsset->IsUploaded() ) {
+		return;
+	}
+
+	Image* image = &imageAsset->Get();
+
+	if( image == nullptr ) {
+		return;
+	}
+
+	if( ( image->gpuImage == nullptr ) || ( image->gpuImage->GetId() < 0 ) )
+	{
+		uploadTextures.insert( imageAsset->Handle() );
+	}
+	if( imageAsset->IsUploaded() )
+	{
+		updateTextures.insert( imageAsset->Handle() );
+	}
+}
+
+
 void Renderer::Commit( const Scene* scene )
 {
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
@@ -183,17 +235,13 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			uploadMaterials.insert( materialHdl );
 		}
 
-		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t ) {
+		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
+		{
 			const hdl_t texHandle = material.GetTexture( t );
-			if ( texHandle.IsValid() ) {
+			if ( texHandle.IsValid() )
+			{
 				Asset<Image>* imageAsset = TextureLib().Find( texHandle );
-				Image& image = imageAsset->Get();
-				if( image.gpuImage->GetId() < 0 ) {
-					uploadTextures.insert( texHandle );
-				}
-				if ( imageAsset->IsUploaded() == false ) {
-					updateTextures.insert( texHandle );
-				}
+				uploader.UploadImage( imageAsset );
 			}
 		}
 
@@ -252,7 +300,8 @@ void Renderer::ShutdownGPU()
 	FlushGPU();
 	ShutdownShaderResources();
 
-	imageFreeSlot = 0;
+	uploader.Shutdown();
+
 	geometry.vbBufElements = 0;
 	geometry.ibBufElements = 0;
 }
@@ -334,16 +383,7 @@ void Renderer::UploadAssets()
 		const uint32_t textureCount = TextureLib().Count();
 		for( uint32_t i = 0; i < textureCount; ++i )
 		{
-			AssetInterface* textureAsset = TextureLib().Find( i );
-			if( textureAsset->IsLoaded() == false )
-			{
-				continue;
-			}
-			if( textureAsset->IsUploaded() )
-			{
-				continue;
-			}
-			uploadTextures.insert( textureAsset->Handle() );
+			uploader.UploadImage( TextureLib().Find( i ) );
 		}
 
 		const uint32_t modelCount = ModelLib().Count();
@@ -378,7 +418,6 @@ void Renderer::UploadAssets()
 	BuildPipelines();
 
 	geometry.stagingBuffer.SetPos( 0 );
-	textureStagingBuffer.SetPos( 0 );
 
 	// Upload queue commands
 	{
@@ -388,7 +427,7 @@ void Renderer::UploadAssets()
 
 		UploadModelsToGPU( &uploadContext );
 
-		UploadTextures( &uploadContext );
+		uploader.UploadTextures( &uploadContext );
 
 		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
 		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
@@ -416,13 +455,12 @@ void Renderer::Render()
 	BuildPipelines();
 
 	geometry.stagingBuffer.SetPos( 0 );
-	textureStagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
 	UploadModelsToGPU( &uploadContext );
 
-	UploadTextures( &uploadContext );
-	UpdateTextureData( &uploadContext );
+	uploader.UploadTextures( &uploadContext );
+	uploader.UpdateTextureData( &uploadContext );
 
 	uploadContext.End();
 	uploadContext.Signal( &uploadFinishedSemaphore );

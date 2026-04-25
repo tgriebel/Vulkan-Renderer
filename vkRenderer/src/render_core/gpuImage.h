@@ -55,12 +55,12 @@ public:
 		Destroy();
 	}
 
-	int GetId() const
+	int32_t GetId() const
 	{
 		return m_id;
 	}
 
-	void SetId( const int id )
+	void SetId( const int32_t id )
 	{
 		m_id = id;
 	}

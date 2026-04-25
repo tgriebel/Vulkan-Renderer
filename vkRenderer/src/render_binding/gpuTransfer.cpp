@@ -9,7 +9,7 @@
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
 
-void Renderer::UpdateTextureData( CommandContext* cmdCommand )
+void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 {
 	const uint32_t textureCount = static_cast<uint32_t>( updateTextures.size() );
 	if( textureCount == 0 ) {
@@ -40,8 +40,10 @@ void Renderer::UpdateTextureData( CommandContext* cmdCommand )
 }
 
 
-void Renderer::UploadTextures( CommandContext* cmdCommand )
+void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 {
+	textureStagingBuffer.SetPos( 0 );
+
 	const uint32_t textureCount = static_cast<uint32_t>( uploadTextures.size() );
 	if ( textureCount == 0 ) {
 		return;
@@ -78,7 +80,7 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
 		texture.gpuImage = 
-			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext.localMemory, resourceLifeTime_t::REBOOT );
+			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext->localMemory, resourceLifeTime_t::REBOOT );
 
 		Transition( cmdCommand, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
@@ -160,12 +162,12 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 			switch ( texture.info.type )
 			{
 				case IMAGE_TYPE_2D:
-					resources.gpuImages2D.BindIndex( uploadId, &texture );
-					resources.gpuImagesCube.BindIndex( uploadId, firstCube );
+					resourceContext->gpuImages2D.BindIndex( uploadId, &texture );
+					resourceContext->gpuImagesCube.BindIndex( uploadId, firstCube );
 					break;
 				case IMAGE_TYPE_CUBE:
-					resources.gpuImages2D.BindIndex( uploadId, &TextureLib().GetDefault()->Get() );
-					resources.gpuImagesCube.BindIndex( uploadId, &texture );
+					resourceContext->gpuImages2D.BindIndex( uploadId, &TextureLib().GetDefault()->Get() );
+					resourceContext->gpuImagesCube.BindIndex( uploadId, &texture );
 					break;
 			}
 		}
@@ -173,8 +175,8 @@ void Renderer::UploadTextures( CommandContext* cmdCommand )
 		// Fill defaults
 		for ( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
 		{
-			resources.gpuImages2D.BindIndex( i, &TextureLib().GetDefault()->Get() );
-			resources.gpuImagesCube.BindIndex( i, firstCube );
+			resourceContext->gpuImages2D.BindIndex( i, &TextureLib().GetDefault()->Get() );
+			resourceContext->gpuImagesCube.BindIndex( i, firstCube );
 		}
 	}
 

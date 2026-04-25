@@ -215,6 +215,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	BuildSceneSchedule( config, &renderContext, &resources, &viewContext, &schedule );
 
+	uploader.Boot( &renderContext, &resources );
 	UploadAssets();
 }
 
@@ -457,15 +458,6 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			1,
 			MaxGeometryUploadMemory,
-			bufferType_t::STAGING,
-			renderContext.sharedMemory
-		);
-		textureStagingBuffer.Create(
-			"Texture Staging",
-			swapBuffering_t::SINGLE_FRAME,
-			resourceLifeTime_t::REBOOT,
-			1,
-			MaxTexturingUploadMemory,
 			bufferType_t::STAGING,
 			renderContext.sharedMemory
 		);

@@ -160,6 +160,29 @@ public:
 };
 
 
+class RenderUploader
+{
+private:
+	uint32_t			imageFreeSlot = 0;
+	GpuBuffer			textureStagingBuffer;
+
+	RenderContext*		renderContext;
+	ResourceContext*	resourceContext;
+
+	std::set<hdl_t>		uploadTextures;
+	std::set<hdl_t>		updateTextures;
+
+public:
+	void				Boot( RenderContext* context, ResourceContext* resources );
+	void				Shutdown();
+
+	void				UploadImage( Asset<Image>* imageAsset );
+
+	void				UpdateTextureData( CommandContext* cmdCommand );
+	void				UploadTextures( CommandContext* cmdCommand );
+};
+
+
 class Renderer
 {
 public:
@@ -206,11 +229,8 @@ private:
 	SysCore::Timer						frameTimer;
 
 	// Upload management
-	std::set<hdl_t>						uploadTextures;
-	std::set<hdl_t>						updateTextures;
+	RenderUploader						uploader;
 	std::set<hdl_t>						uploadMaterials;
-
-	uint32_t							imageFreeSlot = 0;
 	
 	// Render context
 	RenderContext						renderContext;
@@ -223,7 +243,6 @@ private:
 	// Shader resources
 	GeometryContext						geometry;
 	ResourceContext						resources;
-	GpuBuffer							textureStagingBuffer;
 	materialBufferArray_t				materialBuffer;
 	committedLightsArray_t				committedLights;
 
@@ -260,8 +279,6 @@ private:
 #endif
 
 	void								UploadAssets();
-	void								UpdateTextureData( CommandContext* cmdCommand );
-	void								UploadTextures( CommandContext* cmdCommand );
 	void								UpdateGpuMaterials();
 	void								UploadModelsToGPU( CommandContext* cmdCommand );
 	void								UpdateBindSets();
