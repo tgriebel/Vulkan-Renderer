@@ -342,7 +342,6 @@
     <ClCompile Include="src\io\io.cpp" />
     <ClCompile Include="src\render_binding\binding.cpp" />
     <ClCompile Include="src\render_binding\descriptorWrites.cpp" />
-    <ClCompile Include="src\render_binding\gpuTransfer.cpp" />
     <ClCompile Include="src\render_binding\pipeline.cpp" />
     <ClCompile Include="src\render_binding\shaderBinding.cpp" />
     <ClCompile Include="src\render_core\debugMenu.cpp" />
