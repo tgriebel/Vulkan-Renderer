@@ -86,6 +86,8 @@ void RenderUploader::QueueModelUpload( Asset<Model>& modelAsset )
 	}
 	model.uploadId = geometry.surfUploads.Count();
 	geometry.surfUploads.Grow( model.surfCount );
+
+	modelAsset.QueueUpload();
 }
 
 
@@ -115,6 +117,7 @@ void RenderUploader::UploadImage( Asset<Image>* imageAsset )
 	{
 		updateTextures.insert( imageAsset->Handle() );
 	}
+	imageAsset->QueueUpload();
 }
 
 

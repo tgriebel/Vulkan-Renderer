@@ -247,7 +247,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									rgb32_t rgb = mat.GetParms().##VALUE;					\
 									if( EditRgb( rgb ) ) {									\
 										mat.GetParms().##VALUE = rgb;						\
-										matAsset->QueueUpload();							\
+										matAsset->RefreshUpload();							\
 									}														\
 									ImGui::PopID();											\
 								}
@@ -259,7 +259,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 									float value = mat.GetParms().##VALUE;					\
 									if( EditFloat( value ) ) {								\
 										mat.GetParms().##VALUE = value;						\
-										matAsset->QueueUpload();							\
+										matAsset->RefreshUpload();							\
 									}														\
 									ImGui::PopID();											\
 								}
@@ -308,7 +308,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 			if( texHdl != originalHdl )
 			{
 				mat.AddTexture( t, texHdl );
-				matAsset->QueueUpload();
+				matAsset->RefreshUpload();
 			}
 		}
 		ImGui::TreePop();

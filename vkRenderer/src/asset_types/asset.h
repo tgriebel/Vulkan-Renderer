@@ -10,11 +10,13 @@
 template< class AssetType >
 class Asset;
 
+
 enum loadHandlerFlags_t
 {
 	LOAD_HANDLER_FLAGS_NONE		= 0,
 	LOAD_HANDLER_FLAGS_REBAKE	= ( 1 << 0 ),
 };
+
 
 enum class loadReturn_t : uint8_t
 {
@@ -23,6 +25,16 @@ enum class loadReturn_t : uint8_t
 	LOAD_SUCCESS,
 	LOAD_FAIL
 };
+
+
+enum class gpuUploadState_t : uint8_t
+{
+	NOT_UPLOADED,	// Lives only on CPU or disk
+	UPLOAD_QUEUED,	// Needs full GPU upload
+	REFRESH_QUEUED,	// Needs lightweight data update. Named "Refresh" to avoid similarity between "Update/Upload" 
+	UPLOADED,		// Done.
+};
+
 
 template< class AssetType >
 class LoadHandler
@@ -63,19 +75,20 @@ protected:
 	std::string					m_name;
 	hdl_t						m_handle;
 
+	gpuUploadState_t			m_uploadState;
+
 	bool						m_loaded;
-	bool						m_uploaded;
 	bool						m_isDefault;
 	bool						m_canBake;
 
 public:
-	AssetInterface() : m_loaded( false ), m_isDefault( false ), m_uploaded( false ), m_canBake( true ), m_handle( INVALID_HDL ) {}
+	AssetInterface() : m_loaded( false ), m_isDefault( false ), m_uploadState( gpuUploadState_t::NOT_UPLOADED ), m_canBake( true ), m_handle( INVALID_HDL ) {}
 
-	AssetInterface( const hdl_t hdl ) : m_handle( hdl ), m_loaded( false ), m_isDefault( false ), m_canBake( true ), m_uploaded( false )
+	AssetInterface( const hdl_t hdl ) : m_handle( hdl ), m_loaded( false ), m_isDefault( false ), m_canBake( true ), m_uploadState( gpuUploadState_t::NOT_UPLOADED )
 	{}
 
 	AssetInterface( const std::string& _name, const bool _loaded ) :
-		m_name( _name ), m_loaded( _loaded ), m_isDefault( false ), m_uploaded( false ), m_canBake( true )
+		m_name( _name ), m_loaded( _loaded ), m_isDefault( false ), m_uploadState( gpuUploadState_t::NOT_UPLOADED ), m_canBake( true )
 	{
 		m_handle = SysCore::Hash( m_name );
 	}
@@ -114,17 +127,27 @@ public:
 
 	inline void QueueUpload()
 	{
-		m_uploaded = false;
+		m_uploadState = gpuUploadState_t::UPLOAD_QUEUED;
+	}
+
+	inline void RefreshUpload()
+	{
+		m_uploadState = gpuUploadState_t::REFRESH_QUEUED;
 	}
 
 	inline void CompleteUpload()
 	{
-		m_uploaded = true;
+		m_uploadState = gpuUploadState_t::UPLOADED;
+	}
+
+	inline bool IsQueuedForUpload() const
+	{
+		return ( m_uploadState == gpuUploadState_t::UPLOAD_QUEUED ) || ( m_uploadState == gpuUploadState_t::REFRESH_QUEUED );
 	}
 
 	inline bool IsUploaded() const
 	{
-		return m_uploaded;
+		return ( m_uploadState == gpuUploadState_t::UPLOADED );
 	}
 
 	inline bool IsDefault() const

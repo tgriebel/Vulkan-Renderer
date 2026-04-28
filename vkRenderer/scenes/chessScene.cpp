@@ -236,7 +236,7 @@ void ChessScene::Update()
 	Material& glowMat = glowMatAsset->Get();
 	glowMat.GetParms().albedo = rgb32_t(0.1f, 0.1f, 1.0f);
 	glowMat.GetParms().opacity = 0.5f * cos( 3.0f * time ) + 0.5f;
-	glowMatAsset->QueueUpload();
+	glowMatAsset->RefreshUpload();
 
 	const uint32_t lightCount = static_cast<uint32_t>( lights.size() );
 	for ( uint32_t i = 0; i < lightCount; ++i )

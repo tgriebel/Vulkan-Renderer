@@ -74,7 +74,7 @@ void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 			imageBuffer->SetPixel( x, y, rgba );
 		}
 	}
-	imageAsset->QueueUpload();
+	imageAsset->RefreshUpload();
 }
 
 static inline void ThreadRun( Tomtendo::Emulator* emu, const char* bufferName )
