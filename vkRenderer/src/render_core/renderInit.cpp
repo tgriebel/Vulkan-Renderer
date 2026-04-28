@@ -432,35 +432,6 @@ void Renderer::InitShaderResources()
 		for ( size_t v = 0; v < MaxViews; ++v ) {
 			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
 		}
-
-		uploader.geometry.vb.Create(
-			"VB",
-			swapBuffering_t::SINGLE_FRAME,
-			resourceLifeTime_t::REBOOT,
-			MaxVertices,
-			sizeof( vsInput_t ),
-			bufferType_t::VERTEX,
-			renderContext.localMemory
-		);
-		uploader.geometry.ib.Create(
-			"IB",
-			swapBuffering_t::SINGLE_FRAME,
-			resourceLifeTime_t::REBOOT,
-			MaxIndices,
-			sizeof( uint32_t ),
-			bufferType_t::INDEX,
-			renderContext.localMemory
-		);
-
-		uploader.geometry.stagingBuffer.Create(
-			"Geo Staging",
-			swapBuffering_t::SINGLE_FRAME,
-			resourceLifeTime_t::REBOOT,
-			1,
-			MaxGeometryUploadMemory,
-			bufferType_t::STAGING,
-			renderContext.sharedMemory
-		);
 	}
 }
 

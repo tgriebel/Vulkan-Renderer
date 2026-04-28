@@ -77,7 +77,7 @@ void Renderer::Commit( const Scene* scene )
 		{
 			view.drawGroup[ passIx ].Sort();
 			view.drawGroup[ passIx ].Merge();
-			view.drawGroup[ passIx ].AssignGeometryResources( &uploader.geometry );
+			view.drawGroup[ passIx ].AssignGeometryResources( uploader.GetGeometry() );
 
 			view.drawGroupOffset[ passIx ] = drawGroupOffset;
 			drawGroupOffset += view.drawGroup[ passIx ].InstanceCount();
@@ -100,11 +100,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 	for ( uint32_t i = 0; i < model.surfCount; ++i )
 	{
-		if( model.uploadId == -1 )
-		{
-			model.uploadId = uploader.geometry.surfUploads.Count();
-			uploader.geometry.surfUploads.Grow( model.surfCount );
-		}
+		uploader.QueueModelUpload( *modelAsset );
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : model.surfs[ i ].materialHdl;
 		const Asset<Material>* materialAsset = MaterialLib().Find( materialHdl );
@@ -250,9 +246,6 @@ void Renderer::ShutdownGPU()
 	ShutdownShaderResources();
 
 	uploader.Shutdown();
-
-	uploader.geometry.vbBufElements = 0;
-	uploader.geometry.ibBufElements = 0;
 }
 
 
@@ -349,24 +342,12 @@ void Renderer::UploadAssets()
 			{
 				continue;
 			}
-			Model& model = modelAsset->Get();
-			if( model.uploadId != -1 )
-			{
-				continue;
-			}
-
-			for( uint32_t i = 0; i < model.surfCount; ++i )
-			{
-				model.uploadId = uploader.geometry.surfUploads.Count();
-				uploader.geometry.surfUploads.Grow( model.surfCount );
-			}
+			uploader.QueueModelUpload( *modelAsset );
 		}
 	}
 
 	ClearPipelineCache();
 	BuildPipelines();
-
-	uploader.geometry.stagingBuffer.SetPos( 0 );
 
 	// Upload queue commands
 	{
@@ -403,7 +384,6 @@ void Renderer::Render()
 
 	BuildPipelines();
 
-	uploader.geometry.stagingBuffer.SetPos( 0 );
 	uploadContext.Begin();
 
 	uploader.UploadModelsToGPU( &uploadContext );

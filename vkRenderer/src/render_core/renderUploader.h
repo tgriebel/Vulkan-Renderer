@@ -6,7 +6,7 @@
 
 class RenderContext;
 class ResourceContext;
-
+class Model;
 
 struct surfaceUpload_t
 {
@@ -41,6 +41,7 @@ class RenderUploader
 private:
 	uint32_t			imageFreeSlot;
 	GpuBuffer			textureStagingBuffer;
+	GeometryContext		geometry;
 
 	RenderContext*		renderContext;
 	ResourceContext*	resourceContext;
@@ -48,11 +49,16 @@ private:
 	std::set<hdl_t>		uploadTextures;
 	std::set<hdl_t>		updateTextures;
 
+#ifdef USE_VULKAN
+	void				CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
+#endif
+
 public:
-	GeometryContext		geometry;
 
 	void				Boot( RenderContext* context, ResourceContext* resources );
 	void				Shutdown();
+
+	void				QueueModelUpload( Asset<Model>& model );
 
 	void				UploadImage( Asset<Image>* imageAsset );
 
@@ -60,7 +66,8 @@ public:
 	void				UploadTextures( CommandContext* cmdCommand );
 	void				UploadModelsToGPU( CommandContext* cmdCommand );
 
-#ifdef USE_VULKAN
-	void				CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
-#endif
+	inline const GeometryContext* GetGeometry() const
+	{
+		return &geometry;
+	}
 };

@@ -245,6 +245,8 @@ void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBu
 
 void RenderUploader::UploadModelsToGPU( CommandContext* cmdCommand )
 {
+	geometry.stagingBuffer.SetPos( 0 );
+
 	const uint32_t modelCount = ModelLib().Count();
 
 	for ( uint32_t m = 0; m < modelCount; ++m )

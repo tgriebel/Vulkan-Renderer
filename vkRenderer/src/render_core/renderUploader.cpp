@@ -18,12 +18,55 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		bufferType_t::STAGING,
 		renderContext->sharedMemory
 	);
+
+	geometry.vb.Create(
+		"VB",
+		swapBuffering_t::SINGLE_FRAME,
+		resourceLifeTime_t::REBOOT,
+		MaxVertices,
+		sizeof( vsInput_t ),
+		bufferType_t::VERTEX,
+		renderContext->localMemory
+	);
+
+	geometry.ib.Create(
+		"IB",
+		swapBuffering_t::SINGLE_FRAME,
+		resourceLifeTime_t::REBOOT,
+		MaxIndices,
+		sizeof( uint32_t ),
+		bufferType_t::INDEX,
+		renderContext->localMemory
+	);
+
+	geometry.stagingBuffer.Create(
+		"Geo Staging",
+		swapBuffering_t::SINGLE_FRAME,
+		resourceLifeTime_t::REBOOT,
+		1,
+		MaxGeometryUploadMemory,
+		bufferType_t::STAGING,
+		renderContext->sharedMemory
+	);
 }
 
 
 void RenderUploader::Shutdown()
 {
 	imageFreeSlot = 0;
+	geometry.vbBufElements = 0;
+	geometry.ibBufElements = 0;
+}
+
+
+void RenderUploader::QueueModelUpload( Asset<Model>& modelAsset )
+{
+	Model& model = modelAsset.Get();
+	if( model.uploadId != -1 ) {
+		return;
+	}
+	model.uploadId = geometry.surfUploads.Count();
+	geometry.surfUploads.Grow( model.surfCount );
 }
 
 
