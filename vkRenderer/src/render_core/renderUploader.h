@@ -7,6 +7,7 @@
 class RenderContext;
 class ResourceContext;
 class Model;
+class RenderUploader;
 
 struct surfaceUpload_t
 {
@@ -23,16 +24,20 @@ struct surfaceUpload_t
 // Bundle of all resources needed to represent geometry on the GPU
 class GeometryContext
 {
-public:
+private:
+
 	using surfUploadArray_t = Array<surfaceUpload_t, MaxSurfaces* MaxViews>;
 
 	GpuBuffer			stagingBuffer;
+	uint32_t			vbBufElements = 0;
+	uint32_t			ibBufElements = 0;
+
+public:
 	GpuBuffer			vb;
 	GpuBuffer			ib;
 	surfUploadArray_t	surfUploads;
 
-	uint32_t			vbBufElements = 0;
-	uint32_t			ibBufElements = 0;
+	friend RenderUploader;
 };
 
 
@@ -46,8 +51,8 @@ private:
 	RenderContext*		renderContext;
 	ResourceContext*	resourceContext;
 
-	std::set<hdl_t>		uploadTextures;
-	std::set<hdl_t>		updateTextures;
+	std::set<hdl_t>		uploadImages;
+	std::set<hdl_t>		refreshImages;
 
 #ifdef USE_VULKAN
 	void				CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );

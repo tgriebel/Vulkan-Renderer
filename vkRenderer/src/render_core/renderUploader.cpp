@@ -111,11 +111,11 @@ void RenderUploader::UploadImage( Asset<Image>* imageAsset )
 
 	if( ( image->gpuImage == nullptr ) || ( image->gpuImage->GetId() < 0 ) )
 	{
-		uploadTextures.insert( imageAsset->Handle() );
+		uploadImages.insert( imageAsset->Handle() );
 	}
 	if( imageAsset->IsUploaded() )
 	{
-		updateTextures.insert( imageAsset->Handle() );
+		refreshImages.insert( imageAsset->Handle() );
 	}
 	imageAsset->QueueUpload();
 }
@@ -123,13 +123,13 @@ void RenderUploader::UploadImage( Asset<Image>* imageAsset )
 
 void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 {
-	const uint32_t textureCount = static_cast<uint32_t>( updateTextures.size() );
-	if( textureCount == 0 )
+	const uint32_t imageCount = static_cast<uint32_t>( refreshImages.size() );
+	if( imageCount == 0 )
 	{
 		return;
 	}
 
-	for( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
+	for( auto it = refreshImages.begin(); it != refreshImages.end(); ++it )
 	{
 		Asset<Image>* imageAsset = ImageLib().Find( *it );
 		Image& image = imageAsset->Get();
@@ -149,7 +149,7 @@ void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 		imageAsset->CompleteUpload();
 	}
 
-	updateTextures.clear();
+	refreshImages.clear();
 }
 
 
@@ -157,14 +157,14 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 {
 	textureStagingBuffer.SetPos( 0 );
 
-	const uint32_t textureCount = static_cast<uint32_t>( uploadTextures.size() );
+	const uint32_t textureCount = static_cast<uint32_t>( uploadImages.size() );
 	if( textureCount == 0 )
 	{
 		return;
 	}
 
 	// 1. Upload Data
-	for( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
+	for( auto it = uploadImages.begin(); it != uploadImages.end(); ++it )
 	{
 		Asset<Image>* textureAsset = ImageLib().Find( *it );
 		if( textureAsset->IsLoaded() == false )
@@ -213,7 +213,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 	}
 
 	// 2. Generate MIPS
-	for( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
+	for( auto it = uploadImages.begin(); it != uploadImages.end(); ++it )
 	{
 		Asset<Image>* textureAsset = ImageLib().Find( *it );
 		if( textureAsset->IsLoaded() == false )
@@ -244,7 +244,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 	{
 		// Find first cubemap. FIXME: Hacky, just done so there aren't nulls in the list
 		Image* firstCube = nullptr;
-		for( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
+		for( auto it = uploadImages.begin(); it != uploadImages.end(); ++it )
 		{
 			Asset<Image>* textureAsset = ImageLib().Find( *it );
 			if( textureAsset->IsLoaded() == false )
@@ -298,7 +298,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		}
 	}
 
-	uploadTextures.clear();
+	uploadImages.clear();
 }
 
 
