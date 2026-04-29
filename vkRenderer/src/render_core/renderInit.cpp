@@ -801,6 +801,26 @@ void Renderer::CreateFramebuffers()
 		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, lifeTime );
 	}
 
+	// Velocity
+	{
+		imageInfo_t info{};
+		info.width = width;
+		info.height = height;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = config.mainColorSubSamples;
+		info.fmt = IMAGE_FMT_RG_32;
+		info.type = IMAGE_TYPE_2D;
+		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		resources.depthStencilImage->Create(
+			info,
+			nullptr,
+			new GpuImage( "velocity", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+		);
+	}
+
 	// Resolve depth-stencil image
 	{
 		imageInfo_t info{};

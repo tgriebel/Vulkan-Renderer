@@ -54,6 +54,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 				imageReadBackCreateInfo_t info {};
 				info.name = "DiffuseIblReadback";
+				info.name = "DiffuseIblReadback";
 				info.img = tasks.diffuseIBL->GetOutputImage();
 				info.context = renderContext;
 				info.resources = resources;
@@ -66,7 +67,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			}
 		}
 
-		if( config.computeSpecularIBL ) {
+		if( config.computeSpecularIBL )
+		{
 			imageProcessCreateInfo_t info = {};
 			info.name = "SpecularIbl";
 			info.resourceImages[ 0 ] = resources->cubeFbColorImage;

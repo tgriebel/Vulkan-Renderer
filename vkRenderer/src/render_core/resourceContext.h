@@ -33,15 +33,19 @@ public:
 	ImageSampler			trilinearSamplers[ SAMPLER_ADDRESS_MODES ];
 	ImageSampler			shadowMapSampler;
 
-	// TODO: move view-specific data
+	// TODO: Views should have a final output image assigned to them
+	// Intermediate images can be reused across views however
+	// Synchronization can avoid potential hazards when necessary
 	GpuBuffer				viewParms;
 	Image*					mainColorImage;
 	Image*					cubeFbColorImage;
 	Image*					cubeFbDepthImage;
 	Image*					gBufferLayerImage;
 	Image*					depthStencilImage;
+	Image*					velocityImage;
 	ImageView				depthImageView;
 	ImageView				stencilImageView;
+	// TODO: Each view should own its suballocated 'GpuBufferView'
 	GpuBufferView			surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 
 	// Code images
@@ -70,6 +74,7 @@ public:
 		cubeFbDepthImage = NextImage();
 		gBufferLayerImage = NextImage();
 		depthStencilImage = NextImage();
+		velocityImage = NextImage();
 
 		for( uint32_t i = 0; i < MaxShadowViews; ++i )
 		{
