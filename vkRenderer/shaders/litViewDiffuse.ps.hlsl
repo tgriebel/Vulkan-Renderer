@@ -2,10 +2,6 @@
 
 PS_LAYOUT_STANDARD(Texture2D)
 
-#ifdef USE_MRT
-PS_LAYOUT_MRT_1_OUT
-#endif
-
 psOutput_t PSMain(vsToPsInterpolators input)
 {
 	const uint materialId = pushConstants.materialId;
@@ -30,19 +26,17 @@ psOutput_t PSMain(vsToPsInterpolators input)
 	float4 outColor;
 	outColor.rgb = NoV * float3( 1.0f, 1.0f, 1.0f );
 	outColor.a = 1.0f;
+	
+    psOutput_t output = (psOutput_t)0;
 
 #ifdef USE_MRT
     float4 outColor1;
     outColor1.rgb = 0.5f * ( N + float3( 1.0f, 1.0f, 1.0f ) );
     outColor1.a = 1.0f;
 
-    psOutputMRT output = (psOutputMRT)0;
-
     output.outColor = outColor;
     output.outColor1 = outColor1;
 #else
-	psOutput_t output = (psOutput_t) 0;
-
 	output.outColor = outColor;
 #endif
 	return output;

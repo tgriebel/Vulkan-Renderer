@@ -7,10 +7,6 @@ PS_LAYOUT_STANDARD( Texture2D ) // Must come before lighting.h
 
 #include "lighting.h"
 
-#ifdef USE_MRT
-PS_LAYOUT_MRT_1_OUT
-#endif
-
 // Evaluate BRDF functions evaluate a particular BRDF at a surface sample
 // Apply* functions modify some BRDF
 // Clearcoat attenuates the base BRDF, Sheen simply adds on top
@@ -225,11 +221,7 @@ float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, cons
 }
 
 
-#ifdef USE_MRT
-psOutputMRT PSMain( vsToPsInterpolators input )
-#else
 psOutput_t PSMain( vsToPsInterpolators input )
-#endif
 {
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
@@ -341,6 +333,8 @@ psOutput_t PSMain( vsToPsInterpolators input )
             break;
     }
 #endif
+    
+    psOutput_t output = (psOutput_t)0;
 
 #ifdef USE_MRT
     float4 outColor1;
@@ -348,13 +342,9 @@ psOutput_t PSMain( vsToPsInterpolators input )
     //outColor1.rgb = float3( input.uv0.xy, 0.0f );
     outColor1.a = 1.0f;
 
-    psOutputMRT output = (psOutputMRT)0;
-
     output.outColor = ClampColorFp16( outColor );
     output.outColor1 = ClampColorFp16( outColor1 );
 #else
-    psOutput_t output = (psOutput_t)0;
-
     output.outColor = ClampColorFp16( outColor );
 #endif
     return output;

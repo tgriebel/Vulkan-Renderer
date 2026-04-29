@@ -121,14 +121,10 @@ struct vsToPsInterpolators
 struct psOutput_t
 {
     float4 outColor : SV_Target0;
+#ifdef USE_MRT
+	float4 outColor1 : SV_Target1;
+#endif
 };
-
-#define PS_LAYOUT_MRT_1_OUT                                                                                         \
-    struct psOutputMRT																								\
-    {                                                                                                               \
-        float4 outColor  : SV_Target0;                                                                              \
-        float4 outColor1 : SV_Target1;                                                                              \
-    };
 
 #define PS_LAYOUT_STANDARD( TEXTYPE )                                                                               \
                                                         GLOBAL_BINDS( 0 )                                           \

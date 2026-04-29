@@ -1,10 +1,6 @@
 #include "globals.h"
 #include "color.h"
 
-#ifdef USE_MRT
-PS_LAYOUT_MRT_1_OUT
-#endif
-
 struct ImageShaderTask
 {
     float4 generic0;
@@ -18,11 +14,7 @@ PS_LAYOUT_IMAGE_PROCESS( Texture2DMS<float4>, ImageShaderTask )
 PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageShaderTask )
 #endif
 
-#ifdef USE_MRT
-psOutputMRT PSMain( vsToPsInterpolators input )
-#else
 psOutput_t PSMain( vsToPsInterpolators input )
-#endif
 {
     const int2 pixelLocation = int2( dimensions.xy * input.uv0.xy );
 
@@ -37,6 +29,8 @@ psOutput_t PSMain( vsToPsInterpolators input )
     }
     outColor.rgb /= globals.numSamples;
     outColor.a = 1.0f;
+    
+    psOutput_t output = (psOutput_t)0;
 
 #ifdef USE_MRT
     float4 outColor1 = float4( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -53,13 +47,9 @@ psOutput_t PSMain( vsToPsInterpolators input )
     }
     outColor1.rgb /= globals.numSamples;
 
-    psOutputMRT output = (psOutputMRT)0;
-
     output.outColor = outColor;
     output.outColor1 = outColor1;
 #else
-    psOutput_t output = (psOutput_t)0;
-
     output.outColor = outColor;
 #endif
     return output;
