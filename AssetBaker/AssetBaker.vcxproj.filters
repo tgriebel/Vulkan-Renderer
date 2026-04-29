@@ -42,9 +42,6 @@
     <ClCompile Include="..\vkRenderer\src\asset_types\material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\vkRenderer\src\asset_types\texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\vkRenderer\src\asset_types\gpuProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

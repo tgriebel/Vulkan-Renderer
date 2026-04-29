@@ -164,7 +164,6 @@
     <ClCompile Include="..\vkRenderer\src\scene\camera.cpp" />
     <ClCompile Include="..\vkRenderer\src\asset_types\model.cpp" />
     <ClCompile Include="..\vkRenderer\src\asset_types\material.cpp" />
-    <ClCompile Include="..\vkRenderer\src\asset_types\texture.cpp" />
     <ClCompile Include="..\vkRenderer\src\asset_types\gpuProgram.cpp" />
     <ClCompile Include="..\vkRenderer\src\io\io.cpp" />
     <ClCompile Include="..\vkRenderer\src\io\serializeClasses.cpp" />
