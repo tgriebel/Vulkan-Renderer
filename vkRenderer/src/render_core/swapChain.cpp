@@ -1,6 +1,7 @@
 #include "swapChain.h"
 
 
+#ifdef USE_VULKAN
 VkPresentModeKHR vk_ChooseSwapPresentMode( const std::vector<VkPresentModeKHR>& availablePresentModes )
 {
 	for ( const auto& availablePresentMode : availablePresentModes )
@@ -44,11 +45,13 @@ static VkExtent2D vk_ChooseSwapExtent( const VkSurfaceCapabilitiesKHR& capabilit
 		return actualExtent;
 	}
 }
+#endif
 
 
 swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const VkSurfaceKHR surface )
 {
 	swapChainInfo_t info;
+#ifdef USE_VULKAN
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR( device, surface, &info.capabilities );
 
 	uint32_t formatCount;
@@ -68,14 +71,16 @@ swapChainInfo_t SwapChain::QuerySwapChainSupport( VkPhysicalDevice device, const
 		info.presentModes.resize( presentModeCount );
 		vkGetPhysicalDeviceSurfacePresentModesKHR( device, surface, &presentModeCount, info.presentModes.data() );
 	}
-
+#endif
 	return info;
 }
 
 
 void SwapChain::WaitOnFlip( GpuSemaphore& signalSemaphore )
 {
+#ifdef USE_VULKAN
 	VK_CHECK_RESULT( vkAcquireNextImageKHR( context.device, GetVkObject(), UINT64_MAX, signalSemaphore.GetVkObject(), VK_NULL_HANDLE, &m_imageIndex ) );
+#endif
 }
 
 
@@ -114,6 +119,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	m_window = _window;
 	swapChainInfo_t swapChainSupport = QuerySwapChainSupport( context.physicalDevice, m_window->vk_surface );
 
+#ifdef USE_VULKAN
 	VkSurfaceFormatKHR surfaceFormat = vk_ChooseSwapSurfaceFormat( swapChainSupport.formats );
 	VkPresentModeKHR presentMode = vk_ChooseSwapPresentMode( swapChainSupport.presentModes );
 	VkExtent2D extent = vk_ChooseSwapExtent( swapChainSupport.capabilities, displayWidth, displayHeight );
@@ -189,6 +195,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 
 	gpuImageStateFlags_t flags = GPU_IMAGE_PRESENT | GPU_IMAGE_PERSISTENT;
 	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", info, flags, vk_swapChainImages, vk_swapChainImageViews );
+#endif
 }
 
 
@@ -198,5 +205,7 @@ void SwapChain::Destroy()
 	m_swapChainImage.gpuImage->DetachVkImage();
 	delete m_swapChainImage.gpuImage;
 
+#ifdef USE_VULKAN
 	vkDestroySwapchainKHR( context.device, vk_swapChain, nullptr );
+#endif
 }
