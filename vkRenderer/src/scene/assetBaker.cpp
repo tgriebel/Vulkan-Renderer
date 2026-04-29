@@ -204,7 +204,7 @@ void BakeAssets()
 	baker.AddBakeDirectory( BakePath );
 	baker.AddAssetLib( &ModelLib(), ModelPath, BakedModelExtension );
 	baker.AddAssetLib( &MaterialLib(), MaterialPath, BakedMaterialExtension );
-	baker.AddAssetLib( &TextureLib(), TexturePath, BakedTextureExtension );
+	baker.AddAssetLib( &ImageLib(), TexturePath, BakedTextureExtension );
 
 	baker.Bake();
 }

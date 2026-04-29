@@ -50,7 +50,7 @@ extern Window g_window;
 
 void CopyFrameBuffer( Tomtendo::wtFrameResult& fr, hdl_t texHandle )
 {
-	Asset<Image>* imageAsset = TextureLib().Find( texHandle );
+	Asset<Image>* imageAsset = ImageLib().Find( texHandle );
 	Image& texture = imageAsset->Get();
 
 	const uint32_t width = fr.frameBuffer->GetWidth();

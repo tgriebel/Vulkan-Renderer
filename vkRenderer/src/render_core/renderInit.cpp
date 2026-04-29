@@ -333,26 +333,26 @@ void Renderer::InitShaderResources()
 	materialBuffer.Reset();
 
 	{
-		rc.redImage = &TextureLib().Find( "_red" )->Get();
-		rc.blueImage = &TextureLib().Find( "_green" )->Get();
-		rc.greenImage = &TextureLib().Find( "_blue" )->Get();
-		rc.whiteImage = &TextureLib().Find( "_white" )->Get();
-		rc.blackImage = &TextureLib().Find( "_black" )->Get();
-		rc.lightGreyImage = &TextureLib().Find( "_lightGrey" )->Get();
-		rc.darkGreyImage = &TextureLib().Find( "_darkGrey" )->Get();
-		rc.brownImage = &TextureLib().Find( "_brown" )->Get();
-		rc.cyanImage = &TextureLib().Find( "_cyan" )->Get();
-		rc.yellowImage = &TextureLib().Find( "_yellow" )->Get();
-		rc.purpleImage = &TextureLib().Find( "_purple" )->Get();
-		rc.orangeImage = &TextureLib().Find( "_orange" )->Get();
-		rc.pinkImage = &TextureLib().Find( "_pink" )->Get();
-		rc.goldImage = &TextureLib().Find( "_gold" )->Get();
-		rc.albImage = &TextureLib().Find( "_alb" )->Get();
-		rc.nmlImage = &TextureLib().Find( "_nml" )->Get();
-		rc.rghImage = &TextureLib().Find( "_rgh" )->Get();
-		rc.mtlImage = &TextureLib().Find( "_mtl" )->Get();
-		rc.defaultImage = &TextureLib().Find( "_default" )->Get();
-		rc.defaultImageCube = &TextureLib().Find( "_defaultCube" )->Get();
+		rc.redImage = &ImageLib().Find( "_red" )->Get();
+		rc.blueImage = &ImageLib().Find( "_green" )->Get();
+		rc.greenImage = &ImageLib().Find( "_blue" )->Get();
+		rc.whiteImage = &ImageLib().Find( "_white" )->Get();
+		rc.blackImage = &ImageLib().Find( "_black" )->Get();
+		rc.lightGreyImage = &ImageLib().Find( "_lightGrey" )->Get();
+		rc.darkGreyImage = &ImageLib().Find( "_darkGrey" )->Get();
+		rc.brownImage = &ImageLib().Find( "_brown" )->Get();
+		rc.cyanImage = &ImageLib().Find( "_cyan" )->Get();
+		rc.yellowImage = &ImageLib().Find( "_yellow" )->Get();
+		rc.purpleImage = &ImageLib().Find( "_purple" )->Get();
+		rc.orangeImage = &ImageLib().Find( "_orange" )->Get();
+		rc.pinkImage = &ImageLib().Find( "_pink" )->Get();
+		rc.goldImage = &ImageLib().Find( "_gold" )->Get();
+		rc.albImage = &ImageLib().Find( "_alb" )->Get();
+		rc.nmlImage = &ImageLib().Find( "_nml" )->Get();
+		rc.rghImage = &ImageLib().Find( "_rgh" )->Get();
+		rc.mtlImage = &ImageLib().Find( "_mtl" )->Get();
+		rc.defaultImage = &ImageLib().Find( "_default" )->Get();
+		rc.defaultImageCube = &ImageLib().Find( "_defaultCube" )->Get();
 
 		rc.defaultImageArray.SetRenderContext( &renderContext );
 		rc.defaultImageArray.Resize( 1 );

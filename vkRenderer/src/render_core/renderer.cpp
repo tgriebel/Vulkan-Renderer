@@ -161,8 +161,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.modelMatrix = ent.GetMatrix();
 		instance.surfId = 0;
 		instance.id = 0;
-		instance.envMapId = TextureLib().Find( ent.envMap )->Get().gpuImage->GetId();
-		instance.diffuseIblId = TextureLib().Find( ent.diffuseIblMap )->Get().gpuImage->GetId();
+		instance.envMapId = ImageLib().Find( ent.envMap )->Get().gpuImage->GetId();
+		instance.diffuseIblId = ImageLib().Find( ent.diffuseIblMap )->Get().gpuImage->GetId();
 
 		surf.uploadId = ( model.uploadId + i );
 		surf.stencilBit = ent.outline ? OutlineStencilBit : 0;
@@ -185,7 +185,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			const hdl_t texHandle = material.GetTexture( t );
 			if ( texHandle.IsValid() )
 			{
-				Asset<Image>* imageAsset = TextureLib().Find( texHandle );
+				Asset<Image>* imageAsset = ImageLib().Find( texHandle );
 				uploader.UploadImage( imageAsset );
 			}
 		}
@@ -322,10 +322,10 @@ void Renderer::UploadAssets()
 			uploadMaterials.insert( materialAsset->Handle() );
 		}
 
-		const uint32_t textureCount = TextureLib().Count();
+		const uint32_t textureCount = ImageLib().Count();
 		for( uint32_t i = 0; i < textureCount; ++i )
 		{
-			uploader.UploadImage( TextureLib().Find( i ) );
+			uploader.UploadImage( ImageLib().Find( i ) );
 		}
 
 		const uint32_t modelCount = ModelLib().Count();
@@ -626,7 +626,7 @@ void Renderer::UpdateBuffers()
 		globals.defaultRoughnessId = rc.rghImage->gpuImage->GetId();
 		globals.defaultMetalId = rc.mtlImage->gpuImage->GetId();
 		globals.defaultImageId = rc.defaultImage->gpuImage->GetId();
-		globals.brdfLutId = TextureLib().Find( "code_assets/brdf_lut.img" )->Get().gpuImage->GetId();
+		globals.brdfLutId = ImageLib().Find( "code_assets/brdf_lut.img" )->Get().gpuImage->GetId();
 		globals.isTextured = g_imguiControls.isTextured;
 		
 		globals.shadow2dCount = 0;
@@ -636,7 +636,7 @@ void Renderer::UpdateBuffers()
 			globals.shadow2dCount += ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_2D );
 			globals.shadowCubeCount += ( resources.shadowMapImage[ i ]->info.type == imageType_t::IMAGE_TYPE_CUBE );
 		}
-		globals.textureCount = TextureLib().Count();
+		globals.textureCount = ImageLib().Count();
 		globals.materialCount = MaterialLib().Count();
 
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );

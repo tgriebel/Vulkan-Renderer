@@ -15,6 +15,6 @@ typedef AssetLib< GpuProgram >		AssetLibGpuProgram;
 extern AssetManager g_assets;
 
 inline AssetLib<Model>&			ModelLib()			{ return *g_assets.GetLib<Model>(); }
-inline AssetLib<Image>&			TextureLib()		{ return *g_assets.GetLib<Image>(); }
+inline AssetLib<Image>&			ImageLib()			{ return *g_assets.GetLib<Image>(); }
 inline AssetLib<Material>&		MaterialLib()		{ return *g_assets.GetLib<Material>(); }
 inline AssetLib<GpuProgram>&	GpuProgramLib()		{ return *g_assets.GetLib<GpuProgram>(); }

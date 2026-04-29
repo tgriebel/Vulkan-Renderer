@@ -141,7 +141,7 @@ void DebugMenuMaterial( const Material& mat )
 		}
 		else
 		{
-			const char* texName = TextureLib().FindName( texHdl );
+			const char* texName = ImageLib().FindName( texHdl );
 			ImGui::Text( texName );
 		}
 	}
@@ -303,7 +303,7 @@ void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 
 			hdl_t originalHdl = mat.GetTexture( t );
 			hdl_t texHdl = originalHdl;
-			DebugMenuLibComboEdit( label, texHdl, TextureLib() );
+			DebugMenuLibComboEdit( label, texHdl, ImageLib() );
 
 			if( texHdl != originalHdl )
 			{

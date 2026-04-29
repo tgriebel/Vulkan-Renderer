@@ -77,10 +77,10 @@ void Renderer::ShutdownShaderResources()
 	RenderResource::Cleanup( resourceLifeTime_t::REBOOT );
 
 	// Images
-	const uint32_t textureCount = TextureLib().Count();
+	const uint32_t textureCount = ImageLib().Count();
 	for ( uint32_t i = 0; i < textureCount; ++i )
 	{
-		const Image& texture = TextureLib().Find( i )->Get();
+		const Image& texture = ImageLib().Find( i )->Get();
 		delete texture.gpuImage;
 	}
 

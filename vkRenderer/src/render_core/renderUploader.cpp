@@ -131,7 +131,7 @@ void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 
 	for( auto it = updateTextures.begin(); it != updateTextures.end(); ++it )
 	{
-		Asset<Image>* imageAsset = TextureLib().Find( *it );
+		Asset<Image>* imageAsset = ImageLib().Find( *it );
 		Image& image = imageAsset->Get();
 
 		Transition( cmdCommand, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
@@ -166,7 +166,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 	// 1. Upload Data
 	for( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Image>* textureAsset = TextureLib().Find( *it );
+		Asset<Image>* textureAsset = ImageLib().Find( *it );
 		if( textureAsset->IsLoaded() == false )
 		{
 			continue;
@@ -215,7 +215,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 	// 2. Generate MIPS
 	for( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 	{
-		Asset<Image>* textureAsset = TextureLib().Find( *it );
+		Asset<Image>* textureAsset = ImageLib().Find( *it );
 		if( textureAsset->IsLoaded() == false )
 		{
 			continue;
@@ -246,7 +246,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		Image* firstCube = nullptr;
 		for( auto it = uploadTextures.begin(); it != uploadTextures.end(); ++it )
 		{
-			Asset<Image>* textureAsset = TextureLib().Find( *it );
+			Asset<Image>* textureAsset = ImageLib().Find( *it );
 			if( textureAsset->IsLoaded() == false )
 			{
 				continue;
@@ -262,7 +262,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		// Fill assigned slots
 		for( uint32_t i = 0; i < imageFreeSlot; ++i )
 		{
-			Asset<Image>* textureAsset = TextureLib().Find( i );
+			Asset<Image>* textureAsset = ImageLib().Find( i );
 			if( textureAsset->IsLoaded() == false )
 			{
 				continue;
@@ -284,7 +284,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 				resourceContext->gpuImagesCube.BindIndex( uploadId, firstCube );
 				break;
 			case IMAGE_TYPE_CUBE:
-				resourceContext->gpuImages2D.BindIndex( uploadId, &TextureLib().GetDefault()->Get() );
+				resourceContext->gpuImages2D.BindIndex( uploadId, &ImageLib().GetDefault()->Get() );
 				resourceContext->gpuImagesCube.BindIndex( uploadId, &texture );
 				break;
 			}
@@ -293,7 +293,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		// Fill defaults
 		for( uint32_t i = imageFreeSlot; i < MaxImageDescriptors; ++i )
 		{
-			resourceContext->gpuImages2D.BindIndex( i, &TextureLib().GetDefault()->Get() );
+			resourceContext->gpuImages2D.BindIndex( i, &ImageLib().GetDefault()->Get() );
 			resourceContext->gpuImagesCube.BindIndex( i, firstCube );
 		}
 	}
@@ -335,7 +335,7 @@ void Renderer::UpdateGpuMaterials()
 				if( handle.IsValid() )
 				{
 					const hdl_t imageId = m.GetTexture( t );
-					const Asset<Image>* imageAsset = TextureLib().Find( imageId );
+					const Asset<Image>* imageAsset = ImageLib().Find( imageId );
 					const Image& image = imageAsset->Get();
 					assert( image.gpuImage != nullptr );
 

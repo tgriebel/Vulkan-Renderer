@@ -27,8 +27,8 @@ void CreateCodeAssets()
 			ss << "CODE_COLOR_" << t;
 			std::string s = ss.str();
 
-			hdl_t handle = TextureLib().Add( s.c_str(), Image() );
-			Image& texture = TextureLib().Find( handle )->Get();
+			hdl_t handle = ImageLib().Add( s.c_str(), Image() );
+			Image& texture = ImageLib().Find( handle )->Get();
 
 			imageInfo_t info = DefaultImage2dInfo( 256, 240 );
 
@@ -80,8 +80,8 @@ void CreateCodeAssets()
 
 			for ( uint32_t t = 0; t < debugColorCount; ++t )
 			{
-				hdl_t handle = TextureLib().Add( colorInfo[ t ].name, Image() );
-				Image& texture = TextureLib().Find( handle )->Get();
+				hdl_t handle = ImageLib().Add( colorInfo[ t ].name, Image() );
+				Image& texture = ImageLib().Find( handle )->Get();
 
 				rgba8_t pixel = Swizzle( colorInfo[ t ].color.AsRgba8(), RGBA_A, RGBA_B, RGBA_G, RGBA_R );
 
@@ -93,8 +93,8 @@ void CreateCodeAssets()
 
 		// Default Image - Checkerboard
 		{
-			hdl_t handle = TextureLib().Add( "_defaultImage", Image() );
-			Image& texture = TextureLib().Find( handle )->Get();
+			hdl_t handle = ImageLib().Add( "_defaultImage", Image() );
+			Image& texture = ImageLib().Find( handle )->Get();
 
 			const uint32_t cellSize = 16;
 
@@ -117,12 +117,12 @@ void CreateCodeAssets()
 				}
 			}
 		}
-		TextureLib().SetDefault( "_defaultImage" );
+		ImageLib().SetDefault( "_defaultImage" );
 
 		// Default Image Cube - Rainbow
 		{
-			hdl_t handle = TextureLib().Add( "_defaultCube", Image() );
-			Image& texture = TextureLib().Find( handle )->Get();
+			hdl_t handle = ImageLib().Add( "_defaultCube", Image() );
+			Image& texture = ImageLib().Find( handle )->Get();
 
 			imageInfo_t info = DefaultImage2dInfo( 1, 1 );
 			info.width = 8;

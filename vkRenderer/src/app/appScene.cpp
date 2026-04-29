@@ -42,8 +42,8 @@ void InitScene( Scene* scene )
 	for ( uint32_t i = 0; i < entCount; ++i ) {
 		scene->CreateEntityBounds( scene->entities[ i ]->modelHdl, *scene->entities[ i ] );
 
-		scene->entities[ i ]->envMap = TextureLib().RetrieveHdl( scene->envMap.c_str() );
-		scene->entities[ i ]->diffuseIblMap = TextureLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
+		scene->entities[ i ]->envMap = ImageLib().RetrieveHdl( scene->envMap.c_str() );
+		scene->entities[ i ]->diffuseIblMap = ImageLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
 
 	scene->Init();
@@ -71,7 +71,7 @@ void InitScene( Scene* scene )
 		skyModelAsset->Load();
 
 		Material& skyMaterial = MaterialLib().Find( "_sky" )->Get();
-		skyMaterial.AddTexture( 0, TextureLib().RetrieveHdl( scene->envMap.c_str() ) );
+		skyMaterial.AddTexture( 0, ImageLib().RetrieveHdl( scene->envMap.c_str() ) );
 
 		Entity* ent = new Entity();
 		scene->CreateEntityBounds( ModelLib().RetrieveHdl( "_skybox" ), *ent );
@@ -239,8 +239,8 @@ void UpdateScene( Scene* scene )
 	const uint32_t entCount = static_cast<uint32_t>( scene->entities.size() );
 	for ( uint32_t i = 0; i < entCount; ++i )
 	{
-		scene->entities[ i ]->envMap = TextureLib().RetrieveHdl( scene->specIblMap.c_str() );
-		scene->entities[ i ]->diffuseIblMap = TextureLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
+		scene->entities[ i ]->envMap = ImageLib().RetrieveHdl( scene->specIblMap.c_str() );
+		scene->entities[ i ]->diffuseIblMap = ImageLib().RetrieveHdl( scene->diffuseIblMap.c_str() );
 	}
 
 	{
@@ -297,10 +297,10 @@ void UpdateScene( Scene* scene )
 
 	std::vector<const Image*> images;
 
-	const uint32_t imageCount = TextureLib().Count();
+	const uint32_t imageCount = ImageLib().Count();
 	for ( uint32_t i = 0; i < imageCount; ++i )
 	{
-		const Image* img = &TextureLib().Find( i )->Get();
+		const Image* img = &ImageLib().Find( i )->Get();
 		if ( img == nullptr ) {
 			continue;
 		}
@@ -600,14 +600,14 @@ void DrawAssetDebugMenu()
 			}
 			ImGui::TreePop();
 		}
-		const uint32_t texCount = TextureLib().Count();
+		const uint32_t texCount = ImageLib().Count();
 		if ( ImGui::TreeNode( "Textures", "Textures (%i)", texCount ) )
 		{
 			uint64_t totalCpuBytes = 0;
 			uint64_t totalGpuBytes = 0;
 			for ( uint32_t t = 0; t < texCount; ++t )
 			{
-				const Image& tex = TextureLib().Find( t )->Get();
+				const Image& tex = ImageLib().Find( t )->Get();
 				if ( tex.cpuImage != nullptr ) {
 					totalCpuBytes += tex.cpuImage->GetByteCount();
 				}
@@ -624,7 +624,7 @@ void DrawAssetDebugMenu()
 
 			for ( uint32_t t = 0; t < texCount; ++t )
 			{
-				Asset<Image>* texAsset = TextureLib().Find( t );
+				Asset<Image>* texAsset = ImageLib().Find( t );
 				DebugMenuTextureTreeNode( texAsset );
 			}
 			ImGui::TreePop();
