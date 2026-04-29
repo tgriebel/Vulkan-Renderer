@@ -151,9 +151,6 @@ private:
 	void								CommitLight( const light_t& light );
 
 	// Update/Upload
-	void								BeginUploadCommands( UploadContext& uploadContext );
-	void								EndUploadCommands( UploadContext& uploadContext );
-
 	void								UploadAssets();
 	void								UpdateBindSets();
 	void								UpdateBuffers();

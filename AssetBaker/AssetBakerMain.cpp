@@ -17,7 +17,7 @@
 #include "../vkRenderer/src/app/cvar.h"
 #include "../vkRenderer/src/asset_types/model.h"
 #include "../vkRenderer/src/asset_types/material.h"
-#include "../vkRenderer/src/asset_types/texture.h"
+#include "../vkRenderer/src/asset_types/image.h"
 #include "../vkRenderer/src/asset_types/gpuProgram.h"
 #include "../vkRenderer/scenes/sceneParser.h"
 

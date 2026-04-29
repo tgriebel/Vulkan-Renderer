@@ -347,7 +347,6 @@
     <ClCompile Include="src\render_core\debugMenu.cpp" />
     <ClCompile Include="src\render_core\gpuImage.cpp" />
     <ClCompile Include="src\render_core\GpuSync.cpp" />
-    <ClCompile Include="src\render_core\renderCommand.cpp" />
     <ClCompile Include="src\render_core\renderer.cpp" />
     <ClCompile Include="src\render_core\renderInit.cpp" />
     <ClCompile Include="src\render_core\renderResource.cpp" />

@@ -70,7 +70,7 @@ void RenderUploader::Shutdown()
 	geometry.ibBufElements = 0;
 }
 
-
+#ifdef USE_VULKAN
 void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
 	VkCommandBuffer commandBuffer = cmdCommand->CommandBuffer();
@@ -78,6 +78,7 @@ void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBu
 
 	dstBuffer.Allocate( copyRegion.size );
 }
+#endif
 
 
 void RenderUploader::QueueMaterialUpload( Asset<Material>& materialAsset )

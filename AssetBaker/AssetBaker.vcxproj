@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\vkRenderer\src\asset_types\image.cpp" />
     <ClCompile Include="AssetBakerMain.cpp" />
     <ClCompile Include="..\vkRenderer\scenes\sceneParser.cpp" />
     <ClCompile Include="..\vkRenderer\src\scene\assetBaker.cpp" />

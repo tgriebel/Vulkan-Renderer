@@ -60,5 +60,8 @@
     <ClCompile Include="..\vkRenderer\src\app\cvar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\vkRenderer\src\asset_types\image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -29,9 +29,6 @@
     <ClCompile Include="..\external\tinyfiledialogs\tinyfiledialogs.c">
       <Filter>external\tinyfiledialogs</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_core\renderCommand.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_core\renderer.cpp">
       <Filter>Core</Filter>
     </ClCompile>
