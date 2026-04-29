@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "util.h"
 
 VS_LAYOUT_STANDARD( Texture2D )
 

@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "util.h"
 
 struct LuminanceConstants
 {

@@ -12,46 +12,6 @@
 #define AMBIENT         float4( 0.03f, 0.03f, 0.03f, 1.0f )
 
 // ============================================================
-// Convenience
-// ============================================================
-
-int2 GetTextureSize( Texture2D tex, int mipLevel )
-{
-    uint w, h, levels;
-    tex.GetDimensions( mipLevel, w, h, levels );
-    return int2( w, h );
-}
-
-
-uint GetTextureLevels( Texture2D tex )
-{
-    uint w, h, levels;
-    tex.GetDimensions( 0, w, h, levels );
-    return levels;
-}
-
-
-uint GetTextureLevelsCube( TextureCube tex )
-{
-    uint w, h, levels;
-    tex.GetDimensions( 0, w, h, levels );
-    return levels;
-}
-
-
-float3 DecodeNormal( const float3 normalMapTexel )
-{
-	return ( 2.0f * normalMapTexel - float3( 1.0f, 1.0f, 1.0f ) );
-}
-
-
-float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3 B, const float3 N )
-{
-	return normalize( tangentNormal.x * T + tangentNormal.y * B + tangentNormal.z * N );
-}
-
-
-// ============================================================
 // Resource binding macros
 // ============================================================
 

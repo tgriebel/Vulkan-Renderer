@@ -1,6 +1,29 @@
 #ifndef UTIL_HLSL_H
 #define UTIL_HLSL_H
 
+int2 GetTextureSize( Texture2D tex, int mipLevel )
+{
+	uint w, h, levels;
+	tex.GetDimensions( mipLevel, w, h, levels );
+	return int2( w, h );
+}
+
+
+uint GetTextureLevels( Texture2D tex )
+{
+	uint w, h, levels;
+	tex.GetDimensions( 0, w, h, levels );
+	return levels;
+}
+
+
+uint GetTextureLevelsCube( TextureCube tex )
+{
+	uint w, h, levels;
+	tex.GetDimensions( 0, w, h, levels );
+	return levels;
+}
+
 // GLSL mat4() fills columns-first; HLSL float4x4() fills rows-first.
 // This is the transposed form so it matches the GLSL glslSpace matrix.
 static const float4x4 glslSpace = float4x4(
@@ -14,6 +37,18 @@ static const float4x4 glslSpace = float4x4(
 float3 CubeVector( const float3 v )
 {
 	return float3( -v.y, v.z, v.x ); // to glsl coordinate space
+}
+
+
+float3 DecodeNormal( const float3 normalMapTexel )
+{
+	return ( 2.0f * normalMapTexel - float3( 1.0f, 1.0f, 1.0f ) );
+}
+
+
+float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3 B, const float3 N )
+{
+	return normalize( tangentNormal.x * T + tangentNormal.y * B + tangentNormal.z * N );
 }
 
 
