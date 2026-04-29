@@ -201,11 +201,13 @@ struct gpuLight_t
 
 struct gpuView_t
 {
-	float4x4 viewMat;
-	float4x4 projMat;
-	float4   dimensions;
-	float3   viewOrigin;
-	uint     numLights;
+	float4x4	viewMat;
+	float4x4	projMat;
+	float4x4	viewProjMat;
+	float4x4	prevViewProjMat;
+	float4		dimensions;
+	float3		viewOrigin;
+	uint		numLights;
 };
 
 
