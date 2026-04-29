@@ -148,7 +148,6 @@ private:
 	void								CommitLight( const light_t& light );
 
 	// Update/Upload
-	void								UploadAssets();
 	void								UpdateBindSets();
 	void								UpdateBuffers();
 	void								BuildPipelines();
