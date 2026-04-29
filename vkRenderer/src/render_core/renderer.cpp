@@ -274,15 +274,7 @@ void Renderer::Resize()
 	RecreateSwapChain();
 	renderContext.RefreshRegisteredBindParms();
 
-	uploadContext.Begin();
-
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
-
-	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
-
-	uploadContext.End();
-	uploadContext.Submit();
+	uploader.OnReboot();
 
 	FlushGPU();
 }
@@ -345,28 +337,8 @@ void Renderer::UploadAssets()
 	BuildPipelines();
 
 	// Upload queue commands
-	{
-		
-		uploadContext.Begin();
-		uploadContext.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
+	uploader.Upload();
 
-		uploader.UploadModelsToGPU( &uploadContext );
-
-		uploader.UploadTextures( &uploadContext );
-
-		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
-		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
-		RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
-
-		Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
-
-		uploadContext.MarkerEndRegion();
-
-		uploadContext.End();
-		uploadContext.Submit();
-
-		uploader.UpdateGpuMaterials();
-	}
 	FlushGPU();
 }
 
@@ -379,18 +351,8 @@ void Renderer::Render()
 
 	BuildPipelines();
 
-	uploadContext.Begin();
+	uploader.OnFrameBegin();
 
-	uploader.UploadModelsToGPU( &uploadContext );
-
-	uploader.UploadTextures( &uploadContext );
-	uploader.UpdateTextureData( &uploadContext );
-
-	uploadContext.End();
-	uploadContext.Signal( &uploadFinishedSemaphore );
-	uploadContext.Submit();
-
-	uploader.UpdateGpuMaterials();
 	UpdateBuffers();
 	UpdateBindSets();
 
@@ -444,7 +406,7 @@ void Renderer::SubmitFrame()
 
 	{
 		gfxContext.Wait( &gfxContext.presentSemaphore );
-		gfxContext.Wait( &uploadFinishedSemaphore );
+		gfxContext.Wait( uploader.GetFinishedSemaphore() );
 		gfxContext.Signal( &gfxContext.renderFinishedSemaphore );
 		gfxContext.Submit( &gfxContext.frameFence[ context.bufferId ] );
 	}

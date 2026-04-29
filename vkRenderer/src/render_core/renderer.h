@@ -117,9 +117,7 @@ private:
 	RenderContext						renderContext;
 	GfxContext							gfxContext;
 	ComputeContext						computeContext;
-	UploadContext						uploadContext;
 	ComputeState						particleState;
-	GpuSemaphore						uploadFinishedSemaphore;
 
 	// Shader resources
 	ResourceContext						resources;

@@ -11,6 +11,8 @@
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
 
+#include "swapChain.h"
+
 
 void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 {
@@ -18,6 +20,14 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 
 	renderContext = context;
 	resourceContext = resources;
+
+	uploadContext.Create( "Upload Context", renderContext );
+
+	uploadFinishedSemaphore.Create( "UploadSemaphore" );
+
+#ifdef USE_VULKAN
+	uploadFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+#endif
 
 	materialBuffer.Reset();
 
@@ -68,7 +78,67 @@ void RenderUploader::Shutdown()
 	imageFreeSlot = 0;
 	geometry.vbBufElements = 0;
 	geometry.ibBufElements = 0;
+
+	uploadContext.Destroy();
+
+	uploadFinishedSemaphore.Destroy();
 }
+
+
+void RenderUploader::OnReboot()
+{
+	uploadContext.Begin();
+
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
+
+	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+
+	uploadContext.End();
+	uploadContext.Submit();
+}
+
+
+void RenderUploader::OnFrameBegin()
+{
+	uploadContext.Begin();
+
+	UploadModelsToGPU( &uploadContext );
+
+	UploadTextures( &uploadContext );
+	UpdateTextureData( &uploadContext );
+
+	uploadContext.End();
+	uploadContext.Signal( &uploadFinishedSemaphore );
+	uploadContext.Submit();
+
+	UpdateGpuMaterials();
+}
+
+
+void RenderUploader::Upload()
+{
+	uploadContext.Begin();
+	uploadContext.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
+
+	UploadModelsToGPU( &uploadContext );
+
+	UploadTextures( &uploadContext );
+
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
+	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
+
+	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+
+	uploadContext.MarkerEndRegion();
+
+	uploadContext.End();
+	uploadContext.Submit();
+
+	UpdateGpuMaterials();
+}
+
 
 #ifdef USE_VULKAN
 void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )

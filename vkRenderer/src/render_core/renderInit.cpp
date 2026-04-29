@@ -249,7 +249,6 @@ void Renderer::InitApi( const renderConfig_t& cfg )
 
 		gfxContext.Create( "GFX Context", &renderContext );
 		computeContext.Create( "Compute Context", &renderContext );
-		uploadContext.Create( "Upload Context", &renderContext );
 	}
 
 	{
@@ -909,14 +908,11 @@ void Renderer::CreateSyncObjects()
 	gfxContext.renderFinishedSemaphore.Create( "RenderSemaphore" );
 	computeContext.semaphore.Create( "ComputeSemaphore" );
 
-	uploadFinishedSemaphore.Create( "UploadSemaphore" );
-
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
 		gfxContext.frameFence[ i ].Create( "FrameFence" );
 	}
 
 #ifdef USE_VULKAN
-	uploadFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 	gfxContext.presentSemaphore.waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 #endif
 }

@@ -3,6 +3,8 @@
 #include <cstdint>
 
 #include "../render_resources/gpuBuffer.h"
+#include "../render_state/cmdContext.h"
+#include "../render_core/GpuSync.h"
 
 class RenderContext;
 class ResourceContext;
@@ -47,6 +49,8 @@ private:
 	uint32_t			imageFreeSlot;
 	GpuBuffer			textureStagingBuffer;
 	GeometryContext		geometry;
+	UploadContext		uploadContext;
+	GpuSemaphore		uploadFinishedSemaphore;
 
 	RenderContext*		renderContext;
 	ResourceContext*	resourceContext;
@@ -67,6 +71,10 @@ public:
 	void				Boot( RenderContext* context, ResourceContext* resources );
 	void				Shutdown();
 
+	void				OnReboot();
+	void				OnFrameBegin();
+	void				Upload();
+
 	void				QueueMaterialUpload( Asset<Material>& materialAsset );
 	void				QueueModelUpload( Asset<Model>& model );
 
@@ -80,5 +88,10 @@ public:
 	inline const GeometryContext* GetGeometry() const
 	{
 		return &geometry;
+	}
+
+	inline GpuSemaphore* GetFinishedSemaphore()
+	{
+		return &uploadFinishedSemaphore;
 	}
 };
