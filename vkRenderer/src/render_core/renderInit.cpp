@@ -330,8 +330,6 @@ void Renderer::InitShaderResources()
 		particleState.x = ( MaxParticles / 256 );
 	}
 
-	materialBuffer.Reset();
-
 	{
 		rc.redImage = &ImageLib().Find( "_red" )->Get();
 		rc.blueImage = &ImageLib().Find( "_green" )->Get();

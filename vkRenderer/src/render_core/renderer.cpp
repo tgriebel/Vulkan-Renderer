@@ -103,7 +103,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		uploader.QueueModelUpload( *modelAsset );
 
 		hdl_t materialHdl = ent.materialHdl.IsValid() ? ent.materialHdl : model.surfs[ i ].materialHdl;
-		const Asset<Material>* materialAsset = MaterialLib().Find( materialHdl );
+		Asset<Material>* materialAsset = MaterialLib().Find( materialHdl );
 		const Material& material = materialAsset->Get();
 
 		renderFlags_t renderFlags = NONE;
@@ -179,6 +179,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		if( materialAsset->IsUploaded() == false ) {
 			uploadMaterials.insert( materialHdl );
 		}
+		uploader.QueueMaterialUpload( *materialAsset );
 
 		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
 		{
@@ -310,16 +311,9 @@ void Renderer::UploadAssets()
 		const uint32_t materialCount = MaterialLib().Count();
 		for( uint32_t i = 0; i < materialCount; ++i )
 		{
-			AssetInterface* materialAsset = MaterialLib().Find( i );
-			if( materialAsset->IsLoaded() == false )
-			{
-				continue;
-			}
-			if( materialAsset->IsUploaded() )
-			{
-				continue;
-			}
-			uploadMaterials.insert( materialAsset->Handle() );
+			Asset<Material>* materialAsset = MaterialLib().Find( i );
+
+			uploader.QueueMaterialUpload( *materialAsset );
 		}
 
 		const uint32_t textureCount = ImageLib().Count();
@@ -333,6 +327,7 @@ void Renderer::UploadAssets()
 		for( uint32_t m = 0; m < modelCount; ++m )
 		{
 			Asset<Model>* modelAsset = ModelLib().Find( m );
+
 			if( modelAsset->IsLoaded() == false )
 			{
 				continue;
@@ -370,7 +365,7 @@ void Renderer::UploadAssets()
 		uploadContext.End();
 		uploadContext.Submit();
 
-		UpdateGpuMaterials();
+		uploader.UpdateGpuMaterials();
 	}
 	FlushGPU();
 }
@@ -395,7 +390,7 @@ void Renderer::Render()
 	uploadContext.Signal( &uploadFinishedSemaphore );
 	uploadContext.Submit();
 
-	UpdateGpuMaterials();
+	uploader.UpdateGpuMaterials();
 	UpdateBuffers();
 	UpdateBindSets();
 
@@ -698,9 +693,6 @@ void Renderer::UpdateBuffers()
 		resources.surfParmPartitions[ viewId ].SetPos( 0 );
 		resources.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
 	}
-
-	resources.materialBuffers.SetPos( 0 );
-	resources.materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( gpuMaterial_t ) * materialBuffer.Count() );
 
 	resources.lightParms.SetPos( 0 );
 	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( gpuLight_t ) * MaxLights );

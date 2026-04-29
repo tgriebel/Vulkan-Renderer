@@ -90,7 +90,6 @@ public:
 
 private:
 	using committedLightsArray_t	= Array<gpuLight_t, MaxLights>;
-	using materialBufferArray_t		= Array<gpuMaterial_t, MaxMaterials>;
 
 	static const uint32_t				ShadowMapWidth = 2048;
 	static const uint32_t				ShadowMapHeight = 2048;
@@ -124,7 +123,6 @@ private:
 
 	// Shader resources
 	ResourceContext						resources;
-	materialBufferArray_t				materialBuffer;
 	committedLightsArray_t				committedLights;
 
 	uint32_t							shadowCount = 0;
@@ -157,9 +155,7 @@ private:
 	void								EndUploadCommands( UploadContext& uploadContext );
 
 	void								UploadAssets();
-	void								UpdateGpuMaterials();
 	void								UpdateBindSets();
 	void								UpdateBuffers();
-	void								UpdateFrameDescSet();
 	void								BuildPipelines();
 };

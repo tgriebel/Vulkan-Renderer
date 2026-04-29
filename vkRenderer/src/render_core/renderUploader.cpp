@@ -19,6 +19,8 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 	renderContext = context;
 	resourceContext = resources;
 
+	materialBuffer.Reset();
+
 	textureStagingBuffer.Create(
 		"Texture Staging",
 		swapBuffering_t::SINGLE_FRAME,
@@ -75,6 +77,24 @@ void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBu
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
 
 	dstBuffer.Allocate( copyRegion.size );
+}
+
+
+void RenderUploader::QueueMaterialUpload( Asset<Material>& materialAsset )
+{
+	Material& material = materialAsset.Get();
+
+	if( materialAsset.IsLoaded() == false )
+	{
+		return;
+	}
+	if( materialAsset.IsUploaded() )
+	{
+		return;
+	}
+	uploadMaterials.insert( materialAsset.Handle() );
+
+	materialAsset.QueueUpload();
 }
 
 
@@ -302,7 +322,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 }
 
 
-void Renderer::UpdateGpuMaterials()
+void RenderUploader::UpdateGpuMaterials()
 {
 	for( auto it = uploadMaterials.begin(); it != uploadMaterials.end(); ++it )
 	{
@@ -352,6 +372,10 @@ void Renderer::UpdateGpuMaterials()
 
 		m.TranslateToGpuMaterial( materialObject );
 	}
+
+	resourceContext->materialBuffers.SetPos( 0 );
+	resourceContext->materialBuffers.CopyData( materialBuffer.Ptr(), sizeof( gpuMaterial_t ) * materialBuffer.Count() );
+
 	uploadMaterials.clear();
 }
 

@@ -53,6 +53,10 @@ private:
 
 	std::set<hdl_t>		uploadImages;
 	std::set<hdl_t>		refreshImages;
+	std::set<hdl_t>		uploadMaterials;
+
+	using materialBufferArray_t = Array<gpuMaterial_t, MaxMaterials>;
+	materialBufferArray_t	materialBuffer; // This is a holdover from older code and can be removed
 
 #ifdef USE_VULKAN
 	void				CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
@@ -63,12 +67,14 @@ public:
 	void				Boot( RenderContext* context, ResourceContext* resources );
 	void				Shutdown();
 
+	void				QueueMaterialUpload( Asset<Material>& materialAsset );
 	void				QueueModelUpload( Asset<Model>& model );
 
 	void				UploadImage( Asset<Image>* imageAsset );
 
 	void				UpdateTextureData( CommandContext* cmdCommand );
 	void				UploadTextures( CommandContext* cmdCommand );
+	void				UpdateGpuMaterials();
 	void				UploadModelsToGPU( CommandContext* cmdCommand );
 
 	inline const GeometryContext* GetGeometry() const
