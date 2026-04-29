@@ -550,7 +550,7 @@ void Renderer::UpdateBuffers()
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
-		const RenderView& view = views[ viewIx ];
+		RenderView& view = views[ viewIx ];
 		if( view.IsCommitted() == false ) {
 			continue;
 		}
@@ -563,9 +563,13 @@ void Renderer::UpdateBuffers()
 			const vec2i& frameSize = view.GetFrameSize();
 			viewBuffer.viewMat = view.GetViewMatrix( multiViewIndex );
 			viewBuffer.projMat = view.GetProjMatrix( multiViewIndex );
+			viewBuffer.prevViewProjMat = view.GetPreviousViewProjMatrix( multiViewIndex );
+			viewBuffer.viewProjMat = view.GetViewProjMatrix( multiViewIndex );
 			viewBuffer.viewOrigin = view.GetViewOrigin();
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = view.numLights;
+
+			view.UpdatePreviousViewProjMatrix( multiViewIndex );
 
 			resources.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
 		}	

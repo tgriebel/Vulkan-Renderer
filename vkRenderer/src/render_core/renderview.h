@@ -66,7 +66,8 @@ private:
 	viewport_t				m_viewport;
 	mat4x4f					m_viewMatrices[ MaxMultiViews ];
 	mat4x4f					m_projMatrices[ MaxMultiViews ];
-	mat4x4f					m_viewprojMatrices[ MaxMultiViews ];
+	mat4x4f					m_viewProjMatrices[ MaxMultiViews ];
+	mat4x4f					m_previousViewProjMatrices[ MaxMultiViews ];
 	frameBufferCreateInfo_t	m_fbSourceImages;
 	const char*				m_name;
 	renderViewRegion_t		m_region;
@@ -99,7 +100,7 @@ public:
 		{
 			m_viewMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
 			m_projMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
-			m_viewprojMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
+			m_viewProjMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
 
 			m_framebuffers[ multiViewIndex ] = nullptr;
 
@@ -164,11 +165,13 @@ public:
 	void					SetCamera( const Camera& camera, const bool reverseZ = true, const uint32_t multiView = 0 );
 	void					SetCamera2D( const Camera& camera, const vec4f& frame, const uint32_t multiView = 0 );
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
+	void					UpdatePreviousViewProjMatrix( const uint32_t multiView );
 	const viewport_t&		GetViewport() const;
 	vec2i					GetFrameSize() const;
 	const mat4x4f&			GetViewMatrix( const uint32_t multiView = 0 ) const;
 	const mat4x4f&			GetProjMatrix( const uint32_t multiView = 0 ) const;
-	const mat4x4f&			GetViewprojMatrix( const uint32_t multiView = 0 ) const;
+	const mat4x4f&			GetViewProjMatrix( const uint32_t multiView = 0 ) const;
+	const mat4x4f&			GetPreviousViewProjMatrix( const uint32_t multiView = 0 ) const;
 	int						GetViewBufferId( const int multiView ) const; // TODO: Have view own it's view buffer. Eliminates indexing
 	int						GetSurfaceBufferId() const; // TODO: Have view own it's surface buffer. Eliminates indexing
 

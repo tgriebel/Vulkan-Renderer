@@ -64,14 +64,14 @@ float3 ReconstructViewPos( const float2 uv, const float zDepth, const float4x4 p
 
 
 // https://atyuwen.github.io/posts/normal-reconstruction/
-float3 ReconstructNormal( Texture2D depthBufer, const float2 uv, const float4x4 proj )
+float3 ReconstructNormal( Texture2D depthBufer, SamplerState sampler, const float2 uv, const float4 dimensions, const float4x4 proj )
 {
 	const float2 ts = float2( dimensions.z, dimensions.w );
 
-	const float dR = depthBufer.SampleLevel( bilinearSamplerClampEdge, uv + float2( ts.x, 0.0f ), 0 ).r;
-	const float dL = depthBufer.SampleLevel( bilinearSamplerClampEdge, uv + float2( -ts.x, 0.0f ), 0 ).r;
-	const float dU = depthBufer.SampleLevel( bilinearSamplerClampEdge, uv + float2( 0.0f, ts.y ), 0 ).r;
-	const float dD = depthBufer.SampleLevel( bilinearSamplerClampEdge, uv + float2( 0.0f, -ts.y ), 0 ).r;
+	const float dR = depthBufer.SampleLevel( sampler, uv + float2( ts.x, 0.0f ), 0 ).r;
+	const float dL = depthBufer.SampleLevel( sampler, uv + float2( -ts.x, 0.0f ), 0 ).r;
+	const float dU = depthBufer.SampleLevel( sampler, uv + float2( 0.0f, ts.y ), 0 ).r;
+	const float dD = depthBufer.SampleLevel( sampler, uv + float2( 0.0f, -ts.y ), 0 ).r;
 
 	const float3 pR = ReconstructViewPos( uv + float2( ts.x, 0.0f ), dR, proj );
 	const float3 pL = ReconstructViewPos( uv + float2( -ts.x, 0.0f ), dL, proj );

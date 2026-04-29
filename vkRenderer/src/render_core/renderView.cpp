@@ -318,6 +318,12 @@ void RenderView::SetViewRect( const int32_t x, const int32_t y, const uint32_t w
 }
 
 
+void RenderView::UpdatePreviousViewProjMatrix( const uint32_t multiView )
+{
+	m_previousViewProjMatrices[ multiView ] = m_viewProjMatrices[ multiView ];
+}
+
+
 drawPass_t RenderView::ViewRegionPassBegin() const
 {
 	switch ( m_region )
@@ -411,9 +417,15 @@ const mat4x4f& RenderView::GetProjMatrix( const uint32_t multiView ) const
 }
 
 
-const mat4x4f& RenderView::GetViewprojMatrix( const uint32_t multiView ) const
+const mat4x4f& RenderView::GetViewProjMatrix( const uint32_t multiView ) const
 {
-	return m_viewprojMatrices[ multiView ];
+	return m_viewProjMatrices[ multiView ];
+}
+
+
+const mat4x4f& RenderView::GetPreviousViewProjMatrix( const uint32_t multiView ) const
+{
+	return m_previousViewProjMatrices[ multiView ];
 }
 
 
@@ -463,7 +475,7 @@ void RenderView::SetCamera( const Camera& camera, const bool reverseZ, const uin
 {
 	m_viewMatrices[ multiView ] = camera.GetViewMatrix();
 	m_projMatrices[ multiView ] = camera.GetPerspectiveMatrix( reverseZ );
-	m_viewprojMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
+	m_viewProjMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
 
 	m_viewport.near = camera.GetNearClip();
 	m_viewport.far = camera.GetFarClip();
@@ -479,7 +491,7 @@ void RenderView::SetCamera2D( const Camera& camera, const vec4f& frame, const ui
 #else
 	m_projMatrices[ multiView ] = camera.GetOrthographicMatrix( frame[ 0 ], frame[ 1 ], frame[ 2 ], frame[ 3 ] );
 #endif
-	m_viewprojMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
+	m_viewProjMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
 
 	m_viewport.near = camera.GetNearClip();
 	m_viewport.far = camera.GetFarClip();
