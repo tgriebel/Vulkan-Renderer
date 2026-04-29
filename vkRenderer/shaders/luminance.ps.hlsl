@@ -7,9 +7,9 @@ struct LuminanceConstants
 
 PS_LAYOUT_IMAGE_PROCESS( Texture2D, LuminanceConstants )
 
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 {
-	PS_Output output = (PS_Output)0;
+	psOutput_t output = (psOutput_t)0;
 
 	const float luminance = localTextures[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).r;
 	const float previousLuminance = localTextures[ 1 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).r;

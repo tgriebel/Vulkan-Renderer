@@ -51,7 +51,7 @@ static float maskLight = 1.5;
 
 // Nearest emulated sample given floating point position and texel offset.
 // Also zero's off screen.
-float3 Fetch( float2 pos, float2 off, PS_Input input )
+float3 Fetch( float2 pos, float2 off, vsToPsInterpolators input )
 {
     pos = floor( pos * res + off ) / res;
     if ( max( abs( pos.x - 0.5 ), abs( pos.y - 0.5 ) ) > 0.5 ) return float3( 0.0, 0.0, 0.0 );
@@ -75,7 +75,7 @@ float Gaus( float pos, float scale )
 }
 
 // 3-tap Gaussian filter along horz line.
-float3 Horz3( float2 pos, float off, PS_Input input )
+float3 Horz3( float2 pos, float off, vsToPsInterpolators input )
 {
     float3 b = Fetch( pos, float2( -1.0, off ), input );
     float3 c = Fetch( pos, float2( 0.0, off ), input );
@@ -91,7 +91,7 @@ float3 Horz3( float2 pos, float off, PS_Input input )
 }
 
 // 5-tap Gaussian filter along horz line.
-float3 Horz5( float2 pos, float off, PS_Input input )
+float3 Horz5( float2 pos, float off, vsToPsInterpolators input )
 {
     float3 a = Fetch( pos, float2( -2.0, off ), input );
     float3 b = Fetch( pos, float2( -1.0, off ), input );
@@ -118,7 +118,7 @@ float Scan( float2 pos, float off ) {
 }
 
 // Allow nearest three lines to effect pixel.
-float3 Tri( float2 pos, PS_Input input )
+float3 Tri( float2 pos, vsToPsInterpolators input )
 {
     const float3 a = Horz3( pos, -1.0f, input );
     const float3 b = Horz5( pos, 0.0f, input );
@@ -159,9 +159,9 @@ float3 Mask( float2 pos )
 float Bar( float pos, float bar ) { pos -= bar; return pos * pos < 4.0 ? 0.0 : 1.0; }
 
 // Entry.
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 {
-	PS_Output output = (PS_Output)0;
+	psOutput_t output = (psOutput_t)0;
     float2 pos = Warp( input.uv0.xy );
     output.outColor.rgb = Tri( pos, input ) * Mask( input.uv0.xy / res );
     output.outColor.a = 1.0;

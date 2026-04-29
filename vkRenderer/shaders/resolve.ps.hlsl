@@ -19,9 +19,9 @@ PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageShaderTask )
 #endif
 
 #ifdef USE_MRT
-PS_Output_MRT PSMain( PS_Input input )
+psOutputMRT PSMain( vsToPsInterpolators input )
 #else
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 #endif
 {
     const int2 pixelLocation = int2( dimensions.xy * input.uv0.xy );
@@ -53,12 +53,12 @@ PS_Output PSMain( PS_Input input )
     }
     outColor1.rgb /= globals.numSamples;
 
-    PS_Output_MRT output = (PS_Output_MRT)0;
+    psOutputMRT output = (psOutputMRT)0;
 
     output.outColor = outColor;
     output.outColor1 = outColor1;
 #else
-    PS_Output output = (PS_Output)0;
+    psOutput_t output = (psOutput_t)0;
 
     output.outColor = outColor;
 #endif

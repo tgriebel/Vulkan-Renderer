@@ -28,9 +28,9 @@ float ReinhardWeightedAverage( float s0, float s1, float s2, float s3 )
 }
 
 
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 {
-	PS_Output output = (PS_Output)0;
+	psOutput_t output = (psOutput_t)0;
 
 	// Equation from Reinhard's "Photographic Tone Reproduction for Digital Images"
 	//

@@ -226,9 +226,9 @@ float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, cons
 
 
 #ifdef USE_MRT
-PS_Output_MRT PSMain( PS_Input input )
+psOutputMRT PSMain( vsToPsInterpolators input )
 #else
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 #endif
 {
     const uint materialId = pushConstants.materialId;
@@ -348,12 +348,12 @@ PS_Output PSMain( PS_Input input )
     //outColor1.rgb = float3( input.uv0.xy, 0.0f );
     outColor1.a = 1.0f;
 
-    PS_Output_MRT output = (PS_Output_MRT)0;
+    psOutputMRT output = (psOutputMRT)0;
 
     output.outColor = ClampColorFp16( outColor );
     output.outColor1 = ClampColorFp16( outColor1 );
 #else
-    PS_Output output = (PS_Output)0;
+    psOutput_t output = (psOutput_t)0;
 
     output.outColor = ClampColorFp16( outColor );
 #endif

@@ -2,9 +2,9 @@
 
 VS_LAYOUT_STANDARD( Texture2D )
 
-vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
+vsToPsInterpolators VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
 {
-	vsOutput_t output = (vsOutput_t) 0;
+	vsToPsInterpolators output = (vsToPsInterpolators) 0;
 
 	output.objectId = pushConstants.objectId;
 	const uint viewlId = pushConstants.viewId;

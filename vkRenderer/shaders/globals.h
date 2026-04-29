@@ -131,21 +131,21 @@ float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3
 // Vertex shader I/O
 // ============================================================
 
-struct vsOutput_t
+struct vsToPsInterpolators
 {
-	float4 pos : SV_Position;
-	BIND_SLOT( 0 ) float4 color						: COLOR0;
-	BIND_SLOT( 1 ) float3 normal					: NORMAL;
-	BIND_SLOT( 2 ) float3 tangent					: TEXCOORD2;
-	BIND_SLOT( 3 ) float3 bitangent					: TEXCOORD3;
-	BIND_SLOT( 4 ) float3 TBN2						: TEXCOORD4;
-	BIND_SLOT( 5 ) float2 uv0						: TEXCOORD5;
-	BIND_SLOT( 6 ) float2 uv1						: TEXCOORD6;
-	BIND_SLOT( 7 ) float3 objectPosition			: TEXCOORD7;
-	BIND_SLOT( 8 ) float4 clipPosition				: TEXCOORD8;
-	BIND_SLOT( 9 ) float4 preClipPosition			: TEXCOORD9;
-	BIND_SLOT( 10 ) float4 worldPosition			: TEXCOORD10;
-	BIND_SLOT( 11 ) nointerpolation uint objectId	: TEXCOORD11;
+					float4 pos						: SV_Position;
+	BIND_SLOT( 0 )	float4 color					: COLOR0;
+	BIND_SLOT( 1 )	float3 normal					: NORMAL;
+	BIND_SLOT( 2 )	float3 tangent					: TEXCOORD2;
+	BIND_SLOT( 3 )	float3 bitangent				: TEXCOORD3;
+	BIND_SLOT( 4 )	float3 TBN2						: TEXCOORD4;
+	BIND_SLOT( 5 )	float2 uv0						: TEXCOORD5;
+	BIND_SLOT( 6 )	float2 uv1						: TEXCOORD6;
+	BIND_SLOT( 7 )	float3 objectPosition			: TEXCOORD7;
+	BIND_SLOT( 8 )	float4 clipPosition				: TEXCOORD8;
+	BIND_SLOT( 9 )	float4 preClipPosition			: TEXCOORD9;
+	BIND_SLOT( 10 )	float4 worldPosition			: TEXCOORD10;
+	BIND_SLOT( 11 )	nointerpolation uint objectId	: TEXCOORD11;
 };
 
 #define VS_LAYOUT_STANDARD( TEXTYPE )                                                                               \
@@ -158,30 +158,13 @@ struct vsOutput_t
 // Pixel shader I/O
 // ============================================================
 
-struct PS_Input
-{
-				 float4 pos							: SV_Position;
-    BIND_SLOT(0) float4 color						: COLOR0;
-    BIND_SLOT(1) float3 normal						: NORMAL;
-    BIND_SLOT(2) float3 tangent						: TEXCOORD2;
-    BIND_SLOT(3) float3 bitangent					: TEXCOORD3;
-    BIND_SLOT(4) float3 TBN2						: TEXCOORD4;
-    BIND_SLOT(5) float2 uv0							: TEXCOORD5;
-    BIND_SLOT(6) float2 uv1							: TEXCOORD6;
-    BIND_SLOT(7) float3 objectPosition				: TEXCOORD7;
-    BIND_SLOT(8) float4 clipPosition				: TEXCOORD8;
-    BIND_SLOT(9) float4 preClipPosition				: TEXCOORD9;
-    BIND_SLOT(10) float4 worldPosition				: TEXCOORD10;
-    BIND_SLOT(11) nointerpolation uint objectId		: TEXCOORD11;
-};
-
-struct PS_Output
+struct psOutput_t
 {
     float4 outColor : SV_Target0;
 };
 
 #define PS_LAYOUT_MRT_1_OUT                                                                                         \
-    struct PS_Output_MRT                                                                                            \
+    struct psOutputMRT																								\
     {                                                                                                               \
         float4 outColor  : SV_Target0;                                                                              \
         float4 outColor1 : SV_Target1;                                                                              \

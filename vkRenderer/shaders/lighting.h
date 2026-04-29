@@ -150,7 +150,7 @@ float3 SampleTextureNormal( const gpuMaterial_t material, const int materialText
 }
 
 
-surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_t view, const gpuSurface_t surface, const gpuMaterial_t material, const PS_Input input )
+surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_t view, const gpuSurface_t surface, const gpuMaterial_t material, const vsToPsInterpolators input )
 {
 	const float3 specularColor = material.Ks.rgb;
 	const float specularPower = material.Ns;

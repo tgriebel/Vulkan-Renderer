@@ -71,9 +71,9 @@ float2 IntegrateBRDF( const float NoV, const float roughness )
     return float2( A, B );
 }
 
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 {
-    PS_Output output = (PS_Output)0;
+    psOutput_t output = (psOutput_t)0;
 
     float2 integratedBRDF = IntegrateBRDF( input.uv0.x, input.uv0.y );
     output.outColor.r = integratedBRDF.x;

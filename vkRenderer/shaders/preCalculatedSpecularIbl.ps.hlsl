@@ -10,9 +10,9 @@ struct SpecularIblConstants
 PS_LAYOUT_IMAGE_PROCESS( Texture2D, SpecularIblConstants )
 
 // https://learnopengl.com/PBR/IBL/Specular-IBL
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 {
-    PS_Output output = (PS_Output)0;
+    psOutput_t output = (psOutput_t)0;
 
     // GLSL mat4(...) fills columns; HLSL float4x4(...) fills rows.
     // Use transpose() to match GLSL column-major construction.

@@ -9,9 +9,9 @@ struct ImageShaderTask
 
 PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageShaderTask )
 
-PS_Output PSMain( PS_Input input )
+psOutput_t PSMain( vsToPsInterpolators input )
 {
-    PS_Output output = (PS_Output)0;
+    psOutput_t output = (psOutput_t)0;
 
     // Source: https://learnopengl.com/Guest-Articles/2022/Phys.-Based-Bloom
 

@@ -1,8 +1,8 @@
 #include "globals.h"
 
-vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
+vsToPsInterpolators VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
 {
-	vsOutput_t output = (vsOutput_t) 0;
+	vsToPsInterpolators output = (vsToPsInterpolators) 0;
 
 	output.objectPosition	= input.inPosition;
 	output.worldPosition	= float4( input.inPosition, 1.0f );
