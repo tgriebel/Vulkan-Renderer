@@ -192,6 +192,16 @@ void RenderUploader::QueueMaterialUpload( Asset<Material>& materialAsset )
 	}
 	uploadMaterials.insert( materialAsset.Handle() );
 
+	for( uint32_t t = 0; t < MaxMaterialTextures; ++t )
+	{
+		const hdl_t texHandle = material.GetTexture( t );
+		if( texHandle.IsValid() )
+		{
+			Asset<Image>* imageAsset = ImageLib().Find( texHandle );
+			QueueImageUpload( *imageAsset );
+		}
+	}
+
 	materialAsset.QueueUpload();
 }
 

@@ -178,16 +178,6 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 		uploader.QueueMaterialUpload( *materialAsset );
 
-		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
-		{
-			const hdl_t texHandle = material.GetTexture( t );
-			if ( texHandle.IsValid() )
-			{
-				Asset<Image>* imageAsset = ImageLib().Find( texHandle );
-				uploader.QueueImageUpload( *imageAsset );
-			}
-		}
-
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			surf.pipelineObject = INVALID_HDL;
