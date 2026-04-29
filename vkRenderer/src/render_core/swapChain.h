@@ -75,7 +75,7 @@ public:
 
 	void WaitOnFlip( GpuSemaphore& signalSemaphore );
 
-	bool Present( GfxContext& context );
+	bool Present( GfxCmdList& context );
 
 	void Create( const Window* _window, const int displayWidth, const int displayHeight );
 	void Destroy();

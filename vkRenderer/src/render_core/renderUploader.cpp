@@ -21,12 +21,12 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 	renderContext = context;
 	resourceContext = resources;
 
-	uploadContext.Create( "Upload Context", renderContext );
+	commands.Create( "Upload Context", renderContext );
 
-	uploadFinishedSemaphore.Create( "UploadSemaphore" );
+	finishedSemaphore.Create( "UploadSemaphore" );
 
 #ifdef USE_VULKAN
-	uploadFinishedSemaphore.waitStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	finishedSemaphore.waitStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 #endif
 
 	materialBuffer.Reset();
@@ -79,38 +79,38 @@ void RenderUploader::Shutdown()
 	geometry.vbBufElements = 0;
 	geometry.ibBufElements = 0;
 
-	uploadContext.Destroy();
+	commands.Destroy();
 
-	uploadFinishedSemaphore.Destroy();
+	finishedSemaphore.Destroy();
 }
 
 
 void RenderUploader::OnReboot()
 {
-	uploadContext.Begin();
+	commands.Begin();
 
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
+	RenderResource::TransitionImages( &commands, resourceLifeTime_t::RESIZE );
+	RenderResource::TransitionImages( &commands, resourceLifeTime_t::TASK );
 
-	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+	Transition( &commands, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
-	uploadContext.End();
-	uploadContext.Submit();
+	commands.End();
+	commands.Submit();
 }
 
 
 void RenderUploader::OnFrameBegin()
 {
-	uploadContext.Begin();
+	commands.Begin();
 
-	UploadModelsToGPU( &uploadContext );
+	UploadModelsToGPU( &commands );
 
-	UploadTextures( &uploadContext );
-	UpdateTextureData( &uploadContext );
+	UploadTextures( &commands );
+	UpdateTextureData( &commands );
 
-	uploadContext.End();
-	uploadContext.Signal( &uploadFinishedSemaphore );
-	uploadContext.Submit();
+	commands.End();
+	commands.Signal( &finishedSemaphore );
+	commands.Submit();
 
 	UpdateGpuMaterials();
 }
@@ -118,23 +118,23 @@ void RenderUploader::OnFrameBegin()
 
 void RenderUploader::Upload()
 {
-	uploadContext.Begin();
-	uploadContext.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
+	commands.Begin();
+	commands.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
 
-	UploadModelsToGPU( &uploadContext );
+	UploadModelsToGPU( &commands );
 
-	UploadTextures( &uploadContext );
+	UploadTextures( &commands );
 
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::REBOOT );
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::RESIZE );
-	RenderResource::TransitionImages( &uploadContext, resourceLifeTime_t::TASK );
+	RenderResource::TransitionImages( &commands, resourceLifeTime_t::REBOOT );
+	RenderResource::TransitionImages( &commands, resourceLifeTime_t::RESIZE );
+	RenderResource::TransitionImages( &commands, resourceLifeTime_t::TASK );
 
-	Transition( &uploadContext, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
+	Transition( &commands, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
-	uploadContext.MarkerEndRegion();
+	commands.MarkerEndRegion();
 
-	uploadContext.End();
-	uploadContext.Submit();
+	commands.End();
+	commands.Submit();
 
 	UpdateGpuMaterials();
 }

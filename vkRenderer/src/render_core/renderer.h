@@ -115,8 +115,8 @@ private:
 	
 	// Render context
 	RenderContext						renderContext;
-	GfxContext							gfxContext;
-	ComputeContext						computeContext;
+	GfxCmdList							gfxContext;
+	ComputeCmdList						computeContext;
 	ComputeState						particleState;
 
 	// Shader resources

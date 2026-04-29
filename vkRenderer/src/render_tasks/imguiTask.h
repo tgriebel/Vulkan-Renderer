@@ -4,7 +4,7 @@
 #include "RenderTask.h"
 
 class CommandContext;
-class GfxContext;
+class GfxCmdList;
 class RenderView;
 class RenderContext;
 class ResourceContext;

@@ -49,8 +49,8 @@ private:
 	uint32_t			imageFreeSlot;
 	GpuBuffer			textureStagingBuffer;
 	GeometryContext		geometry;
-	UploadContext		uploadContext;
-	GpuSemaphore		uploadFinishedSemaphore;
+	UploadCmdList		commands;
+	GpuSemaphore		finishedSemaphore;
 
 	RenderContext*		renderContext;
 	ResourceContext*	resourceContext;
@@ -92,6 +92,6 @@ public:
 
 	inline GpuSemaphore* GetFinishedSemaphore()
 	{
-		return &uploadFinishedSemaphore;
+		return &finishedSemaphore;
 	}
 };

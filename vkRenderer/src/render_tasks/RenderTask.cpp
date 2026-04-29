@@ -47,7 +47,7 @@ static inline bool SkipPass( const drawSurf_t& surf, const drawPass_t pass )
 }
 
 
-void RenderTask::RenderViewSurfaces( GfxContext* cmdContext, const uint32_t multiViewIndex )
+void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t multiViewIndex )
 {
 	// For now the pass state is the same for the entire view region
 	const DrawPass* pass = m_renderView->passes[ multiViewIndex ][ m_beginPass ];
@@ -284,7 +284,7 @@ void RenderTask::Execute( CommandContext& context )
 
 	const uint32_t multiViewCount = m_renderView->GetMultiViewCount();
 	for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex ) {
-		RenderViewSurfaces( reinterpret_cast<GfxContext*>( &context ), multiViewIndex );
+		RenderViewSurfaces( reinterpret_cast<GfxCmdList*>( &context ), multiViewIndex );
 	}
 
 	context.MarkerEndRegion();
@@ -321,7 +321,7 @@ std::string ComputeTask::AsString() const
 
 void ComputeTask::Execute( CommandContext& context )
 {
-	ComputeContext* computeContext = reinterpret_cast<ComputeContext*>( &context );
+	ComputeCmdList* computeContext = reinterpret_cast<ComputeCmdList*>( &context );
 	computeContext->Dispatch( m_progHdl, *m_state->parms, m_state->x, m_state->y, m_state->z );
 }
 

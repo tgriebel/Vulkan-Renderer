@@ -5,7 +5,7 @@
 #include "../render_resources/imageView.h"
 
 class CommandContext;
-class GfxContext;
+class GfxCmdList;
 class RenderView;
 class RenderContext;
 class ResourceContext;
@@ -54,7 +54,7 @@ private:
 
 	void Init( RenderView* view, drawPass_t begin, drawPass_t end );
 	void Shutdown();
-	void RenderViewSurfaces( GfxContext* context, const uint32_t multiViewIndex );
+	void RenderViewSurfaces( GfxCmdList* context, const uint32_t multiViewIndex );
 
 public:
 	RenderTask()

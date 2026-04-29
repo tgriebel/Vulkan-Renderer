@@ -127,39 +127,39 @@ public:
 };
 
 
-class GfxContext : public CommandContext
+class GfxCmdList : public CommandContext
 {
 public:
-	GpuSemaphore				presentSemaphore;
-	GpuSemaphore				renderFinishedSemaphore;
-	GpuFence					frameFence[ MaxFrameStates ];
+	GpuSemaphore	presentSemaphore;
+	GpuSemaphore	renderFinishedSemaphore;
+	GpuFence		frameFence[ MaxFrameStates ];
 
-	GfxContext()
+	GfxCmdList()
 	{
 		queueType = QUEUE_GRAPHICS;
 	}
 };
 
 
-class ComputeContext : public CommandContext
+class ComputeCmdList : public CommandContext
 {
 public:
-	GpuSemaphore semaphore;
+	GpuSemaphore	semaphore;
 
-	ComputeContext()
+	ComputeCmdList()
 	{
 		queueType = QUEUE_COMPUTE;
 	}
 };
 
 
-class UploadContext : public CommandContext
+class UploadCmdList : public CommandContext
 {
 private:
 	using CommandContext::Dispatch;
 
 public:
-	UploadContext()
+	UploadCmdList()
 	{
 		queueType = QUEUE_GRAPHICS;
 	}

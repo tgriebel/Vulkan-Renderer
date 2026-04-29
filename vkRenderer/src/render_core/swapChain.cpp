@@ -84,7 +84,7 @@ void SwapChain::WaitOnFlip( GpuSemaphore& signalSemaphore )
 }
 
 
-bool SwapChain::Present( GfxContext& gfxContext )
+bool SwapChain::Present( GfxCmdList& gfxContext )
 {
 	bool ret = 0;
 
