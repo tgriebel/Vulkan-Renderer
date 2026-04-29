@@ -168,6 +168,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		m_clearStencil = info.clearStencil;
 	}
 
+	m_viewParmeters = m_resources->viewParms.GetView( m_viewBufferId, 1 );
 	m_surfParmeters = m_resources->surfParms.GetView( m_surfaceBufferId * MaxSurfaces, MaxSurfaces );
 }
 
@@ -241,6 +242,63 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 
 void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 {
+	if( IsCommitted() == false )
+	{
+		return;
+	}
+
+	// View data
+	{
+		//const uint32_t multiViewCount = GetMultiViewCount();
+		//for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
+		//{
+		//	gpuView_t viewBuffer = {};
+
+		//	const vec2i& frameSize = GetFrameSize();
+		//	viewBuffer.viewMat = GetViewMatrix( multiViewIndex );
+		//	viewBuffer.projMat = GetProjMatrix( multiViewIndex );
+		//	viewBuffer.prevViewProjMat = GetPreviousViewProjMatrix( multiViewIndex );
+		//	viewBuffer.viewProjMat = GetViewProjMatrix( multiViewIndex );
+		//	viewBuffer.viewOrigin = GetViewOrigin();
+		//	viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
+		//	viewBuffer.numLights = numLights;
+
+		//	UpdatePreviousViewProjMatrix( multiViewIndex );
+
+		//	m_viewParmeters.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+		//}
+	}
+
+	// Per-surface data
+	{
+		const uint32_t viewId = GetSurfaceBufferId();
+
+		static gpuSurface_t surfBuffer[ MaxSurfaces ];
+
+		for( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
+		{
+			assert( drawGroup[ passIx ].InstanceCount() < MaxSurfaces );
+
+			if( drawGroup[ passIx ].InstanceCount() == 0 )
+			{
+				continue;
+			}
+
+			const drawSurfInstance_t* instances = drawGroup[ passIx ].Instances();
+			for( uint32_t surfIx = 0; surfIx < drawGroup[ passIx ].InstanceCount(); ++surfIx )
+			{
+				const uint32_t instanceId = drawGroupOffset[ passIx ] + drawGroup[ passIx ].InstanceId( surfIx );
+				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();
+				surfBuffer[ instanceId ].diffuseIblCubeId = instances[ surfIx ].diffuseIblId;
+				surfBuffer[ instanceId ].envCubeId = instances[ surfIx ].envMapId;
+			}
+		}
+
+		m_surfParmeters.SetPos( 0 );
+		m_surfParmeters.CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
+	}
+
+	// Bindings
 	const uint64_t currentFrame = m_context->FrameNumber();
 	if( m_lastUpdateFrame != currentFrame )
 	{
@@ -249,6 +307,7 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 		m_lastUpdateFrame = currentFrame;
 	}
 
+	// Draw Passes
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
 		for ( uint32_t passIx = begin; passIx <= end; ++passIx )

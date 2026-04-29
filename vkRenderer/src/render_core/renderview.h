@@ -46,8 +46,6 @@ struct renderViewCreateInfo_t
 
 class RenderView
 {
-public:
-	GpuBufferView			m_surfParmeters; // temp public
 private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
@@ -59,6 +57,8 @@ private:
 	ImageView*				m_gBuffer1Views[ MaxMultiViews ];
 	ImageView*				m_depthViews[ MaxMultiViews ];
 	ImageView*				m_stencilViews[ MaxMultiViews ];
+	GpuBufferView			m_surfParmeters;
+	GpuBufferView			m_viewParmeters;
 
 	ShaderBindParms*		m_viewParms;
 	vec4f					m_clearColor;

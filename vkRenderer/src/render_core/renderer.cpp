@@ -575,38 +575,6 @@ void Renderer::UpdateBuffers()
 		}	
 	}
 
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		RenderView& view = views[ viewIx ];
-		if ( view.IsCommitted() == false ) {
-			continue;
-		}
-		const uint32_t viewId = view.GetSurfaceBufferId();
-
-		static gpuSurface_t surfBuffer[ MaxSurfaces ];
-
-		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
-		{
-			assert( view.drawGroup[ passIx ].InstanceCount() < MaxSurfaces );
-
-			if( view.drawGroup[ passIx ].InstanceCount() == 0 ) {
-				continue;
-			}
-
-			const drawSurfInstance_t* instances = view.drawGroup[ passIx ].Instances();
-			for ( uint32_t surfIx = 0; surfIx < view.drawGroup[ passIx ].InstanceCount(); ++surfIx )
-			{
-				const uint32_t instanceId = view.drawGroupOffset[ passIx ] + view.drawGroup[ passIx ].InstanceId( surfIx );
-				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();		
-				surfBuffer[ instanceId ].diffuseIblCubeId = instances[ surfIx ].diffuseIblId;
-				surfBuffer[ instanceId ].envCubeId = instances[ surfIx ].envMapId;
-			}
-		}
-
-		view.m_surfParmeters.SetPos( 0 );
-		view.m_surfParmeters.CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
-	}
-
 	resources.lightParms.SetPos( 0 );
 	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( gpuLight_t ) * MaxLights );
 
