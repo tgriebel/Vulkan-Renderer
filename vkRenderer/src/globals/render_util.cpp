@@ -5,7 +5,7 @@
 #include <gfxcore/primitives/geoBuilder.h>
 #include "../scene/assetManager.h"
 #include "../asset_types/gpuProgram.h"
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 #include "../asset_types/model.h"
 #include "../asset_types/assetLib.h"
 

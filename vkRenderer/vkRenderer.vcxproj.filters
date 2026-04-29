@@ -179,7 +179,7 @@
     <ClCompile Include="src\asset_types\model.cpp">
       <Filter>Asset Classes</Filter>
     </ClCompile>
-    <ClCompile Include="src\asset_types\texture.cpp">
+    <ClCompile Include="src\asset_types\image.cpp">
       <Filter>Asset Classes</Filter>
     </ClCompile>
     <ClCompile Include="appMain.cpp">
@@ -409,7 +409,7 @@
     <ClInclude Include="src\asset_types\model.h">
       <Filter>Asset Classes</Filter>
     </ClInclude>
-    <ClInclude Include="src\asset_types\texture.h">
+    <ClInclude Include="src\asset_types\image.h">
       <Filter>Asset Classes</Filter>
     </ClInclude>
     <ClInclude Include="src\asset_types\asset.h">

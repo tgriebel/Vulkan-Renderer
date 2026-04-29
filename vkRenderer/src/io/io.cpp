@@ -14,7 +14,7 @@
 #include "../asset_types/gpuProgram.h"
 #include "../scene/assetManager.h"
 
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "../../external/tiny_obj_loader.h"

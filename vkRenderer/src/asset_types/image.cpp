@@ -1,4 +1,4 @@
-#include "texture.h"
+#include "image.h"
 #include <syscore/systemUtils.h>
 #include <syscore/serializer.h>
 #include <syscore/common.h>

@@ -231,7 +231,7 @@
     <ClInclude Include="src\asset_types\gpuProgram.h" />
     <ClInclude Include="src\asset_types\material.h" />
     <ClInclude Include="src\asset_types\model.h" />
-    <ClInclude Include="src\asset_types\texture.h" />
+    <ClInclude Include="src\asset_types\image.h" />
     <ClInclude Include="src\io\serializeClasses.h" />
     <ClInclude Include="src\render_core\allocator.h" />
     <ClInclude Include="src\render_core\renderContext.h" />
@@ -307,7 +307,7 @@
     <ClCompile Include="src\asset_types\gpuProgram.cpp" />
     <ClCompile Include="src\asset_types\material.cpp" />
     <ClCompile Include="src\asset_types\model.cpp" />
-    <ClCompile Include="src\asset_types\texture.cpp" />
+    <ClCompile Include="src\asset_types\image.cpp" />
     <ClCompile Include="src\io\serializeClasses.cpp" />
     <ClCompile Include="src\render_core\allocator.cpp" />
     <ClCompile Include="src\render_core\renderContext.cpp" />

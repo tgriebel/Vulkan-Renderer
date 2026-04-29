@@ -1,4 +1,4 @@
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 #include "frameBuffer.h"
 #include "deviceContext.h"
 #include "rhi.h"

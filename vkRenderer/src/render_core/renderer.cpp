@@ -26,7 +26,7 @@
 
 #include "../scene/sceneBase.h"
 #include "../scene/entity.h"
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/assetLib.h"
 

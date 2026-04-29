@@ -4,7 +4,7 @@
 
 #include "../render_core/gpuImage.h"
 #include "../render_state/deviceContext.h"
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 
 class ImageSampler : public RenderResource
 {

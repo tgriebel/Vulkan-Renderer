@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 #include "../render_core/allocator.h"
 #include "../render_core/renderResource.h"
 

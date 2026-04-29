@@ -1,7 +1,7 @@
 #pragma once
 #include "../globals/common.h"
 #include "../render_resources/imageArray.h"
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 
 struct renderConstants_t
 {

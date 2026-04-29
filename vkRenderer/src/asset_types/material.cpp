@@ -6,7 +6,7 @@
 #include "../scene/assetBaker.h"
 #include "../io/serializeClasses.h"
 #include "../io/io.h"
-#include "texture.h"
+#include "image.h"
 
 bool Material::AddTexture( const uint32_t slot, const hdl_t hdl )
 {

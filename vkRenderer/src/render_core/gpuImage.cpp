@@ -2,7 +2,7 @@
 
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 
 // TODO: move
 #ifdef USE_VULKAN	

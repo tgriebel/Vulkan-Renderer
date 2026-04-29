@@ -5,7 +5,7 @@
 #include "../render_core/gpuImage.h"
 #include "../render_core/renderResource.h"
 #include "rhi.h"
-#include "../asset_types/texture.h"
+#include "../asset_types/image.h"
 #include "../render_resources/imageView.h"
 
 
