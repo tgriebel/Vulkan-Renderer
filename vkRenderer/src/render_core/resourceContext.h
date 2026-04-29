@@ -45,8 +45,6 @@ public:
 	Image*					velocityImage;
 	ImageView				depthImageView;
 	ImageView				stencilImageView;
-	// TODO: Each view should own its suballocated 'GpuBufferView'
-	GpuBufferView			surfParmPartitions[ MaxViews ]; // "View" is used in two ways here: view of data, and view of scene
 
 	// Code images
 	ImageView				depthResolvedImageView;

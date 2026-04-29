@@ -167,6 +167,8 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		m_clearDepth = info.clearDepth;
 		m_clearStencil = info.clearStencil;
 	}
+
+	m_surfParmeters = m_resources->surfParms.GetView( m_surfaceBufferId * MaxSurfaces, MaxSurfaces );
 }
 
 
@@ -242,7 +244,7 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 	const uint64_t currentFrame = m_context->FrameNumber();
 	if( m_lastUpdateFrame != currentFrame )
 	{
-		m_viewParms->Bind( BINDING_NAME( modelBuffer ), &m_resources->surfParmPartitions[ m_surfaceBufferId ] );
+		m_viewParms->Bind( BINDING_NAME( modelBuffer ), &m_surfParmeters );
 
 		m_lastUpdateFrame = currentFrame;
 	}

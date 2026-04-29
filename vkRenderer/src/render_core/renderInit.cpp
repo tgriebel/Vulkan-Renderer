@@ -432,10 +432,6 @@ void Renderer::InitShaderResources()
 			bufferType_t::UNIFORM,
 			renderContext.sharedMemory
 		);
-
-		for ( size_t v = 0; v < MaxViews; ++v ) {
-			resources.surfParmPartitions[ v ] = resources.surfParms.GetView( v * MaxSurfaces, MaxSurfaces );
-		}
 	}
 }
 

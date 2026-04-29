@@ -252,7 +252,7 @@ const char* GpuBuffer::GetName() const
 }
 
 
-GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t elementCount )
+GpuBufferView GpuBuffer::GetView( const uint64_t baseElementIx, const uint64_t elementCount ) const
 {
 	GpuBufferView view;
 

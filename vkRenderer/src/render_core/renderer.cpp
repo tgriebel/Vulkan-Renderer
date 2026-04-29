@@ -577,7 +577,7 @@ void Renderer::UpdateBuffers()
 
 	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
 	{
-		const RenderView& view = views[ viewIx ];
+		RenderView& view = views[ viewIx ];
 		if ( view.IsCommitted() == false ) {
 			continue;
 		}
@@ -603,8 +603,8 @@ void Renderer::UpdateBuffers()
 			}
 		}
 
-		resources.surfParmPartitions[ viewId ].SetPos( 0 );
-		resources.surfParmPartitions[ viewId ].CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
+		view.m_surfParmeters.SetPos( 0 );
+		view.m_surfParmeters.CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
 	}
 
 	resources.lightParms.SetPos( 0 );
