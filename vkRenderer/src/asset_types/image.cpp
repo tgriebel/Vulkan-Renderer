@@ -155,12 +155,6 @@ bool ImageLoader::Load( Asset<Image>& imageAsset )
 }
 
 
-void ImageLoader::SetSampler( const samplerState_t& sampler )
-{
-	m_sampler = sampler;
-}
-
-
 void ImageLoader::SetBasePath( const std::string& path )
 {
 	m_basePath = path;
