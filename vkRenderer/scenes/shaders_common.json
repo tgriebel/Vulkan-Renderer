@@ -83,11 +83,6 @@
       "ps": "depth"
     },
     {
-      "name": "DebugSolid",
-      "vs": "simple",
-      "ps": "emissive"
-    },
-    {
       "name": "PostProcess",
       "vs": "default",
       "ps": "postProcess"

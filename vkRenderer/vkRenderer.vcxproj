@@ -256,7 +256,6 @@
     <ClInclude Include="src\draw_passes\debug3dPass.h" />
     <ClInclude Include="src\draw_passes\depthPass.h" />
     <ClInclude Include="src\draw_passes\drawpass.h" />
-    <ClInclude Include="src\draw_passes\emissivePass.h" />
     <ClInclude Include="src\draw_passes\opaquePass.h" />
     <ClInclude Include="src\draw_passes\postPass.h" />
     <ClInclude Include="src\draw_passes\shadowPass.h" />
@@ -329,7 +328,6 @@
     <ClCompile Include="src\draw_passes\debug3dPass.cpp" />
     <ClCompile Include="src\draw_passes\depthPass.cpp" />
     <ClCompile Include="src\draw_passes\drawpass.cpp" />
-    <ClCompile Include="src\draw_passes\emissivePass.cpp" />
     <ClCompile Include="src\draw_passes\opaquePass.cpp" />
     <ClCompile Include="src\draw_passes\postPass.cpp" />
     <ClCompile Include="src\draw_passes\shadowPass.cpp" />
@@ -412,10 +410,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="shaders\downsample.ps.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="shaders\emissive.ps.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

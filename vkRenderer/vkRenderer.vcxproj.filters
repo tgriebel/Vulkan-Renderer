@@ -122,9 +122,6 @@
     <ClCompile Include="src\draw_passes\transPass.cpp">
       <Filter>Draw Passes</Filter>
     </ClCompile>
-    <ClCompile Include="src\draw_passes\emissivePass.cpp">
-      <Filter>Draw Passes</Filter>
-    </ClCompile>
     <ClCompile Include="src\draw_passes\postPass.cpp">
       <Filter>Draw Passes</Filter>
     </ClCompile>
@@ -349,9 +346,6 @@
     <ClInclude Include="src\draw_passes\opaquePass.h">
       <Filter>Draw Passes</Filter>
     </ClInclude>
-    <ClInclude Include="src\draw_passes\emissivePass.h">
-      <Filter>Draw Passes</Filter>
-    </ClInclude>
     <ClInclude Include="src\draw_passes\depthPass.h">
       <Filter>Draw Passes</Filter>
     </ClInclude>
@@ -532,9 +526,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\downsample.ps.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\emissive.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\equirectangularSky.ps.hlsl">
