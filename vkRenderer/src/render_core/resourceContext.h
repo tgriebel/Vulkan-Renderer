@@ -27,7 +27,6 @@ public:
 	GpuBuffer				materialBuffers;
 	GpuBuffer				lightParms;
 	GpuBuffer				particleBuffer;
-	GpuBuffer				defaultUniformBuffer;
 
 	ImageSampler			bilinearSamplers[ SAMPLER_ADDRESS_MODES ];
 	ImageSampler			trilinearSamplers[ SAMPLER_ADDRESS_MODES ];

@@ -57,12 +57,13 @@ inline uint32_t Hash( const drawSurf_t& surf ) {
 struct drawSurfInstance_t
 {
 	mat4x4f		modelMatrix;
+	mat4x4f		previousModelMatrix;
 	uint16_t	surfId;
 	uint16_t	envMapId;
 	uint16_t	diffuseIblId;
 	uint16_t	id;
 };
-static_assert( sizeof( drawSurfInstance_t ) == 72, "Informative" );
+static_assert( sizeof( drawSurfInstance_t ) == 136, "Informative" );
 
 
 inline bool operator==( const drawSurf_t& lhs, const drawSurf_t& rhs )

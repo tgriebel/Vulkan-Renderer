@@ -242,6 +242,8 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 		return;
 	}
 
+	const uint64_t currentFrame = m_context->FrameNumber();
+
 	// View data
 	{	
 		const uint32_t multiViewCount = GetMultiViewCount();
@@ -264,10 +266,9 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 	}
 
 	// Per-surface data
+	// TODO: Push into DrawPass since this is draw group specific
 	{
 		const uint32_t viewId = GetSurfaceBufferId();
-
-		static gpuSurface_t surfBuffer[ MaxSurfaces ];
 
 		for( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
@@ -282,18 +283,18 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 			for( uint32_t surfIx = 0; surfIx < drawGroup[ passIx ].InstanceCount(); ++surfIx )
 			{
 				const uint32_t instanceId = drawGroupOffset[ passIx ] + drawGroup[ passIx ].InstanceId( surfIx );
-				surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();
-				surfBuffer[ instanceId ].diffuseIblCubeId = instances[ surfIx ].diffuseIblId;
-				surfBuffer[ instanceId ].envCubeId = instances[ surfIx ].envMapId;
+				m_surfBuffer[ instanceId ].prevModel = ( currentFrame > 0 ) ? m_surfBuffer[ instanceId ].model : instances[ surfIx ].modelMatrix.Transpose();
+				m_surfBuffer[ instanceId ].model = instances[ surfIx ].modelMatrix.Transpose();				
+				m_surfBuffer[ instanceId ].diffuseIblCubeId = instances[ surfIx ].diffuseIblId;
+				m_surfBuffer[ instanceId ].envCubeId = instances[ surfIx ].envMapId;
 			}
 		}
 
 		m_surfParmeters.SetPos( 0 );
-		m_surfParmeters.CopyData( surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
+		m_surfParmeters.CopyData( m_surfBuffer, sizeof( gpuSurface_t ) * MaxSurfaces );
 	}
 
 	// Bindings
-	const uint64_t currentFrame = m_context->FrameNumber();
 	if( m_lastUpdateFrame != currentFrame )
 	{
 		m_viewParms->Bind( BINDING_NAME( modelBuffer ), &m_surfParmeters );

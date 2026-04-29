@@ -219,10 +219,11 @@ struct gpuPass_t
 
 struct gpuSurface_t
 {
-	float4x4 model;
-	uint     diffuseIblCubeId;
-	uint     envCubeId;
-	uint     pad[ 14 ];
+	float4x4	model;
+	float4x4	prevModel;
+	uint		diffuseIblCubeId;
+	uint		envCubeId;
+	uint		pad[ 14 ];
 };
 
 

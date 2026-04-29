@@ -59,6 +59,7 @@ private:
 	ImageView*				m_stencilViews[ MaxMultiViews ];
 	GpuBufferView			m_surfParmeters;
 	GpuBufferView			m_viewParmeters;
+	gpuSurface_t			m_surfBuffer[ MaxSurfaces ];
 
 	ShaderBindParms*		m_viewParms;
 	vec4f					m_clearColor;

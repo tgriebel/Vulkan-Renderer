@@ -423,15 +423,6 @@ void Renderer::InitShaderResources()
 			bufferType_t::STORAGE,
 			renderContext.sharedMemory
 		);
-		resources.defaultUniformBuffer.Create(
-			"DefaultUniformBuffer",
-			swapBuffering_t::SINGLE_FRAME,
-			resourceLifeTime_t::REBOOT,
-			1,
-			1024,
-			bufferType_t::UNIFORM,
-			renderContext.sharedMemory
-		);
 	}
 }
 
