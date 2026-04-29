@@ -176,9 +176,6 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 		surf.dbgName = materialAsset->GetName().c_str();
 
-		if( materialAsset->IsUploaded() == false ) {
-			uploadMaterials.insert( materialHdl );
-		}
 		uploader.QueueMaterialUpload( *materialAsset );
 
 		for ( uint32_t t = 0; t < MaxMaterialTextures; ++t )
@@ -187,7 +184,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			if ( texHandle.IsValid() )
 			{
 				Asset<Image>* imageAsset = ImageLib().Find( texHandle );
-				uploader.UploadImage( imageAsset );
+				uploader.QueueImageUpload( *imageAsset );
 			}
 		}
 
@@ -237,7 +234,14 @@ void Renderer::InitGPU()
 
 	InitShaderResources();
 	RecreateSwapChain();
-	UploadAssets();
+
+	ClearPipelineCache();
+	BuildPipelines();
+
+	// Upload queue commands
+	uploader.Upload();
+
+	FlushGPU();
 }
 
 
@@ -293,53 +297,6 @@ const Image* Renderer::FindOutputImage( const uint32_t id )
 		return &resources.gpuOutput2D[ id ];
 	}
 	return nullptr;
-}
-
-
-void Renderer::UploadAssets()
-{
-	// Assign upload indices for all scene assets
-	{
-		const uint32_t materialCount = MaterialLib().Count();
-		for( uint32_t i = 0; i < materialCount; ++i )
-		{
-			Asset<Material>* materialAsset = MaterialLib().Find( i );
-
-			uploader.QueueMaterialUpload( *materialAsset );
-		}
-
-		const uint32_t textureCount = ImageLib().Count();
-		for( uint32_t i = 0; i < textureCount; ++i )
-		{
-			uploader.UploadImage( ImageLib().Find( i ) );
-		}
-
-		const uint32_t modelCount = ModelLib().Count();
-
-		for( uint32_t m = 0; m < modelCount; ++m )
-		{
-			Asset<Model>* modelAsset = ModelLib().Find( m );
-
-			if( modelAsset->IsLoaded() == false )
-			{
-				continue;
-			}
-
-			if( modelAsset->IsUploaded() )
-			{
-				continue;
-			}
-			uploader.QueueModelUpload( *modelAsset );
-		}
-	}
-
-	ClearPipelineCache();
-	BuildPipelines();
-
-	// Upload queue commands
-	uploader.Upload();
-
-	FlushGPU();
 }
 
 

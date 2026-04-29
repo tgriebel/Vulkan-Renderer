@@ -216,7 +216,14 @@ void Renderer::Init( const renderConfig_t& cfg )
 	BuildSceneSchedule( config, &renderContext, &resources, &viewContext, &schedule );
 
 	uploader.Boot( &renderContext, &resources );
-	UploadAssets();
+
+	ClearPipelineCache();
+	BuildPipelines();
+
+	// Upload queue commands
+	uploader.Upload();
+
+	FlushGPU();
 }
 
 

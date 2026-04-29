@@ -111,7 +111,6 @@ private:
 
 	// Upload management
 	RenderUploader						uploader;
-	std::set<hdl_t>						uploadMaterials;
 	
 	// Render context
 	RenderContext						renderContext;

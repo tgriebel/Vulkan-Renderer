@@ -75,10 +75,9 @@ public:
 	void				OnFrameBegin();
 	void				Upload();
 
+	void				QueueImageUpload( Asset<Image>& imageAsset );
 	void				QueueMaterialUpload( Asset<Material>& materialAsset );
 	void				QueueModelUpload( Asset<Model>& model );
-
-	void				UploadImage( Asset<Image>* imageAsset );
 
 	void				UpdateTextureData( CommandContext* cmdCommand );
 	void				UploadTextures( CommandContext* cmdCommand );

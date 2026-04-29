@@ -118,6 +118,33 @@ void RenderUploader::OnFrameBegin()
 
 void RenderUploader::Upload()
 {
+	// Assign upload indices for all scene assets
+	// FIXME: This should happen per-asset and not scan the list
+	{
+		const uint32_t materialCount = MaterialLib().Count();
+		for( uint32_t i = 0; i < materialCount; ++i )
+		{
+			Asset<Material>* materialAsset = MaterialLib().Find( i );
+
+			QueueMaterialUpload( *materialAsset );
+		}
+
+		const uint32_t textureCount = ImageLib().Count();
+		for( uint32_t i = 0; i < textureCount; ++i )
+		{
+			Asset<Image>* imageAsset = ImageLib().Find( i );
+			QueueImageUpload( *imageAsset );
+		}
+
+		const uint32_t modelCount = ModelLib().Count();
+
+		for( uint32_t m = 0; m < modelCount; ++m )
+		{
+			Asset<Model>* modelAsset = ModelLib().Find( m );
+			QueueModelUpload( *modelAsset );
+		}
+	}
+
 	commands.Begin();
 	commands.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
 
@@ -171,6 +198,14 @@ void RenderUploader::QueueMaterialUpload( Asset<Material>& materialAsset )
 
 void RenderUploader::QueueModelUpload( Asset<Model>& modelAsset )
 {
+	if( modelAsset.IsLoaded() == false ) {
+		return;
+	}
+
+	if( modelAsset.IsUploaded() ) {
+		return;
+	}
+
 	Model& model = modelAsset.Get();
 	if( model.uploadId != -1 ) {
 		return;
@@ -182,18 +217,18 @@ void RenderUploader::QueueModelUpload( Asset<Model>& modelAsset )
 }
 
 
-void RenderUploader::UploadImage( Asset<Image>* imageAsset )
+void RenderUploader::QueueImageUpload( Asset<Image>& imageAsset )
 {
-	if( imageAsset->IsLoaded() == false )
+	if( imageAsset.IsLoaded() == false )
 	{
 		return;
 	}
-	if( imageAsset->IsUploaded() )
+	if( imageAsset.IsUploaded() )
 	{
 		return;
 	}
 
-	Image* image = &imageAsset->Get();
+	Image* image = &imageAsset.Get();
 
 	if( image == nullptr )
 	{
@@ -202,13 +237,13 @@ void RenderUploader::UploadImage( Asset<Image>* imageAsset )
 
 	if( ( image->gpuImage == nullptr ) || ( image->gpuImage->GetId() < 0 ) )
 	{
-		uploadImages.insert( imageAsset->Handle() );
+		uploadImages.insert( imageAsset.Handle() );
 	}
-	if( imageAsset->IsUploaded() )
+	if( imageAsset.IsUploaded() )
 	{
-		refreshImages.insert( imageAsset->Handle() );
+		refreshImages.insert( imageAsset.Handle() );
 	}
-	imageAsset->QueueUpload();
+	imageAsset.QueueUpload();
 }
 
 
