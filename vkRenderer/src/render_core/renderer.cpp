@@ -546,35 +546,6 @@ void Renderer::UpdateBuffers()
 		resources.globalConstants.CopyData( &globals, sizeof( globals ) );
 	}
 
-	resources.viewParms.SetPos( 0 );
-
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		RenderView& view = views[ viewIx ];
-		if( view.IsCommitted() == false ) {
-			continue;
-		}
-		
-		const uint32_t multiViewCount = view.GetMultiViewCount();
-		for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
-		{
-			gpuView_t viewBuffer = {};
-
-			const vec2i& frameSize = view.GetFrameSize();
-			viewBuffer.viewMat = view.GetViewMatrix( multiViewIndex );
-			viewBuffer.projMat = view.GetProjMatrix( multiViewIndex );
-			viewBuffer.prevViewProjMat = view.GetPreviousViewProjMatrix( multiViewIndex );
-			viewBuffer.viewProjMat = view.GetViewProjMatrix( multiViewIndex );
-			viewBuffer.viewOrigin = view.GetViewOrigin();
-			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
-			viewBuffer.numLights = view.numLights;
-
-			view.UpdatePreviousViewProjMatrix( multiViewIndex );
-
-			resources.viewParms.CopyData( &viewBuffer, sizeof( viewBuffer ) );
-		}	
-	}
-
 	resources.lightParms.SetPos( 0 );
 	resources.lightParms.CopyData( committedLights.Ptr(), sizeof( gpuLight_t ) * MaxLights );
 

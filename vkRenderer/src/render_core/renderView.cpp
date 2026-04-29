@@ -248,25 +248,24 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 	}
 
 	// View data
-	{
-		//const uint32_t multiViewCount = GetMultiViewCount();
-		//for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
-		//{
-		//	gpuView_t viewBuffer = {};
+	{	
+		const uint32_t multiViewCount = GetMultiViewCount();
+		for( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
+		{
+			gpuView_t viewBuffer = {};
 
-		//	const vec2i& frameSize = GetFrameSize();
-		//	viewBuffer.viewMat = GetViewMatrix( multiViewIndex );
-		//	viewBuffer.projMat = GetProjMatrix( multiViewIndex );
-		//	viewBuffer.prevViewProjMat = GetPreviousViewProjMatrix( multiViewIndex );
-		//	viewBuffer.viewProjMat = GetViewProjMatrix( multiViewIndex );
-		//	viewBuffer.viewOrigin = GetViewOrigin();
-		//	viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
-		//	viewBuffer.numLights = numLights;
+			const vec2i& frameSize = GetFrameSize();
+			viewBuffer.viewMat = GetViewMatrix( multiViewIndex );
+			viewBuffer.projMat = GetProjMatrix( multiViewIndex );
+			viewBuffer.prevViewProjMat = GetPreviousViewProjMatrix( multiViewIndex );
+			viewBuffer.viewProjMat = GetViewProjMatrix( multiViewIndex );
+			viewBuffer.viewOrigin = GetViewOrigin();
+			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
+			viewBuffer.numLights = numLights;
 
-		//	UpdatePreviousViewProjMatrix( multiViewIndex );
-
-		//	m_viewParmeters.CopyData( &viewBuffer, sizeof( viewBuffer ) );
-		//}
+			m_viewParmeters.SetPos( 0 );
+			m_viewParmeters.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+		}
 	}
 
 	// Per-surface data
@@ -326,6 +325,8 @@ void RenderView::FrameEnd( const drawPass_t begin, const drawPass_t end )
 {
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < MaxMultiViews; ++multiViewIndex )
 	{
+		m_previousViewProjMatrices[ multiViewIndex ] = m_viewProjMatrices[ multiViewIndex ];
+
 		for ( uint32_t passIx = begin; passIx <= end; ++passIx )
 		{
 			DrawPass* pass = passes[ multiViewIndex ][ passIx ];
@@ -376,12 +377,6 @@ void RenderView::SetViewRect( const int32_t x, const int32_t y, const uint32_t w
 	m_viewport.y = y;
 	m_viewport.width = width;
 	m_viewport.height = height;
-}
-
-
-void RenderView::UpdatePreviousViewProjMatrix( const uint32_t multiView )
-{
-	m_previousViewProjMatrices[ multiView ] = m_viewProjMatrices[ multiView ];
 }
 
 
