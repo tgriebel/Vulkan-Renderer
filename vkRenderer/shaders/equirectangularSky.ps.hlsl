@@ -19,7 +19,7 @@ PS_Output PSMain( PS_Input input )
 	const gpuMaterial_t material = materials[materialId];
 
 	const float2 uv = SampleSphericalMap( normalize( input.objectPosition ) );
-	const float3 color = texSampler[ material.textureId[ 0 ] ].Sample( bilinearSamplerWrap, uv ).rgb;
+	const float3 color = globalTextures[ material.textureId[ 0 ] ].Sample( bilinearSamplerWrap, uv ).rgb;
 
 	output.outColor = float4( color, 1.0f );
 	return output;

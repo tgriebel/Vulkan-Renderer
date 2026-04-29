@@ -86,13 +86,13 @@ float3 ComputeNormalWS( const float3 tangentNormal, const float3 T, const float3
 
 #define SAMPLER_COMP( S, N, NAME )						BIND_SET( S, N ) SamplerComparisonState NAME;
 
-#define SAMPLER_2D_LAYOUT( S, N )                       BIND_SET( S, N ) Texture2D texSampler[];
+#define SAMPLER_2D_LAYOUT( S, N )                       BIND_SET( S, N ) Texture2D globalTextures[];
 
-#define SAMPLER_CUBE_LAYOUT( S, N )                     BIND_SET( S, N ) TextureCube cubeSamplers[];
+#define SAMPLER_CUBE_LAYOUT( S, N )                     BIND_SET( S, N ) TextureCube globalCubemaps[];
 
-#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )              BIND_SET( S, N ) TEXTYPE codeSamplers[];
+#define CODE_IMAGE_LAYOUT( S, N, TEXTYPE )              BIND_SET( S, N ) TEXTYPE localTextures[];
 
-#define CODE_IMAGE_CUBE_LAYOUT( S, N )                  BIND_SET( S, N ) TextureCube codeCubeSamplers[];
+#define CODE_IMAGE_CUBE_LAYOUT( S, N )                  BIND_SET( S, N ) TextureCube localCubemaps[];
 
 #define STENCIL_LAYOUT( S, N, TEXTYPE )                 BIND_SET( S, N ) TEXTYPE stencilImage;
 

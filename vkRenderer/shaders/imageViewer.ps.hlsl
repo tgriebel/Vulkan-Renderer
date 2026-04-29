@@ -17,9 +17,9 @@ PS_Output PSMain( PS_Input input )
 	float2 uv = ( input.uv0.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
 
 	if( isCubeImage ) {
-		output.outColor = codeCubeSamplers[0].Sample( bilinearSamplerClampEdge, float3(uv, 0.0f));
+		output.outColor = localCubemaps[0].Sample( bilinearSamplerClampEdge, float3(uv, 0.0f));
 	} else {
-		output.outColor = codeSamplers[0].Sample( bilinearSamplerWrap, uv);
+		output.outColor = localTextures[0].Sample( bilinearSamplerWrap, uv);
 	}
 
 	return output;

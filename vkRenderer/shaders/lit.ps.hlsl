@@ -89,7 +89,7 @@ float3 ApplyShadow( const uint shadowViewId, float3 worldPosition, const float3 
 		
 		const uint shadowMapTexId = shadowViewId;
 		
-		Texture2D shadowMap = codeSamplers[ shadowMapTexId ];
+		Texture2D shadowMap = localTextures[ shadowMapTexId ];
 
 		const float shadowBias = 0.001f;
 	
@@ -276,8 +276,8 @@ PS_Output PSMain( PS_Input input )
     }
 #endif
 
-    const float3 kD = EvaluateDiffuseAmbient( cubeSamplers[ diffuseIBL ], surfaceInput );
-    const float3 specularAmbient = EvaluateSpecularAmbient( cubeSamplers[ specularIBL ], texSampler[ brdfLutId ], surfaceInput );
+    const float3 kD = EvaluateDiffuseAmbient( globalCubemaps[ diffuseIBL ], surfaceInput );
+    const float3 specularAmbient = EvaluateSpecularAmbient( globalCubemaps[ specularIBL ], globalTextures[ brdfLutId ], surfaceInput );
 
     const float3 ambient = ( kD + specularAmbient ) * surfaceInput.ao;
 
@@ -333,7 +333,7 @@ PS_Output PSMain( PS_Input input )
         
                 
         case DEBUG_BRDF_LUT:
-            outColor.rg = texSampler[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
+            outColor.rg = globalTextures[ brdfLutId ].Sample( bilinearSamplerClampEdge, float2( surfaceInput.NoV, surfaceInput.roughness ) ).rg;
             outColor.b = 0.0f;
             break;
         

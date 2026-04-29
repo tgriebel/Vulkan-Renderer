@@ -66,7 +66,7 @@ void CSMain( uint3 dtid : SV_DispatchThreadID )
         return;
     }
 
-    const float4 pixel = codeSamplers[ wb.imageId + z ].Load( int3( x, y, wb.lod ) );
+    const float4 pixel = localTextures[ wb.imageId + z ].Load( int3( x, y, wb.lod ) );
 
     const uint offset = x + ( y * width ) + z * ( width * height );
 

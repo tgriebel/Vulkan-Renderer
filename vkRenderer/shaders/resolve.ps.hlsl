@@ -30,9 +30,9 @@ PS_Output PSMain( PS_Input input )
 
     for ( int i = 0; i < int( globals.numSamples ); ++i ) {
 #ifdef USE_MSAA
-        outColor.rgb += codeSamplers[0].Load( pixelLocation, i ).rgb;
+        outColor.rgb += localTextures[0].Load( pixelLocation, i ).rgb;
 #else
-        outColor.rgb += codeSamplers[0].Load( int3( pixelLocation, i ) ).rgb;
+        outColor.rgb += localTextures[0].Load( int3( pixelLocation, i ) ).rgb;
 #endif
     }
     outColor.rgb /= globals.numSamples;
@@ -44,10 +44,10 @@ PS_Output PSMain( PS_Input input )
     for ( int j = 0; j < int( globals.numSamples ); ++j )
     {
 #ifdef USE_MSAA
-        outColor1.r += codeSamplers[1].Load( pixelLocation, j ).r;
+        outColor1.r += localTextures[1].Load( pixelLocation, j ).r;
         outColor1.g += asuint( stencilImage.Load( pixelLocation, j ).r ) == 0x01 ? 1.0f : 0.0f;
 #else
-        outColor1.r += codeSamplers[1].Load( int3( pixelLocation, j ) ).r;
+        outColor1.r += localTextures[1].Load( int3( pixelLocation, j ) ).r;
         outColor1.g += asuint( stencilImage.Load( int3( pixelLocation, j ) ).r ) == 0x01 ? 1.0f : 0.0f;
 #endif
     }

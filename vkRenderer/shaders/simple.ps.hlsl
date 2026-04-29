@@ -8,6 +8,6 @@ PS_Output PSMain( PS_Input input )
     const uint materialId = pushConstants.materialId;
 	const uint textureId0 = materials[ materialId ].textureId[ 0 ];
 
-	output.outColor = texSampler[ textureId0 ].Sample( bilinearSamplerWrap, input.uv0.xy );
+	output.outColor = globalTextures[ textureId0 ].Sample( bilinearSamplerWrap, input.uv0.xy );
 	return output;
 }

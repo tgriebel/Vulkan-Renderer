@@ -113,7 +113,7 @@ float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlo
 	{
 		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[materialTextureSlot];
 
-		return texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv );
+		return globalTextures[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv );
 
 	}
 	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -129,7 +129,7 @@ float4 SampleTextureSrgb( const gpuMaterial_t material, const int materialTextur
 	{
 		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
 
-		return SrgbToLinear( texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
+		return SrgbToLinear( globalTextures[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
 	}
 	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
 }
@@ -144,7 +144,7 @@ float3 SampleTextureNormal( const gpuMaterial_t material, const int materialText
 	{
 		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
 
-		return DecodeNormal( texSampler[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
+		return DecodeNormal( globalTextures[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
 	}
 	return float3( 0.0f, 0.0f, 1.0f );
 }

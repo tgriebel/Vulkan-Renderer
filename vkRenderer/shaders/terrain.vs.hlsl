@@ -4,7 +4,7 @@ VS_LAYOUT_STANDARD( Texture2D )
 
 float3x3 GetTerrainTangent( float2 uv )
 {
-	int2 texDim = GetTextureSize( texSampler[2], 0 );
+	int2 texDim = GetTextureSize( globalTextures[2], 0 );
 
 	const float maxHeight = 1.0f;
 	float gridSize = 0.01f;
@@ -15,8 +15,8 @@ float3x3 GetTerrainTangent( float2 uv )
 	int y0 = cy - 1;
 	int y1 = cy + 1;
 
-	float dzdx = texSampler[2].Load( int3( x1, cy, 0 ) ).r - texSampler[2].Load( int3( x0, cy, 0 ) ).r;
-	float dzdy = texSampler[2].Load( int3( cx, y1, 0 ) ).r - texSampler[2].Load( int3( cx, y0, 0 ) ).r;
+	float dzdx = globalTextures[2].Load( int3( x1, cy, 0 ) ).r - globalTextures[2].Load( int3( x0, cy, 0 ) ).r;
+	float dzdy = globalTextures[2].Load( int3( cx, y1, 0 ) ).r - globalTextures[2].Load( int3( cx, y0, 0 ) ).r;
 
 	dzdx *= maxHeight / gridSize;
 	dzdy *= maxHeight / gridSize;
@@ -38,7 +38,7 @@ vsOutput_t VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIn
 	const gpuView_t view = views[viewlId];
 
 	const uint heightMapId = materials[ materialId ].textureId[ 0 ];
-	const float heightMapValue = texSampler[ heightMapId ].SampleLevel( bilinearSamplerWrap, input.uv0.xy, 0 ).r;
+	const float heightMapValue = globalTextures[ heightMapId ].SampleLevel( bilinearSamplerWrap, input.uv0.xy, 0 ).r;
 
 	const float maxHeight = globals.generic.x;
 	float3 position = input.inPosition;

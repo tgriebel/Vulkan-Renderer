@@ -5,7 +5,7 @@ PS_LAYOUT_STANDARD( Texture2D )
 
 
 float SampleCoverage( const int2 pos, const uint stencilTextureId ) {
-    return codeSamplers[ stencilTextureId ].Load( int3( pos, 0 ) ).g;
+    return localTextures[ stencilTextureId ].Load( int3( pos, 0 ) ).g;
 }
 
 
@@ -118,9 +118,9 @@ PS_Output PSMain( PS_Input input )
 	const uint textureId3 = material.textureId[ 3 ];
 	const uint textureId4 = material.textureId[ 4 ];
 
-	Texture2D sceneTexture = codeSamplers[ textureId0 ];
-	Texture2D bloomTexture = codeSamplers[ textureId4 ];
-	Texture2D luminanceTexture = codeSamplers[ textureId3 ];
+	Texture2D sceneTexture = localTextures[ textureId0 ];
+	Texture2D bloomTexture = localTextures[ textureId4 ];
+	Texture2D luminanceTexture = localTextures[ textureId3 ];
 
     const float4x4 viewMat = view.viewMat;
     const float3 forward = -normalize( viewMat[2].xyz );
@@ -135,9 +135,9 @@ PS_Output PSMain( PS_Input input )
     float4 sceneColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 
     const float4 uvColor = float4( input.uv0.xy, 0.0f, 1.0f );
-    const float sceneDepth = codeSamplers[ textureId1 ].Load( int3( pixelLocation, 0 ) ).r;
+    const float sceneDepth = localTextures[ textureId1 ].Load( int3( pixelLocation, 0 ) ).r;
     const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
-    const float4 skyColor = float4( cubeSamplers[ textureId0 ].Sample( bilinearSamplerWrap, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
+    const float4 skyColor = float4( globalCubemaps[ textureId0 ].Sample( bilinearSamplerWrap, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
     output.outColor.rgb = float3( 0.0f, 0.0f, 0.0f );
     const bool enabled = globals.dof.x != 0.0f;
@@ -149,7 +149,7 @@ PS_Output PSMain( PS_Input input )
 
     float3 hdrColor;
     if ( enabled && ( coc < 0.0f ) ) {
-        hdrColor.rgb = codeSamplers[ textureId2 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
+        hdrColor.rgb = localTextures[ textureId2 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
     } else {
         hdrColor.rgb = sceneTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
     }
@@ -173,18 +173,18 @@ PS_Output PSMain( PS_Input input )
 
 		const float2 offset = dir * dist * intensity;
 
-		float r = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + offset ).r;
-		float g = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).g;
-		float b = codeSamplers[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy - offset ).b;
+		float r = localTextures[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + offset ).r;
+		float g = localTextures[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).g;
+		float b = localTextures[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy - offset ).b;
 
-		r = ApplyBloom( codeSamplers[ textureId4 ], r.xxx, input.uv0.xy + offset ).x;
-		r = ApplyTonemap( codeSamplers[ textureId3 ], r.xxx ).x;
+		r = ApplyBloom( localTextures[ textureId4 ], r.xxx, input.uv0.xy + offset ).x;
+		r = ApplyTonemap( localTextures[ textureId3 ], r.xxx ).x;
 
-		g = ApplyBloom( codeSamplers[ textureId4 ], g.xxx, input.uv0.xy ).y;
-		g = ApplyTonemap( codeSamplers[ textureId3 ], g.xxx ).y;
+		g = ApplyBloom( localTextures[ textureId4 ], g.xxx, input.uv0.xy ).y;
+		g = ApplyTonemap( localTextures[ textureId3 ], g.xxx ).y;
 
-		b = ApplyBloom( codeSamplers[ textureId4], b.xxx, input.uv0.xy ).z;
-		b = ApplyTonemap( codeSamplers[ textureId3 ], b.xxx ).z;
+		b = ApplyBloom( localTextures[ textureId4], b.xxx, input.uv0.xy ).z;
+		b = ApplyTonemap( localTextures[ textureId3 ], b.xxx ).z;
 
 		finalColor.rgb = float3( r, g, b );
 	}

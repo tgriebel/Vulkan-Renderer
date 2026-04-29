@@ -53,34 +53,34 @@ PS_Output PSMain( PS_Input input )
 	// |         |         |
 	// +---------+---------+
 
-	const float2 texelSize = 1.0f / float2( GetTextureSize( codeSamplers[ 0 ], 0 ) );
+	const float2 texelSize = 1.0f / float2( GetTextureSize( localTextures[ 0 ], 0 ) );
 
 	if( level == 0 ) // Initial luminance computation: WxH resolution -> square resolution
 	{
-		const float3 sceneColor = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
+		const float3 sceneColor = localTextures[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
 		const float luminance = dot( sceneColor, float3( 0.2126f, 0.7152f, 0.0722f ) );
 		output.outColor.r = log( max( luminance + 0.0001f, 0.0f ) );
 	}
 	else if( level < ( mipCount - 1 ) ) // Averaged luminance computation
 	{
-		const float s0 = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( -0.5f, -0.5f ) ).r;
-		const float s1 = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( 0.5f, -0.5f ) ).r;
-		const float s2 = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( -0.5f, 0.5f ) ).r;
-		const float s3 = codeSamplers[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( 0.5f, 0.5f ) ).r;
+		const float s0 = localTextures[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( -0.5f, -0.5f ) ).r;
+		const float s1 = localTextures[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( 0.5f, -0.5f ) ).r;
+		const float s2 = localTextures[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( -0.5f, 0.5f ) ).r;
+		const float s3 = localTextures[ 0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + texelSize * float2( 0.5f, 0.5f ) ).r;
 
 		output.outColor.r = ReinhardWeightedAverage( s0, s1, s2, s3 );
 	}
 	else // Final luminance computation
 	{
-		const float s0 = codeSamplers[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( -0.5f, -0.5f ), 0 ).r;
-		const float s1 = codeSamplers[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( 0.5f, -0.5f ), 0 ).r;
-		const float s2 = codeSamplers[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( -0.5f, 0.5f ), 0 ).r;
-		const float s3 = codeSamplers[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( 0.5f, 0.5f ), 0 ).r;
+		const float s0 = localTextures[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( -0.5f, -0.5f ), 0 ).r;
+		const float s1 = localTextures[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( 0.5f, -0.5f ), 0 ).r;
+		const float s2 = localTextures[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( -0.5f, 0.5f ), 0 ).r;
+		const float s3 = localTextures[ 0 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ) + texelSize * float2( 0.5f, 0.5f ), 0 ).r;
 
 		const float logLuminance = ReinhardWeightedAverage( s0, s1, s2, s3 );
 		const float luminance = exp( logLuminance );
 
-		const float previousLuminance = codeSamplers[ 2 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), 0 ).r; // 1x1 texture
+		const float previousLuminance = localTextures[ 2 ].SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), 0 ).r; // 1x1 texture
 		const float dtSec = globals.time.w / 1000.0f;
 		const float adaptationRate = globals.exposure.y;
 		const float weight = 1.0f - exp( -dtSec * adaptationRate );
