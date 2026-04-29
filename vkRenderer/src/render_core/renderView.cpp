@@ -188,12 +188,6 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			colorInfo.type = IMAGE_TYPE_2D;
 
 			m_colorViews[ multiViewIndex ]->Init( info.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if( m_isCubeView )
-			{
-				m_colorViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_colorViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
 		}
 
 		if ( info.color1 != nullptr )
@@ -202,12 +196,6 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			gbufferInfo.type = IMAGE_TYPE_2D;
 
 			m_gBuffer0Views[ multiViewIndex ]->Init( info.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( m_isCubeView )
-			{
-				m_gBuffer0Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_gBuffer0Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
 		}
 
 		if ( info.color2 != nullptr )
@@ -216,12 +204,6 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			gbufferInfo.type = IMAGE_TYPE_2D;
 
 			m_gBuffer1Views[ multiViewIndex ]->Init( info.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( m_isCubeView )
-			{
-				m_gBuffer1Views[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_gBuffer1Views[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
 		}
 
 		if ( info.depth != nullptr )
@@ -230,12 +212,6 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			depthInfo.type = IMAGE_TYPE_2D;
 
 			m_depthViews[ multiViewIndex ]->Init( info.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( m_isCubeView )
-			{
-				m_depthViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_depthViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
 		}
 
 		if ( info.stencil != nullptr )
@@ -244,12 +220,6 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			stencilInfo.type = IMAGE_TYPE_2D;
 
 			m_stencilViews[ multiViewIndex ]->Init( info.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
-
-			if ( m_isCubeView )
-			{
-				m_stencilViews[ multiViewIndex ]->sampler.addrMode = SAMPLER_ADDRESS_CLAMP_EDGE;
-				m_stencilViews[ multiViewIndex ]->sampler.filter = SAMPLER_FILTER_BILINEAR;
-			}
 		}
 
 		frameBufferCreateInfo_t fbInfo {};

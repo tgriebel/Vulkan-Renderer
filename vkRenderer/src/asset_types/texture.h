@@ -253,7 +253,6 @@ private:
 public:
 	imageInfo_t				info;
 	imageSubResourceView_t	subResourceView;
-	samplerState_t			sampler;
 	bool					generateMips;
 
 	// TODO: I'm working out how to manage the memory for these currently because data-flow and lifetimes are complex
@@ -272,9 +271,6 @@ public:
 		subResourceView.mipLevels = 1;
 
 		generateMips = true;
-
-		sampler.addrMode = SAMPLER_ADDRESS_WRAP;
-		sampler.filter = SAMPLER_FILTER_BILINEAR;
 
 		cpuImage = nullptr;
 		gpuImage = nullptr;

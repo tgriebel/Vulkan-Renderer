@@ -80,9 +80,6 @@ void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, G
 
 	generateMips = true;
 
-	sampler.addrMode = SAMPLER_ADDRESS_WRAP;
-	sampler.filter = SAMPLER_FILTER_BILINEAR;
-
 	cpuImage = _cpuImage;
 	gpuImage = _gpuImage;
 }
@@ -120,8 +117,6 @@ void Image::Serialize( Serializer* s )
 bool ImageLoader::Load( Asset<Image>& imageAsset )
 {
 	Image& image = imageAsset.Get();
-
-	image.sampler = m_sampler;
 
 	sourceFile_t imgSource {};
 	imgSource.path = m_basePath + m_fileName + "." + m_ext;
