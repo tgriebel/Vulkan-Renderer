@@ -329,30 +329,16 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
 	colorBlendAttachments.resize( colorAttachmentCount );
 
-	for( uint32_t i = 0; i < colorAttachmentCount; ++i )
+	for ( uint32_t i = 0; i < colorAttachmentCount; ++i )
 	{
-		if( blendEnable )
-		{
-			colorBlendAttachments[ i ].colorWriteMask = colorFlags[ i ];
-			colorBlendAttachments[ i ].blendEnable = VK_TRUE;
-			colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-			colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-			colorBlendAttachments[ i ].colorBlendOp = VK_BLEND_OP_ADD;
-			colorBlendAttachments[ i ].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachments[ i ].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachments[ i ].alphaBlendOp = VK_BLEND_OP_ADD;
-		}
-		else
-		{
-			colorBlendAttachments[ i ].colorWriteMask = colorFlags[ i ];
-			colorBlendAttachments[ i ].blendEnable = VK_FALSE;
-			colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-			colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-			colorBlendAttachments[ i ].colorBlendOp = VK_BLEND_OP_ADD;
-			colorBlendAttachments[ i ].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachments[ i ].dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-			colorBlendAttachments[ i ].alphaBlendOp = VK_BLEND_OP_ADD;
-		}
+		colorBlendAttachments[ i ].colorWriteMask      = colorFlags[ i ];
+		colorBlendAttachments[ i ].blendEnable         = blendEnable ? VK_TRUE : VK_FALSE;
+		colorBlendAttachments[ i ].srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+		colorBlendAttachments[ i ].dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		colorBlendAttachments[ i ].colorBlendOp        = VK_BLEND_OP_ADD;
+		colorBlendAttachments[ i ].srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlendAttachments[ i ].dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		colorBlendAttachments[ i ].alphaBlendOp        = VK_BLEND_OP_ADD;
 	}
 
 	VkPipelineColorBlendStateCreateInfo colorBlending{ };

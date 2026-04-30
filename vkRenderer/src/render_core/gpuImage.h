@@ -67,7 +67,11 @@ public:
 
 	inline uint64_t GetAlignment()
 	{
+#ifdef USE_VULKAN
 		return m_allocation[ 0 ].GetAlignment();
+#else
+		return 0;
+#endif
 	}
 
 	inline uint32_t GetBufferCount() const
