@@ -311,25 +311,33 @@ void UpdateScene( Scene* scene )
 	for ( uint32_t i = 0; i < outputImageCount; ++i )
 	{
 		const Image* img = g_renderer.FindOutputImage( i );
-		if ( img == nullptr ) {
+		if ( ( img == nullptr ) || ( img->gpuImage == nullptr ) ) {
 			continue;
 		}
 		images.push_back( img );
 	}
 
-	const char* debugImageName = ( g_imguiControls.dbgImageId >= 0 ) ? images[ g_imguiControls.dbgImageId ]->gpuImage->GetDebugName() : "";
+	std::sort( images.begin(), images.end() );
+
+	std::vector<std::string> imageNames;
+	const uint32_t dbgImageCount = static_cast<uint32_t>( images.size() );
+	for( uint32_t i = 0; i < dbgImageCount; ++i ) {
+		imageNames.push_back( std::to_string( i ) + ": " + images[i]->gpuImage->GetDebugName());
+	}
+
+	const char* debugImageName = ( g_imguiControls.dbgImageId >= 0 ) ? imageNames[ g_imguiControls.dbgImageId ].c_str() : "";
 
 	if ( ImGui::BeginCombo( "Images", debugImageName ) )
 	{
-		const uint32_t imageCount = static_cast<uint32_t>( images.size() );
-		for ( uint32_t i = 0; i < imageCount; ++i )
+		for ( uint32_t i = 0; i < dbgImageCount; ++i )
 		{
 			const bool selected = ( i == g_imguiControls.dbgImageId );
 
-			if( _stricmp( images[ i ]->gpuImage->GetDebugName(), "" ) == 0 ) {
+			const char* baseName = imageNames[ i ].c_str();
+			if( _stricmp( baseName, "" ) == 0 ) {
 				continue;
 			}
-			if ( ImGui::Selectable( images[ i ]->gpuImage->GetDebugName(), selected ) ) {
+			if ( ImGui::Selectable( imageNames[ i ].c_str(), selected ) ) {
 				g_imguiControls.dbgImageId = i;
 			}
 			if ( selected ) {
