@@ -735,6 +735,79 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 }
 
 
+void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info )
+{
+	const VkImageAspectFlagBits aspect = vk_GetAspectFlags( info.src->info.aspect );
+
+	// Transition source to TRANSFER_SRC_OPTIMAL
+	VkImageMemoryBarrier srcBarrier{ };
+	srcBarrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	srcBarrier.image                           = info.src->gpuImage->GetVkImage( context.bufferId );
+	srcBarrier.oldLayout                       = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	srcBarrier.newLayout                       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	srcBarrier.srcAccessMask                   = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	srcBarrier.dstAccessMask                   = VK_ACCESS_TRANSFER_READ_BIT;
+	srcBarrier.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+	srcBarrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+	srcBarrier.subresourceRange.aspectMask     = aspect;
+	srcBarrier.subresourceRange.baseMipLevel   = info.baseMip;
+	srcBarrier.subresourceRange.levelCount     = 1;
+	srcBarrier.subresourceRange.baseArrayLayer = info.baseArray;
+	srcBarrier.subresourceRange.layerCount     = info.arrayCount;
+
+	// Transition destination to TRANSFER_DST_OPTIMAL
+	VkImageMemoryBarrier dstBarrier{ };
+	dstBarrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	dstBarrier.image                           = info.dst->gpuImage->GetVkImage( context.bufferId );
+	dstBarrier.oldLayout                       = VK_IMAGE_LAYOUT_UNDEFINED;
+	dstBarrier.newLayout                       = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	dstBarrier.srcAccessMask                   = 0;
+	dstBarrier.dstAccessMask                   = VK_ACCESS_TRANSFER_WRITE_BIT;
+	dstBarrier.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+	dstBarrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+	dstBarrier.subresourceRange.aspectMask     = aspect;
+	dstBarrier.subresourceRange.baseMipLevel   = info.baseMip;
+	dstBarrier.subresourceRange.levelCount     = 1;
+	dstBarrier.subresourceRange.baseArrayLayer = info.baseArray;
+	dstBarrier.subresourceRange.layerCount     = info.arrayCount;
+
+	VkImageMemoryBarrier preBlit[ 2 ] = { srcBarrier, dstBarrier };
+	vkCmdPipelineBarrier( cmdBuffer,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		0, 0, nullptr, 0, nullptr, 2, preBlit );
+
+	VkImageResolve region{ };
+	region.srcSubresource.aspectMask     = aspect;
+	region.srcSubresource.mipLevel       = info.baseMip;
+	region.srcSubresource.baseArrayLayer = info.baseArray;
+	region.srcSubresource.layerCount     = info.arrayCount;
+	region.srcOffset                     = { 0, 0, 0 };
+	region.dstSubresource.aspectMask     = aspect;
+	region.dstSubresource.mipLevel       = info.baseMip;
+	region.dstSubresource.baseArrayLayer = info.baseArray;
+	region.dstSubresource.layerCount     = info.arrayCount;
+	region.dstOffset                     = { 0, 0, 0 };
+	region.extent                        = { info.src->info.width, info.src->info.height, 1 };
+
+	vkCmdResolveImage(
+		cmdBuffer,
+		info.src->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+		info.dst->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1, &region );
+
+	// Transition destination to SHADER_READ_ONLY_OPTIMAL for subsequent sampling
+	dstBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	dstBarrier.newLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	dstBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	dstBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	vkCmdPipelineBarrier( cmdBuffer,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		0, 0, nullptr, 0, nullptr, 1, &dstBarrier );
+}
+
+
 void vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* image, const copyImageParms_t& copyParms, GpuBuffer& buffer )
 {
 	std::vector<VkBufferImageCopy> regions;

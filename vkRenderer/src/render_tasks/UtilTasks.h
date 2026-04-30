@@ -53,6 +53,24 @@ public:
 };
 
 
+class ResolveImageTask : public GpuTask
+{
+private:
+	resolveImageInfo_t	m_info;
+
+public:
+	ResolveImageTask( const resolveImageInfo_t& info ) : m_info( info ) {}
+
+	void			Resize() {}
+	void			FrameBegin() {}
+	void			FrameEnd() {}
+	std::string		AsString() const;
+	void			Execute( CommandContext& context ) override;
+
+	~ResolveImageTask() {}
+};
+
+
 class CopyImageTask : public GpuTask
 {
 private:

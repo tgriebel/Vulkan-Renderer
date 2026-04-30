@@ -32,6 +32,26 @@ struct copyImageParms_t
 };
 
 
+enum class resolveMode_t : uint32_t
+{
+	AVERAGE     = 0,	// Color — weighted average across all samples
+	SAMPLE_ZERO = 1,	// Normals, IDs — take sample 0 directly (no blurring at edges)
+	MIN         = 2,	// Depth — conservative minimum
+	MAX         = 3,	// Depth — maximum
+};
+
+
+struct resolveImageInfo_t
+{
+	Image*			src;
+	Image*			dst;
+	resolveMode_t	mode;
+	uint32_t		baseMip;
+	uint32_t		baseArray;
+	uint32_t		arrayCount;
+};
+
+
 class DeviceContext
 {
 public:
@@ -138,6 +158,7 @@ void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHa
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst );
+void				vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info );
 void				vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* texture, const copyImageParms_t& copyParms, GpuBuffer& buffer );
 imageSamples_t		vk_MaxImageSamples();
 VkShaderModule		vk_CreateShaderModule( const std::vector<char>& code, const char* debugName );

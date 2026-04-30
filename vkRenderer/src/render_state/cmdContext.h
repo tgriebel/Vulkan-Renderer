@@ -14,6 +14,7 @@ class GpuImage;
 class FrameBuffer;
 struct imageSubResourceView_t;
 struct copyImageParms_t;
+struct resolveImageInfo_t;
 
 enum gpuImageStateFlags_t : uint8_t;
 
@@ -172,5 +173,6 @@ void Transition( CommandContext* cmdCommand, const GpuImage* gpuImage, swapBuffe
 void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
 void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
 void CopyImage( CommandContext* cmdCommand, Image& src, const copyImageParms_t& srcParms, Image& dst, const copyImageParms_t& dstParms );
+void ResolveImage( CommandContext* cmdCommand, const resolveImageInfo_t& info );
 void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );
 void FlushGPU();

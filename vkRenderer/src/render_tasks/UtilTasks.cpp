@@ -29,6 +29,22 @@ void ComputeTask::Execute( CommandContext& context )
 }
 
 
+// ResolveImageTask
+
+std::string ResolveImageTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "<ResolveImageTask: " << m_info.src->gpuImage->GetDebugName() << " -> " << m_info.dst->gpuImage->GetDebugName() << ">";
+	return ss.str();
+}
+
+
+void ResolveImageTask::Execute( CommandContext& context )
+{
+	ResolveImage( &context, m_info );
+}
+
+
 // TransitionImageTask
 
 std::string TransitionImageTask::AsString() const
