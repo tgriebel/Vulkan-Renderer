@@ -21,7 +21,8 @@
     {
       "name": "Prepass",
       "vs": "simple",
-      "ps": "depth"
+      "ps": "depth",
+      "perms": ["mrt"]
     },
     {
       "name": "Terrain",
@@ -48,11 +49,6 @@
 	  "name": "EquirectangularSampler",
 	  "vs": "simple",
 	  "ps": "equirectangularSky"
-    },
-    {
-      "name": "LitDepth",
-      "vs": "simple",
-      "ps": "depth"
     },
 	{
       "name": "LitDiffuse",
