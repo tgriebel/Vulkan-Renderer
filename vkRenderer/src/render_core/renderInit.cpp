@@ -514,14 +514,17 @@ void Renderer::BuildPipelines()
 		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
 
-		for ( uint32_t permIx = 0; permIx < prog.permCount; ++permIx )
+		for( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
 		{
-			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+			for( auto perm : prog.shaderBins[ shaderIx ] )
 			{
-				if ( prog.vk_shaders[ permIx ][ shaderIx ] != VK_NULL_HANDLE )
+				ShaderBin& shaderBin = perm.second;
+#ifdef USE_VULKAN
+				if ( shaderBin.vk_shader != VK_NULL_HANDLE )
 				{
-					vkDestroyShaderModule( context.device, prog.vk_shaders[ permIx ][ shaderIx ], nullptr );
+					vkDestroyShaderModule( context.device, shaderBin.vk_shader, nullptr );
 				}
+#endif
 			}
 		}
 	}
@@ -532,12 +535,14 @@ void Renderer::BuildPipelines()
 		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
 
-		for ( uint32_t permIx = 0; permIx < prog.permCount; ++permIx )
+		for( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
 		{
-			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+			GpuProgram::ShaderPermMap& shaderMap = prog.shaderBins[ shaderIx ];
+			for ( auto permIt = shaderMap.begin(); permIt != shaderMap.end(); ++permIt )
 			{
-				const shaderBin_t& shaderBin = prog.shaderBins[ permIx ][ shaderIx ];
-				prog.vk_shaders[ permIx ][ shaderIx ] = vk_CreateShaderModule( shaderBin.blob, shaderBin.binName.c_str() );
+#ifdef USE_VULKAN
+				permIt->second.vk_shader = vk_CreateShaderModule( permIt->second.blob, permIt->second.binName.c_str() );
+#endif
 			}
 		}
 	}

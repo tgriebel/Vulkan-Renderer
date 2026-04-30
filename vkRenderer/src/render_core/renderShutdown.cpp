@@ -96,11 +96,15 @@ void Renderer::ShutdownShaderResources()
 	for ( uint32_t i = 0; i < shaderCount; ++i )
 	{
 		GpuProgram& prog = GpuProgramLib().Find( i )->Get();
-		for ( uint32_t permIx = 0; permIx < prog.permCount; ++permIx )
+
+		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
 		{
-			for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
+			for( auto perm : prog.shaderBins[ shaderIx ] )
 			{
-				vkDestroyShaderModule( context.device, prog.vk_shaders[ permIx ][ shaderIx ], nullptr );
+				ShaderBin& shaderBin = perm.second;
+#ifdef USE_VULKAN
+				vkDestroyShaderModule( context.device, shaderBin.vk_shader, nullptr );
+#endif
 			}
 		}
 	}

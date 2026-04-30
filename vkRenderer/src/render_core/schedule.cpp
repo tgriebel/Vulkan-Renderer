@@ -122,7 +122,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.clear = false;
 		info.resolve = true;
 		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
-		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT;
+		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT; // Resolve needs MRT currently since it resolves the gbuffer (if present)
 		info.outputImage = resources->mainColorResolvedImage;
 		info.outputImage1 = &resources->depthResolvedImageView;
 		info.context = renderContext;

@@ -118,20 +118,28 @@ bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
 		permPowerSet[ permIndex ] = shaderPermId_t::NONE;
 	}
 
-	for ( uint32_t permIndex = 0; permIndex < permIdCount; ++permIndex )
+	// Build superset of all permutations
+	shaderPermId_t superSet = shaderPermId_t::NONE;
+	for( uint32_t permIndex = 0; permIndex < permIdCount; ++permIndex )
 	{
-		shaderPermId_t permId = permList[ permIndex ];
-		if ( permId == shaderPermId_t::NONE ) {
+		superSet |= permList[ permIndex ];
+	}
+
+	// Build list of valid sets (i.e. powerset)
+	for ( uint32_t permIndex = 1; permIndex < GpuProgram::MaxPermutations; ++permIndex )
+	{
+		shaderPermId_t permSet = shaderPermId_t( permIndex );
+		if ( ( superSet & permSet ) != permSet ) {
 			continue;
 		}
-		program.permSet |= permId;
 
-		permPowerSet[ permSetCount ] = program.permSet;
+		permPowerSet[ permSetCount ] = permSet;
 		++permSetCount;
 	}
 
 	program.permCount = permSetCount;
 
+	// Go through the powerset and compile each specific combination
 	for ( uint32_t permSetIndex = 0; permSetIndex < permSetCount; ++permSetIndex )
 	{
 		const std::string vsBinName = GetBinName( vsFileName, permPowerSet[ permSetIndex ] );
@@ -140,8 +148,9 @@ bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
 		CheckCompileShader( srcPath + vsFileName, binPath + vsBinName, permPowerSet[ permSetIndex ], HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
 		CheckCompileShader( srcPath + psFileName, binPath + psBinName, permPowerSet[ permSetIndex ], HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
 
-		shaderSource_t& vs = program.shaders[ 0 ];
-		shaderBin_t& vsBin = program.shaderBins[ permSetIndex ][ 0 ];
+		const uint32_t shaderPermIndex = static_cast<uint32_t>( permPowerSet[ permSetIndex ] );
+		ShaderSource& vs = program.shaders[ 0 ];
+		ShaderBin& vsBin = program.shaderBins[ 0 ][ shaderPermIndex ];
 
 		vs.name = vsFileName;
 		vs.src = ReadTextFile( srcPath + vsFileName );
@@ -151,8 +160,8 @@ bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
 		vsBin.blob = ReadBinaryFile( binPath + vsBinName );
 		vsBin.type = shaderType_t::VERTEX;
 
-		shaderSource_t& ps = program.shaders[ 1 ];
-		shaderBin_t& psBin = program.shaderBins[ permSetIndex ][ 1 ];
+		ShaderSource& ps = program.shaders[ 1 ];
+		ShaderBin& psBin = program.shaderBins[ 1 ][ shaderPermIndex ];
 
 		ps.name = psFileName;
 		ps.src = ReadTextFile( srcPath + psFileName );
@@ -179,8 +188,8 @@ bool GpuProgramLoader::LoadComputeProgram( GpuProgram& program )
 
 	CheckCompileShader( srcPath + csFileName, binPath + csBinName, shaderPermId_t::NONE, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
 
-	shaderSource_t& cs = program.shaders[ 0 ];
-	shaderBin_t& csBin = program.shaderBins[ 0 ][ 0 ];
+	ShaderSource& cs = program.shaders[ 0 ];
+	ShaderBin& csBin = program.shaderBins[ 0 ][ 0 ];
 
 	cs.name = csFileName;
 	cs.src = ReadTextFile( srcPath + csFileName );
@@ -189,6 +198,9 @@ bool GpuProgramLoader::LoadComputeProgram( GpuProgram& program )
 	csBin.binName = csBinName;
 	csBin.blob = ReadBinaryFile( binPath + csBinName );
 	csBin.type = shaderType_t::COMPUTE;
+#ifdef USE_VULKAN
+	csBin.vk_shader = VK_NULL_HANDLE;
+#endif
 
 	return true;
 }

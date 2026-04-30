@@ -491,38 +491,41 @@ void DebugMenuTextureTreeNode( Asset<Image>* texAsset )
 }
 
 
-void DebugMenuShaderTreeNode( Asset<GpuProgram>* shaderAsset )
+void DebugMenuShaderTreeNode( Asset<GpuProgram>* progAsset )
 {
 	static ImGuiTableFlags tableFlags = ImguiStyle::TableFlags;
 
-	GpuProgram& shader = shaderAsset->Get();
-	const char* shaderName = shaderAsset->GetName().c_str();
-	if ( ImGui::TreeNode( shaderName ) )
+	GpuProgram& prog = progAsset->Get();
+	const char* progName = progAsset->GetName().c_str();
+	if ( ImGui::TreeNode( progName ) )
 	{
-		if ( ImGui::BeginTable( shaderName, 3, tableFlags ) )
+		if ( ImGui::BeginTable( progName, 3, tableFlags ) )
 		{
 			ImGui::TableSetupColumn( "Name" );
 			ImGui::TableSetupColumn( "Type" );
 			ImGui::TableSetupColumn( "Bytes" );
 			ImGui::TableHeadersRow();
 
-			for ( uint32_t i = 0; i < shader.shaderCount; ++i )
+			for ( uint32_t i = 0; i < prog.shaderCount; ++i )
 			{
+				ShaderBin& bin = prog.shaderBins[ i ].begin()->second;
+				ShaderSource& source = prog.shaders[ i ];
+
 				ImGui::TableNextRow();
 				ImGui::TableSetColumnIndex( 0 );
-				ImGui::Text( shader.shaders[ i ].name.c_str() );
+				ImGui::Text( source.name.c_str() );
 				ImGui::TableSetColumnIndex( 1 );
-				switch ( shader.shaderBins[ 0 ][ i ].type )
+				switch ( bin.type )
 				{
-				case VERTEX: ImGui::Text( "Vertex" ); break;
-				case PIXEL: ImGui::Text( "Pixel" ); break;
-				case COMPUTE: ImGui::Text( "Compute" ); break;
+					case VERTEX: ImGui::Text( "Vertex" ); break;
+					case PIXEL: ImGui::Text( "Pixel" ); break;
+					case COMPUTE: ImGui::Text( "Compute" ); break;
 				}
 				ImGui::TableSetColumnIndex( 2 );
-				ImGui::Text( "%u", shader.shaderBins[ 0 ][ i ].blob.size() );
+				ImGui::Text( "%u", bin.blob.size() );
 			}
 			if( ImGui::Button( "Reload" ) ) {
-				g_imguiControls.shaderHdl = shaderAsset->Handle();
+				g_imguiControls.shaderHdl = progAsset->Handle();
 			}
 			ImGui::EndTable();
 		}

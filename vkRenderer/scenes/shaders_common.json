@@ -11,7 +11,8 @@
     {
       "name": "Basic",
       "vs": "simple",
-      "ps": "simple"
+      "ps": "simple",
+      "perms": ["mrt"]
     },
     {
       "name": "Shadow",
@@ -27,12 +28,14 @@
     {
       "name": "Terrain",
       "vs": "terrain",
-      "ps": "terrain"
+      "ps": "terrain",
+      "perms": ["mrt"]
     },
     {
       "name": "TerrainDepth",
       "vs": "terrain",
-      "ps": "depth"
+      "ps": "depth",
+      "perms": ["mrt"]
     },
     {
       "name": "TerrainShadow",
@@ -43,7 +46,7 @@
       "name": "Sky",
       "vs": "skybox",
       "ps": "skybox",
-      "perms": ["skycube"]
+      "perms": ["skycube", "mrt"]
     },
 	{
 	  "name": "EquirectangularSampler",
@@ -53,7 +56,8 @@
 	{
       "name": "LitDiffuse",
       "vs": "simple",
-      "ps": "litViewDiffuse"
+      "ps": "litViewDiffuse",
+      "perms": ["mrt"]
     },
     {
       "name": "LitOpaque",
@@ -65,18 +69,14 @@
       "name": "LitTree",
       "vs": "tree",
       "ps": "lit",
-	  "perms": ["mrt"]
+	  "perms": ["mrt"],
+      "perms": ["mrt"]
     },
     {
       "name": "LitTrans",
       "vs": "simple",
       "ps": "lit",
-	  "perms": ["mrt"]
-    },
-    {
-      "name": "Debug",
-      "vs": "simple",
-      "ps": "depth"
+      "perms": ["mrt"]
     },
     {
       "name": "PostProcess",

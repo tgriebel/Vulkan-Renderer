@@ -7,6 +7,7 @@
 #include <SysCore/common.h>
 
 #include "asset.h"
+#include "../globals/common.h"
 
 class ShaderBindSet;
 class Serializer;
@@ -72,20 +73,33 @@ static const shaderPerm_t ShaderPerms[] = {	SHADER_PERM( USE_MSAA,			MSAA,				"m
 											SHADER_PERM( USE_CUBE_SAMPLER,	SKY_CUBE_SAMPLER,	"skycube" )};
 
 
-struct shaderSource_t
+class ShaderSource
 {
+public:
 	std::string			name;
 	std::vector<char>	src;
 	shaderType_t		type;
 };
 
 
-struct shaderBin_t
+class ShaderBin
 {
+public:
+
+	ShaderBin()
+	{
+		type = shaderType_t::UNSPECIFIED;
+#ifdef USE_VULKAN
+		vk_shader = VK_NULL_HANDLE;
+#endif
+	}
+
 	std::string			binName;
 	std::vector<char>	blob;
 	shaderType_t		type;
-
+#ifdef USE_VULKAN
+	VkShaderModule		vk_shader;
+#endif
 };
 
 
@@ -128,6 +142,9 @@ static const shaderPerm_t* FindPerm( const std::string& perm )
 class GpuProgram
 {
 public:
+
+	using ShaderPermMap = std::unordered_map<uint32_t, ShaderBin>;
+
 	static const uint32_t MaxShaders = 2;
 	static const uint32_t MaxBindSets = 5;
 	static const uint32_t MaxPermutations = ( 1 << static_cast<uint32_t>( shaderPermId_t::COUNT ) );
@@ -139,11 +156,10 @@ public:
 	uint32_t				permCount;		// Number of unique permutation combinations
 	shaderFlags_t			flags;
 	shaderPermId_t			permSet;		// Superset of all available permutations. Subsets can be selected
-	shaderSource_t			shaders[ MaxShaders ];
-	shaderBin_t				shaderBins[ MaxPermutations ][ MaxShaders ];
-#ifdef USE_VULKAN
-	VkShaderModule			vk_shaders[ MaxPermutations ][ MaxShaders ];
-#endif
+	ShaderSource			shaders[ MaxShaders ];
+			
+	ShaderPermMap			shaderBins[ MaxShaders ];
+
 	const ShaderBindSet*	bindsets[ MaxBindSets ];
 
 	friend class LoadHandler<GpuProgram>;
@@ -155,6 +171,7 @@ public:
 		shaderCount = 0;
 		bindHash = 0;
 		permCount = 0;
+		bindsetCount = 0;
 		flags = shaderFlags_t::NONE;
 		permSet = shaderPermId_t::NONE;
 
@@ -163,16 +180,9 @@ public:
 			bindsets[ bindIndex ] = nullptr;
 		}
 
-		for ( uint32_t permIndex = 0; permIndex < GpuProgram::MaxPermutations; ++permIndex )
+		for( uint32_t shaderIndex = 0; shaderIndex < GpuProgram::MaxShaders; ++shaderIndex )
 		{
-			for ( uint32_t shaderIndex = 0; shaderIndex < GpuProgram::MaxShaders; ++shaderIndex )
-			{
-				shaders[ shaderIndex ] = {};
-				shaderBins[ permIndex ][ shaderIndex ] = {};
-#ifdef USE_VULKAN
-				vk_shaders[ permIndex ][ shaderIndex ] = VK_NULL_HANDLE;
-#endif
-			}
+			shaderBins[ shaderIndex ].clear();
 		}
 	}
 
