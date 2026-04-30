@@ -245,7 +245,7 @@ static Material TranslateObjMaterial( AssetManager& assets, const tinyobj::mater
 	if ( material.dissolve == 1.0f )
 	{
 		outMaterial.AddShader( DRAWPASS_SHADOW, AssetLib<GpuProgram>::Handle( "Shadow" ) );
-		outMaterial.AddShader( DRAWPASS_DEPTH, AssetLib<GpuProgram>::Handle( "LitDepth" ) );
+		outMaterial.AddShader( DRAWPASS_DEPTH, AssetLib<GpuProgram>::Handle( "Prepass" ) );
 		outMaterial.AddShader( DRAWPASS_OPAQUE, AssetLib<GpuProgram>::Handle( "LitOpaque" ) );
 	}
 	else
@@ -598,7 +598,7 @@ static Material TranslateGltfMaterial( AssetManager& assets, const cgltf_materia
 	else
 	{
 		outMaterial.AddShader( DRAWPASS_SHADOW, AssetLib<GpuProgram>::Handle( "Shadow" ) );
-		outMaterial.AddShader( DRAWPASS_DEPTH,  AssetLib<GpuProgram>::Handle( "LitDepth" ) );
+		outMaterial.AddShader( DRAWPASS_DEPTH,  AssetLib<GpuProgram>::Handle( "Prepass" ) );
 		outMaterial.AddShader( DRAWPASS_OPAQUE, AssetLib<GpuProgram>::Handle( "LitOpaque" ) );
 	}
 	outMaterial.AddShader( DRAWPASS_DEBUG_WIREFRAME, AssetLib<GpuProgram>::Handle( "Debug" ) );

@@ -45,7 +45,7 @@ vsToPsInterpolators VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint i
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
     output.clipPosition = clipPos;
-    output.preClipPosition = prevClipPos;
+    output.prevClipPosition = prevClipPos;
 
 	return output;
 }

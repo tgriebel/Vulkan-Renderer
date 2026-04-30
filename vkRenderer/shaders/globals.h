@@ -101,7 +101,7 @@ struct vsToPsInterpolators
 	BIND_SLOT( 6 )	float2 uv1						: TEXCOORD6;
 	BIND_SLOT( 7 )	float3 objectPosition			: TEXCOORD7;
 	BIND_SLOT( 8 )	float4 clipPosition				: TEXCOORD8;
-	BIND_SLOT( 9 )	float4 preClipPosition			: TEXCOORD9;
+	BIND_SLOT( 9 )	float4 prevClipPosition			: TEXCOORD9;
 	BIND_SLOT( 10 )	float4 worldPosition			: TEXCOORD10;
 	BIND_SLOT( 11 )	nointerpolation uint objectId	: TEXCOORD11;
 };
