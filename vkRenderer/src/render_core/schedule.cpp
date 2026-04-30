@@ -118,6 +118,26 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	{
 		imageShaderCreateInfo_t info = {};
+		info.name = "ResolvePostDepth";
+		info.clear = false;
+		info.resolve = true;
+		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
+		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT; // Resolve needs MRT currently since it resolves the gbuffer (if present)
+		info.outputImage = resources->gBufferLayerResolvedImage0;
+		info.outputImage1 = &resources->depthResolvedImageView;
+		info.context = renderContext;
+		info.resources = resources;
+		info.inputImages = 3;
+
+		tasks.resolvePostDepth = new ImageShaderTask( info );
+
+		tasks.resolvePostDepth->SetSourceImage( 0, resources->gBufferLayerImage0 );
+		tasks.resolvePostDepth->SetSourceImage( 1, &resources->depthImageView );
+		tasks.resolvePostDepth->SetSourceImage( 2, &resources->stencilImageView );
+	}
+
+	{
+		imageShaderCreateInfo_t info = {};
 		info.name = "ResolveMain";
 		info.clear = false;
 		info.resolve = true;
@@ -337,7 +357,13 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	for( uint32_t i = 0; i < MaxShadowViews; ++i ) {
 		schedule->Link( new RenderTask( viewContext->shadowViews[ i ], DRAWPASS_SHADOW_BEGIN, DRAWPASS_SHADOW_END ) );
 	}
-	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
+	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_DEPTH, DRAWPASS_DEPTH ) );
+	if( tasks.resolvePostDepth )
+	{
+		schedule->Link( tasks.resolvePostDepth );
+	}
+	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
+
 	if( config.useCubeViews ) {
 		schedule->Link( new RenderTask( viewContext->renderViews[ 1 ], DRAWPASS_MAIN_BEGIN, DRAWPASS_MAIN_END ) );
 

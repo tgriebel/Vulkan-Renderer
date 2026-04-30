@@ -32,6 +32,7 @@ struct availableTasks_t
 
 	// Core frame
 	ImageShaderTask*	resolve							= nullptr;
+	ImageShaderTask*	resolvePostDepth				= nullptr;
 	ImageReadbackTask*	screenshotReadback				= nullptr;
 
 	// Post-Process

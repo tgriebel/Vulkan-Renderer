@@ -39,7 +39,8 @@ public:
 	Image*					mainColorImage;
 	Image*					cubeFbColorImage;
 	Image*					cubeFbDepthImage;
-	Image*					gBufferLayerImage;
+	Image*					gBufferLayerImage0;
+	Image*					gBufferLayerImage1;
 	Image*					depthStencilImage;
 	Image*					velocityImage;
 	ImageView				depthImageView;
@@ -50,6 +51,8 @@ public:
 	ImageView				stencilResolvedImageView;
 	Image*					shadowMapImage[ MaxShadowViews ];
 	Image*					mainColorResolvedImage;
+	Image*					gBufferLayerResolvedImage0;
+	Image*					gBufferLayerResolvedImage1;
 	Image*					bloom;
 	Image*					blurredImage;
 	Image*					tempColorImage;
@@ -69,7 +72,8 @@ public:
 		mainColorImage = NextImage();
 		cubeFbColorImage = NextImage();
 		cubeFbDepthImage = NextImage();
-		gBufferLayerImage = NextImage();
+		gBufferLayerImage0 = NextImage();
+		gBufferLayerImage1 = NextImage();
 		depthStencilImage = NextImage();
 		velocityImage = NextImage();
 
@@ -78,6 +82,8 @@ public:
 			shadowMapImage[ i ] = NextImage();
 		}
 		mainColorResolvedImage = NextImage();
+		gBufferLayerResolvedImage0 = NextImage();
+		gBufferLayerResolvedImage1 = NextImage();
 		blurredImage = NextImage();
 		bloom = NextImage();
 		tempColorImage = NextImage();

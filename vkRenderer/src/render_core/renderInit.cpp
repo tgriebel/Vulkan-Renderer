@@ -117,7 +117,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.color0 = resources.mainColorImage;
-		info.fbImages.color1 = resources.gBufferLayerImage;
+		info.fbImages.color1 = resources.gBufferLayerImage0;
 		info.fbImages.depth = &resources.depthImageView;
 		info.fbImages.stencil = &resources.stencilImageView;
 
@@ -654,11 +654,11 @@ void Renderer::CreateFramebuffers()
 		resources.shadowMapImage[ shadowIx ]->Create(
 			info,
 			nullptr,
-			new GpuImage( "shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
-	// Main images
+	// Main Scene Render Images
 	{
 		imageInfo_t info{};
 		info.width = width;
@@ -674,13 +674,19 @@ void Renderer::CreateFramebuffers()
 		resources.mainColorImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 		
-		resources.gBufferLayerImage->Create(
+		resources.gBufferLayerImage0->Create(
 			info,
 			nullptr,
-			new GpuImage( "gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
+		);
+
+		resources.gBufferLayerImage1->Create(
+			info,
+			nullptr,
+			new GpuImage( "FB_gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
@@ -690,7 +696,7 @@ void Renderer::CreateFramebuffers()
 		resources.depthStencilImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -713,7 +719,7 @@ void Renderer::CreateFramebuffers()
 		resources.cubeFbColorImage->Create(
 			colorInfo,
 			nullptr,
-			new GpuImage( "cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 
 		imageInfo_t depthInfo = colorInfo;
@@ -723,11 +729,11 @@ void Renderer::CreateFramebuffers()
 		resources.cubeFbDepthImage->Create(
 			depthInfo,
 			nullptr,
-			new GpuImage( "cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
-	// Resolve image
+	// Post-Scene Render Images
 	{
 		imageInfo_t info{};
 		info.width = width;
@@ -743,13 +749,27 @@ void Renderer::CreateFramebuffers()
 		resources.mainColorResolvedImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
+		);
+
+		info.fmt = resources.gBufferLayerImage0->info.fmt;
+		resources.gBufferLayerResolvedImage0->Create(
+			info,
+			nullptr,
+			new GpuImage( "FB_gBufferLayerResolvedImage0", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
+		);
+
+		info.fmt = resources.gBufferLayerImage1->info.fmt;
+		resources.gBufferLayerResolvedImage1->Create(
+			info,
+			nullptr,
+			new GpuImage( "FB_gBufferLayerResolvedImage1", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 
 		resources.blurredImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -780,7 +800,7 @@ void Renderer::CreateFramebuffers()
 		resources.depthStencilImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "velocity", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_velocity", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -800,7 +820,7 @@ void Renderer::CreateFramebuffers()
 		resources.depthStencilResolvedImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_depthStencilResolvedImage", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -826,7 +846,7 @@ void Renderer::CreateFramebuffers()
 		resources.bloom->Create(
 			info,
 			nullptr,
-			new GpuImage( "bloom", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_bloom", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -846,7 +866,7 @@ void Renderer::CreateFramebuffers()
 		resources.tempColorImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_tempColor", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -866,7 +886,7 @@ void Renderer::CreateFramebuffers()
 		resources.previousLum->Create(
 			info,
 			nullptr,
-			new GpuImage( "previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 
@@ -886,7 +906,7 @@ void Renderer::CreateFramebuffers()
 		resources.currentLum->Create(
 			info,
 			nullptr,
-			new GpuImage( "currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 }
