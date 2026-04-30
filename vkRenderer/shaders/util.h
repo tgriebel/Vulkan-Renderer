@@ -1,6 +1,13 @@
 #ifndef UTIL_HLSL_H
 #define UTIL_HLSL_H
 
+#ifndef PI
+#define PI              3.14159265359f
+#endif
+#ifndef INV_PI
+#define INV_PI          ( 1.0f / PI )
+#endif
+
 int2 GetTextureSize( Texture2D tex, int mipLevel )
 {
 	uint w, h, levels;
@@ -40,9 +47,72 @@ float3 CubeVector( const float3 v )
 }
 
 
+float3 EncodeNormal( const float3 normalMapTexel )
+{
+	return ( 0.5f * normalMapTexel + float3( 0.5f, 0.5f, 0.5f ) );
+}
+
+
 float3 DecodeNormal( const float3 normalMapTexel )
 {
 	return ( 2.0f * normalMapTexel - float3( 1.0f, 1.0f, 1.0f ) );
+}
+
+
+// https://knarkowicz.wordpress.com/2014/04/16/octahedron-normal-vector-encoding/
+// Spherical and Octehedral encoding
+float2 EncodeSpherical( const float3 n )
+{
+	float2 f;
+	f.x = INV_PI * atan2( n.y, n.x );
+	f.y = n.z;
+
+	f = 0.5f * f + float2( 0.5f, 0.5f );
+	return f;
+}
+
+
+float3 DecodeSpherical( const float2 f )
+{
+	const float2 ang = f * 2.0f - 1.0f;
+
+	float2 scth;
+	sincos( PI * ang.x, scth.x, scth.y );
+	float2 scphi = float2( sqrt( 1.0f - ang.y * ang.y ), ang.y );
+
+	float3 n;
+	n.x = scth.y * scphi.x;
+	n.y = scth.x * scphi.x;
+	n.z = scphi.y;
+	return n;
+}
+
+
+float2 OctWrap( const float2 v )
+{
+	return ( 1.0f - abs( v.yx ) ) * ( step( 0.0f, v ) * 2.0f - 1.0f );
+}
+
+
+float2 OctEncode( const float3 n )
+{
+	float3 outV = n;
+	outV /= ( abs( n.x ) + abs( n.y ) + abs( n.z ) );
+	outV.xy = outV.z >= 0.0 ? outV.xy : OctWrap( outV.xy );
+	outV.xy = outV.xy * 0.5 + 0.5;
+	return outV.xy;
+}
+
+
+float3 OctDecode( const float2 f )
+{
+	float2 enc = 2.0f * f - float2( 1.0f, 1.0f );
+
+	// https://twitter.com/Stubbesaurus/status/937994790553227264
+	float3 n = float3( enc.x, enc.y, 1.0f - abs( enc.x ) - abs( enc.y ) );
+	float t = saturate( -n.z );
+	n.xy += select( n.xy >= 0.0f, -t, t );
+	return normalize( n );
 }
 
 
@@ -99,18 +169,18 @@ float3 ReconstructViewPos( const float2 uv, const float zDepth, const float4x4 p
 
 
 // https://atyuwen.github.io/posts/normal-reconstruction/
-float3 ReconstructNormal( Texture2D depthBufer, SamplerState sampler, const float2 uv, const float4 dimensions, const float4x4 proj )
+float3 ReconstructNormal( Texture2D depthBuffer, SamplerState samp, const float2 uv, const float4 dimensions, const float4x4 proj )
 {
 	const float2 ts = float2( dimensions.z, dimensions.w );
 
-	const float dR = depthBufer.SampleLevel( sampler, uv + float2( ts.x, 0.0f ), 0 ).r;
-	const float dL = depthBufer.SampleLevel( sampler, uv + float2( -ts.x, 0.0f ), 0 ).r;
-	const float dU = depthBufer.SampleLevel( sampler, uv + float2( 0.0f, ts.y ), 0 ).r;
-	const float dD = depthBufer.SampleLevel( sampler, uv + float2( 0.0f, -ts.y ), 0 ).r;
+	const float dR = depthBuffer.SampleLevel( samp, uv + float2(  ts.x, 0.0f ), 0 ).r;
+	const float dL = depthBuffer.SampleLevel( samp, uv + float2( -ts.x, 0.0f ), 0 ).r;
+	const float dU = depthBuffer.SampleLevel( samp, uv + float2( 0.0f,  ts.y ), 0 ).r;
+	const float dD = depthBuffer.SampleLevel( samp, uv + float2( 0.0f, -ts.y ), 0 ).r;
 
-	const float3 pR = ReconstructViewPos( uv + float2( ts.x, 0.0f ), dR, proj );
+	const float3 pR = ReconstructViewPos( uv + float2(  ts.x, 0.0f ), dR, proj );
 	const float3 pL = ReconstructViewPos( uv + float2( -ts.x, 0.0f ), dL, proj );
-	const float3 pU = ReconstructViewPos( uv + float2( 0.0f, ts.y ), dU, proj );
+	const float3 pU = ReconstructViewPos( uv + float2( 0.0f,  ts.y ), dU, proj );
 	const float3 pD = ReconstructViewPos( uv + float2( 0.0f, -ts.y ), dD, proj );
 
 	// Pick the horizontal and vertical pair with the smaller depth discontinuity

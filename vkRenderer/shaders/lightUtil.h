@@ -1,6 +1,8 @@
 #ifndef LIGHT_UTIL_HLSL_H
 #define LIGHT_UTIL_HLSL_H
 
+#include "util.h"
+
 // https://learnopengl.com/PBR/IBL/Specular-IBL
 float RadicalInverse_VdC( uint bits )
 {
