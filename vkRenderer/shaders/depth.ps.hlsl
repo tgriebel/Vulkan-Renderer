@@ -14,7 +14,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     
 	output.outColor = float4( 1.0f, 0.0f, 0.0f, 1.0f );
     
-#ifdef VELOCITY_IN_DEPTH
+#ifdef VELOCITY_IN_PREPASS
     const float2 current = input.clipPosition.xy / input.clipPosition.w;
     const float2 previous = input.prevClipPosition.xy / input.prevClipPosition.w;
 
