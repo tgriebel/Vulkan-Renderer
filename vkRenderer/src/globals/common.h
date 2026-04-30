@@ -1,18 +1,29 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
+#if defined( RENDERER )
+	#define USE_VULKAN
+	#define USE_VULKAN_RTX
+	#define USE_IMGUI
+	#define USE_GLFW
+	#define USE_TINYFD
+#elif defined( BAKER )
+	// no GPU API features needed for the baker
+#endif
+
+#if defined( USE_GLFW )
+	#define GLFW_INCLUDE_VULKAN
+#endif
+
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
 #undef near
 #undef far
-#include <GLFW/glfw3.h>
 
-#define USE_VULKAN
-#define USE_VULKAN_RTX
-#define USE_IMGUI
-#define USE_GLFW
-#define USE_TINYFD
+#if defined( USE_GLFW )
+	#include <GLFW/glfw3.h>
+#endif
+
 
 #include <iostream>
 #include <stdexcept>
