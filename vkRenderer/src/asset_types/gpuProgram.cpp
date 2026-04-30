@@ -1,6 +1,40 @@
 #include "gpuProgram.h"
+#include "../render_state/rhi.h"
 
 using namespace SysCore;
+
+void GpuProgram::CreateApiObjects()
+{
+	for( uint32_t shaderIx = 0; shaderIx < shaderCount; ++shaderIx )
+	{
+		GpuProgram::ShaderPermMap& shaderMap = shaderBins[ shaderIx ];
+		for( auto permIt = shaderMap.begin(); permIt != shaderMap.end(); ++permIt )
+		{
+#ifdef USE_VULKAN
+			permIt->second.vk_shader = vk_CreateShaderModule( permIt->second.blob, permIt->second.binName.c_str() );
+#endif
+		}
+	}
+}
+
+
+void GpuProgram::DestroyApiObjects()
+{
+	for( uint32_t shaderIx = 0; shaderIx < shaderCount; ++shaderIx )
+	{
+		for( auto perm : shaderBins[ shaderIx ] )
+		{
+			ShaderBin& shaderBin = perm.second;
+#ifdef USE_VULKAN
+			if( shaderBin.vk_shader != VK_NULL_HANDLE )
+			{
+				vkDestroyShaderModule( context.device, shaderBin.vk_shader, nullptr );
+			}
+#endif
+		}
+	}
+}
+
 
 std::string GpuProgramLoader::GetBinName( const std::string& fileName, const shaderPermId_t permSet )
 {

@@ -508,46 +508,17 @@ void Renderer::BuildPipelines()
 
 	FlushGPU();
 
-	// 2. Destroy shaders
+	// 2. Recreate shaders
 	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
 		GpuProgram& prog = progAsset->Get();
 
-		for( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
-		{
-			for( auto perm : prog.shaderBins[ shaderIx ] )
-			{
-				ShaderBin& shaderBin = perm.second;
-#ifdef USE_VULKAN
-				if ( shaderBin.vk_shader != VK_NULL_HANDLE )
-				{
-					vkDestroyShaderModule( context.device, shaderBin.vk_shader, nullptr );
-				}
-#endif
-			}
-		}
+		prog.DestroyApiObjects();
+		prog.CreateApiObjects();
 	}
 
-	// 3. Create shaders
-	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
-	{
-		Asset<GpuProgram>* progAsset = *it;
-		GpuProgram& prog = progAsset->Get();
-
-		for( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
-		{
-			GpuProgram::ShaderPermMap& shaderMap = prog.shaderBins[ shaderIx ];
-			for ( auto permIt = shaderMap.begin(); permIt != shaderMap.end(); ++permIt )
-			{
-#ifdef USE_VULKAN
-				permIt->second.vk_shader = vk_CreateShaderModule( permIt->second.blob, permIt->second.binName.c_str() );
-#endif
-			}
-		}
-	}
-
-	// 4. Collect all passes in active views
+	// 3. Collect all passes in active views
 	std::vector<const DrawPass*> passes;
 	passes.reserve( MaxViews * DRAWPASS_COUNT );
 
@@ -570,7 +541,7 @@ void Renderer::BuildPipelines()
 		}
 	}
 
-	// 5. Destroy pipelines. Own pass so cache isn't destroyed per iteration
+	// 4. Destroy pipelines. Own pass so cache isn't destroyed per iteration
 	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
@@ -610,7 +581,7 @@ void Renderer::BuildPipelines()
 		}
 	}
 
-	// 6. Create pipelines
+	// 5. Create pipelines
 	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;

@@ -97,16 +97,7 @@ void Renderer::ShutdownShaderResources()
 	{
 		GpuProgram& prog = GpuProgramLib().Find( i )->Get();
 
-		for ( uint32_t shaderIx = 0; shaderIx < prog.shaderCount; ++shaderIx )
-		{
-			for( auto perm : prog.shaderBins[ shaderIx ] )
-			{
-				ShaderBin& shaderBin = perm.second;
-#ifdef USE_VULKAN
-				vkDestroyShaderModule( context.device, shaderBin.vk_shader, nullptr );
-#endif
-			}
-		}
+		prog.DestroyApiObjects();
 	}
 
 	renderContext.FreeRegisteredBindParms();

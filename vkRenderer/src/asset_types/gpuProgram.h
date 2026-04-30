@@ -160,6 +160,9 @@ public:
 			
 	ShaderPermMap			shaderBins[ MaxShaders ];
 
+	void CreateApiObjects();
+	void DestroyApiObjects();
+
 	const ShaderBindSet*	bindsets[ MaxBindSets ];
 
 	friend class LoadHandler<GpuProgram>;
