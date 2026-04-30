@@ -5,11 +5,12 @@
 #include "../render_tasks/ImageProcessTask.h"
 #include "../render_tasks/ImageReadbackTask.h"
 #include "../render_tasks/RenderTask.h"
+#include "../render_tasks/UtilTasks.h"
 #include "../render_tasks/imguiTask.h"
 
 static availableTasks_t tasks;
 
-void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, RenderSchedule* schedule )
+void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
 {
 	SCOPED_TIMER_PRINT( ScheduleBuild, MILLISECOND )
 

@@ -11,6 +11,7 @@
 #include "../render_core/renderResource.h"
 
 #include "../render_tasks/RenderTask.h"
+#include "../render_tasks/TaskSchedule.h"
 
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
@@ -79,7 +80,7 @@ public:
 	void								ShutdownGPU();
 	void								Resize();
 
-	inline void							SetSchedule( const RenderSchedule* schedule )
+	inline void							SetSchedule( const TaskSchedule* schedule )
 	{
 
 	}
@@ -104,7 +105,7 @@ private:
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
-	RenderSchedule						schedule;
+	TaskSchedule						schedule;
 
 	// Timers
 	SysCore::Timer						frameTimer;

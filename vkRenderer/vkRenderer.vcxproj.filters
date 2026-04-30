@@ -207,6 +207,12 @@
     <ClCompile Include="src\render_core\resourceContext.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_tasks\taskSchedule.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_tasks\UtilTasks.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -448,6 +454,12 @@
     </ClInclude>
     <ClInclude Include="src\render_core\resourceContext.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\taskSchedule.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\UtilTasks.h">
+      <Filter>Tasks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

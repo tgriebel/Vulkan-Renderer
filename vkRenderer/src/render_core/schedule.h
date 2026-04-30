@@ -44,4 +44,4 @@ struct availableTasks_t
 	ImageProcessTask*	bloomUpsampleTask				= nullptr;
 };
 
-void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, RenderSchedule* schedule );
+void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, TaskSchedule* schedule );

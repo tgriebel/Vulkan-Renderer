@@ -238,6 +238,8 @@
     <ClInclude Include="src\render_resources\imageArray.h" />
     <ClInclude Include="src\render_resources\imageSampler.h" />
     <ClInclude Include="src\render_resources\imageView.h" />
+    <ClInclude Include="src\render_tasks\taskSchedule.h" />
+    <ClInclude Include="src\render_tasks\UtilTasks.h" />
     <ClInclude Include="src\scene\assetBaker.h" />
     <ClInclude Include="src\scene\assetManager.h" />
     <ClInclude Include="src\scene\camera.h" />
@@ -313,6 +315,7 @@
     <ClCompile Include="src\render_resources\imageArray.cpp" />
     <ClCompile Include="src\render_resources\imageSampler.cpp" />
     <ClCompile Include="src\render_resources\imageView.cpp" />
+    <ClCompile Include="src\render_tasks\UtilTasks.cpp" />
     <ClCompile Include="src\scene\assetBaker.cpp" />
     <ClCompile Include="src\scene\camera.cpp" />
     <ClCompile Include="src\scene\codeAssets.cpp" />
@@ -355,6 +358,7 @@
     <ClCompile Include="src\render_tasks\imageProcessTask.cpp" />
     <ClCompile Include="src\render_tasks\imguiTask.cpp" />
     <ClCompile Include="src\render_tasks\RenderTask.cpp" />
+    <ClCompile Include="src\render_tasks\taskSchedule.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
