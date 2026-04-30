@@ -195,10 +195,6 @@
     <ClInclude Include="scenes\nesScene.h" />
     <ClInclude Include="scenes\sceneParser.h" />
     <ClInclude Include="scenes\tomtendoCore.h" />
-    <FxCompile Include="shaders\color.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="shaders\globals.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

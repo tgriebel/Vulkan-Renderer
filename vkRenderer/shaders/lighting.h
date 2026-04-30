@@ -2,6 +2,7 @@
 #define LIGHT_HLSL_H
 
 #include "globals.h"
+#include "util.h"
 
 // Three structs here used to represent data respective of the lighting equation
 // surfaceInput_t: Data from the current surface/pixel sample (one per shader invocation)
@@ -104,52 +105,6 @@ float ShadowPCF( Texture2D shadowMap, SamplerComparisonState samp,
 }
 
 
-float4 SampleTexture( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
-{
-	const int textureUploadId = material.textureId[ materialTextureSlot ];
-	const uint channel = min( MaxTextureUVs - 1, material.uvChannel[ materialTextureSlot ] );
-
-	if( textureUploadId >= 0 )
-	{
-		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[materialTextureSlot];
-
-		return globalTextures[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv );
-
-	}
-	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
-}
-
-
-float4 SampleTextureSrgb( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
-{
-	const int textureUploadId = material.textureId[ materialTextureSlot ];
-	const uint channel = min( MaxTextureUVs - 1, material.uvChannel[ materialTextureSlot ] );
-
-	if( textureUploadId >= 0 )
-	{
-		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
-
-		return SrgbToLinear( globalTextures[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv.xy ) );
-	}
-	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
-}
-
-
-float3 SampleTextureNormal( const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
-{
-	const int textureUploadId = material.textureId[ materialTextureSlot ];
-	const uint channel = min( MaxTextureUVs - 1, material.uvChannel[ materialTextureSlot ] );
-
-	if( textureUploadId >= 0 )
-	{
-		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
-
-		return DecodeNormal( globalTextures[ textureUploadId ].Sample( bilinearSamplerWrap, transformedUv ).xyz );
-	}
-	return float3( 0.0f, 0.0f, 1.0f );
-}
-
-
 surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_t view, const gpuSurface_t surface, const gpuMaterial_t material, const vsToPsInterpolators input )
 {
 	const float3 specularColor = material.Ks.rgb;
@@ -177,31 +132,31 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 
 	if( isTextured )
 	{
-		albedoSample *= SampleTextureSrgb( material, GGX_ALBEDO_MAP_SLOT, uv ).rgb;
+		albedoSample *= SampleTextureSrgb( globalTextures, bilinearSamplerWrap, material, GGX_ALBEDO_MAP_SLOT, uv ).rgb;
 
-		normalSample = SampleTextureNormal( material, GGX_NORMAL_MAP_SLOT, uv ).xyz;
+		normalSample = SampleTextureNormal( globalTextures, bilinearSamplerWrap, material, GGX_NORMAL_MAP_SLOT, uv ).xyz;
 
-		roughnessSample *= SampleTexture( material, GGX_ROUGHNESS_MAP_SLOT, uv ).g;
+		roughnessSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_ROUGHNESS_MAP_SLOT, uv ).g;
 
-		metalnessSample *= SampleTexture( material, GGX_METALLIC_MAP_SLOT, uv ).b;
+		metalnessSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_METALLIC_MAP_SLOT, uv ).b;
 
-		aoSample *= SampleTexture( material, GGX_AO_MAP_SLOT, uv ).r;
+		aoSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_AO_MAP_SLOT, uv ).r;
 
-		emissiveSample *= SampleTextureSrgb( material, GGX_EMISSIVE_MAP_SLOT, uv ).rgb;
+		emissiveSample *= SampleTextureSrgb( globalTextures, bilinearSamplerWrap, material, GGX_EMISSIVE_MAP_SLOT, uv ).rgb;
 
-		ccSample *= SampleTexture( material, GGX_CC_MAP_SLOT, uv ).r;
+		ccSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_CC_MAP_SLOT, uv ).r;
 
-		ccRoughnessSample *= SampleTexture( material, GGX_CC_ROUGHNESS_MAP_SLOT, uv ).r;
+		ccRoughnessSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_CC_ROUGHNESS_MAP_SLOT, uv ).r;
 
-		ccNormalSample *= SampleTextureNormal( material, GGX_CC_NML_MAP_SLOT, uv ).xyz;
+		ccNormalSample *= SampleTextureNormal( globalTextures, bilinearSamplerWrap, material, GGX_CC_NML_MAP_SLOT, uv ).xyz;
 
-		sheenSample *= SampleTextureSrgb( material, GGX_SHEEN_COLOR_MAP_SLOT, uv ).rgb;
+		sheenSample *= SampleTextureSrgb( globalTextures, bilinearSamplerWrap, material, GGX_SHEEN_COLOR_MAP_SLOT, uv ).rgb;
 
-		sheenRoughnessSample *= SampleTexture( material, GGX_SHEEN_ROUGHNESS_MAP_SLOT, uv ).r;
+		sheenRoughnessSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_SHEEN_ROUGHNESS_MAP_SLOT, uv ).r;
 
-		anisotropySample *= SampleTexture( material, GGX_ANISOTROPY_MAP_SLOT, uv ).r;
+		anisotropySample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_ANISOTROPY_MAP_SLOT, uv ).r;
 
-		transmissionSample *= SampleTexture( material, GGX_TRANSMISSION_MAP_SLOT, uv ).r;
+		transmissionSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_TRANSMISSION_MAP_SLOT, uv ).r;
 	}
 
 	const float normalBlendFactor = 1.0f;

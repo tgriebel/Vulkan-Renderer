@@ -1,15 +1,16 @@
 #include "globals.h"
+#include "util.h"
 
 PS_LAYOUT_STANDARD( Texture2D )
 
 #ifdef USE_MRT
-#define VELOCITY_IN_DEPTH
+#define VELOCITY_IN_PREPASS
+#define NORMAL_IN_PREPASS
 #endif
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
 	psOutput_t output = (psOutput_t)0;
-    const uint materialId = pushConstants.materialId;
     
 	output.outColor = float4( 1.0f, 0.0f, 0.0f, 1.0f );
     
@@ -19,8 +20,27 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     const float2 velocity = ( current - previous ) * 0.5f;
     
-    output.outColor1 = float4( 1.0f, 1.0f, 0.0f, 1.0f );
+    output.outColor1.rg = velocity.xy;
 #endif
     
+#ifdef NORMAL_IN_PREPASS
+    const uint materialId = pushConstants.materialId;
+	const gpuMaterial_t material = materials[ materialId ];
+
+	float3 normalSample = float3( 0.0f, 0.0f, 1.0f );
+
+	const float2 uv[ 2 ] = { input.uv0.xy, input.uv1.xy };
+
+	const bool isTextured = ( material.textured != 0 ) && ( globals.isTextured != 0 );
+
+	if( isTextured ) {
+		normalSample = SampleTextureNormal( globalTextures, bilinearSamplerWrap, material, GGX_NORMAL_MAP_SLOT, uv );
+    }
+    
+    const float3 normal = ComputeNormalWS( normalSample, input.tangent, input.bitangent, input.TBN2 );
+    
+    output.outColor1.ba = OctEncode( normal );
+#endif    
+
 	return output;
 }

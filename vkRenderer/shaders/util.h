@@ -31,6 +31,7 @@ uint GetTextureLevelsCube( TextureCube tex )
 	return levels;
 }
 
+
 // GLSL mat4() fills columns-first; HLSL float4x4() fills rows-first.
 // This is the transposed form so it matches the GLSL glslSpace matrix.
 static const float4x4 glslSpace = float4x4(
@@ -205,6 +206,94 @@ float InterleavedGradientNoise( float2 screenPos )
 {
 	const float3 k = float3( 0.06711056f, 0.00583715f, 52.9829189f );
 	return frac( k.z * frac( dot( screenPos, k.xy ) ) );
+}
+
+
+float SrgbToLinear( float value )
+{
+	return ( value <= 0.04045f ) ? value / 12.92f : pow( ( value + 0.055f ) / 1.055f, 2.4f );
+}
+
+
+float3 SrgbToLinear( float3 sRGB )
+{
+	return float3( SrgbToLinear( sRGB.r ), SrgbToLinear( sRGB.g ), SrgbToLinear( sRGB.b ) );
+}
+
+
+float4 SrgbToLinear( float4 sRGBA )
+{
+	return float4( SrgbToLinear( sRGBA.rgb ), sRGBA.a );
+}
+
+
+float LinearToSrgb( float value )
+{
+	return ( value < 0.0031308f ? value * 12.92f : 1.055f * pow( value, 0.41666f ) - 0.055f );
+}
+
+
+float3 LinearToSrgb( float3 inLinear )
+{
+	return float3( LinearToSrgb( inLinear.r ), LinearToSrgb( inLinear.g ), LinearToSrgb( inLinear.b ) );
+}
+
+
+float4 LinearToSrgb( float4 inLinear )
+{
+	return float4( LinearToSrgb( inLinear.rgb ), inLinear.a );
+}
+
+
+float3 VectorDebugColor( const float3 vector )
+{
+	return 0.5f * ( vector + float3( 1.0f, 1.0f, 1.0f ) );
+}
+
+
+float4 SampleTexture( const Texture2D textures[], SamplerState sampler, const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
+{
+	const int textureUploadId = material.textureId[ materialTextureSlot ];
+	const uint channel = min( MaxTextureUVs - 1, material.uvChannel[ materialTextureSlot ] );
+
+	if( textureUploadId >= 0 )
+	{
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
+
+		return textures[ textureUploadId ].Sample( sampler, transformedUv );
+
+	}
+	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
+}
+
+
+float4 SampleTextureSrgb( const Texture2D textures[], SamplerState sampler, const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
+{
+	const int textureUploadId = material.textureId[ materialTextureSlot ];
+	const uint channel = min( MaxTextureUVs - 1, material.uvChannel[ materialTextureSlot ] );
+
+	if( textureUploadId >= 0 )
+	{
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
+
+		return SrgbToLinear( textures[ textureUploadId ].Sample( sampler, transformedUv.xy ) );
+	}
+	return float4( 1.0f, 1.0f, 1.0f, 1.0f );
+}
+
+
+float3 SampleTextureNormal( const Texture2D textures[], SamplerState sampler, const gpuMaterial_t material, const int materialTextureSlot, const float2 uv[ 2 ] )
+{
+	const int textureUploadId = material.textureId[ materialTextureSlot ];
+	const uint channel = min( MaxTextureUVs - 1, material.uvChannel[ materialTextureSlot ] );
+
+	if( textureUploadId >= 0 )
+	{
+		const float2 transformedUv = mul( material.uvTransform[ materialTextureSlot ], uv[ channel ] ) + material.uvOffset[ materialTextureSlot ];
+
+		return DecodeNormal( textures[ textureUploadId ].Sample( sampler, transformedUv ).xyz );
+	}
+	return float3( 0.0f, 0.0f, 1.0f );
 }
 
 #endif // UTIL_HLSL_H

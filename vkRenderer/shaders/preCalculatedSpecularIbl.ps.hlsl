@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "color.h"
 #include "lightUtil.h"
 #include "util.h"
 

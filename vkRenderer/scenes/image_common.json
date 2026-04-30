@@ -2,8 +2,7 @@
   "images": [
     {
 	  "name": "code_assets/brdf_lut.img",
-	  "type": "2D",
-	  "uvAddress": "SAMPLER_ADDRESS_CLAMP_EDGE"
+	  "type": "2D"
 	}
   ]
 }
