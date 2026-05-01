@@ -446,9 +446,6 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\codeAssets.h" />
-    <ClInclude Include="shaders\gpuShared.h">
-      <Filter>Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="src\render_core\renderUploader.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -622,6 +619,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\lightUtil.h">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\resolveDepth.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\gpuShared.h">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

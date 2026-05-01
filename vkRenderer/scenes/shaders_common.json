@@ -8,6 +8,13 @@
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },
+	{
+      "name": "ResolveDepth",
+      "vs": "fullscreen",
+      "ps": "resolve",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
     {
       "name": "Basic",
       "vs": "simple",
