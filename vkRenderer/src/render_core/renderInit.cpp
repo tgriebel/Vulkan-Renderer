@@ -791,13 +791,13 @@ void Renderer::CreateFramebuffers()
 		info.height = height;
 		info.mipLevels = 1;
 		info.layers = 1;
-		info.subsamples = config.mainColorSubSamples;
+		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_RG_32;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.depthStencilImage->Create(
+		resources.velocityImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "FB_velocity", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
