@@ -696,7 +696,7 @@ void Renderer::CreateFramebuffers()
 		resources.depthStencilImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "FB_viewDepth", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_viewDepth", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 

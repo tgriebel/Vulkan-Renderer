@@ -132,26 +132,29 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.resolves[ 0 ].info.writeSourceAfterResolve = false;
 		info.resolves[ 0 ].useApi = true;
 
-		tasks.resolvePostDepth = new ResolveImageTask( info );
+		//info.resolves[ 1 ].info.src = resources->depthStencilImage;
+		//info.resolves[ 1 ].info.dst = resources->depthStencilResolvedImage;
+		//info.resolves[ 1 ].useApi = false;
+
+	//	tasks.resolvePostDepth = new ResolveImageTask( info );
 	}
 
 	{
-		imageShaderCreateInfo_t info = {};
-		info.name = "ResolveMain";
-		info.clear = false;
-		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
-		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT; // Resolve needs MRT currently since it resolves the gbuffer (if present)
-		info.outputImage = resources->mainColorResolvedImage;
-		info.outputImage1 = &resources->depthResolvedImageView;
+		resolveTaskCreateInfo_t info{};
+		info.count = 1;
 		info.context = renderContext;
 		info.resources = resources;
-		info.inputImages = 3;
+		info.resolves[ 0 ].info.src = resources->mainColorImage;
+		info.resolves[ 0 ].info.dst = resources->mainColorResolvedImage;
+		info.resolves[ 0 ].info.mode = resolveMode_t::AVERAGE;
+		info.resolves[ 0 ].info.baseArray = 0;
+		info.resolves[ 0 ].info.arrayCount = 1;
+		info.resolves[ 0 ].info.baseMip = 0;
+		info.resolves[ 0 ].info.transitionSourceFromWrite = false;
+		info.resolves[ 0 ].info.writeSourceAfterResolve = false;
+		info.resolves[ 0 ].useApi = false;
 
-		tasks.resolve = new ImageShaderTask( info );
-
-		tasks.resolve->SetSourceImage( 0, resources->mainColorImage );
-		tasks.resolve->SetSourceImage( 1, &resources->depthImageView );
-		tasks.resolve->SetSourceImage( 2, &resources->stencilImageView );
+		tasks.resolve = new ResolveImageTask( info );
 	}
 
 	if( config.gaussianBlur )

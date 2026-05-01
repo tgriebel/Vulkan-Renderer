@@ -45,14 +45,59 @@ ResolveImageTask::ResolveImageTask( const resolveTaskCreateInfo_t& createInfo )
 
 void ResolveImageTask::InitShaderTasks()
 {
-	// TODO: Create one ImageShaderTask per resolve entry using the Resolve program.
-	//       Requires the resolve shader to be updated to support depth-stencil inputs.
+	for( uint32_t i = 0; i < m_count; ++i )
+	{
+		if( m_createInfo.resolves[ i ].useApi ) {
+			continue;
+		}
+
+		Image* srcImage = m_createInfo.resolves[ i ].info.src;
+		Image* dstImage = m_createInfo.resolves[ i ].info.dst;
+
+		const bool isDepth = ( srcImage->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
+
+		if( isDepth )
+		{
+			imageShaderCreateInfo_t info = {};
+			info.name = "ResolveDepthSubTask";
+			info.clear = false;
+			info.progHdl = AssetLibGpuProgram::Handle( "ResolveDepth" );
+			info.permSet = shaderPermId_t::NONE;
+			info.outputImage = dstImage;
+			info.context = m_context;
+			info.resources = m_resources;
+			info.inputImages = 2;
+
+			m_shaderTasks[ i ] = new ImageShaderTask( info );
+
+			// FIXME: needs to be made locally or supplied
+			m_shaderTasks[ i ]->SetSourceImage( 0, &m_resources->depthImageView );
+			m_shaderTasks[ i ]->SetSourceImage( 1, &m_resources->stencilImageView );
+		}
+		else
+		{
+			imageShaderCreateInfo_t info = {};
+			info.name = "ResolveColorSubTask";
+			info.clear = false;
+			info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
+			info.permSet = ForceDisableMSAA ? shaderPermId_t::NONE : shaderPermId_t::MSAA;
+			info.outputImage = dstImage;
+			info.context = m_context;
+			info.resources = m_resources;
+			info.inputImages = 1;
+
+			m_shaderTasks[ i ] = new ImageShaderTask( info );
+
+			m_shaderTasks[ i ]->SetSourceImage( 0, srcImage );
+		}
+	}
 }
 
 
 ResolveImageTask::~ResolveImageTask()
 {
-	for ( uint32_t i = 0; i < m_count; ++i ) {
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
 		delete m_shaderTasks[ i ];
 		m_shaderTasks[ i ] = nullptr;
 	}
@@ -63,7 +108,8 @@ std::string ResolveImageTask::AsString() const
 {
 	std::stringstream ss;
 	ss << "<ResolveImageTask: " << m_count << " resolve(s)>";
-	for ( uint32_t i = 0; i < m_count; ++i ) {
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
 		ss << " [" << m_createInfo.resolves[ i ].info.src->gpuImage->GetDebugName()
 		   << " -> " << m_createInfo.resolves[ i ].info.dst->gpuImage->GetDebugName() << "]";
 	}

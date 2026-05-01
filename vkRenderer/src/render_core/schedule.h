@@ -32,7 +32,7 @@ struct availableTasks_t
 	ImageReadbackTask*	imageCubemapReadBackTask		= nullptr;
 
 	// Core frame
-	ImageShaderTask*	resolve							= nullptr;
+	ResolveImageTask*	resolve							= nullptr;
 	ResolveImageTask*	resolvePostDepth				= nullptr;
 	ImageReadbackTask*	screenshotReadback				= nullptr;
 

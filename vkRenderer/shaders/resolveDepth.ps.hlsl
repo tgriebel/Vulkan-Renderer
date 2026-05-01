@@ -22,7 +22,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     for ( int j = 0; j < int( globals.numSamples ); ++j )
     {
-        outColor.r = min( outColor.r, localTextures[ 1 ].Load( pixelLocation, j ).r );
+        outColor.r = min( outColor.r, localTextures[ 0 ].Load( pixelLocation, j ).r );
         outColor.g += asuint( stencilImage.Load( pixelLocation, j ).r ) == 0x01 ? 1.0f : 0.0f;
     }
     outColor.g /= globals.numSamples;
