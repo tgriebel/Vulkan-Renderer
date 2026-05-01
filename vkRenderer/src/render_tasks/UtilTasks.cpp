@@ -47,7 +47,9 @@ void ResolveImageTask::InitShaderTasks()
 {
 	for( uint32_t i = 0; i < m_count; ++i )
 	{
-		if( m_createInfo.resolves[ i ].useApi ) {
+		if( m_createInfo.resolves[ i ].useApi )
+		{
+			m_shaderTasks[ i ] = nullptr;
 			continue;
 		}
 
@@ -154,18 +156,13 @@ void ResolveImageTask::Execute( CommandContext& context )
 {
 	for ( uint32_t i = 0; i < m_count; ++i )
 	{
-		if( m_createInfo.resolves[ i ].useApi ) {
-			continue;
+		if( m_createInfo.resolves[ i ].useApi )
+		{
+			ResolveImage( &context, m_createInfo.resolves[ i ].info );
 		}
-		ResolveImage( &context, m_createInfo.resolves[ i ].info );
-	}
-
-	for ( uint32_t i = 0; i < m_count; ++i )
-	{
-		if( m_createInfo.resolves[ i ].useApi == false ) {
-			continue;
-		}
-		if ( m_shaderTasks[ i ] != nullptr ) {
+		else
+		{
+			assert( m_shaderTasks[ i ] != nullptr );
 			m_shaderTasks[ i ]->Execute( context );
 		}
 	}

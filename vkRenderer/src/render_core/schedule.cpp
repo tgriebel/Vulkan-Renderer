@@ -117,6 +117,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 	}
 
+	// Prepass resolve
+	if( ForceDisableMSAA == false )
 	{
 		resolveTaskCreateInfo_t info{};
 		info.count = 1;
@@ -132,13 +134,15 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.resolves[ 0 ].info.writeSourceAfterResolve = false;
 		info.resolves[ 0 ].useApi = true;
 
-		//info.resolves[ 1 ].info.src = resources->depthStencilImage;
-		//info.resolves[ 1 ].info.dst = resources->depthStencilResolvedImage;
-		//info.resolves[ 1 ].useApi = false;
+		info.resolves[ 1 ].info.src = resources->depthStencilImage;
+		info.resolves[ 1 ].info.dst = resources->depthStencilResolvedImage;
+		info.resolves[ 1 ].useApi = false;
 
-	//	tasks.resolvePostDepth = new ResolveImageTask( info );
+		tasks.resolvePostDepth = new ResolveImageTask( info );
 	}
 
+	// Main scene resolve
+	if( ForceDisableMSAA == false )
 	{
 		resolveTaskCreateInfo_t info{};
 		info.count = 1;
@@ -152,7 +156,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.resolves[ 0 ].info.baseMip = 0;
 		info.resolves[ 0 ].info.transitionSourceFromWrite = false;
 		info.resolves[ 0 ].info.writeSourceAfterResolve = false;
-		info.resolves[ 0 ].useApi = false;
+		info.resolves[ 0 ].useApi = true;
 
 		tasks.resolve = new ResolveImageTask( info );
 	}
