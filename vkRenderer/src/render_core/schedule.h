@@ -6,6 +6,7 @@ class ImageProcessTask;
 class ImageReadbackTask;
 class ImageShaderTask;
 class CopyImageTask;
+class ResolveImageTask;
 
 // FIXME: Temp, remove once interface becomes clear
 // Intentionally lazy pointers to arrays because this will be removed
@@ -32,7 +33,7 @@ struct availableTasks_t
 
 	// Core frame
 	ImageShaderTask*	resolve							= nullptr;
-	ImageShaderTask*	resolvePostDepth				= nullptr;
+	ResolveImageTask*	resolvePostDepth				= nullptr;
 	ImageReadbackTask*	screenshotReadback				= nullptr;
 
 	// Post-Process

@@ -49,6 +49,8 @@ struct resolveImageInfo_t
 	uint32_t		baseMip;
 	uint32_t		baseArray;
 	uint32_t		arrayCount;
+	bool			transitionSourceFromWrite;
+	bool			writeSourceAfterResolve;
 };
 
 

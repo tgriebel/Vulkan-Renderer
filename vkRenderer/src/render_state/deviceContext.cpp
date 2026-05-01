@@ -743,9 +743,7 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 	VkImageMemoryBarrier srcBarrier{ };
 	srcBarrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	srcBarrier.image                           = info.src->gpuImage->GetVkImage( context.bufferId );
-	srcBarrier.oldLayout                       = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	srcBarrier.newLayout                       = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	srcBarrier.srcAccessMask                   = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 	srcBarrier.dstAccessMask                   = VK_ACCESS_TRANSFER_READ_BIT;
 	srcBarrier.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
 	srcBarrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
@@ -754,6 +752,20 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 	srcBarrier.subresourceRange.levelCount     = 1;
 	srcBarrier.subresourceRange.baseArrayLayer = info.baseArray;
 	srcBarrier.subresourceRange.layerCount     = info.arrayCount;
+
+	VkPipelineStageFlags srcStage;
+	if ( info.transitionSourceFromWrite )
+	{
+		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		srcBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		srcStage                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
+	else
+	{
+		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		srcBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+		srcStage                 = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
 
 	// Transition destination to TRANSFER_DST_OPTIMAL
 	VkImageMemoryBarrier dstBarrier{ };
@@ -773,7 +785,7 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 
 	VkImageMemoryBarrier preBlit[ 2 ] = { srcBarrier, dstBarrier };
 	vkCmdPipelineBarrier( cmdBuffer,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		srcStage,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		0, 0, nullptr, 0, nullptr, 2, preBlit );
 
@@ -796,15 +808,40 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 		info.dst->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &region );
 
-	// Transition destination to SHADER_READ_ONLY_OPTIMAL for subsequent sampling
+	// Transition destination to SHADER_READ_ONLY_OPTIMAL
 	dstBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	dstBarrier.newLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	dstBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 	dstBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-	vkCmdPipelineBarrier( cmdBuffer,
-		VK_PIPELINE_STAGE_TRANSFER_BIT,
-		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		0, 0, nullptr, 0, nullptr, 1, &dstBarrier );
+
+	if ( info.writeSourceAfterResolve )
+	{
+		// Transition source back to COLOR_ATTACHMENT_OPTIMAL so the next render pass sees the expected layout
+		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		srcBarrier.newLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		VkImageMemoryBarrier postResolve[ 2 ] = { srcBarrier, dstBarrier };
+		vkCmdPipelineBarrier( cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			0, 0, nullptr, 0, nullptr, 2, postResolve );
+	}
+	else
+	{
+		// Transition source back to SHADER_READ_ONLY_OPTIMAL so subsequent passes/render passes see the expected layout
+		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		srcBarrier.newLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		VkImageMemoryBarrier postResolve[ 2 ] = { srcBarrier, dstBarrier };
+		vkCmdPipelineBarrier( cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			0, 0, nullptr, 0, nullptr, 2, postResolve );
+	}
 }
 
 
