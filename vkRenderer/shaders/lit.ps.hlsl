@@ -222,6 +222,8 @@ float3 EvaluateSpecularAmbient( TextureCube specularIBL, Texture2D brdfLUT, cons
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
+    const float2 pixelUV = 0.5f * ( input.clipPosition.xy / input.clipPosition.w ) + 0.5f;
+    
     const uint materialId = pushConstants.materialId;
     const uint viewlId = pushConstants.viewId;
 
@@ -266,11 +268,15 @@ psOutput_t PSMain( vsToPsInterpolators input )
         Lo += Lo_i;
     }
 #endif
+    
+    Texture2D ssaoImage = localTextures[ 3 ]; // FIXME: Index should come from globals and determined CPU-side
+    
+    const float ssaoSample = ssaoImage.Sample( bilinearSamplerClampEdge, pixelUV ).r;
 
     const float3 kD = EvaluateDiffuseAmbient( globalCubemaps[ diffuseIBL ], surfaceInput );
     const float3 specularAmbient = EvaluateSpecularAmbient( globalCubemaps[ specularIBL ], globalTextures[ brdfLutId ], surfaceInput );
 
-    const float3 ambient = ( kD + specularAmbient ) * surfaceInput.ao;
+    const float3 ambient = ( kD * ssaoSample + specularAmbient ) * surfaceInput.ao;
 
     float4 outColor;
 	outColor.rgb = Lo + ambient + surfaceInput.emissive;
