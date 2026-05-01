@@ -56,10 +56,21 @@ public:
 class ResolveImageTask : public GpuTask
 {
 private:
-	resolveImageInfo_t	m_info;
+	static const uint32_t	MaxResolves = 8;
+	resolveImageInfo_t		m_infos[ MaxResolves ];
+	uint32_t				m_count;
 
 public:
-	ResolveImageTask( const resolveImageInfo_t& info ) : m_info( info ) {}
+	ResolveImageTask( const resolveImageInfo_t* infos, const uint32_t count )
+	{
+		assert( count <= MaxResolves );
+		m_count = Min( count, MaxResolves );
+		for ( uint32_t i = 0; i < m_count; ++i ) {
+			m_infos[ i ] = infos[ i ];
+		}
+	}
+
+	ResolveImageTask( const resolveImageInfo_t& info ) : ResolveImageTask( &info, 1 ) {}
 
 	void			Resize() {}
 	void			FrameBegin() {}

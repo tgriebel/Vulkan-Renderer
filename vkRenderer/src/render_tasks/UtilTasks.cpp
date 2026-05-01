@@ -34,14 +34,19 @@ void ComputeTask::Execute( CommandContext& context )
 std::string ResolveImageTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ResolveImageTask: " << m_info.src->gpuImage->GetDebugName() << " -> " << m_info.dst->gpuImage->GetDebugName() << ">";
+	ss << "<ResolveImageTask: " << m_count << " resolve(s)>";
+	for ( uint32_t i = 0; i < m_count; ++i ) {
+		ss << " [" << m_infos[ i ].src->gpuImage->GetDebugName() << " -> " << m_infos[ i ].dst->gpuImage->GetDebugName() << "]";
+	}
 	return ss.str();
 }
 
 
 void ResolveImageTask::Execute( CommandContext& context )
 {
-	ResolveImage( &context, m_info );
+	for ( uint32_t i = 0; i < m_count; ++i ) {
+		ResolveImage( &context, m_infos[ i ] );
+	}
 }
 
 
