@@ -1,4 +1,5 @@
 #include "UtilTasks.h"
+#include "imageShaderTask.h"
 #include "../render_state/cmdContext.h"
 #include "../globals/assetDefs.h"
 #include "../render_core/renderer.h"
@@ -31,21 +32,96 @@ void ComputeTask::Execute( CommandContext& context )
 
 // ResolveImageTask
 
+ResolveImageTask::ResolveImageTask( const resolveTaskCreateInfo_t& createInfo )
+{
+	m_count      = Min( createInfo.count, MaxResolves );
+	m_createInfo = createInfo;
+	m_context    = createInfo.context;
+	m_resources  = createInfo.resources;
+
+	InitShaderTasks();
+}
+
+
+void ResolveImageTask::InitShaderTasks()
+{
+	// TODO: Create one ImageShaderTask per resolve entry using the Resolve program.
+	//       Requires the resolve shader to be updated to support depth-stencil inputs.
+}
+
+
+ResolveImageTask::~ResolveImageTask()
+{
+	for ( uint32_t i = 0; i < m_count; ++i ) {
+		delete m_shaderTasks[ i ];
+		m_shaderTasks[ i ] = nullptr;
+	}
+}
+
+
 std::string ResolveImageTask::AsString() const
 {
 	std::stringstream ss;
 	ss << "<ResolveImageTask: " << m_count << " resolve(s)>";
 	for ( uint32_t i = 0; i < m_count; ++i ) {
-		ss << " [" << m_infos[ i ].src->gpuImage->GetDebugName() << " -> " << m_infos[ i ].dst->gpuImage->GetDebugName() << "]";
+		ss << " [" << m_createInfo.resolves[ i ].info.src->gpuImage->GetDebugName()
+		   << " -> " << m_createInfo.resolves[ i ].info.dst->gpuImage->GetDebugName() << "]";
 	}
 	return ss.str();
 }
 
 
+void ResolveImageTask::FrameBegin()
+{
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
+		if ( m_shaderTasks[ i ] != nullptr ) {
+			m_shaderTasks[ i ]->FrameBegin();
+		}
+	}
+}
+
+
+void ResolveImageTask::FrameEnd()
+{
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
+		if ( m_shaderTasks[ i ] != nullptr ) {
+			m_shaderTasks[ i ]->FrameEnd();
+		}
+	}
+}
+
+
+void ResolveImageTask::Resize()
+{
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
+		if ( m_shaderTasks[ i ] != nullptr ) {
+			m_shaderTasks[ i ]->Resize();
+		}
+	}
+}
+
+
 void ResolveImageTask::Execute( CommandContext& context )
 {
-	for ( uint32_t i = 0; i < m_count; ++i ) {
-		ResolveImage( &context, m_infos[ i ] );
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
+		if( m_createInfo.resolves[ i ].useApi ) {
+			continue;
+		}
+		ResolveImage( &context, m_createInfo.resolves[ i ].info );
+	}
+
+	for ( uint32_t i = 0; i < m_count; ++i )
+	{
+		if( m_createInfo.resolves[ i ].useApi == false ) {
+			continue;
+		}
+		if ( m_shaderTasks[ i ] != nullptr ) {
+			m_shaderTasks[ i ]->Execute( context );
+		}
 	}
 }
 

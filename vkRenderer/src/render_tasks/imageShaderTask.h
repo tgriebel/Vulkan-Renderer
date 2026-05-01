@@ -32,7 +32,6 @@ struct imageShaderCreateInfo_t
 	uint32_t			taskImageCount;
 	bool				clear;
 	bool				present;
-	bool				resolve;
 
 	imageShaderFrameBeginCallback_t* callback;
 };

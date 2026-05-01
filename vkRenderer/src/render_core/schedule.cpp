@@ -118,16 +118,19 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 
 	{
-		resolveImageInfo_t info;
-
-		info.src = resources->gBufferLayerImage0;
-		info.dst = resources->gBufferLayerResolvedImage0;
-		info.mode = resolveMode_t::AVERAGE;
-		info.baseArray = 0;
-		info.arrayCount = 1;
-		info.baseMip = 0;
-		info.transitionSourceFromWrite = false;
-		info.writeSourceAfterResolve = false;
+		resolveTaskCreateInfo_t info{};
+		info.count = 1;
+		info.context = renderContext;
+		info.resources = resources;
+		info.resolves[ 0 ].info.src = resources->gBufferLayerImage0;
+		info.resolves[ 0 ].info.dst = resources->gBufferLayerResolvedImage0;
+		info.resolves[ 0 ].info.mode = resolveMode_t::AVERAGE;
+		info.resolves[ 0 ].info.baseArray = 0;
+		info.resolves[ 0 ].info.arrayCount = 1;
+		info.resolves[ 0 ].info.baseMip = 0;
+		info.resolves[ 0 ].info.transitionSourceFromWrite = false;
+		info.resolves[ 0 ].info.writeSourceAfterResolve = false;
+		info.resolves[ 0 ].useApi = true;
 
 		tasks.resolvePostDepth = new ResolveImageTask( info );
 	}
@@ -136,7 +139,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		imageShaderCreateInfo_t info = {};
 		info.name = "ResolveMain";
 		info.clear = false;
-		info.resolve = true;
 		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
 		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT; // Resolve needs MRT currently since it resolves the gbuffer (if present)
 		info.outputImage = resources->mainColorResolvedImage;

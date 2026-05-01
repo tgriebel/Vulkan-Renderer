@@ -53,32 +53,47 @@ public:
 };
 
 
+class ImageShaderTask;
+class RenderContext;
+class ResourceContext;
+
+static const uint32_t MaxResolves = 8;
+
+struct perResolveInfo_t
+{
+	resolveImageInfo_t	info;
+	bool				useApi;
+};
+
+struct resolveTaskCreateInfo_t
+{
+	perResolveInfo_t	resolves[ MaxResolves ];
+	uint32_t			count;
+	RenderContext*		context;
+	ResourceContext*	resources;
+};
+
 class ResolveImageTask : public GpuTask
 {
 private:
-	static const uint32_t	MaxResolves = 8;
-	resolveImageInfo_t		m_infos[ MaxResolves ];
+	resolveTaskCreateInfo_t	m_createInfo;
 	uint32_t				m_count;
+	RenderContext*			m_context;
+	ResourceContext*		m_resources;
+	ImageShaderTask*		m_shaderTasks[ MaxResolves ] = {};
+
+	void					InitShaderTasks();
 
 public:
-	ResolveImageTask( const resolveImageInfo_t* infos, const uint32_t count )
-	{
-		assert( count <= MaxResolves );
-		m_count = Min( count, MaxResolves );
-		for ( uint32_t i = 0; i < m_count; ++i ) {
-			m_infos[ i ] = infos[ i ];
-		}
-	}
+	ResolveImageTask( const resolveTaskCreateInfo_t& createInfo );
 
-	ResolveImageTask( const resolveImageInfo_t& info ) : ResolveImageTask( &info, 1 ) {}
-
-	void			Resize() {}
-	void			FrameBegin() {}
-	void			FrameEnd() {}
+	void			Resize();
+	void			FrameBegin();
+	void			FrameEnd();
 	std::string		AsString() const;
 	void			Execute( CommandContext& context ) override;
 
-	~ResolveImageTask() {}
+	~ResolveImageTask();
 };
 
 
