@@ -12,6 +12,8 @@ psOutput_t PSMain( vsToPsInterpolators input )
 {
 	psOutput_t output = (psOutput_t)0;
     
+    const uint materialId = pushConstants.materialId;
+    
 	output.outColor = float4( 1.0f, 0.0f, 0.0f, 1.0f );
     
 #ifdef VELOCITY_IN_PREPASS
@@ -24,7 +26,6 @@ psOutput_t PSMain( vsToPsInterpolators input )
 #endif
     
 #ifdef NORMAL_IN_PREPASS
-    const uint materialId = pushConstants.materialId;
 	const gpuMaterial_t material = materials[ materialId ];
 
 	float3 normalSample = float3( 0.0f, 0.0f, 1.0f );

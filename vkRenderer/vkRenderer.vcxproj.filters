@@ -534,7 +534,7 @@
     <FxCompile Include="shaders\default.vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\depth.ps.hlsl">
+    <FxCompile Include="shaders\prepass.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\downsample.ps.hlsl">

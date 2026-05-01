@@ -2,19 +2,19 @@
 	"shaders": [
 		{
 		  "name": "Basic",
-		  "vs": "simple.vert",
-		  "ps": "simple.frag",
+		  "vs": "simple",
+		  "ps": "simple",
 		  "perms": ["msaa"]
 		},
 		{
 		  "name": "Shadow",
-		  "vs": "simple.vert",
-		  "ps": "shadow.frag"
+		  "vs": "simple",
+		  "ps": "shadow"
 		},
 		{
 		  "name": "Prepass",
-		  "vs": "simple.vert",
-		  "ps": "depth.frag"
+		  "vs": "simple",
+		  "ps": "prepass"
 		}
 	]
 }

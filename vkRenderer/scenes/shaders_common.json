@@ -22,7 +22,7 @@
     {
       "name": "Prepass",
       "vs": "simple",
-      "ps": "depth",
+      "ps": "prepass",
       "perms": ["mrt"]
     },
     {
@@ -34,7 +34,7 @@
     {
       "name": "TerrainDepth",
       "vs": "terrain",
-      "ps": "depth",
+      "ps": "prepass",
       "perms": ["mrt"]
     },
     {

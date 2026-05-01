@@ -48,7 +48,7 @@
           "perms": [ "" ]
         },
         "DRAWPASS_DEPTH": {
-          "shader": "LitDepth",
+          "shader": "Prepass",
           "perms": [ "" ]
         },
         "DRAWPASS_OPAQUE": {
