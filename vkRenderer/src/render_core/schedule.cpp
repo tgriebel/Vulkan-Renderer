@@ -118,23 +118,18 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 
 	{
-		imageShaderCreateInfo_t info = {};
-		info.name = "ResolvePostDepth";
-		info.clear = false;
-		info.resolve = true;
-		info.progHdl = AssetLibGpuProgram::Handle( "Resolve" );
-		info.permSet = ForceDisableMSAA ? shaderPermId_t::MRT : shaderPermId_t::MSAA | shaderPermId_t::MRT; // Resolve needs MRT currently since it resolves the gbuffer (if present)
-		info.outputImage = resources->gBufferLayerResolvedImage0;
-		info.outputImage1 = &resources->depthResolvedImageView;
-		info.context = renderContext;
-		info.resources = resources;
-		info.inputImages = 3;
+		resolveImageInfo_t info;
 
-		tasks.resolvePostDepth = new ImageShaderTask( info );
+		info.src = resources->gBufferLayerImage0;
+		info.dst = resources->gBufferLayerResolvedImage0;
+		info.mode = resolveMode_t::MIN;
+		info.baseArray = 0;
+		info.arrayCount = 1;
+		info.baseMip = 0;
+		info.transitionSourceFromWrite = false;
+		info.writeSourceAfterResolve = false;
 
-		tasks.resolvePostDepth->SetSourceImage( 0, resources->gBufferLayerImage0 );
-		tasks.resolvePostDepth->SetSourceImage( 1, &resources->depthImageView );
-		tasks.resolvePostDepth->SetSourceImage( 2, &resources->stencilImageView );
+		tasks.resolvePostDepth = new ResolveImageTask( info );
 	}
 
 	{
