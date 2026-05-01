@@ -26,6 +26,9 @@ struct imageProcessCreateInfo_t
 
 	shaderPermId_t		permSet;										// Shader permutations to use for this shader. Default is empty
 
+	const void*			constants;										// Optional custom shader constants (written after reserved IMAGE_CONSTANT_LAYOUT fields)
+	uint32_t			constantsByteSize;								// Size in bytes of constants block
+
 	bool				useAPI;											// Use the API for MIP generation
 	bool				multiPass;										// Runs sequential shader passes (e.g. Separable Gaussian Blur)
 	bool				progressiveSampling;							// Chains output to input (e.g. any MIP chain generation)
@@ -64,6 +67,10 @@ private:
 	bool						m_progressiveSampling;					// Chain output to inputs until finished
 	bool						m_upsampleProcess;						// Used for upscaling
 	bool						m_useApi;
+
+	static const uint32_t		MaxCustomConstantBytes = 128;
+	uint8_t						m_customConstants[ MaxCustomConstantBytes ];
+	uint32_t					m_customConstantsByteSize;
 
 	ImageShaderTask* CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel );
 

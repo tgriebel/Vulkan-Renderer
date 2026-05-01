@@ -28,6 +28,8 @@ struct availableTasks_t
 	ImageReadbackTask*	imageSpecularIblReadBackTask	= nullptr;
 	ImageShaderTask*	brdfLutTask						= nullptr;
 	ImageReadbackTask*	readbackBrdfLut					= nullptr;
+	ImageShaderTask*	noiseGenTask					= nullptr;
+	ImageReadbackTask*	readbackNoiseImage				= nullptr;
 	ImageProcessTask*	mipCubeTask						= nullptr;
 	ImageReadbackTask*	imageCubemapReadBackTask		= nullptr;
 

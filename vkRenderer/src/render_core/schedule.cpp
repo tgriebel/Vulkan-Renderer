@@ -175,8 +175,18 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		tasks.gaussianTask = new ImageProcessTask( info );
 	}
 
-	if( true/*config.ssao*/ )
+	if( config.ssao )
 	{
+		struct SSAOConstants
+		{
+			float    radius;      // World-space sampling radius (meters)
+			uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
+			float    bias;        // Depth bias to prevent self-occlusion (meters)
+			float    strength;    // AO multiplier: 1 = standard, higher = darker
+		};
+
+		const SSAOConstants ssaoConstants = { 0.5f, 16, 0.025f, 1.5f };
+
 		imageProcessCreateInfo_t info{};
 		info.name = "SSAO";
 		info.context = renderContext;
@@ -185,6 +195,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progName = "SSAO";
 		info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
 		info.baseMip = 0;
+		info.constants = &ssaoConstants;
+		info.constantsByteSize = sizeof( ssaoConstants );
 
 		tasks.ssaoTask = new ImageProcessTask( info );
 	}
@@ -357,6 +369,49 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 	}
 
+	if( config.computeNoiseImage )
+	{
+		{
+			imageShaderCreateInfo_t info = {};
+			info.name = "NoiseImageCalculation";
+			info.progHdl = AssetLibGpuProgram::Handle( "NoiseGen" );
+			info.context = renderContext;
+			info.resources = resources;
+
+			{
+				imageInfo_t imgInfo{};
+				imgInfo.width = 512;
+				imgInfo.height = 512;
+				imgInfo.mipLevels = 1;
+				imgInfo.layers = 1;
+				imgInfo.subsamples = IMAGE_SMP_1;
+				imgInfo.fmt = IMAGE_FMT_RGBA_16;
+				imgInfo.type = IMAGE_TYPE_2D;
+				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				imgInfo.tiling = IMAGE_TILING_MORTON;
+
+				info.taskImageCount = 1;
+				info.createInfos = { &imgInfo };
+			}
+
+			tasks.noiseGenTask = new ImageShaderTask( info );
+		}
+
+		{
+			const std::string fileName = "noise.img";
+
+			imageReadBackCreateInfo_t info{};
+			info.name = "NoiseImageReadback";
+			info.img = tasks.noiseGenTask->GetOutputImage();
+			info.context = renderContext;
+			info.resources = resources;
+			info.fileName = fileName.c_str();
+			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+			info.flags |= imageReadbackFlags_t::PACKED_HDR;
+
+			tasks.readbackNoiseImage = new ImageReadbackTask( info );
+		}
+	}
 
 	if( config.screenshot )
 	{
@@ -410,6 +465,12 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 	if( tasks.readbackBrdfLut ) {
 		schedule->Link( tasks.readbackBrdfLut );
+	}
+	if( tasks.noiseGenTask ) {
+		schedule->Link( tasks.noiseGenTask );
+	}
+	if( tasks.readbackBrdfLut ) {
+		schedule->Link( tasks.readbackNoiseImage );
 	}
 	schedule->Link( tasks.resolve );
 

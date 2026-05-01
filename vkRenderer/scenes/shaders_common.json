@@ -39,6 +39,13 @@
       "perms": ["mrt"]
     },
 	{
+      "name": "NoiseGen",
+      "vs": "fullscreen",
+      "ps": "noiseGen",
+      "bindset": "bindset_imageProcess",
+      "image_shader": true
+    },
+	{
       "name": "SSAO",
       "vs": "fullscreen",
       "ps": "ssao",

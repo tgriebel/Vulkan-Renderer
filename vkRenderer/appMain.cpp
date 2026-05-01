@@ -68,6 +68,7 @@ MakeCVar( BOOL,		r_computeEnvMap, false );
 MakeCVar( BOOL,		r_computeDiffuseIbl, false );
 MakeCVar( BOOL,		r_computeSpecularIbl, false );
 MakeCVar( BOOL,		r_computeBrdfLut, false );
+MakeCVar( BOOL,		r_computeNoiseImage, false );
 MakeCVar( BOOL,		r_exitAfterJobComplete, false );
 MakeCVar( STRING,	c_scene, sceneFile );
 MakeCVar( STRING,	r_hdrCubemapSource, "" );
@@ -81,6 +82,7 @@ MakeCVar( BOOL,		r_bloom, true );
 MakeCVar( BOOL,		r_autoExposure, true );
 MakeCVar( BOOL,		r_screenshot, true );
 MakeCVar( BOOL,		r_gaussianBlur, true );
+MakeCVar( BOOL,		r_ssao, true );
 MakeCVar( INT,		r_fullscreenMode, 0 );
 MakeCVar( INT,		r_windowWidth, -1 );
 MakeCVar( INT,		r_windowHeight, -1 );
@@ -190,7 +192,9 @@ int main( int argc, char* argv[] )
 	config.screenshot = r_screenshot.GetBool();
 	config.cubemapName = r_cubemapName.GetString();
 	config.computeBrdfLut = r_computeBrdfLut.GetBool();
+	config.computeNoiseImage = r_computeNoiseImage.GetBool();
 	config.gaussianBlur = r_gaussianBlur.GetBool();
+	config.ssao = r_ssao.GetBool();
 
 	std::thread renderThread( RenderThread );
 

@@ -52,6 +52,13 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
 	m_permSet = info.permSet;
 
+	m_customConstantsByteSize = 0;
+	if ( info.constants != nullptr && info.constantsByteSize > 0 )
+	{
+		m_customConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+		memcpy( m_customConstants, info.constants, m_customConstantsByteSize );
+	}
+
 	m_multiPass = info.multiPass;
 	m_useApi = ( m_progHdl == INVALID_HDL ) || info.useAPI;
 	m_progressiveSampling = info.progressiveSampling;
@@ -161,6 +168,8 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 
 	if ( m_cubeMip ) {
 		imageProcess->SetConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
+	} else if ( m_customConstantsByteSize > 0 ) {
+		imageProcess->SetConstants( m_customConstants, m_customConstantsByteSize );
 	}
 	return imageProcess;
 }
