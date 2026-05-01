@@ -42,7 +42,7 @@ public:
 	Image*					gBufferLayerImage0;
 	Image*					gBufferLayerImage1;
 	Image*					depthStencilImage;
-	Image*					velocityImage;
+	Image*					ssaoImage;
 	ImageView				depthImageView;
 	ImageView				stencilImageView;
 
@@ -75,7 +75,7 @@ public:
 		gBufferLayerImage0 = NextImage();
 		gBufferLayerImage1 = NextImage();
 		depthStencilImage = NextImage();
-		velocityImage = NextImage();
+		ssaoImage = NextImage();
 
 		for( uint32_t i = 0; i < MaxShadowViews; ++i )
 		{

@@ -784,7 +784,7 @@ void Renderer::CreateFramebuffers()
 		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, lifeTime );
 	}
 
-	// Velocity
+	// SSAO
 	{
 		imageInfo_t info{};
 		info.width = width;
@@ -792,15 +792,15 @@ void Renderer::CreateFramebuffers()
 		info.mipLevels = 1;
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RG_32;
+		info.fmt = IMAGE_FMT_R_32;
 		info.type = IMAGE_TYPE_2D;
 		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.velocityImage->Create(
+		resources.ssaoImage->Create(
 			info,
 			nullptr,
-			new GpuImage( "FB_velocity", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
+			new GpuImage( "FB_ssao", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
 	}
 

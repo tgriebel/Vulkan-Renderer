@@ -79,6 +79,7 @@ static const vk_formatTableEntry_t vk_formatTable[] =
 	{ IMAGE_FMT_UNKNOWN,		VK_FORMAT_UNDEFINED				},
 	{ IMAGE_FMT_R_8,			VK_FORMAT_R8_SRGB				},
 	{ IMAGE_FMT_R_16,			VK_FORMAT_R16_SFLOAT			},
+	{ IMAGE_FMT_R_32,			VK_FORMAT_R32_SFLOAT			},
 	{ IMAGE_FMT_D_16,			VK_FORMAT_D16_UNORM				},
 	{ IMAGE_FMT_D24S8,			VK_FORMAT_D24_UNORM_S8_UINT		},
 	{ IMAGE_FMT_D_32,			VK_FORMAT_D32_SFLOAT			},
@@ -112,7 +113,8 @@ static const vk_samplerAddressTableEntry_t vk_samplerAddressTable[] =
 
 static inline constexpr VkFormat vk_GetTextureFormat( const imageFmt_t fmt )
 {
-	for( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i ) {
+	for( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i )
+	{
 		if( vk_formatTable[i].imgFmt == fmt ) {
 			return vk_formatTable[ i ].vk_imgFmt;
 		}
@@ -123,7 +125,8 @@ static inline constexpr VkFormat vk_GetTextureFormat( const imageFmt_t fmt )
 
 static inline constexpr imageFmt_t vk_GetTextureFormat( const VkFormat fmt )
 {
-	for ( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i ) {
+	for ( uint32_t i = 0; i < COUNTARRAY( vk_formatTable ); ++i )
+	{
 		if ( vk_formatTable[ i ].vk_imgFmt == fmt ) {
 			return vk_formatTable[ i ].imgFmt;
 		}

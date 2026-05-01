@@ -38,6 +38,13 @@
       "ps": "terrain",
       "perms": ["mrt"]
     },
+	{
+      "name": "SSAO",
+      "vs": "fullscreen",
+      "ps": "ssao",
+      "bindset": "bindset_imageProcess",
+      "image_shader": true
+    },
     {
       "name": "TerrainDepth",
       "vs": "terrain",

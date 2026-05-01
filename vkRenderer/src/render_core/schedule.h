@@ -36,8 +36,9 @@ struct availableTasks_t
 	ResolveImageTask*	resolvePostDepth				= nullptr;
 	ImageReadbackTask*	screenshotReadback				= nullptr;
 
-	// Post-Process
+	// Image-Space
 	ImageProcessTask*	gaussianTask					= nullptr;
+	ImageProcessTask*	ssaoTask						= nullptr;
 	CopyImageTask*		copyPreviousLuminance			= nullptr;
 	ImageProcessTask*	luminanceSceneAvg				= nullptr;
 	ImageProcessTask*	mipTask							= nullptr;

@@ -175,6 +175,19 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		tasks.gaussianTask = new ImageProcessTask( info );
 	}
 
+	if( true/*config.ssao*/ )
+	{
+		imageProcessCreateInfo_t info{};
+		info.name = "SSAO";
+		info.context = renderContext;
+		info.resources = resources;
+		info.outputImage = resources->ssaoImage;
+		info.progName = "SSAO";
+		info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
+		info.baseMip = 0;
+
+		tasks.ssaoTask = new ImageProcessTask( info );
+	}
 
 	if( config.autoExposure )
 	{
@@ -366,6 +379,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( tasks.resolvePostDepth )
 	{
 		schedule->Link( tasks.resolvePostDepth );
+	}
+	if( tasks.ssaoTask )
+	{
+		schedule->Link( tasks.ssaoTask );
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
