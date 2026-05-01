@@ -33,19 +33,19 @@ psOutput_t PSMain( vsToPsInterpolators input )
     psOutput_t output = (psOutput_t)0;
 
 #ifdef USE_MRT
-    float4 outColor1 = float4( 0.0f, 0.0f, 0.0f, 1.0f );
-
+    float4 outColor1 = float4( 1.0f, 0.0f, 0.0f, 1.0f );
+    
+#ifdef USE_MSAA
     for ( int j = 0; j < int( globals.numSamples ); ++j )
     {
-#ifdef USE_MSAA
-        outColor1.r += localTextures[1].Load( pixelLocation, j ).r;
+        outColor1.r = min( outColor1.r, localTextures[1].Load( pixelLocation, j ).r );
         outColor1.g += asuint( stencilImage.Load( pixelLocation, j ).r ) == 0x01 ? 1.0f : 0.0f;
-#else
-        outColor1.r += localTextures[1].Load( int3( pixelLocation, j ) ).r;
-        outColor1.g += asuint( stencilImage.Load( int3( pixelLocation, j ) ).r ) == 0x01 ? 1.0f : 0.0f;
-#endif
     }
-    outColor1.rgb /= globals.numSamples;
+    outColor1.g /= globals.numSamples;
+#else
+    outColor1.r = localTextures[1].Load( int3( pixelLocation, 0 ) ).r;
+    outColor1.g = asuint( stencilImage.Load( int3( pixelLocation, 0 ) ).r ) == 0x01 ? 1.0f : 0.0f;
+#endif
 
     output.outColor = outColor;
     output.outColor1 = outColor1;
