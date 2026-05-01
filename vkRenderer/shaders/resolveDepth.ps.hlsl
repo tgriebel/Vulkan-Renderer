@@ -16,7 +16,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     psOutput_t output = (psOutput_t)0;
 
-    float4 outColor = float4( 1.0f, 0.0f, 0.0f, 1.0f );
+    float4 outColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 
     for ( int j = 0; j < int( globals.numSamples ); ++j )
     {
