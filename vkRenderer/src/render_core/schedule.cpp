@@ -121,7 +121,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( ForceDisableMSAA == false )
 	{
 		resolveTaskCreateInfo_t info{};
-		info.count = 1;
+		info.count = 2;
 		info.context = renderContext;
 		info.resources = resources;
 		info.resolves[ 0 ].info.src = resources->gBufferLayerImage0;

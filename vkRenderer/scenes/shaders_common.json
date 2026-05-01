@@ -11,7 +11,7 @@
 	{
       "name": "ResolveDepth",
       "vs": "fullscreen",
-      "ps": "resolve",
+      "ps": "resolveDepth",
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },
