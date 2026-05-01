@@ -122,7 +122,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		info.src = resources->gBufferLayerImage0;
 		info.dst = resources->gBufferLayerResolvedImage0;
-		info.mode = resolveMode_t::MIN;
+		info.mode = resolveMode_t::AVERAGE;
 		info.baseArray = 0;
 		info.arrayCount = 1;
 		info.baseMip = 0;

@@ -717,7 +717,17 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 
 void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info )
 {
-	const VkImageAspectFlagBits aspect = vk_GetAspectFlags( info.src->info.aspect );
+	const VkImageAspectFlagBits aspect  = vk_GetAspectFlags( info.src->info.aspect );
+	const bool                  isDepth = ( info.src->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
+
+	// Depth and color images live in different layouts and are owned by different pipeline stages
+	const VkImageLayout attachmentLayout = isDepth ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	const VkImageLayout readLayout = isDepth ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	const VkPipelineStageFlags attachmentStage = isDepth ? ( VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT )
+	                                                        : VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	const VkAccessFlags attachmentWrite = isDepth ? VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	const VkAccessFlags attachmentRW = isDepth ? ( VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT )
+												: ( VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT );
 
 	// Transition source to TRANSFER_SRC_OPTIMAL
 	VkImageMemoryBarrier srcBarrier{ };
@@ -736,13 +746,13 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 	VkPipelineStageFlags srcStage;
 	if ( info.transitionSourceFromWrite )
 	{
-		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		srcBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		srcStage                 = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		srcBarrier.oldLayout     = attachmentLayout;
+		srcBarrier.srcAccessMask = attachmentWrite;
+		srcStage                 = attachmentStage;
 	}
 	else
 	{
-		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		srcBarrier.oldLayout     = readLayout;
 		srcBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 		srcStage                 = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 	}
@@ -788,7 +798,7 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 		info.dst->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		1, &region );
 
-	// Transition destination to SHADER_READ_ONLY_OPTIMAL
+	// Destination always goes to SHADER_READ_ONLY_OPTIMAL — resolved images are sampled, not written
 	dstBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	dstBarrier.newLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 	dstBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -796,23 +806,23 @@ void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info 
 
 	if ( info.writeSourceAfterResolve )
 	{
-		// Transition source back to COLOR_ATTACHMENT_OPTIMAL so the next render pass sees the expected layout
+		// Restore source to its attachment layout so the next render pass can write to it
 		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		srcBarrier.newLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		srcBarrier.newLayout     = attachmentLayout;
 		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-		srcBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		srcBarrier.dstAccessMask = attachmentRW;
 
 		VkImageMemoryBarrier postResolve[ 2 ] = { srcBarrier, dstBarrier };
 		vkCmdPipelineBarrier( cmdBuffer,
 			VK_PIPELINE_STAGE_TRANSFER_BIT,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			attachmentStage | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 			0, 0, nullptr, 0, nullptr, 2, postResolve );
 	}
 	else
 	{
-		// Transition source back to SHADER_READ_ONLY_OPTIMAL so subsequent passes/render passes see the expected layout
+		// Restore source to its read layout for subsequent shader sampling
 		srcBarrier.oldLayout     = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-		srcBarrier.newLayout     = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		srcBarrier.newLayout     = readLayout;
 		srcBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		srcBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
