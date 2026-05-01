@@ -458,6 +458,9 @@
     <ClInclude Include="src\render_tasks\UtilTasks.h">
       <Filter>Tasks</Filter>
     </ClInclude>
+    <ClInclude Include="shaders\gpuShared.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -622,9 +625,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\resolveDepth.ps.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="shaders\gpuShared.h">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
