@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import subprocess
@@ -259,6 +260,28 @@ def compile_record( record: ShaderRecord, log ) -> bool:
         return True
 
 
+def discover_perms_from_source( source_path: str ) -> list[ str ]:
+    """Scan a shader file for #ifdef / #if defined(...) guards that match known FLAG_MAP macros.
+    Returns a sorted list of perm keys (e.g. ['msaa', 'skycube'])."""
+    macro_to_perm  = { v: k for k, v in FLAG_MAP.items() }
+    ifdef_pat      = re.compile( r'#\s*ifdef\s+(\w+)' )
+    defined_pat    = re.compile( r'defined\s*\(\s*(\w+)\s*\)' )
+    found          = set()
+
+    try:
+        with open( source_path, "r", encoding="utf-8", errors="replace" ) as f:
+            for line in f:
+                for pat in ( ifdef_pat, defined_pat ):
+                    for match in pat.finditer( line ):
+                        macro = match.group( 1 )
+                        if macro in macro_to_perm:
+                            found.add( macro_to_perm[ macro ] )
+    except OSError as e:
+        print( f"WARNING: Could not read '{source_path}' for perm discovery: {e}" )
+
+    return sorted( found )
+
+
 def main():
     # Parse -p/--perm flags and other args from argv
     # Perms are comma-delimited: -p msaa,skycube
@@ -303,11 +326,31 @@ def main():
         glsl_single = path.suffix in ( ".vert", ".frag", ".comp" )
 
         if hlsl_single or glsl_single:
-            success = compile_single_shader_source( str( path.name ), tuple( cli_perms ), tuple( cli_macros ), log )
-            summary = "\nAll shaders compiled successfully." if success else "\nBuild failed with 1 error(s)."
+            if cli_perms:
+                # -p specified: compile exactly that one permutation
+                success = compile_single_shader_source( str( path.name ), tuple( cli_perms ), tuple( cli_macros ), log )
+                errors  = 0 if success else 1
+            else:
+                # No -p: discover perms from source and compile all combinations
+                discovered = discover_perms_from_source( SHADER_DIR + path.name )
+                if discovered:
+                    print( f"Discovered perms: {', '.join( discovered )}" )
+
+                perm_combos = []
+                for r in range( 0, len( discovered ) + 1 ):
+                    for combo in combinations( discovered, r ):
+                        perm_combos.append( combo )
+
+                errors = 0
+                for combo in perm_combos:
+                    macros = tuple( FLAG_MAP[ p ] for p in combo )
+                    if not compile_single_shader_source( str( path.name ), combo, macros, log ):
+                        errors += 1
+
+            summary = f"\nBuild failed with {errors} error(s)." if errors else "\nAll shaders compiled successfully."
             print( summary )
             log.write( summary + "\n" )
-            sys.exit( 0 if success else 1 )
+            sys.exit( 0 if errors == 0 else 1 )
 
         # Full build mode
         if path.is_dir():
