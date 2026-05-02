@@ -168,9 +168,9 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 	ImageShaderTask* imageProcess = new ImageShaderTask( imgProcessInfo );
 
 	if ( m_cubeMip ) {
-		imageProcess->SetConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
+		imageProcess->UpdateConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
 	} else if ( m_customConstantsByteSize > 0 ) {
-		imageProcess->SetConstants( m_customConstants, m_customConstantsByteSize );
+		imageProcess->UpdateConstants( m_customConstants, m_customConstantsByteSize );
 	}
 	return imageProcess;
 }
@@ -319,7 +319,7 @@ void ImageProcessTask::UpdateConstants()
 		{
 			if ( m_imgProcesses[ layerId ][ mipLevel ] != nullptr )
 			{
-				m_imgProcesses[ layerId ][ mipLevel ]->SetConstants( m_customConstants, m_customConstantsByteSize );
+				m_imgProcesses[ layerId ][ mipLevel ]->UpdateConstants( m_customConstants, m_customConstantsByteSize );
 			}
 		}
 	}

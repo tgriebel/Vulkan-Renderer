@@ -108,7 +108,7 @@ public:
 
 	void				SetSourceImage( const uint32_t slot, Image* image );
 	void				SetSourceCubeImage( const uint32_t slot, Image* image );
-	void				SetConstants( const void* dataBlock, const uint32_t sizeInBytes);
+	void				UpdateConstants( const void* dataBlock, const uint32_t sizeInBytes);
 
 	void				Execute( CommandContext& cmdContext );
 };

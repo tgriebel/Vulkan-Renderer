@@ -201,7 +201,7 @@ void ImageShaderTask::SetSourceCubeImage( const uint32_t slot, Image* image )
 }
 
 
-void ImageShaderTask::SetConstants( const void* dataBlock, const uint32_t sizeInBytes )
+void ImageShaderTask::UpdateConstants( const void* dataBlock, const uint32_t sizeInBytes )
 {
 	assert( sizeInBytes <= MaxConstantBlockSizeInBytes );
 
