@@ -108,6 +108,7 @@
       "name": "ImageViewer",
       "vs": "fullscreen",
       "ps": "imageViewer",
+      "perms": ["msaa"],
 	  "bindset": "bindset_imageProcess",
 	  "image_shader": true
     },

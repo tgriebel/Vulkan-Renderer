@@ -19,6 +19,7 @@ extern imguiControls_t g_imguiControls;
 struct imguiTaskRenderData_t
 {
 	CommandContext*		commandContext;
+	RenderContext*		renderContext;
 	const DrawPass*		pass;
 };
 
@@ -33,7 +34,13 @@ void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* 
 {
 	imguiImageCallbackData_t* callbackData = (imguiImageCallbackData_t*)cmd->UserCallbackData;
 
-	const hdl_t pipeLine = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, static_cast<shaderPermId_t>( callbackData->permSet ) );
+	shaderPermId_t permSet = static_cast<shaderPermId_t>( callbackData->permSet );
+
+	hdl_t pipeLineHdl = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, permSet );
+
+	if( pipeLineHdl == INVALID_HDL ) {
+		pipeLineHdl = CreateGraphicsPipeline( renderTaskData.renderContext, renderTaskData.pass, *callbackData->progAsset, permSet );
+	}
 
 	const float visMinX = Max( callbackData->x, cmd->ClipRect.x );
 	const float visMinY = Max( callbackData->y, cmd->ClipRect.y );
@@ -44,7 +51,7 @@ void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* 
 		return;
 	}
 
-	vk_QuadDraw( *renderTaskData.commandContext, pipeLine, vec2f( visMinX, visMinY ), vec2f( visMaxX - visMinX, visMaxY - visMinY ), renderTaskData.pass );
+	vk_QuadDraw( *renderTaskData.commandContext, pipeLineHdl, vec2f( visMinX, visMinY ), vec2f( visMaxX - visMinX, visMaxY - visMinY ), renderTaskData.pass );
 }
 
 
@@ -205,11 +212,13 @@ void ImguiTask::Execute( CommandContext& cmdContext )
 	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
 
 	renderTaskData.commandContext = &cmdContext;
+	renderTaskData.renderContext = m_context;
 	renderTaskData.pass = m_imagePass;
 
 	ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), cmdBuffer );
 
 	renderTaskData.commandContext = nullptr;
+	renderTaskData.renderContext = nullptr;
 	renderTaskData.pass = nullptr;
 
 	pendingCallbackTasks = 0;

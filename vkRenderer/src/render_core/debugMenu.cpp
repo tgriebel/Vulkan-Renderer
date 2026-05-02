@@ -1380,9 +1380,7 @@ void DrawImageViewerDebugMenu()
 
 	imguiImageCallbackData_t data;
 	data.progAsset    = GpuProgramLib().Find( "ImageViewer" );
-	data.permSet      = static_cast<uint32_t>( image->info.subsamples != IMAGE_SMP_1
-	                        ? shaderPermId_t::MSAA
-	                        : shaderPermId_t::NONE );
+	data.permSet      = static_cast<uint32_t>( ( image->info.subsamples != IMAGE_SMP_1 ) ? shaderPermId_t::MSAA : shaderPermId_t::NONE );
 	data.image        = image;
 	data.x            = pos.x;
 	data.y            = pos.y;
@@ -1395,6 +1393,8 @@ void DrawImageViewerDebugMenu()
 	data.mipLevel    = (uint32_t)selectedMip;
 	data.layer       = (uint32_t)selectedLayer;
 	data.sampleIndex = ( selectedSample < 0 ) ? ~0u : (uint32_t)selectedSample;
+
+	assert( data.progAsset != nullptr );
 
 	AddImguiCallback( ImGui::GetWindowDrawList(), data );
 
