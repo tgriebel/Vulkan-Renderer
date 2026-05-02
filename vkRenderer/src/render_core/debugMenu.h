@@ -31,4 +31,5 @@ void DebugMenuEntityEdit( Scene* scene );
 void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkPhysicalDeviceFeatures2 deviceFeatures );
 #endif
 void DeviceDebugMenu();
+void DrawImageViewerDebugMenu();
 #endif

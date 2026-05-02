@@ -17,8 +17,11 @@ renderDebugData_t g_renderDebugData;
 #include "debugMenu.h"
 
 #include "../app/imguiInterface.h"
+#include "renderer.h"
 
-extern imguiControls_t g_imguiControls;
+extern imguiControls_t  g_imguiControls;
+extern Renderer         g_renderer;
+extern void             AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& callbackData );
 
 const char* FormatByteSize( const uint64_t bytes )
 {
@@ -1021,5 +1024,188 @@ void DebugMenuDeviceProperties( VkPhysicalDeviceProperties deviceProperties, VkP
 #undef LimitInt
 #undef LimitHex
 #undef FeatureBool
+
+
+void DrawImageViewerDebugMenu()
+{
+	// --- Set-up ---
+	// Build image list from both the asset library and renderer output images
+	std::vector<const Image*> images;
+
+	const uint32_t imageCount = ImageLib().Count();
+	for ( uint32_t i = 0; i < imageCount; ++i )
+	{
+		const Image* img = &ImageLib().Find( i )->Get();
+		if ( img != nullptr ) {
+			images.push_back( img );
+		}
+	}
+
+	const uint32_t outputImageCount = g_renderer.OutputImageCount();
+	for ( uint32_t i = 0; i < outputImageCount; ++i )
+	{
+		const Image* img = g_renderer.FindOutputImage( i );
+		if ( img != nullptr && img->gpuImage != nullptr ) {
+			images.push_back( img );
+		}
+	}
+
+	std::sort( images.begin(), images.end() );
+
+	std::vector<std::string> imageNames;
+	const uint32_t dbgImageCount = static_cast<uint32_t>( images.size() );
+	for ( uint32_t i = 0; i < dbgImageCount; ++i ) {
+		imageNames.push_back( std::to_string( i ) + ": " + images[ i ]->gpuImage->GetDebugName() );
+	}
+
+	const char* debugImageName = ( g_imguiControls.dbgImageId >= 0 ) ? imageNames[ g_imguiControls.dbgImageId ].c_str() : "";
+
+	if ( ImGui::BeginCombo( "Images", debugImageName ) )
+	{
+		for ( uint32_t i = 0; i < dbgImageCount; ++i )
+		{
+			const char* name = imageNames[ i ].c_str();
+			if ( _stricmp( name, "" ) == 0 ) {
+				continue;
+			}
+			const bool selected = ( i == (uint32_t)g_imguiControls.dbgImageId );
+			if ( ImGui::Selectable( name, selected ) ) {
+				g_imguiControls.dbgImageId = i;
+			}
+			if ( selected ) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	if ( g_imguiControls.dbgImageId < 0 ) {
+		return;
+	}
+
+	const Image* image  = images[ g_imguiControls.dbgImageId ];
+	const float  aspect = image->info.width / (float)image->info.height;
+
+	static bool  autoScale = true;
+	static float scale     = 1.0f;
+
+	ImGui::Begin( "Image Viewer" );
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	// --- Toolbar ---
+	const float totalAvailW  = ImGui::GetContentRegionAvail().x;
+	const float totalAvailH  = ImGui::GetContentRegionAvail().y;
+	const float toolbarH     = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
+	const float separatorH   = ImGui::GetStyle().ItemSpacing.y + 1.0f;
+	const float imageAreaH   = totalAvailH - toolbarH - separatorH;
+
+	ImGui::Text( "Zoom" );
+	ImGui::SameLine();
+
+	if ( ImGui::SmallButton( "1:1" ) )
+	{
+		autoScale = false;
+		scale     = 1.0f;
+	}
+	ImGui::SameLine();
+
+	if ( ImGui::SmallButton( "Fit" ) )
+	{
+		autoScale    = false;
+		const float sW = totalAvailW           / (float)image->info.width;
+		const float sH = imageAreaH            / (float)image->info.height;
+		scale          = Min( sW, sH );
+	}
+	ImGui::SameLine();
+
+	static const float presetScales[] = { 0.1f, 0.25f, 0.5f, 0.75f, 1.0f, 2.0f, 4.0f, 8.0f };
+	static const char* presetLabels[] = { "10%", "25%", "50%", "75%", "100%", "200%", "400%", "800%", "Auto" };
+	static const int   presetCount    = 9;
+
+	char comboPreview[ 16 ];
+	if ( autoScale )
+	{
+		sprintf_s( comboPreview, "Auto" );
+	}
+	else
+	{
+		bool matched = false;
+		for ( int i = 0; i < presetCount - 1; ++i )
+		{
+			if ( fabsf( scale - presetScales[ i ] ) < 0.001f )
+			{
+				sprintf_s( comboPreview, "%s", presetLabels[ i ] );
+				matched = true;
+				break;
+			}
+		}
+		if ( !matched )
+		{
+			sprintf_s( comboPreview, "%d%%", (int)roundf( scale * 100.0f ) );
+		}
+	}
+
+	ImGui::SetNextItemWidth( 80.0f );
+	if ( ImGui::BeginCombo( "##zoom", comboPreview ) )
+	{
+		for ( int i = 0; i < presetCount; ++i )
+		{
+			const bool isAuto     = ( i == presetCount - 1 );
+			const bool isSelected = isAuto
+				? autoScale
+				: ( !autoScale && fabsf( scale - presetScales[ i ] ) < 0.001f );
+
+			if ( ImGui::Selectable( presetLabels[ i ], isSelected ) )
+			{
+				autoScale = isAuto;
+				if ( !isAuto ) {
+					scale = presetScales[ i ];
+				}
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::Separator();
+
+	// --- Image ---
+	const float availW   = ImGui::GetContentRegionAvail().x;
+	const float displayW = autoScale ? availW : ( image->info.width * scale );
+	const float displayH = displayW / aspect;
+
+	ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ), 0, ImVec2( displayW, displayH ) );
+
+	if ( ImGui::IsItemHovered() )
+	{
+		const float wheelDelta = io.MouseWheel;
+		if ( wheelDelta != 0.0f )
+		{
+			if ( autoScale )
+			{
+				// Preserve apparent size when transitioning from auto to fixed
+				autoScale = false;
+				scale     = availW / (float)image->info.width;
+			}
+			scale *= powf( 1.1f, wheelDelta );
+			scale  = Max( scale, 0.01f );
+		}
+	}
+
+	const ImVec2 pos = ImGui::GetItemRectMin();
+
+	imguiImageCallbackData_t data;
+	data.progAsset = GpuProgramLib().Find( "ImageViewer" );
+	data.permSet   = static_cast<uint32_t>( shaderPermId_t::NONE );
+	data.image     = image;
+	data.x         = pos.x;
+	data.y         = pos.y;
+	data.width     = displayW;
+	data.height    = displayH;
+
+	AddImguiCallback( ImGui::GetWindowDrawList(), data );
+
+	ImGui::End();
+}
 
 #endif

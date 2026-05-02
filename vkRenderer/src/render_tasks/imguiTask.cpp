@@ -33,14 +33,18 @@ void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* 
 {
 	imguiImageCallbackData_t* callbackData = (imguiImageCallbackData_t*)cmd->UserCallbackData;
 
-	pipelineObject_t* pipelineObject = nullptr;
-
 	const hdl_t pipeLine = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, static_cast<shaderPermId_t>( callbackData->permSet ) );
 
-	vec2f offset = vec2f( callbackData->x, callbackData->y );
-	vec2f size = vec2f( callbackData->width, callbackData->height );
+	const float visMinX = Max( callbackData->x, cmd->ClipRect.x );
+	const float visMinY = Max( callbackData->y, cmd->ClipRect.y );
+	const float visMaxX = Min( callbackData->x + callbackData->width,  cmd->ClipRect.z );
+	const float visMaxY = Min( callbackData->y + callbackData->height, cmd->ClipRect.w );
 
-	vk_QuadDraw( *renderTaskData.commandContext, pipeLine, offset, size, renderTaskData.pass );
+	if ( visMinX >= visMaxX || visMinY >= visMaxY ) {
+		return;
+	}
+
+	vk_QuadDraw( *renderTaskData.commandContext, pipeLine, vec2f( visMinX, visMinY ), vec2f( visMaxX - visMinX, visMaxY - visMinY ), renderTaskData.pass );
 }
 
 

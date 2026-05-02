@@ -105,7 +105,7 @@
       "ps": "postProcess"
     },
     {
-      "name": "Image2D",
+      "name": "ImageViewer",
       "vs": "fullscreen",
       "ps": "imageViewer",
 	  "bindset": "bindset_imageProcess",
