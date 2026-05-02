@@ -18,6 +18,10 @@ struct imguiImageCallbackData_t
 	float				width;
 	float				height;
 	float				tint[ 4 ];  // per-channel scale: R, G, B, A
+	uint32_t			flags;        // bit 0: cube image, bit index 1 (0x02): apply sRGB gamma
+	uint32_t			mipLevel;
+	uint32_t			layer;
+	uint32_t			sampleIndex;  // ~0u = average all samples
 };
 
 

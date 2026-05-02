@@ -110,6 +110,7 @@ void ImguiTask::FrameBegin()
 		vec4f		scissorRectUv;
 		vec4f		tint;
 		uint32_t	flags;
+		uint32_t	sampleIndex;
 	};
 
 	const viewport_t viewport = m_imguiPass->GetViewport();
@@ -126,10 +127,10 @@ void ImguiTask::FrameBegin()
 		viewerShaderConstants_t constants{};
 
 		constants.dimensions = vec4f( (float)image->info.width, (float)image->info.height, 1.0f / image->info.width, 1.0f / image->info.height );
-		constants.level = 0;
+		constants.level = callbackTasks[ 0 ].mipLevel;
 		constants.mipCount = image->info.mipLevels;
 		constants.layerCount = image->info.layers;
-		constants.layer = 0;
+		constants.layer = callbackTasks[ 0 ].layer;
 		constants.scissorRectUv = vec4f( callbackTasks[ 0 ].x, callbackTasks[ 0 ].y, callbackTasks[ 0 ].width, callbackTasks[ 0 ].height );
 		
 		constants.scissorRectUv.x *= 1.0f / viewport.width;
@@ -139,7 +140,8 @@ void ImguiTask::FrameBegin()
 
 		const float* t = callbackTasks[ 0 ].tint;
 		constants.tint  = vec4f( t[ 0 ], t[ 1 ], t[ 2 ], t[ 3 ] );
-		constants.flags = isCubeImage ? 0x01 : 0x00;
+		constants.flags       = ( isCubeImage ? 0x01 : 0x00 ) | callbackTasks[ 0 ].flags;
+		constants.sampleIndex = callbackTasks[ 0 ].sampleIndex;
 
 		m_buffer.SetPos( 0 );
 		m_buffer.CopyData( &constants, sizeof( constants ) );

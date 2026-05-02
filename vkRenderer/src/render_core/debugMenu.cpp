@@ -1089,7 +1089,14 @@ void DrawImageViewerDebugMenu()
 	static bool  autoScale = true;
 	static float scale     = 1.0f;
 
-	static float tint[ 4 ] = { 1.0f, 1.0f, 1.0f, 0.0f };  // R, G, B, A; default: RGB on
+	static float tint[ 4 ]    = { 1.0f, 1.0f, 1.0f, 0.0f };
+	static bool  gammaEnabled  = false;
+	static int   selectedMip    = 0;
+	static int   selectedLayer  = 0;
+	static int   selectedSample = -1;  // -1 = average
+	static float intensity     = 1.0f;
+	static float intensityMin  = 0.0f;
+	static float intensityMax  = 2.0f;
 
 	ImGui::Begin( "Image Viewer" );
 
@@ -1098,7 +1105,10 @@ void DrawImageViewerDebugMenu()
 	// --- Toolbar ---
 	const float totalAvailW  = ImGui::GetContentRegionAvail().x;
 	const float totalAvailH  = ImGui::GetContentRegionAvail().y;
-	const float toolbarH     = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
+	const float rowH         = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
+	const bool  isMsaa       = ( image->info.subsamples != IMAGE_SMP_1 );
+	const int   toolbarRows  = 3 + ( image->info.layers > 1 ? 1 : 0 ) + ( isMsaa ? 1 : 0 );
+	const float toolbarH     = toolbarRows * rowH;
 	const float separatorH   = ImGui::GetStyle().ItemSpacing.y + 1.0f;
 	const float imageAreaH   = totalAvailH - toolbarH - separatorH;
 
@@ -1120,6 +1130,15 @@ void DrawImageViewerDebugMenu()
 	ChannelButton( "B", 2, ImVec4( 0.2f, 0.4f, 0.9f, 1.0f ) );
 	ImGui::SameLine();
 	ChannelButton( "A", 3, ImVec4( 0.7f, 0.7f, 0.7f, 1.0f ) );
+	ImGui::SameLine();
+
+	{
+		ImGui::PushStyleColor( ImGuiCol_Button, gammaEnabled ? ImVec4( 0.9f, 0.7f, 0.1f, 1.0f ) : offColor );
+		if ( ImGui::SmallButton( "sRGB" ) ) {
+			gammaEnabled = !gammaEnabled;
+		}
+		ImGui::PopStyleColor();
+	}
 	ImGui::SameLine();
 
 	ImGui::Separator();
@@ -1192,6 +1211,146 @@ void DrawImageViewerDebugMenu()
 		ImGui::EndCombo();
 	}
 
+	// --- Row 2: Intensity ---
+	{
+		const float fieldW = 50.0f;
+
+		ImGui::Text( "Intensity" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( fieldW );
+		ImGui::InputFloat( "##intMin", &intensityMin, 0.0f, 0.0f, "%.2f" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( -fieldW - ImGui::GetStyle().ItemSpacing.x );
+		ImGui::SliderFloat( "##intensity", &intensity, intensityMin, intensityMax, "%.3f" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( fieldW );
+		ImGui::InputFloat( "##intMax", &intensityMax, 0.0f, 0.0f, "%.2f" );
+
+		intensityMin = Min( intensityMin, intensityMax - 0.001f );
+		intensity    = Max( Min( intensity, intensityMax ), intensityMin );
+	}
+
+	// --- Row 3: MIP level ---
+	{
+		const int mipCount = (int)image->info.mipLevels;
+		selectedMip = Max( 0, Min( selectedMip, mipCount - 1 ) );
+
+		auto MipW = [&]( int mip ) { return Max( 1u, image->info.width  >> mip ); };
+		auto MipH = [&]( int mip ) { return Max( 1u, image->info.height >> mip ); };
+
+		const char* msSuffix = isMsaa ? " MS" : "";
+
+		char preview[ 32 ];
+		snprintf( preview, sizeof( preview ), "%d  (%u x %u%s)", selectedMip, MipW( selectedMip ), MipH( selectedMip ), msSuffix );
+
+		ImGui::Text( "MIP" );
+		ImGui::SameLine();
+
+		ImGui::BeginDisabled( mipCount <= 1 );
+		ImGui::SetNextItemWidth( -1 );
+		if ( ImGui::BeginCombo( "##mip", preview ) )
+		{
+			for ( int i = 0; i < mipCount; ++i )
+			{
+				char label[ 32 ];
+				snprintf( label, sizeof( label ), "%d  (%u x %u%s)", i, MipW( i ), MipH( i ), msSuffix );
+				if ( ImGui::Selectable( label, selectedMip == i ) ) {
+					selectedMip = i;
+				}
+				if ( selectedMip == i ) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+		ImGui::EndDisabled();
+	}
+
+	// --- Row 4: Slice / Face (only when the image has multiple layers) ---
+	if ( image->info.layers > 1 )
+	{
+		static const char* cubeFaceLabels[] = { "+X", "-X", "+Y", "-Y", "+Z", "-Z" };
+		const bool   isCube    = ( image->info.type == IMAGE_TYPE_CUBE );
+		const int    numLayers = (int)image->info.layers;
+
+		selectedLayer = Max( 0, Min( selectedLayer, numLayers - 1 ) );
+
+		auto LayerLabel = [&]( int i, char* buf, int bufSize )
+		{
+			if ( isCube ) {
+				snprintf( buf, bufSize, "%s", cubeFaceLabels[ i % 6 ] );
+			} else {
+				snprintf( buf, bufSize, "Layer %d", i );
+			}
+		};
+
+		char preview[ 16 ];
+		LayerLabel( selectedLayer, preview, sizeof( preview ) );
+
+		ImGui::Text( isCube ? "Face" : "Slice" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( -1 );
+		if ( ImGui::BeginCombo( "##layer", preview ) )
+		{
+			for ( int i = 0; i < numLayers; ++i )
+			{
+				char label[ 16 ];
+				LayerLabel( i, label, sizeof( label ) );
+				if ( ImGui::Selectable( label, selectedLayer == i ) ) {
+					selectedLayer = i;
+				}
+				if ( selectedLayer == i ) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			ImGui::EndCombo();
+		}
+	}
+
+	// --- Row N: Sample (MSAA only) ---
+	if ( isMsaa )
+	{
+		const int numSamples = (int)image->info.subsamples;
+		selectedSample = Max( -1, Min( selectedSample, numSamples - 1 ) );
+
+		const char* preview = ( selectedSample < 0 ) ? "Average" : nullptr;
+		char singlePreview[ 16 ];
+		if ( selectedSample >= 0 ) {
+			snprintf( singlePreview, sizeof( singlePreview ), "Sample %d", selectedSample );
+			preview = singlePreview;
+		}
+
+		ImGui::Text( "Sample" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( -1 );
+		if ( ImGui::BeginCombo( "##sample", preview ) )
+		{
+			for ( int i = 0; i < numSamples; ++i )
+			{
+				char label[ 16 ];
+				snprintf( label, sizeof( label ), "Sample %d", i );
+				if ( ImGui::Selectable( label, selectedSample == i ) ) {
+					selectedSample = i;
+				}
+				if ( selectedSample == i ) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+			if ( ImGui::Selectable( "Average", selectedSample < 0 ) ) {
+				selectedSample = -1;
+			}
+			if ( selectedSample < 0 ) {
+				ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+	}
+
 	ImGui::Separator();
 
 	// --- Image ---
@@ -1221,13 +1380,21 @@ void DrawImageViewerDebugMenu()
 
 	imguiImageCallbackData_t data;
 	data.progAsset    = GpuProgramLib().Find( "ImageViewer" );
-	data.permSet      = static_cast<uint32_t>( shaderPermId_t::NONE );
+	data.permSet      = static_cast<uint32_t>( image->info.subsamples != IMAGE_SMP_1
+	                        ? shaderPermId_t::MSAA
+	                        : shaderPermId_t::NONE );
 	data.image        = image;
 	data.x            = pos.x;
 	data.y            = pos.y;
 	data.width        = displayW;
 	data.height       = displayH;
-	memcpy( data.tint, tint, sizeof( tint ) );
+	for ( int i = 0; i < 4; ++i ) {
+		data.tint[ i ] = tint[ i ] * intensity;
+	}
+	data.flags       = gammaEnabled ? 0x02 : 0x00;
+	data.mipLevel    = (uint32_t)selectedMip;
+	data.layer       = (uint32_t)selectedLayer;
+	data.sampleIndex = ( selectedSample < 0 ) ? ~0u : (uint32_t)selectedSample;
 
 	AddImguiCallback( ImGui::GetWindowDrawList(), data );
 
