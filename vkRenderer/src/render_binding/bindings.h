@@ -35,9 +35,10 @@ BINDING( passBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
 BINDING( imageCodeArray,				IMAGE_2D_ARRAY,		MaxCodeImages,			BIND_STATE_ALL_GFX );
 BINDING( imageCodeCubeArray,			IMAGE_CUBE_ARRAY,	MaxCodeImages,			BIND_STATE_ALL_GFX );
 BINDING( imageStencil,					IMAGE_2D,			1,						BIND_STATE_ALL_GFX );
-BINDING( bilinearWrapSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
-BINDING( bilinearClampEdgeSampler,		IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
-BINDING( bilinearClampBorderSampler,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( nearestSampler,				IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( bilinearSamplerWrap,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( bilinearSamplerClampEdge,		IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
+BINDING( bilinearSamplerClampBorder,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 BINDING( depthShadowSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 
 
@@ -48,9 +49,10 @@ static const ShaderBinding g_globalBindings[] =
 	BINDING_NAME( image2DArray ),
 	BINDING_NAME( imageCubeArray ),
 	BINDING_NAME( materialBuffer ),
-	BINDING_NAME( bilinearWrapSampler ),
-	BINDING_NAME( bilinearClampEdgeSampler ),
-	BINDING_NAME( bilinearClampBorderSampler ),
+	BINDING_NAME( nearestSampler ),
+	BINDING_NAME( bilinearSamplerWrap ),
+	BINDING_NAME( bilinearSamplerClampEdge ),
+	BINDING_NAME( bilinearSamplerClampBorder ),
 	BINDING_NAME( depthShadowSampler ),
 };
 const uint64_t bindset_global = Hash( "bindset_global" );

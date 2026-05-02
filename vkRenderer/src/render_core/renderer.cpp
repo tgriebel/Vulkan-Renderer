@@ -475,10 +475,11 @@ void Renderer::UpdateBindSets()
 	globalParms->Bind( BINDING_NAME( image2DArray ),				&resources.gpuImages2D );
 	globalParms->Bind( BINDING_NAME( imageCubeArray ),				&resources.gpuImagesCube );
 	globalParms->Bind( BINDING_NAME( materialBuffer ),				&resources.materialBuffers );
-	globalParms->Bind( BINDING_NAME( bilinearWrapSampler ),			&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_WRAP ]);
-	globalParms->Bind( BINDING_NAME( bilinearClampEdgeSampler ),	&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_CLAMP_EDGE ] );
-	globalParms->Bind( BINDING_NAME( bilinearClampBorderSampler ),	&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_CLAMP_BORDER ] );
-	globalParms->Bind( BINDING_NAME( depthShadowSampler ),			&resources.shadowMapSampler );
+	globalParms->Bind( BINDING_NAME( nearestSampler ),				&resources.nearestSampler );
+	globalParms->Bind( BINDING_NAME( bilinearSamplerWrap ),			&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_WRAP ] );
+	globalParms->Bind( BINDING_NAME( bilinearSamplerClampEdge ),	&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_CLAMP_EDGE ] );
+	globalParms->Bind( BINDING_NAME( bilinearSamplerClampBorder ),	&resources.bilinearSamplers[ samplerAddress_t::SAMPLER_ADDRESS_CLAMP_BORDER ] );
+	globalParms->Bind( BINDING_NAME( depthShadowSampler ),			&resources.depthShadowSampler );
 
 	{
 		particleState.parms->Bind( BINDING_NAME( globalsBuffer ),		&resources.globalConstants );

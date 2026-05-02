@@ -72,10 +72,11 @@
                                                         SAMPLER_2D_LAYOUT( SET, 2 )                                 \
                                                         SAMPLER_CUBE_LAYOUT( SET, 3 )                               \
                                                         MATERIAL_LAYOUT( SET, 4 )									\
-                                                        SAMPLER( SET, 5, bilinearSamplerWrap )						\
-														SAMPLER( SET, 6, bilinearSamplerClampEdge )					\
+                                                        SAMPLER( SET, 5, nearestSampler )							\
+                                                        SAMPLER( SET, 6, bilinearSamplerWrap )						\
+														SAMPLER( SET, 7, bilinearSamplerClampEdge )					\
                                                         SAMPLER( SET, 7, bilinearSamplerClampBorder );				\
-                                                        SAMPLER_COMP( SET, 8, depthShadowSampler );
+                                                        SAMPLER_COMP( SET, 9, depthShadowSampler );
 
 #define VIEW_BINDS( SET )                               MODEL_LAYOUT( SET, 0 )
 

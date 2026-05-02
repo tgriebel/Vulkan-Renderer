@@ -40,13 +40,17 @@ void Renderer::Init( const renderConfig_t& cfg )
 	// Image samplers
 	{
 		samplerState_t samplerState{};
-		samplerState.filter = SAMPLER_FILTER_BILINEAR;
 		samplerState.borderColor = SAMPLER_BORDER_BLACK;
 		samplerState.borderColorIsFloat = true;
 		samplerState.borderTransparent = false;
 		samplerState.minLod = 0.0f;
 		samplerState.maxLod = 16.0f;
 		samplerState.maxAniso = 16.0f;
+
+		samplerState.filter = SAMPLER_FILTER_NEAREST;
+		resources.nearestSampler.Init( samplerState, resourceLifeTime_t::REBOOT );
+
+		samplerState.filter = SAMPLER_FILTER_BILINEAR;
 
 		for( uint32_t i = 0; i < SAMPLER_ADDRESS_MODES; ++i )
 		{
@@ -66,7 +70,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		samplerState.maxAniso = 0.0f;
 		samplerState.pcf = true;
 
-		resources.shadowMapSampler.Init( samplerState, resourceLifeTime_t::REBOOT );
+		resources.depthShadowSampler.Init( samplerState, resourceLifeTime_t::REBOOT );
 	}
 
 	viewCount = 0;

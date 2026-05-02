@@ -28,9 +28,10 @@ public:
 	GpuBuffer				lightParms;
 	GpuBuffer				particleBuffer;
 
+	ImageSampler			nearestSampler;
 	ImageSampler			bilinearSamplers[ SAMPLER_ADDRESS_MODES ];
 	ImageSampler			trilinearSamplers[ SAMPLER_ADDRESS_MODES ];
-	ImageSampler			shadowMapSampler;
+	ImageSampler			depthShadowSampler;
 
 	// TODO: Views should have a final output image assigned to them
 	// Intermediate images can be reused across views however
