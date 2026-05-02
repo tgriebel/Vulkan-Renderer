@@ -108,6 +108,7 @@ void ImguiTask::FrameBegin()
 	struct viewerShaderConstants_t : public ImageShaderTask::constants_t
 	{
 		vec4f		scissorRectUv;
+		vec4f		tint;
 		uint32_t	flags;
 	};
 
@@ -136,6 +137,8 @@ void ImguiTask::FrameBegin()
 		constants.scissorRectUv.z *= 1.0f / viewport.width;
 		constants.scissorRectUv.w *= 1.0f / viewport.height;
 
+		const float* t = callbackTasks[ 0 ].tint;
+		constants.tint  = vec4f( t[ 0 ], t[ 1 ], t[ 2 ], t[ 3 ] );
 		constants.flags = isCubeImage ? 0x01 : 0x00;
 
 		m_buffer.SetPos( 0 );

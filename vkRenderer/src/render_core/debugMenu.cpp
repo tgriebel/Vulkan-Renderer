@@ -1089,6 +1089,8 @@ void DrawImageViewerDebugMenu()
 	static bool  autoScale = true;
 	static float scale     = 1.0f;
 
+	static float tint[ 4 ] = { 1.0f, 1.0f, 1.0f, 0.0f };  // R, G, B, A; default: RGB on
+
 	ImGui::Begin( "Image Viewer" );
 
 	ImGuiIO& io = ImGui::GetIO();
@@ -1099,6 +1101,29 @@ void DrawImageViewerDebugMenu()
 	const float toolbarH     = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
 	const float separatorH   = ImGui::GetStyle().ItemSpacing.y + 1.0f;
 	const float imageAreaH   = totalAvailH - toolbarH - separatorH;
+
+	const ImVec4 offColor = ImVec4( 0.25f, 0.25f, 0.25f, 1.0f );
+	auto ChannelButton = [&]( const char* label, int i, ImVec4 onColor )
+	{
+		const bool active = tint[ i ] > 0.5f;
+		ImGui::PushStyleColor( ImGuiCol_Button, active ? onColor : offColor );
+		if ( ImGui::SmallButton( label ) ) {
+			tint[ i ] = active ? 0.0f : 1.0f;
+		}
+		ImGui::PopStyleColor();
+	};
+
+	ChannelButton( "R", 0, ImVec4( 0.8f, 0.2f, 0.2f, 1.0f ) );
+	ImGui::SameLine();
+	ChannelButton( "G", 1, ImVec4( 0.2f, 0.7f, 0.2f, 1.0f ) );
+	ImGui::SameLine();
+	ChannelButton( "B", 2, ImVec4( 0.2f, 0.4f, 0.9f, 1.0f ) );
+	ImGui::SameLine();
+	ChannelButton( "A", 3, ImVec4( 0.7f, 0.7f, 0.7f, 1.0f ) );
+	ImGui::SameLine();
+
+	ImGui::Separator();
+	ImGui::SameLine();
 
 	ImGui::Text( "Zoom" );
 	ImGui::SameLine();
@@ -1195,13 +1220,14 @@ void DrawImageViewerDebugMenu()
 	const ImVec2 pos = ImGui::GetItemRectMin();
 
 	imguiImageCallbackData_t data;
-	data.progAsset = GpuProgramLib().Find( "ImageViewer" );
-	data.permSet   = static_cast<uint32_t>( shaderPermId_t::NONE );
-	data.image     = image;
-	data.x         = pos.x;
-	data.y         = pos.y;
-	data.width     = displayW;
-	data.height    = displayH;
+	data.progAsset    = GpuProgramLib().Find( "ImageViewer" );
+	data.permSet      = static_cast<uint32_t>( shaderPermId_t::NONE );
+	data.image        = image;
+	data.x            = pos.x;
+	data.y            = pos.y;
+	data.width        = displayW;
+	data.height       = displayH;
+	memcpy( data.tint, tint, sizeof( tint ) );
 
 	AddImguiCallback( ImGui::GetWindowDrawList(), data );
 

@@ -17,6 +17,7 @@ struct imguiImageCallbackData_t
 	float				y;
 	float				width;
 	float				height;
+	float				tint[ 4 ];  // per-channel scale: R, G, B, A
 };
 
 
