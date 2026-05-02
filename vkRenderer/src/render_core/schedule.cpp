@@ -20,6 +20,11 @@ struct ssaoConstants_t
 	float    strength;    // AO multiplier: 1 = standard, higher = darker
 };
 
+struct bloomUpsampleConstants_t
+{
+	float filterRadius;   // Tent filter radius in UV space
+};
+
 static availableTasks_t tasks;
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
@@ -300,14 +305,29 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		tasks.bloomDownsampleTask = new ImageProcessTask( info );
 
+		const bloomUpsampleConstants_t bloomUpsampleDefaults = { 0.005f };
+
 		info.name = "BloomUpsample";
 		info.sourceImage = resources->bloom;
 		info.outputImage = resources->bloom; // Overwrite the previous downsampled values with upsampled ones
 		info.baseMip = 0;
 		info.upsampleProcess = true;
 		info.progName = "BloomUpsample";
+		info.constants = &bloomUpsampleDefaults;
+		info.constantsByteSize = sizeof( bloomUpsampleDefaults );
 
 		tasks.bloomUpsampleTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+		tasks.bloomUpsampleTask->RegisterControls( [ bloomUpsampleTask = tasks.bloomUpsampleTask ]()
+		{
+			bloomUpsampleConstants_t& c = *bloomUpsampleTask->GetConstants<bloomUpsampleConstants_t>();
+			if ( ImGui::SliderFloat( "Filter Radius", &c.filterRadius, 0.001f, 0.02f ) )
+			{
+				bloomUpsampleTask->UpdateConstants();
+			}
+		} );
+#endif
 	}
 
 

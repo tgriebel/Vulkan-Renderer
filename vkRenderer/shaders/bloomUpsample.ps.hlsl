@@ -1,13 +1,11 @@
 #include "globals.h"
 
-struct ImageShaderTask
+struct BloomUpsampleConstants
 {
-    float4 generic0;
-    float4 generic1;
-    float4 generic2;
+    float filterRadius;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageShaderTask )
+PS_LAYOUT_IMAGE_PROCESS( Texture2D, BloomUpsampleConstants )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
@@ -17,9 +15,8 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     // The filter kernel is applied with a radius, specified in texture
     // coordinates, so that the radius will vary across mip resolutions.
-    float filterRadius = 0.005f;
-    float x = filterRadius;
-    float y = filterRadius;
+    float x = imageProcess.filterRadius;
+    float y = imageProcess.filterRadius;
 
     // Take 9 samples around current texel:
     // a - b - c
