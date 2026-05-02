@@ -12,19 +12,6 @@
 #include "../render_tasks/UtilTasks.h"
 #include "../render_tasks/imguiTask.h"
 
-struct ssaoConstants_t
-{
-	float    radius;      // World-space sampling radius (meters)
-	uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
-	float    bias;        // Depth bias to prevent self-occlusion (meters)
-	float    strength;    // AO multiplier: 1 = standard, higher = darker
-};
-
-struct bloomUpsampleConstants_t
-{
-	float filterRadius;   // Tent filter radius in UV space
-};
-
 static availableTasks_t tasks;
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
@@ -194,6 +181,14 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.ssao )
 	{
+		struct ssaoConstants_t
+		{
+			float    radius;      // World-space sampling radius (meters)
+			uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
+			float    bias;        // Depth bias to prevent self-occlusion (meters)
+			float    strength;    // AO multiplier: 1 = standard, higher = darker
+		};
+
 		const ssaoConstants_t ssaoDefaults = { 0.5f, 16, 0.025f, 1.5f };
 
 		imageProcessCreateInfo_t info{};
@@ -304,6 +299,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progName = "BloomDownsample";
 
 		tasks.bloomDownsampleTask = new ImageProcessTask( info );
+
+		struct bloomUpsampleConstants_t
+		{
+			float filterRadius;   // Tent filter radius in UV space
+		};
 
 		const bloomUpsampleConstants_t bloomUpsampleDefaults = { 0.005f };
 
