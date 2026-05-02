@@ -82,10 +82,10 @@ public:
 	void								ShutdownGPU();
 	void								Resize();
 
-	inline void							SetSchedule( const TaskSchedule* schedule )
-	{
+	void								BuildSchedule( TaskSchedule* schedule ); // FIXME: Temp. Schedule is being refactored so the renderer can take in different schedules
 
-	}
+	inline void							SetSchedule( TaskSchedule* schedule ) { this->schedule = schedule; }
+	inline const TaskSchedule*			GetSchedule() const { return schedule; }
 
 	// Debug
 	uint32_t							OutputImageCount();
@@ -107,7 +107,7 @@ private:
 	uint32_t							viewCount;
 	uint32_t							activeViewCount;
 
-	TaskSchedule						schedule;
+	TaskSchedule*						schedule;
 
 	// Timers
 	SysCore::Timer						frameTimer;

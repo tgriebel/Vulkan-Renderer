@@ -161,7 +161,7 @@ float3 ReconstructViewPos( const float2 uv, const float zDepth, const float4x4 p
 {
 	float depth = LinearDepth( zDepth, proj );
 
-	float2 ndc = float2( uv.x * 2.0f - 1.0f, uv.y * 2.0f - 1.0f );
+	float2 ndc = 2.0f * uv - float2( 1.0f, 1.0f );
 
 	float2 viewPos = ndc * depth * float2( 1.0f / proj[ 0 ][ 0 ], 1.0f / proj[ 1 ][ 1 ] );
 

@@ -207,14 +207,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	InitImGui( view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ]->GetFrameBuffer() );
 
-	RenderViewContext viewContext;
-	viewContext.activeViews = &activeViews[0];
-	viewContext.renderViews = &renderViews[0];
-	viewContext.shadowViews = &shadowViews[0];
-	viewContext.view2Ds = &view2Ds[0];
-
-	BuildSceneSchedule( config, &renderContext, &resources, &viewContext, &schedule );
-
 	uploader.Boot( &renderContext, &resources );
 
 	ClearPipelineCache();
@@ -224,6 +216,18 @@ void Renderer::Init( const renderConfig_t& cfg )
 	uploader.Upload();
 
 	FlushGPU();
+}
+
+
+void Renderer::BuildSchedule( TaskSchedule* schedule )
+{
+	RenderViewContext viewContext;
+	viewContext.activeViews = &activeViews[ 0 ];
+	viewContext.renderViews = &renderViews[ 0 ];
+	viewContext.shadowViews = &shadowViews[ 0 ];
+	viewContext.view2Ds = &view2Ds[ 0 ];
+
+	BuildSceneSchedule( config, &renderContext, &resources, &viewContext, schedule );
 }
 
 

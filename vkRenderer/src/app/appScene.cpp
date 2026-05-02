@@ -13,6 +13,7 @@
 #endif
 
 #include "../render_core/debugMenu.h"
+#include "../render_core/schedule.h"
 #include "../render_core/renderer.h"
 #include "../render_core/allocator.h"
 #include "../globals/assetDefs.h"
@@ -289,6 +290,7 @@ void UpdateScene( Scene* scene )
 		DrawEntityDebugMenu();
 		DrawDrawGroupDebugMenu();
 		DeviceDebugMenu();
+		DrawScheduleDebugMenu( g_renderer.GetSchedule() );
 
 		ImGui::EndTabBar();
 	}

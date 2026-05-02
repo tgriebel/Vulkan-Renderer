@@ -1,5 +1,9 @@
 #include "schedule.h"
 
+#if defined( USE_IMGUI )
+#include "../../../external/imgui/imgui.h"
+#endif
+
 #include "../globals/assetDefs.h"
 #include "../render_tasks/ImageShaderTask.h"
 #include "../render_tasks/ImageProcessTask.h"
@@ -498,3 +502,23 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	schedule->AsString();
 }
+
+#if defined( USE_IMGUI )
+void DrawScheduleDebugMenu( const TaskSchedule* schedule )
+{
+	if ( ImGui::BeginTabItem( "Schedule" ) )
+	{
+		int index = 0;
+		const GpuTask* task = schedule->GetHead();
+		while ( task != nullptr )
+		{
+			ImGui::PushID( index );
+			ImGui::CollapsingHeader( task->AsString().c_str(), ImGuiTreeNodeFlags_Leaf );
+			ImGui::PopID();
+			task = task->GetChild();
+			++index;
+		}
+		ImGui::EndTabItem();
+	}
+}
+#endif

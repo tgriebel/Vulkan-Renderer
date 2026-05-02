@@ -258,7 +258,7 @@ void Renderer::RecreateSwapChain()
 	g_swapChain.Create( &g_window, width, height );
 	CreateFramebuffers();
 
-	schedule.Resize();
+	schedule->Resize();
 }
 
 
@@ -332,7 +332,8 @@ void Renderer::WaitForEndFrame()
 
 void Renderer::SubmitFrame()
 {
-	schedule.FrameBegin();
+	assert( schedule != nullptr );
+	schedule->FrameBegin();
 
 	{
 		computeContext.Begin();
@@ -340,8 +341,8 @@ void Renderer::SubmitFrame()
 
 		renderContext.UpdateBindParms();
 
-		while( schedule.HasPendingTasks() ) {
-			schedule.IssueNext( gfxContext );
+		while( schedule->HasPendingTasks() ) {
+			schedule->IssueNext( gfxContext );
 		}
 
 		gfxContext.End();
@@ -361,7 +362,7 @@ void Renderer::SubmitFrame()
 		g_window.RequestImageResize();
 	}
 
-	schedule.FrameEnd();
+	schedule->FrameEnd();
 
 	context.bufferId = ( context.bufferId + 1 ) % g_swapChain.GetBufferCount();
 }

@@ -8,6 +8,7 @@
 #include "src/app/window.h"
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
+#include "src/render_core/schedule.h"
 #include "scenes/sceneParser.h"
 #include "src/scene/assetBaker.h"
 #include "src/scene/codeAssets.h"
@@ -217,7 +218,11 @@ int main( int argc, char* argv[] )
 
 	try
 	{
+		TaskSchedule* schedule = new TaskSchedule();
+
 		g_renderer.Init( config );
+		g_renderer.BuildSchedule( schedule );
+		g_renderer.SetSchedule( schedule );
 
 		while ( g_window.IsOpen() )
 		{
@@ -324,6 +329,7 @@ int main( int argc, char* argv[] )
 				break;
 			}
 		}
+		delete schedule;
 		g_renderer.Shutdown();
 	}
 	catch (const std::exception& e)

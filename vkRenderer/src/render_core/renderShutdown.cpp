@@ -47,7 +47,7 @@ void Renderer::Destroy()
 		gfxContext.frameFence[ i ].Destroy();
 	}
 
-	schedule.Clear();
+	schedule->Clear();
 
 	AllocatorMemory::DestroyVmaAllocator();
 

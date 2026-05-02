@@ -22,6 +22,7 @@ public:
 	virtual void			Resize() = 0;
 	virtual void			Execute( CommandContext& context ) = 0;
 	virtual std::string		AsString() const = 0;
+	const GpuTask*			GetChild() const { return m_child; };
 	GpuTask*				GetChild() { return m_child; };
 
 	void SetChild( GpuTask* child )
