@@ -12,6 +12,14 @@
 #include "../render_tasks/UtilTasks.h"
 #include "../render_tasks/imguiTask.h"
 
+struct ssaoConstants_t
+{
+	float    radius;      // World-space sampling radius (meters)
+	uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
+	float    bias;        // Depth bias to prevent self-occlusion (meters)
+	float    strength;    // AO multiplier: 1 = standard, higher = darker
+};
+
 static availableTasks_t tasks;
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
@@ -181,15 +189,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.ssao )
 	{
-		struct SSAOConstants
-		{
-			float    radius;      // World-space sampling radius (meters)
-			uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
-			float    bias;        // Depth bias to prevent self-occlusion (meters)
-			float    strength;    // AO multiplier: 1 = standard, higher = darker
-		};
-
-		const SSAOConstants ssaoConstants = { 0.5f, 16, 0.025f, 1.5f };
+		const ssaoConstants_t ssaoDefaults = { 0.5f, 16, 0.025f, 1.5f };
 
 		imageProcessCreateInfo_t info{};
 		info.name = "SSAO";
@@ -199,10 +199,26 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progName = "SSAO";
 		info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
 		info.baseMip = 0;
-		info.constants = &ssaoConstants;
-		info.constantsByteSize = sizeof( ssaoConstants );
+		info.constants = &ssaoDefaults;
+		info.constantsByteSize = sizeof( ssaoDefaults );
 
 		tasks.ssaoTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+		tasks.ssaoTask->RegisterControls( [ ssaoTask = tasks.ssaoTask ]()
+		{
+			ssaoConstants_t& c = *ssaoTask->GetConstants<ssaoConstants_t>();
+			bool changed = false;
+			changed |= ImGui::SliderFloat( "Radius",   &c.radius,           0.1f, 2.0f );
+			changed |= ImGui::SliderInt  ( "Samples",  (int*)&c.numSamples, 4,    32   );
+			changed |= ImGui::SliderFloat( "Bias",     &c.bias,             0.0f, 0.1f );
+			changed |= ImGui::SliderFloat( "Strength", &c.strength,         0.5f, 4.0f );
+			if ( changed )
+			{
+				ssaoTask->UpdateConstants();
+			}
+		} );
+#endif
 	}
 
 	if( config.autoExposure )
@@ -504,16 +520,32 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 }
 
 #if defined( USE_IMGUI )
-void DrawScheduleDebugMenu( const TaskSchedule* schedule )
+void DrawScheduleDebugMenu( TaskSchedule* schedule )
 {
 	if ( ImGui::BeginTabItem( "Schedule" ) )
 	{
 		int index = 0;
-		const GpuTask* task = schedule->GetHead();
+		GpuTask* task = schedule->GetHead();
 		while ( task != nullptr )
 		{
 			ImGui::PushID( index );
-			ImGui::CollapsingHeader( task->AsString().c_str(), ImGuiTreeNodeFlags_Leaf );
+
+			const bool open = ImGui::CollapsingHeader( task->AsString().c_str() );
+
+			bool enabled = task->IsEnabled();
+			ImGui::SameLine();
+			if ( ImGui::Checkbox( "##enabled", &enabled ) )
+			{
+				task->SetEnabled( enabled );
+			}
+
+			if ( open )
+			{
+				ImGui::Indent();
+				task->SetControls();
+				ImGui::Unindent();
+			}
+
 			ImGui::PopID();
 			task = task->GetChild();
 			++index;

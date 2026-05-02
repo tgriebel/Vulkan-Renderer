@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "../render_core/GpuSync.h"
 #include "../render_state/frameBuffer.h"
 #include "../render_resources/imageView.h"
@@ -11,10 +13,22 @@ class RenderContext;
 class ResourceContext;
 class Image;
 
+using TaskControlsFn = std::function<void()>;
+
 class GpuTask
 {
 protected:
-	GpuTask* m_child = nullptr;
+	GpuTask*       m_child        = nullptr;
+	bool           m_enabled      = true;
+	TaskControlsFn m_controlsFn   = nullptr;
+	void*          m_constantsPtr = nullptr;
+	uint32_t       m_constantsSize = 0;
+
+	void RegisterConstants( void* data, const uint32_t size )
+	{
+		m_constantsPtr  = data;
+		m_constantsSize = size;
+	}
 
 public:
 	virtual void			FrameBegin() {};
@@ -24,6 +38,17 @@ public:
 	virtual std::string		AsString() const = 0;
 	const GpuTask*			GetChild() const { return m_child; };
 	GpuTask*				GetChild() { return m_child; };
+
+	bool					IsEnabled() const { return m_enabled; }
+	void					SetEnabled( bool enabled ) { m_enabled = enabled; }
+
+	void					RegisterControls( TaskControlsFn fn ) { m_controlsFn = std::move( fn ); }
+	void					SetControls() const { if ( m_controlsFn ) { m_controlsFn(); } }
+
+	bool					HasConstants() const { return m_constantsPtr != nullptr; }
+
+	template<typename T>
+	T*						GetConstants() { return reinterpret_cast<T*>( m_constantsPtr ); }
 
 	void SetChild( GpuTask* child )
 	{

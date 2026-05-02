@@ -57,6 +57,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	{
 		m_customConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
 		memcpy( m_customConstants, info.constants, m_customConstantsByteSize );
+		RegisterConstants( m_customConstants, m_customConstantsByteSize );
 	}
 
 	m_multiPass = info.multiPass;
@@ -307,6 +308,29 @@ Image* ImageProcessTask::GetOutputImage()
 uint32_t ImageProcessTask::GetMipCount() const
 {
 	return m_mipLevels;
+}
+
+
+void ImageProcessTask::UpdateConstants()
+{
+	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
+	{
+		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel )
+		{
+			if ( m_imgProcesses[ layerId ][ mipLevel ] != nullptr )
+			{
+				m_imgProcesses[ layerId ][ mipLevel ]->SetConstants( m_customConstants, m_customConstantsByteSize );
+			}
+		}
+	}
+}
+
+
+void ImageProcessTask::UpdateConstants( const void* data, const uint32_t sizeInBytes )
+{
+	m_customConstantsByteSize = Min( sizeInBytes, MaxCustomConstantBytes );
+	memcpy( m_customConstants, data, m_customConstantsByteSize );
+	UpdateConstants();
 }
 
 

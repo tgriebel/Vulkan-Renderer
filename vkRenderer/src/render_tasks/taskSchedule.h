@@ -26,4 +26,5 @@ public:
 	void			AsString() const;
 
 	const GpuTask*	GetHead() const { return tasks; }
+	GpuTask*		GetHead() { return tasks; }
 };

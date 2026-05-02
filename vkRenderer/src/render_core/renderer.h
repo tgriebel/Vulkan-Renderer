@@ -85,7 +85,7 @@ public:
 	void								BuildSchedule( TaskSchedule* schedule ); // FIXME: Temp. Schedule is being refactored so the renderer can take in different schedules
 
 	inline void							SetSchedule( TaskSchedule* schedule ) { this->schedule = schedule; }
-	inline const TaskSchedule*			GetSchedule() const { return schedule; }
+	inline TaskSchedule*				GetSchedule() { return schedule; }
 
 	// Debug
 	uint32_t							OutputImageCount();

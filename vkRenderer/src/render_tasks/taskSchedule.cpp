@@ -89,7 +89,10 @@ void TaskSchedule::Resize()
 
 void TaskSchedule::IssueNext( CommandContext& context )
 {
-	currentTask->Execute( context );
+	if ( currentTask->IsEnabled() )
+	{
+		currentTask->Execute( context );
+	}
 	currentTask = currentTask->GetChild();
 }
 

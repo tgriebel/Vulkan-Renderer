@@ -51,5 +51,5 @@ struct availableTasks_t
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, TaskSchedule* schedule );
 
 #if defined( USE_IMGUI )
-void DrawScheduleDebugMenu( const TaskSchedule* schedule );
+void DrawScheduleDebugMenu( TaskSchedule* schedule );
 #endif
