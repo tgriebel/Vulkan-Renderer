@@ -75,7 +75,7 @@ void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourc
 	const uint32_t resourceCount = static_cast<uint32_t>( resourceList->size() );
 	for ( uint32_t i = 0; i < resourceCount; ++i )
 	{
-		if ( (*resourceList)[ i ]->m_type == resourceType_t::IMAGE )
+		if ( (*resourceList)[ i ]->m_type == resourceType_t::GPU_IMAGE )
 		{
 			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( ( *resourceList )[ i ] );
 			Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
@@ -88,6 +88,10 @@ void RenderResource::Create( const resourceType_t type, const resourceLifeTime_t
 {
 	m_type = type;
 	m_lifetime = lifetime;
+
+	m_resourceMemoryRegion = memoryRegion_t::UNKNOWN;
+	m_resourceByteCount = 0;
+
 	switch ( m_lifetime )
 	{
 	case resourceLifeTime_t::TASK:		m_taskDependentResources.push_back( this );		break;

@@ -162,7 +162,7 @@ void ImguiTask::FrameBegin()
 
 	m_imagePass->parms->Bind( BINDING_NAME( sourceImages ),		&m_imagePass->codeImages );
 	m_imagePass->parms->Bind( BINDING_NAME( sourceCubeImages ),	m_imagePass->codeCubeImages[ 0 ] );
-	m_imagePass->parms->Bind( BINDING_NAME( imageStencil ),		&m_resources->stencilImageView );
+	m_imagePass->parms->Bind( BINDING_NAME( imageStencil ),		rc.whiteImage );
 	m_imagePass->parms->Bind( BINDING_NAME( imageProcess ),		&m_buffer );
 
 #ifdef USE_IMGUI

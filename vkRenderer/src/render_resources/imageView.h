@@ -3,7 +3,7 @@
 #include "../render_state/deviceContext.h"
 #include "../asset_types/image.h"
 
-class ImageView : public Image, public RenderResource
+class ImageView : public Image
 {
 private:
 	const Image* m_sourceImage = nullptr;

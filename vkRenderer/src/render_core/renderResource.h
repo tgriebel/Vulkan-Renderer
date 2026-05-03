@@ -29,6 +29,7 @@ enum class resourceType_t : uint8_t
 	MEMORY,
 	BUFFER,
 	IMAGE,
+	GPU_IMAGE,
 	SWAPCHAIN,
 	IMAGE_VIEW,
 	FRAMEBUFFER,

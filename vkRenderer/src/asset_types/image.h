@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "asset.h"
+#include "../render_core/renderResource.h"
 
 class GpuImage;
 
@@ -246,11 +247,14 @@ inline imageInfo_t DefaultImage2dInfo( uint32_t w, uint32_t h )
 }
 
 
-class Image
+class Image : public RenderResource
 {
 private:
 	static const uint32_t Version = 2;
 public:
+
+	using RenderResource::Create;
+
 	imageInfo_t				info;
 	imageSubResourceView_t	subResourceView;
 	bool					generateMips;

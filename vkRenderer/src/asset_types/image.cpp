@@ -12,6 +12,11 @@
 
 void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_t byteCount )
 {
+	{
+		m_lifetime = resourceLifeTime_t::UNMANAGED;
+		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
+	}
+
 	info = _info;
 	info.layers = ( _info.type == IMAGE_TYPE_CUBE ) ? 6 : _info.layers;
 
@@ -70,6 +75,11 @@ void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_
 
 void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, GpuImage* _gpuImage )
 {
+	{
+		m_lifetime = resourceLifeTime_t::UNMANAGED;
+		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
+	}
+
 	info = _info;
 	info.layers = ( _info.type == IMAGE_TYPE_CUBE ) ? 6 : _info.layers;
 
