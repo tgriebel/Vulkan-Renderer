@@ -190,6 +190,7 @@ hdl_t CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass
 	if ( it != g_pipelineLib.end() ) {
 		return pipelineHdl;
 	}
+	assert( pipelineHdl != INVALID_HDL );
 
 	const GpuProgram& prog = progAsset.Get();
 
