@@ -12,6 +12,16 @@ static std::vector<RenderResource*> m_viewDependentResources;
 static std::vector<RenderResource*> m_appDependentResources;
 static std::vector<RenderResource*> m_unmanagedResources;
 
+static void InsertSorted( std::vector<RenderResource*>& list, RenderResource* resource )
+{
+	auto it = std::lower_bound( list.begin(), list.end(), resource,
+		[]( const RenderResource* a, const RenderResource* b )
+		{
+			return a->GetPriority() < b->GetPriority();
+		} );
+	list.insert( it, resource );
+}
+
 std::vector<RenderResource*>& RenderResource::GetResourceList( const resourceLifeTime_t lifetime )
 {
 	switch( lifetime )
@@ -36,7 +46,12 @@ void RenderResource::ResizeResources( const uint32_t displayWidth, const uint32_
 	const uint32_t resourceCount = static_cast<uint32_t>( resizeList.size() );
 	for( uint32_t i = 0; i < resourceCount; ++i )
 	{
-		resizeList[ i ]->OnResize( displayWidth, displayHeight );
+		const bool recreated = resizeList[ i ]->OnResize( displayWidth, displayHeight );
+
+		// Add back into the list if no new resource was created
+		if( recreated == false ) {
+			InsertSorted( m_viewDependentResources, resizeList[ i ] );
+		}
 	}
 }
 
@@ -46,7 +61,14 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 	std::vector<RenderResource*> resourceList = std::move( GetResourceList( lifetime ) );
 
 	const uint32_t resourceCount = static_cast<uint32_t>( resourceList.size() );
-	for( uint32_t i = 0; i < resourceCount; ++i ) {
+	for( uint32_t i = 0; i < resourceCount; ++i )
+	{
+		if( resourceList[ i ]->m_type == resourceType_t::GPU_IMAGE )
+		{
+			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( resourceList[ i ] );
+			assert( gpuImage != nullptr );
+			std::cout << "Destroying GPU Image: " << gpuImage->GetDebugName() << std::endl;
+		}
 		resourceList[ i ]->Destroy();
 	}
 }
@@ -65,16 +87,6 @@ void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourc
 			Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 		}
 	}
-}
-
-
-static void InsertSorted( std::vector<RenderResource*>& list, RenderResource* resource )
-{
-	auto it = std::lower_bound( list.begin(), list.end(), resource,
-		[]( const RenderResource* a, const RenderResource* b ) {
-			return a->GetPriority() < b->GetPriority();
-		} );
-	list.insert( it, resource );
 }
 
 
