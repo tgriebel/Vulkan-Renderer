@@ -80,7 +80,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		renderViewCreateInfo_t info{};
 		info.name = "Shadow View";
-		info.region = renderViewRegion_t::SHADOW;
+		info.viewType = renderViewType_t::SHADOW;
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
@@ -111,7 +111,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		renderViewCreateInfo_t info{};
 		info.name = "Main View";
-		info.region = renderViewRegion_t::STANDARD_RASTER;
+		info.viewType = renderViewType_t::STANDARD_RASTER;
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
@@ -144,7 +144,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		renderViewCreateInfo_t info{};
 		info.name = "Cube View";
-		info.region = renderViewRegion_t::STANDARD_RASTER;
+		info.viewType = renderViewType_t::STANDARD_RASTER;
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;
@@ -176,7 +176,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 	{
 		renderViewCreateInfo_t info{};
 		info.name = "2D";
-		info.region = renderViewRegion_t::STANDARD_2D;
+		info.viewType = renderViewType_t::STANDARD_2D;
 		info.viewId = viewCount;
 		info.context = &renderContext;
 		info.resources = &resources;

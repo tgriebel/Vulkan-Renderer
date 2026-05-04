@@ -112,46 +112,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_WIREFRAME ) ? WIREFRAME | SKIP_OPAQUE : NONE ) );
 		renderFlags = static_cast<renderFlags_t>( renderFlags | ( ent.HasFlag( ENT_FLAG_DEBUG ) ? DEBUG_SOLID | SKIP_OPAQUE : NONE ) );
 
-		// TODO: Make InRegion() function
-		if( view.GetRegion() == renderViewRegion_t::SHADOW )
-		{
-			if( material.GetShader( DRAWPASS_SHADOW ) == INVALID_HDL ) {
-				continue;
-			}
-			if ( ent.HasFlag( ENT_FLAG_NO_SHADOWS ) ) {
-				continue;
-			}
-			if ( ( renderFlags & SKIP_OPAQUE ) != 0 ) {
-				continue;
-			}
-		}
-		else if ( view.GetRegion() == renderViewRegion_t::STANDARD_2D )
-		{
-			if ( ( material.GetShader( DRAWPASS_2D ) == INVALID_HDL ) && ( material.GetShader( DRAWPASS_DEBUG_2D ) == INVALID_HDL ) ) {
-				continue;
-			}
-		}
-		else if ( view.GetRegion() == renderViewRegion_t::STANDARD_RASTER )
-		{
-			const drawPass_t mainPasses[] = {	DRAWPASS_DEPTH,
-												DRAWPASS_TERRAIN,
-												DRAWPASS_OPAQUE,
-												DRAWPASS_SKYBOX,
-												DRAWPASS_TRANS,
-												DRAWPASS_DEBUG_3D,
-												DRAWPASS_DEBUG_WIREFRAME
-											};
-			const uint32_t passCount = COUNTARRAY( mainPasses );
-
-			uint32_t passId = 0;
-			for( passId = 0; passId < passCount; ++passId ) {
-				if ( material.GetShader( mainPasses[ passId ] ) != INVALID_HDL ) {
-					break;
-				}
-			}
-			if( passId >= passCount ) {
-				continue;
-			}
+		if( view.CanRenderSurface( ent, material, renderFlags ) == false ) {
+			continue;
 		}
 
 		drawSurfInstance_t instance = {};

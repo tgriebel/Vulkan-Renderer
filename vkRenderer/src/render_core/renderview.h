@@ -13,7 +13,7 @@ class RenderContext;
 
 static const uint32_t MaxMultiViews = 6;
 
-enum class renderViewRegion_t : uint32_t
+enum class renderViewType_t : uint32_t
 {
 	SHADOW			= 0,
 	STANDARD_RASTER = 1,
@@ -25,7 +25,7 @@ enum class renderViewRegion_t : uint32_t
 
 struct renderViewCreateInfo_t
 {
-	renderViewRegion_t			region;
+	renderViewType_t			viewType;
 	renderPassTransition_t		transition;
 	frameBufferCreateInfo_t		fbImages;
 
@@ -74,7 +74,7 @@ private:
 	mat4x4f					m_previousViewProjMatrices[ MaxMultiViews ];
 	frameBufferCreateInfo_t	m_fbSourceImages;
 	const char*				m_name;
-	renderViewRegion_t		m_region;
+	renderViewType_t		m_region;
 	uint32_t				m_multiViewCount;
 	int32_t					m_viewBufferId;
 	int32_t					m_surfaceBufferId;
@@ -112,7 +112,7 @@ public:
 				passes[ multiViewIndex ][ passIndex ] = nullptr;
 			}
 		}
-		m_region = renderViewRegion_t::UNKNOWN;
+		m_region = renderViewType_t::UNKNOWN;
 	}
 
 	~RenderView()
@@ -183,7 +183,8 @@ public:
 	inline const vec3f&		GetViewOrigin( const uint32_t multiView = 0 ) const { return m_viewOrigin; }
 
 	const char*				GetName() const;
-	const renderViewRegion_t GetRegion() const;
+	const renderViewType_t	GetViewType() const;
+	const bool				CanRenderSurface( const Entity& ent, const Material& material, const renderFlags_t renderFlags ) const;
 
 	const void				Commit();
 	bool					IsCommitted() const;
