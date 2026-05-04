@@ -90,6 +90,10 @@ public:
 		return m_resourceByteCount;
 	}
 
-	virtual void OnResize( const uint32_t w, const uint32_t h ) {}
+	// Returns if the resource was recreated on resize
+	virtual bool OnResize( const uint32_t w, const uint32_t h )
+	{
+		return false;
+	}
 	virtual void Destroy() = 0;
 };

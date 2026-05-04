@@ -94,7 +94,7 @@ public:
 	}
 
 
-	void OnResize( const uint32_t w, const uint32_t h ) override
+	bool OnResize( const uint32_t w, const uint32_t h ) override
 	{
 		Destroy();
 
@@ -103,6 +103,8 @@ public:
 		info.mipLevels = m_sourceImage->info.mipLevels;
 
 		Init( m_sourceImage, info, subResourceView, m_lifetime );
+
+		return true;
 	}
 
 

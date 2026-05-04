@@ -489,18 +489,22 @@ bool FrameBuffer::NeedsResize() const
 }
 
 
-void FrameBuffer::OnResize( const uint32_t w, const uint32_t h )
+bool FrameBuffer::OnResize( const uint32_t w, const uint32_t h )
 {
+	// TOOD: Remove?
 	if( m_createInfo.lifetime != resourceLifeTime_t::RESIZE ) { // What if backing images are marked as resize?
-		return;
+		return false;
 	}
 
+	// TOOD: Remove?
 	if( NeedsResize() == false ) {
-		return;
+		return false;
 	}
 
 	Destroy();
 	Create( m_createInfo );
 
 	m_lastResizeFrame = m_createInfo.context->FrameNumber();
+
+	return true;
 }

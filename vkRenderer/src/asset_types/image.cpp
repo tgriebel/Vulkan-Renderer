@@ -116,7 +116,7 @@ void Image::Destroy()
 }
 
 
-void Image::OnResize( uint32_t w, uint32_t h )
+bool Image::OnResize( uint32_t w, uint32_t h )
 {
 	if( m_resizeFn )
 	{
@@ -130,7 +130,9 @@ void Image::OnResize( uint32_t w, uint32_t h )
 			gpuImage->Destroy();
 			gpuImage->Create( gpuImage->GetDebugName(), info, flags, lifeTime );
 		}
+		return true;
 	}
+	return false;
 }
 
 
