@@ -331,7 +331,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		gpuImageStateFlags_t flags = ( GPU_IMAGE_READ | GPU_IMAGE_TRANSFER_SRC | GPU_IMAGE_TRANSFER_DST );
 
 		texture.gpuImage =
-			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, renderContext->localMemory, resourceLifeTime_t::REBOOT );
+			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, resourceLifeTime_t::REBOOT );
 
 		Transition( cmdCommand, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 

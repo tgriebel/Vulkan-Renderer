@@ -33,7 +33,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 		m_image = new Image(
 				info.createInfos[ 0 ],
 				nullptr,
-				new GpuImage( "ImageProcessImage", info.createInfos[ 0 ], GPU_IMAGE_RW, m_context->frameBufferMemory, resourceLifeTime_t::TASK )
+				new GpuImage( "ImageProcessImage", info.createInfos[ 0 ], GPU_IMAGE_RW, resourceLifeTime_t::TASK )
 			);
 	}
 

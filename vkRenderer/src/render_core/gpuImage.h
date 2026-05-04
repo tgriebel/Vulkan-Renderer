@@ -46,7 +46,7 @@ protected:
 	}
 
 public:
-	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime )
+	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime )
 	{
 		Create( name, info, flags, lifetime );
 	}
