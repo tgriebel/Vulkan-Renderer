@@ -62,8 +62,14 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 {
 	std::vector<RenderResource*> resourceList = std::move( GetResourceList( lifetime ) );
 
-	const uint32_t resourceCount = static_cast<uint32_t>( resourceList.size() );
-	for( uint32_t i = 0; i < resourceCount; ++i )
+	// List goes in reverse priority
+	const int32_t resourceCount = static_cast<int32_t>( resourceList.size() );
+
+	if( resourceCount == 0 ) {
+		return;
+	}
+
+	for( int32_t i = ( resourceCount - 1 ); i >= 0; --i )
 	{
 		if( resourceList[ i ]->m_type == resourceType_t::GPU_IMAGE )
 		{
@@ -101,11 +107,10 @@ static resourcePriority_t GetPriorityForType( const resourceType_t type )
 	{
 	case resourceType_t::MEMORY:		return resourcePriority_t::HIGHEST; break;
 	case resourceType_t::BUFFER:		return resourcePriority_t::HIGHEST; break;
-	case resourceType_t::FB_IMAGE:		return resourcePriority_t::HIGHEST; break;	// Sets the image info, most important piece for resizing
+	case resourceType_t::IMAGE:			return resourcePriority_t::HIGHEST; break;	// Needs to resize first, deleted last
 	case resourceType_t::GPU_IMAGE:		return resourcePriority_t::MEDIUM; break;
 	case resourceType_t::SWAPCHAIN:		return resourcePriority_t::MEDIUM; break;
 	case resourceType_t::IMAGE_VIEW:	return resourcePriority_t::MEDIUM; break;
-	case resourceType_t::ASSET_IMAGE:	return resourcePriority_t::LOWEST; break;
 	case resourceType_t::FRAMEBUFFER:	return resourcePriority_t::LOWEST; break;
 	case resourceType_t::BINDSET:		return resourcePriority_t::LOWEST; break;
 	case resourceType_t::IMAGE_SAMPLER:	return resourcePriority_t::LOWEST; break;

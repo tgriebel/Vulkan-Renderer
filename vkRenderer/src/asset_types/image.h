@@ -265,9 +265,8 @@ public:
 	imageSubResourceView_t	subResourceView;
 	bool					generateMips;
 
-	// TODO: I'm working out how to manage the memory for these currently because data-flow and lifetimes are complex
 	// `cpuImage` is loaded from disk, passed as a pointer to avoid slow copies. It can be explicitly deleted once uploaded
-	// `gpuImage` is coupled to all rendering so it's better to have that managed by the renderer
+	// Ownership for `cpuImage` needs to be clearer--whatever does the allocation should also delete
 	ImageBufferInterface*	cpuImage; // Memory lifetime is not tied to the object for now
 	GpuImage*				gpuImage; // Does not own memory
 

@@ -15,7 +15,7 @@ void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_
 {
 	{
 		m_lifetime = resourceLifeTime_t::ASSET;
-		RenderResource::Create( resourceType_t::ASSET_IMAGE, m_lifetime );
+		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
 	}
 
 	info = _info;
@@ -77,7 +77,7 @@ void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_
 void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage )
 {
 	{
-		RenderResource::Create( resourceType_t::ASSET_IMAGE, resourceLifeTime_t::ASSET );
+		RenderResource::Create( resourceType_t::IMAGE, resourceLifeTime_t::ASSET );
 	}
 
 	info = _info;
@@ -101,7 +101,7 @@ void Image::Create( const imageInfo_t& _info, const char* _name, const gpuImageS
 	m_lifetime = _lifetime;
 
 	{
-		RenderResource::Create( resourceType_t::FB_IMAGE, m_lifetime );
+		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
 
 		if( !m_resizeFn )
 		{
@@ -132,12 +132,12 @@ void Image::Destroy()
 		delete cpuImage;
 		cpuImage = nullptr;
 	}
-	// TODO: need to change the resource management to prevent dangling pointers
-	//if( gpuImage != nullptr )
-	//{
-	//	delete gpuImage;
-	//	gpuImage = nullptr;
-	//}
+
+	if( gpuImage != nullptr )
+	{
+		delete gpuImage;
+		gpuImage = nullptr;
+	}
 }
 
 

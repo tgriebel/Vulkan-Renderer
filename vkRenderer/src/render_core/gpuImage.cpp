@@ -140,21 +140,25 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 void GpuImage::Destroy()
 {
 	assert( context.device != VK_NULL_HANDLE );
-	if ( context.device != VK_NULL_HANDLE )
+	if( context.device == VK_NULL_HANDLE ) {
+		return;
+	}
+
+	const uint32_t bufferCount = GetBufferCount();
+	for ( uint32_t i = 0; i < bufferCount; ++i )
 	{
-		const uint32_t bufferCount = GetBufferCount();
-		for ( uint32_t i = 0; i < bufferCount; ++i )
+		if( vk_view[ i ] != VK_NULL_HANDLE )
 		{
-			if( vk_view[ i ] != VK_NULL_HANDLE ) {
-				vkDestroyImageView( context.device, vk_view[ i ], nullptr );
-				vk_view[ i ] = VK_NULL_HANDLE;
-			}
-			if ( vk_image[ i ] != VK_NULL_HANDLE ) {
-				vmaDestroyImage( AllocatorMemory::GetVmaAllocator(), vk_image[ i ], m_allocation[ i ].m_allocation );
-				vk_image[ i ] = VK_NULL_HANDLE;
-				m_allocation[ i ].m_allocation = VK_NULL_HANDLE;
-				m_allocation[ i ].m_info = {};
-			}
+			vkDestroyImageView( context.device, vk_view[ i ], nullptr );
+			vk_view[ i ] = VK_NULL_HANDLE;
+		}
+
+		if ( vk_image[ i ] != VK_NULL_HANDLE )
+		{
+			vmaDestroyImage( AllocatorMemory::GetVmaAllocator(), vk_image[ i ], m_allocation[ i ].m_allocation );
+			vk_image[ i ] = VK_NULL_HANDLE;
+			m_allocation[ i ].m_allocation = VK_NULL_HANDLE;
+			m_allocation[ i ].m_info = {};
 		}
 	}
 }
