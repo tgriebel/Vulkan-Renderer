@@ -26,6 +26,7 @@ void Renderer::Destroy()
 	vk_ClearRenderPassCache();
 #endif
 
+	RenderResource::Cleanup( resourceLifeTime_t::FRAME );
 	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
 
 	g_swapChain.Destroy();
@@ -48,6 +49,8 @@ void Renderer::Destroy()
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
 		gfxContext.frameFence[ i ].Destroy();
 	}
+
+	schedule->Clear();
 
 	AllocatorMemory::DestroyVmaAllocator();
 
