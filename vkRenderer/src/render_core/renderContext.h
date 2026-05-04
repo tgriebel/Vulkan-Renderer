@@ -24,6 +24,9 @@ private:
 	uint64_t				frameNumber = 0;
 	float					deltaTimeMs = 0.0f;
 
+	uint32_t				displayWidth;
+	uint32_t				displayHeight;
+
 public:
 	ShaderBindParms*		globalParms;
 
@@ -32,6 +35,9 @@ public:
 	AllocatorMemory			localMemory;
 	AllocatorMemory			frameBufferMemory;
 	AllocatorMemory			sharedMemory;
+
+	inline const uint32_t	GetDisplayWidth() const { return displayWidth; }
+	inline const uint32_t	GetDisplayHeight() const { return displayHeight; }
 
 	ShaderBindParms*		RegisterBindParm( const ShaderBindSet* set );
 	ShaderBindParms*		RegisterBindParm( const uint64_t setId );

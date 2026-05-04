@@ -18,6 +18,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 {
 	SCOPED_TIMER_PRINT( ScheduleBuild, MILLISECOND )
 
+	const uint32_t displayWidth = renderContext->GetDisplayWidth();
+	const uint32_t displayHeight = renderContext->GetDisplayHeight();
+
 	if( config.useCubeViews )
 	{
 		if( config.computeDiffuseIbl )
@@ -288,47 +291,78 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.bloom )
 	{
-		imageProcessCreateInfo_t info {};
-		info.name = "BloomDownsample";
-		info.context = renderContext;
-		info.resources = resources;
-		info.sourceImage = resources->mainColorResolvedImage;
-		info.outputImage = resources->bloom;
-		info.baseMip = 1;
-		info.mipCount = 4;
-		info.progressiveSampling = true;
-		info.progName = "BloomDownsample";
-
-		tasks.bloomDownsampleTask = new ImageProcessTask( info );
-
-		struct bloomUpsampleConstants_t
+		// Create images
 		{
-			float filterRadius;   // Tent filter radius in UV space
-		};
+			imageInfo_t info{};
+			info.width = displayWidth;
+			info.height = displayHeight;
+			info.mipLevels = MipCount( displayWidth, displayHeight );
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_RGBA_16;
+			info.type = IMAGE_TYPE_2D;
+			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+			info.tiling = IMAGE_TILING_MORTON;
 
-		const bloomUpsampleConstants_t bloomUpsampleDefaults = { 0.005f };
+			resources->bloom->Create(
+				info,
+				nullptr,
+				new GpuImage( "FB_bloom", info, GPU_IMAGE_RW, resourceLifeTime_t::RESIZE )
+			);
+		}
 
-		info.name = "BloomUpsample";
-		info.sourceImage = resources->bloom;
-		info.outputImage = resources->bloom; // Overwrite the previous downsampled values with upsampled ones
-		info.baseMip = 0;
-		info.upsampleProcess = true;
-		info.progName = "BloomUpsample";
-		info.constants = &bloomUpsampleDefaults;
-		info.constantsByteSize = sizeof( bloomUpsampleDefaults );
+		// First pass: Downsample
+		{
+			imageProcessCreateInfo_t info{};
+			info.name = "BloomDownsample";
+			info.context = renderContext;
+			info.resources = resources;
+			info.sourceImage = resources->mainColorResolvedImage;
+			info.outputImage = resources->bloom;
+			info.baseMip = 1;
+			info.mipCount = 4; // TODO: define relative to resolution
+			info.progressiveSampling = true;
+			info.progName = "BloomDownsample";
 
-		tasks.bloomUpsampleTask = new ImageProcessTask( info );
+			tasks.bloomDownsampleTask = new ImageProcessTask( info );
+		}
+
+		// Second pass: Upsample
+		{
+			struct bloomUpsampleConstants_t
+			{
+				float filterRadius;   // Tent filter radius in UV space
+			};
+
+			const bloomUpsampleConstants_t bloomUpsampleDefaults = { 0.005f };
+
+			imageProcessCreateInfo_t info{};
+			info.name = "BloomUpsample";
+			info.context = renderContext;
+			info.resources = resources;
+			info.sourceImage = resources->bloom;
+			info.outputImage = resources->bloom; // Overwrite the previous downsampled values with upsampled ones
+			info.baseMip = 0;
+			info.mipCount = 4;
+			info.progressiveSampling = true;
+			info.upsampleProcess = true;
+			info.progName = "BloomUpsample";
+			info.constants = &bloomUpsampleDefaults;
+			info.constantsByteSize = sizeof( bloomUpsampleDefaults );
+
+			tasks.bloomUpsampleTask = new ImageProcessTask( info );
 
 #if defined( USE_IMGUI )
-		tasks.bloomUpsampleTask->RegisterControls( [ bloomUpsampleTask = tasks.bloomUpsampleTask ]()
-		{
-			bloomUpsampleConstants_t& c = *bloomUpsampleTask->GetConstants<bloomUpsampleConstants_t>();
-			if ( ImGui::SliderFloat( "Filter Radius", &c.filterRadius, 0.001f, 0.02f ) )
-			{
-				bloomUpsampleTask->UpdateConstants();
-			}
-		} );
+			tasks.bloomUpsampleTask->RegisterControls( [ bloomUpsampleTask = tasks.bloomUpsampleTask ]()
+				{
+					bloomUpsampleConstants_t& c = *bloomUpsampleTask->GetConstants<bloomUpsampleConstants_t>();
+					if( ImGui::SliderFloat( "Filter Radius", &c.filterRadius, 0.001f, 0.02f ) )
+					{
+						bloomUpsampleTask->UpdateConstants();
+					}
+				} );
 #endif
+		}
 	}
 
 

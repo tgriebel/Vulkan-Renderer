@@ -208,6 +208,9 @@ void Renderer::RecreateSwapChain()
 	int width = 0, height = 0;
 	g_window.QueryWindowFrameBufferSize( width, height, true );
 
+	renderContext.displayWidth = width;
+	renderContext.displayHeight = height;
+
 	FlushGPU();
 
 	g_swapChain.Destroy();

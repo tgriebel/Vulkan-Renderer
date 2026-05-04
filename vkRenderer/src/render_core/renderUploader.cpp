@@ -85,9 +85,6 @@ void RenderUploader::OnReboot()
 {
 	commands.Begin();
 
-	RenderResource::TransitionImages( &commands, resourceLifeTime_t::RESIZE );
-	RenderResource::TransitionImages( &commands, resourceLifeTime_t::TASK );
-
 	Transition( &commands, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
 	commands.End();
@@ -98,6 +95,8 @@ void RenderUploader::OnReboot()
 void RenderUploader::OnFrameBegin()
 {
 	commands.Begin();
+
+	RenderResource::TransitionNewImages( &commands );
 
 	UploadModelsToGPU( &commands );
 
@@ -147,10 +146,6 @@ void RenderUploader::Upload()
 	UploadModelsToGPU( &commands );
 
 	UploadTextures( &commands );
-
-	RenderResource::TransitionImages( &commands, resourceLifeTime_t::REBOOT );
-	RenderResource::TransitionImages( &commands, resourceLifeTime_t::RESIZE );
-	RenderResource::TransitionImages( &commands, resourceLifeTime_t::TASK );
 
 	Transition( &commands, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 

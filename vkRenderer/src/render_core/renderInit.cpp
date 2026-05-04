@@ -633,6 +633,9 @@ void Renderer::CreateFramebuffers()
 	int height = 0;
 	g_window.QueryWindowFrameBufferSize( width, height );
 
+	renderContext.displayWidth = width;
+	renderContext.displayHeight = height;
+
 	resources.RegisterOutputImages();
 
 	// TODO: Force all FrameBuffers to be resize for now
@@ -838,26 +841,6 @@ void Renderer::CreateFramebuffers()
 	{
 		resources.depthResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, lifeTime );
 		resources.stencilResolvedImageView.Init( resources.depthStencilResolvedImage, resources.depthStencilResolvedImage->info, lifeTime );
-	}
-
-	// Bloom
-	{
-		imageInfo_t info{};
-		info.width = width;
-		info.height = height;
-		info.mipLevels = MipCount( width, height );
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_RGBA_16;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
-
-		resources.bloom->Create(
-			info,
-			nullptr,
-			new GpuImage( "FB_bloom", info, GPU_IMAGE_RW, lifeTime )
-		);
 	}
 
 	// Temp image

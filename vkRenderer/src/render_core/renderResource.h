@@ -63,7 +63,7 @@ public:
 	static std::vector<RenderResource*>& GetResourceList( const resourceLifeTime_t lifetime );
 	static void Cleanup( const resourceLifeTime_t lifetime );
 	static void ResizeResources( const uint32_t displayWidth, const uint32_t displayHeight );
-	static void TransitionImages( CommandContext* cmdCommand, const resourceLifeTime_t lifetime );
+	static void TransitionNewImages( CommandContext* cmdCommand );
 
 	inline resourceLifeTime_t GetLifetime() const
 	{
