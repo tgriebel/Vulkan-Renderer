@@ -42,36 +42,35 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 {
 	if ( lifetime == resourceLifeTime_t::TASK )
 	{
-		const uint32_t resourceCount = static_cast<uint32_t>( m_taskDependentResources.size() );
+		std::vector<RenderResource*> taskList = std::move( m_taskDependentResources );
+		const uint32_t resourceCount = static_cast<uint32_t>( taskList.size() );
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
-			m_taskDependentResources[ i ]->Destroy();
+			taskList[ i ]->Destroy();
 		}
-		m_taskDependentResources.clear();
 	}
 	else if ( lifetime == resourceLifeTime_t::FRAME )
 	{
-		const uint32_t resourceCount = static_cast<uint32_t>( m_frameDependentResources.size() );
+		std::vector<RenderResource*> frameList = std::move( m_frameDependentResources );
+		const uint32_t resourceCount = static_cast<uint32_t>( frameList.size() );
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
-			m_frameDependentResources[ i ]->Destroy();
+			frameList[ i ]->Destroy();
 		}
-		m_frameDependentResources.clear();
 	}
 	else if ( lifetime == resourceLifeTime_t::RESIZE )
 	{
-		const uint32_t resourceCount = static_cast<uint32_t>( m_viewDependentResources.size() );
-		for( uint32_t i = 0; i < resourceCount; ++i )
-		{
-			m_viewDependentResources[ i ]->Destroy();
+		std::vector<RenderResource*> viewList = std::move( m_viewDependentResources );
+		const uint32_t resourceCount = static_cast<uint32_t>( viewList.size() );
+		for( uint32_t i = 0; i < resourceCount; ++i ) {
+			viewList[ i ]->Destroy();
 		}
-		m_viewDependentResources.clear();
 	}
 	else if ( lifetime == resourceLifeTime_t::REBOOT )
 	{
-		const uint32_t resourceCount = static_cast<uint32_t>( m_appDependentResources.size() );
+		std::vector<RenderResource*> appList = std::move( m_appDependentResources );
+		const uint32_t resourceCount = static_cast<uint32_t>( appList.size() );
 		for ( uint32_t i = 0; i < resourceCount; ++i ) {
-			m_appDependentResources[ i ]->Destroy();
+			appList[ i ]->Destroy();
 		}
-		m_appDependentResources.clear();
 	}
 }
 
