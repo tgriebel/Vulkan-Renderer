@@ -660,8 +660,7 @@ void Renderer::CreateFramebuffers()
 
 		shadowImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_shadowMap", info, GPU_IMAGE_RW, lifeTime )
+			"FB_shadowMap", GPU_IMAGE_RW, lifeTime
 		);
 
 		shadowImage->RegisterResize( nullptr );
@@ -682,20 +681,17 @@ void Renderer::CreateFramebuffers()
 
 		resources.mainColorImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_mainColor", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime )
+			"FB_mainColor", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime
 		);
 		
 		resources.gBufferLayerImage0->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime )
+			"FB_gBufferLayer", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime
 		);
 
 		resources.gBufferLayerImage1->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_gBufferLayer", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime )
+			"FB_gBufferLayer", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime
 		);
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
@@ -704,8 +700,7 @@ void Renderer::CreateFramebuffers()
 
 		resources.depthStencilImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_viewDepth", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime )
+			"FB_viewDepth", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime
 		);
 	}
 
@@ -724,28 +719,24 @@ void Renderer::CreateFramebuffers()
 
 		resources.mainColorResolvedImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_mainColorResolvedImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime )
+			"FB_mainColorResolvedImage", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime
 		);
 
 		info.fmt = resources.gBufferLayerImage0->info.fmt;
 		resources.gBufferLayerResolvedImage0->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_gBufferLayerResolvedImage0", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime )
+			"FB_gBufferLayerResolvedImage0", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime
 		);
 
 		info.fmt = resources.gBufferLayerImage1->info.fmt;
 		resources.gBufferLayerResolvedImage1->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_gBufferLayerResolvedImage1", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime )
+			"FB_gBufferLayerResolvedImage1", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime
 		);
 
 		resources.blurredImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_blurredImage", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime )
+			"FB_blurredImage", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime
 		);
 	}
 
@@ -775,8 +766,7 @@ void Renderer::CreateFramebuffers()
 
 		resources.depthStencilResolvedImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_depthStencilResolvedImage", info, GPU_IMAGE_RW, lifeTime )
+			"FB_depthStencilResolvedImage", GPU_IMAGE_RW, lifeTime
 		);
 	}
 
@@ -801,8 +791,7 @@ void Renderer::CreateFramebuffers()
 
 		resources.tempColorImage->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_tempColor", info, GPU_IMAGE_RW, lifeTime )
+			"FB_tempColor", GPU_IMAGE_RW, lifeTime
 		);
 	}
 
@@ -821,8 +810,7 @@ void Renderer::CreateFramebuffers()
 
 		resources.currentLum->Create(
 			info,
-			nullptr,
-			new GpuImage( "FB_currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime )
+			"FB_currentLuminance", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime
 		);
 
 		resources.currentLum->RegisterResize( nullptr );

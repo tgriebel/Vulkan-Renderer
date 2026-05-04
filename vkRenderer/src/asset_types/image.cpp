@@ -74,21 +74,10 @@ void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_
 }
 
 
-void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, GpuImage* _gpuImage )
+void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage )
 {
-	if( ( _gpuImage != nullptr ) && HasFlags( _gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_WRITE ) )
 	{
-		m_lifetime = _gpuImage->GetLifetime();
-		RenderResource::Create( resourceType_t::FB_IMAGE, m_lifetime );
-
-		if ( !m_resizeFn ) {
-			RegisterResize( FullDimensionResizeFn( _info ) );
-		}
-	}
-	else
-	{
-		m_lifetime = resourceLifeTime_t::ASSET;
-		RenderResource::Create( resourceType_t::ASSET_IMAGE, m_lifetime );
+		RenderResource::Create( resourceType_t::ASSET_IMAGE, resourceLifeTime_t::ASSET );
 	}
 
 	info = _info;
@@ -102,7 +91,37 @@ void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, G
 	generateMips = true;
 
 	cpuImage = _cpuImage;
-	gpuImage = _gpuImage;
+	gpuImage = nullptr;
+}
+
+void Image::Create( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime )
+{
+	assert( HasFlags( _flags, gpuImageStateFlags_t::GPU_IMAGE_WRITE ) );
+
+	m_lifetime = _lifetime;
+
+	{
+		RenderResource::Create( resourceType_t::FB_IMAGE, m_lifetime );
+
+		if( !m_resizeFn )
+		{
+			RegisterResize( FullDimensionResizeFn( _info ) );
+		}
+	}
+
+	gpuImage = new GpuImage( _name, _info, _flags, m_lifetime );
+
+	info = _info;
+	info.layers = ( _info.type == IMAGE_TYPE_CUBE ) ? 6 : _info.layers;
+
+	subResourceView.baseArray = 0;
+	subResourceView.arrayCount = info.layers;
+	subResourceView.baseMip = 0;
+	subResourceView.mipLevels = info.mipLevels;
+
+	generateMips = true;
+
+	cpuImage = nullptr;
 }
 
 
@@ -113,6 +132,12 @@ void Image::Destroy()
 		delete cpuImage;
 		cpuImage = nullptr;
 	}
+	// TODO: need to change the resource management to prevent dangling pointers
+	//if( gpuImage != nullptr )
+	//{
+	//	delete gpuImage;
+	//	gpuImage = nullptr;
+	//}
 }
 
 

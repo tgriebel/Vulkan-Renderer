@@ -8,6 +8,8 @@
 
 class GpuImage;
 
+enum gpuImageStateFlags_t : uint8_t;
+
 enum imageType_t : uint8_t
 {
 	IMAGE_TYPE_UNKNOWN,
@@ -284,11 +286,16 @@ public:
 		gpuImage = nullptr;
 	}
 
-	Image( const imageInfo_t& _info ) : Image( _info, nullptr, nullptr ) {}
+	Image( const imageInfo_t& _info ) : Image( _info, nullptr ) {}
 
-	Image( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, GpuImage* _gpuImage )
+	Image( const imageInfo_t& _info, ImageBufferInterface* _cpuImage )
 	{
-		Create( _info, _cpuImage, _gpuImage );
+		Create( _info, _cpuImage );
+	}
+
+	Image( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime )
+	{
+		Create( _info, _name, _flags, _lifetime );
 	}
 
 	~Image()
@@ -304,7 +311,9 @@ public:
 
 	void Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_t byteCount );
 
-	void Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, GpuImage* _gpuImage );
+	void Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage );
+
+	void Create( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime );
 
 	void Destroy() override;
 

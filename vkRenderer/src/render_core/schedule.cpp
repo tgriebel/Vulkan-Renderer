@@ -39,8 +39,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		resources->cubeFbColorImage->Create(
 			colorInfo,
-			nullptr,
-			new GpuImage( "FB_cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, resourceLifeTime_t::REBOOT )
+			"FB_cubeColor", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, resourceLifeTime_t::REBOOT
 		);
 
 		resources->cubeFbColorImage->RegisterResize( nullptr );
@@ -51,8 +50,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		resources->cubeFbDepthImage->Create(
 			depthInfo,
-			nullptr,
-			new GpuImage( "FB_cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, resourceLifeTime_t::REBOOT )
+			"FB_cubeDepth", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, resourceLifeTime_t::REBOOT
 		);
 
 		resources->cubeFbDepthImage->RegisterResize( nullptr );
@@ -234,8 +232,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			resources->ssaoImage->Create(
 				info,
-				nullptr,
-				new GpuImage( "FB_ssao", info, GPU_IMAGE_RW, resourceLifeTime_t::RESIZE )
+				"FB_ssao", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 			);
 		}
 
@@ -301,8 +298,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 				resources->previousLum->Create(
 					info,
-					nullptr,
-					new GpuImage( "FB_previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, resourceLifeTime_t::REBOOT )
+					"FB_previousLuminance", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, resourceLifeTime_t::REBOOT
 				);
 			}
 
@@ -408,8 +404,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			resources->bloom->Create(
 				info,
-				nullptr,
-				new GpuImage( "FB_bloom", info, GPU_IMAGE_RW, resourceLifeTime_t::RESIZE )
+				"FB_bloom", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 			);
 		}
 

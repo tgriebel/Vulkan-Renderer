@@ -41,8 +41,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		{
 			m_taskImages[ i ] = new Image(
 				info.createInfos[ i ],
-				nullptr,
-				new GpuImage( "ImageShaderImage", info.createInfos[ i ], GPU_IMAGE_RW, resourceLifeTime_t::TASK )
+				"ImageShaderImage", GPU_IMAGE_RW, resourceLifeTime_t::TASK
 			);
 		}
 		outputImage0 = m_taskImages[ 0 ];

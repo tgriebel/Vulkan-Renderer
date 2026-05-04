@@ -90,7 +90,7 @@ bool LoadImageHDR( const char* texturePath, Image& texture )
 		buffer[ i ] = PackFloat32( elements[ i ] );
 	}
 
-	texture.Create( info, imageBuffer, nullptr );
+	texture.Create( info, imageBuffer );
 
 	stbi_image_free( elements );
 	return true;
