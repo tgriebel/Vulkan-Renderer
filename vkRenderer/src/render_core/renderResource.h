@@ -59,7 +59,7 @@ protected:
 public:
 	void Create( const resourceType_t type, const resourceLifeTime_t lifetime );
 
-	static std::vector<RenderResource*> GetResourceList( const resourceLifeTime_t lifetime );
+	static std::vector<RenderResource*>& GetResourceList( const resourceLifeTime_t lifetime );
 	static void Cleanup( const resourceLifeTime_t lifetime );
 	static void ResizeResources( const uint32_t displayWidth, const uint32_t displayHeight );
 	static void TransitionImages( CommandContext* cmdCommand, const resourceLifeTime_t lifetime );

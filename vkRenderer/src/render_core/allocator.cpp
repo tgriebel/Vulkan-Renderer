@@ -1,3 +1,16 @@
+#include <iostream>
+
+// Verbose debug prints
+#if 0
+#define VMA_DEBUG_LOG_LEVEL 4
+#define VMA_DEBUG_LOG_FORMAT( format, ... ) \
+    do { \
+        char _vmaBuf[ 512 ]; \
+        snprintf( _vmaBuf, sizeof( _vmaBuf ), (format), __VA_ARGS__ ); \
+        std::cout << "[VMA] " << _vmaBuf << "\n"; \
+    } while( false )
+#endif
+
 #define VMA_IMPLEMENTATION
 #include "allocator.h"
 #include "../render_state/deviceContext.h"

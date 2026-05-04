@@ -10,17 +10,20 @@ static std::vector<RenderResource*> m_taskDependentResources;
 static std::vector<RenderResource*> m_frameDependentResources;
 static std::vector<RenderResource*> m_viewDependentResources;
 static std::vector<RenderResource*> m_appDependentResources;
+static std::vector<RenderResource*> m_unmanagedResources;
 
-std::vector<RenderResource*> RenderResource::GetResourceList( const resourceLifeTime_t lifetime )
+std::vector<RenderResource*>& RenderResource::GetResourceList( const resourceLifeTime_t lifetime )
 {
-	switch ( lifetime )
+	switch( lifetime )
 	{
-	case resourceLifeTime_t::TASK:		return m_taskDependentResources;
 	case resourceLifeTime_t::FRAME:		return m_frameDependentResources;
 	case resourceLifeTime_t::RESIZE:	return m_viewDependentResources;
 	case resourceLifeTime_t::REBOOT:	return m_appDependentResources;
+	case resourceLifeTime_t::TASK:		return m_taskDependentResources;
+	case resourceLifeTime_t::UNMANAGED:	return m_unmanagedResources;
 	}
-	return std::vector<RenderResource*>();
+	assert( 0 );
+	return m_unmanagedResources;
 }
 
 
@@ -40,62 +43,25 @@ void RenderResource::ResizeResources( const uint32_t displayWidth, const uint32_
 
 void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 {
-	if ( lifetime == resourceLifeTime_t::TASK )
-	{
-		std::vector<RenderResource*> taskList = std::move( m_taskDependentResources );
-		const uint32_t resourceCount = static_cast<uint32_t>( taskList.size() );
-		for ( uint32_t i = 0; i < resourceCount; ++i ) {
-			taskList[ i ]->Destroy();
-		}
-	}
-	else if ( lifetime == resourceLifeTime_t::FRAME )
-	{
-		std::vector<RenderResource*> frameList = std::move( m_frameDependentResources );
-		const uint32_t resourceCount = static_cast<uint32_t>( frameList.size() );
-		for ( uint32_t i = 0; i < resourceCount; ++i ) {
-			frameList[ i ]->Destroy();
-		}
-	}
-	else if ( lifetime == resourceLifeTime_t::RESIZE )
-	{
-		std::vector<RenderResource*> viewList = std::move( m_viewDependentResources );
-		const uint32_t resourceCount = static_cast<uint32_t>( viewList.size() );
-		for( uint32_t i = 0; i < resourceCount; ++i ) {
-			viewList[ i ]->Destroy();
-		}
-	}
-	else if ( lifetime == resourceLifeTime_t::REBOOT )
-	{
-		std::vector<RenderResource*> appList = std::move( m_appDependentResources );
-		const uint32_t resourceCount = static_cast<uint32_t>( appList.size() );
-		for ( uint32_t i = 0; i < resourceCount; ++i ) {
-			appList[ i ]->Destroy();
-		}
+	std::vector<RenderResource*> resourceList = std::move( GetResourceList( lifetime ) );
+
+	const uint32_t resourceCount = static_cast<uint32_t>( resourceList.size() );
+	for( uint32_t i = 0; i < resourceCount; ++i ) {
+		resourceList[ i ]->Destroy();
 	}
 }
 
 
 void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourceLifeTime_t lifetime )
 {
-	std::vector<RenderResource*>* resourceList = nullptr;
-	if ( lifetime == resourceLifeTime_t::REBOOT ) {
-		resourceList = &m_appDependentResources;
-	} else if ( lifetime == resourceLifeTime_t::RESIZE ) {
-		resourceList = &m_viewDependentResources;
-	} else if ( lifetime == resourceLifeTime_t::TASK ) {
-		resourceList = &m_taskDependentResources;
-	}
+	std::vector<RenderResource*>& resourceList = GetResourceList( lifetime );
 
-	if( resourceList == nullptr ) {
-		return;
-	}
-
-	const uint32_t resourceCount = static_cast<uint32_t>( resourceList->size() );
+	const uint32_t resourceCount = static_cast<uint32_t>( resourceList.size() );
 	for ( uint32_t i = 0; i < resourceCount; ++i )
 	{
-		if ( (*resourceList)[ i ]->m_type == resourceType_t::GPU_IMAGE )
+		if ( resourceList[ i ]->m_type == resourceType_t::GPU_IMAGE )
 		{
-			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( ( *resourceList )[ i ] );
+			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( resourceList[ i ] );
 			Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 		}
 	}
@@ -143,11 +109,6 @@ void RenderResource::Create( const resourceType_t type, const resourceLifeTime_t
 	m_resourceMemoryRegion = memoryRegion_t::UNKNOWN;
 	m_resourceByteCount = 0;
 
-	switch ( m_lifetime )
-	{
-	case resourceLifeTime_t::TASK:		InsertSorted( m_taskDependentResources,  this ); break;
-	case resourceLifeTime_t::FRAME:		InsertSorted( m_frameDependentResources, this ); break;
-	case resourceLifeTime_t::RESIZE:	InsertSorted( m_viewDependentResources,  this ); break;
-	case resourceLifeTime_t::REBOOT:	InsertSorted( m_appDependentResources,   this ); break;
-	}
+	std::vector<RenderResource*>& resourceList = GetResourceList( lifetime );
+	InsertSorted( resourceList, this );
 }
