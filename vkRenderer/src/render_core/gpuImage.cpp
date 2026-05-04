@@ -114,6 +114,8 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 					+ " (format: " + std::to_string( imageInfo.format ) + ")" );
 			}
 
+			vmaSetAllocationName( AllocatorMemory::GetVmaAllocator(), allocation, name );
+
 			m_allocation[ i ].m_allocation = allocation;
 			m_allocation[ i ].m_info = allocInfo;
 

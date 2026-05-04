@@ -155,6 +155,8 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 					+ std::to_string( bufferSize ) + " bytes (alignment: " + std::to_string( alignment ) + ")" );
 			}
 
+			vmaSetAllocationName( AllocatorMemory::GetVmaAllocator(), allocation, name );
+
 			m_buffer[ bufferId ].alloc.m_allocation = allocation;
 			m_buffer[ bufferId ].alloc.m_info = allocInfo;
 			m_buffer[ bufferId ].alloc.m_alignment = alignment;
