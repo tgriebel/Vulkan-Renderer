@@ -23,6 +23,40 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.useCubeViews )
 	{
+		extern CVar r_cubeWidth;
+		extern CVar r_cubeHeight;
+
+		imageInfo_t colorInfo{};
+		colorInfo.width = r_cubeWidth.GetInt();
+		colorInfo.height = r_cubeHeight.GetInt();
+		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
+		colorInfo.layers = 6;
+		colorInfo.subsamples = IMAGE_SMP_1;
+		colorInfo.fmt = IMAGE_FMT_RGBA_16;
+		colorInfo.type = IMAGE_TYPE_CUBE;
+		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
+		colorInfo.tiling = IMAGE_TILING_MORTON;
+
+		resources->cubeFbColorImage->Create(
+			colorInfo,
+			nullptr,
+			new GpuImage( "FB_cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, resourceLifeTime_t::REBOOT )
+		);
+
+		resources->cubeFbColorImage->RegisterResize( nullptr );
+
+		imageInfo_t depthInfo = colorInfo;
+		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+		depthInfo.fmt = IMAGE_FMT_D_16;
+
+		resources->cubeFbDepthImage->Create(
+			depthInfo,
+			nullptr,
+			new GpuImage( "FB_cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, resourceLifeTime_t::REBOOT )
+		);
+
+		resources->cubeFbDepthImage->RegisterResize( nullptr );
+
 		if( config.computeDiffuseIbl )
 		{
 			imageProcessCreateInfo_t info = {};
@@ -185,48 +219,116 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.ssao )
 	{
-		struct ssaoConstants_t
+		// Image
 		{
-			float    radius;      // World-space sampling radius (meters)
-			uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
-			float    bias;        // Depth bias to prevent self-occlusion (meters)
-			float    strength;    // AO multiplier: 1 = standard, higher = darker
-		};
+			imageInfo_t info{};
+			info.width = displayWidth;
+			info.height = displayHeight;
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_R_32;
+			info.type = IMAGE_TYPE_2D;
+			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+			info.tiling = IMAGE_TILING_MORTON;
 
-		const ssaoConstants_t ssaoDefaults = { 0.5f, 16, 0.025f, 1.5f };
+			resources->ssaoImage->Create(
+				info,
+				nullptr,
+				new GpuImage( "FB_ssao", info, GPU_IMAGE_RW, resourceLifeTime_t::RESIZE )
+			);
+		}
 
-		imageProcessCreateInfo_t info{};
-		info.name = "SSAO";
-		info.context = renderContext;
-		info.resources = resources;
-		info.outputImage = resources->ssaoImage;
-		info.progName = "SSAO";
-		info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
-		info.baseMip = 0;
-		info.constants = &ssaoDefaults;
-		info.constantsByteSize = sizeof( ssaoDefaults );
+		// Image Process
+		{
+			struct ssaoConstants_t
+			{
+				float    radius;      // World-space sampling radius (meters)
+				uint32_t numSamples;  // Sample count — 8 (fast) to 32 (quality)
+				float    bias;        // Depth bias to prevent self-occlusion (meters)
+				float    strength;    // AO multiplier: 1 = standard, higher = darker
+			};
 
-		tasks.ssaoTask = new ImageProcessTask( info );
+			const ssaoConstants_t ssaoDefaults = { 0.5f, 16, 0.025f, 1.5f };
+
+			imageProcessCreateInfo_t info{};
+			info.name = "SSAO";
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = resources->ssaoImage;
+			info.progName = "SSAO";
+			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
+			info.baseMip = 0;
+			info.constants = &ssaoDefaults;
+			info.constantsByteSize = sizeof( ssaoDefaults );
+
+			tasks.ssaoTask = new ImageProcessTask( info );
 
 #if defined( USE_IMGUI )
-		tasks.ssaoTask->RegisterControls( [ ssaoTask = tasks.ssaoTask ]()
-		{
-			ssaoConstants_t& c = *ssaoTask->GetConstants<ssaoConstants_t>();
-			bool changed = false;
-			changed |= ImGui::SliderFloat( "Radius",   &c.radius,           0.1f, 2.0f );
-			changed |= ImGui::SliderInt  ( "Samples",  (int*)&c.numSamples, 4,    32   );
-			changed |= ImGui::SliderFloat( "Bias",     &c.bias,             0.0f, 0.1f );
-			changed |= ImGui::SliderFloat( "Strength", &c.strength,         0.5f, 4.0f );
-			if ( changed )
-			{
-				ssaoTask->UpdateConstants();
-			}
-		} );
+			tasks.ssaoTask->RegisterControls( [ ssaoTask = tasks.ssaoTask ]()
+				{
+					ssaoConstants_t& c = *ssaoTask->GetConstants<ssaoConstants_t>();
+					bool changed = false;
+					changed |= ImGui::SliderFloat( "Radius", &c.radius, 0.1f, 2.0f );
+					changed |= ImGui::SliderInt( "Samples", (int*)&c.numSamples, 4, 32 );
+					changed |= ImGui::SliderFloat( "Bias", &c.bias, 0.0f, 0.1f );
+					changed |= ImGui::SliderFloat( "Strength", &c.strength, 0.5f, 4.0f );
+					if( changed )
+					{
+						ssaoTask->UpdateConstants();
+					}
+				} );
 #endif
+		}
 	}
 
 	if( config.autoExposure )
 	{
+		// Images
+		{
+			// Previous Luminance
+			{
+				imageInfo_t info{};
+				info.width = 1;
+				info.height = 1;
+				info.mipLevels = 1;
+				info.layers = 1;
+				info.subsamples = IMAGE_SMP_1;
+				info.fmt = IMAGE_FMT_R_16;
+				info.type = IMAGE_TYPE_2D;
+				info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				info.tiling = IMAGE_TILING_MORTON;
+
+				resources->previousLum->Create(
+					info,
+					nullptr,
+					new GpuImage( "FB_previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, resourceLifeTime_t::REBOOT )
+				);
+			}
+
+			// Luminance MIP-chain
+			{
+				//imageInfo_t info{};
+				//info.width = 1024;
+				//info.height = 1024;
+				//info.mipLevels = MipCount( info.width, info.height );
+				//info.layers = 1;
+				//info.subsamples = IMAGE_SMP_1;
+				//info.fmt = IMAGE_FMT_R_16;
+				//info.type = IMAGE_TYPE_2D;
+				//info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				//info.tiling = IMAGE_TILING_MORTON;
+
+				//resources->currentLum->Create(
+				//	info,
+				//	nullptr,
+				//	new GpuImage( "FB_currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, resourceLifeTime_t::RESIZE )
+				//);
+
+				//resources->currentLum->RegisterResize( nullptr );
+			}
+		}
+
 		// Copy previous luminance
 		{
 			copyImageParms_t srcCopy {};
@@ -368,6 +470,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.cubeDownsample )
 	{
+		assert( config.useCubeViews );
+
 		imageProcessCreateInfo_t info {};
 		info.name = "CubeDownsample";
 		info.context = renderContext;
@@ -382,6 +486,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.computeEnvMap )
 	{
+		assert( config.useCubeViews );
+
 		const std::string fileName = std::string( config.cubemapName ) + "_env.img";
 
 		imageReadBackCreateInfo_t info {};

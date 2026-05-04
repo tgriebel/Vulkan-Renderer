@@ -709,43 +709,6 @@ void Renderer::CreateFramebuffers()
 		);
 	}
 
-	// Cube images
-	{
-		extern CVar r_cubeWidth;
-		extern CVar r_cubeHeight;
-
-		imageInfo_t colorInfo{};
-		colorInfo.width = r_cubeWidth.GetInt();
-		colorInfo.height = r_cubeHeight.GetInt();
-		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
-		colorInfo.layers = 6;
-		colorInfo.subsamples = IMAGE_SMP_1;
-		colorInfo.fmt = IMAGE_FMT_RGBA_16;
-		colorInfo.type = IMAGE_TYPE_CUBE;
-		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		colorInfo.tiling = IMAGE_TILING_MORTON;
-
-		resources.cubeFbColorImage->Create(
-			colorInfo,
-			nullptr,
-			new GpuImage( "FB_cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, lifeTime )
-		);
-
-		resources.cubeFbColorImage->RegisterResize( nullptr );
-
-		imageInfo_t depthInfo = colorInfo;
-		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		depthInfo.fmt = IMAGE_FMT_D_16;
-
-		resources.cubeFbDepthImage->Create(
-			depthInfo,
-			nullptr,
-			new GpuImage( "FB_cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, lifeTime )
-		);
-
-		resources.cubeFbDepthImage->RegisterResize( nullptr );
-	}
-
 	// Post-Scene Render Images
 	{
 		imageInfo_t info{};
@@ -797,26 +760,6 @@ void Renderer::CreateFramebuffers()
 		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, lifeTime );
 	}
 
-	// SSAO
-	{
-		imageInfo_t info{};
-		info.width = width;
-		info.height = height;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_R_32;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
-
-		resources.ssaoImage->Create(
-			info,
-			nullptr,
-			new GpuImage( "FB_ssao", info, GPU_IMAGE_RW, lifeTime )
-		);
-	}
-
 	// Resolve depth-stencil image
 	{
 		imageInfo_t info{};
@@ -861,28 +804,6 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "FB_tempColor", info, GPU_IMAGE_RW, lifeTime )
 		);
-	}
-
-	// Previous Luminance
-	{
-		imageInfo_t info{};
-		info.width = 1;
-		info.height = 1;
-		info.mipLevels = 1;
-		info.layers = 1;
-		info.subsamples = IMAGE_SMP_1;
-		info.fmt = IMAGE_FMT_R_16;
-		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
-		info.tiling = IMAGE_TILING_MORTON;
-
-		resources.previousLum->Create(
-			info,
-			nullptr,
-			new GpuImage( "FB_previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, lifeTime )
-		);
-
-		resources.previousLum->RegisterResize( nullptr );
 	}
 
 	// Luminance MIP-chain
