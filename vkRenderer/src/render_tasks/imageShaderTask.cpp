@@ -61,22 +61,23 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		imageInfo_t imageInfo = outputImage0->info;
 		imageInfo.type = IMAGE_TYPE_2D;
 
-		assert( info.passCount <= 2 ); // TODO: Support?
-		m_passCount = Clamp( info.passCount, 1u, 2u );
+		assert( info.passCount <= MaxPasses );
+		m_passCount = Clamp( info.passCount, 1u, MaxPasses );
 
 		uint32_t passIndex = 0;
 
 		// Intermediate Frame Buffer
 		if ( m_passCount > 1 )
 		{
-			m_views[ passIndex ][ 0 ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_outputImageViews[ passIndex ][ 0 ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
 
-			assert( ( m_views[ passIndex ][ 1 ] == nullptr ) && ( m_views[ passIndex ][ 2 ] == nullptr ) ); // Not supported
+			assert( ( m_outputImageViews[ passIndex ][ 1 ] == nullptr ) && ( m_outputImageViews[ passIndex ][ 2 ] == nullptr ) ); // Not supported
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = "TempImageProcessFb";
-			fbInfo.color0 = m_views[ passIndex ][ 0 ];
+			fbInfo.color0 = m_outputImageViews[ passIndex ][ 0 ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME; 
+			fbInfo.context = m_context;
 
 			m_fb[ passIndex ].Create( fbInfo );
 			m_passes[ passIndex ] = new PostPass( m_context, &m_fb[ passIndex ] );
@@ -87,17 +88,17 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		// Main Frame Buffer
 		{
 			m_image = outputImage0;
-			m_views[ passIndex ][ 0 ] = new ImageView( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
+			m_outputImageViews[ passIndex ][ 0 ] = new ImageView( m_image, imageInfo, view, resourceLifeTime_t::RESIZE );
 
-			m_views[ passIndex ][ 1 ] = nullptr;
-			m_views[ passIndex ][ 2 ] = nullptr;
+			m_outputImageViews[ passIndex ][ 1 ] = nullptr;
+			m_outputImageViews[ passIndex ][ 2 ] = nullptr;
 
 			if( outputImage1 )
 			{
 				imageInfo_t imageInfo = outputImage1->info;
 				imageInfo.type = IMAGE_TYPE_2D;
 
-				m_views[ passIndex ][ 1 ] = new ImageView( outputImage1, imageInfo, view, resourceLifeTime_t::RESIZE );
+				m_outputImageViews[ passIndex ][ 1 ] = new ImageView( outputImage1, imageInfo, view, resourceLifeTime_t::RESIZE );
 			}
 
 			if ( outputImage2 )
@@ -105,15 +106,15 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 				imageInfo_t imageInfo = outputImage2->info;
 				imageInfo.type = IMAGE_TYPE_2D;
 
-				m_views[ passIndex ][ 2 ] = new ImageView( outputImage2, imageInfo, view, resourceLifeTime_t::RESIZE );
+				m_outputImageViews[ passIndex ][ 2 ] = new ImageView( outputImage2, imageInfo, view, resourceLifeTime_t::RESIZE );
 			}
 
 			frameBufferCreateInfo_t fbInfo;
 			fbInfo.name = m_dbgName.c_str();
 			fbInfo.context = m_context;
-			fbInfo.color0 = m_views[ passIndex ][ 0 ];
-			fbInfo.color1 = m_views[ passIndex ][ 1 ];
-			fbInfo.color2 = m_views[ passIndex ][ 2 ];
+			fbInfo.color0 = m_outputImageViews[ passIndex ][ 0 ];
+			fbInfo.color1 = m_outputImageViews[ passIndex ][ 1 ];
+			fbInfo.color2 = m_outputImageViews[ passIndex ][ 2 ];
 			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 
 			m_fb[ passIndex ].Create( fbInfo );
@@ -149,7 +150,8 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		m_passes[ passIndex ]->codeImages.Resize( info.inputImages + multiPassImageCount );
 		m_passes[ passIndex ]->codeCubeImages.Resize( info.inputCubeImages );
 
-		for( uint32_t codeImageIx = 0; codeImageIx < m_image2dSlotCount; ++codeImageIx ) {
+		const uint32_t codeImageCount = m_passes[ passIndex ]->codeImages.Count();
+		for( uint32_t codeImageIx = 0; codeImageIx < codeImageCount; ++codeImageIx ) {
 			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
 		}
 
@@ -160,16 +162,21 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 	// HACK: Clean this up with a better design
 	// Attach the previous frame buffers as input for the next pass
-	for ( uint32_t passIndex = 1; passIndex < m_passCount; ++passIndex )
+	for( uint32_t passIndex = 1; passIndex < m_passCount; ++passIndex )
 	{
-		m_passes[ passIndex ]->codeImages.BindIndex( m_image2dSlotCount, m_views[ passIndex - 1 ][ 0 ] );
+		PostPass* currentPass = m_passes[ passIndex ];
+
+		const ImageView* lastPassOutputColorImage = m_outputImageViews[ passIndex - 1 ][ 0 ];
+
+		const uint32_t codeImageCount = currentPass->codeImages.Count();
+		currentPass->codeImages.BindIndex( codeImageCount - 1, lastPassOutputColorImage );
 	}
 }
 
 
 ImageView* ImageShaderTask::GetOutputImage( const uint32_t outputImageIndex )
 {
-	return m_views[ m_passCount - 1 ][ outputImageIndex ];
+	return m_outputImageViews[ m_passCount - 1 ][ outputImageIndex ];
 }
 
 
@@ -225,7 +232,10 @@ void ImageShaderTask::Shutdown()
 {
 	for ( uint32_t i = 0; i < MaxOutputImages; ++i )
 	{
-		if( m_taskImages[ i ] != nullptr ) {
+		if( m_taskImages[ i ] != nullptr )
+		{
+			// FIXME: gpu images leak CPU memory b/c ownership was never established
+			// FIXME: dependency issue with TASK resource cleanup
 			delete m_taskImages[ i ];
 			m_taskImages[ i ] = nullptr;
 		}
@@ -235,10 +245,10 @@ void ImageShaderTask::Shutdown()
 	{
 		for ( uint32_t outputImageIx = 0; outputImageIx < MaxOutputImages; ++outputImageIx )
 		{
-			if ( m_views[ passIndex ][ outputImageIx ] != nullptr )
+			if ( m_outputImageViews[ passIndex ][ outputImageIx ] != nullptr )
 			{
-				delete m_views[ passIndex ][ outputImageIx ];
-				m_views[ passIndex ][ outputImageIx ] = nullptr;
+				delete m_outputImageViews[ passIndex ][ outputImageIx ];
+				m_outputImageViews[ passIndex ][ outputImageIx ] = nullptr;
 			}
 		}
 

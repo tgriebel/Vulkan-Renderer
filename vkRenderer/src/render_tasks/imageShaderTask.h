@@ -3,6 +3,7 @@
 #include "../globals/common.h"
 #include "../asset_types/gpuProgram.h"
 #include "../draw_passes/drawpass.h"
+#include "../draw_passes/postPass.h"
 #include "../render_tasks/RenderTask.h"
 
 class ShaderBindParms;
@@ -69,9 +70,9 @@ private:
 	ResourceContext*		m_resources;
 	RenderContext*			m_context;
 	FrameBuffer				m_fb[ MaxPasses ];
-	DrawPass*				m_passes[ MaxPasses ];
+	PostPass*				m_passes[ MaxPasses ];
 	GpuBuffer				m_buffer[ MaxPasses ];
-	ImageView*				m_views[ MaxPasses ][ MaxOutputImages ] = {};
+	ImageView*				m_outputImageViews[ MaxPasses ][ MaxOutputImages ] = {};
 	Image*					m_image = nullptr;
 	Image*					m_taskImages[ MaxOutputImages ] = {};
 	uint32_t				m_taskImageCount;

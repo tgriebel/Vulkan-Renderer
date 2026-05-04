@@ -14,7 +14,7 @@
 // ============================================================
 
 #define IMAGE_CONSTANT_LAYOUT( S, N, TYPE, NAME )                                                                   \
-    BIND_SET( S, N ) cbuffer _ShaderConstants                                                                       \
+    BIND_SET( S, N ) cbuffer imageShaderConstants_t                                                                 \
     {                                                                                                               \
         float4  dimensions;                                                                                         \
         uint    pass;                                                                                               \

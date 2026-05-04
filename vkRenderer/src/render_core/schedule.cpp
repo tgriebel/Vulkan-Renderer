@@ -175,6 +175,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progName = "SeparableGaussianBlur";
 		info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
 		info.baseMip = 0;
+		info.multiPass = true;
 
 		tasks.gaussianTask = new ImageProcessTask( info );
 	}
