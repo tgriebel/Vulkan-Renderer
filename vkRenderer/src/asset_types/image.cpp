@@ -124,12 +124,11 @@ void Image::OnResize( uint32_t w, uint32_t h )
 
 		if( gpuImage != nullptr )
 		{
-			const std::string name = gpuImage->GetDebugName();
 			const gpuImageStateFlags_t flags = gpuImage->GetFlags();
 			const resourceLifeTime_t lifeTime = gpuImage->GetLifetime();
 
 			gpuImage->Destroy();
-			gpuImage->Create( name.c_str(), info, flags, lifeTime );
+			gpuImage->Create( gpuImage->GetDebugName(), info, flags, lifeTime );
 		}
 	}
 }
