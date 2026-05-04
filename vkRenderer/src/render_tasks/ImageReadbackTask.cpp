@@ -76,8 +76,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 		resourceLifeTime_t::TASK,
 		elementsCount,
 		maxBpp,
-		bufferType_t::STORAGE,
-		m_context->sharedMemory
+		bufferType_t::STORAGE
 	);
 
 	m_resourceBuffer.Create( 
@@ -86,8 +85,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 		resourceLifeTime_t::TASK,
 		1,
 		2 * sizeof( writeBackParms ),
-		bufferType_t::UNIFORM,
-		m_context->sharedMemory
+		bufferType_t::UNIFORM
 	);
 
 	writeBackParms.dimensions = vec4f(	(float)m_readbackImage->info.width,

@@ -80,11 +80,11 @@ VkBuffer& GpuBuffer::VkObject()
 
 void GpuBuffer::Create( const bufferCreateInfo_t info )
 {
-	Create( info.name, info.swapBuffering, info.lifetime, info.elements, info.elementSizeBytes, info.type, *info.bufferMemory );
+	Create( info.name, info.swapBuffering, info.lifetime, info.elements, info.elementSizeBytes, info.type );
 }
 
 
-void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory )
+void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type )
 {
 	// Resource Management
 	{
@@ -134,7 +134,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 
 		VmaAllocationCreateInfo allocCreateInfo = {};
 		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-		if ( bufferMemory.GetMemoryRegion() == memoryRegion_t::SHARED || type == bufferType_t::STAGING ) {
+		if ( ( type == bufferType_t::UNIFORM ) || ( type == bufferType_t::STORAGE ) || ( type == bufferType_t::STAGING )  ) {
 			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
 								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		}

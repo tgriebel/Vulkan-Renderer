@@ -383,8 +383,7 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			1,
 			sizeof( gpuGlobals_t ),
-			bufferType_t::UNIFORM,
-			renderContext.sharedMemory
+			bufferType_t::UNIFORM
 		);
 		resources.viewParms.Create(
 			"View",
@@ -392,8 +391,7 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			MaxViews * MaxMultiViews,
 			sizeof( gpuView_t ),
-			bufferType_t::STORAGE,
-			renderContext.sharedMemory
+			bufferType_t::STORAGE
 		);
 		resources.surfParms.Create(
 			"Surf",
@@ -401,8 +399,7 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			MaxViews * MaxSurfaces,
 			sizeof( gpuSurface_t ),
-			bufferType_t::STORAGE,
-			renderContext.sharedMemory
+			bufferType_t::STORAGE
 		);
 		resources.materialBuffers.Create(
 			"Material",
@@ -410,8 +407,7 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			MaxMaterials,
 			sizeof( gpuMaterial_t ),
-			bufferType_t::STORAGE,
-			renderContext.sharedMemory
+			bufferType_t::STORAGE
 		);
 		resources.lightParms.Create(
 			"Light",
@@ -419,8 +415,7 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			MaxLights,
 			sizeof( gpuLight_t ),
-			bufferType_t::STORAGE,
-			renderContext.sharedMemory
+			bufferType_t::STORAGE
 		);
 		resources.particleBuffer.Create(
 			"Particle",
@@ -428,8 +423,7 @@ void Renderer::InitShaderResources()
 			resourceLifeTime_t::REBOOT,
 			MaxParticles,
 			sizeof( gpuParticle_t ),
-			bufferType_t::STORAGE,
-			renderContext.sharedMemory
+			bufferType_t::STORAGE
 		);
 	}
 }

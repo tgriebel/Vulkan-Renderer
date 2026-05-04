@@ -37,8 +37,7 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		resourceLifeTime_t::REBOOT,
 		1,
 		MaxTexturingUploadMemory,
-		bufferType_t::STAGING,
-		renderContext->sharedMemory
+		bufferType_t::STAGING
 	);
 
 	geometry.vb.Create(
@@ -47,8 +46,7 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		resourceLifeTime_t::REBOOT,
 		MaxVertices,
 		sizeof( vsInput_t ),
-		bufferType_t::VERTEX,
-		renderContext->localMemory
+		bufferType_t::VERTEX
 	);
 
 	geometry.ib.Create(
@@ -57,8 +55,7 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		resourceLifeTime_t::REBOOT,
 		MaxIndices,
 		sizeof( uint32_t ),
-		bufferType_t::INDEX,
-		renderContext->localMemory
+		bufferType_t::INDEX
 	);
 
 	geometry.stagingBuffer.Create(
@@ -67,8 +64,7 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		resourceLifeTime_t::REBOOT,
 		1,
 		MaxGeometryUploadMemory,
-		bufferType_t::STAGING,
-		renderContext->sharedMemory
+		bufferType_t::STAGING
 	);
 }
 

@@ -46,7 +46,7 @@ public:
 	VkBuffer		GetVkObject() const;
 #endif
 	void			Create( const bufferCreateInfo_t info );
-	void			Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type, AllocatorMemory& bufferMemory );
+	void			Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type );
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			Allocate( const uint64_t size );

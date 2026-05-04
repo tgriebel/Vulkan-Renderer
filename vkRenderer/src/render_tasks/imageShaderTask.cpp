@@ -157,7 +157,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( bindset_imageProcess );
 
-		m_buffer[ passIndex ].Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM, m_context->sharedMemory );
+		m_buffer[ passIndex ].Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM );
 	}
 
 	// HACK: Clean this up with a better design
