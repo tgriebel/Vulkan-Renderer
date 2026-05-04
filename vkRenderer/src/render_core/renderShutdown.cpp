@@ -22,7 +22,9 @@ void Renderer::Shutdown()
 
 void Renderer::Destroy()
 {
+#ifdef USE_VULKAN 
 	vk_ClearRenderPassCache();
+#endif
 
 	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
 
@@ -46,8 +48,6 @@ void Renderer::Destroy()
 	for ( size_t i = 0; i < MaxFrameStates; ++i ) {
 		gfxContext.frameFence[ i ].Destroy();
 	}
-
-	schedule->Clear();
 
 	AllocatorMemory::DestroyVmaAllocator();
 

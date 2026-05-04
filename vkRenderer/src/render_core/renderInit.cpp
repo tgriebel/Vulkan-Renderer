@@ -646,11 +646,11 @@ void Renderer::CreateFramebuffers()
 	const resourceLifeTime_t lifeTime = resourceLifeTime_t::RESIZE;
 
 	// Shadow images
-	for ( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
+	for( uint32_t shadowIx = 0; shadowIx < MaxShadowMaps; ++shadowIx )
 	{
 		imageInfo_t info{};
-		info.width = ShadowMapWidth;
-		info.height = ShadowMapHeight;
+		info.width = Renderer::ShadowMapWidth;
+		info.height = Renderer::ShadowMapHeight;
 		info.mipLevels = 1;
 		info.layers = 1;
 		info.subsamples = IMAGE_SMP_1;
@@ -659,11 +659,15 @@ void Renderer::CreateFramebuffers()
 		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
-		resources.shadowMapImage[ shadowIx ]->Create(
+		Image* shadowImage = resources.shadowMapImage[ shadowIx ];
+
+		shadowImage->Create(
 			info,
 			nullptr,
 			new GpuImage( "FB_shadowMap", info, GPU_IMAGE_RW, renderContext.frameBufferMemory, lifeTime )
 		);
+
+		shadowImage->RegisterResize( nullptr );
 	}
 
 	// Main Scene Render Images
@@ -730,6 +734,8 @@ void Renderer::CreateFramebuffers()
 			new GpuImage( "FB_cubeColor", colorInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, renderContext.frameBufferMemory, lifeTime )
 		);
 
+		resources.cubeFbColorImage->RegisterResize( nullptr );
+
 		imageInfo_t depthInfo = colorInfo;
 		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		depthInfo.fmt = IMAGE_FMT_D_16;
@@ -739,6 +745,8 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "FB_cubeDepth", depthInfo, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
+
+		resources.cubeFbDepthImage->RegisterResize( nullptr );
 	}
 
 	// Post-Scene Render Images
@@ -896,6 +904,8 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "FB_previousLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_DST, renderContext.frameBufferMemory, lifeTime )
 		);
+
+		resources.previousLum->RegisterResize( nullptr );
 	}
 
 	// Luminance MIP-chain
@@ -916,6 +926,8 @@ void Renderer::CreateFramebuffers()
 			nullptr,
 			new GpuImage( "FB_currentLuminance", info, GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, renderContext.frameBufferMemory, lifeTime )
 		);
+
+		resources.currentLum->RegisterResize( nullptr );
 	}
 }
 

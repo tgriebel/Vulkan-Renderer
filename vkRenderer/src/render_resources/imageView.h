@@ -67,7 +67,11 @@ public:
 			RenderResource::Create( resourceType_t::IMAGE_VIEW, m_lifetime );
 		}
 
-		m_sourceImage = image;
+		if( image->IsView() ) {
+			m_sourceImage = reinterpret_cast<const ImageView*>( image )->m_sourceImage;
+		} else {
+			m_sourceImage = image;
+		}
 
 		info = imageInfo;
 		assert( info.layers >= 1 );
@@ -90,7 +94,7 @@ public:
 	}
 
 
-	void Resize()
+	void OnResize( const uint32_t w, const uint32_t h ) override
 	{
 		Destroy();
 
@@ -107,11 +111,17 @@ public:
 		if ( gpuImage != nullptr )
 		{
 #ifdef USE_VULKAN
-			// Views do not own the image, only the view
+			// Views do not own the vulkan image, only the vulkan image view object
+			// Detaching prevents the GpuImage destructor from deleting the shared vulkan image
 			gpuImage->DetachVkImage();
 #endif
 			delete gpuImage;
 			gpuImage = nullptr;
 		}
+	}
+
+	virtual bool IsView() const override
+	{
+		return true;
 	}
 };

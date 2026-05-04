@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 
 #include "asset.h"
 #include "../render_core/renderResource.h"
@@ -249,11 +250,14 @@ inline imageInfo_t DefaultImage2dInfo( uint32_t w, uint32_t h )
 
 class Image : public RenderResource
 {
+public:
+	using ResizeFn = std::function<imageInfo_t( uint32_t width, uint32_t height )>;
+
 private:
 	static const uint32_t Version = 2;
-public:
+	ResizeFn m_resizeFn;
 
-	using RenderResource::Create;
+public:
 
 	imageInfo_t				info;
 	imageSubResourceView_t	subResourceView;
@@ -302,7 +306,14 @@ public:
 
 	void Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, GpuImage* _gpuImage );
 
-	void Destroy();
+	void Destroy() override;
+
+	void OnResize( const uint32_t w, const uint32_t h ) override;
+
+	virtual bool IsView() const { return false; }
+
+	void RegisterResize( ResizeFn fn ) { m_resizeFn = std::move( fn ); }
+	static ResizeFn FullDimensionResizeFn( const imageInfo_t& info );
 
 	void Serialize( Serializer* serializer );
 };

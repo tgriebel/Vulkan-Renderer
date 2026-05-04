@@ -8,13 +8,14 @@
 #include "../io/serializeClasses.h"
 #include "../io/io.h"
 #include "../asset_types/assetLib.h"
+#include "../render_core/gpuImage.h"
 
 
 void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_t byteCount )
 {
 	{
 		m_lifetime = resourceLifeTime_t::UNMANAGED;
-		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
+		RenderResource::Create( resourceType_t::ASSET_IMAGE, m_lifetime );
 	}
 
 	info = _info;
@@ -75,9 +76,19 @@ void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_
 
 void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, GpuImage* _gpuImage )
 {
+	if( ( _gpuImage != nullptr ) && HasFlags( _gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_WRITE ) )
+	{
+		m_lifetime = _gpuImage->GetLifetime();
+		RenderResource::Create( resourceType_t::FB_IMAGE, m_lifetime );
+
+		if ( !m_resizeFn ) {
+			RegisterResize( FullDimensionResizeFn( _info ) );
+		}
+	}
+	else
 	{
 		m_lifetime = resourceLifeTime_t::UNMANAGED;
-		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
+		RenderResource::Create( resourceType_t::ASSET_IMAGE, m_lifetime );
 	}
 
 	info = _info;
@@ -102,6 +113,42 @@ void Image::Destroy()
 		delete cpuImage;
 		cpuImage = nullptr;
 	}
+}
+
+
+void Image::OnResize( uint32_t w, uint32_t h )
+{
+	if( m_resizeFn )
+	{
+		info = m_resizeFn( w, h );
+
+		if( gpuImage != nullptr )
+		{
+			const std::string name = gpuImage->GetDebugName();
+			const gpuImageStateFlags_t flags = gpuImage->GetFlags();
+			const resourceLifeTime_t lifeTime = gpuImage->GetLifetime();
+
+			gpuImage->Destroy();
+			gpuImage->Create( name.c_str(), info, flags, lifeTime );
+		}
+	}
+}
+
+
+Image::ResizeFn Image::FullDimensionResizeFn( const imageInfo_t& info )
+{
+	return [ info ]( uint32_t w, uint32_t h ) -> imageInfo_t
+	{
+		imageInfo_t resized = info;
+		resized.width = w;
+		resized.height = h;
+
+		// If the original had a mip-chain, recalculate the levels (in the default case)
+		if( info.mipLevels > 1 ) {
+			resized.mipLevels = MipCount( info.width, info.height );
+		}
+		return resized;
+	};
 }
 
 

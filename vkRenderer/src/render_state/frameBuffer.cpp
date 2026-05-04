@@ -489,7 +489,7 @@ bool FrameBuffer::NeedsResize() const
 }
 
 
-void FrameBuffer::Resize()
+void FrameBuffer::OnResize( const uint32_t w, const uint32_t h )
 {
 	if( m_createInfo.lifetime != resourceLifeTime_t::RESIZE ) { // What if backing images are marked as resize?
 		return;

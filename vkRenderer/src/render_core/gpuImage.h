@@ -47,7 +47,7 @@ protected:
 public:
 	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime )
 	{
-		Create( name, info, flags, memory, lifetime );
+		Create( name, info, flags, lifetime );
 	}
 
 	virtual GpuImage::~GpuImage()
@@ -168,6 +168,6 @@ public:
 		return m_isViewOwned;
 	}
 
-	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime );
+	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime );
 	virtual void Destroy() override;
 };

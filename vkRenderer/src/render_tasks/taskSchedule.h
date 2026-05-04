@@ -15,6 +15,11 @@ public:
 	TaskSchedule() : tasks( nullptr ), end( nullptr ), currentTask( nullptr ), taskCount( 0 )
 	{}
 
+	~TaskSchedule()
+	{
+		Clear();
+	}
+
 	uint32_t		TaskCount() const;
 	bool			HasPendingTasks() const;
 	void			Clear();

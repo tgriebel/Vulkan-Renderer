@@ -329,8 +329,8 @@ int main( int argc, char* argv[] )
 				break;
 			}
 		}
-		delete schedule;
 		g_renderer.Shutdown();
+		delete schedule;
 	}
 	catch (const std::exception& e)
 	{

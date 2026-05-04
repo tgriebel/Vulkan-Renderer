@@ -190,5 +190,5 @@ public:
 
 	void Create( const frameBufferCreateInfo_t& createInfo );
 	void Destroy() override;
-	void Resize();
+	void OnResize( const uint32_t w, const uint32_t h ) override;
 };

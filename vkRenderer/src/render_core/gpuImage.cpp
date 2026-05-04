@@ -40,7 +40,7 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 }
 #endif
 
-void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, AllocatorMemory& memory, const resourceLifeTime_t lifetime )
+void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime )
 {
 	// Managed Resource
 	{
@@ -69,7 +69,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 		VmaAllocationCreateInfo allocCreateInfo = {};
 		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
 
-		m_resourceMemoryRegion = memory.GetMemoryRegion();
+		//m_resourceMemoryRegion = ?;
 
 		const uint32_t bufferCount = GetBufferCount();
 		for ( uint32_t i = 0; i < bufferCount; ++i )

@@ -347,11 +347,10 @@ void RenderView::Resize()
 		return;
 	}
 
-	CreateFrameBuffers( m_fbSourceImages );
+	//CreateFrameBuffers( m_fbSourceImages );
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
-		m_framebuffers[ multiViewIndex ]->Resize();
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
 		{
 			DrawPass* pass = passes[ multiViewIndex ][ passIx ];

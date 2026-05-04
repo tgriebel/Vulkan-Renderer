@@ -215,15 +215,7 @@ void ImageShaderTask::UpdateConstants( const void* dataBlock, const uint32_t siz
 
 void ImageShaderTask::Resize()
 {
-	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
-	{
-		for ( uint32_t outputImageIx = 0; outputImageIx < MaxOutputImages; ++outputImageIx )
-		{
-			if( m_views[ passIndex ][ outputImageIx ] != nullptr ) {
-				m_views[ passIndex ][ outputImageIx ]->Resize();
-			}
-		}
-		m_fb[ passIndex ].Resize();
+	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex ) {
 		m_passes[ passIndex ]->Resize();
 	}
 }

@@ -1,6 +1,10 @@
 #include "renderResource.h"
 #include "../render_state/cmdContext.h"
 #include "../render_core/gpuImage.h"
+#include <algorithm>
+#include "../app/window.h"
+
+extern Window g_window;
 
 static std::vector<RenderResource*> m_taskDependentResources;
 static std::vector<RenderResource*> m_frameDependentResources;
@@ -11,12 +15,26 @@ std::vector<RenderResource*> RenderResource::GetResourceList( const resourceLife
 {
 	switch ( lifetime )
 	{
-	case resourceLifeTime_t::TASK:	return m_taskDependentResources;
-	case resourceLifeTime_t::FRAME:	return m_frameDependentResources;
+	case resourceLifeTime_t::TASK:		return m_taskDependentResources;
+	case resourceLifeTime_t::FRAME:		return m_frameDependentResources;
 	case resourceLifeTime_t::RESIZE:	return m_viewDependentResources;
 	case resourceLifeTime_t::REBOOT:	return m_appDependentResources;
 	}
 	return std::vector<RenderResource*>();
+}
+
+
+void RenderResource::ResizeResources( const uint32_t displayWidth, const uint32_t displayHeight )
+{
+	// This is tricky b/c recreating new resources adds to this exact list! Uh-oh! No worries though!
+	// The solution is to use a move which clears the global list while providing a local copy
+	std::vector<RenderResource*> resizeList = std::move( m_viewDependentResources );
+
+	const uint32_t resourceCount = static_cast<uint32_t>( resizeList.size() );
+	for( uint32_t i = 0; i < resourceCount; ++i )
+	{
+		resizeList[ i ]->OnResize( displayWidth, displayHeight );
+	}
 }
 
 
@@ -41,7 +59,8 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 	else if ( lifetime == resourceLifeTime_t::RESIZE )
 	{
 		const uint32_t resourceCount = static_cast<uint32_t>( m_viewDependentResources.size() );
-		for ( uint32_t i = 0; i < resourceCount; ++i ) {
+		for( uint32_t i = 0; i < resourceCount; ++i )
+		{
 			m_viewDependentResources[ i ]->Destroy();
 		}
 		m_viewDependentResources.clear();
@@ -84,19 +103,52 @@ void RenderResource::TransitionImages( CommandContext* cmdCommand, const resourc
 }
 
 
+static void InsertSorted( std::vector<RenderResource*>& list, RenderResource* resource )
+{
+	auto it = std::lower_bound( list.begin(), list.end(), resource,
+		[]( const RenderResource* a, const RenderResource* b ) {
+			return a->GetPriority() < b->GetPriority();
+		} );
+	list.insert( it, resource );
+}
+
+
+static resourcePriority_t GetPriorityForType( const resourceType_t type )
+{
+	// Defines a dependency hierachy from most fundamental to least
+	// Destructures should reverse the priority
+	// Resize bascially needs this most since GpuImage, ImageView, and FrameBuffer build off Image class
+	switch( type )
+	{
+	case resourceType_t::MEMORY:		return resourcePriority_t::HIGHEST; break;
+	case resourceType_t::BUFFER:		return resourcePriority_t::HIGHEST; break;
+	case resourceType_t::FB_IMAGE:		return resourcePriority_t::HIGHEST; break;	// Sets the image info, most important piece for resizing
+	case resourceType_t::GPU_IMAGE:		return resourcePriority_t::MEDIUM; break;
+	case resourceType_t::SWAPCHAIN:		return resourcePriority_t::MEDIUM; break;
+	case resourceType_t::IMAGE_VIEW:	return resourcePriority_t::MEDIUM; break;
+	case resourceType_t::ASSET_IMAGE:	return resourcePriority_t::LOWEST; break;
+	case resourceType_t::FRAMEBUFFER:	return resourcePriority_t::LOWEST; break;
+	case resourceType_t::BINDSET:		return resourcePriority_t::LOWEST; break;
+	case resourceType_t::IMAGE_SAMPLER:	return resourcePriority_t::LOWEST; break;
+	default:							return resourcePriority_t::LOWEST; break;
+	}
+}
+
+
 void RenderResource::Create( const resourceType_t type, const resourceLifeTime_t lifetime )
 {
 	m_type = type;
 	m_lifetime = lifetime;
+	m_priority = GetPriorityForType( type );
 
 	m_resourceMemoryRegion = memoryRegion_t::UNKNOWN;
 	m_resourceByteCount = 0;
 
 	switch ( m_lifetime )
 	{
-	case resourceLifeTime_t::TASK:		m_taskDependentResources.push_back( this );		break;
-	case resourceLifeTime_t::FRAME:		m_frameDependentResources.push_back( this );	break;
-	case resourceLifeTime_t::RESIZE:	m_viewDependentResources.push_back( this );		break;
-	case resourceLifeTime_t::REBOOT:	m_appDependentResources.push_back( this );		break;
+	case resourceLifeTime_t::TASK:		InsertSorted( m_taskDependentResources,  this ); break;
+	case resourceLifeTime_t::FRAME:		InsertSorted( m_frameDependentResources, this ); break;
+	case resourceLifeTime_t::RESIZE:	InsertSorted( m_viewDependentResources,  this ); break;
+	case resourceLifeTime_t::REBOOT:	InsertSorted( m_appDependentResources,   this ); break;
 	}
 }

@@ -272,10 +272,6 @@ void ImageProcessTask::Resize()
 
 	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
-		if ( m_progressiveSampling ) {
-			m_baseViews[ layerId ].Resize();
-		}
-
 		for ( uint32_t mipLevel = m_baseMip; mipLevel < m_mipLevels; ++mipLevel ) {
 			m_imgProcesses[ layerId ][ mipLevel ]->Resize();
 		}

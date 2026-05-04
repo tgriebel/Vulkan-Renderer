@@ -248,13 +248,10 @@ void Renderer::RecreateSwapChain()
 
 	FlushGPU();
 
-	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
 	g_swapChain.Destroy();
-
-	renderContext.frameBufferMemory.Create( MaxFrameBufferMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::RESIZE );
-
 	g_swapChain.Create( &g_window, width, height );
-	CreateFramebuffers();
+
+	RenderResource::ResizeResources( width, height );
 
 	schedule->Resize();
 }
