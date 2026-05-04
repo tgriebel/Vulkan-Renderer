@@ -11,6 +11,7 @@ enum class resourceLifeTime_t : uint8_t
 	FRAME,
 	RESIZE,
 	REBOOT,
+	ASSET,
 	UNMANAGED
 };
 

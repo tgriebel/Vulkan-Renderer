@@ -3,6 +3,7 @@
 #include "../render_state/deviceContext.h"
 #include "../render_state/rhi.h"
 #include "../asset_types/image.h"
+#include "../render_core/swapChain.h"
 
 // TODO: move
 #ifdef USE_VULKAN	
@@ -39,6 +40,30 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 	return imageInfo;
 }
 #endif
+
+
+GpuImage::GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const SwapChain* swapChain )
+{
+	RenderResource::Create( resourceType_t::SWAPCHAIN, resourceLifeTime_t::UNMANAGED );
+
+	m_dbgName = name;
+	m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
+
+	const uint32_t bufferCount = GetBufferCount();
+	for( uint32_t i = 0; i < bufferCount; ++i )
+	{
+#ifdef USE_VULKAN
+		vk_image[ i ] = swapChain->GetVkImage( i );
+		vk_view[ i ] = swapChain->GetVkImageView( i );
+#endif
+	}
+
+	m_id = -1;
+	m_flags = flags;
+	m_info = info;
+	m_isViewOwned = true;
+}
+
 
 void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime )
 {

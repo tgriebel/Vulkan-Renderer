@@ -162,7 +162,6 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 
 	VK_CHECK_RESULT( vkCreateSwapchainKHR( context.device, &createInfo, nullptr, &vk_swapChain ) );
 
-	VkImage vk_swapChainImages[ MaxSwapChainBuffers ];
 	vkGetSwapchainImagesKHR( context.device, vk_swapChain, &m_imageCount, nullptr );
 	assert( m_imageCount <= MaxSwapChainBuffers );
 	vkGetSwapchainImagesKHR( context.device, vk_swapChain, &m_imageCount, vk_swapChainImages );
@@ -186,15 +185,13 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	m_swapChainImage.subResourceView.baseMip = 0;
 	m_swapChainImage.subResourceView.mipLevels = 1;
 
-	VkImageView vk_swapChainImageViews[ MaxSwapChainBuffers ];
-
 	for ( uint32_t i = 0; i < m_imageCount; ++i )
 	{
 		vk_swapChainImageViews[ i ] = vk_CreateImageView( vk_swapChainImages[ i ], info, "Swapchain", i );
 	}
 
 	gpuImageStateFlags_t flags = GPU_IMAGE_PRESENT | GPU_IMAGE_PERSISTENT;
-	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", info, flags, vk_swapChainImages, vk_swapChainImageViews );
+	m_swapChainImage.gpuImage = new GpuImage( "_backbuffer", info, flags, this );
 #endif
 }
 

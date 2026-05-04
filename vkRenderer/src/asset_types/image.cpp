@@ -14,7 +14,7 @@
 void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_t byteCount )
 {
 	{
-		m_lifetime = resourceLifeTime_t::UNMANAGED;
+		m_lifetime = resourceLifeTime_t::ASSET;
 		RenderResource::Create( resourceType_t::ASSET_IMAGE, m_lifetime );
 	}
 
@@ -87,7 +87,7 @@ void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage, G
 	}
 	else
 	{
-		m_lifetime = resourceLifeTime_t::UNMANAGED;
+		m_lifetime = resourceLifeTime_t::ASSET;
 		RenderResource::Create( resourceType_t::ASSET_IMAGE, m_lifetime );
 	}
 

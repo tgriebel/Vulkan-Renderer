@@ -179,7 +179,8 @@ void GpuBuffer::Destroy()
 	}
 	for ( uint32_t bufferId = 0; bufferId < m_bufferCount; ++bufferId )
 	{
-		if ( m_buffer[ bufferId ].buffer != VK_NULL_HANDLE ) {
+		if ( m_buffer[ bufferId ].buffer != VK_NULL_HANDLE )
+		{
 			vmaDestroyBuffer( AllocatorMemory::GetVmaAllocator(), m_buffer[ bufferId ].buffer, m_buffer[ bufferId ].alloc.m_allocation );
 			m_buffer[ bufferId ].buffer = VK_NULL_HANDLE;
 			m_buffer[ bufferId ].alloc.m_allocation = VK_NULL_HANDLE;

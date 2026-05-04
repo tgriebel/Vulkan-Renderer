@@ -109,6 +109,12 @@ void RenderResource::Create( const resourceType_t type, const resourceLifeTime_t
 	m_resourceMemoryRegion = memoryRegion_t::UNKNOWN;
 	m_resourceByteCount = 0;
 
-	std::vector<RenderResource*>& resourceList = GetResourceList( lifetime );
-	InsertSorted( resourceList, this );
+	switch ( m_lifetime )
+	{
+	case resourceLifeTime_t::TASK:		InsertSorted( m_taskDependentResources,  this ); break;
+	case resourceLifeTime_t::FRAME:		InsertSorted( m_frameDependentResources, this ); break;
+	case resourceLifeTime_t::RESIZE:	InsertSorted( m_viewDependentResources,  this ); break;
+	case resourceLifeTime_t::REBOOT:	InsertSorted( m_appDependentResources,   this ); break;
+	case resourceLifeTime_t::UNMANAGED:	InsertSorted( m_unmanagedResources,   this ); break;
+	}
 }

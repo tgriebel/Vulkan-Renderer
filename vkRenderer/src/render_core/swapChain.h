@@ -23,6 +23,8 @@ private:
 	Image						m_swapChainImage;
 #ifdef USE_VULKAN
 	VkSwapchainKHR				vk_swapChain;
+	VkImage						vk_swapChainImages[ MaxSwapChainBuffers ];
+	VkImageView					vk_swapChainImageViews[ MaxSwapChainBuffers ];
 #endif
 	uint32_t					m_imageIndex;
 
@@ -41,6 +43,16 @@ public:
 	inline VkSwapchainKHR GetVkObject() const
 	{
 		return vk_swapChain;
+	}
+
+	inline VkImage GetVkImage( const uint32_t bufferId ) const
+	{
+		return vk_swapChainImages[ bufferId ];
+	}
+
+	inline VkImageView GetVkImageView( const uint32_t bufferId ) const
+	{
+		return vk_swapChainImageViews[ bufferId ];
 	}
 #endif
 

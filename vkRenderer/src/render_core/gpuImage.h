@@ -6,6 +6,7 @@
 
 struct imageInfo_t;
 class AllocatorMemory;
+class SwapChain;
 
 enum gpuImageStateFlags_t : uint8_t
 {
@@ -49,6 +50,8 @@ public:
 	{
 		Create( name, info, flags, lifetime );
 	}
+
+	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const SwapChain* swapChain );
 
 	virtual GpuImage::~GpuImage()
 	{
@@ -95,27 +98,6 @@ public:
 		m_info = gpuImage->m_info;
 		m_isViewOwned = true;
 	}
-
-	// TODO: take in swapchain
-	GpuImage( const char* name, imageInfo_t& info, const gpuImageStateFlags_t flags, const VkImage* image, const VkImageView* view )
-	{
-		RenderResource::Create( resourceType_t::SWAPCHAIN, resourceLifeTime_t::UNMANAGED );
-
-		m_dbgName = name;
-		m_swapBuffering = ( flags & GPU_IMAGE_PERSISTENT ) != 0 ? swapBuffering_t::MULTI_FRAME : swapBuffering_t::SINGLE_FRAME;
-
-		const uint32_t bufferCount = GetBufferCount();
-		for ( uint32_t i = 0; i < bufferCount; ++i )
-		{
-			vk_image[ i ] = image[ i ];
-			vk_view[ i ] = view[ i ];
-		}
-		m_flags = flags;
-		m_id = -1;
-		m_info = info;
-		m_isViewOwned = true;
-	}
-
 
 	inline VkImage GetVkImage( const uint32_t bufferId ) const
 	{
