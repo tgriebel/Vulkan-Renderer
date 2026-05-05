@@ -150,13 +150,13 @@ public:
 	static const uint32_t MaxPermutations = ( 1 << static_cast<uint32_t>( shaderPermId_t::COUNT ) );
 
 	pipelineType_t			type;
-	uint64_t				bindHash;		// Only one bindset is specified in the shader right now
-	uint32_t				shaderCount;	// Number of shaders within the pipeline (e.g. 2 for VS/PS or 1 for CS)
-	uint32_t				bindsetCount;	// Bindset for inputs
-	uint32_t				permCount;		// Number of unique permutation combinations
+	uint64_t				bindHash;				// Only one bindset is specified in the shader right now
+	uint32_t				shaderCount;			// Number of shaders within the pipeline (e.g. 2 for VS/PS or 1 for CS)
+	uint32_t				bindsetCount;			// Bindset for inputs
+	uint32_t				permCount;				// Number of unique permutation combinations
 	shaderFlags_t			flags;
-	shaderPermId_t			permSet;		// Superset of all available permutations. Subsets can be selected
-	ShaderSource			shaders[ MaxShaders ];
+	shaderPermId_t			permSet;				// Superset of all available permutations. Subsets can be selected
+	ShaderSource			shaders[ MaxShaders ];	// This is seemingly redundant but shader sources can diverge because of reloading
 			
 	ShaderPermMap			shaderBins[ MaxShaders ];
 
