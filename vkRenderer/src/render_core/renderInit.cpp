@@ -444,13 +444,6 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 
 	assert( fb != nullptr );
 
-	renderPassTransition_t transitionState {};
-	transitionState.flags.clear = false;
-	transitionState.flags.presentAfter = false;
-	transitionState.flags.presentBefore = false;
-	transitionState.flags.readOnly = true;
-	transitionState.flags.readAfter = true;
-
 	ImGui_ImplVulkan_InitInfo vkInfo = {};
 	vkInfo.ApiVersion = VK_API_VERSION_1_2;
 	vkInfo.Instance = context.instance;
@@ -464,8 +457,19 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 	vkInfo.MinImageCount = MaxFrameStates;
 	vkInfo.ImageCount = MaxFrameStates;
 	vkInfo.CheckVkResultFn = nullptr;
+	vkInfo.UseDynamicRendering = true;
 #ifdef USE_VULKAN
-	vkInfo.PipelineInfoMain.RenderPass = fb->GetVkRenderPass( transitionState );
+#ifdef IMGUI_IMPL_VULKAN_HAS_DYNAMIC_RENDERING
+	{
+		const renderAttachmentBits_t    attachBits = fb->GetAttachmentBits();
+		const renderPassAttachmentMask_t attachMask = fb->GetAttachmentMask();
+		static VkFormat colorFmt = ( attachMask & RENDER_PASS_MASK_COLOR0 ) ? vk_GetTextureFormat( attachBits.color0.fmt ) : VK_FORMAT_UNDEFINED;
+
+		vkInfo.PipelineInfoMain.PipelineRenderingCreateInfo.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		vkInfo.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount    = ( colorFmt != VK_FORMAT_UNDEFINED ) ? 1 : 0;
+		vkInfo.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFmt;
+	}
+#endif
 #endif
 
 #ifdef USE_VULKAN

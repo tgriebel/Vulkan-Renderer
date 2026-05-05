@@ -508,8 +508,23 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, con
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
-	pipelineInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass();
-	pipelineInfo.subpass = 0;
+	const renderPassAttachmentMask_t attachMask = pass->GetFrameBuffer()->GetAttachmentMask();
+	const renderPassAttachmentBits_t* colorBits[ 3 ] = { &state.passBits.color0, &state.passBits.color1, &state.passBits.color2 };
+
+	VkFormat colorAttachmentFormats[ 3 ] = {};
+	for ( uint32_t i = 0; i < colorAttachmentCount; ++i ) {
+		colorAttachmentFormats[ i ] = vk_GetTextureFormat( colorBits[ i ]->fmt );
+	}
+
+	VkPipelineRenderingCreateInfo renderingCreateInfo = {};
+	renderingCreateInfo.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+	renderingCreateInfo.colorAttachmentCount    = colorAttachmentCount;
+	renderingCreateInfo.pColorAttachmentFormats = colorAttachmentFormats;
+	renderingCreateInfo.depthAttachmentFormat   = ( attachMask & RENDER_PASS_MASK_DEPTH   ) ? vk_GetTextureFormat( state.passBits.depth.fmt   ) : VK_FORMAT_UNDEFINED;
+	renderingCreateInfo.stencilAttachmentFormat = ( attachMask & RENDER_PASS_MASK_STENCIL ) ? vk_GetTextureFormat( state.passBits.stencil.fmt ) : VK_FORMAT_UNDEFINED;
+
+	pipelineInfo.pNext      = &renderingCreateInfo;
+	pipelineInfo.renderPass = VK_NULL_HANDLE;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional
 	pipelineInfo.pDepthStencilState = &depthStencil;

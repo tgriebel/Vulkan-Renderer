@@ -343,39 +343,39 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 	// Attachment bits
 	m_attachmentBits = {};
-	renderPassAttachmentMask_t mask = RENDER_PASS_MASK_NONE;
+	m_attachmentMask = RENDER_PASS_MASK_NONE;
 	{
 		if ( createInfo.color0 != nullptr )
 		{
 			m_attachmentBits.color0.samples = createInfo.color0->info.subsamples;
 			m_attachmentBits.color0.fmt = createInfo.color0->info.fmt;
-			mask |= RENDER_PASS_MASK_COLOR0;
+			m_attachmentMask |= RENDER_PASS_MASK_COLOR0;
 		}
 		if ( createInfo.color1 != nullptr )
 		{
 			m_attachmentBits.color1.samples = createInfo.color1->info.subsamples;
 			m_attachmentBits.color1.fmt = createInfo.color1->info.fmt;
-			mask |= RENDER_PASS_MASK_COLOR1;
+			m_attachmentMask |= RENDER_PASS_MASK_COLOR1;
 		}
 		if ( createInfo.color2 != nullptr )
 		{
 			m_attachmentBits.color2.samples = createInfo.color2->info.subsamples;
 			m_attachmentBits.color2.fmt = createInfo.color2->info.fmt;
-			mask |= RENDER_PASS_MASK_COLOR2;
+			m_attachmentMask |= RENDER_PASS_MASK_COLOR2;
 		}
 
 		if ( createInfo.depth != nullptr )
 		{
 			m_attachmentBits.depth.samples = createInfo.depth->info.subsamples;
 			m_attachmentBits.depth.fmt = createInfo.depth->info.fmt;
-			mask |= RENDER_PASS_MASK_DEPTH;
+			m_attachmentMask |= RENDER_PASS_MASK_DEPTH;
 		}
 
 		if ( createInfo.stencil != nullptr )
 		{
 			m_attachmentBits.stencil.samples = createInfo.stencil->info.subsamples;
 			m_attachmentBits.stencil.fmt = createInfo.stencil->info.fmt;
-			mask |= RENDER_PASS_MASK_STENCIL;
+			m_attachmentMask |= RENDER_PASS_MASK_STENCIL;
 		}
 	}
 
@@ -397,7 +397,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.transitionBits.colorTrans2 = state;
 		passBits.semantic.transitionBits.depthTrans = state;
 		passBits.semantic.transitionBits.stencilTrans = state;
-		passBits.semantic.attachmentMask = mask;
+		passBits.semantic.attachmentMask = m_attachmentMask;
 
 		vk_renderPasses[ permIx ] = vk_CreateRenderPass( passBits );
 		if ( vk_renderPasses[ permIx ] == VK_NULL_HANDLE ) {

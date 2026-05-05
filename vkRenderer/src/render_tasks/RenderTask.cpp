@@ -74,42 +74,52 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		transitionState.flags.presentAfter = isBackBuffer;
 	}
 
-	VkRenderPassBeginInfo passInfo{ };
-	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = fb->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = fb->GetVkBuffer( transitionState, context.bufferId );
-	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
-	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
-
 	const uint32_t colorAttachmentsCount = fb->ColorLayerCount();
-	const uint32_t attachmentsCount = fb->LayerCount();
 
-	passInfo.clearValueCount = 0;
-	passInfo.pClearValues = nullptr;
+	const VkAttachmentLoadOp  loadOp  = transitionState.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+	const VkAttachmentStoreOp storeOp = transitionState.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-	std::array<VkClearValue, 5> clearValues{ };
-	assert( attachmentsCount <= 5 );
-
+	VkClearValue clearColor = {};
+	VkClearValue clearDepth = {};
 	if ( transitionState.flags.clear )
 	{
-		const vec4f clearColor = m_renderView->ClearColor();
-		const float clearDepth = m_renderView->ClearDepth();
-		const uint32_t clearStencil = m_renderView->ClearStencil();
-
-		const VkClearColorValue vk_clearColor = { clearColor[ 0 ], clearColor[ 1 ], clearColor[ 2 ], clearColor[ 3 ] };
-		const VkClearDepthStencilValue vk_clearDepth = { clearDepth, clearStencil };
-
-		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
-			clearValues[ i ].color = vk_clearColor;
-		}
-
-		for ( uint32_t i = colorAttachmentsCount; i < attachmentsCount; ++i ) {
-			clearValues[ i ].depthStencil = vk_clearDepth;
-		}
-
-		passInfo.clearValueCount = attachmentsCount;
-		passInfo.pClearValues = clearValues.data();
+		const vec4f c = m_renderView->ClearColor();
+		clearColor.color = { c[ 0 ], c[ 1 ], c[ 2 ], c[ 3 ] };
+		clearDepth.depthStencil = { m_renderView->ClearDepth(), m_renderView->ClearStencil() };
 	}
+
+	const Image* colorImages[ 3 ] = { fb->GetColor(), fb->GetColor1(), fb->GetColor2() };
+	VkRenderingAttachmentInfo colorAttachments[ 3 ] = {};
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i )
+	{
+		colorAttachments[ i ].sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		colorAttachments[ i ].imageView   = colorImages[ i ]->gpuImage->GetVkImageView( context.bufferId );
+		colorAttachments[ i ].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachments[ i ].loadOp      = loadOp;
+		colorAttachments[ i ].storeOp     = storeOp;
+		colorAttachments[ i ].clearValue  = clearColor;
+	}
+
+	VkRenderingAttachmentInfo depthAttachment = {};
+	const bool hasDepth = ( fb->GetDepth() != nullptr );
+	if ( hasDepth )
+	{
+		depthAttachment.sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		depthAttachment.imageView   = fb->GetDepth()->gpuImage->GetVkImageView( context.bufferId );
+		depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		depthAttachment.loadOp      = loadOp;
+		depthAttachment.storeOp     = storeOp;
+		depthAttachment.clearValue  = clearDepth;
+	}
+
+	VkRenderingInfo renderingInfo = {};
+	renderingInfo.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO;
+	renderingInfo.renderArea.offset    = { pass->GetViewport().x, pass->GetViewport().y };
+	renderingInfo.renderArea.extent    = { pass->GetViewport().width, pass->GetViewport().height };
+	renderingInfo.layerCount           = 1;
+	renderingInfo.colorAttachmentCount = colorAttachmentsCount;
+	renderingInfo.pColorAttachments    = colorAttachmentsCount > 0 ? colorAttachments : nullptr;
+	renderingInfo.pDepthAttachment     = hasDepth ? &depthAttachment : nullptr;
 
 	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
 
@@ -123,7 +133,16 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		pass->InsertResourceBarriers( *cmdContext );
 	}
 
-	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+	// Transition render targets from their current layout into attachment-write layout
+	const gpuImageStateFlags_t colorPriorState = transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+		Transition( cmdContext, *colorImages[ i ], colorPriorState, GPU_IMAGE_WRITE );
+	}
+	if ( hasDepth ) {
+		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_READ, GPU_IMAGE_WRITE );
+	}
+
+	vkCmdBeginRendering( cmdBuffer, &renderingInfo );
 
 	uint32_t modelOffset = 0;
 
@@ -230,7 +249,16 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		cmdContext->MarkerEndRegion();
 	}
 
-	vkCmdEndRenderPass( cmdBuffer );
+	vkCmdEndRendering( cmdBuffer );
+
+	// Transition render targets back for subsequent sampling (or presentation)
+	const gpuImageStateFlags_t colorNextState = transitionState.flags.presentAfter ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+		Transition( cmdContext, *colorImages[ i ], GPU_IMAGE_WRITE, colorNextState );
+	}
+	if ( hasDepth ) {
+		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_WRITE, GPU_IMAGE_READ );
+	}
 }
 
 

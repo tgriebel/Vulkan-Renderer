@@ -197,19 +197,29 @@ void ImguiTask::Execute( CommandContext& cmdContext )
 	cmdContext.MarkerBeginRegion( "ImGui", ColorToVector( Color::White ) );
 
 #ifdef USE_IMGUI
-	VkRenderPassBeginInfo passInfo{ };
-	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = m_imguiPass->GetFrameBuffer()->GetVkRenderPass( m_transitionState );
-	passInfo.framebuffer = m_imguiPass->GetFrameBuffer()->GetVkBuffer( m_transitionState, context.bufferId );
-	passInfo.renderArea.offset = { m_imguiPass->GetViewport().x, m_imguiPass->GetViewport().y };
-	passInfo.renderArea.extent = { m_imguiPass->GetViewport().width, m_imguiPass->GetViewport().height };
-
-	passInfo.clearValueCount = 0;
-	passInfo.pClearValues = nullptr;
-
+	const FrameBuffer* fb = m_imguiPass->GetFrameBuffer();
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
-	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+	VkRenderingAttachmentInfo colorAttachment = {};
+	colorAttachment.sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+	colorAttachment.imageView   = fb->GetColor()->gpuImage->GetVkImageView( context.bufferId );
+	colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	colorAttachment.loadOp      = VK_ATTACHMENT_LOAD_OP_LOAD;
+	colorAttachment.storeOp     = VK_ATTACHMENT_STORE_OP_STORE;
+
+	VkRenderingInfo renderingInfo = {};
+	renderingInfo.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO;
+	renderingInfo.renderArea.offset    = { m_imguiPass->GetViewport().x, m_imguiPass->GetViewport().y };
+	renderingInfo.renderArea.extent    = { m_imguiPass->GetViewport().width, m_imguiPass->GetViewport().height };
+	renderingInfo.layerCount           = 1;
+	renderingInfo.colorAttachmentCount = 1;
+	renderingInfo.pColorAttachments    = &colorAttachment;
+
+	// Backbuffer arrives in READ state from the preceding post-pass; transition to write
+	const gpuImageStateFlags_t colorPriorState = m_transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+	Transition( &cmdContext, *fb->GetColor(), colorPriorState, GPU_IMAGE_WRITE );
+
+	vkCmdBeginRendering( cmdBuffer, &renderingInfo );
 
 	renderTaskData.commandContext = &cmdContext;
 	renderTaskData.renderContext = m_context;
@@ -223,7 +233,11 @@ void ImguiTask::Execute( CommandContext& cmdContext )
 
 	pendingCallbackTasks = 0;
 
-	vkCmdEndRenderPass( cmdBuffer );
+	vkCmdEndRendering( cmdBuffer );
+
+	// Transition backbuffer to its final state for this frame
+	const gpuImageStateFlags_t colorNextState = m_transitionState.flags.presentAfter ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+	Transition( &cmdContext, *fb->GetColor(), GPU_IMAGE_WRITE, colorNextState );
 #endif
 
 	cmdContext.MarkerEndRegion();

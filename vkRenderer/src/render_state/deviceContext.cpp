@@ -437,38 +437,41 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
-	VkRenderPassBeginInfo passInfo{ };
-	passInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	passInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass( transitionState );
-	passInfo.framebuffer = pass->GetFrameBuffer()->GetVkBuffer( transitionState, context.bufferId );
-	passInfo.renderArea.offset = { pass->GetViewport().x, pass->GetViewport().y };
-	passInfo.renderArea.extent = { pass->GetViewport().width, pass->GetViewport().height };
+	const FrameBuffer* fb                  = pass->GetFrameBuffer();
+	const uint32_t     colorAttachmentsCount = fb->ColorLayerCount();
 
-	const VkClearColorValue vk_clearColor = { 0.0f, 1.0f, 0.0f, 0.0f };
+	const VkAttachmentLoadOp  loadOp  = transitionState.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+	const VkAttachmentStoreOp storeOp = transitionState.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-	const uint32_t colorAttachmentsCount = pass->GetFrameBuffer()->ColorLayerCount();
-	const uint32_t attachmentsCount = pass->GetFrameBuffer()->LayerCount();
+	const VkClearValue clearColor = {};
 
-	passInfo.clearValueCount = 0;
-	passInfo.pClearValues = nullptr;
-
-	std::array<VkClearValue, 3> clearValues{ };
-	assert( attachmentsCount <= 3 );
-
-	if ( transitionState.flags.clear )
+	const Image* colorImages[ 3 ] = { fb->GetColor(), fb->GetColor1(), fb->GetColor2() };
+	VkRenderingAttachmentInfo colorAttachments[ 3 ] = {};
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i )
 	{
-		for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
-			clearValues[ i ].color = vk_clearColor;
-		}
-
-		passInfo.clearValueCount = attachmentsCount;
-		passInfo.pClearValues = clearValues.data();
+		colorAttachments[ i ].sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		colorAttachments[ i ].imageView   = colorImages[ i ]->gpuImage->GetVkImageView( context.bufferId );
+		colorAttachments[ i ].imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachments[ i ].loadOp      = loadOp;
+		colorAttachments[ i ].storeOp     = storeOp;
+		colorAttachments[ i ].clearValue  = clearColor;
 	}
 
-	passInfo.clearValueCount = 1;
-	passInfo.pClearValues = clearValues.data();
+	VkRenderingInfo renderingInfo = {};
+	renderingInfo.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO;
+	renderingInfo.renderArea.offset    = { pass->GetViewport().x, pass->GetViewport().y };
+	renderingInfo.renderArea.extent    = { pass->GetViewport().width, pass->GetViewport().height };
+	renderingInfo.layerCount           = 1;
+	renderingInfo.colorAttachmentCount = colorAttachmentsCount;
+	renderingInfo.pColorAttachments    = colorAttachmentsCount > 0 ? colorAttachments : nullptr;
 
-	vkCmdBeginRenderPass( cmdBuffer, &passInfo, VK_SUBPASS_CONTENTS_INLINE );
+	// Transition render targets from their current layout into attachment-write layout
+	const gpuImageStateFlags_t colorPriorState = transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+		Transition( &cmdContext, *colorImages[ i ], colorPriorState, GPU_IMAGE_WRITE );
+	}
+
+	vkCmdBeginRendering( cmdBuffer, &renderingInfo );
 
 	const viewport_t& viewport = pass->GetViewport();
 
@@ -498,7 +501,13 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 		vkCmdDraw( cmdBuffer, 3, 1, 0, 0 );
 	}
 
-	vkCmdEndRenderPass( cmdBuffer );
+	vkCmdEndRendering( cmdBuffer );
+
+	// Transition render targets back for subsequent sampling (or presentation)
+	const gpuImageStateFlags_t colorNextState = transitionState.flags.presentAfter ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
+		Transition( &cmdContext, *colorImages[ i ], GPU_IMAGE_WRITE, colorNextState );
+	}
 }
 
 
@@ -1123,7 +1132,7 @@ void DeviceContext::Create( Window& window )
 		appInfo.applicationVersion = VK_MAKE_VERSION( 1, 0, 0 );
 		appInfo.pEngineName = "No Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION( 1, 0, 0 );
-		appInfo.apiVersion = VK_API_VERSION_1_2;
+		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		VkInstanceCreateInfo createInfo{ };
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -1292,10 +1301,15 @@ void DeviceContext::Create( Window& window )
 			createInfo.enabledLayerCount = 0;
 		}
 
+		VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeature = {};
+		dynamicRenderingFeature.sType            = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+		dynamicRenderingFeature.dynamicRendering = VK_TRUE;
+		dynamicRenderingFeature.pNext            = nullptr;
+
 		VkPhysicalDeviceDescriptorIndexingFeatures descIndexing;
 		memset( &descIndexing, 0, sizeof( VkPhysicalDeviceDescriptorIndexingFeatures ) );
 		descIndexing.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
-		descIndexing.pNext = NULL;
+		descIndexing.pNext = &dynamicRenderingFeature;
 		descIndexing.runtimeDescriptorArray = true;
 		descIndexing.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 		createInfo.pNext = &descIndexing;
