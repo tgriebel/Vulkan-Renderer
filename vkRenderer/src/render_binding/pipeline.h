@@ -32,13 +32,6 @@ enum gfxStateBits_t : uint64_t
 };
 DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 
-// Just needed for re/building the pipeline
-// Other state has the essentials
-struct pipelineBuildState_t
-{
-	const DrawPass* pass;
-};
-
 struct pipelineState_t
 {
 	gfxStateBits_t			stateBits;
@@ -46,7 +39,8 @@ struct pipelineState_t
 	hdl_t					progHdl;
 	renderAttachmentBits_t	passBits;
 	shaderPermId_t			permSet;
-	pipelineBuildState_t	buildState;
+	const GpuProgram*		prog;
+	const char*				dbgProgName;
 };
 
 
@@ -120,8 +114,8 @@ struct pipelineObject_t
 	VkPipeline			pipeline;
 	VkPipelineLayout	pipelineLayout;
 #endif
-	const char*			dbgShaderName;
-	const GpuProgram*	dbgProg;
+	const GpuProgram*	prog;
+	const char*			dbgProgName;
 };
 
 
@@ -135,8 +129,8 @@ hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
 #endif
 hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
-hdl_t	CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipelineState_t state );
-void	RebuildAllGraphicsPipelines( const Asset<GpuProgram>& progAsset );
+hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, const pipelineState_t& state );
+void	DestoryAllGraphicsPipelines( const Asset<GpuProgram>& progAsset );
 void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 void	CreateComputePipeline( const Asset<GpuProgram>& prog );
 void	DestroyComputePipeline( const Asset<GpuProgram>& prog );

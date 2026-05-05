@@ -40,7 +40,7 @@ void DrawGroup::Merge()
 
 	uint32_t surfaceHashes[ MaxSurfaces ];
 	for ( uint32_t i = 0; i < committedModelCount; ++i ) {
-		surfaceHashes[ i ] = Hash( sortedSurfaces[ i ] );
+		surfaceHashes[ i ] = Hash( reinterpret_cast<const uint8_t*>( &sortedSurfaces[ i ] ), sizeof( sortedSurfaces[ i ] ) );
 	}
 
 	for ( uint32_t i = 0; i < committedModelCount; ++i ) {

@@ -120,7 +120,7 @@ void DestroyPipelineCache()
 
 static hdl_t GetGfxPipelineStateHash( const pipelineState_t& state )
 {
-	return Hash( reinterpret_cast<const uint8_t*>( &state ), offsetof( pipelineState_t, buildState ) );
+	return Hash( reinterpret_cast<const uint8_t*>( &state ), offsetof( pipelineState_t, prog ) );
 }
 
 
@@ -139,7 +139,8 @@ pipelineState_t CreateGfxState( const DrawPass* pass, const Asset<GpuProgram>& p
 	state.progHdl = progAsset.Handle();
 	state.passBits = pass->GetFrameBuffer()->GetAttachmentBits();
 	state.permSet = permSet;
-	state.buildState.pass = pass;
+	state.prog = &progAsset.Get();
+	state.dbgProgName = progAsset.GetName().c_str();
 
 	if( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
 		SetFlags( state.permSet, shaderPermId_t::MRT );
@@ -155,6 +156,7 @@ pipelineState_t CreateComputeState( const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state{};
 	state.progHdl = progAsset.Handle();
+	state.dbgProgName = progAsset.GetName().c_str();
 
 	return state;
 }
@@ -186,7 +188,7 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 }
 
 
-void RebuildAllGraphicsPipelines( const Asset<GpuProgram>& progAsset )
+void DestoryAllGraphicsPipelines( const Asset<GpuProgram>& progAsset )
 {
 	auto pipelineSetIt = s_progToPipelines.find( progAsset.Handle().Get() );
 
@@ -207,9 +209,8 @@ void RebuildAllGraphicsPipelines( const Asset<GpuProgram>& progAsset )
 		vkDestroyPipeline( context.device, pipelineIt->second.pipeline, nullptr );
 		vkDestroyPipelineLayout( context.device, pipelineIt->second.pipelineLayout, nullptr );
 
-		s_pipelineLib.erase( pipelineIt );
-
-		CreateGraphicsPipeline( progAsset, pipelineState );
+		pipelineIt->second.pipeline = VK_NULL_HANDLE;
+		pipelineIt->second.pipelineLayout = VK_NULL_HANDLE;
 	}
 	pipelineHandles.clear();
 }
@@ -235,28 +236,38 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	const pipelineState_t state = CreateGfxState( pass, progAsset, permSet );
-	return CreateGraphicsPipeline( progAsset, state );
+	const hdl_t pipelineHdl = GetGfxPipelineStateHash( state );
+	return CreateGraphicsPipeline( pass, pipelineHdl, state );
 }
 
 
-hdl_t CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipelineState_t state )
+hdl_t CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, const pipelineState_t& state )
 {
-	const hdl_t pipelineHdl = GetGfxPipelineStateHash( state );
-
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
-	if ( it != s_pipelineLib.end() ) {
-		return pipelineHdl;
+	const bool found = ( it != s_pipelineLib.end() );
+
+	pipelineObject_t pipelineObject{};
+	
+	if( found )
+	{
+		pipelineObject = it->second;
+		if( pipelineObject.pipeline != VK_NULL_HANDLE ) {
+			return pipelineHdl;
+		}
 	}
+	else
+	{
+		pipelineObject.state = state;
+		pipelineObject.prog = state.prog;
+		pipelineObject.dbgProgName = state.dbgProgName;
+	}
+
+	assert( pipelineObject.prog == state.prog );
 	assert( pipelineHdl != INVALID_HDL );
 
-	const GpuProgram& prog = progAsset.Get();
+	const GpuProgram& prog = *state.prog;
 
 	const uint32_t permIndex = static_cast<uint32_t>( state.permSet );
-
-	pipelineObject_t pipelineObject;
-	pipelineObject.state = state;
-	pipelineObject.dbgProg = &progAsset.Get();
-	pipelineObject.dbgShaderName = progAsset.GetName().c_str();
 
 	assert( prog.shaderCount == 2 );
 
@@ -321,16 +332,16 @@ hdl_t CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipeline
 	inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	VkViewport viewport{ };
-	viewport.x = static_cast<float>( state.buildState.pass->GetViewport().x );
-	viewport.y = static_cast<float>( state.buildState.pass->GetViewport().y );
-	viewport.width = static_cast<float>( state.buildState.pass->GetViewport().width );
-	viewport.height = static_cast<float>( state.buildState.pass->GetViewport().height );
+	viewport.x = static_cast<float>( pass->GetViewport().x );
+	viewport.y = static_cast<float>( pass->GetViewport().y );
+	viewport.width = static_cast<float>( pass->GetViewport().width );
+	viewport.height = static_cast<float>( pass->GetViewport().height );
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor{ };
-	scissor.offset = { state.buildState.pass->GetViewport().x, state.buildState.pass->GetViewport().y };
-	scissor.extent = { state.buildState.pass->GetViewport().width, state.buildState.pass->GetViewport().height };
+	scissor.offset = { pass->GetViewport().x, pass->GetViewport().y };
+	scissor.extent = { pass->GetViewport().width, pass->GetViewport().height };
 
 	VkPipelineViewportStateCreateInfo viewportState{ };
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -381,7 +392,7 @@ hdl_t CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipeline
 
 	const bool blendEnable = ( ( state.stateBits & GFX_STATE_BLEND_ENABLE ) != 0 );
 
-	const uint32_t colorAttachmentCount = state.buildState.pass->GetFrameBuffer()->ColorLayerCount();
+	const uint32_t colorAttachmentCount = pass->GetFrameBuffer()->ColorLayerCount();
 	assert( colorAttachmentCount <= 3 );
 
 	std::vector<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
@@ -497,7 +508,7 @@ hdl_t CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipeline
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineObject.pipelineLayout;
-	pipelineInfo.renderPass = state.buildState.pass->GetFrameBuffer()->GetVkRenderPass();
+	pipelineInfo.renderPass = pass->GetFrameBuffer()->GetVkRenderPass();
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 	pipelineInfo.basePipelineIndex = -1; // Optional
@@ -509,7 +520,7 @@ hdl_t CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipeline
 
 	s_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 
-	s_progToPipelines[ progAsset.Handle().Get() ].insert( state );
+	s_progToPipelines[ state.progHdl.Get()].insert(state);
 
 	return pipelineHdl;
 }
@@ -553,8 +564,8 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 
 	pipelineObject_t pipelineObject;
 	pipelineObject.state = state;
-	pipelineObject.dbgProg = &progAsset.Get();
-	pipelineObject.dbgShaderName = progAsset.GetName().c_str();
+	pipelineObject.prog = state.prog;
+	pipelineObject.dbgProgName = state.dbgProgName;
 
 	const ShaderBin& csBin = prog.shaderBins[ 0 ].find( 0 )->second;
 	assert( csBin.type == shaderType_t::COMPUTE );

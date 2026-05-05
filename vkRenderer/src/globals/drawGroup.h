@@ -8,6 +8,7 @@
 class GpuBuffer;
 class ShaderBindParms;
 class GeometryContext;
+class GpuProgram;
 
 const static uint32_t KeyMaterialBits = 32;
 const static uint32_t KeyStencilBits = 8;
@@ -36,23 +37,16 @@ struct drawSurf_t
 	uint32_t			uploadId;
 	uint32_t			objectOffset;
 	renderFlags_t		flags;
+	shaderPermId_t		permSet;
 	uint8_t				stencilBit;
+	uint8_t				_padding[3];
 
 	const char*			dbgName;
+	GpuProgram*			prog;
 
 	hdl_t				pipelineObject;
 };
-static_assert( sizeof( drawSurf_t ) == 40, "Informative" );
-
-
-inline uint32_t Hash( const drawSurf_t& surf ) {
-	uint64_t shaderIds;
-	shaderIds = surf.pipelineObject.Get();
-	uint32_t shaderHash = Hash( reinterpret_cast<const uint8_t*>( &shaderIds ), sizeof( shaderIds ) );
-	uint32_t stateHash = Hash( reinterpret_cast<const uint8_t*>( &surf ), offsetof( drawSurf_t, dbgName ) );
-	return ( shaderHash ^ stateHash );
-}
-
+static_assert( sizeof( drawSurf_t ) == 56, "Informative" );
 
 struct drawSurfInstance_t
 {

@@ -528,7 +528,7 @@ void Renderer::BuildPipelines()
 	for( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
-		RebuildAllGraphicsPipelines( *progAsset );
+		DestoryAllGraphicsPipelines( *progAsset );
 		progAsset->CompleteUpload();
 	}
 }

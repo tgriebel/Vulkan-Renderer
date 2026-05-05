@@ -161,6 +161,8 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 				SetFlags( permSet, shaderPermId_t::MRT );
 			}
 
+			surf.prog = &prog->Get();
+			surf.permSet = permSet;
 			surf.pipelineObject = FindPipelineObject( pass, *prog, permSet ); // Search the cache first
 			if( surf.pipelineObject == INVALID_HDL ) {
 				surf.pipelineObject = CreateGraphicsPipeline( pass, *prog, permSet );

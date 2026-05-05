@@ -227,7 +227,7 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 
 	if ( pipelineObject != nullptr )
 	{
-		std::string dbgName = "Dispatch( " + std::string( pipelineObject->dbgShaderName ) + " )";
+		std::string dbgName = "Dispatch( " + std::string( pipelineObject->dbgProgName ) + " )";
 
 		MarkerBeginRegion( dbgName.c_str(), ColorToVector( ColorWhite ) );
 
