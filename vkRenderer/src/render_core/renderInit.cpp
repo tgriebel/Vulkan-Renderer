@@ -506,11 +506,12 @@ void Renderer::BuildPipelines()
 		return;
 	}
 
-	AssignBindSetsToGpuProgs();
-
 	FlushGPU();
 
-	// 2. Recreate shaders
+	// 2. Assign the bind sets (i.e. descriptor set layouts)
+	AssignBindSetsToGpuProgs();
+
+	// 3. Recreate shaders
 	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
@@ -520,109 +521,15 @@ void Renderer::BuildPipelines()
 		prog.CreateApiObjects();
 	}
 
-	// 3. Collect all passes in active views
-	std::vector<const DrawPass*> passes;
-	passes.reserve( MaxViews * DRAWPASS_COUNT );
-
-	for ( uint32_t viewIx = 0; viewIx < MaxViews; ++viewIx )
-	{
-		if( views[ viewIx ].IsCommitted() == false ) {
-			continue;
-		}
-
-		const uint32_t multiViewCount = views[ viewIx ].GetMultiViewCount();
-		for ( uint32_t multiViewIndex = 0; multiViewIndex < multiViewCount; ++multiViewIndex )
-		{
-			for ( int passIx = 0; passIx < DRAWPASS_COUNT; ++passIx )
-			{
-				const DrawPass* pass = views[ viewIx ].passes[ multiViewIndex ][ passIx ];
-				if( pass != nullptr ) {
-					passes.push_back( pass );
-				}
-			}
-		}
-	}
-
-	// 4. Destroy pipelines. Own pass so cache isn't destroyed per iteration
-	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
+	// 4. Rebuild Pipelines
+	// This does nothing on first load. The rest of the renderer will take care of actually building the pipeline
+	// The rederer needs additional state (e.g. blend modes), that make it hard to build a priori
+	// The upload mechanism is there mostly to trigger the upload process, unfortunately this is complex for shaders
+	for( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
-		GpuProgram& prog = progAsset->Get();
-
-		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
-		{
-			assert( prog.shaderCount == 1 );
-			DestroyComputePipeline( *progAsset );
-			continue;
-		}
-
-		const uint32_t passCount = static_cast< uint32_t >( passes.size() );
-		for( uint32_t passIx = 0; passIx < passCount; ++passIx )
-		{
-			DestroyGraphicsPipeline( passes[ passIx ], *progAsset );
-
-			uint32_t permSet = ( uint32_t )prog.permSet;
-			if( permSet == 0 ) {
-				continue;
-			}
-
-			uint32_t permBit = 0x01;
-
-			while( permSet != 0 )
-			{
-				if( ( permSet & permBit ) == 0 )
-				{
-					permBit <<= 1;
-					continue;
-				}
-				permSet &= ~( permSet & permBit );
-				DestroyGraphicsPipeline( passes[ passIx ], *progAsset, static_cast< shaderPermId_t >( permBit ) );
-
-				permBit <<= 1;
-			}
-		}
-	}
-
-	// 5. Create pipelines
-	for ( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
-	{
-		Asset<GpuProgram>* progAsset = *it;
+		RebuildAllGraphicsPipelines( *progAsset );
 		progAsset->CompleteUpload();
-
-		GpuProgram& prog = progAsset->Get();
-		if ( prog.shaders[ 0 ].type == shaderType_t::COMPUTE )
-		{
-			assert( prog.shaderCount == 1 );
-			CreateComputePipeline( *progAsset );
-			continue;
-		}
-
-		const uint32_t passCount = static_cast<uint32_t>( passes.size() );
-		for ( uint32_t passIx = 0; passIx < passCount; ++passIx )
-		{
-			CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset );
-
-			uint32_t permSet = (uint32_t)prog.permSet;
-			if( permSet == 0 ) {
-				continue;
-			}
-
-			uint32_t permBit = 0x01;
-
-			while( permSet != 0 )
-			{	
-				if( ( permSet & permBit ) == 0 )
-				{
-					permBit <<= 1;
-					continue;
-				}
-				permSet &= ~( permSet & permBit );
-
-				CreateGraphicsPipeline( &renderContext, passes[ passIx ], *progAsset, static_cast< shaderPermId_t >( permBit ) );
-
-				permBit <<= 1;
-			}
-		}	
 	}
 }
 

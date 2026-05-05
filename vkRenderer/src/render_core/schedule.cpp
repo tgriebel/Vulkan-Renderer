@@ -225,7 +225,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.mipLevels = 1;
 			info.layers = 1;
 			info.subsamples = IMAGE_SMP_1;
-			info.fmt = IMAGE_FMT_R_32;
+			info.fmt = IMAGE_FMT_RGBA_32; // TEMP! For debugging
 			info.type = IMAGE_TYPE_2D;
 			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 			info.tiling = IMAGE_TILING_MORTON;
@@ -255,6 +255,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.outputImage = resources->ssaoImage;
 			info.progName = "SSAO";
 			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
+			info.resourceImages[ 1 ] = resources->gBufferLayerResolvedImage0;
 			info.baseMip = 0;
 			info.constants = &ssaoDefaults;
 			info.constantsByteSize = sizeof( ssaoDefaults );

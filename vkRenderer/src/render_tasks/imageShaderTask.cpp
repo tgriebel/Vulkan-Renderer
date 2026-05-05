@@ -323,7 +323,7 @@ void ImageShaderTask::Execute( CommandContext& cmdContext )
 
 		m_passes[ passIndex ]->InsertResourceBarriers( cmdContext );
 
-		hdl_t pipeLineHandle = CreateGraphicsPipeline( cmdContext.GetRenderContext(), m_passes[ passIndex ], *m_progAsset, m_permSet );
+		hdl_t pipeLineHandle = CreateGraphicsPipeline( m_passes[ passIndex ], *m_progAsset, m_permSet );
 
 		vk_RenderImageShader( cmdContext, pipeLineHandle, m_passes[ passIndex ], m_transitionState );
 

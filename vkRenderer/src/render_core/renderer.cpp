@@ -163,7 +163,7 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 			surf.pipelineObject = FindPipelineObject( pass, *prog, permSet ); // Search the cache first
 			if( surf.pipelineObject == INVALID_HDL ) {
-				surf.pipelineObject = CreateGraphicsPipeline( &renderContext, pass, *prog, permSet );
+				surf.pipelineObject = CreateGraphicsPipeline( pass, *prog, permSet );
 			}
 			assert( surf.pipelineObject != INVALID_HDL );
 

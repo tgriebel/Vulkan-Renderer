@@ -34,6 +34,38 @@ struct renderAttachmentBits_t
 };
 static_assert( sizeof( renderAttachmentBits_t ) == 10, "Bits overflowed" );
 
+inline bool operator==( const renderPassAttachmentBits_t& a, const renderPassAttachmentBits_t& b )
+{
+	return a.samples == b.samples && a.fmt == b.fmt;
+}
+inline bool operator!=( const renderPassAttachmentBits_t& a, const renderPassAttachmentBits_t& b )
+{
+	return !( a == b );
+}
+inline bool operator<( const renderPassAttachmentBits_t& a, const renderPassAttachmentBits_t& b )
+{
+	if ( a.samples != b.samples ) return a.samples < b.samples;
+	return a.fmt < b.fmt;
+}
+
+inline bool operator==( const renderAttachmentBits_t& a, const renderAttachmentBits_t& b )
+{
+	return a.color0 == b.color0 && a.color1 == b.color1 && a.color2 == b.color2
+	    && a.depth  == b.depth  && a.stencil == b.stencil;
+}
+inline bool operator!=( const renderAttachmentBits_t& a, const renderAttachmentBits_t& b )
+{
+	return !( a == b );
+}
+inline bool operator<( const renderAttachmentBits_t& a, const renderAttachmentBits_t& b )
+{
+	if ( a.color0  != b.color0  ) return a.color0  < b.color0;
+	if ( a.color1  != b.color1  ) return a.color1  < b.color1;
+	if ( a.color2  != b.color2  ) return a.color2  < b.color2;
+	if ( a.depth   != b.depth   ) return a.depth   < b.depth;
+	return a.stencil < b.stencil;
+}
+
 
 union renderPassTransition_t
 {
@@ -92,6 +124,8 @@ static const vk_formatTableEntry_t vk_formatTable[] =
 	{ IMAGE_FMT_BGRA_8,			VK_FORMAT_B8G8R8A8_SRGB			},
 	{ IMAGE_FMT_RGB_16,			VK_FORMAT_R16G16B16_SFLOAT		},
 	{ IMAGE_FMT_RGBA_16,		VK_FORMAT_R16G16B16A16_SFLOAT	},
+	{ IMAGE_FMT_RGB_32,			VK_FORMAT_R32G32B32_SFLOAT		},
+	{ IMAGE_FMT_RGBA_32,		VK_FORMAT_R32G32B32A32_SFLOAT	},
 	{ IMAGE_FMT_RG_32,			VK_FORMAT_R32G32_SFLOAT			},
 };
 

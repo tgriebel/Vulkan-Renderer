@@ -39,7 +39,7 @@ void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* 
 	hdl_t pipeLineHdl = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, permSet );
 
 	if( pipeLineHdl == INVALID_HDL ) {
-		pipeLineHdl = CreateGraphicsPipeline( renderTaskData.renderContext, renderTaskData.pass, *callbackData->progAsset, permSet );
+		pipeLineHdl = CreateGraphicsPipeline( renderTaskData.pass, *callbackData->progAsset, permSet );
 	}
 
 	const float visMinX = Max( callbackData->x, cmd->ClipRect.x );

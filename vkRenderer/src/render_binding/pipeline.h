@@ -32,15 +32,40 @@ enum gfxStateBits_t : uint64_t
 };
 DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 
+// Just needed for re/building the pipeline
+// Other state has the essentials
+struct pipelineBuildState_t
+{
+	const DrawPass* pass;
+};
 
 struct pipelineState_t
 {
-	gfxStateBits_t				stateBits;
-	imageSamples_t				samplingRate;
-	hdl_t						progHdl;
-	renderAttachmentBits_t		passBits;
-	shaderPermId_t				permSet;
+	gfxStateBits_t			stateBits;
+	imageSamples_t			samplingRate;
+	hdl_t					progHdl;
+	renderAttachmentBits_t	passBits;
+	shaderPermId_t			permSet;
+	pipelineBuildState_t	buildState;
 };
+
+
+inline bool operator<( const pipelineState_t& a, const pipelineState_t& b )
+{
+	if( a.stateBits != b.stateBits ) {
+		return a.stateBits < b.stateBits;
+	}
+	if( a.samplingRate != b.samplingRate ) {
+		return a.samplingRate < b.samplingRate;
+	}
+	if( a.progHdl != b.progHdl ) {
+		return a.progHdl < b.progHdl;
+	}
+	if( a.passBits != b.passBits ) {
+		return a.passBits < b.passBits;
+	}
+	return ( a.permSet < b.permSet );
+}
 
 class DrawPass;
 class ShaderBindSet;
@@ -109,7 +134,9 @@ hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 #ifdef USE_VULKAN
 void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
 #endif
-hdl_t	CreateGraphicsPipeline( const RenderContext* renderContext, const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
+hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
+hdl_t	CreateGraphicsPipeline( const Asset<GpuProgram>& progAsset, const pipelineState_t state );
+void	RebuildAllGraphicsPipelines( const Asset<GpuProgram>& progAsset );
 void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 void	CreateComputePipeline( const Asset<GpuProgram>& prog );
 void	DestroyComputePipeline( const Asset<GpuProgram>& prog );
