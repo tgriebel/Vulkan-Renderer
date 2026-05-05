@@ -75,7 +75,7 @@ union renderPassTransition_t
 		uint8_t	store			: 1;
 		uint8_t	readAfter		: 1;
 		uint8_t	presentAfter	: 1;
-		uint8_t	readOnly		: 1;
+		uint8_t	readBefore		: 1;
 		uint8_t	presentBefore	: 1;
 	} flags;
 	uint8_t						bits;

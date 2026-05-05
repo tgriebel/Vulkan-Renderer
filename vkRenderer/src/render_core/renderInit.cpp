@@ -98,7 +98,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		renderPassTransition_t& t = info.transition;		
 		{
 			t = {};
-			t.flags.readOnly = true;
+			t.flags.readBefore = true;
 			t.flags.readAfter = true;
 		}
 
@@ -131,7 +131,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		renderPassTransition_t& t = info.transition;
 		{
 			t = {};
-			t.flags.readOnly = true;
+			t.flags.readBefore = true;
 			t.flags.readAfter = true;
 		}
 
@@ -163,7 +163,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		renderPassTransition_t& t = info.transition;
 		{
 			t = {};
-			t.flags.readOnly = true;
+			t.flags.readBefore = true;
 			t.flags.readAfter = true;
 		}
 

@@ -88,7 +88,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 		if( passState.semantic.transitionBits.colorTrans0.flags.presentBefore ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-		} else if ( passState.semantic.transitionBits.colorTrans0.flags.readOnly ) {
+		} else if ( passState.semantic.transitionBits.colorTrans0.flags.readBefore ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -117,7 +117,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-		if ( passState.semantic.transitionBits.colorTrans1.flags.readOnly ) {
+		if ( passState.semantic.transitionBits.colorTrans1.flags.readBefore ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -144,7 +144,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachments[ count ].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-		if ( passState.semantic.transitionBits.colorTrans2.flags.readOnly ) {
+		if ( passState.semantic.transitionBits.colorTrans2.flags.readBefore ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -173,7 +173,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].stencilLoadOp = passState.semantic.transitionBits.depthTrans.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
 		attachments[ count ].stencilStoreOp = passState.semantic.transitionBits.depthTrans.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		
-		if ( passState.semantic.transitionBits.depthTrans.flags.readOnly ) {
+		if ( passState.semantic.transitionBits.depthTrans.flags.readBefore ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -203,7 +203,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 		attachments[ count ].stencilLoadOp = passState.semantic.transitionBits.stencilTrans.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
 		attachments[ count ].stencilStoreOp = passState.semantic.transitionBits.stencilTrans.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		
-		if ( passState.semantic.transitionBits.stencilTrans.flags.readOnly ) {
+		if ( passState.semantic.transitionBits.stencilTrans.flags.readBefore ) {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else {
 			attachments[ count ].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

@@ -133,7 +133,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		pass->InsertResourceBarriers( *cmdContext );
 	}
 
-	if( transitionState.flags.readOnly || transitionState.flags.presentBefore )
+	if( transitionState.flags.readBefore || transitionState.flags.presentBefore )
 	{
 		const gpuImageStateFlags_t colorPriorState = transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
 		for( uint32_t i = 0; i < colorAttachmentsCount; ++i )
@@ -142,7 +142,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		}
 	}
 
-	if( hasDepth && transitionState.flags.readOnly ) {
+	if( hasDepth && transitionState.flags.readBefore ) {
 		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_READ, GPU_IMAGE_WRITE );
 	}
 

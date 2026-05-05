@@ -130,7 +130,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 	m_transitionState.flags.store = true;
 	m_transitionState.flags.presentAfter = info.present;
 	m_transitionState.flags.readAfter = !info.present;
-	m_transitionState.flags.readOnly = true;
+	m_transitionState.flags.readBefore = true;
 
 	assert( info.progHdl != INVALID_HDL );
 	m_progAsset = GpuProgramLib().Find( info.progHdl );
