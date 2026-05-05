@@ -215,10 +215,6 @@ void ImguiTask::Execute( CommandContext& cmdContext )
 	renderingInfo.colorAttachmentCount = 1;
 	renderingInfo.pColorAttachments    = &colorAttachment;
 
-	// Backbuffer arrives in READ state from the preceding post-pass; transition to write
-	const gpuImageStateFlags_t colorPriorState = m_transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
-	Transition( &cmdContext, *fb->GetColor(), colorPriorState, GPU_IMAGE_WRITE );
-
 	vkCmdBeginRendering( cmdBuffer, &renderingInfo );
 
 	renderTaskData.commandContext = &cmdContext;
@@ -234,10 +230,6 @@ void ImguiTask::Execute( CommandContext& cmdContext )
 	pendingCallbackTasks = 0;
 
 	vkCmdEndRendering( cmdBuffer );
-
-	// Transition backbuffer to its final state for this frame
-	const gpuImageStateFlags_t colorNextState = m_transitionState.flags.presentAfter ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
-	Transition( &cmdContext, *fb->GetColor(), GPU_IMAGE_WRITE, colorNextState );
 #endif
 
 	cmdContext.MarkerEndRegion();

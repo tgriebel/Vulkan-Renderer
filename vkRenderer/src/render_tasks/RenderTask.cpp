@@ -133,12 +133,16 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		pass->InsertResourceBarriers( *cmdContext );
 	}
 
-	// Transition render targets from their current layout into attachment-write layout
-	const gpuImageStateFlags_t colorPriorState = transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
-	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
-		Transition( cmdContext, *colorImages[ i ], colorPriorState, GPU_IMAGE_WRITE );
+	if( transitionState.flags.readOnly || transitionState.flags.presentBefore )
+	{
+		const gpuImageStateFlags_t colorPriorState = transitionState.flags.presentBefore ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+		for( uint32_t i = 0; i < colorAttachmentsCount; ++i )
+		{
+			Transition( cmdContext, *colorImages[ i ], colorPriorState, GPU_IMAGE_WRITE );
+		}
 	}
-	if ( hasDepth ) {
+
+	if( hasDepth && transitionState.flags.readOnly ) {
 		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_READ, GPU_IMAGE_WRITE );
 	}
 
@@ -251,12 +255,16 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 
 	vkCmdEndRendering( cmdBuffer );
 
-	// Transition render targets back for subsequent sampling (or presentation)
-	const gpuImageStateFlags_t colorNextState = transitionState.flags.presentAfter ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
-	for ( uint32_t i = 0; i < colorAttachmentsCount; ++i ) {
-		Transition( cmdContext, *colorImages[ i ], GPU_IMAGE_WRITE, colorNextState );
+	if( transitionState.flags.readAfter || transitionState.flags.presentAfter )
+	{
+		const gpuImageStateFlags_t colorNextState = transitionState.flags.presentAfter ? GPU_IMAGE_PRESENT : GPU_IMAGE_READ;
+		for( uint32_t i = 0; i < colorAttachmentsCount; ++i )
+		{
+			Transition( cmdContext, *colorImages[ i ], GPU_IMAGE_WRITE, colorNextState );
+		}
 	}
-	if ( hasDepth ) {
+	if( hasDepth && transitionState.flags.readAfter )
+	{
 		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_WRITE, GPU_IMAGE_READ );
 	}
 }
