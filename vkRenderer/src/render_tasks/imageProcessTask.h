@@ -29,6 +29,7 @@ struct imageProcessCreateInfo_t
 	const void*			constants;										// Optional custom shader constants (written after reserved IMAGE_CONSTANT_LAYOUT fields)
 	uint32_t			constantsByteSize;								// Size in bytes of constants block
 
+	uint32_t			viewId;											// For pairing to a RenderView
 	bool				useAPI;											// Use the API for MIP generation
 	bool				multiPass;										// Runs sequential shader passes (e.g. Separable Gaussian Blur)
 	bool				progressiveSampling;							// Chains output to input (e.g. any MIP chain generation)
@@ -57,6 +58,7 @@ private:
 	uint32_t					m_mipLevels;
 	uint32_t					m_layers;
 	uint32_t					m_baseMip;
+	uint32_t					m_viewId;
 	uint32_t					m_requestedMipCount;
 	uint32_t					m_taskImageCount;
 	uint32_t					m_resource2dCount;

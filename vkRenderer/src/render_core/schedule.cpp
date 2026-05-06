@@ -257,6 +257,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
 			info.resourceImages[ 1 ] = resources->gBufferLayerResolvedImage0;
 			info.baseMip = 0;
+			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
 			info.constants = &ssaoDefaults;
 			info.constantsByteSize = sizeof( ssaoDefaults );
 

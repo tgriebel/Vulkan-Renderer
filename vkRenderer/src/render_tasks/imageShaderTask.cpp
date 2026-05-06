@@ -25,6 +25,8 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 	m_resources = info.resources;
 	m_context = info.context;
 
+	m_viewId = info.viewId;
+
 	m_callback = info.callback;
 
 	Image* outputImage0 = info.outputImage;
@@ -278,6 +280,7 @@ void ImageShaderTask::FrameBegin()
 			constants.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 			constants.pass = passIndex;
 			constants.previousImageId = m_image2dSlotCount;
+			constants.pad0 = m_viewId;
 			constants.level = m_mipLevel;
 			constants.layer = m_layer;
 			constants.mipCount = m_image->info.mipLevels;

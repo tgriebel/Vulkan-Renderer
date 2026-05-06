@@ -47,6 +47,8 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_baseMip = info.baseMip; // TODO: Need to adjust when `m_baseMip` is 0 but the source is also 0 and same image
 	m_mipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : ( m_baseMip + m_requestedMipCount );
 	m_mipLevels = Clamp( m_mipLevels, m_baseMip + 1, m_image->info.mipLevels ); // Clamp [1, mipLevels]
+	
+	m_viewId = info.viewId;
 
 	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
 	m_permSet = info.permSet;
@@ -157,6 +159,7 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 	imgProcessInfo.inputCubeImages = m_resourceCubeCount;
 	imgProcessInfo.inputImages = m_resource2dCount + 1; // Index zero always includes the sample source (even when redundant)
 	imgProcessInfo.layer = remappedLayerId;
+	imgProcessInfo.viewId = m_viewId;
 	imgProcessInfo.outputImage = m_image;
 	imgProcessInfo.progHdl = m_progHdl;
 	imgProcessInfo.permSet = m_permSet;

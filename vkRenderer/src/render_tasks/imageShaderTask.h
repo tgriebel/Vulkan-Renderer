@@ -16,23 +16,24 @@ typedef void imageShaderFrameBeginCallback_t( ImageShaderTask* imageProcess );
 
 struct imageShaderCreateInfo_t
 {
-	const char*			name;
-	hdl_t				progHdl;
-	shaderPermId_t		permSet;
-	Image*				outputImage;
-	Image*				outputImage1;
-	Image*				outputImage2;
-	RenderContext*		context;
-	ResourceContext*	resources;
-	uint32_t			inputImages;
-	uint32_t			inputCubeImages;
-	uint32_t			mipLevel;
-	uint32_t			layer;
-	uint32_t			passCount;
-	imageInfo_t*		createInfos;
-	uint32_t			taskImageCount;
-	bool				clear;
-	bool				present;
+	const char*			name;				// Debug name
+	hdl_t				progHdl;			// Shaders
+	shaderPermId_t		permSet;			// Shader permutations
+	Image*				outputImage;		// Main render image
+	Image*				outputImage1;		// MRT
+	Image*				outputImage2;		// MRT
+	RenderContext*		context;			// Render context
+	ResourceContext*	resources;			// Resource context
+	uint32_t			inputImages;		// Input images to sample
+	uint32_t			inputCubeImages;	// Input cubemaps to sample
+	uint32_t			mipLevel;			// Mip-level to work on
+	uint32_t			layer;				// Image layer to work on
+	uint32_t			passCount;			// Used for multi-pass shaders (e.g. Separable Gaussian)
+	imageInfo_t*		createInfos;		// Inline created framebuffer images (useful for temp images)
+	uint32_t			taskImageCount;		// Number of inline framebuffer images
+	uint32_t			viewId;				// For pairing to a RenderView
+	bool				clear;				// Clear the output before rendering
+	bool				present;			// Present output after this shader runs
 
 	imageShaderFrameBeginCallback_t* callback;
 };
@@ -78,6 +79,7 @@ private:
 	uint32_t				m_taskImageCount;
 	uint32_t				m_layer;
 	uint32_t				m_mipLevel;
+	uint32_t				m_viewId;
 	uint32_t				m_passCount;
 	uint32_t				m_image2dSlotCount;
 	uint32_t				m_imageCubeSlotCount;

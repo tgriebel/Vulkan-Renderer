@@ -58,10 +58,10 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const uint ResourceImageIx1 = 2;
     const uint ResourceImageIx2 = 3;
 
-    const float depthP = localTextures[ ResourceImageIx0 ].Load( int3( pixelPos, 0 ) ).r;
+    const float depth = localTextures[ ResourceImageIx0 ].Load( int3( pixelPos, 0 ) ).r;
 
     // Sky / background — fully lit, no geometry to occlude
-    if ( depthP <= 0.0f )
+    if ( depth <= 0.0f )
     {
         output.outColor = float4( 1.0f, 1.0f, 1.0f, 1.0f );
         return output;
@@ -74,7 +74,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const float4x4 view = views[ viewId ].viewMat;
     const float4x4 proj = views[ viewId ].projMat;
     const float3 viewOrigin = views[ viewId ].viewOrigin;
-    const float3 P = ReconstructViewPos( uv, depthP, proj );
+    const float3 P = ReconstructViewPos( uv, depth, proj );
     const float3 N = OctDecode( localTextures[ ResourceImageIx1 ].SampleLevel( bilinearSamplerClampEdge, uv, 0 ).ba );
 
     float3 T, B;
@@ -84,11 +84,9 @@ psOutput_t PSMain( vsToPsInterpolators input )
     // viewDepth = -P.z because ReconstructViewPos returns z < 0 for visible geometry.
     // proj[0][0] = 1/tan(fovX/2),  proj[1][1] = 1/tan(fovY/2).
     const float  viewDepth = -P.z;
-    //const float2 radiusUV  = float2( imageProcess.radius * proj[ 0 ][ 0 ],
-    //                                 imageProcess.radius * proj[ 1 ][ 1 ] )
-    //                         / viewDepth * 0.5f;   
-    
-    const float2 radiusUV = 0.5f;
+    const float2 radiusUV  = float2( imageProcess.radius * proj[ 0 ][ 0 ],
+                                     imageProcess.radius * proj[ 1 ][ 1 ] )
+                             / viewDepth * 0.5f;   
 
     float occlusion = 0.0f;
 
@@ -104,17 +102,13 @@ psOutput_t PSMain( vsToPsInterpolators input )
         // Every sample is guaranteed to lie in the visible hemisphere of the surface.
         const float3 dir = s.x * T + s.y * B + s.z * N;
 
-        const float2 sampleUV = uv + dir.xy * radiusUV;
-        const float depthS =localTextures[ ResourceImageIx0 ].SampleLevel( bilinearSamplerClampEdge, sampleUV, 0 ).r;
+        const float2 sampleUV    = uv + dir.xy * radiusUV;
+        const float sampleDepth =localTextures[ ResourceImageIx0 ].SampleLevel( bilinearSamplerClampEdge, sampleUV, 0 ).r;
 
-        if ( depthS <= 0.0f ) {
-            continue; // Sky behind the sample — skip
-        }
-        
-        const float3 S = ReconstructViewPos( sampleUV, depthS, proj );
+        const float3 S = ReconstructViewPos( sampleUV, sampleDepth, proj );
         
         // Occlusion (z increases from camera origin)
-        const float coverage = ( S.z >= ( P.z + imageProcess.bias ) ) ? 1.0f : 0.0f;
+        const float coverage = ( S.z >= P.z + imageProcess.bias ) ? 1.0f : 0.0f;
 
         // Range. Discount samples as their distance increases
         float rangeCheck = smoothstep( 0.0f, 1.0f, imageProcess.radius / abs( P.z - S.z ) );
@@ -122,7 +116,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     }
 
     // Average, apply strength, then invert so 1 = fully lit, 0 = fully occluded.
-    const float ao = 1.0f - saturate( imageProcess.strength * ( occlusion / imageProcess.numSamples ) );
+    const float ao = 1.0f - ( occlusion / imageProcess.numSamples );
 
     output.outColor = float4( ao.xxx, 1.0f );
     //output.outColor.rgb = EncodeNormal( N );

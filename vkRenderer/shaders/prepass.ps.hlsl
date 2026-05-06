@@ -13,6 +13,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 	psOutput_t output = (psOutput_t)0;
     
     const uint materialId = pushConstants.materialId;
+    const uint viewId = pushConstants.viewId;
     
 	output.outColor = float4( 1.0f, 0.0f, 0.0f, 1.0f );
     
@@ -38,9 +39,10 @@ psOutput_t PSMain( vsToPsInterpolators input )
 		normalSample = SampleTextureNormal( globalTextures, bilinearSamplerWrap, material, GGX_NORMAL_MAP_SLOT, uv );
     }
     
-    const float3 normal = ComputeNormalWS( normalSample, input.tangent, input.bitangent, input.TBN2 );
+    const float3 normalWS = ComputeNormalWS( normalSample, input.tangent, input.bitangent, input.TBN2 );
+    const float3 normalVS = mul( views[ viewId ].viewMat, float4( normalWS, 0.0f ) ).xyz;
     
-    output.outColor1.ba = OctEncode( normal );
+    output.outColor1.ba = OctEncode( normalVS );
 #endif    
 
 	return output;
