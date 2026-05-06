@@ -45,18 +45,8 @@ struct renderPassTuple_t
 };
 
 
-static std::unordered_map<uint64_t, renderPassTuple_t> renderPassCache;
-
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 {
-	const uint64_t passHash = Hash( passState.bytes, VkPassBitsSize );
-	auto it = renderPassCache.find( passHash );
-	if( it != renderPassCache.end() )
-	{
-		assert( memcmp( passState.bytes, it->second.state.bytes, VkPassBitsSize ) == 0 );
-		return it->second.pass;
-	}
-
 	VkRenderPass pass = VK_NULL_HANDLE;
 
 	VkAttachmentReference colorAttachmentRef[ 3 ] = { };
