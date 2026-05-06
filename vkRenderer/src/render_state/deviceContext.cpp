@@ -420,6 +420,10 @@ void vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const 
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipeLineHandle, &pipelineObject );
 
+	if( pipelineObject->pipeline == VK_NULL_HANDLE ) {
+		CreateGraphicsPipeline( pass, pipeLineHandle, pipelineObject->state );
+	}
+
 	if ( pipelineObject != nullptr )
 	{
 		const uint32_t descSetCount = 2;
@@ -491,6 +495,11 @@ void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandl
 
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipeLineHandle, &pipelineObject );
+
+	if( pipelineObject->pipeline == VK_NULL_HANDLE ) {
+		CreateGraphicsPipeline( pass, pipeLineHandle, pipelineObject->state );
+	}
+
 	if ( pipelineObject != nullptr ) {
 		const uint32_t descSetCount = 2;
 		VkDescriptorSet descSetArray[ descSetCount ] = { cmdContext.GetRenderContext()->globalParms->GetVkObject(), pass->parms->GetVkObject() };

@@ -112,10 +112,12 @@ void ImguiTask::Shutdown()
 
 void ImguiTask::FrameBegin()
 {
-	struct viewerShaderConstants_t : public ImageShaderTask::constants_t
+	struct viewerShaderConstants_t : public ImageShaderTask::baseConstants_t
 	{
 		vec4f		scissorRectUv;
 		vec4f		tint;
+		float		rangeMin;
+		float		rangeMax;
 		uint32_t	flags;
 		uint32_t	sampleIndex;
 	};
@@ -145,9 +147,10 @@ void ImguiTask::FrameBegin()
 		constants.scissorRectUv.z *= 1.0f / viewport.width;
 		constants.scissorRectUv.w *= 1.0f / viewport.height;
 
-		const float* t = callbackTasks[ 0 ].tint;
-		constants.tint  = vec4f( t[ 0 ], t[ 1 ], t[ 2 ], t[ 3 ] );
-		constants.flags       = ( isCubeImage ? 0x01 : 0x00 ) | callbackTasks[ 0 ].flags;
+		constants.tint = callbackTasks[ 0 ].tint;
+		constants.rangeMin = callbackTasks[ 0 ].rangeMin;
+		constants.rangeMax = callbackTasks[ 0 ].rangeMax;
+		constants.flags = ( isCubeImage ? 0x01 : 0x00 ) | callbackTasks[ 0 ].flags;
 		constants.sampleIndex = callbackTasks[ 0 ].sampleIndex;
 
 		m_buffer.SetPos( 0 );

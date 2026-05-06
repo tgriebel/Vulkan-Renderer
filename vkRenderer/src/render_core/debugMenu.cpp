@@ -1097,6 +1097,8 @@ void DrawImageViewerDebugMenu()
 	static float intensity     = 1.0f;
 	static float intensityMin  = 0.0f;
 	static float intensityMax  = 2.0f;
+	static float rangeMin  = 0.0f;
+	static float rangeMax  = FLT_MAX;
 
 	ImGui::Begin( "Image Viewer" );
 
@@ -1211,7 +1213,7 @@ void DrawImageViewerDebugMenu()
 		ImGui::EndCombo();
 	}
 
-	// --- Row 2: Intensity ---
+	// --- Row: Intensity ---
 	{
 		const float fieldW = 50.0f;
 
@@ -1233,7 +1235,24 @@ void DrawImageViewerDebugMenu()
 		intensity    = Max( Min( intensity, intensityMax ), intensityMin );
 	}
 
-	// --- Row 3: MIP level ---
+	// --- Row: Range ---
+	{
+		const float fieldW = 50.0f;
+
+		ImGui::Text( "Range" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( fieldW );
+		ImGui::InputFloat( "##rangeMin", &rangeMin, 0.0f, 0.0f, "%.2f" );
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth( fieldW );
+		ImGui::InputFloat( "##rangeMax", &rangeMax, 0.0f, 0.0f, "%.2f" );
+
+		rangeMin = Min( rangeMin, rangeMax - 0.001f );
+	}
+
+	// --- Row: MIP level ---
 	{
 		const int mipCount = (int)image->info.mipLevels;
 		selectedMip = Max( 0, Min( selectedMip, mipCount - 1 ) );
@@ -1269,7 +1288,7 @@ void DrawImageViewerDebugMenu()
 		ImGui::EndDisabled();
 	}
 
-	// --- Row 4: Slice / Face (only when the image has multiple layers) ---
+	// --- Row: Slice / Face (only when the image has multiple layers) ---
 	if ( image->info.layers > 1 )
 	{
 		static const char* cubeFaceLabels[] = { "+X", "-X", "+Y", "-Y", "+Z", "-Z" };
@@ -1311,7 +1330,7 @@ void DrawImageViewerDebugMenu()
 		}
 	}
 
-	// --- Row N: Sample (MSAA only) ---
+	// --- Row: Sample (MSAA only) ---
 	if ( isMsaa )
 	{
 		const int numSamples = (int)image->info.subsamples;
@@ -1379,20 +1398,20 @@ void DrawImageViewerDebugMenu()
 	const ImVec2 pos = ImGui::GetItemRectMin();
 
 	imguiImageCallbackData_t data;
-	data.progAsset    = GpuProgramLib().Find( "ImageViewer" );
-	data.permSet      = static_cast<uint32_t>( ( image->info.subsamples != IMAGE_SMP_1 ) ? shaderPermId_t::MSAA : shaderPermId_t::NONE );
-	data.image        = image;
-	data.x            = pos.x;
-	data.y            = pos.y;
-	data.width        = displayW;
-	data.height       = displayH;
-	for ( int i = 0; i < 4; ++i ) {
-		data.tint[ i ] = tint[ i ] * intensity;
-	}
-	data.flags       = gammaEnabled ? 0x02 : 0x00;
-	data.mipLevel    = (uint32_t)selectedMip;
-	data.layer       = (uint32_t)selectedLayer;
-	data.sampleIndex = ( selectedSample < 0 ) ? ~0u : (uint32_t)selectedSample;
+	data.progAsset		= GpuProgramLib().Find( "ImageViewer" );
+	data.permSet		= static_cast<uint32_t>( ( image->info.subsamples != IMAGE_SMP_1 ) ? shaderPermId_t::MSAA : shaderPermId_t::NONE );
+	data.image			= image;
+	data.x				= pos.x;
+	data.y				= pos.y;
+	data.width			= displayW;
+	data.height			= displayH;
+	data.tint			= ((vec4f)tint) * intensity;
+	data.rangeMin		= rangeMin;
+	data.rangeMax		= rangeMax;
+	data.flags			= gammaEnabled ? 0x02 : 0x00;
+	data.mipLevel		= (uint32_t)selectedMip;
+	data.layer			= (uint32_t)selectedLayer;
+	data.sampleIndex	= ( selectedSample < 0 ) ? ~0u : (uint32_t)selectedSample;
 
 	assert( data.progAsset != nullptr );
 

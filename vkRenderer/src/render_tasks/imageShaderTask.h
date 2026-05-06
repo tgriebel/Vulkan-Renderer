@@ -41,7 +41,7 @@ struct imageShaderCreateInfo_t
 class ImageShaderTask : public GpuTask
 {
 public:
-	struct constants_t
+	struct baseConstants_t
 	{
 		vec4f		dimensions;
 		uint32_t	pass;
@@ -56,7 +56,7 @@ public:
 
 private:
 	static const uint32_t	MaxBufferSizeInBytes = 256;
-	static const uint32_t	ReservedConstantSizeInBytes = sizeof( constants_t );
+	static const uint32_t	ReservedConstantSizeInBytes = sizeof( baseConstants_t );
 	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
 	static const uint32_t	MaxPasses = 2;
 	static const uint32_t	MaxOutputImages = 3;

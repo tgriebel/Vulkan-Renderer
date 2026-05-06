@@ -276,7 +276,7 @@ void ImageShaderTask::FrameBegin()
 			const float w = float( viewport.width );
 			const float h = float( viewport.height );
 
-			constants_t constants {};
+			baseConstants_t constants {};
 			constants.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 			constants.pass = passIndex;
 			constants.previousImageId = m_image2dSlotCount;
@@ -288,7 +288,7 @@ void ImageShaderTask::FrameBegin()
 
 			const uint64_t offset = m_buffer[ passIndex ].GetSize();
 			m_buffer[ passIndex ].SetPos( 0 );
-			m_buffer[ passIndex ].CopyData( &constants, sizeof( constants_t ) );
+			m_buffer[ passIndex ].CopyData( &constants, sizeof( baseConstants_t ) );
 			m_buffer[ passIndex ].SetPos( offset );
 		}
 

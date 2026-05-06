@@ -5,6 +5,8 @@ struct ImageViewer
 {
 	float4	scissorRectUv;
 	float4	tint;
+    float	rangeMin;
+    float	rangeMax;
 	uint	flags;
 	uint	sampleIndex;  // ~0u = average all samples
 };
@@ -22,10 +24,11 @@ psOutput_t PSMain( vsToPsInterpolators input )
 	const bool isCubeImage = ( ( imageProcess.flags >> 0 ) & 1 ) != 0;
 	const bool applySrgbCurve = ( ( imageProcess.flags >> 1 ) & 1 ) != 0;
 
+	// 1. Sample Texture
 	// The shader uses a clip fullscreen quad so the sample UV needs to be computed from the scissor subsection of the fullscreen quad
 	const float2 uv = ( input.uv0.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
 
-	float4 color;
+	float4 sampleColor;
 	if ( isCubeImage )
 	{
 		const float s = 2.0f * uv.x - 1.0f;
@@ -40,39 +43,45 @@ psOutput_t PSMain( vsToPsInterpolators input )
 			case 4:  dir = float3(     s,    -t,  1.0f ); break;  // +Z
 			default: dir = float3(    -s,    -t, -1.0f ); break;  // -Z
 		}
-		color = localCubemaps[ 0 ].SampleLevel( bilinearSamplerClampEdge, dir, (float)level );
-	}
+        sampleColor = localCubemaps[ 0 ].SampleLevel( bilinearSamplerClampEdge, dir, (float)level );
+    }
 	else
 	{
 #ifdef USE_MSAA
 		const int2 pixelLocation = int2( uv * dimensions.xy );
 		if ( imageProcess.sampleIndex < globals.numSamples )
 		{
-			color = localTextures[ 0 ].Load( pixelLocation, int( imageProcess.sampleIndex ) );
+			sampleColor = localTextures[ 0 ].Load( pixelLocation, int( imageProcess.sampleIndex ) );
 		}
 		else
 		{
-			color = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+			sampleColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
 			for ( int i = 0; i < int( globals.numSamples ); ++i ) {
-				color += localTextures[ 0 ].Load( pixelLocation, i );
+				sampleColor += localTextures[ 0 ].Load( pixelLocation, i );
 			}
-			color /= float( globals.numSamples );
+			sampleColor /= float( globals.numSamples );
 		}
 #else
 		uint mipW, mipH, mipLevels;
 		localTextures[ 0 ].GetDimensions( (uint)level, mipW, mipH, mipLevels );
 		const int3 pixelLocation = int3( uv * int2( mipW, mipH ), level );
-		color = localTextures[ 0 ].Load( pixelLocation );
+        sampleColor = localTextures[ 0 ].Load( pixelLocation );
 #endif
 	}
 
+	// 2. Viewer Controls
 	const float4 tint = imageProcess.tint;
-
+	
 	if ( !any( tint ) )
 	{
 		output.outColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 		return output;
 	}
+	
+    float4 color = sampleColor.rgba;
+    color.rgb = ( length( color.rgb ) <= imageProcess.rangeMin ) ? float3( 0.0f, 0.0f, 0.0f ) : color.rgb;
+    color.rgb = ( length( color.rgb ) >= imageProcess.rangeMax ) ? float3( 1.0f, 1.0f, 1.0f ) : color.rgb; // Images might be HDR, but the viewer itself is SDR
+    color.a = 1.0f;
 	
 	// Mark each channel 0/1, then check if only a single 1 value is in the mask
     const float4 mask = step( 0.00001f, abs( tint ) );	
@@ -80,7 +89,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
 	// Single channel selection displays in black and white
     if ( isMonochrome )
-	{
+	{	
         const float channelColor = dot( color, tint );
         output.outColor = float4( channelColor.rrr, 1.0f );
     }
@@ -95,5 +104,5 @@ psOutput_t PSMain( vsToPsInterpolators input )
 		output.outColor.rgb = LinearToSrgb( output.outColor.rgb );
 	}
 
-	return output;
+    return output; 
 }
