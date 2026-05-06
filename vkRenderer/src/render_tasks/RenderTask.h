@@ -6,7 +6,7 @@
 #include "../render_state/frameBuffer.h"
 #include "../render_resources/imageView.h"
 
-class CommandContext;
+class CommandList;
 class GfxCmdList;
 class RenderView;
 class RenderContext;
@@ -34,7 +34,7 @@ public:
 	virtual void			FrameBegin() {};
 	virtual void			FrameEnd() {};
 	virtual void			Resize() = 0;
-	virtual void			Execute( CommandContext& context ) = 0;
+	virtual void			Execute( CommandList& context ) = 0;
 	virtual std::string		AsString() const = 0;
 	const GpuTask*			GetChild() const { return m_child; };
 	GpuTask*				GetChild() { return m_child; };
@@ -95,5 +95,5 @@ public:
 	void			Resize();
 	std::string		AsString() const;
 
-	void			Execute( CommandContext& context ) override;
+	void			Execute( CommandList& context ) override;
 };

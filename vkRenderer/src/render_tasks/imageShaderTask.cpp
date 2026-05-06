@@ -314,7 +314,7 @@ void ImageShaderTask::FrameEnd()
 }
 
 
-void ImageShaderTask::Execute( CommandContext& cmdContext )
+void ImageShaderTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( Color::Brown ) );
 

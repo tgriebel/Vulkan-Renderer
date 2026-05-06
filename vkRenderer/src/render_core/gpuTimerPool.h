@@ -2,7 +2,7 @@
 
 #include "../globals/common.h"
 
-class CommandContext;
+class CommandList;
 
 // ---------------------------------------------------------------------------
 // GpuTimerPool
@@ -32,13 +32,13 @@ public:
 
 	// Call inside the command buffer at the start of each frame
 	// (resets this frame's query slab so queries can be written again)
-	void				FrameBegin( CommandContext* cmd, uint32_t bufferId );
+	void				FrameBegin( CommandList* cmd, uint32_t bufferId );
 
 	// Call after the frame fence has signalled — reads back completed timings
 	void				FrameReadback( uint32_t frameIndex );
 
-	void				BeginScope( CommandContext* cmd, uint32_t bufferId, const char* name );
-	void				EndScope  ( CommandContext* cmd, uint32_t bufferId, const char* name );
+	void				BeginScope( CommandList* cmd, uint32_t bufferId, const char* name );
+	void				EndScope  ( CommandList* cmd, uint32_t bufferId, const char* name );
 
 	const ScopeResult*  Results() const { return m_results; }
 
@@ -64,11 +64,11 @@ private:
 // ---------------------------------------------------------------------------
 struct GpuScopedTimer
 {
-	GpuScopedTimer( CommandContext* ctx, const char* name );
+	GpuScopedTimer( CommandList* ctx, const char* name );
 	~GpuScopedTimer();
 
 private:
-	CommandContext*	m_ctx;
+	CommandList*	m_ctx;
 	const char*		m_name;
 };
 

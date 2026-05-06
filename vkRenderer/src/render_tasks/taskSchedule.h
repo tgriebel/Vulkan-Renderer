@@ -27,7 +27,7 @@ public:
 	void			FrameBegin();
 	void			FrameEnd();
 	void			Resize();
-	void			IssueNext( CommandContext& context );
+	void			IssueNext( CommandList& context );
 	void			AsString() const;
 
 	const GpuTask*	GetHead() const { return tasks; }

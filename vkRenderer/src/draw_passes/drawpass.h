@@ -85,7 +85,7 @@ public:
 		return m_fb;
 	}
 
-	void InsertResourceBarriers( CommandContext& cmdContext );
+	void InsertResourceBarriers( CommandList& cmdContext );
 
 	ImageArray					codeImages;
 	ImageArray					codeCubeImages;

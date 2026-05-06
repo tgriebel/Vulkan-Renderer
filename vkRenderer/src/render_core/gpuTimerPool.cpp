@@ -47,7 +47,7 @@ void GpuTimerPool::Destroy()
 }
 
 
-void GpuTimerPool::FrameBegin( CommandContext* cmd, uint32_t bufferId )
+void GpuTimerPool::FrameBegin( CommandList* cmd, uint32_t bufferId )
 {
 #ifdef USE_VULKAN
 	if ( m_pool == VK_NULL_HANDLE ) {
@@ -138,7 +138,7 @@ int GpuTimerPool::FindOrRegisterScope( const char* name )
 }
 
 
-void GpuTimerPool::BeginScope( CommandContext* cmd, uint32_t bufferId, const char* name )
+void GpuTimerPool::BeginScope( CommandList* cmd, uint32_t bufferId, const char* name )
 {
 #ifdef USE_VULKAN
 	if ( m_pool == VK_NULL_HANDLE ) {
@@ -153,7 +153,7 @@ void GpuTimerPool::BeginScope( CommandContext* cmd, uint32_t bufferId, const cha
 }
 
 
-void GpuTimerPool::EndScope( CommandContext* cmd, uint32_t bufferId, const char* name )
+void GpuTimerPool::EndScope( CommandList* cmd, uint32_t bufferId, const char* name )
 {
 #ifdef USE_VULKAN
 	if ( m_pool == VK_NULL_HANDLE ) {
@@ -204,7 +204,7 @@ void GpuTimerPool::DrawDebugMenu() const
 // GpuScopedTimer
 // ---------------------------------------------------------------------------
 
-GpuScopedTimer::GpuScopedTimer( CommandContext* ctx, const char* name )
+GpuScopedTimer::GpuScopedTimer( CommandList* ctx, const char* name )
 	: m_ctx( ctx ), m_name( name )
 {
 	ctx->BeginTimestamp( name );

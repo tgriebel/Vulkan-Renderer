@@ -72,7 +72,7 @@ struct QueueFamilyIndices
 };
 
 
-class CommandContext
+class CommandList
 {
 protected:
 	pipelineQueue_t				queueType;
@@ -88,7 +88,7 @@ private:
 	RenderContext*				m_renderContext;
 
 public:
-	CommandContext()
+	CommandList()
 	{
 #ifdef USE_VULKAN
 		commandPool = VK_NULL_HANDLE;
@@ -130,7 +130,7 @@ public:
 };
 
 
-class GfxCmdList : public CommandContext
+class GfxCmdList : public CommandList
 {
 public:
 	GpuSemaphore	presentSemaphore;
@@ -144,7 +144,7 @@ public:
 };
 
 
-class ComputeCmdList : public CommandContext
+class ComputeCmdList : public CommandList
 {
 public:
 	GpuSemaphore	semaphore;
@@ -156,10 +156,10 @@ public:
 };
 
 
-class UploadCmdList : public CommandContext
+class UploadCmdList : public CommandList
 {
 private:
-	using CommandContext::Dispatch;
+	using CommandList::Dispatch;
 
 public:
 	UploadCmdList()
@@ -169,12 +169,12 @@ public:
 };
 
 
-void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
-void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
-void Transition( CommandContext* cmdCommand, const GpuImage* gpuImage, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
-void GenerateMipmaps( CommandContext* cmdCommand, Image& image );
-void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst );
-void CopyImage( CommandContext* cmdCommand, Image& src, const copyImageParms_t& srcParms, Image& dst, const copyImageParms_t& dstParms );
-void ResolveImage( CommandContext* cmdCommand, const resolveImageInfo_t& info );
-void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );
+void Transition( CommandList* cmdList, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void Transition( CommandList* cmdList, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void Transition( CommandList* cmdList, const GpuImage* gpuImage, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
+void GenerateMipmaps( CommandList* cmdList, Image& image );
+void CopyImage( CommandList* cmdList, Image& src, Image& dst );
+void CopyImage( CommandList* cmdList, Image& src, const copyImageParms_t& srcParms, Image& dst, const copyImageParms_t& dstParms );
+void ResolveImage( CommandList* cmdList, const resolveImageInfo_t& info );
+void UploadImageData( CommandList* cmdList, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer );
 void FlushGPU();

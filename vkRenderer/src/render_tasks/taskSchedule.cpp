@@ -87,7 +87,7 @@ void TaskSchedule::Resize()
 }
 
 
-void TaskSchedule::IssueNext( CommandContext& context )
+void TaskSchedule::IssueNext( CommandList& context )
 {
 	if ( currentTask->IsEnabled() )
 	{

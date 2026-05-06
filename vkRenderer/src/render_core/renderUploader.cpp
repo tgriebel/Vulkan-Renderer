@@ -159,9 +159,9 @@ void RenderUploader::Upload()
 
 
 #ifdef USE_VULKAN
-void RenderUploader::CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
+void RenderUploader::CopyGpuBuffer( CommandList* cmdList, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion )
 {
-	VkCommandBuffer commandBuffer = cmdCommand->CommandBuffer();
+	VkCommandBuffer commandBuffer = cmdList->CommandBuffer();
 	vkCmdCopyBuffer( commandBuffer, srcBuffer.GetVkObject(), dstBuffer.GetVkObject(), 1, &copyRegion );
 
 	dstBuffer.Allocate( copyRegion.size );
@@ -248,7 +248,7 @@ void RenderUploader::QueueImageUpload( Asset<Image>& imageAsset )
 }
 
 
-void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
+void RenderUploader::UpdateTextureData( CommandList* cmdList )
 {
 	const uint32_t imageCount = static_cast<uint32_t>( refreshImages.size() );
 	if( imageCount == 0 )
@@ -261,7 +261,7 @@ void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 		Asset<Image>* imageAsset = ImageLib().Find( *it );
 		Image& image = imageAsset->Get();
 
-		Transition( cmdCommand, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+		Transition( cmdList, image, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		imageSubResourceView_t subView{};
 		subView.baseMip = 0;
@@ -269,9 +269,9 @@ void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 		subView.baseArray = 0;
 		subView.arrayCount = 1;
 
-		UploadImageData( cmdCommand, image, subView, textureStagingBuffer );
+		UploadImageData( cmdList, image, subView, textureStagingBuffer );
 
-		Transition( cmdCommand, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+		Transition( cmdList, image, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 
 		imageAsset->CompleteUpload();
 	}
@@ -280,7 +280,7 @@ void RenderUploader::UpdateTextureData( CommandContext* cmdCommand )
 }
 
 
-void RenderUploader::UploadTextures( CommandContext* cmdCommand )
+void RenderUploader::UploadTextures( CommandList* cmdList )
 {
 	textureStagingBuffer.SetPos( 0 );
 
@@ -324,7 +324,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		texture.gpuImage =
 			new GpuImage( textureAsset->GetName().c_str(), texture.info, flags, resourceLifeTime_t::REBOOT );
 
-		Transition( cmdCommand, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
+		Transition( cmdList, texture, GPU_IMAGE_NONE, GPU_IMAGE_TRANSFER_DST );
 
 		imageSubResourceView_t subView{};
 		subView.baseMip = 0;
@@ -332,7 +332,7 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		subView.baseArray = 0;
 		subView.arrayCount = texture.info.layers;
 
-		UploadImageData( cmdCommand, texture, subView, textureStagingBuffer );
+		UploadImageData( cmdList, texture, subView, textureStagingBuffer );
 
 		assert( imageFreeSlot < MaxImageDescriptors );
 		texture.gpuImage->SetId( imageFreeSlot );
@@ -359,10 +359,10 @@ void RenderUploader::UploadTextures( CommandContext* cmdCommand )
 		}
 		if( texture.generateMips == false )
 		{
-			Transition( cmdCommand, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
+			Transition( cmdList, texture, GPU_IMAGE_TRANSFER_DST, GPU_IMAGE_READ );
 			continue;
 		}
-		GenerateMipmaps( cmdCommand, texture );
+		GenerateMipmaps( cmdList, texture );
 
 		textureAsset->CompleteUpload();
 	}
@@ -487,7 +487,7 @@ void RenderUploader::UpdateGpuMaterials()
 }
 
 
-void RenderUploader::UploadModelsToGPU( CommandContext* cmdCommand )
+void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 {
 	geometry.stagingBuffer.SetPos( 0 );
 
@@ -543,7 +543,7 @@ void RenderUploader::UploadModelsToGPU( CommandContext* cmdCommand )
 
 				geometry.stagingBuffer.CopyData( vertexStream.data(), static_cast<size_t>( vbCopySize ) );
 
-				CopyGpuBuffer( cmdCommand, geometry.stagingBuffer, geometry.vb, vbCopyRegion );
+				CopyGpuBuffer( cmdList, geometry.stagingBuffer, geometry.vb, vbCopyRegion );
 
 				upload.vertexCount = vertexCount;
 				geometry.vbBufElements += vertexCount;
@@ -560,7 +560,7 @@ void RenderUploader::UploadModelsToGPU( CommandContext* cmdCommand )
 				ibCopyRegion.size = ibCopySize;
 				ibCopyRegion.srcOffset = geometry.stagingBuffer.GetSize();
 				ibCopyRegion.dstOffset = geometry.ib.GetSize();
-				CopyGpuBuffer( cmdCommand, geometry.stagingBuffer, geometry.ib, ibCopyRegion );
+				CopyGpuBuffer( cmdList, geometry.stagingBuffer, geometry.ib, ibCopyRegion );
 
 				geometry.stagingBuffer.CopyData( surf.indices.data(), static_cast<size_t>( ibCopySize ) );
 

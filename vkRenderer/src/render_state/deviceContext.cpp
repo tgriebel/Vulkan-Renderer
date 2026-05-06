@@ -395,7 +395,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 }
 
 
-void vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const vec2f offset, const vec2f size, const DrawPass* pass )
+void vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec2f offset, const vec2f size, const DrawPass* pass )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
@@ -437,7 +437,7 @@ void vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const 
 }
 
 
-void vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, const DrawPass* pass, const renderPassTransition_t& transitionState )
+void vk_RenderImageShader( CommandList& cmdContext, const hdl_t pipeLineHandle, const DrawPass* pass, const renderPassTransition_t& transitionState )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 

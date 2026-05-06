@@ -318,7 +318,7 @@ std::string RenderTask::AsString() const
 }
 
 
-void RenderTask::Execute( CommandContext& context )
+void RenderTask::Execute( CommandList& context )
 {
 	context.MarkerBeginRegion( m_renderView->GetName(), ColorToVector( Color::Cyan ) );
 

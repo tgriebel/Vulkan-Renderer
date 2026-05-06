@@ -63,7 +63,7 @@ private:
 	materialBufferArray_t	materialBuffer; // This is a holdover from older code and can be removed
 
 #ifdef USE_VULKAN
-	void				CopyGpuBuffer( CommandContext* cmdCommand, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
+	void				CopyGpuBuffer( CommandList* cmdList, GpuBuffer& srcBuffer, GpuBuffer& dstBuffer, VkBufferCopy copyRegion );
 #endif
 
 public:
@@ -79,10 +79,10 @@ public:
 	void				QueueMaterialUpload( Asset<Material>& materialAsset );
 	void				QueueModelUpload( Asset<Model>& model );
 
-	void				UpdateTextureData( CommandContext* cmdCommand );
-	void				UploadTextures( CommandContext* cmdCommand );
+	void				UpdateTextureData( CommandList* cmdList );
+	void				UploadTextures( CommandList* cmdList );
 	void				UpdateGpuMaterials();
-	void				UploadModelsToGPU( CommandContext* cmdCommand );
+	void				UploadModelsToGPU( CommandList* cmdList );
 
 	inline const GeometryContext* GetGeometry() const
 	{

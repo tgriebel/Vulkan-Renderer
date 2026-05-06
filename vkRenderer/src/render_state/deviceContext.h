@@ -156,8 +156,8 @@ VkImageView			vk_CreateImageView( const VkImage image, const imageInfo_t& info, 
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const Image* image, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuImage, const imageSubResourceView_t& subView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next );
 void				vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image );
-void				vk_QuadDraw( CommandContext& cmdContext, const hdl_t pipeLineHandle, const vec2f offset, const vec2f size, const DrawPass* pass );
-void				vk_RenderImageShader( CommandContext& cmdContext, const hdl_t pipeLineHandle, const DrawPass* pass, const renderPassTransition_t& transitionState );
+void				vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec2f offset, const vec2f size, const DrawPass* pass );
+void				vk_RenderImageShader( CommandList& cmdContext, const hdl_t pipeLineHandle, const DrawPass* pass, const renderPassTransition_t& transitionState );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageParms_t& srcParms, Image* dst, const copyImageParms_t& dstParms );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const Image& src, Image& dst );
 void				vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& dst );

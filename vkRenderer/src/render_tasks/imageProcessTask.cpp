@@ -332,7 +332,7 @@ void ImageProcessTask::UpdateConstants( const void* data, const uint32_t sizeInB
 }
 
 
-void ImageProcessTask::Execute( CommandContext& cmdContext )
+void ImageProcessTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
 

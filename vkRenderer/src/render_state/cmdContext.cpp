@@ -18,13 +18,13 @@ extern AssetManager g_assets;
 /////////////////////////////////////////////
 // Base Command Context
 /////////////////////////////////////////////
-VkCommandBuffer& CommandContext::CommandBuffer()
+VkCommandBuffer& CommandList::CommandBuffer()
 {
 	return commandBuffers[ context.bufferId ];
 }
 
 
-void CommandContext::Begin()
+void CommandList::Begin()
 {
 #ifdef USE_VULKAN
 	vkResetCommandBuffer( CommandBuffer(), 0 );
@@ -44,7 +44,7 @@ void CommandContext::Begin()
 }
 
 
-void CommandContext::End()
+void CommandList::End()
 {
 #ifdef USE_VULKAN
 	VK_CHECK_RESULT( vkEndCommandBuffer( CommandBuffer() ) );
@@ -54,7 +54,7 @@ void CommandContext::End()
 }
 
 
-void CommandContext::Create( const char* name, RenderContext* renderContext )
+void CommandList::Create( const char* name, RenderContext* renderContext )
 {
 	m_renderContext = renderContext;
 
@@ -90,7 +90,7 @@ void CommandContext::Create( const char* name, RenderContext* renderContext )
 }
 
 
-void CommandContext::Destroy()
+void CommandList::Destroy()
 {
 #ifdef USE_VULKAN
 	vkFreeCommandBuffers( context.device, commandPool, static_cast<uint32_t>( MaxFrameStates ), commandBuffers );
@@ -99,19 +99,19 @@ void CommandContext::Destroy()
 }
 
 
-void CommandContext::Wait( GpuSemaphore* semaphore )
+void CommandList::Wait( GpuSemaphore* semaphore )
 {
 	waitSemaphores.push_back( semaphore );
 }
 
 
-void CommandContext::Signal( GpuSemaphore* semaphore )
+void CommandList::Signal( GpuSemaphore* semaphore )
 {
 	signalSemaphores.push_back( semaphore );
 }
 
 
-void CommandContext::MarkerBeginRegion( const char* pMarkerName, const vec4f& color )
+void CommandList::MarkerBeginRegion( const char* pMarkerName, const vec4f& color )
 {
 	if ( context.debugMarkersEnabled )
 	{
@@ -129,7 +129,7 @@ void CommandContext::MarkerBeginRegion( const char* pMarkerName, const vec4f& co
 }
 
 
-void CommandContext::MarkerEndRegion()
+void CommandList::MarkerEndRegion()
 {
 	if ( context.debugMarkersEnabled && ( context.fnCmdDebugMarkerEnd != nullptr ) )
 	{
@@ -140,7 +140,7 @@ void CommandContext::MarkerEndRegion()
 }
 
 
-void CommandContext::MarkerInsert( std::string markerName, const vec4f& color )
+void CommandList::MarkerInsert( std::string markerName, const vec4f& color )
 {
 	if ( context.debugMarkersEnabled )
 	{
@@ -155,7 +155,7 @@ void CommandContext::MarkerInsert( std::string markerName, const vec4f& color )
 }
 
 
-void CommandContext::BeginTimestamp( const char* name )
+void CommandList::BeginTimestamp( const char* name )
 {
 #ifdef USE_VULKAN
 	g_gpuTimerPool.BeginScope( this, context.bufferId, name );
@@ -163,7 +163,7 @@ void CommandContext::BeginTimestamp( const char* name )
 }
 
 
-void CommandContext::EndTimestamp( const char* name )
+void CommandList::EndTimestamp( const char* name )
 {
 #ifdef USE_VULKAN
 	g_gpuTimerPool.EndScope( this, context.bufferId, name );
@@ -171,7 +171,7 @@ void CommandContext::EndTimestamp( const char* name )
 }
 
 
-void CommandContext::Submit( const GpuFence* fence )
+void CommandList::Submit( const GpuFence* fence )
 {
 #ifdef USE_VULKAN
 	VkSubmitInfo submitInfo{ };
@@ -220,13 +220,13 @@ void CommandContext::Submit( const GpuFence* fence )
 }
 
 
-void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
+void CommandList::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	Dispatch( progHdl, bindParms, nullptr, 0, x, y, z );
 }
 
 
-void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z )
+void CommandList::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	assert( isOpen );
 	assert( ( constantsSize % 4 ) == 0 );
@@ -264,113 +264,113 @@ void CommandContext::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindP
 }
 
 
-void Transition( CommandContext* cmdCommand, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void Transition( CommandList* cmdList, const Image& image, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
-	Transition( cmdCommand, image, swapBuffering_t::SINGLE_FRAME, current, next );
+	Transition( cmdList, image, swapBuffering_t::SINGLE_FRAME, current, next );
 }
 
 
-void Transition( CommandContext* cmdCommand, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void Transition( CommandList* cmdList, const Image& image, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
-	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
 
 	imageSubResourceView_t subview {};
 	subview.mipLevels = image.info.mipLevels;
 	subview.arrayCount = image.info.layers;
 
 #ifdef USE_VULKAN
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &image, subview, buffering, current, next );
+	vk_TransitionImageLayout( cmdList->CommandBuffer(), &image, subview, buffering, current, next );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void Transition( CommandContext* cmdCommand, const GpuImage* gpuImage, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void Transition( CommandList* cmdList, const GpuImage* gpuImage, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
-	cmdCommand->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "Transition", ColorToVector( ColorWhite ) );
 
 	imageSubResourceView_t subview{};
 	subview.mipLevels = gpuImage->GetInfo().mipLevels;
 	subview.arrayCount = gpuImage->GetInfo().layers;
 
 #ifdef USE_VULKAN
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), gpuImage, subview, buffering, current, next );
+	vk_TransitionImageLayout( cmdList->CommandBuffer(), gpuImage, subview, buffering, current, next );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void Transition( CommandContext* cmdCommand, ImageView& imageView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void Transition( CommandList* cmdList, ImageView& imageView, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
-	Transition( cmdCommand, imageView, swapBuffering_t::SINGLE_FRAME, current, next );
+	Transition( cmdList, imageView, swapBuffering_t::SINGLE_FRAME, current, next );
 }
 
 
-void Transition( CommandContext* cmdCommand, ImageView& imageView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
+void Transition( CommandList* cmdList, ImageView& imageView, swapBuffering_t buffering, gpuImageStateFlags_t current, gpuImageStateFlags_t next )
 {
-	cmdCommand->MarkerBeginRegion( "Transition Image View", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "Transition Image View", ColorToVector( ColorWhite ) );
 
 #ifdef USE_VULKAN
-	vk_TransitionImageLayout( cmdCommand->CommandBuffer(), &imageView, imageView.subResourceView, buffering, current, next );
+	vk_TransitionImageLayout( cmdList->CommandBuffer(), &imageView, imageView.subResourceView, buffering, current, next );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void GenerateMipmaps( CommandContext* cmdCommand, Image& image )
+void GenerateMipmaps( CommandList* cmdList, Image& image )
 {
-	cmdCommand->MarkerBeginRegion( "GenerateMips", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "GenerateMips", ColorToVector( ColorWhite ) );
 
 #ifdef USE_VULKAN
-	vk_GenerateMipmaps( cmdCommand->CommandBuffer(), &image );
+	vk_GenerateMipmaps( cmdList->CommandBuffer(), &image );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void CopyImage( CommandContext* cmdCommand, Image& src, Image& dst )
+void CopyImage( CommandList* cmdList, Image& src, Image& dst )
 {
-	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
 
 #ifdef USE_VULKAN
-	vk_CopyImage( cmdCommand->CommandBuffer(), src, dst );
+	vk_CopyImage( cmdList->CommandBuffer(), src, dst );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void CopyImage( CommandContext* cmdCommand, Image& src, const copyImageParms_t& srcParms, Image& dst, const copyImageParms_t& dstParms )
+void CopyImage( CommandList* cmdList, Image& src, const copyImageParms_t& srcParms, Image& dst, const copyImageParms_t& dstParms )
 {
-	cmdCommand->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "CopyImage", ColorToVector( ColorWhite ) );
 
 #ifdef USE_VULKAN
-	vk_CopyImage( cmdCommand->CommandBuffer(), &src, srcParms, &dst, dstParms );
+	vk_CopyImage( cmdList->CommandBuffer(), &src, srcParms, &dst, dstParms );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void ResolveImage( CommandContext* cmdCommand, const resolveImageInfo_t& info )
+void ResolveImage( CommandList* cmdList, const resolveImageInfo_t& info )
 {
-	cmdCommand->MarkerBeginRegion( "ResolveImage", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "ResolveImage", ColorToVector( ColorWhite ) );
 
 #ifdef USE_VULKAN
-	vk_ResolveImage( cmdCommand->CommandBuffer(), info );
+	vk_ResolveImage( cmdList->CommandBuffer(), info );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 
-void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer )
+void UploadImageData( CommandList* cmdList, Image& image, imageSubResourceView_t& subView, GpuBuffer& buffer )
 {
-	cmdCommand->MarkerBeginRegion( "UploadImageData", ColorToVector( ColorWhite ) );
+	cmdList->MarkerBeginRegion( "UploadImageData", ColorToVector( ColorWhite ) );
 
 	copyImageParms_t copyParms{};
 
@@ -386,10 +386,10 @@ void UploadImageData( CommandContext* cmdCommand, Image& image, imageSubResource
 	copyParms.mipLevels = subView.mipLevels;
 
 #ifdef USE_VULKAN
-	vk_UploadImageData( cmdCommand->CommandBuffer(), &image, copyParms, buffer );
+	vk_UploadImageData( cmdList->CommandBuffer(), &image, copyParms, buffer );
 #endif
 
-	cmdCommand->MarkerEndRegion();
+	cmdList->MarkerEndRegion();
 }
 
 

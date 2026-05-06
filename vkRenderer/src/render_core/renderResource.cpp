@@ -82,7 +82,7 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 }
 
 
-void RenderResource::TransitionNewImages( CommandContext* cmdCommand )
+void RenderResource::TransitionNewImages( CommandList* cmdList )
 {
 	std::vector<RenderResource*> resourceList = std::move( m_newImages );
 
@@ -92,7 +92,7 @@ void RenderResource::TransitionNewImages( CommandContext* cmdCommand )
 		if ( resourceList[ i ]->m_type == resourceType_t::GPU_IMAGE )
 		{
 			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( resourceList[ i ] );
-			Transition( cmdCommand, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+			Transition( cmdList, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 		}
 	}
 }

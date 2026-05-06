@@ -3,7 +3,7 @@
 #include <queue>
 #include "RenderTask.h"
 
-class CommandContext;
+class CommandList;
 class GfxCmdList;
 class RenderView;
 class RenderContext;
@@ -44,5 +44,5 @@ public:
 	void				Resize();
 	std::string			AsString() const;
 
-	void				Execute( CommandContext& context ) override;
+	void				Execute( CommandList& context ) override;
 };

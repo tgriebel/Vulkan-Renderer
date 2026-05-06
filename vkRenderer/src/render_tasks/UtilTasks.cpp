@@ -23,7 +23,7 @@ std::string ComputeTask::AsString() const
 }
 
 
-void ComputeTask::Execute( CommandContext& context )
+void ComputeTask::Execute( CommandList& context )
 {
 	ComputeCmdList* computeContext = reinterpret_cast<ComputeCmdList*>( &context );
 	computeContext->Dispatch( m_progHdl, *m_state->parms, m_state->x, m_state->y, m_state->z );
@@ -152,7 +152,7 @@ void ResolveImageTask::Resize()
 }
 
 
-void ResolveImageTask::Execute( CommandContext& context )
+void ResolveImageTask::Execute( CommandList& context )
 {
 	for ( uint32_t i = 0; i < m_count; ++i )
 	{
@@ -179,7 +179,7 @@ std::string TransitionImageTask::AsString() const
 }
 
 
-void TransitionImageTask::Execute( CommandContext& context )
+void TransitionImageTask::Execute( CommandList& context )
 {
 	Transition( &context, *m_img, m_srcState, m_dstState );
 }
@@ -245,7 +245,7 @@ void CopyImageTask::SetDestinationParms( const copyImageParms_t& dst )
 }
 
 
-void CopyImageTask::Execute( CommandContext& context )
+void CopyImageTask::Execute( CommandList& context )
 {
 	CopyImage( &context, *m_src, m_srcParms, *m_dst, m_dstParms );
 }

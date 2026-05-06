@@ -109,7 +109,7 @@ void ImageReadbackTask::FrameBegin()
 }
 
 
-void ImageReadbackTask::Execute( CommandContext& cmdContext )
+void ImageReadbackTask::Execute( CommandList& cmdContext )
 {
 	if ( HasFlags( m_flags, SCREENSHOT ) ) {
 		if( g_imguiControls.captureScreenshot == false ) {

@@ -18,7 +18,7 @@ extern imguiControls_t g_imguiControls;
 
 struct imguiTaskRenderData_t
 {
-	CommandContext*		commandContext;
+	CommandList*		commandContext;
 	RenderContext*		renderContext;
 	const DrawPass*		pass;
 };
@@ -195,7 +195,7 @@ std::string ImguiTask::AsString() const
 }
 
 
-void ImguiTask::Execute( CommandContext& cmdContext )
+void ImguiTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( "ImGui", ColorToVector( Color::White ) );
 

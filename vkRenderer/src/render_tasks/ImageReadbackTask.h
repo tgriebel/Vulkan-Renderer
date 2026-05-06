@@ -63,5 +63,5 @@ public:
 	void			FrameEnd();
 	std::string		AsString() const;
 
-	void Execute( CommandContext& context ) override;
+	void Execute( CommandList& context ) override;
 };

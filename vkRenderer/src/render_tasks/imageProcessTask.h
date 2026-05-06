@@ -97,7 +97,7 @@ public:
 	void			UpdateConstants( const void* data, uint32_t sizeInBytes );
 	void			UpdateConstants();
 
-	void			Execute( CommandContext& context ) override;
+	void			Execute( CommandList& context ) override;
 
 	~ImageProcessTask() {
 		Shutdown();

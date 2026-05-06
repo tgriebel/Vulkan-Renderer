@@ -5,7 +5,7 @@
 
 extern renderConstants_t rc;
 
-void DrawPass::InsertResourceBarriers( CommandContext& cmdContext )
+void DrawPass::InsertResourceBarriers( CommandList& cmdContext )
 {
 	const uint32_t codeImageCount = codeImages.Count();
 	for ( uint32_t i = 0; i < codeImageCount; ++i ) {

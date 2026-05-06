@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-class CommandContext;
+class CommandList;
 
 enum class resourceLifeTime_t : uint8_t
 {
@@ -62,7 +62,7 @@ public:
 	static std::vector<RenderResource*>& GetResourceList( const resourceLifeTime_t lifetime );
 	static void Cleanup( const resourceLifeTime_t lifetime );
 	static void ResizeResources( const uint32_t displayWidth, const uint32_t displayHeight );
-	static void TransitionNewImages( CommandContext* cmdCommand );
+	static void TransitionNewImages( CommandList* cmdList );
 
 	inline resourceLifeTime_t GetLifetime() const
 	{

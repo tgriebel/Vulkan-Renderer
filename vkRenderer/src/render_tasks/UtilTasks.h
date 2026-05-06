@@ -2,7 +2,7 @@
 
 #include "RenderTask.h"
 
-class CommandContext;
+class CommandList;
 class RenderContext;
 struct ComputeState;
 enum gpuImageStateFlags_t : uint8_t;
@@ -22,7 +22,7 @@ public:
 	void			FrameBegin() {}
 	void			FrameEnd() {}
 	std::string		AsString() const;
-	void			Execute( CommandContext& context ) override;
+	void			Execute( CommandList& context ) override;
 
 	~ComputeTask() {}
 };
@@ -47,7 +47,7 @@ public:
 	void			FrameBegin() {}
 	void			FrameEnd() {}
 	std::string		AsString() const;
-	void			Execute( CommandContext& context ) override;
+	void			Execute( CommandList& context ) override;
 
 	~TransitionImageTask() {}
 };
@@ -91,7 +91,7 @@ public:
 	void			FrameBegin();
 	void			FrameEnd();
 	std::string		AsString() const;
-	void			Execute( CommandContext& context ) override;
+	void			Execute( CommandList& context ) override;
 
 	~ResolveImageTask();
 };
@@ -117,7 +117,7 @@ public:
 	void			SetSourceParms( const copyImageParms_t& src );
 	void			SetDestinationParms( const copyImageParms_t& dst );
 
-	void			Execute( CommandContext& context ) override;
+	void			Execute( CommandList& context ) override;
 
 	~CopyImageTask() {}
 };
