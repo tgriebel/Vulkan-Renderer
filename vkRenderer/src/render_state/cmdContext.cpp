@@ -2,6 +2,7 @@
 
 #include "cmdContext.h"
 #include "deviceContext.h"
+#include "../render_core/gpuTimerPool.h"
 #include "../render_core/renderer.h"
 #include "../render_binding/pipeline.h"
 #include "../render_resources/imageView.h"
@@ -151,6 +152,22 @@ void CommandContext::MarkerInsert( std::string markerName, const vec4f& color )
 		context.fnCmdDebugMarkerInsert( CommandBuffer(), &markerInfo );
 #endif
 	}
+}
+
+
+void CommandContext::BeginTimestamp( const char* name )
+{
+#ifdef USE_VULKAN
+	g_gpuTimerPool.BeginScope( this, context.bufferId, name );
+#endif
+}
+
+
+void CommandContext::EndTimestamp( const char* name )
+{
+#ifdef USE_VULKAN
+	g_gpuTimerPool.EndScope( this, context.bufferId, name );
+#endif
 }
 
 

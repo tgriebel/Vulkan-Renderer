@@ -5,6 +5,7 @@
 #include "../scene/entity.h"
 #include "../globals/assetDefs.h"
 #include "../render_core/allocator.h"
+#include "../render_core/gpuTimerPool.h"
 
 #include "swapChain.h"
 
@@ -25,6 +26,8 @@ void Renderer::Destroy()
 #ifdef USE_VULKAN 
 	vk_ClearRenderPassCache();
 #endif
+
+	g_gpuTimerPool.Destroy();
 
 	RenderResource::Cleanup( resourceLifeTime_t::FRAME );
 	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );

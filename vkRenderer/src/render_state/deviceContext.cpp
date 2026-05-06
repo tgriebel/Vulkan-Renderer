@@ -1422,47 +1422,6 @@ void DeviceContext::Create( Window& window )
 		vk_SetObjectName( (uint64_t)descriptorPool, VK_OBJECT_TYPE_DESCRIPTOR_POOL, "DescriptorPool (Uniform | Storage | ImageSampler | Image)" );
 	}
 
-	// Query Pool (Statistics)
-	if ( deviceFeatures.features.pipelineStatisticsQuery )
-	{
-		VkQueryPoolCreateInfo queryPoolInfo = {};
-		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
-		// This query pool will store pipeline statistics
-		queryPoolInfo.queryType = VK_QUERY_TYPE_PIPELINE_STATISTICS;
-		// Pipeline counters to be returned for this pool
-		queryPoolInfo.pipelineStatistics =
-			VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT |
-			VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT |
-			VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT |
-			VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT |
-			VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT |
-			VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT;
-		queryPoolInfo.queryCount = 6;
-
-		VK_CHECK_RESULT( vkCreateQueryPool( device, &queryPoolInfo, NULL, &statQueryPool ) );
-	}
-
-	// Query Pool (Timestamp)
-	if ( deviceProperties.limits.timestampComputeAndGraphics )
-	{
-		VkQueryPoolCreateInfo queryPoolInfo = {};
-		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
-		queryPoolInfo.queryType = VK_QUERY_TYPE_TIMESTAMP;
-		queryPoolInfo.queryCount = MaxTimeStampQueries;
-
-		VK_CHECK_RESULT( vkCreateQueryPool( device, &queryPoolInfo, NULL, &timestampQueryPool ) );
-	}
-
-	// Query Pool (Occlusion)
-	{
-		VkQueryPoolCreateInfo queryPoolInfo = {};
-		queryPoolInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
-		queryPoolInfo.queryType = VK_QUERY_TYPE_OCCLUSION;
-		queryPoolInfo.queryCount = MaxOcclusionQueries;
-
-		VK_CHECK_RESULT( vkCreateQueryPool( device, &queryPoolInfo, NULL, &occlusionQueryPool ) );
-	}
-
 	bufferId = 0;
 }
 

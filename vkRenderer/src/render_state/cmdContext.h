@@ -110,6 +110,8 @@ public:
 	void						MarkerBeginRegion( const char* pMarkerName, const vec4f& color );
 	void						MarkerEndRegion();
 	void						MarkerInsert( std::string markerName, const vec4f& color );
+	void						BeginTimestamp( const char* name );
+	void						EndTimestamp( const char* name );
 	void						Wait( GpuSemaphore* semaphore );
 	void						Signal( GpuSemaphore* semaphore );
 	void						Submit( const GpuFence* fence = nullptr );

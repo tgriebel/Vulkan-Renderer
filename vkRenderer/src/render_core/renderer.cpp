@@ -12,6 +12,7 @@
 
 #include "debugMenu.h"
 #include "gpuImage.h"
+#include "gpuTimerPool.h"
 #include "swapChain.h"
 
 #include "../render_state/rhi.h"
@@ -177,31 +178,13 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 
 void Renderer::InitGPU()
 {
-	{
-		// Memory Allocations
-		renderContext.sharedMemory.Create( MaxSharedMemory, memoryRegion_t::SHARED, resourceLifeTime_t::REBOOT );
-		renderContext.localMemory.Create( MaxLocalMemory, memoryRegion_t::LOCAL, resourceLifeTime_t::REBOOT );
-	}
-
-	InitShaderResources();
-	RecreateSwapChain();
-
-	ClearPipelineCache();
-	BuildPipelines();
-
-	// Upload queue commands
-	uploader.Upload();
-
-	FlushGPU();
+	assert( 0 ); // Rotted function, reimplement
 }
 
 
 void Renderer::ShutdownGPU()
 {
-	FlushGPU();
-	ShutdownShaderResources();
-
-	uploader.Shutdown();
+	assert( 0 ); // Rotted function, reimplement
 }
 
 
@@ -282,6 +265,8 @@ void Renderer::WaitForEndFrame()
 		gfxContext.frameFence[ context.bufferId ].Wait();
 	}
 
+	g_gpuTimerPool.FrameReadback( context.bufferId );
+
 	g_swapChain.WaitOnFlip( gfxContext.presentSemaphore );
 
 #ifdef USE_IMGUI
@@ -301,12 +286,17 @@ void Renderer::SubmitFrame()
 		computeContext.Begin();
 		gfxContext.Begin();
 
-		renderContext.UpdateBindParms();
+		g_gpuTimerPool.FrameBegin( &gfxContext, context.bufferId );
+		{
+			GpuScopedTimer frameTimer( &gfxContext, "FrameTime" );
 
-		while( schedule->HasPendingTasks() ) {
-			schedule->IssueNext( gfxContext );
+			renderContext.UpdateBindParms();
+
+			while( schedule->HasPendingTasks() )
+			{
+				schedule->IssueNext( gfxContext );
+			}
 		}
-
 		gfxContext.End();
 		computeContext.End();
 	}

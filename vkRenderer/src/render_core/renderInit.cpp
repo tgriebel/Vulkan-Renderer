@@ -11,6 +11,7 @@
 #include "../render_tasks/ImageReadbackTask.h"
 #include "../render_tasks/ImageProcessTask.h"
 #include "../render_tasks/imguiTask.h"
+#include "../render_core/gpuTimerPool.h"
 
 #include "../draw_passes/drawpass.h"
 #include "swapChain.h"
@@ -25,11 +26,14 @@
 
 #include "schedule.h"
 
+
 void Renderer::Init( const renderConfig_t& cfg )
 {
 	InitApi( cfg );
 
 	InitShaderResources();
+
+	g_gpuTimerPool.Create();
 
 	resources.gpuImages2D.SetRenderContext( &renderContext );
 	resources.gpuImagesCube.SetRenderContext( &renderContext );

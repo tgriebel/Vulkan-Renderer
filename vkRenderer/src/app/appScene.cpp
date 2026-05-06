@@ -13,6 +13,7 @@
 #endif
 
 #include "../render_core/debugMenu.h"
+#include "../render_core/gpuTimerPool.h"
 #include "../render_core/schedule.h"
 #include "../render_core/renderer.h"
 #include "../render_core/allocator.h"
@@ -430,6 +431,9 @@ void DrawSceneDebugMenu()
 		ImGui::SliderFloat( "Metalness Scale", &g_imguiControls.pbr.metalnessScale, 0.0f, 1.0f );
 		ImGui::SliderFloat( "Metalness Bias", &g_imguiControls.pbr.metalnessBias, -1.0f, 1.0f );
 		ImGui::SliderFloat( "Shadow Strength", &g_imguiControls.shadowStrength, 0.0f, 1.0f );
+
+		g_gpuTimerPool.DrawDebugMenu();
+
 		ImGui::EndTabItem();
 	}
 #endif
