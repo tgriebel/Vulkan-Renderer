@@ -236,19 +236,7 @@ VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState )
 
 	//vk_SetObjectName( (uint64_t)pass, VK_OBJECT_TYPE_RENDER_PASS, vk_BuildObjectName( "RenderPass", name ).c_str() );
 
-	renderPassCache[ passHash ] = renderPassTuple_t{ pass, passState };
-
 	return pass;
-}
-
-
-void vk_ClearRenderPassCache()
-{
-	for( auto it : renderPassCache ) {
-		if ( it.second.pass != VK_NULL_HANDLE ) {
-			vkDestroyRenderPass( context.device, it.second.pass, nullptr );
-		}
-	}
 }
 
 
@@ -337,9 +325,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			vk_buffers[ frameIx ][ permIx ] = VK_NULL_HANDLE;
 		}
 	}
-	for ( uint32_t permIx = 0; permIx < PassPermCount; ++permIx ) {
-		vk_renderPasses[ permIx ] = VK_NULL_HANDLE;
-	}
 
 	// Attachment bits
 	m_attachmentBits = {};
@@ -399,11 +384,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		passBits.semantic.transitionBits.stencilTrans = state;
 		passBits.semantic.attachmentMask = m_attachmentMask;
 
-		vk_renderPasses[ permIx ] = vk_CreateRenderPass( passBits );
-		if ( vk_renderPasses[ permIx ] == VK_NULL_HANDLE ) {
-			throw std::runtime_error( "Failed to create framebuffer! Render pass invalid" );
-		}
-
 		for ( uint32_t frameIx = 0; frameIx < m_bufferCount; ++frameIx )
 		{
 			VkImageView attachments[ MaxAttachmentCount ] = {};
@@ -428,7 +408,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 			VkFramebufferCreateInfo framebufferInfo{ };
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = vk_renderPasses[ permIx ];
+			framebufferInfo.renderPass = VK_NULL_HANDLE;
 			framebufferInfo.attachmentCount = m_attachmentCount;
 			framebufferInfo.pAttachments = attachments;
 			framebufferInfo.width = images[ firstValidIx ]->info.width;
@@ -471,9 +451,6 @@ void FrameBuffer::Destroy()
 				}		
 			}
 			
-		}
-		for ( uint32_t i = 0; i < PassPermCount; ++i ) {
-			vk_renderPasses[ i ] = VK_NULL_HANDLE;
 		}
 	}
 	m_colorCount = 0;

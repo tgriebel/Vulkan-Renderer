@@ -229,10 +229,6 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 void Renderer::Destroy()
 {
-#ifdef USE_VULKAN 
-	vk_ClearRenderPassCache();
-#endif
-
 	g_gpuTimerPool.Destroy();
 
 	RenderResource::Cleanup( resourceLifeTime_t::FRAME );

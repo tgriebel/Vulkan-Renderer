@@ -66,7 +66,6 @@ private:
 
 #ifdef USE_VULKAN
 	VkFramebuffer				vk_buffers[ MaxFrameStates ][ PassPermCount ];
-	VkRenderPass				vk_renderPasses[ PassPermCount ];
 #endif
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
@@ -177,12 +176,6 @@ public:
 		const uint32_t id = GetBufferId( bufferId );
 		assert( id < MaxFrameStates );
 		return vk_buffers[ id ][ transitionState.bits ];
-	}
-
-	VkRenderPass GetVkRenderPass( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
-	{
-		assert( transitionState.bits < PassPermCount );
-		return vk_renderPasses[ transitionState.bits ];
 	}
 #endif
 

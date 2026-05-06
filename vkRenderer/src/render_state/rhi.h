@@ -95,7 +95,6 @@ static const uint32_t VkPassBitsSize = 16;
 #ifdef USE_VULKAN
 struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
-void vk_ClearRenderPassCache();
 #endif
 
 #ifdef USE_VULKAN
