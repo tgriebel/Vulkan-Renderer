@@ -364,7 +364,6 @@
     <ClCompile Include="src\render_core\renderer.cpp" />
     <ClCompile Include="src\render_core\renderInit.cpp" />
     <ClCompile Include="src\render_core\renderResource.cpp" />
-    <ClCompile Include="src\render_core\renderShutdown.cpp" />
     <ClCompile Include="src\render_core\renderView.cpp" />
     <ClCompile Include="src\render_core\swapChain.cpp" />
     <ClCompile Include="src\render_state\cmdContext.cpp" />

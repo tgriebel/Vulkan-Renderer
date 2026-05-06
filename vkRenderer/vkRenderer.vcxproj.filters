@@ -35,9 +35,6 @@
     <ClCompile Include="src\render_core\renderInit.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_core\renderShutdown.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\render_binding\pipeline.cpp">
       <Filter>Binding</Filter>
     </ClCompile>

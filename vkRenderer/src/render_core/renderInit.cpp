@@ -227,6 +227,56 @@ void Renderer::Init( const renderConfig_t& cfg )
 }
 
 
+void Renderer::Destroy()
+{
+#ifdef USE_VULKAN 
+	vk_ClearRenderPassCache();
+#endif
+
+	g_gpuTimerPool.Destroy();
+
+	RenderResource::Cleanup( resourceLifeTime_t::FRAME );
+	RenderResource::Cleanup( resourceLifeTime_t::RESIZE );
+
+	g_swapChain.Destroy();
+
+	ShutdownImGui();
+
+	// Buffers
+	gfxContext.Destroy();
+	computeContext.Destroy();
+
+	ShutdownShaderResources();
+
+	uploader.Shutdown();
+
+	// Sync
+	gfxContext.presentSemaphore.Destroy();
+	gfxContext.renderFinishedSemaphore.Destroy();
+	computeContext.semaphore.Destroy();
+
+	for( size_t i = 0; i < MaxFrameStates; ++i )
+	{
+		gfxContext.frameFence[ i ].Destroy();
+	}
+
+	schedule->Clear();
+
+	AllocatorMemory::DestroyVmaAllocator();
+
+	context.Destroy( g_window );
+
+	g_window.~Window();
+}
+
+
+void Renderer::Shutdown()
+{
+	FlushGPU();
+	Destroy();
+}
+
+
 void Renderer::BuildSchedule( TaskSchedule* schedule )
 {
 	RenderViewContext viewContext;
@@ -433,6 +483,40 @@ void Renderer::InitShaderResources()
 }
 
 
+void Renderer::ShutdownShaderResources()
+{
+	// Managed Cleanup
+	RenderResource::Cleanup( resourceLifeTime_t::REBOOT );
+
+	// Images
+	const uint32_t textureCount = ImageLib().Count();
+	for( uint32_t i = 0; i < textureCount; ++i )
+	{
+		const Image& texture = ImageLib().Find( i )->Get();
+		delete texture.gpuImage;
+	}
+
+	for( uint32_t i = 0; i < MaxImageDescriptors; ++i )
+	{
+		resources.gpuImages2D.BindIndex( i, nullptr );
+		resources.gpuImagesCube.BindIndex( i, nullptr );
+	}
+
+	// PSO
+	DestroyPipelineCache();
+
+	const uint32_t shaderCount = GpuProgramLib().Count();
+	for( uint32_t i = 0; i < shaderCount; ++i )
+	{
+		GpuProgram& prog = GpuProgramLib().Find( i )->Get();
+
+		prog.DestroyApiObjects();
+	}
+
+	renderContext.FreeRegisteredBindParms();
+}
+
+
 void Renderer::InitImGui( const FrameBuffer* fb )
 {
 #if defined( USE_IMGUI )
@@ -485,6 +569,20 @@ void Renderer::InitImGui( const FrameBuffer* fb )
 #ifdef USE_GLFW
 	ImGui_ImplGlfw_NewFrame();
 #endif
+#endif
+}
+
+
+void Renderer::ShutdownImGui()
+{
+#if defined( USE_IMGUI )
+#ifdef USE_VULKAN
+	ImGui_ImplVulkan_Shutdown();
+#endif
+#ifdef USE_GLFW
+	ImGui_ImplGlfw_Shutdown();
+#endif
+	ImGui::DestroyContext();
 #endif
 }
 
