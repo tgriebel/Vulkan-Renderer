@@ -84,6 +84,7 @@ void RenderResource::Cleanup( const resourceLifeTime_t lifetime )
 
 void RenderResource::TransitionNewImages( CommandList* cmdList )
 {
+#ifdef USE_VULKAN
 	std::vector<RenderResource*> resourceList = std::move( m_newImages );
 
 	const uint32_t resourceCount = static_cast<uint32_t>( resourceList.size() );
@@ -95,6 +96,9 @@ void RenderResource::TransitionNewImages( CommandList* cmdList )
 			Transition( cmdList, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
 		}
 	}
+#else
+	(void)cmdList;
+#endif
 }
 
 

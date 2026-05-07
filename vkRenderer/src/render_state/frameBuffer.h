@@ -92,11 +92,6 @@ public:
 		m_stencil = nullptr;
 	}
 
-	inline bool IsValid() const
-	{
-		return ( vk_buffers != VK_NULL_HANDLE );
-	}
-
 	inline uint32_t GetWidth() const
 	{
 		return m_width;

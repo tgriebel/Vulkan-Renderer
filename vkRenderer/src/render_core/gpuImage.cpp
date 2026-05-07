@@ -139,6 +139,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 
 void GpuImage::Destroy()
 {
+#ifdef USE_VULKAN	
 	assert( context.device != VK_NULL_HANDLE );
 	if( context.device == VK_NULL_HANDLE ) {
 		return;
@@ -161,4 +162,5 @@ void GpuImage::Destroy()
 			m_allocation[ i ].m_info = {};
 		}
 	}
+#endif
 }
