@@ -710,7 +710,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	schedule->Link( new RenderTask( viewContext->view2Ds[ 0 ], DRAWPASS_2D, DRAWPASS_2D ) );
 	schedule->Link( new ImguiTask( viewContext->view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], renderContext, resources, false ) );
 	schedule->Link( new RenderTask( viewContext->view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) ); // FIXME: Causes framebuffer resize issue due to multiple calls to Resize()
-	//schedule->Link( new ComputeTask( "ClearParticles", &particleState ) );
 
 	schedule->AsString();
 }

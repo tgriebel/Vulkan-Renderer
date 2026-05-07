@@ -118,6 +118,11 @@
 	  "bindset": "bindset_particle"
     },
 	{
+      "name": "ImageState",
+      "cs": "imageStat",
+	  "bindset": "bindset_compute"
+    },
+	{
       "name": "ImageWriteback",
       "cs": "imagewriteback",
 	  "bindset": "bindset_compute"

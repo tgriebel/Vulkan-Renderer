@@ -213,6 +213,9 @@
     <ClCompile Include="src\render_core\gpuTimerPool.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_tasks\ComputeTask.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -464,6 +467,9 @@
     <ClInclude Include="src\render_core\gpuTimerPool.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_tasks\ComputeTask.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -634,6 +640,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\noiseGen.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\imageStat.cs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

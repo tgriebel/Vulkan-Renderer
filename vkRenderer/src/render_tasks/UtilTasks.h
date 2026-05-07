@@ -4,28 +4,7 @@
 
 class CommandList;
 class RenderContext;
-struct ComputeState;
 enum gpuImageStateFlags_t : uint8_t;
-
-
-class ComputeTask : public GpuTask
-{
-private:
-	ComputeState*	m_state;
-	hdl_t			m_progHdl;
-	std::string		m_name;
-
-public:
-	ComputeTask( const char* csName, ComputeState* state );
-
-	void			Resize() {}
-	void			FrameBegin() {}
-	void			FrameEnd() {}
-	std::string		AsString() const;
-	void			Execute( CommandList& context ) override;
-
-	~ComputeTask() {}
-};
 
 
 class TransitionImageTask : public GpuTask

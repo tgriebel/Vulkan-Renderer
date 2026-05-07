@@ -5,31 +5,6 @@
 #include "../render_core/renderer.h"
 
 
-// ComputeTask
-
-ComputeTask::ComputeTask( const char* csName, ComputeState* state )
-{
-	m_name    = csName;
-	m_state   = state;
-	m_progHdl = GpuProgramLib().RetrieveHdl( csName );
-}
-
-
-std::string ComputeTask::AsString() const
-{
-	std::stringstream ss;
-	ss << "<ComputeTask: " << m_name << ">";
-	return ss.str();
-}
-
-
-void ComputeTask::Execute( CommandList& context )
-{
-	ComputeCmdList* computeContext = reinterpret_cast<ComputeCmdList*>( &context );
-	computeContext->Dispatch( m_progHdl, *m_state->parms, m_state->x, m_state->y, m_state->z );
-}
-
-
 // ResolveImageTask
 
 ResolveImageTask::ResolveImageTask( const resolveTaskCreateInfo_t& createInfo )
