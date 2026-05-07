@@ -14,7 +14,7 @@ extern imguiControls_t g_imguiControls;
 std::string ImageReadbackTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImageReadbackTask: " << m_name << ">";
+	ss << "ImageReadbackTask: " << m_name;
 	return ss.str();
 }
 

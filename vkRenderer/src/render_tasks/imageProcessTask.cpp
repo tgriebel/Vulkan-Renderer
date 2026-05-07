@@ -9,7 +9,7 @@
 std::string ImageProcessTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImageProcessTask: " << m_dbgName << ">";
+	ss << "ImageProcessTask: " << m_dbgName;
 	return ss.str();
 }
 

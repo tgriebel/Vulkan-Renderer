@@ -104,7 +104,7 @@ void TaskSchedule::AsString() const
 	GpuTask* t = tasks;
 	while ( t != nullptr )
 	{
-		std::cout << "+ " << t->AsString() << "\n";
+		std::cout << "+ <" << t->AsString() << ">\n";
 		t = t->GetChild();
 	}
 	std::cout << std::flush;

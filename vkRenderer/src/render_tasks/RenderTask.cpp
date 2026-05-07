@@ -313,7 +313,7 @@ void RenderTask::Resize()
 std::string RenderTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<RenderTask: " << m_renderView->GetName() << ">";
+	ss << "RenderTask: " << m_renderView->GetName();
 	return ss.str();
 }
 

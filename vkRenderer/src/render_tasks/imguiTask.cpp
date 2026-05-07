@@ -190,7 +190,7 @@ void ImguiTask::Resize()
 std::string ImguiTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImguiTask>";
+	ss << "ImguiTask";
 	return ss.str();
 }
 

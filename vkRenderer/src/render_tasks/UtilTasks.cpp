@@ -84,7 +84,7 @@ ResolveImageTask::~ResolveImageTask()
 std::string ResolveImageTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ResolveImageTask: " << m_count << " resolve(s)>";
+	ss << "ResolveImageTask: " << m_count << " resolve(s)";
 	for ( uint32_t i = 0; i < m_count; ++i )
 	{
 		ss << " [" << m_createInfo.resolves[ i ].info.src->gpuImage->GetDebugName()
@@ -149,7 +149,7 @@ void ResolveImageTask::Execute( CommandList& context )
 std::string TransitionImageTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<TransitionImageTask: " << m_img->gpuImage->GetDebugName() << ">";
+	ss << "TransitionImageTask: " << m_img->gpuImage->GetDebugName();
 	return ss.str();
 }
 
@@ -203,7 +203,7 @@ CopyImageTask::CopyImageTask( Image* src, const copyImageParms_t& srcParms, Imag
 std::string CopyImageTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<CopyImageTask: " << m_src->gpuImage->GetDebugName() << " -> " << m_dst->gpuImage->GetDebugName() << ">";
+	ss << "CopyImageTask: " << m_src->gpuImage->GetDebugName() << " -> " << m_dst->gpuImage->GetDebugName();
 	return ss.str();
 }
 

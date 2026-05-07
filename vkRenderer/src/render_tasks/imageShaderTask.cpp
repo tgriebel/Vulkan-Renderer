@@ -9,7 +9,7 @@
 std::string ImageShaderTask::AsString() const
 {
 	std::stringstream ss;
-	ss << "<ImageShaderTask: " << m_dbgName << ">";
+	ss << "ImageShaderTask: " << m_dbgName;
 	return ss.str();
 }
 
