@@ -118,6 +118,12 @@ public:
 	void						Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z );
 	void						Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z );
 
+
+	static uint32_t DispatchDim( const uint32_t dim, const uint32_t groupSize )
+	{
+		return 	( dim + groupSize - 1 ) / groupSize;
+	}
+
 	inline RenderContext*	GetRenderContext()
 	{
 		return m_renderContext;

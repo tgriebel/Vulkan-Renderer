@@ -2,6 +2,7 @@
 
 #include <queue>
 #include "RenderTask.h"
+#include "../render_resources/imageArray.h"
 
 class CommandList;
 class GfxCmdList;
@@ -9,7 +10,10 @@ class RenderView;
 class RenderContext;
 class ResourceContext;
 class Image;
+class ShaderBindParms;
 struct ComputeState;
+
+static const uint32_t ImageStatHistogramBins = 256;
 
 enum gpuImageStateFlags_t : uint8_t;
 
@@ -24,6 +28,15 @@ private:
 	const DrawPass*			m_imguiPass;
 	DrawPass*				m_imagePass;
 	GpuBuffer				m_buffer;
+
+	// Image histogram (dispatched per-frame on the currently viewed image).
+	GpuBuffer				m_imageStatBuffer;
+	GpuBuffer				m_imageStatParmsBuffer;
+	ShaderBindParms*		m_imageStatParms;
+	ImageArray				m_imageStatImages;
+	const Image*			m_imageStatImage;
+	bool					m_imageStatDispatched;
+	uint32_t				m_imageStatHistogram[ ImageStatHistogramBins ];
 
 	void Init( const DrawPass* pass, RenderContext* renderContext, ResourceContext* resourceContext, const bool finalizeImage );
 	void Shutdown();

@@ -2,9 +2,23 @@
 #include "../render_core/renderer.h"
 #include "../render_state/cmdContext.h"
 #include "../render_binding/bindings.h"
+#include "../render_resources/gpuBuffer.h"
 #include "../draw_passes/postPass.h"
+#include "../asset_types/gpuProgram.h"
+#include "../asset_types/assetLib.h"
 
 #include "imageShaderTask.h"
+
+namespace
+{
+	struct imageStatParms_t
+	{
+		vec4f		dimensions;		// .xy = w/h, .z = lod
+		vec2f		luminanceRange;	// log2 min/max
+		uint32_t	imageId;
+		uint32_t	baseOffset;
+	};
+}
 
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/imgui.h"
@@ -96,6 +110,33 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 		m_imagePass->codeCubeImages.BindIndex( codeImageIx, rc.defaultImageCube );
 	}
 	m_buffer.Create( "ImguiCallbackBuffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM );
+
+	// MULTI_FRAME so each frame writes its own slot; we read the slot whose
+	// dispatch finished MaxFrameStates frames ago — no FlushGPU stall needed.
+	m_imageStatBuffer.Create(
+		"ImageStatHistogram",
+		swapBuffering_t::MULTI_FRAME,
+		resourceLifeTime_t::UNMANAGED,
+		ImageStatHistogramBins,
+		sizeof( uint32_t ),
+		bufferType_t::STORAGE );
+
+	m_imageStatParmsBuffer.Create(
+		"ImageStatParms",
+		swapBuffering_t::SINGLE_FRAME,
+		resourceLifeTime_t::UNMANAGED,
+		1,
+		sizeof( imageStatParms_t ),
+		bufferType_t::UNIFORM );
+
+	m_imageStatImages.SetRenderContext( m_context );
+	m_imageStatImages.Resize( 1 );
+	m_imageStatImages.BindIndex( 0, rc.defaultImage );
+
+	m_imageStatParms      = m_context->RegisterBindParm( m_context->LookupBindSet( bindset_compute ) );
+	m_imageStatImage      = nullptr;
+	m_imageStatDispatched = false;
+	memset( m_imageStatHistogram, 0, sizeof( m_imageStatHistogram ) );
 }
 
 
@@ -107,6 +148,8 @@ void ImguiTask::Shutdown()
 		m_imagePass = nullptr;
 	}
 	m_buffer.Destroy();
+	m_imageStatBuffer.Destroy();
+	m_imageStatParmsBuffer.Destroy();
 }
 
 
@@ -168,6 +211,39 @@ void ImguiTask::FrameBegin()
 	m_imagePass->parms->Bind( BINDING_NAME( imageStencil ),		rc.whiteImage );
 	m_imagePass->parms->Bind( BINDING_NAME( imageProcess ),		&m_buffer );
 
+	// Image histogram setup — only run when a non-cube image is being viewed.
+	m_imageStatImage      = nullptr;
+	m_imageStatDispatched = false;
+
+	if ( image != nullptr && image->info.type != IMAGE_TYPE_CUBE )
+	{
+		imageStatParms_t parms{};
+		parms.dimensions     = vec4f( (float)image->info.width, (float)image->info.height, (float)callbackTasks[ 0 ].mipLevel, 0.0f );
+		parms.luminanceRange = vec2f( -8.0f, 4.0f );
+		parms.imageId        = 0;
+		parms.baseOffset     = 0;
+
+		m_imageStatParmsBuffer.SetPos( 0 );
+		m_imageStatParmsBuffer.CopyData( &parms, sizeof( parms ) );
+
+		// The current frame's slot holds the result from MaxFrameStates frames
+		// ago — guaranteed complete since the GPU is at most MaxFrameStates - 1
+		// frames in flight. Read it now, then overwrite for this frame's dispatch.
+		assert( m_imageStatBuffer.VisibleToCpu() );
+		memcpy( m_imageStatHistogram, m_imageStatBuffer.Get(), sizeof( m_imageStatHistogram ) );
+		memset( m_imageStatBuffer.Get(), 0, ImageStatHistogramBins * sizeof( uint32_t ) );
+
+		m_imageStatImages.BindIndex( 0, image );
+
+		m_imageStatImage      = image;
+		m_imageStatDispatched = true;
+	}
+
+	m_imageStatParms->Bind( BINDING_NAME( globalsBuffer ), &m_resources->globalConstants );
+	m_imageStatParms->Bind( BINDING_NAME( computeImage ),  &m_imageStatImages );
+	m_imageStatParms->Bind( BINDING_NAME( computeParms ),  &m_imageStatParmsBuffer );
+	m_imageStatParms->Bind( BINDING_NAME( computeWrite ),  &m_imageStatBuffer );
+
 #ifdef USE_IMGUI
 	// Prepare dear imgui render data
 	ImGui::Render();
@@ -177,7 +253,7 @@ void ImguiTask::FrameBegin()
 
 void ImguiTask::FrameEnd()
 {
-
+	m_imageStatDispatched = false;
 }
 
 
@@ -198,6 +274,17 @@ std::string ImguiTask::AsString() const
 void ImguiTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( "ImGui", ColorToVector( Color::White ) );
+
+	// Image histogram dispatch — must execute outside any rendering scope.
+	if ( m_imageStatDispatched && m_imageStatImage != nullptr )
+	{
+		const uint32_t groupSize = 16;
+		const uint32_t groupsX = CommandList::DispatchDim( m_imageStatImage->info.width, groupSize );
+		const uint32_t groupsY = CommandList::DispatchDim( m_imageStatImage->info.width, groupSize );
+
+		const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageState" );
+		cmdContext.Dispatch( progHdl, *m_imageStatParms, groupsX, groupsY, 1 );
+	}
 
 #ifdef USE_IMGUI
 	const FrameBuffer* fb = m_imguiPass->GetFrameBuffer();
