@@ -279,6 +279,41 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				} );
 #endif
 		}
+
+		// Blur
+		{
+			// Blur Image
+			{
+				imageInfo_t info{};
+				info.width = displayWidth;
+				info.height = displayHeight;
+				info.mipLevels = 1;
+				info.layers = 1;
+				info.subsamples = IMAGE_SMP_1;
+				info.fmt = IMAGE_FMT_R_32;
+				info.type = IMAGE_TYPE_2D;
+				info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+				info.tiling = IMAGE_TILING_MORTON;
+
+				resources->ssaoBlurImage->Create(
+					info,
+					"FB_ssaoBlurredImage", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, resourceLifeTime_t::RESIZE
+				);
+			}
+
+			imageProcessCreateInfo_t info{};
+			info.name = "Separable Gaussian";
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = resources->ssaoBlurImage;
+			info.progName = "SeparableGaussianBlur";
+			info.resourceImages[ 0 ] = resources->ssaoImage;
+			info.baseMip = 0;
+			info.mipCount = 1;
+			info.multiPass = true;
+
+			tasks.ssaoBlurTask = new ImageProcessTask( info );
+		}
 	}
 
 	if( config.autoExposure )
@@ -616,6 +651,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( tasks.ssaoTask )
 	{
 		schedule->Link( tasks.ssaoTask );
+		if( tasks.ssaoBlurTask ) {
+			schedule->Link( tasks.ssaoBlurTask );
+		}
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
