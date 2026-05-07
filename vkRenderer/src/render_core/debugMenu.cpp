@@ -1097,8 +1097,8 @@ void DrawImageViewerDebugMenu()
 	static float intensity     = 1.0f;
 	static float intensityMin  = 0.0f;
 	static float intensityMax  = 2.0f;
-	static float rangeMin  = -INFINITY;
-	static float rangeMax  = INFINITY;
+	static float rangeMin  = 0.0f;
+	static float rangeMax = 1.0f;// INFINITY;
 
 	ImGui::Begin( "Image Viewer" );
 

@@ -78,10 +78,12 @@ psOutput_t PSMain( vsToPsInterpolators input )
 		return output;
 	}
 	
-    float4 color = sampleColor.rgba;
-    color.rgb = ( length( color.rgb ) <= imageProcess.rangeMin ) ? float3( 0.0f, 0.0f, 0.0f ) : color.rgb;
-    color.rgb = ( length( color.rgb ) >= imageProcess.rangeMax ) ? float3( 1.0f, 1.0f, 1.0f ) : color.rgb; // Images might be HDR, but the viewer itself is SDR
-    color.a = 1.0f;
+    // Normalize values inside [rangeMin, rangeMax] to [0, 1]; clamp outside.
+    // Tint/intensity is applied afterward as a scale on the normalized range.
+    const float rangeSpan = max( imageProcess.rangeMax - imageProcess.rangeMin, 1e-6f );
+    float4 color;
+    color.rgb = saturate( ( sampleColor.rgb - imageProcess.rangeMin ) / rangeSpan );
+    color.a   = 1.0f;
 	
 	// Mark each channel 0/1, then check if only a single 1 value is in the mask
     const float4 mask = step( 0.00001f, abs( tint ) );	
@@ -98,6 +100,9 @@ psOutput_t PSMain( vsToPsInterpolators input )
 		output.outColor   = color * tint;
 		output.outColor.a = tint.a > 0.0f ? color.a : 1.0f;
 	}
+
+	// Viewer is SDR — clamp the tinted result back to [0, 1].
+	output.outColor = saturate( output.outColor );
 
     if ( applySrgbCurve )
 	{
