@@ -60,7 +60,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     const float depthP = localTextures[ ResourceImageIx0 ].Load( int3( pixelPos, 0 ) ).r;
 
-    // Sky / background — fully lit, no geometry to occlude
+    // Skip sky
     if ( depthP <= 0.0f )
     {
         output.outColor = float4( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -72,7 +72,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     uint viewId = 6;
     
     const float4x4 view = views[ viewId ].viewMat;
-    const float4x4 proj = views[ viewId ].projMat;
+    const float4x4 proj = views[ viewId ].invProjMat;
     const float3 viewOrigin = views[ viewId ].viewOrigin;
     const float3 P = ReconstructViewPos( uv, depthP, proj );
     const float3 N = OctDecode( localTextures[ ResourceImageIx1 ].SampleLevel( bilinearSamplerClampEdge, uv, 0 ).ba );
@@ -83,12 +83,12 @@ psOutput_t PSMain( vsToPsInterpolators input )
     // UV-space extent of the sampling radius at this pixel's depth.
     // viewDepth = -P.z because ReconstructViewPos returns z < 0 for visible geometry.
     // proj[0][0] = 1/tan(fovX/2),  proj[1][1] = 1/tan(fovY/2).
-    const float  viewDepth = -P.z;
-    //const float2 radiusUV  = float2( imageProcess.radius * proj[ 0 ][ 0 ],
-    //                                 imageProcess.radius * proj[ 1 ][ 1 ] )
-    //                         / viewDepth * 0.5f;   
+    const float viewDepth = -P.z;
+    const float2 radiusUV  = float2( imageProcess.radius * proj[ 0 ][ 0 ],
+                                     imageProcess.radius * proj[ 1 ][ 1 ] )
+                             / viewDepth * 0.5f;   
     
-    const float2 radiusUV = 0.5f;
+   // const float2 radiusUV = 0.5f;
 
     float occlusion = 0.0f;
 
@@ -126,7 +126,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     output.outColor = float4( ao.xxx, 1.0f );
     //output.outColor.rgb = EncodeNormal( N );
-    //output.outColor.rgb = P.zzz;
+   // output.outColor.rgb = viewDepth.xxx;
     output.outColor.a = 1.0f;
     return output;
 }

@@ -29,8 +29,6 @@ using renderPassMap_t = std::unordered_map<uint64_t, VkRenderPass>;
 #endif
 using pipelineMap_t = std::unordered_map<uint64_t, pipelineObject_t>;
 
-#define USE_OPENGL_CONVENTIONS 1
-
 extern Window						g_window;
 extern SwapChain					g_swapChain;
 

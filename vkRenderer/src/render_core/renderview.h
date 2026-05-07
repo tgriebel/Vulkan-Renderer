@@ -70,6 +70,7 @@ private:
 	viewport_t				m_viewport;
 	mat4x4f					m_viewMatrices[ MaxMultiViews ];
 	mat4x4f					m_projMatrices[ MaxMultiViews ];
+	mat4x4f					m_invProjMatrices[ MaxMultiViews ];
 	mat4x4f					m_viewProjMatrices[ MaxMultiViews ];
 	mat4x4f					m_previousViewProjMatrices[ MaxMultiViews ];
 	frameBufferCreateInfo_t	m_fbSourceImages;
@@ -104,6 +105,7 @@ public:
 		{
 			m_viewMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
 			m_projMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
+			m_invProjMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
 			m_viewProjMatrices[ multiViewIndex ] = mat4x4f( 1.0f );
 
 			m_framebuffers[ multiViewIndex ] = nullptr;
@@ -173,6 +175,7 @@ public:
 	vec2i					GetFrameSize() const;
 	const mat4x4f&			GetViewMatrix( const uint32_t multiView = 0 ) const;
 	const mat4x4f&			GetProjMatrix( const uint32_t multiView = 0 ) const;
+	const mat4x4f&			GetInvProjMatrix( const uint32_t multiView = 0 ) const;
 	const mat4x4f&			GetViewProjMatrix( const uint32_t multiView = 0 ) const;
 	const mat4x4f&			GetPreviousViewProjMatrix( const uint32_t multiView = 0 ) const;
 	int						GetViewBufferId( const int multiView ) const; // TODO: Have view own it's view buffer. Eliminates indexing

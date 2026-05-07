@@ -254,11 +254,15 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 			const vec2i& frameSize = GetFrameSize();
 			viewBuffer.viewMat = GetViewMatrix( multiViewIndex );
 			viewBuffer.projMat = GetProjMatrix( multiViewIndex );
+			viewBuffer.invProjMat = GetInvProjMatrix( multiViewIndex );
 			viewBuffer.prevViewProjMat = GetPreviousViewProjMatrix( multiViewIndex );
 			viewBuffer.viewProjMat = GetViewProjMatrix( multiViewIndex );
 			viewBuffer.viewOrigin = GetViewOrigin();
 			viewBuffer.dimensions = vec4f( (float)frameSize[ 0 ], (float)frameSize[ 1 ], 1.0f / frameSize[ 0 ], 1.0f / frameSize[ 1 ] );
 			viewBuffer.numLights = numLights;
+
+			mat4x4f invCheck = viewBuffer.invProjMat * viewBuffer.projMat;
+			assert( IsIdentity( invCheck, 0.001f ) );
 
 			m_viewParmeters.SetPos( 0 );
 			m_viewParmeters.CopyData( &viewBuffer, sizeof( viewBuffer ) );
@@ -468,6 +472,12 @@ const mat4x4f& RenderView::GetProjMatrix( const uint32_t multiView ) const
 }
 
 
+const mat4x4f& RenderView::GetInvProjMatrix( const uint32_t multiView ) const
+{
+	return m_invProjMatrices[ multiView ];
+}
+
+
 const mat4x4f& RenderView::GetViewProjMatrix( const uint32_t multiView ) const
 {
 	return m_viewProjMatrices[ multiView ];
@@ -579,6 +589,7 @@ void RenderView::SetCamera( const Camera& camera, const bool reverseZ, const uin
 {
 	m_viewMatrices[ multiView ] = camera.GetViewMatrix();
 	m_projMatrices[ multiView ] = camera.GetPerspectiveMatrix( reverseZ );
+	m_invProjMatrices[ multiView ] = camera.GetInversePerspectiveMatrix( reverseZ );
 	m_viewProjMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
 
 	m_viewport.near = camera.GetNearClip();
@@ -587,14 +598,12 @@ void RenderView::SetCamera( const Camera& camera, const bool reverseZ, const uin
 	m_viewOrigin = camera.GetOrigin().xyz;
 }
 
+
 void RenderView::SetCamera2D( const Camera& camera, const vec4f& frame, const uint32_t multiView )
 {
 	m_viewMatrices[ multiView ] = mat4x4f::Identity();
-#if USE_OPENGL_CONVENTIONS
 	m_projMatrices[ multiView ] = camera.GetOrthographicMatrix( frame[ 0 ], frame[ 1 ], frame[ 3 ], frame[ 2 ] );
-#else
-	m_projMatrices[ multiView ] = camera.GetOrthographicMatrix( frame[ 0 ], frame[ 1 ], frame[ 2 ], frame[ 3 ] );
-#endif
+	m_invProjMatrices[ multiView ] = camera.GetInverseOrthographicMatrix( frame[ 0 ], frame[ 1 ], frame[ 3 ], frame[ 2 ] );
 	m_viewProjMatrices[ multiView ] = m_projMatrices[ multiView ] * m_viewMatrices[ multiView ];
 
 	m_viewport.near = camera.GetNearClip();

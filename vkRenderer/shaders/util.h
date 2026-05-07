@@ -165,29 +165,31 @@ float3 ViewUp( const float4x4 view )
 	return float3( view[ 1 ][ 0 ], view[ 1 ][ 1 ], view[ 1 ][ 2 ] );
 }
 
-// https://therealmjp.github.io/posts/position-from-depth-3/
-float LinearDepth( const float zDepth, const float4x4 proj )
+
+float LinearDepth( const float zDepth, const float4x4 invProj )
 {
-	// TODO: Stubbed here for now, but need a per-view constant
-	const bool reverseZ = true;
+	//float a = proj[ 2 ][ 2 ];
+	//float b = proj[ 3 ][ 2 ];
+	//return b / ( z + a );
 
-	const float z = reverseZ ? ( 1.0f - zDepth ) : zDepth;
-
-	float a = proj[ 2 ][ 2 ];
-	float b = proj[ 3 ][ 2 ];
-	return b / ( z + a );
+	float4 viewPos = mul( invProj, float4( 0.0f, 0.0f, zDepth, 1.0f ) );
+	viewPos /= viewPos.w;
+	return viewPos.z;
 }
 
 
-float3 ReconstructViewPos( const float2 uv, const float zDepth, const float4x4 proj )
+float3 ReconstructViewPos( const float2 uv, const float zDepth, const float4x4 invProj )
 {
-	float depth = LinearDepth( zDepth, proj );
+	//float depth = LinearDepth( zDepth, proj );
 
 	float2 ndc = 2.0f * uv - float2( 1.0f, 1.0f );
 
-	float2 viewPos = ndc * depth * float2( 1.0f / proj[ 0 ][ 0 ], 1.0f / proj[ 1 ][ 1 ] );
+	//float2 viewPos = ndc * depth * float2( 1.0f / proj[ 0 ][ 0 ], 1.0f / proj[ 1 ][ 1 ] );
 
-	return float3( viewPos, -depth ); // View-forward vector points towards origin
+	//return float3( viewPos, -depth ); // View-forward vector points towards origin
+	float4 viewPos = mul( invProj, float4( ndc.xy, zDepth, 1.0f ) );
+	viewPos /= viewPos.w;
+	return viewPos.z;
 }
 
 

@@ -20,7 +20,7 @@ struct viewport_t
 		width( 1 ),
 		height( 1 ),
 		near( 0 ),
-		far( 1 )
+		far( INFINITY )
 	{}
 
 	viewport_t( const int32_t x_, const int32_t y_, const uint32_t width_, const uint32_t height_, const float near_, const float far_ ) :
@@ -68,7 +68,7 @@ private:
 	plane_t		GetFocalPlane() const;
 
 public:
-	void Init( const vec4f& _origin, const mat4x4f& _axis, const float _aspect = 1.0f, const float _fov = 90.0f, const float _near = 1.0f, const float _far = 1000.0f )
+	void Init( const vec4f& _origin, const mat4x4f& _axis, const float _aspect = 1.0f, const float _fov = 90.0f, const float _near = 0.01f, const float _far = INFINITY )
 	{
 		float aspectRatio = ( _aspect != 0.0f ) ? _aspect : 1.0f;
 
@@ -131,7 +131,9 @@ public:
 	void		GetAxisVectors( vec4f& forward, vec4f& right, vec4f& up ) const;
 	mat4x4f		GetViewMatrix() const;
 	mat4x4f		GetPerspectiveMatrix( const bool reverseZ = true ) const;
+	mat4x4f		GetInversePerspectiveMatrix( const bool reverseZ ) const;
 	mat4x4f		GetOrthographicMatrix( const float left, const float right, const float top, const float bottom ) const;
+	mat4x4f		GetInverseOrthographicMatrix( const float left, const float right, const float top, const float bottom ) const;
 	
 	// Movement
 	void		SetPosition( const vec3f& angles );

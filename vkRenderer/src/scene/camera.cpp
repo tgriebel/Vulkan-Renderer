@@ -130,7 +130,7 @@ mat4x4f Camera::GetPerspectiveMatrix( const bool reverseZ ) const
 
 	if ( reverseZ )
 	{
-		const bool invFarPlane = true; // Just assume as convention and not as param
+		const bool invFarPlane = ( f >= 10000.0f );
 		if( invFarPlane )
 		{
 			proj[ 2 ][ 2 ] = 0.0f; // As the far plane goes to inf, this becomes 0
@@ -151,6 +151,36 @@ mat4x4f Camera::GetPerspectiveMatrix( const bool reverseZ ) const
 }
 
 
+mat4x4f Camera::GetInversePerspectiveMatrix( const bool reverseZ ) const
+{
+	mat4x4f invProj = mat4x4f( 0.0f );
+	invProj[ 0 ][ 0 ] = halfFovX;
+	invProj[ 1 ][ 1 ] = halfFovY;
+	invProj[ 3 ][ 2 ] = -1.0f;
+
+	const float n = clipRegion.near;
+	const float f = clipRegion.far;
+
+	if( reverseZ )
+	{
+		const float a = -n / ( f - n );
+		const float b = ( f * n ) / ( f - n );
+
+		invProj[ 2 ][ 3 ] = ( 1.0f / b );
+		invProj[ 3 ][ 3 ] = ( a / b );
+	}
+	else
+	{
+		const float a = f / ( n - f );
+		const float b = -( f * n ) / ( f - n );
+
+		invProj[ 2 ][ 3 ] = ( 1.0f / b );
+		invProj[ 3 ][ 3 ] = ( a / b );
+	}
+	return invProj;
+}
+
+
 mat4x4f Camera::GetOrthographicMatrix( const float left, const float right, const float top, const float bottom ) const
 {
 	const float n = clipRegion.near;
@@ -165,6 +195,23 @@ mat4x4f Camera::GetOrthographicMatrix( const float left, const float right, cons
 	proj[ 3 ][ 1 ] = -( top + bottom ) / ( top - bottom );
 	proj[ 3 ][ 2 ] = -( f + n ) / ( f - n );
 	return proj;
+}
+
+
+mat4x4f Camera::GetInverseOrthographicMatrix( const float left, const float right, const float top, const float bottom ) const
+{
+	const float n = clipRegion.near;
+	const float f = clipRegion.far;
+
+	mat4x4f inv = mat4x4f( 1.0f );
+	inv[ 0 ][ 0 ] = 0.5f * ( right - left );
+	inv[ 1 ][ 1 ] = 0.5f * ( top - bottom );
+	inv[ 2 ][ 2 ] = -0.5f * ( f - n );
+	inv[ 3 ][ 3 ] = 1.0f;
+	inv[ 3 ][ 0 ] = 0.5f * ( right + left );
+	inv[ 3 ][ 1 ] = 0.5f * ( top + bottom );
+	inv[ 3 ][ 2 ] = -0.5f * ( f + n );
+	return inv;
 }
 
 
