@@ -396,18 +396,9 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			}
 			assert( currentAttachment == m_attachmentCount );
 
-			VkFramebufferCreateInfo framebufferInfo{ };
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = VK_NULL_HANDLE;
-			framebufferInfo.attachmentCount = m_attachmentCount;
-			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = images[ firstValidIx ]->info.width;
-			framebufferInfo.height = images[ firstValidIx ]->info.height;
-			framebufferInfo.layers = images[ firstValidIx ]->subResourceView.arrayCount;
-
-			VK_CHECK_RESULT( vkCreateFramebuffer( context.device, &framebufferInfo, nullptr, &vk_buffers[ frameIx ][ permIx ] ) );
-
-			vk_SetObjectName( (uint64_t)vk_buffers[ frameIx ][ permIx ], VK_OBJECT_TYPE_FRAMEBUFFER, vk_BuildObjectName( "FrameBuffer", createInfo.name, frameIx ).c_str() );
+			// Dynamic rendering: no VkFramebuffer needed — image views are bound
+			// directly via VkRenderingAttachmentInfo at vkCmdBeginRendering time.
+			(void)attachments;
 		}
 		m_color0 = createInfo.color0;
 		m_color1 = createInfo.color1;
