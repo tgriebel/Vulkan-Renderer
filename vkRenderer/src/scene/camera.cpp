@@ -118,7 +118,7 @@ mat4x4f Camera::GetViewMatrix() const
 }
 
 
-mat4x4f Camera::GetPerspectiveMatrix( const bool inverseZ ) const
+mat4x4f Camera::GetPerspectiveMatrix( const bool reverseZ ) const
 {
 	mat4x4f proj = mat4x4f( 0.0f );
 	proj[ 0 ][ 0 ] = 1.0f / halfFovX;
@@ -128,15 +128,24 @@ mat4x4f Camera::GetPerspectiveMatrix( const bool inverseZ ) const
 	const float n = clipRegion.near;
 	const float f = clipRegion.far;
 
-	if ( inverseZ )
+	if ( reverseZ )
 	{
-		proj[ 2 ][ 2 ] = -n / ( f - n );
-		proj[ 3 ][ 2 ] = ( f * n ) / ( f - n );
+		const bool invFarPlane = true; // Just assume as convention and not as param
+		if( invFarPlane )
+		{
+			proj[ 2 ][ 2 ] = 0.0f; // As the far plane goes to inf, this becomes 0
+			proj[ 3 ][ 2 ] = n; // As far plane goes to inf, this goes to n
+		}
+		else
+		{
+			proj[ 2 ][ 2 ] = n / ( f - n );
+			proj[ 3 ][ 2 ] = ( f * n ) / ( f - n );
+		}
 	}
 	else
 	{
 		proj[ 2 ][ 2 ] = f / ( n - f );
-		proj[ 3 ][ 2 ] = -( f * n ) / ( f - n );
+		proj[ 3 ][ 2 ] = ( f * n ) / ( n - f );
 	}
 	return proj;
 }

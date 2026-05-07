@@ -130,7 +130,7 @@ public:
 	mat4x4f		GetAxis() const;
 	void		GetAxisVectors( vec4f& forward, vec4f& right, vec4f& up ) const;
 	mat4x4f		GetViewMatrix() const;
-	mat4x4f		GetPerspectiveMatrix( const bool inverseZ = true ) const;
+	mat4x4f		GetPerspectiveMatrix( const bool reverseZ = true ) const;
 	mat4x4f		GetOrthographicMatrix( const float left, const float right, const float top, const float bottom ) const;
 	
 	// Movement
