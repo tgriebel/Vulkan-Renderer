@@ -309,13 +309,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		}
 	}
 
-	// Defaults
-	for ( uint32_t frameIx = 0; frameIx < m_bufferCount; ++frameIx ) {
-		for ( uint32_t permIx = 0; permIx < PassPermCount; ++permIx ) {	
-			vk_buffers[ frameIx ][ permIx ] = VK_NULL_HANDLE;
-		}
-	}
-
 	// Attachment bits
 	m_attachmentBits = {};
 	m_attachmentMask = RENDER_PASS_MASK_NONE;
@@ -418,22 +411,6 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 
 void FrameBuffer::Destroy()
 {
-	assert( context.device != VK_NULL_HANDLE );
-	if ( context.device != VK_NULL_HANDLE )
-	{	
-		for ( uint32_t frameIx = 0; frameIx < m_bufferCount; ++frameIx )
-		{
-			for ( uint32_t i = 0; i < PassPermCount; ++i )
-			{
-				if ( vk_buffers != VK_NULL_HANDLE )
-				{
-					vkDestroyFramebuffer( context.device, vk_buffers[ frameIx ][ i ], nullptr );
-					vk_buffers[ frameIx ][ i ] = VK_NULL_HANDLE;
-				}		
-			}
-			
-		}
-	}
 	m_colorCount = 0;
 	m_dsCount = 0;
 	m_attachmentCount = 0;

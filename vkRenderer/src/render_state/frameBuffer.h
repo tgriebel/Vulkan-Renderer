@@ -64,10 +64,6 @@ private:
 	renderPassAttachmentMask_t	m_attachmentMask;
 	renderAttachmentBits_t		m_attachmentBits;
 
-#ifdef USE_VULKAN
-	VkFramebuffer				vk_buffers[ MaxFrameStates ][ PassPermCount ];
-#endif
-
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
 	{
 		const uint32_t bufferCount = ( m_swapBuffering == swapBuffering_t::MULTI_FRAME ) ? MaxFrameStates : 1;
@@ -164,15 +160,6 @@ public:
 	{
 		return m_attachmentMask;
 	}
-
-#ifdef USE_VULKAN
-	VkFramebuffer GetVkBuffer( const renderPassTransition_t& transitionState = {}, const uint32_t bufferId = 0 ) const
-	{
-		const uint32_t id = GetBufferId( bufferId );
-		assert( id < MaxFrameStates );
-		return vk_buffers[ id ][ transitionState.bits ];
-	}
-#endif
 
 	bool NeedsResize() const;
 
