@@ -56,6 +56,9 @@ struct resolveImageInfo_t
 
 class DeviceContext
 {
+private:
+	bool isRendeDocAttached = false;
+
 public:
 #ifdef USE_VULKAN
 	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
@@ -119,6 +122,8 @@ public:
 
 	void	Create( Window& window );
 	void	Destroy( Window& window );
+
+	inline bool IsRenderDocAttached() const { return isRendeDocAttached; }
 };
 
 extern DeviceContext context;

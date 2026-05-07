@@ -7,6 +7,20 @@
 
 DeviceContext context;
 
+
+static bool IsRenderDocAttached()
+{
+#if defined( _WIN32 )
+	// RenderDoc injects renderdoc.dll into the target process before Vulkan loads.
+	// Its timestamp-query handling is flaky during capture, so disable our pool
+	// when it's present.
+	return GetModuleHandleA( "renderdoc.dll" ) != nullptr;
+#else
+	return false;
+#endif
+}
+
+
 bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
 {
 	uint32_t extensionCount;
@@ -1200,6 +1214,8 @@ void DeviceContext::Create( Window& window )
 		window.CreateGlfwSurface( context.instance );
 #endif
 	}
+
+	isRendeDocAttached = ::IsRenderDocAttached();
 
 	// Pick physical device
 	{
