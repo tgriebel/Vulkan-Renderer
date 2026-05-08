@@ -69,8 +69,6 @@ psOutput_t PSMain( vsToPsInterpolators input )
     
     const float randomNoise = InterleavedGradientNoise( float2( pixelPos ) ) * 2.0f * PI;
 
-    uint viewId = 6;
-    
     const float4x4 view = views[ viewId ].viewMat;
     const float4x4 proj = views[ viewId ].invProjMat;
     const float3 viewOrigin = views[ viewId ].viewOrigin;

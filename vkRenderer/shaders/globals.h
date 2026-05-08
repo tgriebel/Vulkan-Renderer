@@ -23,7 +23,7 @@
         uint    layer;                                                                                              \
         uint    mipCount;                                                                                           \
         uint    layerCount;                                                                                         \
-        uint    _sc_pad0;                                                                                           \
+        uint    viewId;																								\
         uint    _sc_pad1;                                                                                           \
         TYPE    NAME;                                                                                               \
     };
