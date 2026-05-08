@@ -96,7 +96,7 @@ void Image::Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage )
 
 void Image::Create( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime )
 {
-	assert( HasFlags( _flags, gpuImageStateFlags_t::GPU_IMAGE_WRITE ) );
+	assert( HasFlags( _flags, gpuImageStateFlags_t::GPU_IMAGE_WRITE | gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) );
 
 	m_lifetime = _lifetime;
 

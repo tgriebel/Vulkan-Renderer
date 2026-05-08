@@ -61,12 +61,14 @@ enum imageFmt_t : uint8_t
 	IMAGE_FMT_ABGR_8,
 	IMAGE_FMT_BGR_8,
 	IMAGE_FMT_BGRA_8,
-	IMAGE_FMT_RG_32,
+	IMAGE_FMT_RG_16,
 	IMAGE_FMT_RGB_16,
 	IMAGE_FMT_RGBA_16,
+	IMAGE_FMT_RG_32,
 	IMAGE_FMT_RGB_32,
 	IMAGE_FMT_RGBA_32,
 	IMAGE_FMT_R11G11B10_US, // Unsigned
+	IMAGE_FMT_COUNT,
 };
 
 
@@ -180,11 +182,12 @@ static const colorAspectTableEntry_t formatAspectTable[] =
 	{ IMAGE_FMT_ABGR_8,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_BGR_8,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_BGRA_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RG_16,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_RGB_16,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_RGBA_16,		IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RG_32,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_RGB_32,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_RGBA_32,		IMAGE_ASPECT_COLOR_FLAG	},
-	{ IMAGE_FMT_RG_32,			IMAGE_ASPECT_COLOR_FLAG	},
 	{ IMAGE_FMT_R11G11B10_US,	IMAGE_ASPECT_COLOR_FLAG	},
 };
 
@@ -226,12 +229,18 @@ inline uint32_t GetBppForFormat( const imageFmt_t format )
 		case IMAGE_FMT_ABGR_8:			return 4;
 		case IMAGE_FMT_BGR_8:			return 3;
 		case IMAGE_FMT_BGRA_8:			return 4;
-		case IMAGE_FMT_RG_32:			return 8;
 		case IMAGE_FMT_RGB_16:			return 6;
 		case IMAGE_FMT_RGBA_16:			return 8;
+		case IMAGE_FMT_RG_32:			return 8;
+		case IMAGE_FMT_RGB_32:			return 12;
+		case IMAGE_FMT_RGBA_32:			return 16;
 		case IMAGE_FMT_R11G11B10_US:	return 4;
 
-		default: return 4;
+		default:
+		{
+			assert( 0 );
+			return 4;
+		}
 	}
 }
 
@@ -253,12 +262,19 @@ inline uint32_t GetChannelsForFormat( const imageFmt_t format )
 		case IMAGE_FMT_ABGR_8:			return 4;
 		case IMAGE_FMT_BGR_8:			return 3;
 		case IMAGE_FMT_BGRA_8:			return 4;
-		case IMAGE_FMT_RG_32:			return 2;
+		case IMAGE_FMT_RG_16:			return 2;
 		case IMAGE_FMT_RGB_16:			return 3;
 		case IMAGE_FMT_RGBA_16:			return 4;
+		case IMAGE_FMT_RG_32:			return 2;
+		case IMAGE_FMT_RGB_32:			return 3;
+		case IMAGE_FMT_RGBA_32:			return 4;
 		case IMAGE_FMT_R11G11B10_US:	return 3;
 
-		default: return 4;
+		default:
+		{
+			assert( 0 );
+			return 4;
+		}
 	}
 }
 

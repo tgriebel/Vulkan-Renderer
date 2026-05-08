@@ -130,7 +130,7 @@ mat4x4f Camera::GetPerspectiveMatrix( const bool reverseZ ) const
 
 	if ( reverseZ )
 	{
-		const bool invFarPlane = ( f >= 10000.0f );
+		const bool invFarPlane = ( f >= FLT_MAX );
 		if( invFarPlane )
 		{
 			proj[ 2 ][ 2 ] = 0.0f; // As the far plane goes to inf, this becomes 0

@@ -33,6 +33,10 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_DEPTH_BIT   ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
 		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_STENCIL_BIT ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
 	}
+	if( ( flags & GPU_IMAGE_STORAGE ) != 0 )
+	{
+		imageInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+	}
 	imageInfo.usage |= ( flags & GPU_IMAGE_READ ) != 0 ? VK_IMAGE_USAGE_SAMPLED_BIT : 0;
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0;
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_DST ) != 0 ? VK_IMAGE_USAGE_TRANSFER_DST_BIT : 0;

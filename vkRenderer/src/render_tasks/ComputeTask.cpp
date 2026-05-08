@@ -16,17 +16,17 @@ std::string ComputeTask::AsString() const
 
 void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 {
-	m_context     = info.context;
-	m_resources   = info.resources;
-	m_name        = info.name;
-	m_programName = info.programName;
+	m_context = info.context;
+	m_resources = info.resources;
+	m_name = info.name;
+	m_progName = info.progName;
 
 	m_dispatchX = info.dispatchX;
 	m_dispatchY = info.dispatchY;
 	m_dispatchZ = info.dispatchZ;
 
 	m_resourceImage = info.resourceImage;
-	m_outputBuffer  = info.outputBuffer;
+	m_outputBuffer = info.outputBuffer;
 
 	m_imageArray.SetRenderContext( m_context );
 	if ( m_resourceImage != nullptr )
@@ -73,7 +73,7 @@ void ComputeTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_name.c_str(), ColorToVector( ColorLGrey ) );
 
-	const hdl_t progHdl = AssetLib<GpuProgram>::Handle( m_programName.c_str() );
+	const hdl_t progHdl = AssetLib<GpuProgram>::Handle( m_progName.c_str() );
 
 	if ( m_pushConstants.empty() ) {
 		cmdContext.Dispatch( progHdl, *m_parms, m_dispatchX, m_dispatchY, m_dispatchZ );

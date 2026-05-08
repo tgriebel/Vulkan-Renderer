@@ -7,7 +7,7 @@
 struct computeTaskCreateInfo_t
 {
 	const char*			name;
-	const char*			programName;
+	const char*			progName;
 	RenderContext*		context;
 	ResourceContext*	resources;
 
@@ -34,7 +34,7 @@ private:
 	ShaderBindParms*		m_parms;
 
 	std::string				m_name;
-	std::string				m_programName;
+	std::string				m_progName;
 
 	uint32_t				m_dispatchX;
 	uint32_t				m_dispatchY;

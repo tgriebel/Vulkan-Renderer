@@ -170,6 +170,11 @@
 	  "image_shader": true
     },
 	{
+      "name": "DofTileMinMax",
+      "cs": "dofTileMinMax",
+	  "bindset": "bindset_compute"
+    },
+	{
       "name": "DiffuseIBL",
       "vs": "fullscreen",
       "ps": "preCalculatedDiffuseIbl",

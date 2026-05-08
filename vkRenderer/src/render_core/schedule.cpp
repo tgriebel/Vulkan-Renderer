@@ -11,6 +11,7 @@
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/UtilTasks.h"
 #include "../render_tasks/imguiTask.h"
+#include "../render_tasks/ComputeTask.h"
 
 static availableTasks_t tasks;
 
@@ -221,7 +222,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.mipLevels = 1;
 			info.layers = 1;
 			info.subsamples = IMAGE_SMP_1;
-			info.fmt = IMAGE_FMT_RGBA_32; // TEMP! For debugging
+			info.fmt = IMAGE_FMT_R_16;
 			info.type = IMAGE_TYPE_2D;
 			info.tiling = IMAGE_TILING_MORTON;
 
@@ -285,7 +286,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
-				info.fmt = IMAGE_FMT_R_32;
+				info.fmt = IMAGE_FMT_R_16;
 				info.type = IMAGE_TYPE_2D;
 				info.tiling = IMAGE_TILING_MORTON;
 
@@ -339,12 +340,12 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		// Image
 		{
 			imageInfo_t info{};
-			info.width = displayWidth / 2;
-			info.height = displayHeight / 2;
+			info.width = ( displayWidth / 2 );
+			info.height = ( displayHeight / 2 );
 			info.mipLevels = 1;
 			info.layers = 1;
 			info.subsamples = IMAGE_SMP_1;
-			info.fmt = IMAGE_FMT_RGBA_32;
+			info.fmt = IMAGE_FMT_R11G11B10_US;
 			info.type = IMAGE_TYPE_2D;
 			info.tiling = IMAGE_TILING_MORTON;
 
@@ -358,17 +359,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			struct dofCocConstants_t
 			{
-				float focalLengthMM;	// 14 .. 200 mm
-				float fstop;			// f-number ; 1.0 .. 22.0
-				float focusDistanceM;	// metres
-				float maxCoCPixels;		// clamp on |coc| in pixels
-				float sensorHeightM;	// 0.024 = full-frame
-				float pad0;
-				float pad1;
-				float pad2;
+				float depthScaleForeground;
+				float pixelRadius;
 			};
 
-			const dofCocConstants_t dofCocDefaults = { 50.0f, 2.8f, 3.0f, 24.0f, 0.024f, 0.0f, 0.0f, 0.0f };
+			const dofCocConstants_t dofCocDefaults = { 1.0f, 1.0f };
 
 			imageProcessCreateInfo_t info{};
 			info.name = "DoF CoC";
@@ -390,16 +385,54 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				{
 					dofCocConstants_t& c = *cocTask->GetConstants<dofCocConstants_t>();
 					bool changed = false;
-					changed |= ImGui::SliderFloat( "Focal Length (mm)",  &c.focalLengthMM,   14.0f, 200.0f );
-					changed |= ImGui::SliderFloat( "Aperture (f-stop)",  &c.fstop,            1.0f,  22.0f );
-					changed |= ImGui::SliderFloat( "Focus Distance (m)", &c.focusDistanceM,   0.1f, 100.0f );
-					changed |= ImGui::SliderFloat( "Max CoC (px)",       &c.maxCoCPixels,     4.0f,  48.0f );
+					//changed |= ImGui::SliderFloat( "Focal Length (mm)",  &c.focalLengthMM,   14.0f, 200.0f );
+					//changed |= ImGui::SliderFloat( "Aperture (f-stop)",  &c.fstop,            1.0f,  22.0f );
+					//changed |= ImGui::SliderFloat( "Focus Distance (m)", &c.focusDistanceM,   0.1f, 100.0f );
+					//changed |= ImGui::SliderFloat( "Max CoC (px)",       &c.maxCoCPixels,     4.0f,  48.0f );
 					if( changed )
 					{
 						cocTask->UpdateConstants();
 					}
 				} );
 #endif
+		}
+
+		// DoF Tile min/max CoC binning
+		{
+			{
+				imageInfo_t info{};
+				info.width = ( resources->dofCocImage->info.width ) / 8;
+				info.height = ( resources->dofCocImage->info.height ) / 8;
+				info.mipLevels = 1;
+				info.layers = 1;
+				info.subsamples = IMAGE_SMP_1;
+				info.fmt = IMAGE_FMT_RG_16;
+				info.type = IMAGE_TYPE_2D;
+				info.tiling = IMAGE_TILING_MORTON;
+
+				resources->dofTileCocImage->Create(
+					info,
+					"FB_dofTileCoc", GPU_IMAGE_STORAGE | GPU_IMAGE_READ, resourceLifeTime_t::RESIZE
+				);
+			}
+
+			struct dofTileConstants_t
+			{
+				uint32_t	tileSize;
+			};
+
+			const dofTileConstants_t dofTileDefaults = { 8u };
+
+			computeTaskCreateInfo_t info{};
+			info.name = "DoF Tile MinMax";
+			info.context = renderContext;
+			info.resources = resources;
+			info.progName = "DofTileMinMax";
+			info.dispatchX = 8;
+			info.dispatchY = 8;
+			info.dispatchZ = 1;
+
+			tasks.dofTileTask = nullptr;// new ComputeTask( info );
 		}
 	}
 
@@ -741,6 +774,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( tasks.dofCocTask )
 	{
 		schedule->Link( tasks.dofCocTask );
+	}
+	if( tasks.dofTileTask )
+	{
+		schedule->Link( tasks.dofTileTask );
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
