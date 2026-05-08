@@ -84,6 +84,7 @@ MakeCVar( BOOL,		r_autoExposure, true );
 MakeCVar( BOOL,		r_screenshot, true );
 MakeCVar( BOOL,		r_gaussianBlur, true );
 MakeCVar( BOOL,		r_ssao, true );
+MakeCVar( BOOL,		r_dof, true );
 MakeCVar( INT,		r_fullscreenMode, 0 );
 MakeCVar( INT,		r_windowWidth, -1 );
 MakeCVar( INT,		r_windowHeight, -1 );
@@ -196,6 +197,7 @@ int main( int argc, char* argv[] )
 	config.computeNoiseImage = r_computeNoiseImage.GetBool();
 	config.gaussianBlur = r_gaussianBlur.GetBool();
 	config.ssao = r_ssao.GetBool();
+	config.dof = r_dof.GetBool();
 
 	std::thread renderThread( RenderThread );
 

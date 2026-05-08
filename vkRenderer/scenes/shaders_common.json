@@ -163,6 +163,13 @@
 	  "image_shader": true
     },
 	{
+      "name": "DofCoc",
+      "vs": "fullscreen",
+      "ps": "dofCoc",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
       "name": "DiffuseIBL",
       "vs": "fullscreen",
       "ps": "preCalculatedDiffuseIbl",

@@ -340,6 +340,76 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 	}
 
+	if( config.dof )
+	{
+		// Image
+		{
+			imageInfo_t info{};
+			info.width = displayWidth / 2;
+			info.height = displayHeight / 2;
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_RGBA_32;
+			info.type = IMAGE_TYPE_2D;
+			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
+			info.tiling = IMAGE_TILING_MORTON;
+
+			resources->dofCocImage->Create(
+				info,
+				"FB_dofCoc", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+			);
+		}
+
+		// DoF Circle-of-Confusion Calculation
+		{
+			struct dofCocConstants_t
+			{
+				float focalLengthMM;	// 14 .. 200 mm
+				float fstop;			// f-number ; 1.0 .. 22.0
+				float focusDistanceM;	// metres
+				float maxCoCPixels;		// clamp on |coc| in pixels
+				float sensorHeightM;	// 0.024 = full-frame
+				float pad0;
+				float pad1;
+				float pad2;
+			};
+
+			const dofCocConstants_t dofCocDefaults = { 50.0f, 2.8f, 3.0f, 24.0f, 0.024f, 0.0f, 0.0f, 0.0f };
+
+			imageProcessCreateInfo_t info{};
+			info.name = "DoF CoC";
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = resources->dofCocImage;
+			info.progName = "DofCoc";
+			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
+			info.baseMip = 0;
+			info.mipCount = 1;
+			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
+			info.constants = &dofCocDefaults;
+			info.constantsByteSize = sizeof( dofCocDefaults );
+
+			tasks.dofCocTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+			tasks.dofCocTask->RegisterControls( [ cocTask = tasks.dofCocTask ]()
+				{
+					dofCocConstants_t& c = *cocTask->GetConstants<dofCocConstants_t>();
+					bool changed = false;
+					changed |= ImGui::SliderFloat( "Focal Length (mm)",  &c.focalLengthMM,   14.0f, 200.0f );
+					changed |= ImGui::SliderFloat( "Aperture (f-stop)",  &c.fstop,            1.0f,  22.0f );
+					changed |= ImGui::SliderFloat( "Focus Distance (m)", &c.focusDistanceM,   0.1f, 100.0f );
+					changed |= ImGui::SliderFloat( "Max CoC (px)",       &c.maxCoCPixels,     4.0f,  48.0f );
+					if( changed )
+					{
+						cocTask->UpdateConstants();
+					}
+				} );
+#endif
+		}
+	}
+
 	if( config.autoExposure )
 	{
 		// Images

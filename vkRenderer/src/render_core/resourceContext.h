@@ -44,6 +44,7 @@ public:
 	Image*					gBufferLayerImage1;
 	Image*					depthStencilImage;
 	Image*					ssaoImage;
+	Image*					dofCocImage;
 	Image*					ssaoBlurImage;
 	ImageView				depthImageView;
 	ImageView				stencilImageView;
@@ -79,6 +80,7 @@ public:
 		depthStencilImage = NextImage();
 		ssaoImage = NextImage();
 		ssaoBlurImage = NextImage();
+		dofCocImage = NextImage();
 
 		for( uint32_t i = 0; i < MaxShadowViews; ++i )
 		{

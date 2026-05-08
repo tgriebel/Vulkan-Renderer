@@ -51,6 +51,7 @@ struct renderConfig_t
 	bool			screenshot;
 	bool			gaussianBlur;
 	bool			ssao;
+	bool			dof;
 	bool			shadows;
 	bool			computeBrdfLut;
 	bool			computeNoiseImage;
