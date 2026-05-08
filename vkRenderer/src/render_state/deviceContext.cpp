@@ -153,7 +153,12 @@ VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, co
 
 VkImageView vk_CreateImageView( const VkImage image, const imageInfo_t& info, const imageSubResourceView_t& subResourceView, const char* debugName, const uint32_t debugBufferId )
 {
-	VkImageAspectFlags aspectFlags = vk_GetAspectFlags( info.aspect );
+	VkImageAspectFlags aspectFlags = vk_GetColorAspectFlags( info.fmt );
+
+	if( info.aspect != IMAGE_ASPECT_NONE )
+	{
+		aspectFlags &= vk_GetAspectFlags( info.aspect );
+	}
 
 	assert( subResourceView.mipLevels >= 1 );
 	assert( subResourceView.arrayCount >= 1 );

@@ -23,12 +23,19 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
+	// Aspect inferred from format, masked by info.aspect for image views
+	VkImageAspectFlags aspect = vk_GetColorAspectFlags( info.fmt );
+	
+	if( info.aspect != IMAGE_ASPECT_NONE ) {
+		aspect &= vk_GetAspectFlags( info.aspect );
+	}
+
 	imageInfo.usage = 0;
 	if( ( flags & GPU_IMAGE_WRITE ) != 0 )
 	{
-		imageInfo.usage |= ( info.aspect & IMAGE_ASPECT_COLOR_FLAG ) != 0 ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT : 0;
-		imageInfo.usage |= ( info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
-		imageInfo.usage |= ( info.aspect & IMAGE_ASPECT_STENCIL_FLAG ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
+		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_COLOR_BIT   ) != 0 ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT         : 0;
+		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_DEPTH_BIT   ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
+		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_STENCIL_BIT ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
 	}
 	imageInfo.usage |= ( flags & GPU_IMAGE_READ ) != 0 ? VK_IMAGE_USAGE_SAMPLED_BIT : 0;
 	imageInfo.usage |= ( flags & GPU_IMAGE_TRANSFER_SRC ) != 0 ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0;

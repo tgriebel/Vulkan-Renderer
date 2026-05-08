@@ -34,7 +34,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		colorInfo.subsamples = IMAGE_SMP_1;
 		colorInfo.fmt = IMAGE_FMT_RGBA_16;
 		colorInfo.type = IMAGE_TYPE_CUBE;
-		colorInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		colorInfo.tiling = IMAGE_TILING_MORTON;
 
 		resources->cubeFbColorImage->Create(
@@ -79,7 +78,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				imgInfo.subsamples = IMAGE_SMP_1;
 				imgInfo.fmt = IMAGE_FMT_RGBA_16;
 				imgInfo.type = IMAGE_TYPE_CUBE;
-				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 				imgInfo.tiling = IMAGE_TILING_MORTON;
 
 				info.taskImageCount = 1;
@@ -127,7 +125,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				imgInfo.subsamples = IMAGE_SMP_1;
 				imgInfo.fmt = IMAGE_FMT_RGBA_16;
 				imgInfo.type = IMAGE_TYPE_CUBE;
-				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 				imgInfo.tiling = IMAGE_TILING_MORTON;
 
 				info.taskImageCount = 1;
@@ -227,7 +224,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.subsamples = IMAGE_SMP_1;
 			info.fmt = IMAGE_FMT_RGBA_32; // TEMP! For debugging
 			info.type = IMAGE_TYPE_2D;
-			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 			info.tiling = IMAGE_TILING_MORTON;
 
 			resources->ssaoImage->Create(
@@ -292,7 +288,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.subsamples = IMAGE_SMP_1;
 				info.fmt = IMAGE_FMT_R_32;
 				info.type = IMAGE_TYPE_2D;
-				info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 				info.tiling = IMAGE_TILING_MORTON;
 
 				resources->ssaoBlurImage->Create(
@@ -352,7 +347,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.subsamples = IMAGE_SMP_1;
 			info.fmt = IMAGE_FMT_RGBA_32;
 			info.type = IMAGE_TYPE_2D;
-			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 			info.tiling = IMAGE_TILING_MORTON;
 
 			resources->dofCocImage->Create(
@@ -424,7 +418,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.subsamples = IMAGE_SMP_1;
 				info.fmt = IMAGE_FMT_R_16;
 				info.type = IMAGE_TYPE_2D;
-				info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 				info.tiling = IMAGE_TILING_MORTON;
 
 				resources->previousLum->Create(
@@ -530,7 +523,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.subsamples = IMAGE_SMP_1;
 			info.fmt = IMAGE_FMT_RGBA_16;
 			info.type = IMAGE_TYPE_2D;
-			info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 			info.tiling = IMAGE_TILING_MORTON;
 
 			resources->bloom->Create(
@@ -650,7 +642,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				imgInfo.subsamples = IMAGE_SMP_1;
 				imgInfo.fmt = IMAGE_FMT_RGBA_16;
 				imgInfo.type = IMAGE_TYPE_2D;
-				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 				imgInfo.tiling = IMAGE_TILING_MORTON;
 
 				info.taskImageCount = 1;
@@ -694,7 +685,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				imgInfo.subsamples = IMAGE_SMP_1;
 				imgInfo.fmt = IMAGE_FMT_RGBA_16;
 				imgInfo.type = IMAGE_TYPE_2D;
-				imgInfo.aspect = IMAGE_ASPECT_COLOR_FLAG;
 				imgInfo.tiling = IMAGE_TILING_MORTON;
 
 				info.taskImageCount = 1;

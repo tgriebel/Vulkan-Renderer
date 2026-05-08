@@ -685,7 +685,6 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = config.mainColorSubSamples;
 		info.fmt = IMAGE_FMT_RGBA_16;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
 		resources.mainColorImage->Create(
@@ -770,7 +769,6 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_RG_32;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = resources.depthStencilImage->info.tiling;
 
 		resources.depthStencilResolvedImage->Create(
@@ -795,7 +793,6 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_RGBA_16;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
 		resources.tempColorImage->Create(
@@ -814,7 +811,6 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_R_16;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
 		resources.currentLum->Create(
