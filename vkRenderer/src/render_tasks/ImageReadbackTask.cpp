@@ -158,7 +158,7 @@ void ImageReadbackTask::Execute( CommandList& cmdContext )
 		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_READ, GPU_IMAGE_TRANSFER_SRC );
 
 		VkImageSubresourceLayers subLayers{};
-		subLayers.aspectMask = vk_GetAspectFlags( m_imageArray[ 0 ]->info.aspect );
+		subLayers.aspectMask = vk_GetColorAspectFlags( m_imageArray[ 0 ]->info.fmt );
 		subLayers.baseArrayLayer = 0;
 		subLayers.layerCount = 1;
 		subLayers.mipLevel = 0;

@@ -198,11 +198,11 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuIma
 	barrier.subresourceRange.baseArrayLayer = subView.baseArray;
 	barrier.subresourceRange.layerCount = subView.arrayCount;
 
-	const imageAspectFlags_t aspectFlags = gpuImage->GetInfo().aspect;
+	const VkImageAspectFlagBits aspectFlags = vk_GetColorAspectFlags( gpuImage->GetInfo().fmt );
 
-	const bool hasColorAspect = ( aspectFlags & IMAGE_ASPECT_COLOR_FLAG ) != 0;
-	const bool hasDepthAspect = ( aspectFlags & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
-	const bool hasStencilAspect = ( aspectFlags & IMAGE_ASPECT_STENCIL_FLAG ) != 0;
+	const bool hasColorAspect = ( aspectFlags & VK_IMAGE_ASPECT_COLOR_BIT ) != 0;
+	const bool hasDepthAspect = ( aspectFlags & VK_IMAGE_ASPECT_DEPTH_BIT ) != 0;
+	const bool hasStencilAspect = ( aspectFlags & VK_IMAGE_ASPECT_STENCIL_BIT ) != 0;
 
 	VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 	VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
@@ -275,7 +275,7 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuIma
 		barrier.newLayout = hasColorAspect ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 	}
 
-	barrier.subresourceRange.aspectMask = vk_GetAspectFlags( aspectFlags );
+	barrier.subresourceRange.aspectMask = aspectFlags;
 
 	if ( buffering == swapBuffering_t::SINGLE_FRAME )
 	{
@@ -318,7 +318,7 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 		throw std::runtime_error( "texture outputImage format does not support linear blitting!" );
 	}
 
-	VkImageAspectFlags aspectMask = vk_GetAspectFlags( image->info.aspect );
+	VkImageAspectFlags aspectMask = vk_GetColorAspectFlags( image->info.fmt );
 
 	VkImageMemoryBarrier barrier{ };
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -564,8 +564,8 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const Image* src, const copyImageP
 		}
 	}
 
-	const VkImageAspectFlagBits srcAspect = vk_GetAspectFlags( src->info.aspect );
-	const VkImageAspectFlagBits dstAspect = vk_GetAspectFlags( dst->info.aspect );
+	const VkImageAspectFlagBits srcAspect = vk_GetColorAspectFlags( src->info.fmt );
+	const VkImageAspectFlagBits dstAspect = vk_GetColorAspectFlags( dst->info.fmt );
 
 	VkImageMemoryBarrier srcBarrier{ };
 	srcBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -749,7 +749,7 @@ void vk_CopyImage( VkCommandBuffer cmdBuffer, const ImageView& src, ImageView& d
 
 void vk_ResolveImage( VkCommandBuffer cmdBuffer, const resolveImageInfo_t& info )
 {
-	const VkImageAspectFlagBits aspect  = vk_GetAspectFlags( info.src->info.aspect );
+	const VkImageAspectFlagBits aspect  = vk_GetColorAspectFlags( info.src->info.fmt );
 	const bool                  isDepth = ( info.src->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
 
 	// Depth and color images live in different layouts and are owned by different pipeline stages
@@ -894,7 +894,7 @@ void vk_UploadImageData( VkCommandBuffer cmdBuffer, Image* image, const copyImag
 			buffer.CopyData( imageBuffer.ptr, imageBuffer.size );
 		}
 
-		region.imageSubresource.aspectMask = vk_GetAspectFlags( image->info.aspect );
+		region.imageSubresource.aspectMask = vk_GetColorAspectFlags( image->info.fmt );
 		region.imageSubresource.mipLevel = copyParms.baseMip + mip;
 		region.imageSubresource.baseArrayLayer = copyParms.baseArray;
 		region.imageSubresource.layerCount = copyParms.arrayCount;

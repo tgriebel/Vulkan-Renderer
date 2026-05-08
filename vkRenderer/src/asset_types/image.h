@@ -177,7 +177,7 @@ inline uint32_t GetBppForFormat( const imageFmt_t format )
 		case IMAGE_FMT_RG_32:			return 8;
 		case IMAGE_FMT_RGB_16:			return 6;
 		case IMAGE_FMT_RGBA_16:			return 8;
-		case IMAGE_FMT_R11G11B10:		return 4;
+		case IMAGE_FMT_R11G11B10_US:	return 4;
 
 		default: return 4;
 	}
@@ -204,7 +204,7 @@ inline uint32_t GetChannelsForFormat( const imageFmt_t format )
 		case IMAGE_FMT_RG_32:			return 2;
 		case IMAGE_FMT_RGB_16:			return 3;
 		case IMAGE_FMT_RGBA_16:			return 4;
-		case IMAGE_FMT_R11G11B10:		return 3;
+		case IMAGE_FMT_R11G11B10_US:	return 3;
 
 		default: return 4;
 	}

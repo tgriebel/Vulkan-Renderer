@@ -749,6 +749,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			schedule->Link( tasks.ssaoBlurTask );
 		}
 	}
+	if( tasks.dofCocTask )
+	{
+		schedule->Link( tasks.dofCocTask );
+	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
 	if( config.useCubeViews ) {

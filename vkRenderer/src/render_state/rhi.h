@@ -92,6 +92,50 @@ static const uint32_t PassPermCount = ( 1 << PassPermBits );
 static const uint32_t VkPassBitsSize = 16;
 #endif
 
+
+struct colorAspectTableEntry_t
+{
+	imageFmt_t				fmt;
+	VkImageAspectFlagBits	aspect;
+};
+
+
+static const colorAspectTableEntry_t vk_formatAspectTable[] =
+{
+	{ IMAGE_FMT_UNKNOWN,		VK_IMAGE_ASPECT_NONE		},
+	{ IMAGE_FMT_R_8,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_R_16,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_R_32,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_D_16,			VK_IMAGE_ASPECT_DEPTH_BIT		},
+	{ IMAGE_FMT_D24S8,			VkImageAspectFlagBits( VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT ) },
+	{ IMAGE_FMT_D_32,			VK_IMAGE_ASPECT_DEPTH_BIT		},
+	{ IMAGE_FMT_D_32_S8,		VkImageAspectFlagBits( VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT ) },
+	{ IMAGE_FMT_RGB_8,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RGBA_8,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RGBA_8_UNORM,	VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_ABGR_8,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_BGR_8,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_BGRA_8,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RGB_16,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RGBA_16,		VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RGB_32,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RGBA_32,		VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_RG_32,			VK_IMAGE_ASPECT_COLOR_BIT	},
+	{ IMAGE_FMT_R11G11B10_US,	VK_IMAGE_ASPECT_COLOR_BIT	},
+};
+
+
+static inline constexpr VkImageAspectFlagBits vk_GetColorAspectFlags( const imageFmt_t fmt )
+{
+	for ( uint32_t i = 0; i < COUNTARRAY( vk_formatAspectTable ); ++i )
+	{
+		if ( vk_formatAspectTable[ i ].fmt == fmt ) {
+			return vk_formatAspectTable[ i ].aspect;
+		}
+	}
+	return VK_IMAGE_ASPECT_NONE;
+}
+
 #ifdef USE_VULKAN
 struct vk_RenderPassBits_t;
 VkRenderPass vk_CreateRenderPass( const vk_RenderPassBits_t& passState );
@@ -126,7 +170,7 @@ static const vk_formatTableEntry_t vk_formatTable[] =
 	{ IMAGE_FMT_RGB_32,				VK_FORMAT_R32G32B32_SFLOAT			},
 	{ IMAGE_FMT_RGBA_32,			VK_FORMAT_R32G32B32A32_SFLOAT		},
 	{ IMAGE_FMT_RG_32,				VK_FORMAT_R32G32_SFLOAT				},
-	{ IMAGE_FMT_R11G11B10_UNSIGNED,		VK_FORMAT_B10G11R11_UFLOAT_PACK32	},
+	{ IMAGE_FMT_R11G11B10_US,		VK_FORMAT_B10G11R11_UFLOAT_PACK32	},
 };
 
 
