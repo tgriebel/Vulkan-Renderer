@@ -92,7 +92,6 @@ struct imageInfo_t
 	imageSamples_t			subsamples;
 	imageType_t				type;
 	imageFmt_t				fmt;
-	imageAspectFlags_t		aspect;
 	imageTiling_t			tiling;
 	bool					unused; // Deprecated v2
 };
@@ -111,10 +110,11 @@ enum imageCubeFace : uint8_t
 
 struct imageSubResourceView_t
 {
-	uint32_t baseMip;
-	uint32_t mipLevels;
-	uint32_t baseArray;
-	uint32_t arrayCount;
+	uint32_t			baseMip;
+	uint32_t			mipLevels;
+	uint32_t			baseArray;
+	uint32_t			arrayCount;
+	imageAspectFlags_t	aspect;
 };
 
 
@@ -155,6 +155,58 @@ struct samplerState_t
 	bool					borderColorIsFloat;
 	bool					pcf;
 };
+
+
+struct colorAspectTableEntry_t
+{
+	imageFmt_t			fmt;
+	imageAspectFlags_t	aspect;
+};
+
+
+static const colorAspectTableEntry_t formatAspectTable[] =
+{
+	{ IMAGE_FMT_UNKNOWN,		IMAGE_ASPECT_NONE		},
+	{ IMAGE_FMT_R_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_R_16,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_R_32,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_D_16,			IMAGE_ASPECT_DEPTH_FLAG	},
+	{ IMAGE_FMT_D24S8,			imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) },
+	{ IMAGE_FMT_D_32,			IMAGE_ASPECT_DEPTH_FLAG	},
+	{ IMAGE_FMT_D_32_S8,		imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) },
+	{ IMAGE_FMT_RGB_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RGBA_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RGBA_8_UNORM,	IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_ABGR_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_BGR_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_BGRA_8,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RGB_16,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RGBA_16,		IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RGB_32,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RGBA_32,		IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_RG_32,			IMAGE_ASPECT_COLOR_FLAG	},
+	{ IMAGE_FMT_R11G11B10_US,	IMAGE_ASPECT_COLOR_FLAG	},
+};
+
+
+static inline constexpr imageAspectFlags_t GetColorAspectFlags( const imageFmt_t fmt )
+{
+	for( uint32_t i = 0; i < COUNTARRAY( formatAspectTable ); ++i )
+	{
+		if( formatAspectTable[ i ].fmt == fmt )
+		{
+			return formatAspectTable[ i ].aspect;
+		}
+	}
+	return IMAGE_ASPECT_NONE;
+}
+
+
+static inline constexpr bool IsDepthStencilCompatible( const imageFmt_t fmt )
+{
+	const imageAspectFlags_t aspect = GetColorAspectFlags( fmt );
+	return ( aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0;
+}
 
 
 inline uint32_t GetBppForFormat( const imageFmt_t format )
@@ -222,7 +274,6 @@ inline bool operator==( const imageInfo_t& info0, const imageInfo_t& info1 )
 		( info0.subsamples == info1.subsamples ) &&
 		( info0.type == info1.type ) &&
 		( info0.fmt == info1.fmt ) &&
-		( info0.aspect == info1.aspect ) &&
 		( info0.tiling == info1.tiling );
 	return equal;
 }
@@ -245,7 +296,6 @@ inline imageInfo_t DefaultImage2dInfo( uint32_t w, uint32_t h )
 	info.subsamples = IMAGE_SMP_1;
 	info.type = IMAGE_TYPE_2D;
 	info.fmt = IMAGE_FMT_RGBA_8;
-	info.aspect = IMAGE_ASPECT_COLOR_FLAG;
 	info.tiling = IMAGE_TILING_MORTON;
 
 	return info;
@@ -280,6 +330,7 @@ public:
 		subResourceView.arrayCount = 1;
 		subResourceView.baseMip = 0;
 		subResourceView.mipLevels = 1;
+		subResourceView.aspect = IMAGE_ASPECT_ALL;
 
 		generateMips = true;
 

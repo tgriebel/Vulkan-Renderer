@@ -24,12 +24,8 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 	imageInfo.samples = vk_GetSampleCount( info.subsamples );
 
 	// Aspect inferred from format, masked by info.aspect for image views
-	VkImageAspectFlags aspect = vk_GetColorAspectFlags( info.fmt );
+	const VkImageAspectFlags aspect = vk_GetColorAspectFlags( info.fmt );
 	
-	if( info.aspect != IMAGE_ASPECT_NONE ) {
-		aspect &= vk_GetAspectFlags( info.aspect );
-	}
-
 	imageInfo.usage = 0;
 	if( ( flags & GPU_IMAGE_WRITE ) != 0 )
 	{
@@ -89,8 +85,10 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 	{
 		VkImageCreateInfo imageInfo = vk_GetImageCreateInfo( info, flags );
 
+		const VkImageAspectFlags aspect = vk_GetColorAspectFlags( info.fmt );
+
 		VkImageStencilUsageCreateInfo stencilUsage{};
-		if ( ( info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
+		if ( IsDepthStencilCompatible( info.fmt ) )
 		{
 			stencilUsage.sType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_CREATE_INFO;
 			stencilUsage.stencilUsage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;

@@ -58,6 +58,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		view.arrayCount = 1;
 		view.baseMip = m_mipLevel;
 		view.mipLevels = 1;
+		view.aspect = GetColorAspectFlags( outputImage0->info.fmt );
 
 		imageInfo_t imageInfo = outputImage0->info;
 		imageInfo.type = IMAGE_TYPE_2D;

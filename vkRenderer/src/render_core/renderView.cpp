@@ -174,7 +174,7 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
-		imageSubResourceView_t subView;
+		imageSubResourceView_t subView{};
 		subView.arrayCount = 1;
 		subView.baseArray = m_isCubeView ? vk_MapToGlslCubemapConvention( multiViewIndex ) : 0; // This is all that changes for cube views
 		subView.baseMip = 0;
@@ -185,29 +185,37 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 			imageInfo_t colorInfo = info.color0->info;
 			colorInfo.type = IMAGE_TYPE_2D;
 
+			subView.aspect = GetColorAspectFlags( colorInfo.fmt );
+
 			m_colorViews[ multiViewIndex ]->Init( info.color0, colorInfo, subView, resourceLifeTime_t::RESIZE );
 		}
 
 		if ( info.color1 != nullptr )
 		{
-			imageInfo_t gbufferInfo = info.color1->info;
-			gbufferInfo.type = IMAGE_TYPE_2D;
+			imageInfo_t color1Info = info.color1->info;
+			color1Info.type = IMAGE_TYPE_2D;
 
-			m_gBuffer0Views[ multiViewIndex ]->Init( info.color1, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+			subView.aspect = GetColorAspectFlags( color1Info.fmt );
+
+			m_gBuffer0Views[ multiViewIndex ]->Init( info.color1, color1Info, subView, resourceLifeTime_t::RESIZE );
 		}
 
 		if ( info.color2 != nullptr )
 		{
-			imageInfo_t gbufferInfo = info.color2->info;
-			gbufferInfo.type = IMAGE_TYPE_2D;
+			imageInfo_t color2Info = info.color2->info;
+			color2Info.type = IMAGE_TYPE_2D;
 
-			m_gBuffer1Views[ multiViewIndex ]->Init( info.color2, gbufferInfo, subView, resourceLifeTime_t::RESIZE );
+			subView.aspect = GetColorAspectFlags( color2Info.fmt );
+
+			m_gBuffer1Views[ multiViewIndex ]->Init( info.color2, color2Info, subView, resourceLifeTime_t::RESIZE );
 		}
 
 		if ( info.depth != nullptr )
 		{
 			imageInfo_t depthInfo = info.depth->info;
 			depthInfo.type = IMAGE_TYPE_2D;
+
+			subView.aspect = GetColorAspectFlags( depthInfo.fmt );
 
 			m_depthViews[ multiViewIndex ]->Init( info.depth, depthInfo, subView, resourceLifeTime_t::RESIZE );
 		}
@@ -216,6 +224,8 @@ void RenderView::CreateFrameBuffers( const frameBufferCreateInfo_t& info )
 		{
 			imageInfo_t stencilInfo = info.stencil->info;
 			stencilInfo.type = IMAGE_TYPE_2D;
+
+			subView.aspect = GetColorAspectFlags( stencilInfo.fmt );
 
 			m_stencilViews[ multiViewIndex ]->Init( info.stencil, stencilInfo, subView, resourceLifeTime_t::RESIZE );
 		}

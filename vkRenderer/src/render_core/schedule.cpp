@@ -44,7 +44,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		resources->cubeFbColorImage->RegisterResize( nullptr );
 
 		imageInfo_t depthInfo = colorInfo;
-		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		depthInfo.fmt = IMAGE_FMT_D_16;
 
 		resources->cubeFbDepthImage->Create(

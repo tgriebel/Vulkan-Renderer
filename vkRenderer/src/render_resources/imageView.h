@@ -47,11 +47,12 @@ public:
 
 	void Init( const Image* image, const imageInfo_t& imageInfo, const resourceLifeTime_t lifetime )
 	{
-		imageSubResourceView_t subView;
+		imageSubResourceView_t subView{};
 		subView.baseMip = 0;
 		subView.mipLevels = imageInfo.mipLevels;
 		subView.baseArray = 0;
 		subView.arrayCount = imageInfo.layers;
+		subView.aspect = GetColorAspectFlags( info.fmt );
 		assert( subView.mipLevels >= 1 );
 		assert( subView.arrayCount >= 1 );
 

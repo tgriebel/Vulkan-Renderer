@@ -154,10 +154,9 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView( currentBuffer );
 			assert( info.imageView != nullptr );
 
-			if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 ) {
+			if ( IsDepthStencilCompatible( image->info.fmt ) ) {
 				info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-			}
-			else {
+			} else {
 				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
 
@@ -189,7 +188,7 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 				info.imageView = image->gpuImage->GetVkImageView( currentBuffer );
 				assert( info.imageView != nullptr );
 
-				if ( ( image->info.aspect & ( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG ) ) != 0 )
+				if ( IsDepthStencilCompatible( image->info.fmt ) )
 				{
 				//	info.sampler = context.depthShadowSampler;
 					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;

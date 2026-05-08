@@ -125,14 +125,15 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 
 			const Image* sourceImage = ( info.sourceImage != nullptr ) ? info.sourceImage : m_image;
 
+			imageInfo_t imageInfo = sourceImage->info;
+			imageInfo.type = IMAGE_TYPE_2D;
+
 			imageSubResourceView_t sourceSubresource{};
 			sourceSubresource.baseArray = remappedLayerId;
 			sourceSubresource.arrayCount = 1;
 			sourceSubresource.baseMip = firstSampledMip;
 			sourceSubresource.mipLevels = 1;
-
-			imageInfo_t imageInfo = sourceImage->info;
-			imageInfo.type = IMAGE_TYPE_2D;
+			sourceSubresource.aspect = GetColorAspectFlags( imageInfo.fmt );
 
 			m_baseViews[ layerId ].Init( sourceImage, imageInfo, sourceSubresource, resourceLifeTime_t::RESIZE );
 		}

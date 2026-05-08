@@ -31,7 +31,7 @@ void ResolveImageTask::InitShaderTasks()
 		Image* srcImage = m_createInfo.resolves[ i ].info.src;
 		Image* dstImage = m_createInfo.resolves[ i ].info.dst;
 
-		const bool isDepth = ( srcImage->info.aspect & IMAGE_ASPECT_DEPTH_FLAG ) != 0;
+		const bool isDepth = IsDepthStencilCompatible( srcImage->info.fmt );
 
 		if( isDepth )
 		{

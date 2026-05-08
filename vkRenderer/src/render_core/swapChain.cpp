@@ -184,6 +184,7 @@ void SwapChain::Create( const Window* _window, const int displayWidth, const int
 	m_swapChainImage.subResourceView.arrayCount = 1;	
 	m_swapChainImage.subResourceView.baseMip = 0;
 	m_swapChainImage.subResourceView.mipLevels = 1;
+	m_swapChainImage.subResourceView.aspect = IMAGE_ASPECT_ALL;
 
 	for ( uint32_t i = 0; i < m_imageCount; ++i )
 	{

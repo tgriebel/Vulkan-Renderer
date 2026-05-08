@@ -662,7 +662,6 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = IMAGE_FMT_D_32;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = IMAGE_ASPECT_DEPTH_FLAG;
 		info.tiling = IMAGE_TILING_MORTON;
 
 		Image* shadowImage = resources.shadowMapImage[ shadowIx ];
@@ -704,7 +703,6 @@ void Renderer::CreateFramebuffers()
 		
 		info.fmt = IMAGE_FMT_D_32_S8;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = imageAspectFlags_t( IMAGE_ASPECT_DEPTH_FLAG | IMAGE_ASPECT_STENCIL_FLAG );
 
 		resources.depthStencilImage->Create(
 			info,
@@ -722,7 +720,6 @@ void Renderer::CreateFramebuffers()
 		info.subsamples = IMAGE_SMP_1;
 		info.fmt = resources.mainColorImage->info.fmt;
 		info.type = IMAGE_TYPE_2D;
-		info.aspect = resources.mainColorImage->info.aspect;
 		info.tiling = resources.mainColorImage->info.tiling;
 
 		resources.mainColorResolvedImage->Create(
@@ -750,13 +747,13 @@ void Renderer::CreateFramebuffers()
 
 	// Depth-stencil views
 	{
-		imageInfo_t depthInfo = resources.depthStencilImage->info;
-		depthInfo.aspect = IMAGE_ASPECT_DEPTH_FLAG;
-		resources.depthImageView.Init( resources.depthStencilImage, depthInfo, lifeTime );
+		imageSubResourceView_t depthView = resources.depthStencilImage->subResourceView;
+		depthView.aspect = IMAGE_ASPECT_DEPTH_FLAG;
+		resources.depthImageView.Init( resources.depthStencilImage, resources.depthStencilImage->info, depthView, lifeTime );
 
-		imageInfo_t stencilInfo = resources.depthStencilImage->info;
-		stencilInfo.aspect = IMAGE_ASPECT_STENCIL_FLAG;
-		resources.stencilImageView.Init( resources.depthStencilImage, stencilInfo, lifeTime );
+		imageSubResourceView_t stencilView = resources.depthStencilImage->subResourceView;
+		stencilView.aspect = IMAGE_ASPECT_STENCIL_FLAG;
+		resources.stencilImageView.Init( resources.depthStencilImage, resources.depthStencilImage->info, stencilView, lifeTime );
 	}
 
 	// Resolve depth-stencil image
