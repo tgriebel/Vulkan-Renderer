@@ -301,18 +301,42 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				);
 			}
 
+			struct bilateralConstants_t
+			{
+				float kDepth;
+				float pad0;
+				float pad1;
+				float pad2;
+			};
+
+			const bilateralConstants_t bilateralDefaults = { 1.0f, 0.0f, 0.0f, 0.0f };
+
 			imageProcessCreateInfo_t info{};
-			info.name = "Separable Gaussian";
+			info.name = "SSAO Bilateral Blur";
 			info.context = renderContext;
 			info.resources = resources;
 			info.outputImage = resources->ssaoBlurImage;
-			info.progName = "SeparableGaussianBlur";
+			info.progName = "BilateralBlur";
 			info.resourceImages[ 0 ] = resources->ssaoImage;
+			info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
 			info.baseMip = 0;
 			info.mipCount = 1;
 			info.multiPass = true;
+			info.constants = &bilateralDefaults;
+			info.constantsByteSize = sizeof( bilateralDefaults );
 
 			tasks.ssaoBlurTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+			tasks.ssaoBlurTask->RegisterControls( [ blurTask = tasks.ssaoBlurTask ]()
+				{
+					bilateralConstants_t& c = *blurTask->GetConstants<bilateralConstants_t>();
+					if( ImGui::SliderFloat( "Edge Stop", &c.kDepth, 0.0f, 1.0f ) )
+					{
+						blurTask->UpdateConstants();
+					}
+				} );
+#endif
 		}
 	}
 

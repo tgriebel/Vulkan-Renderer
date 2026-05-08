@@ -156,6 +156,13 @@
 	  "image_shader": true
     },
 	{
+      "name": "BilateralBlur",
+      "vs": "fullscreen",
+      "ps": "bilateralBlur",
+	  "bindset": "bindset_imageProcess",
+	  "image_shader": true
+    },
+	{
       "name": "DiffuseIBL",
       "vs": "fullscreen",
       "ps": "preCalculatedDiffuseIbl",
