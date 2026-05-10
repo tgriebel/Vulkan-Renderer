@@ -115,8 +115,8 @@ public:
 	void						Wait( GpuSemaphore* semaphore );
 	void						Signal( GpuSemaphore* semaphore );
 	void						Submit( const GpuFence* fence = nullptr );
-	void						Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z );
-	void						Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z );
+	void						Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z );
+	void						Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z );
 
 
 	static uint32_t DispatchDim( const uint32_t dim, const uint32_t groupSize )

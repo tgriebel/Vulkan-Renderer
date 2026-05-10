@@ -235,6 +235,12 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuIma
 		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	}
+	else if( ( current & GPU_IMAGE_STORAGE ) != 0 )
+	{
+		sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		barrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+	}
 	else if ( ( current & GPU_IMAGE_WRITE ) != 0 )
 	{
 		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -268,6 +274,12 @@ void vk_TransitionImageLayout( VkCommandBuffer cmdBuffer, const GpuImage* gpuIma
 		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	}
+	else if( ( next & GPU_IMAGE_STORAGE ) != 0 )
+	{
+		destinationStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+		barrier.dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 	}
 	else if ( ( next & GPU_IMAGE_WRITE ) != 0 )
 	{
@@ -1413,7 +1425,7 @@ void DeviceContext::Create( Window& window )
 
 	// Descriptor Pool
 	{
-		const uint32_t subPoolCount = 5;
+		const uint32_t subPoolCount = 6;
 
 		VkDescriptorPoolSize poolSizes[ subPoolCount ];
 		poolSizes[ 0 ].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1426,6 +1438,8 @@ void DeviceContext::Create( Window& window )
 		poolSizes[ 3 ].descriptorCount = DescriptorPoolMaxImages;
 		poolSizes[ 4 ].type = VK_DESCRIPTOR_TYPE_SAMPLER;
 		poolSizes[ 4 ].descriptorCount = DescriptorPoolMaxSamplers;
+		poolSizes[ 5 ].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		poolSizes[ 5 ].descriptorCount = DescriptorPoolMaxStorageImages;
 
 		VkDescriptorPoolCreateInfo poolInfo{ };
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;

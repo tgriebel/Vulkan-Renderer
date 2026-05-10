@@ -91,13 +91,13 @@ static inline bindSemantic_t GetBindSemantic( const bindType_t bindType )
 		case bindType_t::CONSTANT_BUFFER:
 		case bindType_t::READ_BUFFER:
 		case bindType_t::WRITE_BUFFER:
-		case bindType_t::READ_IMAGE_BUFFER:
-		case bindType_t::WRITE_IMAGE_BUFFER:
 			return bindSemantic_t::BUFFER;
 
 		case bindType_t::IMAGE_2D:
 		case bindType_t::IMAGE_3D:
 		case bindType_t::IMAGE_CUBE:
+		case bindType_t::READ_IMAGE_BUFFER:
+		case bindType_t::WRITE_IMAGE_BUFFER:
 			return bindSemantic_t::IMAGE;
 
 		case bindType_t::IMAGE_2D_ARRAY:

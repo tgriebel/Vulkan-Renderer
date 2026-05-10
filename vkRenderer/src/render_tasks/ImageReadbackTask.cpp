@@ -106,7 +106,6 @@ void ImageReadbackTask::FrameBegin()
 	m_parms->Bind( BINDING_NAME( computeImage ),		&m_imageArray );
 	m_parms->Bind( BINDING_NAME( computeParms ),		&m_resourceBuffer );
 	m_parms->Bind( BINDING_NAME( computeWrite ),		&m_writebackBuffer );
-//	m_parms->Bind( BINDING_NAME( computeWriteImage ),	&m_writebackBuffer );
 }
 
 

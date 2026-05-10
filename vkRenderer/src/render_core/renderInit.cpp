@@ -423,6 +423,23 @@ void Renderer::InitShaderResources()
 		rc.defaultImageCubeArray.SetRenderContext( &renderContext );
 		rc.defaultImageCubeArray.Resize( 1 );
 		rc.defaultImageCubeArray.BindIndex( 0, rc.defaultImageCube );
+
+		{
+			imageInfo_t info{};
+			info.width = 1;
+			info.height = 1;
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_R_16;
+			info.type = IMAGE_TYPE_2D;
+			info.tiling = IMAGE_TILING_MORTON;
+
+			rc.defaultStorageImage.Create(
+				info,
+				"FB_defaultStorage", GPU_IMAGE_STORAGE | GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+			);
+		}
 	}
 
 	// Buffers
@@ -630,7 +647,7 @@ void Renderer::BuildPipelines()
 	for( auto it = invalidAssets.begin(); it != invalidAssets.end(); ++it )
 	{
 		Asset<GpuProgram>* progAsset = *it;
-		DestoryAllGraphicsPipelines( *progAsset );
+		DestoryAllPipelines( *progAsset );
 		progAsset->CompleteUpload();
 	}
 }

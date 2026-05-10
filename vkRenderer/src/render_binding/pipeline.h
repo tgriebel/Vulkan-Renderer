@@ -123,14 +123,13 @@ class ShaderBindSet;
 
 void	ClearPipelineCache();
 void	DestroyPipelineCache();
+hdl_t	GetComputePipelineStateHandle( const Asset<GpuProgram>& progAsset );
 bool	GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet );
-#ifdef USE_VULKAN
-void	CreateBindingLayout( ShaderBindSet& parms, VkDescriptorSetLayout& layout );
-#endif
 hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, const pipelineState_t& state );
-void	DestoryAllGraphicsPipelines( const Asset<GpuProgram>& progAsset );
+void	DestoryAllPipelines( const Asset<GpuProgram>& progAsset );
 void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 void	CreateComputePipeline( const Asset<GpuProgram>& prog );
+void	CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state );
 void	DestroyComputePipeline( const Asset<GpuProgram>& prog );

@@ -66,41 +66,6 @@ static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertex
 }
 
 
-void CreateBindingLayout( ShaderBindSet& bindSet, VkDescriptorSetLayout& layout )
-{
-	const uint32_t bindingCount = bindSet.Count();
-	if( bindingCount == 0 )
-	{
-		assert( 0 );
-		return;
-	}
-
-	std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-	layoutBindings.resize( bindingCount );
-
-	for( uint32_t i = 0; i < bindingCount; ++i )
-	{
-		const ShaderBinding* binding = bindSet.GetBinding(i);
-		
-		layoutBindings[i] = {};
-		layoutBindings[i].binding = binding->GetSlot();
-		layoutBindings[i].descriptorCount = binding->GetMaxDescriptorCount();
-		layoutBindings[i].descriptorType = vk_GetDescriptorType( binding->GetType() );
-		layoutBindings[i].pImmutableSamplers = nullptr;
-		layoutBindings[i].stageFlags = vk_GetStageFlags( binding->GetBindFlags() );
-	}
-
-	VkDescriptorSetLayoutCreateInfo layoutInfo{};
-	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>( layoutBindings.size() );
-	layoutInfo.pBindings = layoutBindings.data();
-
-	VK_CHECK_RESULT( vkCreateDescriptorSetLayout( context.device, &layoutInfo, nullptr, &layout ) );
-
-	vk_SetObjectName( (uint64_t)layout, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, vk_BuildObjectName( "DescriptorSetLayout", bindSet.GetName() ).c_str() );
-}
-
-
 void ClearPipelineCache()
 {
 	s_pipelineLib.clear();
@@ -130,6 +95,12 @@ static hdl_t GetComputePipelineStateHash( const pipelineState_t& state )
 }
 
 
+hdl_t GetComputePipelineStateHandle( const Asset<GpuProgram>& progAsset )
+{
+	return Hash( reinterpret_cast<const uint8_t*>( &progAsset.Handle() ), sizeof( progAsset.Handle() ) );
+}
+
+
 pipelineState_t CreateGfxState( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	pipelineState_t state {};
@@ -156,6 +127,7 @@ pipelineState_t CreateComputeState( const Asset<GpuProgram>& progAsset )
 {
 	pipelineState_t state{};
 	state.progHdl = progAsset.Handle();
+	state.prog = &progAsset.Get();
 	state.dbgProgName = progAsset.GetName().c_str();
 
 	return state;
@@ -188,7 +160,7 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 }
 
 
-void DestoryAllGraphicsPipelines( const Asset<GpuProgram>& progAsset )
+void DestoryAllPipelines( const Asset<GpuProgram>& progAsset )
 {
 	auto pipelineSetIt = s_progToPipelines.find( progAsset.Handle().Get() );
 
@@ -561,16 +533,20 @@ void DestroyComputePipeline( const Asset<GpuProgram>& progAsset )
 
 void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 {
-	pipelineState_t state = CreateComputeState( progAsset );
-
+	const pipelineState_t state = CreateComputeState( progAsset );
 	const hdl_t pipelineHdl = GetComputePipelineStateHash( state );
+	return CreateComputePipeline( pipelineHdl, state );
+}
 
+
+void CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state )
+{
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
 	if ( it != s_pipelineLib.end() ) {
 		return;
 	}
 
-	const GpuProgram& prog = progAsset.Get();
+	const GpuProgram& prog = *state.prog;
 
 	VkDescriptorSetLayout layouts[ GpuProgram::MaxBindSets ];
 	for ( uint32_t i = 0; i < prog.bindsetCount; ++i ) {
@@ -620,4 +596,6 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 	vk_SetObjectName( (uint64_t)pipelineObject.pipeline, VK_OBJECT_TYPE_PIPELINE, ( "Pipeline (Compute): < " + csBin.binName + " >" ).c_str() );
 
 	s_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
+
+	s_progToPipelines[ state.progHdl.Get() ].insert( state );
 }

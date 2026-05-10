@@ -25,6 +25,7 @@ struct renderConstants_t
 	Image*			mtlImage;
 	Image*			defaultImage;
 	Image*			defaultImageCube;
+	Image			defaultStorageImage;
 	ImageArray		defaultImageArray;
 	ImageArray		defaultImageCubeArray;
 };

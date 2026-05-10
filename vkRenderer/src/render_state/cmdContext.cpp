@@ -220,47 +220,45 @@ void CommandList::Submit( const GpuFence* fence )
 }
 
 
-void CommandList::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
+void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z )
 {
-	Dispatch( progHdl, bindParms, nullptr, 0, x, y, z );
+	Dispatch( progAsset, bindParms, nullptr, 0, x, y, z );
 }
 
 
-void CommandList::Dispatch( const hdl_t progHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z )
+void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	assert( isOpen );
 	assert( ( constantsSize % 4 ) == 0 );
 
-	pipelineState_t state = {};
-	state.progHdl = progHdl;
-
-	const hdl_t pipelineHdl = Hash( reinterpret_cast<const uint8_t*>( &state ), sizeof( state ) );
+	const hdl_t pipelineHdl = GetComputePipelineStateHandle( progAsset );
 
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipelineHdl, &pipelineObject );
 
+	assert( pipelineObject != nullptr );
+
+	if( pipelineObject->pipeline == VK_NULL_HANDLE ) {
+		CreateComputePipeline( progAsset );
+	}
+
+	std::string dbgName = "Dispatch( " + std::string( pipelineObject->dbgProgName ) + " )";
+
+	MarkerBeginRegion( dbgName.c_str(), ColorToVector( ColorWhite ) );
+
 #ifdef USE_VULKAN
 	VkCommandBuffer cmdBuffer = CommandBuffer();
+	VkDescriptorSet set[1] = { bindParms.GetVkObject() };
 
-	if ( pipelineObject != nullptr )
-	{
-		std::string dbgName = "Dispatch( " + std::string( pipelineObject->dbgProgName ) + " )";
-
-		MarkerBeginRegion( dbgName.c_str(), ColorToVector( ColorWhite ) );
-
-		VkDescriptorSet set[1] = { bindParms.GetVkObject() };
-
-		if( ( constants != nullptr ) && ( constantsSize > 0 )  ) {
-			vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, constantsSize, constants );
-		}
-		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
-		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
-
-		vkCmdDispatch( cmdBuffer, x, y, z );
-
-		MarkerEndRegion();
+	if( ( constants != nullptr ) && ( constantsSize > 0 )  ) {
+		vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, constantsSize, constants );
 	}
+	vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
+	vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
+
+	vkCmdDispatch( cmdBuffer, x, y, z );
 #endif
+	MarkerEndRegion();
 }
 
 

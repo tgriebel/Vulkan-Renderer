@@ -1,6 +1,16 @@
 #include "renderer.h"
 #include "../render_binding/bindings.h"
 
+uint64_t RenderContext::CreateBindSet( const char* name, const ShaderBinding bindings[], const uint32_t bindCount )
+{
+	const uint64_t bindSetId = Hash( name );
+	ShaderBindSet* bindset = &bindSets[ bindSetId ];
+	assert( bindset != nullptr );
+	bindset->Create( name, bindings, bindCount );
+	return bindSetId;
+}
+
+
 ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 {
 	const uint32_t id = bindParmsList.Count();

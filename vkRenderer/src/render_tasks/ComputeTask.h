@@ -1,8 +1,12 @@
 #pragma once
 
+#include <functional>
+
 #include "../render_core/renderer.h"
 #include "../render_resources/imageView.h"
 #include "../render_resources/gpuBuffer.h"
+
+class ShaderBindParms;
 
 struct computeTaskCreateInfo_t
 {
@@ -11,15 +15,15 @@ struct computeTaskCreateInfo_t
 	RenderContext*		context;
 	ResourceContext*	resources;
 
+	uint64_t			bindSetId; // Hash id of the target bindset (e.g. bindset_compute)
+
 	uint32_t			dispatchX;
 	uint32_t			dispatchY;
 	uint32_t			dispatchZ;
 
-	Image*				resourceImage;		// Optional
-	GpuBuffer*			outputBuffer;		// Optional
-
-	const void*			parmBufferData;		// Optional
-	uint32_t			parmBufferSize;		// Optional
+	// Invoked once per frame to populate the bindset. The caller is responsible
+	// for matching the slot names / resource types declared by bindSetId.
+	std::function<void( ShaderBindParms* )> bind;
 
 	const void*			pushConstants;		// Optional. Set at init time
 	uint32_t			pushConstantsSize;	// Optional
@@ -34,19 +38,13 @@ private:
 	ShaderBindParms*		m_parms;
 
 	std::string				m_name;
-	std::string				m_progName;
-
+	
+	hdl_t					m_progHdl;
 	uint32_t				m_dispatchX;
 	uint32_t				m_dispatchY;
 	uint32_t				m_dispatchZ;
 
-	Image*					m_resourceImage;
-	ImageArray				m_imageArray;
-
-	GpuBuffer*				m_outputBuffer;
-
-	GpuBuffer				m_parmBuffer;
-	bool					m_hasParmBuffer;
+	std::function<void( ShaderBindParms* )> m_bind;
 
 	std::vector<uint8_t>	m_pushConstants;
 

@@ -18,7 +18,7 @@ BINDING( particleWriteBuffer,	WRITE_BUFFER,		1,	BIND_STATE_CS );
 BINDING( computeParms,			CONSTANT_BUFFER,	1,	BIND_STATE_CS );
 BINDING( computeWrite,			WRITE_BUFFER,		1,	BIND_STATE_CS );
 BINDING( computeImage,			IMAGE_2D_ARRAY,		8,	BIND_STATE_CS );
-BINDING( computeWriteImage,		WRITE_IMAGE_BUFFER,	1,	BIND_STATE_CS ); // Unused write now
+BINDING( computeWriteImage,		WRITE_IMAGE_BUFFER,	1,	BIND_STATE_CS );
 
 // Post Effect Resources
 BINDING( imageProcess,			CONSTANT_BUFFER,	1,						BIND_STATE_PS );

@@ -6,6 +6,7 @@
 #include "../draw_passes/postPass.h"
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/assetLib.h"
+#include "../globals/assetDefs.h"
 
 #include "imageShaderTask.h"
 
@@ -137,6 +138,9 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	m_imageStatImage      = nullptr;
 	m_imageStatDispatched = false;
 	memset( m_imageStatHistogram, 0, sizeof( m_imageStatHistogram ) );
+
+	const Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "ImageState" );
+	CreateComputePipeline( *progAsset );
 }
 
 

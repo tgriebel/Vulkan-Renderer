@@ -359,8 +359,8 @@ static VkDescriptorType vk_GetDescriptorType( const bindType_t type )
 		case bindType_t::IMAGE_CUBE_ARRAY:		return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 		case bindType_t::READ_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		case bindType_t::WRITE_BUFFER:			return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		case bindType_t::READ_IMAGE_BUFFER:		return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-		case bindType_t::WRITE_IMAGE_BUFFER:	return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+		case bindType_t::READ_IMAGE_BUFFER:		return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		case bindType_t::WRITE_IMAGE_BUFFER:	return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		case bindType_t::IMAGE_SAMPLER:			return VK_DESCRIPTOR_TYPE_SAMPLER;
 		default: break;
 	}

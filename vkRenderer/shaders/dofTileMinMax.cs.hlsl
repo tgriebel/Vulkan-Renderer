@@ -48,4 +48,5 @@ void CSMain( uint3 dtid : SV_DispatchThreadID, uint3 gid : SV_GroupID, uint gi :
             dofTileOut[ gid.xy ] = float4( g_far[ 0 ], 0.0f, g_near[ 0 ], 1.0f );
         }
     }
+    dofTileOut[ gid.xy ] = float4( 1.0f, 0.0f, 1.0f, 1.0f );
 }

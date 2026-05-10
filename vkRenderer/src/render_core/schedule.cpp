@@ -12,6 +12,7 @@
 #include "../render_tasks/UtilTasks.h"
 #include "../render_tasks/imguiTask.h"
 #include "../render_tasks/ComputeTask.h"
+#include "../render_binding/bindings.h"
 
 static availableTasks_t tasks;
 
@@ -406,7 +407,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
-				info.fmt = IMAGE_FMT_RG_16;
+				info.fmt = IMAGE_FMT_RGBA_32;
 				info.type = IMAGE_TYPE_2D;
 				info.tiling = IMAGE_TILING_MORTON;
 
@@ -421,7 +422,30 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				uint32_t	tileSize;
 			};
 
+			resources->dofTileBuffer.Create(
+				"DofTileBuffer",
+				swapBuffering_t::MULTI_FRAME,
+				resourceLifeTime_t::REBOOT,
+				1,
+				sizeof( dofTileConstants_t ),
+				bufferType_t::UNIFORM
+			);
+
 			const dofTileConstants_t dofTileDefaults = { 8u };
+
+			BINDING( dofSourceImage, IMAGE_2D, 1, BIND_STATE_CS );
+
+			const uint64_t bindset_dofTile = renderContext->CreateBindSet( "bindset_dofTile", {
+				BINDING_NAME( globalsBuffer ),
+				BINDING_NAME( dofSourceImage ),
+				BINDING_NAME( computeParms ),
+				BINDING_NAME( computeWriteImage ),
+			} );
+
+			Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "DofTileMinMax" );
+			GpuProgram& prog = progAsset->Get();
+			prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
+			prog.bindsetCount = 1;
 
 			computeTaskCreateInfo_t info{};
 			info.name = "DoF Tile MinMax";
@@ -431,8 +455,16 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.dispatchX = 8;
 			info.dispatchY = 8;
 			info.dispatchZ = 1;
+			info.bindSetId = bindset_dofTile;
+			info.bind = [ resources ]( ShaderBindParms* p )
+			{
+				p->Bind( BINDING_NAME( globalsBuffer ), &resources->globalConstants );
+				p->Bind( BINDING_NAME( dofSourceImage ), resources->depthStencilResolvedImage );
+				p->Bind( BINDING_NAME( computeParms ), &resources->dofTileBuffer );
+				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
+			};
 
-			tasks.dofTileTask = nullptr;// new ComputeTask( info );
+			tasks.dofTileTask = new ComputeTask( info );
 		}
 	}
 

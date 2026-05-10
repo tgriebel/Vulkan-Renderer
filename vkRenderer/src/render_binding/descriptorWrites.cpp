@@ -149,17 +149,20 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 				image = rc.whiteImage;
 			}
 
+			const gpuImageStateFlags_t imageFlags = attachment->GetImage()->gpuImage->GetFlags();
+
 			VkDescriptorImageInfo& info = writeBuilder.NextImageInfo();
 			info.sampler = nullptr;
 			info.imageView = attachment->GetImage()->gpuImage->GetVkImageView( currentBuffer );
 			assert( info.imageView != nullptr );
 
-			if ( IsDepthStencilCompatible( image->info.fmt ) ) {
+			if( HasFlags( imageFlags, gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) ) {
+				info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+			} else if( IsDepthStencilCompatible( image->info.fmt ) ) {
 				info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			} else {
 				info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			}
-
 			writeInfo.pImageInfo = &info;
 		}
 		else if ( attachment->GetSemantic() == bindSemantic_t::IMAGE_ARRAY )
@@ -188,14 +191,13 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 				info.imageView = image->gpuImage->GetVkImageView( currentBuffer );
 				assert( info.imageView != nullptr );
 
-				if ( IsDepthStencilCompatible( image->info.fmt ) )
-				{
-				//	info.sampler = context.depthShadowSampler;
+				const gpuImageStateFlags_t imageFlags = image->gpuImage->GetFlags();
+
+				if( HasFlags( imageFlags, gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) ) {
+					info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+				} else if ( IsDepthStencilCompatible( image->info.fmt ) ) {
 					info.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-				}
-				else
-				{
-				//	info.sampler = context.bilinearSampler[ image->sampler.addrMode ];
+				} else {
 					info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				}
 			}

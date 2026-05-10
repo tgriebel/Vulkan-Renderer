@@ -1,5 +1,7 @@
 #pragma once
 
+#include <initializer_list>
+
 #include <SysCore/timer.h>
 
 #include "../globals/common.h"
@@ -8,6 +10,7 @@
 #include "../render_core/renderview.h"
 #include "../render_core/renderResource.h"
 
+class ShaderBinding;
 using bindSetMap_t = std::unordered_map<uint64_t, ShaderBindSet>;
 
 // Renderer system and resources accessible to sub-systems
@@ -38,6 +41,12 @@ public:
 
 	inline const uint32_t	GetDisplayWidth() const { return displayWidth; }
 	inline const uint32_t	GetDisplayHeight() const { return displayHeight; }
+
+	uint64_t				CreateBindSet( const char* name, const ShaderBinding bindings[], const uint32_t bindCount );
+	uint64_t				CreateBindSet( const char* name, std::initializer_list<ShaderBinding> bindings )
+							{
+								return CreateBindSet( name, bindings.begin(), static_cast<uint32_t>( bindings.size() ) );
+							}
 
 	ShaderBindParms*		RegisterBindParm( const ShaderBindSet* set );
 	ShaderBindParms*		RegisterBindParm( const uint64_t setId );

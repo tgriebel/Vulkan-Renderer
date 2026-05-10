@@ -172,7 +172,7 @@
 	{
       "name": "DofTileMinMax",
       "cs": "dofTileMinMax",
-	  "bindset": "bindset_compute"
+	  "bindset": "bindset_dofTile"
     },
 	{
       "name": "DiffuseIBL",

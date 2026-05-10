@@ -27,6 +27,7 @@ public:
 	GpuBuffer				materialBuffers;
 	GpuBuffer				lightParms;
 	GpuBuffer				particleBuffer;
+	GpuBuffer				dofTileBuffer;
 
 	ImageSampler			nearestSampler;
 	ImageSampler			bilinearSamplers[ SAMPLER_ADDRESS_MODES ];
