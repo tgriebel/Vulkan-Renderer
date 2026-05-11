@@ -149,7 +149,7 @@ void ImageReadbackTask::Execute( CommandList& cmdContext )
 
 			baseOffset += w * h * layers; // Pack tightly without MIP padding
 
-			const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageWriteback" );
+			const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageReadback" );
 			cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
 		}
 	}

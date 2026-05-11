@@ -124,7 +124,7 @@
 	  "bindset": "bindset_compute"
     },
 	{
-      "name": "ImageWriteback",
+      "name": "ImageReadback",
       "cs": "imagewriteback",
 	  "bindset": "bindset_compute"
     },

@@ -1,17 +1,17 @@
 #include "globals.h"
 #include "util.h"
 
-struct WriteBackParms
+struct ReadbackParms
 {
     float4 dimensions;
 };
 
 GLOBALS_LAYOUT( 0, 0 )
 CODE_IMAGE_LAYOUT( 0, 1, Texture2D )
-CONSTANT_LAYOUT( 0, 2, WriteBackParms, writebackParms )
-WRITE_BUFFER_LAYOUT( 0, 3, float4, imageWriteback )
+CONSTANT_LAYOUT( 0, 2, ReadbackParms, readbackParms )
+WRITE_BUFFER_LAYOUT( 0, 3, float4, imageReadback )
 
-struct WritebackPush_t
+struct ReadbackPush_t
 {
     float4 dimensions;
     uint imageId;
@@ -19,37 +19,7 @@ struct WritebackPush_t
     uint baseOffset;
 };
 
-[[vk::push_constant]] WritebackPush_t wb;
-
-uint PackF16( const float unpacked )
-{
-    const uint element = asuint( unpacked );
-
-    const uint signBit = ( element >> 16 ) & 0x8000;
-    uint exp = ( element >> 23 ) & 0xFF;
-    uint mantissa = element & 0x7FFFFF;
-
-    if ( exp > 0x70 ) {
-        exp = ( exp - 0x70 ); // Implicitly clamps to INF
-    } else {
-        exp = 0; // Flush denormals
-    }
-    mantissa >>= 13; // Don't round up
-
-    const uint packed = signBit | exp | mantissa;
-
-    return packed;
-}
-
-float2 PackVectorF16( const float4 unpacked )
-{
-    const uint x0 = PackF16( unpacked.x );
-    const uint x1 = PackF16( unpacked.y );
-    const uint x2 = PackF16( unpacked.z );
-    const uint x3 = PackF16( unpacked.w );
-
-    return float2( asfloat( x0 << 16 | x1 ), asfloat( x2 << 16 | x3 ) );
-}
+BIND_INLINE ReadbackPush_t wb;
 
 [numthreads(8, 8, 8)]
 void CSMain( uint3 dtid : SV_DispatchThreadID )
@@ -71,5 +41,5 @@ void CSMain( uint3 dtid : SV_DispatchThreadID )
     const uint offset = x + ( y * width ) + z * ( width * height );
 
     //const float4 sRgb = LinearToSrgb( pixel.rgba );
-    imageWriteback[ wb.baseOffset + offset ].xyzw = pixel.rgba;
+    imageReadback[ wb.baseOffset + offset ].xyzw = pixel.rgba;
 }
