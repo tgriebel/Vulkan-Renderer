@@ -34,7 +34,7 @@ private:
 	ImageView				m_cubeViews[ 6 ];	// Make a view for each face
 	RenderContext*			m_context;
 	ResourceContext*		m_resources;
-	GpuBuffer				m_writebackBuffer;
+	GpuBuffer				m_readbackBuffer;
 	GpuBuffer				m_resourceBuffer;
 	ShaderBindParms*		m_parms;
 	std::string				m_fileName;

@@ -70,7 +70,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 	assert( sizeof( vec4f ) == sizeof( Color ) );
 	const uint32_t elementsCount = MipPixelCount( m_readbackImage->info.width, m_readbackImage->info.height ) * m_readbackImage->info.layers; // Allocated as for padded out MIPs
 	
-	m_writebackBuffer.Create(
+	m_readbackBuffer.Create(
 		"Writeback Buffer",
 		swapBuffering_t::MULTI_FRAME,
 		resourceLifeTime_t::TASK,
@@ -105,7 +105,7 @@ void ImageReadbackTask::FrameBegin()
 	m_parms->Bind( BINDING_NAME( globalsBuffer ),		&m_resources->globalConstants );
 	m_parms->Bind( BINDING_NAME( computeImage ),		&m_imageArray );
 	m_parms->Bind( BINDING_NAME( computeParms ),		&m_resourceBuffer );
-	m_parms->Bind( BINDING_NAME( computeWrite ),		&m_writebackBuffer );
+	m_parms->Bind( BINDING_NAME( computeWrite ),		&m_readbackBuffer );
 }
 
 
@@ -170,7 +170,7 @@ void ImageReadbackTask::Execute( CommandList& cmdContext )
 		copyParms.imageExtent.depth = 1;
 		copyParms.imageSubresource = subLayers;
 
-		vkCmdCopyImageToBuffer( cmdContext.CommandBuffer(), m_imageArray[ 0 ]->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_writebackBuffer.GetVkObject(), 1, &copyParms );
+		vkCmdCopyImageToBuffer( cmdContext.CommandBuffer(), m_imageArray[ 0 ]->gpuImage->GetVkImage( context.bufferId ), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_readbackBuffer.GetVkObject(), 1, &copyParms );
 
 		Transition( &cmdContext, *m_imageArray[ 0 ], GPU_IMAGE_TRANSFER_SRC, GPU_IMAGE_READ );
 	}
@@ -190,7 +190,7 @@ void ImageReadbackTask::FrameEnd()
 
 	FlushGPU();
 
-	assert( m_writebackBuffer.VisibleToCpu() );
+	assert( m_readbackBuffer.VisibleToCpu() );
 
 	// Clear old CPU image
 	m_readbackImage->Destroy();
@@ -219,7 +219,7 @@ void ImageReadbackTask::FrameEnd()
 	};
 	*/
 
-	Color* colorData = reinterpret_cast<Color*>( m_writebackBuffer.Get() );
+	Color* colorData = reinterpret_cast<Color*>( m_readbackBuffer.Get() );
 
 	if ( HasFlags( m_flags, PACKED_HDR ) )
 	{
