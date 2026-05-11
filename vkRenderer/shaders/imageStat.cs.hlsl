@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "util.h"
 
-#define HistogramBins 256
+#define HistogramBins 16
 
 struct ImageStatParms
 {
