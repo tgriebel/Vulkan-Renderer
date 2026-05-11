@@ -9,7 +9,8 @@ enum class bufferType_t
 	STORAGE,
 	VERTEX,
 	INDEX,
-	STAGING
+	STAGING,
+	READBACK
 };
 
 
@@ -52,6 +53,8 @@ public:
 	void			Allocate( const uint64_t size );
 	void			CopyData( const void* data, const size_t sizeInBytes );
 	void			CopyFrom( void* data, const size_t sizeInBytes ) const;
+	void			Invalidate();	// Invalidates host cache for the current frame's buffer (no-op on coherent memory). Call after GPU writes, before CPU reads.
+	void			Flush();		// Flushes host cache for the current frame's buffer (no-op on coherent memory). Call after CPU writes, before GPU reads.
 	void*			Get() const;
 	void*			GetPrevious() const;
 

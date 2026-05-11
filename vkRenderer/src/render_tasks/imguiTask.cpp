@@ -119,7 +119,7 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 		resourceLifeTime_t::UNMANAGED,
 		2048,
 		sizeof( uint32_t ),
-		bufferType_t::STORAGE );
+		bufferType_t::READBACK );
 
 	m_imageStatParmsBuffer.Create(
 		"ImageStatParms",
@@ -225,8 +225,10 @@ void ImguiTask::FrameBegin()
 		m_imageStatParmsBuffer.SetPos( 0 );
 		m_imageStatParmsBuffer.CopyData( &parms, sizeof( parms ) );
 
-		// Readback, this is guaranteed done, but has worst-case latency
+		// Readback, this is guaranteed complete, but has worst-case latency since it's the oldest frame
 		assert( m_imageStatBuffer.VisibleToCpu() );
+
+		m_imageStatBuffer.Invalidate();
 		{
 			const void* baseData = reinterpret_cast<void*>( m_imageStatBuffer.Get() );
 
@@ -237,6 +239,8 @@ void ImguiTask::FrameBegin()
 
 		memcpy( m_imageStatHistogram, m_imageStatBuffer.Get(), sizeof( m_imageStatHistogram ) );
 		memset( m_imageStatBuffer.Get(), 0, ImageStatHistogramBins * sizeof( uint32_t ) );
+
+		m_imageStatBuffer.Flush();
 
 		m_imageStatImages.BindIndex( 0, image, true );
 

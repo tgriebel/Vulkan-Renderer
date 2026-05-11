@@ -76,7 +76,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 		resourceLifeTime_t::TASK,
 		elementsCount,
 		maxBpp,
-		bufferType_t::STORAGE
+		bufferType_t::READBACK
 	);
 
 	m_resourceBuffer.Create( 
@@ -191,6 +191,8 @@ void ImageReadbackTask::FrameEnd()
 	FlushGPU();
 
 	assert( m_readbackBuffer.VisibleToCpu() );
+
+	m_readbackBuffer.Invalidate();
 
 	// Clear old CPU image
 	m_readbackImage->Destroy();

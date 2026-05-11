@@ -111,10 +111,14 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 		} else if ( type == bufferType_t::STAGING ) {
 			alignment = 1;
 			usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		} else if ( type == bufferType_t::READBACK ) {
+			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
+			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		} else {
 			assert(0);
 		}
 
+		m_type = type;
 		m_elementSize = elementSizeBytes;
 		m_elementPadding = GpuBuffer::GetAlignedSize( elementSizeBytes, alignment );
 
@@ -129,7 +133,13 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 
 		VmaAllocationCreateInfo allocCreateInfo = {};
 		allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-		if ( ( type == bufferType_t::UNIFORM ) || ( type == bufferType_t::STORAGE ) || ( type == bufferType_t::STAGING )  ) {
+		if ( type == bufferType_t::READBACK )
+		{
+			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT
+								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+		}
+		else if ( ( type == bufferType_t::UNIFORM ) || ( type == bufferType_t::STORAGE ) || ( type == bufferType_t::STAGING )  )
+		{
 			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
 								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		}
@@ -165,6 +175,32 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 			m_buffer[ bufferId ].offset = 0;
 		}
 	}
+#endif
+}
+
+
+void GpuBuffer::Invalidate()
+{
+#ifdef USE_VULKAN
+	const uint32_t id = ClampId( context.bufferId );
+	VmaAllocation alloc = m_buffer[ id ].alloc.m_allocation;
+	if ( alloc == VK_NULL_HANDLE ) {
+		return;
+	}
+	vmaInvalidateAllocation( AllocatorMemory::GetVmaAllocator(), alloc, 0, VK_WHOLE_SIZE );
+#endif
+}
+
+
+void GpuBuffer::Flush()
+{
+#ifdef USE_VULKAN
+	const uint32_t id = ClampId( context.bufferId );
+	VmaAllocation alloc = m_buffer[ id ].alloc.m_allocation;
+	if ( alloc == VK_NULL_HANDLE ) {
+		return;
+	}
+	vmaFlushAllocation( AllocatorMemory::GetVmaAllocator(), alloc, 0, VK_WHOLE_SIZE );
 #endif
 }
 
