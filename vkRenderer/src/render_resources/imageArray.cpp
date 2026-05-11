@@ -7,11 +7,11 @@ void ImageArray::SetRenderContext( RenderContext* context )
 }
 
 
-void ImageArray::BindIndex( const uint32_t index, const Image* image )
+void ImageArray::BindIndex( const uint32_t index, const Image* image, const bool forceUpdate )
 {
 	assert( m_context );
 
-	if( (*this)[ index ] != image )
+	if( ( (*this)[ index ] != image ) || forceUpdate )
 	{
 		m_lastFrameUpdate[ index ] = m_context->FrameNumber(); // Conservative marking since any assignment could set the same pointer
 

@@ -29,7 +29,7 @@ public:
 	}
 
 	// This name makes the intent more explicit than [] and allows additional book-keeping easily
-	void BindIndex(const uint32_t index, const Image* image);
+	void BindIndex( const uint32_t index, const Image* image, const bool forceUpdate = false );
 
 	void SetRenderContext(RenderContext* context);
 

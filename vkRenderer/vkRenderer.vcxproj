@@ -179,6 +179,9 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Natvis Include="..\external\GfxCore\GfxCore\math\vector.natvis" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="..\external\imgui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="..\external\imgui\backends\imgui_impl_vulkan.h" />
     <ClInclude Include="..\external\imgui\imconfig.h" />

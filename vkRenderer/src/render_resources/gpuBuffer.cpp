@@ -9,12 +9,7 @@ uint32_t GpuBuffer::ClampId( const uint32_t bufferId ) const
 	if( m_swapBuffering == swapBuffering_t::SINGLE_FRAME ) {
 		return 0;
 	}
-	if ( bufferId >= m_bufferCount )
-	{
-		assert( 0 );
-		return 0;
-	}
-	return bufferId;
+	return ( bufferId % m_bufferCount );
 }
 
 
@@ -242,6 +237,16 @@ void GpuBuffer::CopyFrom( void* data, const size_t sizeInBytes ) const
 void* GpuBuffer::Get() const
 {
 	const uint32_t id = ClampId( context.bufferId );
+
+	void* mappedData = m_buffer[ id ].alloc.GetPtr();
+	assert( mappedData != nullptr );
+	return mappedData;
+}
+
+
+void* GpuBuffer::GetPrevious() const
+{
+	const uint32_t id = ClampId( context.bufferId + m_bufferCount - 1 );
 
 	void* mappedData = m_buffer[ id ].alloc.GetPtr();
 	assert( mappedData != nullptr );

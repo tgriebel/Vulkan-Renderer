@@ -16,6 +16,7 @@ namespace
 	{
 		vec4f		dimensions;		// .xy = w/h, .z = lod
 		vec2f		luminanceRange;	// log2 min/max
+		vec2u		pickLocation;
 		uint32_t	imageId;
 		uint32_t	baseOffset;
 	};
@@ -132,8 +133,8 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	m_imageStatImages.Resize( 1 );
 	m_imageStatImages.BindIndex( 0, rc.defaultImage );
 
-	m_imageStatParms      = m_context->RegisterBindParm( m_context->LookupBindSet( bindset_compute ) );
-	m_imageStatImage      = nullptr;
+	m_imageStatParms = m_context->RegisterBindParm( m_context->LookupBindSet( bindset_compute ) );
+	m_imageStatImage = nullptr;
 	m_imageStatDispatched = false;
 	memset( m_imageStatHistogram, 0, sizeof( m_imageStatHistogram ) );
 
@@ -212,22 +213,32 @@ void ImguiTask::FrameBegin()
 	m_imageStatImage      = nullptr;
 	m_imageStatDispatched = false;
 
-	if ( image != nullptr && image->info.type != IMAGE_TYPE_CUBE )
+	if ( ( image != nullptr ) && ( image->info.type != IMAGE_TYPE_CUBE ) )
 	{
 		imageStatParms_t parms{};
-		parms.dimensions     = vec4f( (float)image->info.width, (float)image->info.height, (float)callbackTasks[ 0 ].mipLevel, 0.0f );
+		parms.dimensions = vec4f( (float)image->info.width, (float)image->info.height, (float)callbackTasks[ 0 ].mipLevel, 0.0f );
 		parms.luminanceRange = vec2f( -8.0f, 4.0f );
-		parms.imageId        = 0;
-		parms.baseOffset     = 0;
+		parms.imageId = 0;
+		parms.baseOffset = 0;
+		parms.pickLocation = vec2u( 200, 200 );
 
 		m_imageStatParmsBuffer.SetPos( 0 );
 		m_imageStatParmsBuffer.CopyData( &parms, sizeof( parms ) );
 
+		// Readback, this is guaranteed done, but has worst-case latency
 		assert( m_imageStatBuffer.VisibleToCpu() );
+		{
+			const void* baseData = reinterpret_cast<void*>( m_imageStatBuffer.Get() );
+
+			const vec4f* pickSample = reinterpret_cast<const vec4f*>( baseData );
+
+			m_pickLocationSample = *pickSample;
+		}
+
 		memcpy( m_imageStatHistogram, m_imageStatBuffer.Get(), sizeof( m_imageStatHistogram ) );
 		memset( m_imageStatBuffer.Get(), 0, ImageStatHistogramBins * sizeof( uint32_t ) );
 
-		m_imageStatImages.BindIndex( 0, image );
+		m_imageStatImages.BindIndex( 0, image, true );
 
 		m_imageStatImage      = image;
 		m_imageStatDispatched = true;

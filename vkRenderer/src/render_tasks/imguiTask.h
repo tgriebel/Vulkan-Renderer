@@ -29,7 +29,7 @@ private:
 	DrawPass*				m_imagePass;
 	GpuBuffer				m_buffer;
 
-	// Image histogram (dispatched per-frame on the currently viewed image).
+	// Image Viewer.
 	GpuBuffer				m_imageStatBuffer;
 	GpuBuffer				m_imageStatParmsBuffer;
 	ShaderBindParms*		m_imageStatParms;
@@ -37,6 +37,7 @@ private:
 	const Image*			m_imageStatImage;
 	bool					m_imageStatDispatched;
 	uint32_t				m_imageStatHistogram[ ImageStatHistogramBins ];
+	vec4f					m_pickLocationSample;
 
 	void Init( const DrawPass* pass, RenderContext* renderContext, ResourceContext* resourceContext, const bool finalizeImage );
 	void Shutdown();

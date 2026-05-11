@@ -5,17 +5,18 @@
 
 #define HistogramBins 16
 
-struct ImageStatParms
+struct ImageStatParms_t
 {
-    float4 dimensions;
-    float2 luminanceRange;
-    uint   imageId;
-    uint   baseOffset;
+    float4  dimensions;
+    float2  luminanceRange;
+    uint2   pickLocation;
+    uint    imageId;
+    uint    baseOffset;
 };
 
 GLOBALS_LAYOUT( 0, 0 )
 CODE_IMAGE_LAYOUT( 0, 1, Texture2D )
-CONSTANT_LAYOUT( 0, 2, ImageStatParms, imageStatParms )
+CONSTANT_LAYOUT( 0, 2, ImageStatParms_t, imageStatParms )
 WRITE_BUFFER_LAYOUT( 0, 3, uint, imageStatBuffer )
 
 groupshared uint groupHistogramBins[ HistogramBins ];
@@ -73,7 +74,7 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint groupId : SV_GroupIndex 
 
     if ( ( pixelLocation.x < width ) && ( pixelLocation.y < height ) )
     {
-        const float4 pixel = localTextures[ imageStatParms.imageId ].Load( int3( pixelLocation.xy, lod ) );
+        const float4 pixel = localTextures[ 0 ].Load( int3( pixelLocation.xy, lod ) );
         const uint bin = ColorToHistogramBin( pixel.rgb, imageStatParms.luminanceRange.x, imageStatParms.luminanceRange.y );
 
         InterlockedMin( groupMinRSample, QuantizeFloat( pixel.r ) );
@@ -97,9 +98,15 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint groupId : SV_GroupIndex 
     if ( groupId < HistogramBins ) {
     //    InterlockedAdd( imageStatBuffer[ imageStatParms.baseOffset + groupId ], groupHistogramBins[ groupId ] );
     }
-    if ( ( pixelLocation.x < width ) && ( pixelLocation.y < height ) )
+    if ( ( pixelLocation.x == imageStatParms.pickLocation.x ) && ( pixelLocation.y == imageStatParms.pickLocation.y ) )
     {
-        imageStatBuffer[ pixelLocation.x + pixelLocation.y * width ] = pixelLocation.x;
+        const float4 pixel = localTextures[ 0 ].Load( int3( pixelLocation.xy, lod ) );
+        
+        // Pick Location is always [0 - 4]
+        imageStatBuffer[ 0 ] = asuint( pixel.r );
+        imageStatBuffer[ 1 ] = asuint( pixel.g );
+        imageStatBuffer[ 2 ] = asuint( pixel.b );
+        imageStatBuffer[ 3 ] = asuint( pixel.a );
     }
     //InterlockedMin( imageStatBuffer[ imageStatParms.baseOffset + groupId + 0 ], groupMinRSample );
     //InterlockedMin( imageStatBuffer[ imageStatParms.baseOffset + groupId + 1 ], groupMinGSample );

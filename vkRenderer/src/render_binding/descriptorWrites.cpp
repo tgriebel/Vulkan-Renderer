@@ -119,6 +119,11 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 			}
 		}
 
+		static bool print = false;
+		if( print ) {
+			std::cout << parms.AsString() << std::endl;
+		}
+
 		VkWriteDescriptorSet writeInfo = {};
 		writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		writeInfo.descriptorCount = binding->GetMaxDescriptorCount();
