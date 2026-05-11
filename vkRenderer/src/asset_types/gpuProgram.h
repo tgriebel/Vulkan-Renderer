@@ -39,6 +39,7 @@ enum class shaderFlags_t : uint32_t
 	IMAGE_SHADER			= ( 1 << 2 ),
 	NO_VERTEX_BUFFER		= ( 1 << 3 ),
 	USE_MRT					= ( 1 << 4 ),
+	QUAD_2D					= ( 1 << 5 ),
 };
 DEFINE_ENUM_OPERATORS( shaderFlags_t, uint32_t )
 

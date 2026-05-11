@@ -416,20 +416,10 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, con
 	pipelineLayoutInfo.pushConstantRangeCount = 1;
 
 	VkPushConstantRange pushRanges{};
-	if( HasFlags( prog.flags, shaderFlags_t::IMAGE_SHADER ) )
-	{
-		pushRanges.offset = 0;
-		pushRanges.size = sizeof( gpuImageShaderPushConstants_t );
-		pushRanges.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
-	}
-	else
-	{
-		pushRanges.offset = 0;
-		pushRanges.size = sizeof( gpuPushConstants_t );
-		pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
-		pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
-	}
+	pushRanges.offset = 0;
+	pushRanges.size = sizeof( gpuPushConstants_t );
+	pushRanges.stageFlags = VK_SHADER_STAGE_ALL;
+	pipelineLayoutInfo.pPushConstantRanges = &pushRanges;
 
 	VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &pipelineLayoutInfo, nullptr, &pipelineObject.pipelineLayout ) );
 

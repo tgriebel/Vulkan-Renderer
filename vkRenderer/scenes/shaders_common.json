@@ -110,7 +110,8 @@
       "ps": "imageViewer",
       "perms": ["msaa"],
 	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "image_shader": true,
+	  "no_vb": true
     },
 	{
       "name": "ClearParticles",

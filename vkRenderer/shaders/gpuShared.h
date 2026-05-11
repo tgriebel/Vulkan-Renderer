@@ -244,13 +244,6 @@ struct gpuPushConstants_t
 };
 
 
-struct gpuImageShaderPushConstants_t
-{
-	float2 xy0;	// Start point
-	float2 xy1;	// End point
-};
-
-
 struct vsInput_t
 { 
 	BIND_SLOT( 0 ) float3 inPosition	SEMANTIC( POSITION );

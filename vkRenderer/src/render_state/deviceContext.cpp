@@ -429,19 +429,17 @@ void vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec
 	const viewport_t& viewport = pass->GetViewport();
 
 	VkViewport vk_viewport{ };
-	vk_viewport.x = static_cast<float>( viewport.x );
-	vk_viewport.y = static_cast<float>( viewport.y );
-	vk_viewport.width = static_cast<float>( viewport.width );
-	vk_viewport.height = static_cast<float>( viewport.height );
+	vk_viewport.x = static_cast<float>( Clamp( offset.x, 0.0f, (float)viewport.width ) );
+	vk_viewport.y = static_cast<float>( Clamp( offset.y, 0.0f, (float)viewport.height ) );
+	vk_viewport.width = static_cast<float>( size.x );
+	vk_viewport.height = static_cast<float>( size.y );
 	vk_viewport.minDepth = 0.0f;
 	vk_viewport.maxDepth = 1.0f;
 	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
 
 	VkRect2D rect{ };
-	rect.offset.x = static_cast<uint32_t>( Clamp( offset.x, 0.0f, (float)viewport.width ) );
-	rect.offset.y = static_cast<uint32_t>( Clamp( offset.y, 0.0f, (float)viewport.height ) );
-	rect.extent.width = static_cast<uint32_t>( size.x );
-	rect.extent.height = static_cast<uint32_t>( size.y );
+	rect.extent.width = viewport.width;
+	rect.extent.height = viewport.height;
 	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
 
 	pipelineObject_t* pipelineObject = nullptr;
@@ -527,15 +525,10 @@ void vk_RenderImageShader( CommandList& cmdContext, const hdl_t pipeLineHandle, 
 		CreateGraphicsPipeline( pass, pipeLineHandle, pipelineObject->state );
 	}
 
-	if ( pipelineObject != nullptr ) {
+	if ( pipelineObject != nullptr )
+	{
 		const uint32_t descSetCount = 2;
 		VkDescriptorSet descSetArray[ descSetCount ] = { cmdContext.GetRenderContext()->globalParms->GetVkObject(), pass->parms->GetVkObject() };
-
-		gpuImageShaderPushConstants_t pushConstants = {};
-		pushConstants.xy0 = vec2f( 0.0f, 0.0f );
-		pushConstants.xy1 = vec2f( 0.0f, 0.0f );
-
-		vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof( pushConstants ), &pushConstants );
 
 		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );

@@ -187,12 +187,7 @@ void ImguiTask::FrameBegin()
 		constants.mipCount = image->info.mipLevels;
 		constants.layerCount = image->info.layers;
 		constants.layer = callbackTasks[ 0 ].layer;
-		constants.scissorRectUv = vec4f( callbackTasks[ 0 ].x, callbackTasks[ 0 ].y, callbackTasks[ 0 ].width, callbackTasks[ 0 ].height );
-		
-		constants.scissorRectUv.x *= 1.0f / viewport.width;
-		constants.scissorRectUv.y *= 1.0f / viewport.height;
-		constants.scissorRectUv.z *= 1.0f / viewport.width;
-		constants.scissorRectUv.w *= 1.0f / viewport.height;
+		constants.scissorRectUv = vec4f( 0.0f, 0.0f, 1.0f, 1.0f );
 
 		constants.tint = callbackTasks[ 0 ].tint;
 		constants.rangeMin = callbackTasks[ 0 ].rangeMin;

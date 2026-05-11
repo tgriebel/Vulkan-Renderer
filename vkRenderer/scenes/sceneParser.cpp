@@ -703,7 +703,7 @@ int ParseShaderObject( parseState_t& st, void* object, uint32_t offset )
 		{ "perms",			&perms,			TOKEN_LEN,				1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
 		{ "sampling_ms",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
 		{ "image_shader",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
-		{ "no_vb",			&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> },
+		{ "no_vb",			&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> }
 	};
 
 	ParseObject( st, objectMap, objectCount );
