@@ -157,7 +157,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
 		}
 
-		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( bindset_imageProcess );
+		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( bindset_imageShader );
 
 		m_buffer[ passIndex ].Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM );
 	}

@@ -8,7 +8,7 @@ struct ImageShaderTask
     float4 generic2;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2DMS<float4>, ImageShaderTask )
+PS_LAYOUT_IMAGE_SHADER( Texture2DMS<float4>, ImageShaderTask )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {

@@ -12,7 +12,7 @@ struct SSAOConstants
     float   strength;    // AO multiplier: 1 = standard, higher = darker
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, SSAOConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, SSAOConstants )
 
 // localTextures[0] = resolved depth buffer
 

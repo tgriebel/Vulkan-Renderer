@@ -12,7 +12,7 @@ struct DofCocConstants
     float pad2;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, DofCocConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, DofCocConstants )
 
 float2 DepthCmp2( float depth, float closestDepth )
 {

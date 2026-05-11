@@ -7,7 +7,7 @@ struct SpecularIblConstants
     float4x4 viewMat;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, SpecularIblConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, SpecularIblConstants )
 
 // https://learnopengl.com/PBR/IBL/Specular-IBL
 psOutput_t PSMain( vsToPsInterpolators input )

@@ -97,7 +97,7 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 
 	m_imagePass = new PostPass( m_context, const_cast<FrameBuffer*>( m_imguiPass->GetFrameBuffer() ) );
 
-	m_imagePass->parms = m_context->RegisterBindParm( bindset_imageProcess );
+	m_imagePass->parms = m_context->RegisterBindParm( bindset_imageShader );
 
 	m_imagePass->codeImages.SetRenderContext( m_context );
 	m_imagePass->codeCubeImages.SetRenderContext( m_context );

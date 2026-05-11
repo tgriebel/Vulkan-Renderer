@@ -11,7 +11,7 @@ struct BilateralProcess
     float pad2;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, BilateralProcess )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, BilateralProcess )
 
 static const uint  weightCount = 5;
 static const float weights[ 5 ] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };

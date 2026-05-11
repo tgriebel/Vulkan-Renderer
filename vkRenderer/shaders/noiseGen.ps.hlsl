@@ -7,7 +7,7 @@ struct NoiseGenConstants
     float dummy; // TODO: take in type field (e.g. blue noise, IGN, perlin)
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, NoiseGenConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, NoiseGenConstants )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {

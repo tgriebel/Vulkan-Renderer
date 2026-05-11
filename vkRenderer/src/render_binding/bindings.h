@@ -101,4 +101,4 @@ static const ShaderBinding g_imageProcessBindings[] =
 	BINDING_NAME( imageStencil ),
 	BINDING_NAME( imageProcess ),
 };
-const uint64_t bindset_imageProcess = Hash( "bindset_imageProcess" );
+const uint64_t bindset_imageShader = Hash( "bindset_imageShader" );

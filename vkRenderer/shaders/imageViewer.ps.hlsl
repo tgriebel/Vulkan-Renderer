@@ -12,9 +12,9 @@ struct ImageViewer
 };
 
 #ifdef USE_MSAA
-PS_LAYOUT_IMAGE_PROCESS( Texture2DMS<float4>, ImageViewer )
+PS_LAYOUT_IMAGE_SHADER( Texture2DMS<float4>, ImageViewer )
 #else
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageViewer )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, ImageViewer )
 #endif
 
 psOutput_t PSMain( vsToPsInterpolators input )

@@ -9,9 +9,9 @@ struct ImageShaderTask
 };
 
 #ifdef USE_MSAA
-PS_LAYOUT_IMAGE_PROCESS( Texture2DMS<float4>, ImageShaderTask )
+PS_LAYOUT_IMAGE_SHADER( Texture2DMS<float4>, ImageShaderTask )
 #else
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageShaderTask )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, ImageShaderTask )
 #endif
 
 psOutput_t PSMain( vsToPsInterpolators input )

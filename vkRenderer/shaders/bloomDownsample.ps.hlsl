@@ -17,7 +17,7 @@ float KarisAverage( float3 col )
     return 1.0f / ( 1.0f + luma );
 }
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, ImageShaderTask )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, ImageShaderTask )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {

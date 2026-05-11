@@ -7,7 +7,7 @@ struct BrdfLutConstants
     float dummy;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, BrdfLutConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, BrdfLutConstants )
 
 // https://learnopengl.com/PBR/IBL/Specular-IBL
 float G_SchlickGGX_BRDF_LUT( float NdotV, float roughness )

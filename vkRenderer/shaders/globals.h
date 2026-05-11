@@ -136,7 +136,7 @@ struct psOutput_t
 
 #define VS_LAYOUT_IMAGE_SHADER							BIND_INLINE gpuImageShaderPushConstants_t imageShaderPushConstants;
 
-#define PS_LAYOUT_IMAGE_PROCESS( TEXTYPE, USERTYPE )                                                                \
+#define PS_LAYOUT_IMAGE_SHADER( TEXTYPE, USERTYPE )                                                                \
                                                         GLOBAL_BINDS( 0 )                                           \
                                                         CODE_IMAGE_LAYOUT( 1, 0, TEXTYPE )                          \
                                                         CODE_IMAGE_CUBE_LAYOUT( 1, 1 )                              \

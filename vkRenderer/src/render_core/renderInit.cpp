@@ -334,7 +334,7 @@ void Renderer::InitApi( const renderConfig_t& cfg )
 		bindset = &renderContext.bindSets[ bindset_compute ];
 		bindset->Create( "ComputeBindings", g_computeBindings, COUNTARRAY( g_computeBindings ) );
 
-		bindset = &renderContext.bindSets[ bindset_imageProcess ];
+		bindset = &renderContext.bindSets[ bindset_imageShader ];
 		bindset->Create( "ImageProcessBindings", g_imageProcessBindings, COUNTARRAY( g_imageProcessBindings ) );
 	}
 }
@@ -345,7 +345,7 @@ void Renderer::AssignBindSetsToGpuProgs()
 	const ShaderBindSet& globalBindSet = renderContext.bindSets[ bindset_global ];
 	const ShaderBindSet& viewBindSet = renderContext.bindSets[ bindset_view ];
 	const ShaderBindSet& passBindSet = renderContext.bindSets[ bindset_pass ];
-	const ShaderBindSet& imageProcessBindSet = renderContext.bindSets[ bindset_imageProcess ];
+	const ShaderBindSet& imageProcessBindSet = renderContext.bindSets[ bindset_imageShader ];
 
 	{
 		const uint32_t programCount = GpuProgramLib().Count();

@@ -5,14 +5,14 @@
       "vs": "fullscreen",
       "ps": "resolve",
 	  "perms": ["msaa", "mrt"],
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "ResolveDepth",
       "vs": "fullscreen",
       "ps": "resolveDepth",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
     {
@@ -42,14 +42,14 @@
       "name": "NoiseGen",
       "vs": "fullscreen",
       "ps": "noiseGen",
-      "bindset": "bindset_imageProcess",
+      "bindset": "bindset_imageShader",
       "image_shader": true
     },
 	{
       "name": "SSAO",
       "vs": "fullscreen",
       "ps": "ssao",
-      "bindset": "bindset_imageProcess",
+      "bindset": "bindset_imageShader",
       "image_shader": true
     },
     {
@@ -109,7 +109,7 @@
       "vs": "fullscreen",
       "ps": "imageViewer",
       "perms": ["msaa"],
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
@@ -131,42 +131,42 @@
       "name": "DownSample",
       "vs": "fullscreen",
       "ps": "downsample",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "preCalculatedBrdfLut",
       "vs": "fullscreen",
       "ps": "computeBrdfLut",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "preCalculatedSpecularIbl",
       "vs": "fullscreen",
       "ps": "preCalculatedSpecularIbl",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "SeparableGaussianBlur",
       "vs": "fullscreen",
       "ps": "gaussian",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "BilateralBlur",
       "vs": "fullscreen",
       "ps": "bilateralBlur",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "DofCoc",
       "vs": "fullscreen",
       "ps": "dofCoc",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
@@ -178,35 +178,35 @@
       "name": "DiffuseIBL",
       "vs": "fullscreen",
       "ps": "preCalculatedDiffuseIbl",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "LuminanceDownsample",
       "vs": "fullscreen",
       "ps": "luminanceDownsample",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "Luminance",
       "vs": "fullscreen",
       "ps": "luminance",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "BloomDownsample",
       "vs": "fullscreen",
       "ps": "bloomDownsample",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{
       "name": "BloomUpsample",
       "vs": "fullscreen",
       "ps": "bloomUpsample",
-	  "bindset": "bindset_imageProcess",
+	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },
 	{

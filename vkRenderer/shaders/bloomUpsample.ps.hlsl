@@ -5,7 +5,7 @@ struct BloomUpsampleConstants
     float filterRadius;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, BloomUpsampleConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, BloomUpsampleConstants )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {

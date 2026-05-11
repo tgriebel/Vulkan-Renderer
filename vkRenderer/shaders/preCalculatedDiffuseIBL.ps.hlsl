@@ -6,7 +6,7 @@ struct DiffuseIblConstants
     float4x4 viewMat;
 };
 
-PS_LAYOUT_IMAGE_PROCESS( Texture2D, DiffuseIblConstants )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, DiffuseIblConstants )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
