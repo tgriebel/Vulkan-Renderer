@@ -354,6 +354,14 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info,
 				"FB_dofCoc", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 			);
+
+			resources->dofCocImage->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+			{
+				imageInfo_t resized = info;
+				resized.width = ( w / 2 );
+				resized.height = ( h / 2 );
+				return resized;
+			} );
 		}
 
 		// DoF Circle-of-Confusion Calculation
@@ -402,8 +410,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			{
 				imageInfo_t info{};
-				info.width = ( resources->dofCocImage->info.width ) / 8;
-				info.height = ( resources->dofCocImage->info.height ) / 8;
+				info.width = ( displayWidth / 16 );
+				info.height = ( displayHeight / 16 );
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
@@ -415,6 +423,14 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					info,
 					"FB_dofTileCoc", GPU_IMAGE_STORAGE | GPU_IMAGE_READ, resourceLifeTime_t::RESIZE
 				);
+
+				resources->dofTileCocImage->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+				{
+					imageInfo_t resized = info;
+					resized.width = ( w / 16 );
+					resized.height = ( h / 16 );
+					return resized;
+				} );
 			}
 
 			struct dofTileConstants_t

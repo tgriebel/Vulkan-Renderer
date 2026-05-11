@@ -171,7 +171,7 @@ Image::ResizeFn Image::FullDimensionResizeFn( const imageInfo_t& info )
 
 		// If the original had a mip-chain, recalculate the levels (in the default case)
 		if( info.mipLevels > 1 ) {
-			resized.mipLevels = MipCount( info.width, info.height );
+			resized.mipLevels = MipCount( resized.width, resized.height );
 		}
 		return resized;
 	};
