@@ -1,5 +1,7 @@
 #include "globals.h"
 
+VS_LAYOUT_IMAGE_SHADER
+
 vsToPsInterpolators VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint instanceIndex : SV_InstanceID )
 {
     vsToPsInterpolators output = (vsToPsInterpolators)0;

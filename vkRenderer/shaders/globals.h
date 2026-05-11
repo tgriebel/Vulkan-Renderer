@@ -134,11 +134,12 @@ struct psOutput_t
                                                         PASS_BINDS( 2, TEXTYPE )                                    \
                                                         MATERIAL_PUSH_CONSTANTS
 
+#define VS_LAYOUT_IMAGE_SHADER							BIND_INLINE gpuImageShaderPushConstants_t imageShaderPushConstants;
+
 #define PS_LAYOUT_IMAGE_PROCESS( TEXTYPE, USERTYPE )                                                                \
                                                         GLOBAL_BINDS( 0 )                                           \
                                                         CODE_IMAGE_LAYOUT( 1, 0, TEXTYPE )                          \
                                                         CODE_IMAGE_CUBE_LAYOUT( 1, 1 )                              \
                                                         STENCIL_LAYOUT( 1, 2, TEXTYPE )                             \
                                                         IMAGE_CONSTANT_LAYOUT( 1, 3, USERTYPE, imageProcess )
-
 #endif // GLOBALS_HLSL_H

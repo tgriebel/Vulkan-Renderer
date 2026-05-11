@@ -1,5 +1,7 @@
 #include "globals.h"
 
+VS_LAYOUT_IMAGE_SHADER
+
 static const float2 positions[ 4 ] = {
 	float2( -1.0f, -1.0f ),
 	float2( 1.0f, -1.0f ),

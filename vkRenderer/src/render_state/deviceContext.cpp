@@ -468,8 +468,8 @@ void vk_RenderImageShader( CommandList& cmdContext, const hdl_t pipeLineHandle, 
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
-	const FrameBuffer* fb                  = pass->GetFrameBuffer();
-	const uint32_t     colorAttachmentsCount = fb->ColorLayerCount();
+	const FrameBuffer* fb = pass->GetFrameBuffer();
+	const uint32_t colorAttachmentsCount = fb->ColorLayerCount();
 
 	const VkAttachmentLoadOp  loadOp  = transitionState.flags.clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
 	const VkAttachmentStoreOp storeOp = transitionState.flags.store ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -530,6 +530,12 @@ void vk_RenderImageShader( CommandList& cmdContext, const hdl_t pipeLineHandle, 
 	if ( pipelineObject != nullptr ) {
 		const uint32_t descSetCount = 2;
 		VkDescriptorSet descSetArray[ descSetCount ] = { cmdContext.GetRenderContext()->globalParms->GetVkObject(), pass->parms->GetVkObject() };
+
+		gpuImageShaderPushConstants_t pushConstants = {};
+		pushConstants.xy0 = vec2f( 0.0f, 0.0f );
+		pushConstants.xy1 = vec2f( 0.0f, 0.0f );
+
+		vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof( pushConstants ), &pushConstants );
 
 		vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipeline );
 		vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineObject->pipelineLayout, 0, descSetCount, descSetArray, 0, nullptr );
