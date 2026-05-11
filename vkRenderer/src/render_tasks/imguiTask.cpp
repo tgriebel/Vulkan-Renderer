@@ -112,13 +112,11 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	}
 	m_buffer.Create( "ImguiCallbackBuffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM );
 
-	// MULTI_FRAME so each frame writes its own slot; we read the slot whose
-	// dispatch finished MaxFrameStates frames ago — no FlushGPU stall needed.
 	m_imageStatBuffer.Create(
 		"ImageStatHistogram",
 		swapBuffering_t::MULTI_FRAME,
 		resourceLifeTime_t::UNMANAGED,
-		ImageStatHistogramBins,
+		2048,
 		sizeof( uint32_t ),
 		bufferType_t::STORAGE );
 
@@ -139,7 +137,7 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	m_imageStatDispatched = false;
 	memset( m_imageStatHistogram, 0, sizeof( m_imageStatHistogram ) );
 
-	const Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "ImageState" );
+	const Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "ImageStat" );
 	CreateComputePipeline( *progAsset );
 }
 
@@ -225,9 +223,6 @@ void ImguiTask::FrameBegin()
 		m_imageStatParmsBuffer.SetPos( 0 );
 		m_imageStatParmsBuffer.CopyData( &parms, sizeof( parms ) );
 
-		// The current frame's slot holds the result from MaxFrameStates frames
-		// ago — guaranteed complete since the GPU is at most MaxFrameStates - 1
-		// frames in flight. Read it now, then overwrite for this frame's dispatch.
 		assert( m_imageStatBuffer.VisibleToCpu() );
 		memcpy( m_imageStatHistogram, m_imageStatBuffer.Get(), sizeof( m_imageStatHistogram ) );
 		memset( m_imageStatBuffer.Get(), 0, ImageStatHistogramBins * sizeof( uint32_t ) );
@@ -281,7 +276,7 @@ void ImguiTask::Execute( CommandList& cmdContext )
 		const uint32_t groupsX = CommandList::DispatchDim( m_imageStatImage->info.width, groupSize );
 		const uint32_t groupsY = CommandList::DispatchDim( m_imageStatImage->info.width, groupSize );
 
-		const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageState" );
+		const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageStat" );
 		cmdContext.Dispatch( progHdl, *m_imageStatParms, groupsX, groupsY, 1 );
 	}
 

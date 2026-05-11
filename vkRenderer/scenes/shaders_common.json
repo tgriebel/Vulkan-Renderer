@@ -119,7 +119,7 @@
 	  "bindset": "bindset_particle"
     },
 	{
-      "name": "ImageState",
+      "name": "ImageStat",
       "cs": "imageStat",
 	  "bindset": "bindset_compute"
     },
