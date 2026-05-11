@@ -531,7 +531,7 @@ void DestroyComputePipeline( const Asset<GpuProgram>& progAsset )
 }
 
 
-void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
+hdl_t CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 {
 	const pipelineState_t state = CreateComputeState( progAsset );
 	const hdl_t pipelineHdl = GetComputePipelineStateHash( state );
@@ -539,11 +539,11 @@ void CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 }
 
 
-void CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state )
+hdl_t CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state )
 {
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
 	if ( it != s_pipelineLib.end() ) {
-		return;
+		return pipelineHdl.Get();
 	}
 
 	const GpuProgram& prog = *state.prog;
@@ -598,4 +598,6 @@ void CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& stat
 	s_pipelineLib[ pipelineHdl.Get() ] = pipelineObject;
 
 	s_progToPipelines[ state.progHdl.Get() ].insert( state );
+
+	return pipelineHdl.Get();
 }

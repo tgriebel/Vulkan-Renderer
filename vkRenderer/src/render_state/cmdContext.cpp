@@ -231,16 +231,12 @@ void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBind
 	assert( isOpen );
 	assert( ( constantsSize % 4 ) == 0 );
 
-	const hdl_t pipelineHdl = GetComputePipelineStateHandle( progAsset );
+	const hdl_t pipelineHdl = CreateComputePipeline( progAsset );
 
 	pipelineObject_t* pipelineObject = nullptr;
 	GetPipelineObject( pipelineHdl, &pipelineObject );
 
-	assert( pipelineObject != nullptr );
-
-	if( pipelineObject->pipeline == VK_NULL_HANDLE ) {
-		CreateComputePipeline( progAsset );
-	}
+	assert( pipelineObject && pipelineObject->pipeline );
 
 	std::string dbgName = "Dispatch( " + std::string( pipelineObject->dbgProgName ) + " )";
 
