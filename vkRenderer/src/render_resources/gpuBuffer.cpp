@@ -79,7 +79,7 @@ void GpuBuffer::Create( const bufferCreateInfo_t info )
 }
 
 
-void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type )
+void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, const bufferType_t type, const bufferFlags_t flags )
 {
 	// Resource Management
 	{
@@ -98,23 +98,48 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 			m_bufferCount = 1;
 		}
 
-		if( type == bufferType_t::STORAGE ) {
+		if( type == bufferType_t::STORAGE )
+		{
 			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		} else if ( type == bufferType_t::UNIFORM ) {
+		}
+		else if ( type == bufferType_t::UNIFORM )
+		{
 			alignment = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
 			usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-		} else if ( type == bufferType_t::VERTEX ) {
+		}
+		else if ( type == bufferType_t::VERTEX )
+		{
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		} else if ( type == bufferType_t::INDEX ) {
+
+			if( HasFlags( flags, bufferFlags_t::RT_VISIBLE ) )
+			{
+				usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+				usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+			}
+		}
+		else if ( type == bufferType_t::INDEX )
+		{
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-		} else if ( type == bufferType_t::STAGING ) {
+
+			if( HasFlags( flags, bufferFlags_t::RT_VISIBLE ) )
+			{
+				usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+				usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+			}
+		}
+		else if ( type == bufferType_t::STAGING )
+		{
 			alignment = 1;
 			usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		} else if ( type == bufferType_t::READBACK ) {
+		}
+		else if ( type == bufferType_t::READBACK )
+		{
 			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-		} else {
+		}
+		else
+		{
 			assert(0);
 		}
 
@@ -177,6 +202,18 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 	}
 #endif
 }
+
+
+#ifdef USE_VULKAN
+VkDeviceAddress GpuBuffer::GetDeviceAddress() const
+{
+	const uint32_t id = ClampId( context.bufferId );
+	VkBufferDeviceAddressInfo info{};
+	info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+	info.buffer = m_buffer[ id ].buffer;
+	return vkGetBufferDeviceAddress( context.device, &info ) + m_buffer[ id ].baseOffset;
+}
+#endif
 
 
 void GpuBuffer::Invalidate()

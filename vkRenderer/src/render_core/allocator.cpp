@@ -88,6 +88,8 @@ void AllocatorMemory::CreateVmaAllocator()
 	createInfo.instance = context.instance;
 	createInfo.vulkanApiVersion = VK_API_VERSION_1_2;
 
+	createInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
 	VK_CHECK_RESULT( vmaCreateAllocator( &createInfo, &s_allocator ) );
 }
 

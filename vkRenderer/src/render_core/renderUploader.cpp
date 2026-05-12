@@ -46,7 +46,8 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		resourceLifeTime_t::REBOOT,
 		MaxVertices,
 		sizeof( vsInput_t ),
-		bufferType_t::VERTEX
+		bufferType_t::VERTEX,
+		bufferFlags_t::RT_VISIBLE
 	);
 
 	geometry.ib.Create(
@@ -55,7 +56,8 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		resourceLifeTime_t::REBOOT,
 		MaxIndices,
 		sizeof( uint32_t ),
-		bufferType_t::INDEX
+		bufferType_t::INDEX,
+		bufferFlags_t::RT_VISIBLE
 	);
 
 	geometry.stagingBuffer.Create(

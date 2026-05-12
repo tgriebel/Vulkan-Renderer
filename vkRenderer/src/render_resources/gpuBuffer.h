@@ -14,6 +14,13 @@ enum class bufferType_t
 };
 
 
+enum class bufferFlags_t : uint32_t
+{
+	NONE,
+	RT_VISIBLE,
+};
+DEFINE_ENUM_OPERATORS( bufferFlags_t, uint32_t )
+
 struct bufferCreateInfo_t
 {
 	const char*				name;
@@ -21,6 +28,7 @@ struct bufferCreateInfo_t
 	uint32_t				elements;
 	uint32_t				elementSizeBytes;
 	bufferType_t			type;
+	bufferFlags_t			flags;
 	resourceLifeTime_t		lifetime;
 	AllocatorMemory*		bufferMemory;
 };
@@ -45,9 +53,10 @@ public:
 #ifdef USE_VULKAN
 	VkBuffer&		VkObject();
 	VkBuffer		GetVkObject() const;
+	VkDeviceAddress	GetDeviceAddress() const;
 #endif
 	void			Create( const bufferCreateInfo_t info );
-	void			Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, bufferType_t type );
+	void			Create( const char* name, const swapBuffering_t swapBuffering, const resourceLifeTime_t lifetime, const uint32_t elements, const uint32_t elementSizeBytes, const bufferType_t type, const bufferFlags_t flags = bufferFlags_t::NONE );
 	void			Destroy();
 	bool			VisibleToCpu() const;
 	void			Allocate( const uint64_t size );
