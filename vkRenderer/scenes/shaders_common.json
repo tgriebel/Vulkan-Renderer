@@ -136,6 +136,20 @@
 	  "image_shader": true
     },
 	{
+      "name": "DownSampleMin",
+      "vs": "fullscreen",
+      "ps": "downsampleMin",
+	  "bindset": "bindset_imageShader",
+	  "image_shader": true
+    },
+	{
+      "name": "DownSampleMax",
+      "vs": "fullscreen",
+      "ps": "downsampleMax",
+	  "bindset": "bindset_imageShader",
+	  "image_shader": true
+    },
+	{
       "name": "preCalculatedBrdfLut",
       "vs": "fullscreen",
       "ps": "computeBrdfLut",

@@ -657,5 +657,14 @@
     <FxCompile Include="shaders\quad2d.vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="shaders\downsampleMax.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\downsampleMin.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\external\GfxCore\GfxCore\math\vector.natvis" />
   </ItemGroup>
 </Project>
