@@ -16,13 +16,36 @@ std::string ComputeTask::AsString() const
 
 void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 {
+	m_dispatchByTile = ( info.dispatchX == 0 ) || ( info.dispatchY == 0 ) || ( info.dispatchZ == 0 );
+
 	m_context = info.context;
 	m_resources = info.resources;
 	m_name = info.name;
 
-	m_dispatchX = info.dispatchX;
-	m_dispatchY = info.dispatchY;
-	m_dispatchZ = info.dispatchZ;
+	if( m_dispatchByTile == false )
+	{
+		m_imageTileSizeX = 0;
+		m_imageTileSizeY = 0;
+		m_image = nullptr;
+
+		m_dispatchX = info.dispatchX;
+		m_dispatchY = info.dispatchY;
+		m_dispatchZ = info.dispatchZ;
+	}
+	else
+	{
+		assert( info.image != nullptr );
+		assert( info.imageTileSizeX != 0 );
+		assert( info.imageTileSizeY != 0 );
+
+		m_imageTileSizeX = info.imageTileSizeX;
+		m_imageTileSizeY = info.imageTileSizeY;
+		m_image = info.image;
+
+		m_dispatchX = 0;
+		m_dispatchY = 0;
+		m_dispatchZ = 0;
+	}
 
 	m_bind = info.bind;
 
@@ -32,10 +55,9 @@ void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 		memcpy( m_pushConstants.data(), info.pushConstants, info.pushConstantsSize );
 	}
 
-	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
-	Asset<GpuProgram>* prog = GpuProgramLib().Find( m_progHdl );
+	m_progAsset = GpuProgramLib().Find( info.progName );
 
-	CreateComputePipeline( *prog );
+	CreateComputePipeline( *m_progAsset );
 
 	m_parms = m_context->RegisterBindParm( m_context->LookupBindSet( info.bindSetId ) );
 }
@@ -44,7 +66,7 @@ void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 void ComputeTask::FrameBegin()
 {
 	if ( m_bind ) {
-		m_bind( m_parms );
+		m_bind( this, m_parms );
 	}
 }
 
@@ -53,10 +75,27 @@ void ComputeTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_name.c_str(), ColorToVector( ColorLGrey ) );
 
+	uint32_t x = 0;
+	uint32_t y = 0;
+	uint32_t z = 0;
+
+	if( m_dispatchByTile )
+	{
+		x = ComputeCmdList::DispatchDim( m_image->info.width, m_imageTileSizeX );
+		y = ComputeCmdList::DispatchDim( m_image->info.height, m_imageTileSizeY );
+		z = 1;
+	}
+	else
+	{
+		x = m_dispatchX;
+		y = m_dispatchY;
+		z = m_dispatchZ;
+	}
+
 	if ( m_pushConstants.empty() ) {
-		cmdContext.Dispatch( m_progHdl, *m_parms, m_dispatchX, m_dispatchY, m_dispatchZ );
+		cmdContext.Dispatch( *m_progAsset, * m_parms, x, y, z );
 	} else {
-		cmdContext.Dispatch( m_progHdl, *m_parms, m_pushConstants.data(), static_cast<uint32_t>( m_pushConstants.size() ), m_dispatchX, m_dispatchY, m_dispatchZ );
+		cmdContext.Dispatch( *m_progAsset, *m_parms, m_pushConstants.data(), static_cast<uint32_t>( m_pushConstants.size() ), x, y, z );
 	}
 
 	cmdContext.MarkerEndRegion();

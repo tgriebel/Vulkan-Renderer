@@ -369,8 +369,8 @@ void ImguiTask::Execute( CommandList& cmdContext )
 		const uint32_t groupsX = CommandList::DispatchDim( m_imageStatImage->info.width, groupSize );
 		const uint32_t groupsY = CommandList::DispatchDim( m_imageStatImage->info.width, groupSize );
 
-		const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageStat" );
-		cmdContext.Dispatch( progHdl, *m_imageStatParms, groupsX, groupsY, 1 );
+		const Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "ImageStat" );
+		cmdContext.Dispatch( *progAsset, *m_imageStatParms, groupsX, groupsY, 1 );
 	}
 
 #ifdef USE_IMGUI

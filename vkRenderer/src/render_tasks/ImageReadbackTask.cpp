@@ -7,6 +7,7 @@
 #include "../render_binding/bindings.h"
 
 #include "../app/imguiInterface.h"
+#include "../globals/assetDefs.h"
 
 extern imguiControls_t g_imguiControls;
 
@@ -148,9 +149,9 @@ void ImageReadbackTask::Execute( CommandList& cmdContext )
 			constants.baseOffset = baseOffset;
 
 			baseOffset += w * h * layers; // Pack tightly without MIP padding
-
-			const hdl_t progHdl = AssetLib<GpuProgram>::Handle( "ImageReadback" );
-			cmdContext.Dispatch( progHdl, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
+			
+			const Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "ImageReadback" );
+			cmdContext.Dispatch( *progAsset, *m_parms, &constants, sizeof( pushConstants_t ),  w / blockSize + 1, h / blockSize + 1, layers / blockSize + 1 );
 		}
 	}
 	else

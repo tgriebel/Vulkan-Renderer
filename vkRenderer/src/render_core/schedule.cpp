@@ -433,28 +433,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				} );
 			}
 
-			struct dofTileConstants_t
-			{
-				uint32_t	tileSize;
-			};
-
-			resources->dofTileBuffer.Create(
-				"DofTileBuffer",
-				swapBuffering_t::MULTI_FRAME,
-				resourceLifeTime_t::REBOOT,
-				1,
-				sizeof( dofTileConstants_t ),
-				bufferType_t::UNIFORM
-			);
-
-			const dofTileConstants_t dofTileDefaults = { 8u };
-
 			BINDING( dofSourceImage, IMAGE_2D, 1, BIND_STATE_CS );
 
 			const uint64_t bindset_dofTile = renderContext->CreateBindSet( "bindset_dofTile", {
 				BINDING_NAME( globalsBuffer ),
 				BINDING_NAME( dofSourceImage ),
-				BINDING_NAME( computeParms ),
 				BINDING_NAME( computeWriteImage ),
 			} );
 
@@ -463,21 +446,30 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
 			prog.bindsetCount = 1;
 
+			const uint32_t tileSize = 8;
+
 			computeTaskCreateInfo_t info{};
 			info.name = "DoF Tile MinMax";
 			info.context = renderContext;
 			info.resources = resources;
 			info.progName = "DofTileMinMax";
-			info.dispatchX = 8;
-			info.dispatchY = 8;
-			info.dispatchZ = 1;
+			info.imageTileSizeX = 8;
+			info.imageTileSizeY = 4;
+			info.image = resources->depthStencilResolvedImage;
 			info.bindSetId = bindset_dofTile;
-			info.bind = [ resources ]( ShaderBindParms* p )
+			info.bind = [ resources ]( ComputeTask* task, ShaderBindParms* p )
 			{
 				p->Bind( BINDING_NAME( globalsBuffer ), &resources->globalConstants );
 				p->Bind( BINDING_NAME( dofSourceImage ), resources->depthStencilResolvedImage );
-				p->Bind( BINDING_NAME( computeParms ), &resources->dofTileBuffer );
 				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
+
+				vec4f dimensions;
+				dimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+				dimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+				dimensions.z = 1.0f / dimensions.x;
+				dimensions.w = 1.0f / dimensions.y;
+
+				task->SetPushConstants( dimensions );
 			};
 
 			tasks.dofTileTask = new ComputeTask( info );

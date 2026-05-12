@@ -7,6 +7,7 @@
 #include "../render_resources/gpuBuffer.h"
 
 class ShaderBindParms;
+class ComputeTask;
 
 struct computeTaskCreateInfo_t
 {
@@ -14,16 +15,20 @@ struct computeTaskCreateInfo_t
 	const char*			progName;
 	RenderContext*		context;
 	ResourceContext*	resources;
+	const Image*		image;			// Optional. Used when `imageTileSize` is not 0
 
-	uint64_t			bindSetId; // Hash id of the target bindset (e.g. bindset_compute)
+	uint64_t			bindSetId;		// Hash id of the target bindset (e.g. bindset_compute)
 
-	uint32_t			dispatchX;
-	uint32_t			dispatchY;
-	uint32_t			dispatchZ;
+	uint32_t			imageTileSizeX;	// Optional: Used for processing over an image in tiles. Size is in pixels
+	uint32_t			imageTileSizeY;	// Optional: Used for processing over an image in tiles. Size is in pixels
+
+	uint32_t			dispatchX;		// Explicit dispatch controls. Used when imageTileSize is 0.
+	uint32_t			dispatchY;		// Explicit dispatch controls. Used when imageTileSize is 0.
+	uint32_t			dispatchZ;		// Explicit dispatch controls. Used when imageTileSize is 0.
 
 	// Invoked once per frame to populate the bindset. The caller is responsible
 	// for matching the slot names / resource types declared by bindSetId.
-	std::function<void( ShaderBindParms* )> bind;
+	std::function<void( ComputeTask* task, ShaderBindParms* )> bind;
 
 	const void*			pushConstants;		// Optional. Set at init time
 	uint32_t			pushConstantsSize;	// Optional
@@ -38,13 +43,18 @@ private:
 	ShaderBindParms*		m_parms;
 
 	std::string				m_name;
+
+	const Image*			m_image = nullptr;
 	
-	hdl_t					m_progHdl;
+	Asset<GpuProgram>*		m_progAsset;
+	bool					m_dispatchByTile = false;
+	uint32_t				m_imageTileSizeX;
+	uint32_t				m_imageTileSizeY;
 	uint32_t				m_dispatchX;
 	uint32_t				m_dispatchY;
 	uint32_t				m_dispatchZ;
 
-	std::function<void( ShaderBindParms* )> m_bind;
+	std::function<void( ComputeTask* task, ShaderBindParms* )> m_bind;
 
 	std::vector<uint8_t>	m_pushConstants;
 
@@ -66,6 +76,13 @@ public:
 	void			Resize() {}
 	void			FrameBegin();
 	std::string		AsString() const;
+
+	template<typename T>
+	void			SetPushConstants( const T& constants )
+	{
+		m_pushConstants.resize( sizeof( T ) );
+		memcpy( m_pushConstants.data(), &constants, sizeof( T ) );
+	}
 
 	void Execute( CommandList& context ) override;
 };

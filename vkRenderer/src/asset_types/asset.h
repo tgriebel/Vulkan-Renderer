@@ -10,6 +10,8 @@
 template< class AssetType >
 class Asset;
 
+template< class AssetType >
+class AssetLib;
 
 enum loadHandlerFlags_t
 {
@@ -183,9 +185,6 @@ protected:
 	loadHandlerPtr_t			m_loader;
 	AssetType					m_asset;
 
-public:
-	Asset() : AssetInterface(), m_loader( nullptr ) {}
-
 	Asset( const hdl_t hdl ) : AssetInterface( hdl ), m_loader( nullptr ) {}
 
 	Asset( const std::string& _name  ) : AssetInterface( _name, false ), m_loader( nullptr ) {}
@@ -193,25 +192,35 @@ public:
 	Asset( const AssetType& _asset, const std::string& _name, const bool _loaded = true ) :
 		AssetInterface( _name, _loaded ), m_asset( _asset ), m_loader( nullptr ) {}
 
+	friend class AssetLib<AssetType>;
+public:
+
+	Asset() : AssetInterface(), m_loader( nullptr )
+	{}
+
 	inline void AttachLoader( loadHandlerPtr_t _loader )
 	{
 		m_loader = std::move( _loader );
 	}
+
 
 	inline const AssetType& Get() const
 	{
 		return m_asset;
 	}
 
+
 	inline AssetType& Get()
 	{
 		return m_asset;
 	}
 
+
 	bool HasLoader() const override
 	{
 		return m_loader ? true : false;
 	}
+
 
 	loadReturn_t Load( const bool rebake = false ) override
 	{
@@ -235,11 +244,13 @@ public:
 		return loadReturn_t::ALREADY_LOADED;
 	}
 
+
 	void Unload() override
 	{
 	//	m_asset = AssetType{}; // This isn't safe since assets require complex resource management (i.e. deleting API resources)
 		m_loaded = false;
 	}
+
 
 	loadReturn_t Reload( const bool rebake = false ) override
 	{
@@ -253,6 +264,7 @@ public:
 
 		return ret;
 	}
+
 
 	void Serialize( Serializer* s ) override
 	{

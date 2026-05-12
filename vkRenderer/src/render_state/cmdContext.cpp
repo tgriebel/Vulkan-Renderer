@@ -231,6 +231,10 @@ void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBind
 	assert( isOpen );
 	assert( ( constantsSize % 4 ) == 0 );
 
+	assert( progAsset.IsLoaded() );
+	assert( progAsset.Handle() != INVALID_HDL );
+	assert( progAsset.Get().type == pipelineType_t::COMPUTE );
+
 	const hdl_t pipelineHdl = CreateComputePipeline( progAsset );
 
 	pipelineObject_t* pipelineObject = nullptr;

@@ -83,21 +83,17 @@ void DestroyPipelineCache()
 }
 
 
-static hdl_t GetGfxPipelineStateHash( const pipelineState_t& state )
+static hdl_t GetPipelineStateHash( const pipelineState_t& state )
 {
-	return Hash( reinterpret_cast<const uint8_t*>( &state ), offsetof( pipelineState_t, prog ) );
-}
-
-
-static hdl_t GetComputePipelineStateHash( const pipelineState_t& state )
-{
-	return Hash( reinterpret_cast<const uint8_t*>( &state.progHdl ), sizeof( state.progHdl ) );
-}
-
-
-hdl_t GetComputePipelineStateHandle( const Asset<GpuProgram>& progAsset )
-{
-	return Hash( reinterpret_cast<const uint8_t*>( &progAsset.Handle() ), sizeof( progAsset.Handle() ) );
+	if( state.prog->type == pipelineType_t::COMPUTE )
+	{
+		return Hash( reinterpret_cast<const uint8_t*>( &state.progHdl ), sizeof( state.progHdl ) );
+	}
+	else
+	{
+		assert( state.prog->type == pipelineType_t::RASTER );
+		return Hash( reinterpret_cast<const uint8_t*>( &state ), offsetof( pipelineState_t, prog ) );
+	}
 }
 
 
@@ -150,7 +146,7 @@ hdl_t FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAss
 {
 	const pipelineState_t state = CreateGfxState( pass, progAsset, permSet );
 
-	const hdl_t pipelineHdl = GetGfxPipelineStateHash( state );
+	const hdl_t pipelineHdl = GetPipelineStateHash( state );
 
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
 	if ( it != s_pipelineLib.end() ) {
@@ -172,7 +168,7 @@ void DestoryAllPipelines( const Asset<GpuProgram>& progAsset )
 
 	for( auto pipelineState : pipelineHandles )
 	{
-		const hdl_t pipelineHdl = GetGfxPipelineStateHash( pipelineState );
+		const hdl_t pipelineHdl = GetPipelineStateHash( pipelineState );
 
 		auto pipelineIt = s_pipelineLib.find( pipelineHdl.Get() );
 		if( pipelineIt == s_pipelineLib.end() ){
@@ -192,7 +188,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 {
 	const pipelineState_t state = CreateGfxState( pass, progAsset, permSet );
 
-	const hdl_t pipelineHdl = GetGfxPipelineStateHash( state );
+	const hdl_t pipelineHdl = GetPipelineStateHash( state );
 
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
 	if ( it == s_pipelineLib.end() ) {
@@ -208,7 +204,7 @@ void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& pro
 hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	const pipelineState_t state = CreateGfxState( pass, progAsset, permSet );
-	const hdl_t pipelineHdl = GetGfxPipelineStateHash( state );
+	const hdl_t pipelineHdl = GetPipelineStateHash( state );
 	return CreateGraphicsPipeline( pass, pipelineHdl, state );
 }
 
@@ -518,7 +514,7 @@ void DestroyComputePipeline( const Asset<GpuProgram>& progAsset )
 	pipelineState_t state = {};
 	state.progHdl = progAsset.Handle();
 
-	const hdl_t pipelineHdl = GetComputePipelineStateHash( state );
+	const hdl_t pipelineHdl = GetPipelineStateHash( state );
 
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
 	if ( it == s_pipelineLib.end() ) {
@@ -534,7 +530,7 @@ void DestroyComputePipeline( const Asset<GpuProgram>& progAsset )
 hdl_t CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 {
 	const pipelineState_t state = CreateComputeState( progAsset );
-	const hdl_t pipelineHdl = GetComputePipelineStateHash( state );
+	const hdl_t pipelineHdl = GetPipelineStateHash( state );
 	return CreateComputePipeline( pipelineHdl, state );
 }
 
@@ -542,8 +538,23 @@ hdl_t CreateComputePipeline( const Asset<GpuProgram>& progAsset )
 hdl_t CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state )
 {
 	auto it = s_pipelineLib.find( pipelineHdl.Get() );
-	if ( it != s_pipelineLib.end() ) {
-		return pipelineHdl.Get();
+	const bool found = ( it != s_pipelineLib.end() );
+
+	pipelineObject_t pipelineObject{};
+
+	if( found )
+	{
+		pipelineObject = it->second;
+		if( pipelineObject.pipeline != VK_NULL_HANDLE )
+		{
+			return pipelineHdl;
+		}
+	}
+	else
+	{
+		pipelineObject.state = state;
+		pipelineObject.prog = state.prog;
+		pipelineObject.dbgProgName = state.dbgProgName;
 	}
 
 	const GpuProgram& prog = *state.prog;
@@ -552,11 +563,6 @@ hdl_t CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& sta
 	for ( uint32_t i = 0; i < prog.bindsetCount; ++i ) {
 		layouts[ i ] = prog.bindsets[ i ]->GetVkObject();
 	}
-
-	pipelineObject_t pipelineObject;
-	pipelineObject.state = state;
-	pipelineObject.prog = state.prog;
-	pipelineObject.dbgProgName = state.dbgProgName;
 
 	const ShaderBin& csBin = prog.shaderBins[ 0 ].find( 0 )->second;
 	assert( csBin.type == shaderType_t::COMPUTE );
