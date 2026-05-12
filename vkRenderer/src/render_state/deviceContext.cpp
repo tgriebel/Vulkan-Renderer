@@ -422,24 +422,28 @@ void vk_GenerateMipmaps( VkCommandBuffer cmdBuffer, Image* image )
 }
 
 
-void vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec2f offset, const vec2f size, const DrawPass* pass )
+void vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec4f& extent, const scissor_t& clipRect, const DrawPass* pass )
 {
 	VkCommandBuffer cmdBuffer = cmdContext.CommandBuffer();
 
 	const viewport_t& viewport = pass->GetViewport();
-
+	
 	VkViewport vk_viewport{ };
-	vk_viewport.x = static_cast<float>( Clamp( offset.x, 0.0f, (float)viewport.width ) );
-	vk_viewport.y = static_cast<float>( Clamp( offset.y, 0.0f, (float)viewport.height ) );
-	vk_viewport.width = static_cast<float>( size.x );
-	vk_viewport.height = static_cast<float>( size.y );
+	vk_viewport.x = extent.x;
+	vk_viewport.y = extent.y;
+	vk_viewport.width = extent.z;
+	vk_viewport.height = extent.w;
 	vk_viewport.minDepth = 0.0f;
 	vk_viewport.maxDepth = 1.0f;
 	vkCmdSetViewport( cmdBuffer, 0, 1, &vk_viewport );
 
+	const scissor_t& scissor = pass->GetScissor();
+
 	VkRect2D rect{ };
-	rect.extent.width = viewport.width;
-	rect.extent.height = viewport.height;
+	rect.offset.x = clipRect.x;
+	rect.offset.y = clipRect.y;
+	rect.extent.width = clipRect.width;
+	rect.extent.height = clipRect.height;
 	vkCmdSetScissor( cmdBuffer, 0, 1, &rect );
 
 	pipelineObject_t* pipelineObject = nullptr;

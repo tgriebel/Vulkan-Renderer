@@ -10,17 +10,25 @@
 
 #include "imageShaderTask.h"
 
-namespace
+struct imageStatParms_t
 {
-	struct imageStatParms_t
-	{
-		vec4f		dimensions;		// .xy = w/h, .z = lod
-		vec2f		luminanceRange;	// log2 min/max
-		vec2u		pickLocation;
-		uint32_t	imageId;
-		uint32_t	baseOffset;
-	};
-}
+	vec4f		dimensions;
+	vec2f		luminanceRange;
+	vec2u		pickLocation;
+	uint32_t	imageId;
+	uint32_t	baseOffset;
+};
+
+
+struct imageStateReadback_t
+{
+	vec4f	pickLocationSample;
+	vec2u	pickLocation;
+	Image*	image;
+};
+
+
+static imageStateReadback_t s_readbackSample; // Just deal with a single sample for now
 
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/imgui.h"
@@ -36,42 +44,68 @@ struct imguiTaskRenderData_t
 {
 	CommandList*		commandContext;
 	RenderContext*		renderContext;
-	const DrawPass*		pass;
+	DrawPass*			pass;
 };
 
 const uint32_t MaxImguiCallbackImages = 32;
 
 static uint32_t pendingCallbackTasks = 0;
-static imguiImageCallbackData_t callbackTasks[ MaxImguiCallbackImages ];
+static imageViewerCallbackData_t callbackTasks[ MaxImguiCallbackImages ];
 static imguiTaskRenderData_t renderTaskData; // Push/pop state
 
 
-void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* cmd )
+vec4f QueryImageViewerSample( const Image* image, const vec2u& pickLocation )
 {
-	imguiImageCallbackData_t* callbackData = (imguiImageCallbackData_t*)cmd->UserCallbackData;
-
-	shaderPermId_t permSet = static_cast<shaderPermId_t>( callbackData->permSet );
-
-	hdl_t pipeLineHdl = FindPipelineObject( renderTaskData.pass, *callbackData->progAsset, permSet );
-
-	if( pipeLineHdl == INVALID_HDL ) {
-		pipeLineHdl = CreateGraphicsPipeline( renderTaskData.pass, *callbackData->progAsset, permSet );
+	if( s_readbackSample.image != image ) {
+	//	return vec4f();
 	}
 
-	const float visMinX = Max( callbackData->x, cmd->ClipRect.x );
-	const float visMinY = Max( callbackData->y, cmd->ClipRect.y );
-	const float visMaxX = Min( callbackData->x + callbackData->width,  cmd->ClipRect.z );
-	const float visMaxY = Min( callbackData->y + callbackData->height, cmd->ClipRect.w );
+	if( ( s_readbackSample.pickLocation.x != pickLocation.x ) && ( s_readbackSample.pickLocation.y != pickLocation.y ) ) {
+	//	return vec4f();
+	}
+	return s_readbackSample.pickLocationSample;
+}
 
-	if ( visMinX >= visMaxX || visMinY >= visMaxY ) {
+void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* cmd )
+{
+	imageViewerCallbackData_t* callbackData = (imageViewerCallbackData_t*)cmd->UserCallbackData;
+
+	if( cmd->ClipRect.x >= cmd->ClipRect.z || cmd->ClipRect.y >= cmd->ClipRect.w ) {
 		return;
 	}
 
-	vk_QuadDraw( *renderTaskData.commandContext, pipeLineHdl, vec2f( visMinX, visMinY ), vec2f( visMaxX - visMinX, visMaxY - visMinY ), renderTaskData.pass );
+	Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "ImageViewer" );
+
+	const Image* image = callbackData->image;
+
+	const shaderPermId_t permSet = ( image->info.subsamples != IMAGE_SMP_1 ) ? shaderPermId_t::MSAA : shaderPermId_t::NONE;
+
+	hdl_t pipeLineHdl = FindPipelineObject( renderTaskData.pass, *progAsset, permSet );
+
+	if( pipeLineHdl == INVALID_HDL ) {
+		pipeLineHdl = CreateGraphicsPipeline( renderTaskData.pass, *progAsset, permSet );
+	}
+
+	const vec4i clipRect = vec4i( (int32_t)cmd->ClipRect.x, (int32_t)cmd->ClipRect.y, (int32_t)cmd->ClipRect.z, (int32_t)cmd->ClipRect.w );
+
+	vec4f extent{};
+	extent.x = callbackData->x;
+	extent.y = callbackData->y;
+	extent.z = callbackData->width;
+	extent.w = callbackData->height;
+	
+	scissor_t scissor{};
+	scissor.x = clipRect.x;
+	scissor.y = clipRect.y;
+	scissor.width = ( clipRect.z - clipRect.x );
+	scissor.height = ( clipRect.w - clipRect.y );
+	renderTaskData.pass->SetScissor( clipRect.x, clipRect.y, clipRect.z - clipRect.x, clipRect.w - clipRect.y );
+
+	vk_QuadDraw( *renderTaskData.commandContext, pipeLineHdl, extent, scissor, renderTaskData.pass );
 }
 
 
-void AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& callbackData )
+void AddImageViewerCallback( ImDrawList* dl, const imageViewerCallbackData_t& callbackData )
 {
 	if ( pendingCallbackTasks >= MaxImguiCallbackImages ) {
 		return;
@@ -160,7 +194,7 @@ void ImguiTask::FrameBegin()
 {
 	struct viewerShaderConstants_t : public ImageShaderTask::baseConstants_t
 	{
-		vec4f		scissorRectUv;
+		vec4f		rectUv;
 		vec4f		tint;
 		float		rangeMin;
 		float		rangeMax;
@@ -186,13 +220,13 @@ void ImguiTask::FrameBegin()
 		constants.mipCount = image->info.mipLevels;
 		constants.layerCount = image->info.layers;
 		constants.layer = callbackTasks[ 0 ].layer;
-		constants.scissorRectUv = vec4f( 0.0f, 0.0f, 1.0f, 1.0f );
+		constants.rectUv = vec4f( 0.0f, 0.0f, 1.0f, 1.0f );
 
 		constants.tint = callbackTasks[ 0 ].tint;
 		constants.rangeMin = callbackTasks[ 0 ].rangeMin;
 		constants.rangeMax = callbackTasks[ 0 ].rangeMax;
 		constants.flags = ( isCubeImage ? 0x01 : 0x00 ) | callbackTasks[ 0 ].flags;
-		constants.sampleIndex = callbackTasks[ 0 ].sampleIndex;
+		constants.sampleIndex = callbackTasks[ 0 ].msaaSampleIndex;
 
 		m_buffer.SetPos( 0 );
 		m_buffer.CopyData( &constants, sizeof( constants ) );
@@ -220,7 +254,7 @@ void ImguiTask::FrameBegin()
 		parms.luminanceRange = vec2f( -8.0f, 4.0f );
 		parms.imageId = 0;
 		parms.baseOffset = 0;
-		parms.pickLocation = vec2u( 200, 200 );
+		parms.pickLocation = vec2u( callbackTasks[ 0 ].pixelX, callbackTasks[ 0 ].pixelY );
 
 		m_imageStatParmsBuffer.SetPos( 0 );
 		m_imageStatParmsBuffer.CopyData( &parms, sizeof( parms ) );
@@ -233,8 +267,10 @@ void ImguiTask::FrameBegin()
 			const void* baseData = reinterpret_cast<void*>( m_imageStatBuffer.Get() );
 
 			const vec4f* pickSample = reinterpret_cast<const vec4f*>( baseData );
+			const vec2u* pickLocation = reinterpret_cast<const vec2u*>( baseData ) + sizeof( vec4f );
 
-			m_pickLocationSample = *pickSample;
+			s_readbackSample.pickLocationSample = *pickSample;
+			s_readbackSample.pickLocation = *pickLocation;
 		}
 
 		memcpy( m_imageStatHistogram, m_imageStatBuffer.Get(), sizeof( m_imageStatHistogram ) );

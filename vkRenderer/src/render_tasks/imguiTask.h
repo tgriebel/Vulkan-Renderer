@@ -37,7 +37,6 @@ private:
 	const Image*			m_imageStatImage;
 	bool					m_imageStatDispatched;
 	uint32_t				m_imageStatHistogram[ ImageStatHistogramBins ];
-	vec4f					m_pickLocationSample;
 
 	void Init( const DrawPass* pass, RenderContext* renderContext, ResourceContext* resourceContext, const bool finalizeImage );
 	void Shutdown();

@@ -24,7 +24,6 @@ extern Renderer g_renderer;
 
 #if defined( USE_IMGUI )
 extern imguiControls_t g_imguiControls;
-extern void AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& callbackData );
 #endif
 extern Window					g_window;
 

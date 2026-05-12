@@ -107,6 +107,8 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint groupId : SV_GroupIndex 
         imageStatBuffer[ 1 ] = asuint( pixel.g );
         imageStatBuffer[ 2 ] = asuint( pixel.b );
         imageStatBuffer[ 3 ] = asuint( pixel.a );
+        imageStatBuffer[ 4 ] = pixelLocation.x;
+        imageStatBuffer[ 5 ] = pixelLocation.y;
     }
     //InterlockedMin( imageStatBuffer[ imageStatParms.baseOffset + groupId + 0 ], groupMinRSample );
     //InterlockedMin( imageStatBuffer[ imageStatParms.baseOffset + groupId + 1 ], groupMinGSample );

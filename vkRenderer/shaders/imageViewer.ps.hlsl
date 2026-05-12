@@ -3,7 +3,7 @@
 
 struct ImageViewer
 {
-	float4	scissorRectUv;
+    float4	rectUv;
 	float4	tint;
     float	rangeMin;
     float	rangeMax;
@@ -26,7 +26,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
 	// 1. Sample Texture
 	// The shader uses a clip fullscreen quad so the sample UV needs to be computed from the scissor subsection of the fullscreen quad
-	const float2 uv = ( input.uv0.xy - imageProcess.scissorRectUv.xy ) / imageProcess.scissorRectUv.zw;
+    const float2 uv = ( input.uv0.xy - imageProcess.rectUv.xy ) / imageProcess.rectUv.zw;
 
 	float4 sampleColor;
 	if ( isCubeImage )

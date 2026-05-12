@@ -8,11 +8,11 @@ class Image;
 template<class AssetType>
 class Asset;
 
-struct imguiImageCallbackData_t
+struct imageViewerCallbackData_t
 {
-	Asset<GpuProgram>* progAsset;
-	uint32_t			permSet;
 	const Image*		image;
+	uint32_t			pixelX;
+	uint32_t			pixelY;
 	float				x;
 	float				y;
 	float				width;
@@ -23,7 +23,7 @@ struct imguiImageCallbackData_t
 	uint32_t			flags;			// Bit 0: cube image. Bit 1: Apply sRGB gamma
 	uint32_t			mipLevel;
 	uint32_t			layer;
-	uint32_t			sampleIndex;	// ~0u: average all samples
+	uint32_t			msaaSampleIndex;	// ~0u: average all samples
 };
 
 

@@ -8,9 +8,18 @@
 
 class ResourceContext;
 
+struct scissor_t
+{
+	int32_t		x;
+	int32_t		y;
+	uint32_t	width;
+	uint32_t	height;
+};
+
 class DrawPass
 {
 private:
+	scissor_t			m_scissor;
 	viewport_t			m_viewport;
 	FrameBuffer*		m_fb;
 
@@ -28,6 +37,12 @@ protected:
 		m_viewport.y = 0;
 		m_viewport.width = frameBuffer->GetWidth();
 		m_viewport.height = frameBuffer->GetHeight();
+
+		m_scissor.x = m_viewport.x;
+		m_scissor.y = m_viewport.y;
+		m_scissor.width = m_viewport.width;
+		m_scissor.height = m_viewport.height;
+
 		m_fb = frameBuffer;
 	}
 
@@ -62,7 +77,7 @@ public:
 		return m_sampleRate;
 	}
 
-	inline void SetViewport( const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height )
+	inline void SetViewport( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height )
 	{
 		m_viewport.x = x;
 		m_viewport.y = y;
@@ -73,6 +88,19 @@ public:
 	inline const viewport_t& GetViewport() const
 	{
 		return m_viewport;
+	}
+
+	inline void SetScissor( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height )
+	{
+		m_scissor.x = x;
+		m_scissor.y = y;
+		m_scissor.width = width;
+		m_scissor.height = height;
+	}
+
+	inline const scissor_t& GetScissor() const
+	{
+		return m_scissor;
 	}
 
 	inline const FrameBuffer* GetFrameBuffer() const

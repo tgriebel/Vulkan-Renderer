@@ -21,7 +21,8 @@ renderDebugData_t g_renderDebugData;
 
 extern imguiControls_t  g_imguiControls;
 extern Renderer         g_renderer;
-extern void             AddImguiCallback( ImDrawList* dl, const imguiImageCallbackData_t& callbackData );
+extern void AddImageViewerCallback( ImDrawList* dl, const imageViewerCallbackData_t& callbackData );
+extern vec4f QueryImageViewerSample( const Image* image, const vec2u& pickLocation );
 
 const char* FormatByteSize( const uint64_t bytes )
 {
@@ -1158,10 +1159,7 @@ void DrawImageViewerDebugMenu()
 
 	if ( ImGui::SmallButton( "Fit" ) )
 	{
-		autoScale    = false;
-		const float sW = totalAvailW           / (float)image->info.width;
-		const float sH = imageAreaH            / (float)image->info.height;
-		scale          = Min( sW, sH );
+		autoScale = true;
 	}
 	ImGui::SameLine();
 
@@ -1197,7 +1195,7 @@ void DrawImageViewerDebugMenu()
 	{
 		for ( int i = 0; i < presetCount; ++i )
 		{
-			const bool isAuto     = ( i == presetCount - 1 );
+			const bool isAuto = ( i == presetCount - 1 );
 			const bool isSelected = isAuto
 				? autoScale
 				: ( !autoScale && fabsf( scale - presetScales[ i ] ) < 0.001f );
@@ -1373,36 +1371,77 @@ void DrawImageViewerDebugMenu()
 	ImGui::Separator();
 
 	// --- Image ---
+	ImGui::BeginChild( "##image", ImVec2( ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y ), 0, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoScrollWithMouse );
+
 	const float availW   = ImGui::GetContentRegionAvail().x;
-	const float displayW = autoScale ? availW : ( image->info.width * scale );
-	const float displayH = displayW / aspect;
+	const float displayW = autoScale ? availW : ( image->info.width  * scale );
+	const float displayH = autoScale ? displayW / aspect : ( image->info.height * scale );
 
 	ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ), 0, ImVec2( displayW, displayH ) );
+	const ImVec2 imageMin = ImGui::GetItemRectMin();
+	// Use the full intended extent, not GetItemRectMax() which is clipped to the visible window.
+	const ImVec2 imageMax = ImVec2( imageMin.x + displayW, imageMin.y + displayH );
 
-	if ( ImGui::IsItemHovered() )
+	vec2u  pixelLocation  = vec2u( 0, 0 );
+	bool   isHovered      = false;
+	ImVec2 pixelBoxMin    = {};
+	ImVec2 pixelBoxMax    = {};
+
+	if( ImGui::IsItemHovered() )
 	{
+		isHovered = true;
+		ImGui::SetMouseCursor( ImGuiMouseCursor_None );
+
 		const float wheelDelta = io.MouseWheel;
-		if ( wheelDelta != 0.0f )
+		if( wheelDelta != 0.0f )
 		{
-			if ( autoScale )
+			if( autoScale )
 			{
 				// Preserve apparent size when transitioning from auto to fixed
 				autoScale = false;
-				scale     = availW / (float)image->info.width;
+				scale = availW / (float)image->info.width;
 			}
 			scale *= powf( 1.1f, wheelDelta );
-			scale  = Max( scale, 0.01f );
+			scale = Max( scale, 0.01f );
 		}
+
+		// UV inside the drawn image, then map to the image's own pixel grid.
+		const ImVec2 mouse = ImGui::GetMousePos();
+		const float rangeX = imageMax.x - imageMin.x;
+		const float rangeY = imageMax.y - imageMin.y;
+		const float uvX = ( rangeX > 0.0f ) ? ( mouse.x - imageMin.x ) / rangeX : 0.0f;
+		const float uvY = ( rangeY > 0.0f ) ? ( mouse.y - imageMin.y ) / rangeY : 0.0f;
+
+		const uint32_t w = image->info.width;
+		const uint32_t h = image->info.height;
+		pixelLocation.x = Clamp( static_cast<uint32_t>( uvX * w ), 0u, w - 1u );
+		pixelLocation.y = Clamp( static_cast<uint32_t>( uvY * h ), 0u, h - 1u );
+
+		// Screen size of one image pixel at current scale.
+		const float pixelScreenSize = displayW / (float)w;
+		pixelBoxMin = ImVec2( imageMin.x + pixelLocation.x * pixelScreenSize,
+		                      imageMin.y + pixelLocation.y * pixelScreenSize );
+		pixelBoxMax = ImVec2( pixelBoxMin.x + pixelScreenSize,
+		                      pixelBoxMin.y + pixelScreenSize );
+
+		const vec4f color = QueryImageViewerSample( image, pixelLocation );
+
+		ImGui::SetTooltip( "" );
+
+		ImGui::BeginTooltip();
+		ImGui::ColorButton( "#pixelSample", ImVec4( color.x, color.y, color.z, color.w ), 0, ImVec2( 50.0f, 50.0f ) );
+		ImGui::SameLine();
+		ImGui::Text( "(x, y): (%u, %u)", pixelLocation.x, pixelLocation.y );
+		ImGui::Text( "Pixel: (%4.2g, %4.2g, %4.2g, %4.2g)", color.x, color.y, color.z, color.w );
+		ImGui::EndTooltip();
 	}
 
-	const ImVec2 pos = ImGui::GetItemRectMin();
-
-	imguiImageCallbackData_t data;
-	data.progAsset		= GpuProgramLib().Find( "ImageViewer" );
-	data.permSet		= static_cast<uint32_t>( ( image->info.subsamples != IMAGE_SMP_1 ) ? shaderPermId_t::MSAA : shaderPermId_t::NONE );
+	imageViewerCallbackData_t data{};
 	data.image			= image;
-	data.x				= pos.x;
-	data.y				= pos.y;
+	data.pixelX			= pixelLocation.x;
+	data.pixelY			= pixelLocation.y;
+	data.x				= imageMin.x;
+	data.y				= imageMin.y;
 	data.width			= displayW;
 	data.height			= displayH;
 	data.tint			= ((vec4f)tint) * intensity;
@@ -1411,11 +1450,17 @@ void DrawImageViewerDebugMenu()
 	data.flags			= gammaEnabled ? 0x02 : 0x00;
 	data.mipLevel		= (uint32_t)selectedMip;
 	data.layer			= (uint32_t)selectedLayer;
-	data.sampleIndex	= ( selectedSample < 0 ) ? ~0u : (uint32_t)selectedSample;
+	data.msaaSampleIndex= ( selectedSample < 0 ) ? ~0u : (uint32_t)selectedSample;
 
-	assert( data.progAsset != nullptr );
+	ImDrawList* dl = ImGui::GetWindowDrawList();
+	AddImageViewerCallback( dl, data );
 
-	AddImguiCallback( ImGui::GetWindowDrawList(), data );
+	// Draw pixel cursor box on top of the image (added after the callback so it renders last).
+	if ( isHovered ) {
+		dl->AddRect( pixelBoxMin, pixelBoxMax, IM_COL32( 255, 255, 255, 255 ) );
+	}
+
+	ImGui::EndChild(); // End image region
 
 	ImGui::End();
 }
