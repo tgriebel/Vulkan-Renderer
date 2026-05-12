@@ -21,8 +21,10 @@ renderDebugData_t g_renderDebugData;
 
 extern imguiControls_t  g_imguiControls;
 extern Renderer         g_renderer;
+
 extern void AddImageViewerCallback( ImDrawList* dl, const imageViewerCallbackData_t& callbackData );
-extern vec4f QueryImageViewerSample( const Image* image, const vec2u& pickLocation );
+extern bool QueryImageViewerSample( const vec2u& pickLocation, vec4f& outColor );
+extern bool QueryImageViewerStat( imageViewerStatistics_t& outStats );
 
 const char* FormatByteSize( const uint64_t bytes )
 {
@@ -1248,6 +1250,17 @@ void DrawImageViewerDebugMenu()
 		ImGui::InputFloat( "##rangeMax", &rangeMax, 0.0f, 0.0f, "%.2f" );
 
 		rangeMin = Min( rangeMin, rangeMax - 0.001f );
+
+		ImGui::SameLine();
+		if( ImGui::Button( "Auto Range" ) )
+		{
+			imageViewerStatistics_t stats{};
+			if( QueryImageViewerStat( stats ) )
+			{
+				rangeMin = Min( stats.minSample.xyz );
+				rangeMax = Max( stats.maxSample.xyz );
+			}
+		}
 	}
 
 	// --- Row: MIP level ---
@@ -1377,7 +1390,7 @@ void DrawImageViewerDebugMenu()
 	const float displayW = autoScale ? availW : ( image->info.width  * scale );
 	const float displayH = autoScale ? displayW / aspect : ( image->info.height * scale );
 
-	ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ), 0, ImVec2( displayW, displayH ) );
+	ImGui::ColorButton( "button", ImVec4( 1.0f, 1.0f, 1.0f, 0.0f ), ImGuiColorEditFlags_NoTooltip, ImVec2( displayW, displayH ) );
 	const ImVec2 imageMin = ImGui::GetItemRectMin();
 	// Use the full intended extent, not GetItemRectMax() which is clipped to the visible window.
 	const ImVec2 imageMax = ImVec2( imageMin.x + displayW, imageMin.y + displayH );
@@ -1424,16 +1437,17 @@ void DrawImageViewerDebugMenu()
 		pixelBoxMax = ImVec2( pixelBoxMin.x + pixelScreenSize,
 		                      pixelBoxMin.y + pixelScreenSize );
 
-		const vec4f color = QueryImageViewerSample( image, pixelLocation );
+		vec4f color;		
+		if( QueryImageViewerSample( pixelLocation, color ) )
+		{
+			ImGui::BeginTooltip();
+			ImGui::ColorButton( "#pixelSample", ImVec4( color.x, color.y, color.z, color.w ), 0, ImVec2( 50.0f, 50.0f ) );
+			ImGui::SameLine();
+			ImGui::Text( "(x, y): (%u, %u)", pixelLocation.x, pixelLocation.y );
+			ImGui::Text( "Pixel: (%4.2g, %4.2g, %4.2g, %4.2g)", color.x, color.y, color.z, color.w );
 
-		ImGui::SetTooltip( "" );
-
-		ImGui::BeginTooltip();
-		ImGui::ColorButton( "#pixelSample", ImVec4( color.x, color.y, color.z, color.w ), 0, ImVec2( 50.0f, 50.0f ) );
-		ImGui::SameLine();
-		ImGui::Text( "(x, y): (%u, %u)", pixelLocation.x, pixelLocation.y );
-		ImGui::Text( "Pixel: (%4.2g, %4.2g, %4.2g, %4.2g)", color.x, color.y, color.z, color.w );
-		ImGui::EndTooltip();
+			ImGui::EndTooltip();
+		}
 	}
 
 	imageViewerCallbackData_t data{};

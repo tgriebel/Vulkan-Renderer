@@ -429,6 +429,11 @@ void vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec
 	const viewport_t& viewport = pass->GetViewport();
 	
 	VkViewport vk_viewport{ };
+	// TODO: Fix UVs in shader before clamping
+	//vk_viewport.x = Max( extent.x, (float)viewport.x );
+	//vk_viewport.y = Max( extent.y, (float)viewport.y );
+	//vk_viewport.width = Clamp( extent.z, extent.x, (float)viewport.width );
+	//vk_viewport.height = Clamp( extent.w, extent.y, (float)viewport.height );
 	vk_viewport.x = extent.x;
 	vk_viewport.y = extent.y;
 	vk_viewport.width = extent.z;

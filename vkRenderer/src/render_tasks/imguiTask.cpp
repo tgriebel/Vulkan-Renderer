@@ -7,6 +7,7 @@
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/assetLib.h"
 #include "../globals/assetDefs.h"
+#include "../app/imguiInterface.h"
 
 #include "imageShaderTask.h"
 
@@ -24,11 +25,11 @@ struct imageStateReadback_t
 {
 	vec4f	pickLocationSample;
 	vec2u	pickLocation;
-	Image*	image;
 };
 
 
 static imageStateReadback_t s_readbackSample; // Just deal with a single sample for now
+static imageViewerStatistics_t s_statsReadback;
 
 #if defined( USE_IMGUI )
 #include "../../../external/imgui/imgui.h"
@@ -53,18 +54,33 @@ static uint32_t pendingCallbackTasks = 0;
 static imageViewerCallbackData_t callbackTasks[ MaxImguiCallbackImages ];
 static imguiTaskRenderData_t renderTaskData; // Push/pop state
 
-
-vec4f QueryImageViewerSample( const Image* image, const vec2u& pickLocation )
+static float DequantizeFloat( const uint32_t u )
 {
-	if( s_readbackSample.image != image ) {
-	//	return vec4f();
-	}
+	const uint32_t mask = ( u >> 31 ) ? 0x80000000u : 0xFFFFFFFFu;
+	const uint32_t bits = u ^ mask;
+	float f;
+	memcpy( &f, &bits, sizeof( f ) );
+	return f;
+};
 
+
+bool QueryImageViewerSample( const vec2u& pickLocation, vec4f& outColor )
+{
 	if( ( s_readbackSample.pickLocation.x != pickLocation.x ) && ( s_readbackSample.pickLocation.y != pickLocation.y ) ) {
-	//	return vec4f();
+		return false;
 	}
-	return s_readbackSample.pickLocationSample;
+	outColor = s_readbackSample.pickLocationSample;
+	return true;
 }
+
+
+bool QueryImageViewerStat( imageViewerStatistics_t& outStats )
+{
+	outStats.minSample = s_statsReadback.minSample;
+	outStats.maxSample = s_statsReadback.maxSample;
+	return true;
+}
+
 
 void ImguiImage2DRenderCallback( const ImDrawList* parentList, const ImDrawCmd* cmd )
 {
@@ -259,22 +275,48 @@ void ImguiTask::FrameBegin()
 		m_imageStatParmsBuffer.SetPos( 0 );
 		m_imageStatParmsBuffer.CopyData( &parms, sizeof( parms ) );
 
+		const uint32_t PickSampleOffset = 0;
+		const uint32_t PickLocationOffset = 4;
+		const uint32_t MinSampleOffset = 6;
+		const uint32_t MaxSampleOffset = 10;
+
 		// Readback, this is guaranteed complete, but has worst-case latency since it's the oldest frame
 		assert( m_imageStatBuffer.VisibleToCpu() );
 
 		m_imageStatBuffer.Invalidate();
 		{
-			const void* baseData = reinterpret_cast<void*>( m_imageStatBuffer.Get() );
+			const uint32_t* baseData = reinterpret_cast<uint32_t*>( m_imageStatBuffer.Get() );
 
-			const vec4f* pickSample = reinterpret_cast<const vec4f*>( baseData );
-			const vec2u* pickLocation = reinterpret_cast<const vec2u*>( baseData ) + sizeof( vec4f );
+			const vec4f* pickSample = reinterpret_cast<const vec4f*>( &baseData[ PickSampleOffset ] );
+			const vec2u* pickLocation = reinterpret_cast<const vec2u*>( &baseData[ PickLocationOffset ] );
 
 			s_readbackSample.pickLocationSample = *pickSample;
 			s_readbackSample.pickLocation = *pickLocation;
+
+			s_statsReadback.minSample = vec4f(	DequantizeFloat( baseData[ MinSampleOffset + 0 ] ), 
+												DequantizeFloat( baseData[ MinSampleOffset + 1 ] ),
+												DequantizeFloat( baseData[ MinSampleOffset + 2 ] ),
+												DequantizeFloat( baseData[ MinSampleOffset + 3 ] ) );
+
+			s_statsReadback.maxSample = vec4f(	DequantizeFloat( baseData[ MaxSampleOffset + 0 ] ),
+												DequantizeFloat( baseData[ MaxSampleOffset + 1 ] ),
+												DequantizeFloat( baseData[ MaxSampleOffset + 2 ] ),
+												DequantizeFloat( baseData[ MaxSampleOffset + 3 ] ) );
 		}
 
 		memcpy( m_imageStatHistogram, m_imageStatBuffer.Get(), sizeof( m_imageStatHistogram ) );
 		memset( m_imageStatBuffer.Get(), 0, ImageStatHistogramBins * sizeof( uint32_t ) );
+
+		// Write global sentinels for the ordered-float min/max slots.
+		// Min slots [6-9]  need QuantizeFloat(+FLT_MAX) = 0xFF7FFFFF so any real pixel wins InterlockedMin.
+		// Max slots [10-13] need QuantizeFloat(-FLT_MAX) = 0x00800000 so any real pixel wins InterlockedMax.
+		uint32_t* bufData = reinterpret_cast<uint32_t*>( m_imageStatBuffer.Get() );
+		for( uint32_t i = MinSampleOffset; i < ( MinSampleOffset + 4 ); ++i ) {
+			bufData[ i ] = 0xFF7FFFFFu;
+		}
+		for( uint32_t i = MaxSampleOffset; i < ( MaxSampleOffset + 4 ); ++i ) {
+			bufData[ i ] = 0x00800000u;
+		}
 
 		m_imageStatBuffer.Flush();
 

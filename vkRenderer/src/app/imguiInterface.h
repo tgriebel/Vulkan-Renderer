@@ -27,6 +27,13 @@ struct imageViewerCallbackData_t
 };
 
 
+struct imageViewerStatistics_t
+{
+	vec4f	minSample;
+	vec4f	maxSample;
+};
+
+
 struct postProcessControls_t
 {
 	float				toneMapColor[ 4 ];
