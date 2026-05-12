@@ -241,15 +241,21 @@ void GpuBuffer::CopyData( const void* data, const size_t sizeInBytes )
 {
 	const uint32_t id = ClampId( context.bufferId );
 
-	assert( ( GetSize() + sizeInBytes ) <= GetMaxSize() );
-	void* mappedData = m_buffer[ id ].alloc.GetPtr();
-	if ( mappedData != nullptr )
-	{
-		memcpy( (uint8_t*)mappedData + m_buffer[ id ].offset, data, sizeInBytes );
-		m_buffer[ id ].offset += GetAlignedSize( sizeInBytes, m_buffer[ id ].alloc.GetAlignment() );
-	} else {
-		assert( 0 );
+	const uint64_t remaining = GetMaxSize() - GetSize();
+	assert( sizeInBytes <= remaining );
+	if ( sizeInBytes > remaining ) {
+		return;
 	}
+
+	void* mappedData = m_buffer[ id ].alloc.GetPtr();
+	assert( mappedData != nullptr );
+	if ( mappedData == nullptr ) {
+		return;
+	}
+
+	memcpy( (uint8_t*)mappedData + m_buffer[ id ].offset, data, sizeInBytes );
+	m_buffer[ id ].offset += GetAlignedSize( sizeInBytes, m_buffer[ id ].alloc.GetAlignment() );
+	m_buffer[ id ].offset = Min( m_buffer[ id ].offset, m_end );
 }
 
 
