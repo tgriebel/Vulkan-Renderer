@@ -446,15 +446,13 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
 			prog.bindsetCount = 1;
 
-			const uint32_t tileSize = 8;
-
 			computeTaskCreateInfo_t info{};
 			info.name = "DoF Tile MinMax";
 			info.context = renderContext;
 			info.resources = resources;
 			info.progName = "DofTileMinMax";
-			info.imageTileSizeX = 8;
-			info.imageTileSizeY = 4;
+			info.imageTileSizeX = 16;
+			info.imageTileSizeY = 16;
 			info.image = resources->depthStencilResolvedImage;
 			info.bindSetId = bindset_dofTile;
 			info.bind = [ resources ]( ComputeTask* task, ShaderBindParms* p )
