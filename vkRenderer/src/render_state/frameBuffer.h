@@ -18,7 +18,7 @@ struct frameBufferCreateInfo_t
 	Image*				color0;
 	Image*				color1;
 	Image*				color2;
-	Image*				depth;
+	Image*				depthStencil;
 	Image*				stencil;
 
 	frameBufferCreateInfo_t() :
@@ -32,7 +32,7 @@ struct frameBufferCreateInfo_t
 		color0 = nullptr;
 		color1 = nullptr;
 		color2 = nullptr;
-		depth = nullptr;
+		depthStencil = nullptr;
 		stencil = nullptr;
 	}
 };
@@ -48,7 +48,7 @@ private:
 	Image*						m_color0;
 	Image*						m_color1;
 	Image*						m_color2;
-	Image*						m_depth;
+	Image*						m_depthStencil;
 	Image*						m_stencil;
 
 	uint32_t					m_width;
@@ -84,7 +84,7 @@ public:
 		m_color0 = nullptr;
 		m_color1 = nullptr;
 		m_color2 = nullptr;
-		m_depth = nullptr;
+		m_depthStencil = nullptr;
 		m_stencil = nullptr;
 	}
 
@@ -115,7 +115,7 @@ public:
 
 	inline imageSamples_t SampleCount() const
 	{
-		return ( ColorLayerCount() > 0 ) ? GetColor()->info.subsamples : GetDepth()->info.subsamples;
+		return ( ColorLayerCount() > 0 ) ? GetColor()->info.subsamples : GetDepthStencil()->info.subsamples;
 	}
 
 	inline bool IsBackbuffer() const
@@ -141,9 +141,9 @@ public:
 		return ( m_colorCount > 2 ) ? m_color2 : nullptr;
 	}
 
-	inline const Image* GetDepth() const
+	inline const Image* GetDepthStencil() const
 	{
-		return ( m_dsCount >= 1 ) ? m_depth : nullptr;
+		return ( m_dsCount >= 1 ) ? m_depthStencil : nullptr;
 	}
 
 	inline const Image* GetStencil() const

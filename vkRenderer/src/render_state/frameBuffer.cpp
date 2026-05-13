@@ -260,7 +260,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	m_colorCount += ( createInfo.color0 != nullptr ) ? 1 : 0;
 	m_colorCount += ( createInfo.color1 != nullptr ) ? 1 : 0;
 	m_colorCount += ( createInfo.color2 != nullptr ) ? 1 : 0;
-	m_dsCount += ( createInfo.depth != nullptr ) ? 1 : 0;
+	m_dsCount += ( createInfo.depthStencil != nullptr ) ? 1 : 0;
 	m_dsCount += ( createInfo.stencil != nullptr ) ? 1 : 0;
 
 	m_attachmentCount = m_colorCount + m_dsCount;
@@ -269,7 +269,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 	images[ 0 ] = createInfo.color0;
 	images[ 1 ] = createInfo.color1;
 	images[ 2 ] = createInfo.color2;
-	images[ 3 ] = createInfo.depth;
+	images[ 3 ] = createInfo.depthStencil;
 	images[ 4 ] = createInfo.stencil;
 
 	uint32_t firstValidIx = MaxAttachmentCount;
@@ -332,10 +332,10 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			m_attachmentMask |= RENDER_PASS_MASK_COLOR2;
 		}
 
-		if ( createInfo.depth != nullptr )
+		if ( createInfo.depthStencil != nullptr )
 		{
-			m_attachmentBits.depth.samples = createInfo.depth->info.subsamples;
-			m_attachmentBits.depth.fmt = createInfo.depth->info.fmt;
+			m_attachmentBits.depth.samples = createInfo.depthStencil->info.subsamples;
+			m_attachmentBits.depth.fmt = createInfo.depthStencil->info.fmt;
 			m_attachmentMask |= RENDER_PASS_MASK_DEPTH;
 		}
 
@@ -381,8 +381,8 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 			if ( createInfo.color2 != nullptr ) {
 				attachments[ currentAttachment++ ] = createInfo.color2->gpuImage->GetVkImageView( frameIx );
 			}
-			if ( createInfo.depth != nullptr ) {
-				attachments[ currentAttachment++ ] = createInfo.depth->gpuImage->GetVkImageView( frameIx );
+			if ( createInfo.depthStencil != nullptr ) {
+				attachments[ currentAttachment++ ] = createInfo.depthStencil->gpuImage->GetVkImageView( frameIx );
 			}
 			if ( createInfo.stencil != nullptr ) {
 				attachments[ currentAttachment++ ] = createInfo.stencil->gpuImage->GetVkImageView( frameIx );
@@ -396,7 +396,7 @@ void FrameBuffer::Create( const frameBufferCreateInfo_t& createInfo )
 		m_color0 = createInfo.color0;
 		m_color1 = createInfo.color1;
 		m_color2 = createInfo.color2;
-		m_depth = createInfo.depth;
+		m_depthStencil = createInfo.depthStencil;
 		m_stencil = createInfo.stencil;
 	}
 	m_width = images[ firstValidIx ]->info.width;

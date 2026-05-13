@@ -94,7 +94,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.context = &renderContext;
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
-		info.fbImages.depth = resources.shadowMapImage[ i ];
+		info.fbImages.depthStencil = resources.shadowMapImage[ i ];
 
 		info.clear = true;
 		info.clearDepth = 1.0f;
@@ -126,7 +126,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.color0 = resources.mainColorImage;
 		info.fbImages.color1 = resources.gBufferLayerImage0;
-		info.fbImages.depth = &resources.depthImageView;
+		info.fbImages.depthStencil = resources.depthStencilImage;
 		info.fbImages.stencil = &resources.stencilImageView;
 
 		info.clear = true;
@@ -159,7 +159,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.lifetime = resourceLifeTime_t::REBOOT;
 		info.fbImages.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 		info.fbImages.color0 = resources.cubeFbColorImage;
-		info.fbImages.depth = resources.cubeFbDepthImage;
+		info.fbImages.depthStencil = resources.cubeFbDepthImage;
 
 		info.clear = true;
 		info.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );

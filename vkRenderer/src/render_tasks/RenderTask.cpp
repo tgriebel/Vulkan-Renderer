@@ -101,11 +101,11 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 	}
 
 	VkRenderingAttachmentInfo depthAttachment = {};
-	const bool hasDepth = ( fb->GetDepth() != nullptr );
+	const bool hasDepth = ( fb->GetDepthStencil() != nullptr );
 	if ( hasDepth )
 	{
 		depthAttachment.sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		depthAttachment.imageView   = fb->GetDepth()->gpuImage->GetVkImageView( context.bufferId );
+		depthAttachment.imageView   = fb->GetDepthStencil()->gpuImage->GetVkImageView( context.bufferId );
 		depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		depthAttachment.loadOp      = loadOp;
 		depthAttachment.storeOp     = storeOp;
@@ -117,7 +117,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 	if ( hasStencil )
 	{
 		stencilAttachment.sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		stencilAttachment.imageView   = fb->GetStencil()->gpuImage->GetVkImageView( context.bufferId );
+		stencilAttachment.imageView   = fb->GetDepthStencil()->gpuImage->GetVkImageView( context.bufferId );
 		stencilAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		stencilAttachment.loadOp      = loadOp;
 		stencilAttachment.storeOp     = storeOp;
@@ -156,7 +156,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 	}
 
 	if( hasDepth && transitionState.flags.readBefore ) {
-		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_READ, GPU_IMAGE_WRITE );
+		Transition( cmdContext, *fb->GetDepthStencil(), GPU_IMAGE_READ, GPU_IMAGE_WRITE );
 	}
 
 	vkCmdBeginRendering( cmdBuffer, &renderingInfo );
@@ -278,7 +278,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 	}
 	if( hasDepth && transitionState.flags.readAfter )
 	{
-		Transition( cmdContext, *fb->GetDepth(), GPU_IMAGE_WRITE, GPU_IMAGE_READ );
+		Transition( cmdContext, *fb->GetDepthStencil(), GPU_IMAGE_WRITE, GPU_IMAGE_READ );
 	}
 }
 
