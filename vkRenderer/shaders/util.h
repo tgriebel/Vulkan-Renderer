@@ -320,4 +320,13 @@ float3 SampleTextureNormal( const Texture2D textures[], SamplerState sampler, co
 	return float3( 0.0f, 0.0f, 1.0f );
 }
 
+
+float CircleOfConfusion( const float linearDepth, const float focalDepth, const float focalRange )
+{
+	float coc = ( linearDepth - focalDepth ) / focalRange;
+	coc = clamp( coc, -1.0, 1.0f );
+	return coc;
+}
+
+
 #endif // UTIL_HLSL_H

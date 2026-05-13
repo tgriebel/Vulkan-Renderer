@@ -437,6 +437,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			const uint64_t bindset_dofTile = renderContext->CreateBindSet( "bindset_dofTile", {
 				BINDING_NAME( globalsBuffer ),
+				BINDING_NAME( viewBuffer ),
 				BINDING_NAME( dofSourceImage ),
 				BINDING_NAME( computeWriteImage ),
 			} );
@@ -445,6 +446,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			GpuProgram& prog = progAsset->Get();
 			prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
 			prog.bindsetCount = 1;
+
+			const RenderView* view = viewContext->renderViews[ 0 ];
 
 			computeTaskCreateInfo_t info{};
 			info.name = "DoF Tile MinMax";
@@ -455,19 +458,28 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.imageTileSizeY = 16;
 			info.image = resources->depthStencilResolvedImage;
 			info.bindSetId = bindset_dofTile;
-			info.bind = [ resources ]( ComputeTask* task, ShaderBindParms* p )
+			info.bind = [ resources, view ]( ComputeTask* task, ShaderBindParms* p )
 			{
 				p->Bind( BINDING_NAME( globalsBuffer ), &resources->globalConstants );
+				p->Bind( BINDING_NAME( viewBuffer ), &resources->viewParms );
 				p->Bind( BINDING_NAME( dofSourceImage ), resources->depthStencilResolvedImage );
 				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
 
-				vec4f dimensions;
-				dimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-				dimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-				dimensions.z = 1.0f / dimensions.x;
-				dimensions.w = 1.0f / dimensions.y;
+				struct dofTileConstants_t
+				{
+					vec4f		dimensions;
+					uint32_t	viewId;
+				};
 
-				task->SetPushConstants( dimensions );
+				dofTileConstants_t constants{};
+
+				constants.viewId = view->GetViewBufferId();
+				constants.dimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+				constants.dimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+				constants.dimensions.z = 1.0f / constants.dimensions.x;
+				constants.dimensions.w = 1.0f / constants.dimensions.y;
+
+				task->SetPushConstants( constants );
 			};
 
 			tasks.dofTileTask = new ComputeTask( info );

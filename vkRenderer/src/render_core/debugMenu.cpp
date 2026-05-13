@@ -244,6 +244,19 @@ std::string GetLightingDebugModeName( const gpuDebugLightingMode_t mode )
 }
 
 
+void ChannelButton( const char* label, float& channelValue, ImVec4 onColor )
+{
+	static const ImVec4 offColor = ImVec4( 0.25f, 0.25f, 0.25f, 1.0f );
+
+	const bool active = channelValue > 0.5f;
+	ImGui::PushStyleColor( ImGuiCol_Button, active ? onColor : offColor );
+	if( ImGui::SmallButton( label ) ) {
+		channelValue = active ? 0.0f : 1.0f;
+	}
+	ImGui::PopStyleColor();
+}
+
+
 void DebugMenuMaterialEdit( Asset<Material>* matAsset )
 {
 #define EditRgbValue( VALUE )	{															\
@@ -1091,21 +1104,21 @@ void DrawImageViewerDebugMenu()
 		return;
 	}
 
-	const Image* image  = images[ g_imguiControls.dbgImageId ];
+	const Image* image = images[ g_imguiControls.dbgImageId ];
 	const float  aspect = image->info.width / (float)image->info.height;
 
 	static bool  autoScale = true;
-	static float scale     = 1.0f;
+	static float scale = 1.0f;
 
-	static float tint[ 4 ]    = { 1.0f, 1.0f, 1.0f, 0.0f };
-	static bool  gammaEnabled  = false;
-	static int   selectedMip    = 0;
-	static int   selectedLayer  = 0;
-	static int   selectedSample = -1;  // -1 = average
-	static float intensity     = 1.0f;
-	static float intensityMin  = 0.0f;
-	static float intensityMax  = 2.0f;
-	static float rangeMin  = 0.0f;
+	static float tint[ 4 ] = { 1.0f, 1.0f, 1.0f, 0.0f };
+	static bool gammaEnabled = false;
+	static int selectedMip = 0;
+	static int selectedLayer = 0;
+	static int selectedSample = -1;  // -1 = average
+	static float intensity = 1.0f;
+	static float intensityMin = 0.0f;
+	static float intensityMax = 2.0f;
+	static float rangeMin = 0.0f;
 	static float rangeMax = 1.0f;// INFINITY;
 
 	ImGui::Begin( "Image Viewer" );
@@ -1113,36 +1126,26 @@ void DrawImageViewerDebugMenu()
 	ImGuiIO& io = ImGui::GetIO();
 
 	// --- Toolbar ---
-	const float totalAvailW  = ImGui::GetContentRegionAvail().x;
-	const float totalAvailH  = ImGui::GetContentRegionAvail().y;
-	const float rowH         = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
-	const bool  isMsaa       = ( image->info.subsamples != IMAGE_SMP_1 );
-	const int   toolbarRows  = 3 + ( image->info.layers > 1 ? 1 : 0 ) + ( isMsaa ? 1 : 0 );
-	const float toolbarH     = toolbarRows * rowH;
-	const float separatorH   = ImGui::GetStyle().ItemSpacing.y + 1.0f;
-	const float imageAreaH   = totalAvailH - toolbarH - separatorH;
+	const float totalAvailW = ImGui::GetContentRegionAvail().x;
+	const float totalAvailH = ImGui::GetContentRegionAvail().y;
+	const float rowH = ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.y;
+	const bool isMsaa = ( image->info.subsamples != IMAGE_SMP_1 );
+	const int toolbarRows = 3 + ( image->info.layers > 1 ? 1 : 0 ) + ( isMsaa ? 1 : 0 );
+	const float toolbarH = toolbarRows * rowH;
+	const float separatorH = ImGui::GetStyle().ItemSpacing.y + 1.0f;
+	const float imageAreaH = totalAvailH - toolbarH - separatorH;
 
-	const ImVec4 offColor = ImVec4( 0.25f, 0.25f, 0.25f, 1.0f );
-	auto ChannelButton = [&]( const char* label, int i, ImVec4 onColor )
-	{
-		const bool active = tint[ i ] > 0.5f;
-		ImGui::PushStyleColor( ImGuiCol_Button, active ? onColor : offColor );
-		if ( ImGui::SmallButton( label ) ) {
-			tint[ i ] = active ? 0.0f : 1.0f;
-		}
-		ImGui::PopStyleColor();
-	};
-
-	ChannelButton( "R", 0, ImVec4( 0.8f, 0.2f, 0.2f, 1.0f ) );
+	ChannelButton( "R", tint[ 0 ], ImVec4(0.8f, 0.2f, 0.2f, 1.0f) );
 	ImGui::SameLine();
-	ChannelButton( "G", 1, ImVec4( 0.2f, 0.7f, 0.2f, 1.0f ) );
+	ChannelButton( "G", tint[ 1 ], ImVec4( 0.2f, 0.7f, 0.2f, 1.0f ) );
 	ImGui::SameLine();
-	ChannelButton( "B", 2, ImVec4( 0.2f, 0.4f, 0.9f, 1.0f ) );
+	ChannelButton( "B", tint[ 2 ], ImVec4( 0.2f, 0.4f, 0.9f, 1.0f ) );
 	ImGui::SameLine();
-	ChannelButton( "A", 3, ImVec4( 0.7f, 0.7f, 0.7f, 1.0f ) );
+	ChannelButton( "A", tint[ 3 ], ImVec4( 0.7f, 0.7f, 0.7f, 1.0f ) );
 	ImGui::SameLine();
 
 	{
+		static const ImVec4 offColor = ImVec4( 0.25f, 0.25f, 0.25f, 1.0f );
 		ImGui::PushStyleColor( ImGuiCol_Button, gammaEnabled ? ImVec4( 0.9f, 0.7f, 0.1f, 1.0f ) : offColor );
 		if ( ImGui::SmallButton( "sRGB" ) ) {
 			gammaEnabled = !gammaEnabled;
@@ -1262,8 +1265,11 @@ void DrawImageViewerDebugMenu()
 			imageViewerStatistics_t stats{};
 			if( QueryImageViewerStat( stats ) )
 			{
-				rangeMin = Min( stats.minSample.xyz );
-				rangeMax = Max( stats.maxSample.xyz );
+				const vec3f maskedMin = Multiply( vec4f( tint ).xyz, stats.minSample.xyz );
+				const vec3f maskedMax = Multiply( vec4f( tint ).xyz, stats.maxSample.xyz );
+
+				rangeMin = Min( maskedMin );
+				rangeMax = Max( maskedMax );
 			}
 		}
 	}
@@ -1446,11 +1452,12 @@ void DrawImageViewerDebugMenu()
 		if( QueryImageViewerSample( pixelLocation, color ) )
 		{
 			ImGui::BeginTooltip();
-			ImGui::ColorButton( "#pixelSample", ImVec4( color.x, color.y, color.z, color.w ), 0, ImVec2( 50.0f, 50.0f ) );
+			ImGui::ColorButton( "#pixelSample", ImVec4( color.x, color.y, color.z, color.w ), ImGuiColorEditFlags_NoTooltip, ImVec2( 50.0f, 50.0f ) );
 			ImGui::SameLine();
-			ImGui::Text( "(x, y): (%u, %u)", pixelLocation.x, pixelLocation.y );
-			ImGui::Text( "Pixel: (%4.2g, %4.2g, %4.2g, %4.2g)", color.x, color.y, color.z, color.w );
-
+			ImGui::BeginGroup();
+			ImGui::Text( "x:%u, y:%u (%1.2g, %1.2g)", pixelLocation.x, pixelLocation.y, uvX, uvY  );
+			ImGui::Text( "(%g, %g, %g, %g)", color.x, color.y, color.z, color.w );
+			ImGui::EndGroup();
 			ImGui::EndTooltip();
 		}
 	}

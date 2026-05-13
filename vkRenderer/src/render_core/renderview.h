@@ -178,7 +178,7 @@ public:
 	const mat4x4f&			GetInvProjMatrix( const uint32_t multiView = 0 ) const;
 	const mat4x4f&			GetViewProjMatrix( const uint32_t multiView = 0 ) const;
 	const mat4x4f&			GetPreviousViewProjMatrix( const uint32_t multiView = 0 ) const;
-	int						GetViewBufferId( const int multiView ) const; // TODO: Have view own it's view buffer. Eliminates indexing
+	int						GetViewBufferId( const int multiView = 0 ) const; // TODO: Have view own it's view buffer. Eliminates indexing
 	int						GetSurfaceBufferId() const; // TODO: Have view own it's surface buffer. Eliminates indexing
 
 	uint32_t				GetMultiViewCount() const;

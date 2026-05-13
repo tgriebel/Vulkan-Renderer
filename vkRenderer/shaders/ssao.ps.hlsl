@@ -48,8 +48,8 @@ float2 Rotate2D( float2 v, float angle )
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
-    const float2 uv       = input.uv0.xy;
-    const int2   pixelPos = int2( dimensions.xy * uv );
+    const float2 uv = input.uv0.xy;
+    const int2 pixelPos = int2( dimensions.xy * uv );
 
     psOutput_t output = (psOutput_t)0;
     
