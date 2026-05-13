@@ -112,6 +112,18 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 		depthAttachment.clearValue  = clearDepth;
 	}
 
+	VkRenderingAttachmentInfo stencilAttachment = {};
+	const bool hasStencil = ( fb->GetStencil() != nullptr );
+	if ( hasStencil )
+	{
+		stencilAttachment.sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		stencilAttachment.imageView   = fb->GetStencil()->gpuImage->GetVkImageView( context.bufferId );
+		stencilAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		stencilAttachment.loadOp      = loadOp;
+		stencilAttachment.storeOp     = storeOp;
+		stencilAttachment.clearValue  = clearDepth;
+	}
+
 	VkRenderingInfo renderingInfo = {};
 	renderingInfo.sType                = VK_STRUCTURE_TYPE_RENDERING_INFO;
 	renderingInfo.renderArea.offset    = { pass->GetViewport().x, pass->GetViewport().y };
@@ -119,7 +131,8 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 	renderingInfo.layerCount           = 1;
 	renderingInfo.colorAttachmentCount = colorAttachmentsCount;
 	renderingInfo.pColorAttachments    = colorAttachmentsCount > 0 ? colorAttachments : nullptr;
-	renderingInfo.pDepthAttachment     = hasDepth ? &depthAttachment : nullptr;
+	renderingInfo.pDepthAttachment     = hasDepth    ? &depthAttachment   : nullptr;
+	renderingInfo.pStencilAttachment   = hasStencil  ? &stencilAttachment : nullptr;
 
 	VkCommandBuffer cmdBuffer = cmdContext->CommandBuffer();
 
