@@ -1317,8 +1317,6 @@ void DeviceContext::Create( Window& window )
 
 		deviceFeatures.pNext = &accelerationStructureFeatures;
 		vkGetPhysicalDeviceFeatures2( physicalDevice, &deviceFeatures );
-
-		createInfo.pNext = &enabledAccelerationStructureFeatures;
 #endif
 
 		createInfo.pEnabledFeatures = &deviceFeatures.features;
@@ -1358,7 +1356,12 @@ void DeviceContext::Create( Window& window )
 		descIndexing.pNext = &dynamicRenderingFeature;
 		descIndexing.runtimeDescriptorArray = true;
 		descIndexing.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+#ifdef USE_VULKAN_RTX
+		enabledBufferDeviceAddresFeatures.pNext = &descIndexing;
+		createInfo.pNext = &enabledAccelerationStructureFeatures;
+#else
 		createInfo.pNext = &descIndexing;
+#endif
 
 		VK_CHECK_RESULT( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) );
 		vk_SetObjectName( (uint64_t)device, VK_OBJECT_TYPE_DEVICE, "VulkanLogicalDevice" );

@@ -687,18 +687,20 @@ int ParseShaderObject( parseState_t& st, void* object, uint32_t offset )
 	char vsShader[ TOKEN_LEN ] = "";
 	char psShader[ TOKEN_LEN ] = "";
 	char csShader[ TOKEN_LEN ] = "";
+	char rgenShader[ TOKEN_LEN ] = "";
 	char bindSet[ TOKEN_LEN ] = "";
 	char perms[ UniquePermCount ][ TOKEN_LEN ] = {};
 	shaderFlags_t shaderFlags = shaderFlags_t::NONE;
 	AssetLib<GpuProgram>* shaders = reinterpret_cast<AssetLib<GpuProgram>*>( object );
 
-	const uint32_t objectCount = 9;
+	const uint32_t objectCount = 10;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
 		{ "name",			&name,			TOKEN_LEN,				1,	&ParseStringObject },
 		{ "vs",				&vsShader,		TOKEN_LEN,				1,	&ParseStringObject },
 		{ "ps",				&psShader,		TOKEN_LEN,				1,	&ParseStringObject },
 		{ "cs",				&csShader,		TOKEN_LEN,				1,	&ParseStringObject },
+		{ "rgen",			&rgenShader,	TOKEN_LEN,				1,	&ParseStringObject },
 		{ "bindset",		&bindSet,		TOKEN_LEN,				1,	&ParseStringObject },
 		{ "perms",			&perms,			TOKEN_LEN,				1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
 		{ "sampling_ms",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },

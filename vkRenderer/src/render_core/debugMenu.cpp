@@ -526,6 +526,11 @@ void DebugMenuShaderTreeNode( Asset<GpuProgram>* progAsset )
 					case VERTEX: ImGui::Text( "Vertex" ); break;
 					case PIXEL: ImGui::Text( "Pixel" ); break;
 					case COMPUTE: ImGui::Text( "Compute" ); break;
+					case RAY_GEN: ImGui::Text( "Ray Generation" ); break;
+					case RAY_HIT: ImGui::Text( "Ray Hit" ); break;
+					case RAY_CLOSEST_HIT: ImGui::Text( "Ray Closest Hit" ); break;
+					case RAY_INTERSECTION: ImGui::Text( "Ray Intersection" ); break;
+					case RAY_MISS: ImGui::Text( "Ray Miss" ); break;
 				}
 				ImGui::TableSetColumnIndex( 2 );
 				ImGui::Text( "%u", bin.blob.size() );

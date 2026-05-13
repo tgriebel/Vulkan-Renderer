@@ -64,6 +64,10 @@
 
 #define MATERIAL_PUSH_CONSTANTS                         BIND_INLINE gpuPushConstants_t pushConstants;
 
+#define RT_ACCELERATION_STRUCTURE( S, N, NAME )			BIND_SET( S, N ) RaytracingAccelerationStructure NAME;
+
+#define RT_OUTPUT( S, N, NAME )							BIND_SET( S, N ) RWTexture2D<float4> NAME;
+
 // ============================================================
 // Compound bind macros
 // ============================================================

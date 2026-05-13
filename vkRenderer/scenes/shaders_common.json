@@ -150,6 +150,10 @@
 	  "image_shader": true
     },
 	{
+      "name": "ScreenRayGen",
+      "rgen": "primaryRay"
+    },
+	{
       "name": "preCalculatedBrdfLut",
       "vs": "fullscreen",
       "ps": "computeBrdfLut",

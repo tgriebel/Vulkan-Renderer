@@ -36,6 +36,7 @@ enum class resourceType_t : uint8_t
 	FRAMEBUFFER,
 	BINDSET,
 	IMAGE_SAMPLER,
+	ACCELERATION_STRUCTURE,
 	COUNT
 };
 

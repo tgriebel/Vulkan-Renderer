@@ -240,6 +240,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="shaders\primaryRay.rgen.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="shaders\quad2d.vs.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -281,6 +285,7 @@
     <ClInclude Include="src\render_core\renderUploader.h" />
     <ClInclude Include="src\render_core\resourceContext.h" />
     <ClInclude Include="src\render_core\schedule.h" />
+    <ClInclude Include="src\render_resources\gpuAccelerationStructure.h" />
     <ClInclude Include="src\render_resources\gpuBuffer.h" />
     <ClInclude Include="src\render_resources\imageArray.h" />
     <ClInclude Include="src\render_resources\imageSampler.h" />
@@ -360,6 +365,7 @@
     <ClCompile Include="src\render_core\renderUploader.cpp" />
     <ClCompile Include="src\render_core\resourceContext.cpp" />
     <ClCompile Include="src\render_core\schedule.cpp" />
+    <ClCompile Include="src\render_resources\gpuAccelerationStructure.cpp" />
     <ClCompile Include="src\render_resources\gpuBuffer.cpp" />
     <ClCompile Include="src\render_resources\imageArray.cpp" />
     <ClCompile Include="src\render_resources\imageSampler.cpp" />

@@ -216,6 +216,9 @@
     <ClCompile Include="src\render_tasks\ComputeTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_resources\gpuAccelerationStructure.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -470,6 +473,9 @@
     <ClInclude Include="src\render_tasks\ComputeTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_resources\gpuAccelerationStructure.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -661,6 +667,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\downsampleMin.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\primaryRay.rgen.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -10,7 +10,8 @@ enum class bufferType_t
 	VERTEX,
 	INDEX,
 	STAGING,
-	READBACK
+	READBACK,
+	ACCELERATION_STRUCTURE
 };
 
 

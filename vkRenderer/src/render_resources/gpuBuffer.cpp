@@ -75,7 +75,7 @@ VkBuffer& GpuBuffer::VkObject()
 
 void GpuBuffer::Create( const bufferCreateInfo_t info )
 {
-	Create( info.name, info.swapBuffering, info.lifetime, info.elements, info.elementSizeBytes, info.type );
+	Create( info.name, info.swapBuffering, info.lifetime, info.elements, info.elementSizeBytes, info.type, info.flags );
 }
 
 
@@ -102,6 +102,11 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 		{
 			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+
+			if ( HasFlags( flags, bufferFlags_t::RT_VISIBLE ) )
+			{
+				usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+			}
 		}
 		else if ( type == bufferType_t::UNIFORM )
 		{
@@ -138,6 +143,12 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 			alignment = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
 			usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		}
+		else if ( type == bufferType_t::ACCELERATION_STRUCTURE )
+		{
+			alignment = 256;
+			usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR
+				  | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		}
 		else
 		{
 			assert(0);
@@ -163,7 +174,8 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT
 								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		}
-		else if ( ( type == bufferType_t::UNIFORM ) || ( type == bufferType_t::STORAGE ) || ( type == bufferType_t::STAGING )  )
+		else if ( ( type == bufferType_t::UNIFORM ) || ( type == bufferType_t::STAGING ) ||
+				  ( type == bufferType_t::STORAGE && HasFlags( flags, bufferFlags_t::RT_VISIBLE ) == false ) )
 		{
 			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT
 								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;

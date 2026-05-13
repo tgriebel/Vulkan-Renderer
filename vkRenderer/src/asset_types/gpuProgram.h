@@ -19,6 +19,11 @@ enum shaderType_t : uint32_t
 	VERTEX,
 	PIXEL,
 	COMPUTE,
+	RAY_GEN,
+	RAY_HIT,
+	RAY_CLOSEST_HIT,
+	RAY_INTERSECTION,
+	RAY_MISS
 };
 
 
