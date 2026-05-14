@@ -321,10 +321,14 @@ float3 SampleTextureNormal( const Texture2D textures[], SamplerState sampler, co
 }
 
 
-float CircleOfConfusion( const float linearDepth, const float focalDepth, const float focalRange )
+float CircleOfConfusion( const float aperture, const float focallength, const float planeinfocus, const float objectdistance )
 {
-	float coc = ( linearDepth - focalDepth ) / focalRange;
-	coc = clamp( coc, -1.0, 1.0f );
+	// https://developer.nvidia.com/gpugems/gpugems/part-iv-image-processing/chapter-23-depth-field-survey-techniques
+	// Also: Graphics Gems from Cryengine 3
+	const float numerator = ( focallength * ( objectdistance - planeinfocus ) );
+	const float denom = ( objectdistance * ( planeinfocus - focallength ) );
+
+	const float coc = abs( aperture * ( numerator / denom ) );
 	return coc;
 }
 

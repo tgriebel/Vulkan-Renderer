@@ -161,7 +161,7 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 		m_imagePass->codeImages.BindIndex( codeImageIx, rc.defaultImage );
 		m_imagePass->codeCubeImages.BindIndex( codeImageIx, rc.defaultImageCube );
 	}
-	m_buffer.Create( "ImguiCallbackBuffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM );
+	m_buffer.Create( "ImguiCallbackBuffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::UNMANAGED, 1, MaxCustomConstantBytes, bufferType_t::UNIFORM );
 
 	m_imageStatBuffer.Create(
 		"ImageStatHistogram",

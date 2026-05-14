@@ -469,7 +469,7 @@ void Renderer::UpdateBuffers()
 		globals.exposure = vec4f( postProcess.exposureMidGray, postProcess.exposureAdaptation, postProcess.exposureWhitePoint, postProcess.exposureDarkLimit );
 		globals.exposure2 = vec4f( ( postProcess.autoExposureEnable && config.autoExposure ) ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 		globals.shadowParms = vec4f( 0, ShadowMapWidth, ShadowMapHeight, g_imguiControls.shadowStrength );
-		globals.dof = vec4f( postProcess.dofEnable ? 1.0f : 0.0f, postProcess.dofFocalDepth, postProcess.dofFocalRange, 0.0f );
+		globals.dof = vec4f( postProcess.dofEnable ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 		globals.chromaticAberration = vec4f( postProcess.caEnable ? 1.0f : 0.0f, postProcess.caIntensity, 0.0f, 0.0f );
 		globals.useDiffuseIBL = g_imguiControls.pbr.useDiffuseIBL ? 1 : 0;
 		globals.useSpecularIBL = g_imguiControls.pbr.useSpecularIBL ? 1 : 0;

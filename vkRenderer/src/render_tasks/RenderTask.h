@@ -18,17 +18,15 @@ using TaskControlsFn = std::function<void()>;
 class GpuTask
 {
 protected:
-	GpuTask*       m_child        = nullptr;
-	bool           m_enabled      = true;
-	TaskControlsFn m_controlsFn   = nullptr;
-	void*          m_constantsPtr = nullptr;
-	uint32_t       m_constantsSize = 0;
+	// 128 since that's also the push constants limit, but not a hard limit
+	static const uint32_t MaxCustomConstantBytes = 128;
 
-	void RegisterConstants( void* data, const uint32_t size )
-	{
-		m_constantsPtr  = data;
-		m_constantsSize = size;
-	}
+	GpuTask*		m_child			= nullptr;
+	bool			m_enabled		= true;
+	TaskControlsFn	m_controlsFn	= nullptr;
+
+	uint32_t		m_customConstantsByteSize = 0;
+	uint8_t			m_customConstants[ MaxCustomConstantBytes ];
 
 public:
 	virtual void			FrameBegin() {};
@@ -45,10 +43,10 @@ public:
 	void					RegisterControls( TaskControlsFn fn ) { m_controlsFn = std::move( fn ); }
 	void					SetControls() const { if ( m_controlsFn ) { m_controlsFn(); } }
 
-	bool					HasConstants() const { return m_constantsPtr != nullptr; }
+	bool					HasConstants() const { return ( m_customConstantsByteSize > 0 ); }
 
 	template<typename T>
-	T*						GetConstants() { return reinterpret_cast<T*>( m_constantsPtr ); }
+	T*						GetConstants() { return reinterpret_cast<T*>( &m_customConstants ); }
 
 	void SetChild( GpuTask* child )
 	{

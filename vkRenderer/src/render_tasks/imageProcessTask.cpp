@@ -54,11 +54,10 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_permSet = info.permSet;
 
 	m_customConstantsByteSize = 0;
-	if ( info.constants != nullptr && info.constantsByteSize > 0 )
+	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
 	{
 		m_customConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
 		memcpy( m_customConstants, info.constants, m_customConstantsByteSize );
-		RegisterConstants( m_customConstants, m_customConstantsByteSize );
 	}
 
 	m_multiPass = info.multiPass;

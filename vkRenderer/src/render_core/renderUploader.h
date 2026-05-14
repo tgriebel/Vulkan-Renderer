@@ -10,6 +10,7 @@ class RenderContext;
 class ResourceContext;
 class Model;
 class RenderUploader;
+class GpuAccelerationStructure;
 
 struct surfaceUpload_t
 {
@@ -46,18 +47,19 @@ public:
 class RenderUploader
 {
 private:
-	uint32_t			imageFreeSlot;
-	GpuBuffer			textureStagingBuffer;
-	GeometryContext		geometry;
-	UploadCmdList		commands;
-	GpuSemaphore		finishedSemaphore;
+	uint32_t					imageFreeSlot;
+	GpuBuffer					textureStagingBuffer;
+	GeometryContext				geometry;
+	UploadCmdList				commands;
+	GpuSemaphore				finishedSemaphore;
+	GpuAccelerationStructure*	accelerationStructure;
 
-	RenderContext*		renderContext;
-	ResourceContext*	resourceContext;
+	RenderContext*				renderContext;
+	ResourceContext*			resourceContext;
 
-	std::set<hdl_t>		uploadImages;
-	std::set<hdl_t>		refreshImages;
-	std::set<hdl_t>		uploadMaterials;
+	std::set<hdl_t>				uploadImages;
+	std::set<hdl_t>				refreshImages;
+	std::set<hdl_t>				uploadMaterials;
 
 	using materialBufferArray_t = Array<gpuMaterial_t, MaxMaterials>;
 	materialBufferArray_t	materialBuffer; // This is a holdover from older code and can be removed

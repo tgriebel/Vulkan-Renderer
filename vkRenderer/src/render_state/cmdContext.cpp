@@ -226,10 +226,10 @@ void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBind
 }
 
 
-void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsSize, const uint32_t x, const uint32_t y, const uint32_t z )
+void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsByteSize, const uint32_t x, const uint32_t y, const uint32_t z )
 {
 	assert( isOpen );
-	assert( ( constantsSize % 4 ) == 0 );
+	assert( ( constantsByteSize % 4 ) == 0 );
 
 	assert( progAsset.IsLoaded() );
 	assert( progAsset.Handle() != INVALID_HDL );
@@ -250,8 +250,8 @@ void CommandList::Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBind
 	VkCommandBuffer cmdBuffer = CommandBuffer();
 	VkDescriptorSet set[1] = { bindParms.GetVkObject() };
 
-	if( ( constants != nullptr ) && ( constantsSize > 0 )  ) {
-		vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, constantsSize, constants );
+	if( ( constants != nullptr ) && ( constantsByteSize > 0 )  ) {
+		vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, constantsByteSize, constants );
 	}
 	vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipeline );
 	vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );

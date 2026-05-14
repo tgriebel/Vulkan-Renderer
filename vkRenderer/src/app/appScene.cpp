@@ -131,8 +131,6 @@ void InitScene( Scene* scene )
 		g_imguiControls.postProcess.caEnable = true;
 		g_imguiControls.postProcess.caIntensity = 0.01f;
 		g_imguiControls.postProcess.dofEnable = false;
-		g_imguiControls.postProcess.dofFocalDepth = 0.01f;
-		g_imguiControls.postProcess.dofFocalRange = 0.25f;
 		g_imguiControls.dbgImageId = -1;
 		g_imguiControls.selectedFrameBufferImageId = -1;
 		g_imguiControls.isTextured = true;
@@ -460,8 +458,6 @@ void DrawPostProcessDebugMenu()
 		ImGui::Checkbox( "Chromatic Aberration Enable", &postProcess.caEnable );
 		ImGui::InputFloat( "Chromatic Aberration Intensity", &postProcess.caIntensity, 0.005f, 0.2f );
 		ImGui::Checkbox( "DoF Enabled", &postProcess.dofEnable );
-		ImGui::SliderFloat( "DoF Focal Depth", &postProcess.dofFocalDepth, 0.0f, 1.0f );
-		ImGui::SliderFloat( "DoF Focal Range", &postProcess.dofFocalRange, 0.0f, 1.0f );
 
 		ImGui::EndTabItem();
 	}

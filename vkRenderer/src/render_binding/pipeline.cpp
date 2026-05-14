@@ -576,7 +576,7 @@ hdl_t CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& sta
 
 	VkPushConstantRange pushRanges;
 	pushRanges.offset = 0;
-	pushRanges.size = 32;
+	pushRanges.size = 128;
 	pushRanges.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{ };

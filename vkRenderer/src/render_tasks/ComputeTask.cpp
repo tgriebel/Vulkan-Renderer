@@ -49,10 +49,12 @@ void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 
 	m_bind = info.bind;
 
-	if ( info.pushConstants != nullptr && info.pushConstantsSize > 0 )
+
+	m_customConstantsByteSize = 0;
+	if( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
 	{
-		m_pushConstants.resize( info.pushConstantsSize );
-		memcpy( m_pushConstants.data(), info.pushConstants, info.pushConstantsSize );
+		m_customConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+		memcpy( m_customConstants, info.constants, m_customConstantsByteSize );
 	}
 
 	m_progAsset = GpuProgramLib().Find( info.progName );
@@ -92,10 +94,10 @@ void ComputeTask::Execute( CommandList& cmdContext )
 		z = m_dispatchZ;
 	}
 
-	if ( m_pushConstants.empty() ) {
-		cmdContext.Dispatch( *m_progAsset, * m_parms, x, y, z );
+	if ( HasConstants() ) {
+		cmdContext.Dispatch( *m_progAsset, *m_parms, m_customConstants, m_customConstantsByteSize, x, y, z );	
 	} else {
-		cmdContext.Dispatch( *m_progAsset, *m_parms, m_pushConstants.data(), static_cast<uint32_t>( m_pushConstants.size() ), x, y, z );
+		cmdContext.Dispatch( *m_progAsset, *m_parms, x, y, z );
 	}
 
 	cmdContext.MarkerEndRegion();

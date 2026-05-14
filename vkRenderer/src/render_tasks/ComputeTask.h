@@ -15,16 +15,19 @@ struct computeTaskCreateInfo_t
 	const char*			progName;
 	RenderContext*		context;
 	ResourceContext*	resources;
-	const Image*		image;			// Optional. Used when `imageTileSize` is not 0
+	const Image*		image;				// Optional. Used when `imageTileSize` is not 0
 
-	uint64_t			bindSetId;		// Hash id of the target bindset (e.g. bindset_compute)
+	uint64_t			bindSetId;			// Hash id of the target bindset (e.g. bindset_compute)
 
-	uint32_t			imageTileSizeX;	// Optional: Used for processing over an image in tiles. Size is in pixels
-	uint32_t			imageTileSizeY;	// Optional: Used for processing over an image in tiles. Size is in pixels
+	const void*			constants;			// Optional: custom shader constants
+	uint32_t			constantsByteSize;	// Size in bytes
 
-	uint32_t			dispatchX;		// Explicit dispatch controls. Used when imageTileSize is 0.
-	uint32_t			dispatchY;		// Explicit dispatch controls. Used when imageTileSize is 0.
-	uint32_t			dispatchZ;		// Explicit dispatch controls. Used when imageTileSize is 0.
+	uint32_t			imageTileSizeX;		// Optional: Used for processing over an image in tiles. Size is in pixels
+	uint32_t			imageTileSizeY;		// Optional: Used for processing over an image in tiles. Size is in pixels
+
+	uint32_t			dispatchX;			// Explicit dispatch controls. Used when imageTileSize is 0.
+	uint32_t			dispatchY;			// Explicit dispatch controls. Used when imageTileSize is 0.
+	uint32_t			dispatchZ;			// Explicit dispatch controls. Used when imageTileSize is 0.
 
 	// Invoked once per frame to populate the bindset. The caller is responsible
 	// for matching the slot names / resource types declared by bindSetId.
@@ -56,8 +59,6 @@ private:
 
 	std::function<void( ComputeTask* task, ShaderBindParms* )> m_bind;
 
-	std::vector<uint8_t>	m_pushConstants;
-
 	void Init( const computeTaskCreateInfo_t& info );
 	void Shutdown();
 
@@ -76,13 +77,6 @@ public:
 	void			Resize() {}
 	void			FrameBegin();
 	std::string		AsString() const;
-
-	template<typename T>
-	void			SetPushConstants( const T& constants )
-	{
-		m_pushConstants.resize( sizeof( T ) );
-		memcpy( m_pushConstants.data(), &constants, sizeof( T ) );
-	}
 
 	void Execute( CommandList& context ) override;
 };

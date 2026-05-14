@@ -57,7 +57,7 @@ public:
 private:
 	static const uint32_t	MaxBufferSizeInBytes = 256;
 	static const uint32_t	ReservedConstantSizeInBytes = sizeof( baseConstants_t );
-	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxBufferSizeInBytes - ReservedConstantSizeInBytes );
+	static const uint32_t	MaxConstantBlockSizeInBytes = ( MaxCustomConstantBytes - ReservedConstantSizeInBytes );
 	static const uint32_t	MaxPasses = 2;
 	static const uint32_t	MaxOutputImages = 3;
 

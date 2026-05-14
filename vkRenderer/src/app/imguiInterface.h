@@ -42,8 +42,6 @@ struct postProcessControls_t
 	float				exposureAdaptation;
 	float				exposureWhitePoint;
 	float				exposureDarkLimit;
-	float				dofFocalDepth;
-	float				dofFocalRange;
 	float				caIntensity;
 	bool				bloomEnable;
 	bool				autoExposureEnable;

@@ -20,8 +20,6 @@ enum gpuImageStateFlags_t : uint8_t;
 class ImguiTask : public GpuTask
 {
 private:
-	static const uint32_t	MaxBufferSizeInBytes = 256;
-
 	renderPassTransition_t	m_transitionState = {};
 	ResourceContext*		m_resources;
 	RenderContext*			m_context;

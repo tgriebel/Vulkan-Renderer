@@ -7,6 +7,7 @@
 #include "../render_core/renderer.h"
 #include "../render_state/rhi.h"
 #include "../render_state/cmdContext.h"
+#include "../render_resources/gpuAccelerationStructure.h"
 
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
@@ -68,6 +69,8 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		MaxGeometryUploadMemory,
 		bufferType_t::STAGING
 	);
+
+	accelerationStructure = new GpuAccelerationStructure();
 }
 
 
@@ -80,6 +83,8 @@ void RenderUploader::Shutdown()
 	commands.Destroy();
 
 	finishedSemaphore.Destroy();
+
+	delete accelerationStructure;
 }
 
 

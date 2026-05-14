@@ -70,10 +70,6 @@ private:
 	bool						m_upsampleProcess;						// Used for upscaling
 	bool						m_useApi;
 
-	static const uint32_t		MaxCustomConstantBytes = 128;
-	uint8_t						m_customConstants[ MaxCustomConstantBytes ];
-	uint32_t					m_customConstantsByteSize;
-
 	ImageShaderTask* CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel );
 
 public:

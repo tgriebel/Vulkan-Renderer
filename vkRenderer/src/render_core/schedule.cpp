@@ -364,16 +364,30 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			} );
 		}
 
+		// Constants for all DoF Passes
+		struct dofConstants_t
+		{
+			vec4f		srcDepthDimensions;
+			uint32_t	viewId;
+			float		focalLength;
+			float		focalPlaneDistance;
+			float		apertureDiameter;
+			float		maxCocRadius;
+		};
+
+		dofConstants_t dofCocDefaults = {};
+
+		dofCocDefaults.focalLength = 14.0f;
+		dofCocDefaults.focalPlaneDistance = 10000.0f;
+		dofCocDefaults.apertureDiameter = 25.0f;
+		dofCocDefaults.maxCocRadius = 16.0f;
+		dofCocDefaults.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+		dofCocDefaults.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+		dofCocDefaults.srcDepthDimensions.z = 1.0f / dofCocDefaults.srcDepthDimensions.x;
+		dofCocDefaults.srcDepthDimensions.w = 1.0f / dofCocDefaults.srcDepthDimensions.y;
+
 		// DoF Circle-of-Confusion Calculation
 		{
-			struct dofCocConstants_t
-			{
-				float depthScaleForeground;
-				float pixelRadius;
-			};
-
-			const dofCocConstants_t dofCocDefaults = { 1.0f, 1.0f };
-
 			imageProcessCreateInfo_t info{};
 			info.name = "DoF CoC";
 			info.context = renderContext;
@@ -388,22 +402,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constantsByteSize = sizeof( dofCocDefaults );
 
 			tasks.dofCocTask = new ImageProcessTask( info );
-
-#if defined( USE_IMGUI )
-			tasks.dofCocTask->RegisterControls( [ cocTask = tasks.dofCocTask ]()
-				{
-					dofCocConstants_t& c = *cocTask->GetConstants<dofCocConstants_t>();
-					bool changed = false;
-					//changed |= ImGui::SliderFloat( "Focal Length (mm)",  &c.focalLengthMM,   14.0f, 200.0f );
-					//changed |= ImGui::SliderFloat( "Aperture (f-stop)",  &c.fstop,            1.0f,  22.0f );
-					//changed |= ImGui::SliderFloat( "Focus Distance (m)", &c.focusDistanceM,   0.1f, 100.0f );
-					//changed |= ImGui::SliderFloat( "Max CoC (px)",       &c.maxCoCPixels,     4.0f,  48.0f );
-					if( changed )
-					{
-						cocTask->UpdateConstants();
-					}
-				} );
-#endif
 		}
 
 		// DoF Tile min/max CoC binning
@@ -457,6 +455,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.imageTileSizeX = 16;
 			info.imageTileSizeY = 16;
 			info.image = resources->depthStencilResolvedImage;
+			info.constants = &dofCocDefaults;
+			info.constantsByteSize = sizeof( dofCocDefaults );
 			info.bindSetId = bindset_dofTile;
 			info.bind = [ resources, view ]( ComputeTask* task, ShaderBindParms* p )
 			{
@@ -464,25 +464,28 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				p->Bind( BINDING_NAME( viewBuffer ), &resources->viewParms );
 				p->Bind( BINDING_NAME( dofSourceImage ), resources->depthStencilResolvedImage );
 				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
-
-				struct dofTileConstants_t
-				{
-					vec4f		dimensions;
-					uint32_t	viewId;
-				};
-
-				dofTileConstants_t constants{};
-
-				constants.viewId = view->GetViewBufferId();
-				constants.dimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-				constants.dimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-				constants.dimensions.z = 1.0f / constants.dimensions.x;
-				constants.dimensions.w = 1.0f / constants.dimensions.y;
-
-				task->SetPushConstants( constants );
 			};
 
 			tasks.dofTileTask = new ComputeTask( info );
+
+#if defined( USE_IMGUI )
+			tasks.dofTileTask->RegisterControls( [ resources, view, task = tasks.dofTileTask ]()
+				{
+					dofConstants_t& dofParms = *task->GetConstants<dofConstants_t>();
+
+					bool changed = false;
+					changed |= ImGui::SliderFloat( "Focal Length (mm)", &dofParms.focalLength, 14.0f, 200.0f );
+					changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &dofParms.apertureDiameter, 1.0f, 50.0f );
+					changed |= ImGui::SliderFloat( "Focus Distance (mm)", &dofParms.focalPlaneDistance, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
+					changed |= ImGui::SliderFloat( "Max CoC", &dofParms.maxCocRadius, 4.0f, 32.0f );
+
+					dofParms.viewId = view->GetViewBufferId();
+					dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+					dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+					dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
+					dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+				} );
+#endif
 		}
 	}
 
