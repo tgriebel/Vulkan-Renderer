@@ -338,6 +338,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.dof )
 	{
+		const RenderView* view = viewContext->renderViews[ 0 ];
+
 		// Image
 		{
 			imageInfo_t info{};
@@ -381,6 +383,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		dofCocDefaults.focalPlaneDistance = 10000.0f;
 		dofCocDefaults.apertureDiameter = 25.0f;
 		dofCocDefaults.maxCocRadius = 16.0f;
+		dofCocDefaults.viewId = view->GetViewBufferId();
 		dofCocDefaults.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
 		dofCocDefaults.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
 		dofCocDefaults.srcDepthDimensions.z = 1.0f / dofCocDefaults.srcDepthDimensions.x;
@@ -444,8 +447,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			GpuProgram& prog = progAsset->Get();
 			prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
 			prog.bindsetCount = 1;
-
-			const RenderView* view = viewContext->renderViews[ 0 ];
 
 			computeTaskCreateInfo_t info{};
 			info.name = "DoF Tile MinMax";

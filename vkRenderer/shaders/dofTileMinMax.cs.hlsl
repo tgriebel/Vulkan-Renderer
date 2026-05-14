@@ -46,18 +46,18 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
     
     const float4x4 invProj = views[ dofTileParms.viewId ].invProjMat;
 
+    const float apertureDiameter = dofTileParms.apertureDiameter / 1000.0f;
+    const float focalLength = dofTileParms.focalLength / 1000.0f;
+    const float focalPlaneDistance = dofTileParms.focalPlaneDistance / 1000.0f;
+    
     if( inBounds )
     {
         // Depth is [0, 1] so it's fine just to cast the bits as a uint for min/max
         const float depthSample = localTextures[ 0 ].Load( int3( threadId.xy, 0 ) ).r;
         const uint depthUint = asuint( depthSample );
         
-        // CoC is positive
-        const float apertureDiameter = dofTileParms.apertureDiameter / 1000.0f;
-        const float focalLength = dofTileParms.focalLength / 1000.0f;
-        const float focalPlaneDistance = dofTileParms.focalPlaneDistance / 1000.0f;
-        
-        const float linearDepth = LinearDepth( depthSample, invProj );
+        // CoC is positive, depth needs to increase from camera so negate it      
+        const float linearDepth = -LinearDepth( depthSample, invProj );
         const float coc = CircleOfConfusion( apertureDiameter, focalLength, focalPlaneDistance, linearDepth );
         const uint cocUint = asuint( coc );
     
@@ -72,7 +72,11 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
     const float maxDepthTile = asfloat( groupMaxSample );
     const float maxCocTile = min( dofTileParms.maxCocRadius / 1000.0f, asfloat( groupMaxCocSample ) );
 
+    const float halfFovX = invProj[ 0 ][ 0 ];
+    const float sensorWidth = 36.0f;
+    const float maxCocInPixels = maxCocTile * ( dofTileParms.srcDepthDimensions.x / sensorWidth );
+    
     if ( groupIndex == 0 ) {
-        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocTile, 1.0f );
+        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocInPixels, 1.0f );
     }
 }
