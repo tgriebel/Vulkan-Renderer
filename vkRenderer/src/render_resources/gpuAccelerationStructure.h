@@ -7,16 +7,12 @@
 class CommandList;
 
 
-struct blasCreateInfo_t
+struct blasSurfaceInfo_t
 {
 	const char*			name;
-	VkDeviceAddress		vertexBufferAddress;
-	uint32_t			vertexCount;
-	VkDeviceSize		vertexStride;
-	VkFormat			vertexFormat;
-	VkDeviceAddress		indexBufferAddress;
-	VkIndexType			indexType;
-	uint32_t			primitiveCount;
+	const GpuBuffer*	vb;
+	const GpuBuffer*	ib;
+	const surface_t*	surface;
 	resourceLifeTime_t	lifetime;
 };
 
@@ -40,7 +36,7 @@ private:
 #endif
 
 public:
-	void						AddGeometry( const blasCreateInfo_t& info, CommandList* cmdList, GpuBuffer& scratchBuffer );
+	void						AddGeometry( CommandList* cmdList, const blasSurfaceInfo_t& surfaceInfo );
 	void						Create( CommandList* cmdList, const tlasCreateInfo_t& info, VkDeviceAddress instanceBufferAddress );
 	void						Destroy() override;
 

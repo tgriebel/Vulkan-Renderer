@@ -7,12 +7,12 @@ extern DeviceContext context;
 
 #ifdef USE_VULKAN_RTX
 
-void GpuAccelerationStructure::AddGeometry( const blasCreateInfo_t& info, CommandList* cmdList, GpuBuffer& scratchBuffer )
+void GpuAccelerationStructure::AddGeometry( CommandList* cmdList, const blasSurfaceInfo_t& surfaceInfo )
 {
 	//VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
 	//triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-	//triangles.vertexFormat = info.vertexFormat;
-	//triangles.vertexData.deviceAddress = info.vertexBufferAddress;
+	//triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+	//triangles.vertexData.deviceAddress = surfaceInfo.vb->GetDeviceAddress();
 	//triangles.vertexStride = info.vertexStride;
 	//triangles.maxVertex = info.vertexCount - 1;
 	//triangles.indexType = info.indexType;
@@ -24,9 +24,9 @@ void GpuAccelerationStructure::AddGeometry( const blasCreateInfo_t& info, Comman
 	//geometry.geometry.triangles = triangles;
 	//geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 
-	//VkAccelerationStructureBuildSizesInfoKHR sizes{};
-	//sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-	//context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.instanceCount, &sizes );
+	////VkAccelerationStructureBuildSizesInfoKHR sizes{};
+	////sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+	////context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.instanceCount, &sizes );
 
 	//assert( m_scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
 
@@ -55,10 +55,10 @@ void GpuAccelerationStructure::AddGeometry( const blasCreateInfo_t& info, Comman
 	//sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 	//context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.primitiveCount, &sizes );
 
-	//assert( scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
+	//assert( m_scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
 
 	//buildInfo.dstAccelerationStructure = m_accelerationStructure;
-	//buildInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
+	//buildInfo.scratchData.deviceAddress = m_scratchBuffer.GetDeviceAddress();
 
 	//VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
 	//rangeInfo.primitiveCount = info.primitiveCount;

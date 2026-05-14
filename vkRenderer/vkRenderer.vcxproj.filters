@@ -219,6 +219,9 @@
     <ClCompile Include="src\render_resources\gpuAccelerationStructure.cpp">
       <Filter>Resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_binding\vertexInput.cpp">
+      <Filter>Binding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -475,6 +478,9 @@
     </ClInclude>
     <ClInclude Include="src\render_resources\gpuAccelerationStructure.h">
       <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_binding\vertexInput.h">
+      <Filter>Binding</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

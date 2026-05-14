@@ -280,6 +280,7 @@
     <ClInclude Include="src\asset_types\model.h" />
     <ClInclude Include="src\asset_types\image.h" />
     <ClInclude Include="src\io\serializeClasses.h" />
+    <ClInclude Include="src\render_binding\vertexInput.h" />
     <ClInclude Include="src\render_core\allocator.h" />
     <ClInclude Include="src\render_core\renderContext.h" />
     <ClInclude Include="src\render_core\renderUploader.h" />
@@ -360,6 +361,7 @@
     <ClCompile Include="src\asset_types\model.cpp" />
     <ClCompile Include="src\asset_types\image.cpp" />
     <ClCompile Include="src\io\serializeClasses.cpp" />
+    <ClCompile Include="src\render_binding\vertexInput.cpp" />
     <ClCompile Include="src\render_core\allocator.cpp" />
     <ClCompile Include="src\render_core\renderContext.cpp" />
     <ClCompile Include="src\render_core\renderUploader.cpp" />

@@ -8,63 +8,10 @@
 #include "shaderBinding.h"
 #include "../scene/sceneBase.h"
 #include "../asset_types/assetLib.h"
+#include "vertexInput.h"
 
 static std::unordered_map< uint64_t, pipelineObject_t > s_pipelineLib;
 static std::unordered_map< uint64_t, std::set<pipelineState_t> > s_progToPipelines;
-
-static const uint32_t MaxVertexAttribs = 7;
-static std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> GetVertexAttributeDescriptions()
-{
-	uint32_t attribId = 0;
-
-	std::array<VkVertexInputAttributeDescription, MaxVertexAttribs> attributeDescriptions{ };
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inPosition );
-	++attribId;
-
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inColor );
-	++attribId;
-
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inNormal );
-	++attribId;
-
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inTangent );
-	++attribId;
-
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, inBitangent );
-	++attribId;
-
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, uv0 );
-	++attribId;
-
-	attributeDescriptions[ attribId ].binding = 0;
-	attributeDescriptions[ attribId ].location = attribId;
-	attributeDescriptions[ attribId ].format = VK_FORMAT_R32G32_SFLOAT;
-	attributeDescriptions[ attribId ].offset = offsetof( vsInput_t, uv1 );
-	++attribId;
-
-	assert( attribId == MaxVertexAttribs );
-
-	return attributeDescriptions;
-}
-
 
 void ClearPipelineCache()
 {
@@ -274,7 +221,13 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, con
 	bindingDescription.stride = sizeof( vsInput_t );
 	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-	auto attributeDescriptions = GetVertexAttributeDescriptions();
+	VertexDescription attributeDescriptions = GetVertexAttributeDescriptions();
+
+	VkVertexInputAttributeDescription vertDesc[ VertexDescription::Capacity ] = {};
+
+	for( uint32_t i = 0; i < VertexDescription::Capacity; ++i ) {
+		vertDesc[ i ] = attributeDescriptions[ i ].desc;
+	}
 
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo{ };
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -289,9 +242,9 @@ hdl_t CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, con
 	else
 	{
 		vertexInputInfo.vertexBindingDescriptionCount = 1;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>( attributeDescriptions.size() );
+		vertexInputInfo.vertexAttributeDescriptionCount = VertexDescription::Capacity;
 		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+		vertexInputInfo.pVertexAttributeDescriptions = vertDesc;
 	}
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly{ };
