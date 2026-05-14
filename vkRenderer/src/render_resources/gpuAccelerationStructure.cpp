@@ -7,69 +7,73 @@ extern DeviceContext context;
 
 #ifdef USE_VULKAN_RTX
 
-void GpuAccelerationStructure::Allocate( const char* name, const VkAccelerationStructureTypeKHR type, const VkAccelerationStructureBuildSizesInfoKHR& sizes, const resourceLifeTime_t lifetime )
+void GpuAccelerationStructure::AddGeometry( const blasCreateInfo_t& info, CommandList* cmdList, GpuBuffer& scratchBuffer )
 {
-	const uint32_t storageSize = static_cast<uint32_t>( sizes.accelerationStructureSize );
-	m_storageBuffer.Create( name, swapBuffering_t::SINGLE_FRAME, lifetime, 1, storageSize, bufferType_t::ACCELERATION_STRUCTURE );
+	//VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
+	//triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+	//triangles.vertexFormat = info.vertexFormat;
+	//triangles.vertexData.deviceAddress = info.vertexBufferAddress;
+	//triangles.vertexStride = info.vertexStride;
+	//triangles.maxVertex = info.vertexCount - 1;
+	//triangles.indexType = info.indexType;
+	//triangles.indexData.deviceAddress = info.indexBufferAddress;
 
-	VkAccelerationStructureCreateInfoKHR createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
-	createInfo.buffer = m_storageBuffer.GetVkObject();
-	createInfo.size = sizes.accelerationStructureSize;
-	createInfo.type = type;
+	//VkAccelerationStructureGeometryKHR geometry{};
+	//geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+	//geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+	//geometry.geometry.triangles = triangles;
+	//geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 
-	VK_CHECK_RESULT( context.vkCreateAccelerationStructureKHR( context.device, &createInfo, nullptr, &m_accelerationStructure ) );
+	//VkAccelerationStructureBuildSizesInfoKHR sizes{};
+	//sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+	//context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.instanceCount, &sizes );
+
+	//assert( m_scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
+
+	//// Allocate
+	//{
+	//	const uint32_t storageSize = static_cast<uint32_t>( sizes.accelerationStructureSize );
+	//	m_storageBuffer.Create( info.name, swapBuffering_t::SINGLE_FRAME, info.lifetime, 1, storageSize, bufferType_t::ACCELERATION_STRUCTURE );
+
+	//	VkAccelerationStructureCreateInfoKHR createInfo{};
+	//	createInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+	//	createInfo.buffer = m_storageBuffer.GetVkObject();
+	//	createInfo.size = sizes.accelerationStructureSize;
+	//	createInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+
+	//	VK_CHECK_RESULT( context.vkCreateAccelerationStructureKHR( context.device, &createInfo, nullptr, &m_accelerationStructure ) );
+	//}
+
+	//VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+	//buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+	//buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+	//buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+	//buildInfo.geometryCount = 1;
+	//buildInfo.pGeometries = &geometry;
+
+	//VkAccelerationStructureBuildSizesInfoKHR sizes{};
+	//sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+	//context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.primitiveCount, &sizes );
+
+	//assert( scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
+
+	//buildInfo.dstAccelerationStructure = m_accelerationStructure;
+	//buildInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
+
+	//VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
+	//rangeInfo.primitiveCount = info.primitiveCount;
+
+	//const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
+	//context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), 1, &buildInfo, &pRangeInfo );
 }
 
 
-void GpuAccelerationStructure::CreateBlas( const blasCreateInfo_t& info, CommandList* cmdList, GpuBuffer& scratchBuffer )
+void GpuAccelerationStructure::Create( CommandList* cmdList, const tlasCreateInfo_t& info, VkDeviceAddress instanceBufferAddress )
 {
-	RenderResource::Create( resourceType_t::ACCELERATION_STRUCTURE, info.lifetime );
-
-	VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
-	triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-	triangles.vertexFormat = info.vertexFormat;
-	triangles.vertexData.deviceAddress = info.vertexBufferAddress;
-	triangles.vertexStride = info.vertexStride;
-	triangles.maxVertex = info.vertexCount - 1;
-	triangles.indexType = info.indexType;
-	triangles.indexData.deviceAddress = info.indexBufferAddress;
-
-	VkAccelerationStructureGeometryKHR geometry{};
-	geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-	geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-	geometry.geometry.triangles = triangles;
-	geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
-
-	VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
-	buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-	buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-	buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-	buildInfo.geometryCount = 1;
-	buildInfo.pGeometries = &geometry;
-
-	VkAccelerationStructureBuildSizesInfoKHR sizes{};
-	sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-	context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.primitiveCount, &sizes );
-
-	assert( scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
-
-	Allocate( info.name, VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR, sizes, info.lifetime );
-
-	buildInfo.dstAccelerationStructure = m_accelerationStructure;
-	buildInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
-
-	VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
-	rangeInfo.primitiveCount = info.primitiveCount;
-
-	const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
-	context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), 1, &buildInfo, &pRangeInfo );
-}
-
-
-void GpuAccelerationStructure::CreateTlas( const tlasCreateInfo_t& info, VkDeviceAddress instanceBufferAddress, CommandList* cmdList, GpuBuffer& scratchBuffer )
-{
-	RenderResource::Create( resourceType_t::ACCELERATION_STRUCTURE, info.lifetime );
+	// Resource create
+	{
+		RenderResource::Create( resourceType_t::ACCELERATION_STRUCTURE, info.lifetime );
+	}
 
 	VkAccelerationStructureGeometryInstancesDataKHR instancesData{};
 	instancesData.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
@@ -91,18 +95,33 @@ void GpuAccelerationStructure::CreateTlas( const tlasCreateInfo_t& info, VkDevic
 	sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
 	context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.instanceCount, &sizes );
 
-	assert( scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
+	assert( m_scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
 
-	Allocate( info.name, VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR, sizes, info.lifetime );
+	// Allocate
+	{
+		const uint32_t storageSize = static_cast<uint32_t>( sizes.accelerationStructureSize );
+		m_storageBuffer.Create( info.name, swapBuffering_t::SINGLE_FRAME, info.lifetime, 1, storageSize, bufferType_t::ACCELERATION_STRUCTURE );
 
-	buildInfo.dstAccelerationStructure = m_accelerationStructure;
-	buildInfo.scratchData.deviceAddress = scratchBuffer.GetDeviceAddress();
+		VkAccelerationStructureCreateInfoKHR createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
+		createInfo.buffer = m_storageBuffer.GetVkObject();
+		createInfo.size = sizes.accelerationStructureSize;
+		createInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
 
-	VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
-	rangeInfo.primitiveCount = info.instanceCount;
+		VK_CHECK_RESULT( context.vkCreateAccelerationStructureKHR( context.device, &createInfo, nullptr, &m_accelerationStructure ) );
+	}
 
-	const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
-	context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), 1, &buildInfo, &pRangeInfo );
+	// Build
+	{
+		buildInfo.dstAccelerationStructure = m_accelerationStructure;
+		buildInfo.scratchData.deviceAddress = m_scratchBuffer.GetDeviceAddress();
+
+		VkAccelerationStructureBuildRangeInfoKHR rangeInfo{};
+		rangeInfo.primitiveCount = info.instanceCount;
+
+		const VkAccelerationStructureBuildRangeInfoKHR* pRangeInfo = &rangeInfo;
+		context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), 1, &buildInfo, &pRangeInfo );
+	}
 }
 
 
@@ -129,6 +148,7 @@ void GpuAccelerationStructure::Destroy()
 		m_accelerationStructure = VK_NULL_HANDLE;
 	}
 	m_storageBuffer.Destroy();
+	m_scratchBuffer.Destroy();
 }
 
 #endif

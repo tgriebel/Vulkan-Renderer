@@ -33,18 +33,15 @@ class GpuAccelerationStructure : public RenderResource
 {
 private:
 
+	GpuBuffer					m_scratchBuffer;
 	GpuBuffer					m_storageBuffer;
 #ifdef USE_VULKAN_RTX
 	VkAccelerationStructureKHR	m_accelerationStructure = VK_NULL_HANDLE;
 #endif
 
-#ifdef USE_VULKAN_RTX
-	void						Allocate( const char* name, const VkAccelerationStructureTypeKHR type, const VkAccelerationStructureBuildSizesInfoKHR& sizes, const resourceLifeTime_t lifetime );
-#endif
-
 public:
-	void						CreateBlas( const blasCreateInfo_t& info, CommandList* cmdList, GpuBuffer& scratchBuffer );
-	void						CreateTlas( const tlasCreateInfo_t& info, VkDeviceAddress instanceBufferAddress, CommandList* cmdList, GpuBuffer& scratchBuffer );
+	void						AddGeometry( const blasCreateInfo_t& info, CommandList* cmdList, GpuBuffer& scratchBuffer );
+	void						Create( CommandList* cmdList, const tlasCreateInfo_t& info, VkDeviceAddress instanceBufferAddress );
 	void						Destroy() override;
 
 #ifdef USE_VULKAN_RTX
