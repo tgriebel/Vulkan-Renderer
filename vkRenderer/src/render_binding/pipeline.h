@@ -188,13 +188,10 @@ class ShaderBindSet;
 
 void	ClearPipelineCache();
 void	DestroyPipelineCache();
-hdl_t	GetComputePipelineStateHandle( const Asset<GpuProgram>& progAsset );
 bool	GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet );
 hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 hdl_t	CreateGraphicsPipeline( const hdl_t pipelineHdl, const pipelineState_t& state );
 void	DestoryAllPipelines( const Asset<GpuProgram>& progAsset );
-void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 hdl_t	CreateComputePipeline( const Asset<GpuProgram>& prog );
 hdl_t	CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state );
-void	DestroyComputePipeline( const Asset<GpuProgram>& prog );

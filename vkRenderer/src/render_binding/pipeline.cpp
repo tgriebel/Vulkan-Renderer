@@ -134,23 +134,6 @@ void DestoryAllPipelines( const Asset<GpuProgram>& progAsset )
 }
 
 
-void DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
-{
-	const pipelineState_t state = CreateGfxState( pass, progAsset, permSet );
-
-	const hdl_t pipelineHdl = GetPipelineStateHash( state );
-
-	auto it = s_pipelineLib.find( pipelineHdl.Get() );
-	if ( it == s_pipelineLib.end() ) {
-		return;
-	}
-	vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
-	vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
-
-	s_pipelineLib.erase( it );
-}
-
-
 hdl_t CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet )
 {
 	const pipelineState_t state = CreateGfxState( pass, progAsset, permSet );
@@ -468,24 +451,6 @@ hdl_t CreateGraphicsPipeline( const hdl_t pipelineHdl, const pipelineState_t& st
 	s_progToPipelines[ state.progHdl.Get()].insert(state);
 
 	return pipelineHdl;
-}
-
-
-void DestroyComputePipeline( const Asset<GpuProgram>& progAsset )
-{
-	pipelineState_t state = {};
-	state.progHdl = progAsset.Handle();
-
-	const hdl_t pipelineHdl = GetPipelineStateHash( state );
-
-	auto it = s_pipelineLib.find( pipelineHdl.Get() );
-	if ( it == s_pipelineLib.end() ) {
-		return;
-	}
-	vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
-	vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
-
-	s_pipelineLib.erase( it );
 }
 
 
