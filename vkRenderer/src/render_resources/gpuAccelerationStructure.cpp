@@ -9,25 +9,36 @@ extern DeviceContext context;
 
 void GpuAccelerationStructure::AddGeometry( CommandList* cmdList, const blasSurfaceInfo_t& surfaceInfo )
 {
-	//VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
-	//triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
-	//triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
-	//triangles.vertexData.deviceAddress = surfaceInfo.vb->GetDeviceAddress();
-	//triangles.vertexStride = info.vertexStride;
-	//triangles.maxVertex = info.vertexCount - 1;
-	//triangles.indexType = info.indexType;
-	//triangles.indexData.deviceAddress = info.indexBufferAddress;
+	VkAccelerationStructureGeometryTrianglesDataKHR triangles{};
+	triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
+	triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
+	triangles.vertexData.deviceAddress = surfaceInfo.vb->GetDeviceAddress();
+	triangles.vertexStride = surfaceInfo.vb->GetElementSizeAligned();
+	triangles.maxVertex = surfaceInfo.surface->vbEnd;
+	triangles.indexType = VK_INDEX_TYPE_UINT32;
+	triangles.indexData.deviceAddress = surfaceInfo.ib->GetDeviceAddress();
 
-	//VkAccelerationStructureGeometryKHR geometry{};
-	//geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
-	//geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-	//geometry.geometry.triangles = triangles;
-	//geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
+	// Temp sanity while RT is being stood up
+	assert( surfaceInfo.vb->GetElementSizeAligned() == sizeof( vsInput_t ) );
+	assert( surfaceInfo.ib->GetElementSize() == sizeof( uint32_t ) );
 
-	////VkAccelerationStructureBuildSizesInfoKHR sizes{};
-	////sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
-	////context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildInfo, &info.instanceCount, &sizes );
+	VkAccelerationStructureGeometryKHR geometry{};
+	geometry.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR;
+	geometry.geometryType = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+	geometry.geometry.triangles = triangles;
+	geometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 
+	VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
+	buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
+	buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+	buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
+	buildInfo.geometryCount = 1;
+	buildInfo.pGeometries = &geometry; // TODO: AddGeometry will just build up this buffer
+
+	//VkAccelerationStructureBuildSizesInfoKHR sizes{};
+	//sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+	//context.vkGetAccelerationStructureBuildSizesKHR( context.device, VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &accelerationStructureSize, &info.instanceCount, &sizes );
+	//
 	//assert( m_scratchBuffer.GetMaxSize() >= sizes.buildScratchSize );
 
 	//// Allocate
@@ -43,13 +54,6 @@ void GpuAccelerationStructure::AddGeometry( CommandList* cmdList, const blasSurf
 
 	//	VK_CHECK_RESULT( context.vkCreateAccelerationStructureKHR( context.device, &createInfo, nullptr, &m_accelerationStructure ) );
 	//}
-
-	//VkAccelerationStructureBuildGeometryInfoKHR buildInfo{};
-	//buildInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_GEOMETRY_INFO_KHR;
-	//buildInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
-	//buildInfo.flags = VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR;
-	//buildInfo.geometryCount = 1;
-	//buildInfo.pGeometries = &geometry;
 
 	//VkAccelerationStructureBuildSizesInfoKHR sizes{};
 	//sizes.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
