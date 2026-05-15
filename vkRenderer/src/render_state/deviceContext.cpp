@@ -455,7 +455,7 @@ void vk_QuadDraw( CommandList& cmdContext, const hdl_t pipeLineHandle, const vec
 	GetPipelineObject( pipeLineHandle, &pipelineObject );
 
 	if( pipelineObject->pipeline == VK_NULL_HANDLE ) {
-		CreateGraphicsPipeline( pass, pipeLineHandle, pipelineObject->state );
+		CreateGraphicsPipeline( pipeLineHandle, pipelineObject->state );
 	}
 
 	if ( pipelineObject != nullptr )
@@ -531,7 +531,7 @@ void vk_RenderImageShader( CommandList& cmdContext, const hdl_t pipeLineHandle, 
 	GetPipelineObject( pipeLineHandle, &pipelineObject );
 
 	if( pipelineObject->pipeline == VK_NULL_HANDLE ) {
-		CreateGraphicsPipeline( pass, pipeLineHandle, pipelineObject->state );
+		CreateGraphicsPipeline( pipeLineHandle, pipelineObject->state );
 	}
 
 	if ( pipelineObject != nullptr )

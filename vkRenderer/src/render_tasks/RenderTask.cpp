@@ -234,7 +234,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 
 					// Rebuild the pipeline (should only happen on hot reloads)
 					if ( pipelineObject->pipeline == VK_NULL_HANDLE ){	
-						CreateGraphicsPipeline( pass, surface.pipelineObject, pipelineObject->state );
+						CreateGraphicsPipeline( surface.pipelineObject, pipelineObject->state );
 					}
 					assert( pipelineObject != nullptr );
 					assert( pipelineObject->pipeline != nullptr );

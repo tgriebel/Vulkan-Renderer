@@ -32,13 +32,40 @@ enum gfxStateBits_t : uint64_t
 };
 DEFINE_ENUM_OPERATORS( gfxStateBits_t, uint64_t )
 
+struct rasterPipelineState_t
+{
+	gfxStateBits_t				stateBits;
+	imageSamples_t				samplingRate;
+	renderPassAttachmentMask_t	attachmentMask;
+	renderAttachmentBits_t		passBits;
+	float						viewportX;
+	float						viewportY;
+	float						viewportWidth;
+	float						viewportHeight;
+};
+
+
+struct computePipelineState_t
+{
+};
+
+
+struct hitgroupPipelineState_t
+{
+};
+
+
 struct pipelineState_t
 {
-	gfxStateBits_t			stateBits;
-	imageSamples_t			samplingRate;
+	pipelineType_t			type;
 	hdl_t					progHdl;
-	renderAttachmentBits_t	passBits;
 	shaderPermId_t			permSet;
+	union
+	{
+		rasterPipelineState_t	rasterState;
+		computePipelineState_t	computeState;
+		hitgroupPipelineState_t	hitgroupState;
+	};
 	const GpuProgram*		prog;
 	const char*				dbgProgName;
 };
@@ -46,19 +73,57 @@ struct pipelineState_t
 
 inline bool operator<( const pipelineState_t& a, const pipelineState_t& b )
 {
-	if( a.stateBits != b.stateBits ) {
-		return a.stateBits < b.stateBits;
+	if( a.type != b.type )
+	{
+		return a.type < b.type;
 	}
-	if( a.samplingRate != b.samplingRate ) {
-		return a.samplingRate < b.samplingRate;
-	}
-	if( a.progHdl != b.progHdl ) {
+
+	if( a.progHdl != b.progHdl )
+	{
 		return a.progHdl < b.progHdl;
 	}
-	if( a.passBits != b.passBits ) {
-		return a.passBits < b.passBits;
+	if( a.permSet != b.permSet )
+	{
+		return a.permSet < b.permSet;
 	}
-	return ( a.permSet < b.permSet );
+
+	assert( a.prog != nullptr );
+	assert( a.prog == b.prog );
+
+	// Both objects are known to have the same state at this point
+	if( a.type == pipelineType_t::RASTER )
+	{
+		if( a.rasterState.stateBits != b.rasterState.stateBits )
+		{
+			return a.rasterState.stateBits < b.rasterState.stateBits;
+		}
+		if( a.rasterState.samplingRate != b.rasterState.samplingRate )
+		{
+			return a.rasterState.samplingRate < b.rasterState.samplingRate;
+		}
+		if( a.rasterState.viewportX != b.rasterState.viewportX )
+		{
+			return a.rasterState.viewportX < b.rasterState.viewportX;
+		}
+		if( a.rasterState.viewportY != b.rasterState.viewportY )
+		{
+			return a.rasterState.viewportY < b.rasterState.viewportY;
+		}
+		if( a.rasterState.viewportWidth != b.rasterState.viewportWidth )
+		{
+			return a.rasterState.viewportWidth < b.rasterState.viewportWidth;
+		}
+		if( a.rasterState.viewportHeight != b.rasterState.viewportHeight )
+		{
+			return a.rasterState.viewportHeight < b.rasterState.viewportHeight;
+		}
+		if( a.rasterState.attachmentMask != b.rasterState.attachmentMask )
+		{
+			return a.rasterState.attachmentMask < b.rasterState.attachmentMask;
+		}
+		return a.rasterState.passBits < b.rasterState.passBits;
+	}
+	return true;
 }
 
 class DrawPass;
@@ -127,7 +192,7 @@ hdl_t	GetComputePipelineStateHandle( const Asset<GpuProgram>& progAsset );
 bool	GetPipelineObject( hdl_t hdl, pipelineObject_t** pipelineObject );
 hdl_t	FindPipelineObject( const DrawPass* pass, const Asset<GpuProgram>& progAsset, const shaderPermId_t permSet );
 hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
-hdl_t	CreateGraphicsPipeline( const DrawPass* pass, const hdl_t pipelineHdl, const pipelineState_t& state );
+hdl_t	CreateGraphicsPipeline( const hdl_t pipelineHdl, const pipelineState_t& state );
 void	DestoryAllPipelines( const Asset<GpuProgram>& progAsset );
 void	DestroyGraphicsPipeline( const DrawPass* pass, const Asset<GpuProgram>& prog, const shaderPermId_t permSet = shaderPermId_t::NONE );
 hdl_t	CreateComputePipeline( const Asset<GpuProgram>& prog );

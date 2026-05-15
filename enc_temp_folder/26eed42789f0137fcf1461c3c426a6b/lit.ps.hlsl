@@ -281,6 +281,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     float4 outColor;
 	outColor.rgb = Lo + ambient + surfaceInput.emissive;
     outColor.a = material.opacity;
+
 #define DEBUG_LIGHTING
     
 #ifdef DEBUG_LIGHTING
