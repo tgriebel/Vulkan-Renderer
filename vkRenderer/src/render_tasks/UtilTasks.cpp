@@ -102,6 +102,7 @@ void ResolveImageTask::FrameBegin()
 			m_shaderTasks[ i ]->FrameBegin();
 		}
 	}
+	GpuTask::OnFrameBegin();
 }
 
 

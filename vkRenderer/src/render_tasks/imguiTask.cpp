@@ -331,6 +331,8 @@ void ImguiTask::FrameBegin()
 	m_imageStatParms->Bind( BINDING_NAME( computeParms ),  &m_imageStatParmsBuffer );
 	m_imageStatParms->Bind( BINDING_NAME( computeWrite ),  &m_imageStatBuffer );
 
+	GpuTask::OnFrameBegin();
+
 #ifdef USE_IMGUI
 	// Prepare dear imgui render data
 	ImGui::Render();

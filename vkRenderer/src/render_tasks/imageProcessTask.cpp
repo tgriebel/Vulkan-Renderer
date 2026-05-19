@@ -53,11 +53,11 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
 	m_permSet = info.permSet;
 
-	m_customConstantsByteSize = 0;
+	m_shaderConstantsByteSize = 0;
 	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
 	{
-		m_customConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
-		memcpy( m_customConstants, info.constants, m_customConstantsByteSize );
+		m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+		memcpy( m_shaderConstants, info.constants, m_shaderConstantsByteSize );
 	}
 
 	m_multiPass = info.multiPass;
@@ -171,8 +171,8 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 
 	if ( m_cubeMip ) {
 		imageProcess->UpdateConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
-	} else if ( m_customConstantsByteSize > 0 ) {
-		imageProcess->UpdateConstants( m_customConstants, m_customConstantsByteSize );
+	} else if ( m_shaderConstantsByteSize > 0 ) {
+		imageProcess->UpdateConstants( m_shaderConstants, m_shaderConstantsByteSize );
 	}
 	return imageProcess;
 }
@@ -223,6 +223,7 @@ void ImageProcessTask::FrameBegin()
 			m_imgProcesses[ layerId ][ mipLevel ]->FrameBegin();
 		}
 	}
+	GpuTask::OnFrameBegin();
 }
 
 
@@ -317,7 +318,7 @@ void ImageProcessTask::UpdateConstants()
 		{
 			if ( m_imgProcesses[ layerId ][ mipLevel ] != nullptr )
 			{
-				m_imgProcesses[ layerId ][ mipLevel ]->UpdateConstants( m_customConstants, m_customConstantsByteSize );
+				m_imgProcesses[ layerId ][ mipLevel ]->UpdateConstants( m_shaderConstants, m_shaderConstantsByteSize );
 			}
 		}
 	}
@@ -326,8 +327,8 @@ void ImageProcessTask::UpdateConstants()
 
 void ImageProcessTask::UpdateConstants( const void* data, const uint32_t sizeInBytes )
 {
-	m_customConstantsByteSize = Min( sizeInBytes, MaxCustomConstantBytes );
-	memcpy( m_customConstants, data, m_customConstantsByteSize );
+	m_shaderConstantsByteSize = Min( sizeInBytes, MaxCustomConstantBytes );
+	memcpy( m_shaderConstants, data, m_shaderConstantsByteSize );
 	UpdateConstants();
 }
 

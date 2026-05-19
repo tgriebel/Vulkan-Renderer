@@ -27,8 +27,6 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 	m_viewId = info.viewId;
 
-	m_callback = info.callback;
-
 	Image* outputImage0 = info.outputImage;
 	Image* outputImage1 = info.outputImage1;
 	Image* outputImage2 = info.outputImage2;
@@ -302,10 +300,7 @@ void ImageShaderTask::FrameBegin()
 
 	// std::cout << m_pass->parms->AsString() << std::endl;
 
-	// Allow custom constants/binds
-	if ( m_callback != nullptr ) {
-		( *m_callback )( this );
-	}
+	GpuTask::OnFrameBegin();
 }
 
 

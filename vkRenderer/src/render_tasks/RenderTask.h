@@ -13,7 +13,7 @@ class RenderContext;
 class ResourceContext;
 class Image;
 
-using TaskControlsFn = std::function<void()>;
+using TaskCallback = std::function<void()>;
 
 class GpuTask
 {
@@ -23,10 +23,11 @@ protected:
 
 	GpuTask*		m_child			= nullptr;
 	bool			m_enabled		= true;
-	TaskControlsFn	m_controlsFn	= nullptr;
+	TaskCallback	m_controlsFn	= nullptr;
+	TaskCallback	m_frameBeginFn	= nullptr;
 
-	uint32_t		m_customConstantsByteSize = 0;
-	uint8_t			m_customConstants[ MaxCustomConstantBytes ];
+	uint32_t		m_shaderConstantsByteSize = 0;
+	uint8_t			m_shaderConstants[ MaxCustomConstantBytes ];
 
 public:
 	virtual void			FrameBegin() {};
@@ -40,13 +41,19 @@ public:
 	bool					IsEnabled() const { return m_enabled; }
 	void					SetEnabled( bool enabled ) { m_enabled = enabled; }
 
-	void					RegisterControls( TaskControlsFn fn ) { m_controlsFn = std::move( fn ); }
+	void					RegisterControls( TaskCallback fn ) { m_controlsFn = std::move( fn ); }
 	void					SetControls() const { if ( m_controlsFn ) { m_controlsFn(); } }
 
-	bool					HasConstants() const { return ( m_customConstantsByteSize > 0 ); }
+	void					RegisterFrameBeginCallback( TaskCallback fn ) { m_frameBeginFn = std::move( fn ); }
+	void					OnFrameBegin()  const{ if( m_frameBeginFn ) { m_frameBeginFn(); } }
+
+	bool					HasConstants() const { return ( m_shaderConstantsByteSize > 0 ); }
 
 	template<typename T>
-	T*						GetConstants() { return reinterpret_cast<T*>( &m_customConstants ); }
+	T*						GetConstants() { return reinterpret_cast<T*>( &m_shaderConstants ); }
+
+	template<typename T>
+	T*						GetShaderConstants() { return reinterpret_cast<T*>( &m_shaderConstants ); }
 
 	void SetChild( GpuTask* child )
 	{

@@ -27,6 +27,7 @@ BIND_INLINE dofTileConstants_t dofTileParms;
 groupshared uint groupMinSample;
 groupshared uint groupMaxSample;
 groupshared uint groupMaxCocSample;
+groupshared int groupMaxSign;
 
 [numthreads( TILE_SIZE_X, TILE_SIZE_Y, 1 )]
 void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, uint groupIndex : SV_GroupIndex )
@@ -40,15 +41,16 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
         groupMinSample = asuint( 1.0f );
         groupMaxSample = 0;
         groupMaxCocSample = asuint( 0.0f );
+        groupMaxSign = -1;
     }
     
     GroupMemoryBarrierWithGroupSync();
     
     const float4x4 invProj = views[ dofTileParms.viewId ].invProjMat;
 
-    const float apertureDiameter = dofTileParms.apertureDiameter / 1000.0f;
-    const float focalLength = dofTileParms.focalLength / 1000.0f;
-    const float focalPlaneDistance = dofTileParms.focalPlaneDistance / 1000.0f;
+    const float apertureDiameter = dofTileParms.apertureDiameter;
+    const float focalLength = dofTileParms.focalLength;
+    const float focalPlaneDistance = dofTileParms.focalPlaneDistance;
     
     if( inBounds )
     {
@@ -59,24 +61,32 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
         // CoC is positive, depth needs to increase from camera so negate it      
         const float linearDepth = -LinearDepth( depthSample, invProj );
         const float coc = CircleOfConfusion( apertureDiameter, focalLength, focalPlaneDistance, linearDepth );
-        const uint cocUint = asuint( coc );
+        
+        const int cocSign = sign( coc );
+        
+        const uint cocUint = asuint( abs( coc ) );
     
         InterlockedMin( groupMinSample, depthUint );
         InterlockedMax( groupMaxSample, depthUint );
         InterlockedMax( groupMaxCocSample, cocUint );
+        InterlockedAdd( groupMaxSign, cocSign );
     }
     
     GroupMemoryBarrierWithGroupSync();
 
     const float minDepthTile = asfloat( groupMinSample  );
     const float maxDepthTile = asfloat( groupMaxSample );
-    const float maxCocTile = min( dofTileParms.maxCocRadius / 1000.0f, asfloat( groupMaxCocSample ) );
 
-    const float halfFovX = invProj[ 0 ][ 0 ];
-    const float sensorWidth = 36.0f;
-    const float maxCocInPixels = maxCocTile * ( dofTileParms.srcDepthDimensions.x / sensorWidth );
+    const float halfFovX = invProj[ 0 ][ 0 ]; // (i.e. tanHalfAngle)
+    const float sensorWidth = 2.0f * focalLength * halfFovX;
+    const float toPixelUnitsTransform = ( dofTileParms.srcDepthDimensions.x / sensorWidth );
+
+    const float cocClampInPixels = dofTileParms.maxCocRadius;
+
+    float maxCocInPixels = asfloat( groupMaxCocSample ) * toPixelUnitsTransform;
+    maxCocInPixels = min( cocClampInPixels, maxCocInPixels );
     
     if ( groupIndex == 0 ) {
-        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocInPixels, 1.0f );
+        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocInPixels * groupMaxSign, 1.0f );
     }
 }

@@ -367,7 +367,18 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 
 		// Constants for all DoF Passes
-		struct dofConstants_t
+
+		struct dofUserConstants_t
+		{
+			vec4f		srcDepthDimensions;
+			uint32_t	viewId;
+			float		focalLengthMM;
+			float		focalPlaneDistanceMM;
+			float		apertureDiameterMM;
+			float		maxCocRadius;
+		};
+
+		struct dofShaderConstants_t
 		{
 			vec4f		srcDepthDimensions;
 			uint32_t	viewId;
@@ -377,17 +388,17 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			float		maxCocRadius;
 		};
 
-		dofConstants_t dofCocDefaults = {};
+		static dofUserConstants_t userParms{};
 
-		dofCocDefaults.focalLength = 14.0f;
-		dofCocDefaults.focalPlaneDistance = 10000.0f;
-		dofCocDefaults.apertureDiameter = 25.0f;
-		dofCocDefaults.maxCocRadius = 16.0f;
-		dofCocDefaults.viewId = view->GetViewBufferId();
-		dofCocDefaults.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-		dofCocDefaults.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-		dofCocDefaults.srcDepthDimensions.z = 1.0f / dofCocDefaults.srcDepthDimensions.x;
-		dofCocDefaults.srcDepthDimensions.w = 1.0f / dofCocDefaults.srcDepthDimensions.y;
+		userParms.focalLengthMM = 14.0f;
+		userParms.focalPlaneDistanceMM = 10000.0f;
+		userParms.apertureDiameterMM = 25.0f;
+		userParms.maxCocRadius = 16.0f;
+		userParms.viewId = view->GetViewBufferId();
+		userParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+		userParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+		userParms.srcDepthDimensions.z = 1.0f / userParms.srcDepthDimensions.x;
+		userParms.srcDepthDimensions.w = 1.0f / userParms.srcDepthDimensions.y;
 
 		// DoF Circle-of-Confusion Calculation
 		{
@@ -401,8 +412,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.baseMip = 0;
 			info.mipCount = 1;
 			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
-			info.constants = &dofCocDefaults;
-			info.constantsByteSize = sizeof( dofCocDefaults );
+			info.constants = &userParms;
+			info.constantsByteSize = sizeof( userParms );
 
 			tasks.dofCocTask = new ImageProcessTask( info );
 		}
@@ -456,8 +467,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.imageTileSizeX = 16;
 			info.imageTileSizeY = 16;
 			info.image = resources->depthStencilResolvedImage;
-			info.constants = &dofCocDefaults;
-			info.constantsByteSize = sizeof( dofCocDefaults );
+			info.constants = &userParms;
+			info.constantsByteSize = sizeof( userParms );
 			info.bindSetId = bindset_dofTile;
 			info.bind = [ resources, view ]( ComputeTask* task, ShaderBindParms* p )
 			{
@@ -471,22 +482,29 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 #if defined( USE_IMGUI )
 			tasks.dofTileTask->RegisterControls( [ resources, view, task = tasks.dofTileTask ]()
-				{
-					dofConstants_t& dofParms = *task->GetConstants<dofConstants_t>();
-
-					bool changed = false;
-					changed |= ImGui::SliderFloat( "Focal Length (mm)", &dofParms.focalLength, 14.0f, 200.0f );
-					changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &dofParms.apertureDiameter, 1.0f, 50.0f );
-					changed |= ImGui::SliderFloat( "Focus Distance (mm)", &dofParms.focalPlaneDistance, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
-					changed |= ImGui::SliderFloat( "Max CoC", &dofParms.maxCocRadius, 4.0f, 32.0f );
-
-					dofParms.viewId = view->GetViewBufferId();
-					dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-					dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-					dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
-					dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
-				} );
+			{
+				bool changed = false;
+				changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
+				changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
+				changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
+				changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
+			} );
 #endif
+			tasks.dofTileTask->RegisterFrameBeginCallback( [ resources, view, task = tasks.dofTileTask ]()
+			{
+				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+
+				dofParms.viewId = view->GetViewBufferId();
+				dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+				dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+				dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
+				dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+
+				dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
+				dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
+				dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
+				dofParms.maxCocRadius = userParms.maxCocRadius;
+			} );
 		}
 	}
 

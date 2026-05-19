@@ -328,7 +328,7 @@ float CircleOfConfusion( const float aperture, const float focallength, const fl
 	const float numerator = ( focallength * ( objectdistance - planeinfocus ) );
 	const float denom = ( objectdistance * ( planeinfocus - focallength ) );
 
-	const float coc = abs( aperture * ( numerator / denom ) );
+	const float coc = aperture * ( numerator / denom );
 	return coc;
 }
 

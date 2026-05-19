@@ -107,6 +107,8 @@ void ImageReadbackTask::FrameBegin()
 	m_parms->Bind( BINDING_NAME( computeImage ),		&m_imageArray );
 	m_parms->Bind( BINDING_NAME( computeParms ),		&m_resourceBuffer );
 	m_parms->Bind( BINDING_NAME( computeWrite ),		&m_readbackBuffer );
+
+	GpuTask::OnFrameBegin();
 }
 
 

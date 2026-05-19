@@ -304,6 +304,7 @@ void RenderTask::FrameBegin()
 	if( m_renderView != nullptr ) {
 		m_renderView->FrameBegin( m_beginPass, m_endPass );
 	}
+	GpuTask::OnFrameBegin();
 }
 
 

@@ -50,11 +50,11 @@ void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 	m_bind = info.bind;
 
 
-	m_customConstantsByteSize = 0;
+	m_shaderConstantsByteSize = 0;
 	if( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
 	{
-		m_customConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
-		memcpy( m_customConstants, info.constants, m_customConstantsByteSize );
+		m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+		memcpy( m_shaderConstants, info.constants, m_shaderConstantsByteSize );
 	}
 
 	m_progAsset = GpuProgramLib().Find( info.progName );
@@ -70,6 +70,7 @@ void ComputeTask::FrameBegin()
 	if ( m_bind ) {
 		m_bind( this, m_parms );
 	}
+	GpuTask::OnFrameBegin();
 }
 
 
@@ -95,7 +96,7 @@ void ComputeTask::Execute( CommandList& cmdContext )
 	}
 
 	if ( HasConstants() ) {
-		cmdContext.Dispatch( *m_progAsset, *m_parms, m_customConstants, m_customConstantsByteSize, x, y, z );	
+		cmdContext.Dispatch( *m_progAsset, *m_parms, m_shaderConstants, m_shaderConstantsByteSize, x, y, z );	
 	} else {
 		cmdContext.Dispatch( *m_progAsset, *m_parms, x, y, z );
 	}

@@ -11,8 +11,6 @@ class RenderContext;
 class ResourceContext;
 
 class ImageShaderTask;
-// A callback is used instead of inheritance for now since most image processes will be very similar
-typedef void imageShaderFrameBeginCallback_t( ImageShaderTask* imageProcess );
 
 struct imageShaderCreateInfo_t
 {
@@ -34,8 +32,6 @@ struct imageShaderCreateInfo_t
 	uint32_t			viewId;				// For pairing to a RenderView
 	bool				clear;				// Clear the output before rendering
 	bool				present;			// Present output after this shader runs
-
-	imageShaderFrameBeginCallback_t* callback;
 };
 
 class ImageShaderTask : public GpuTask
@@ -83,8 +79,6 @@ private:
 	uint32_t				m_passCount;
 	uint32_t				m_image2dSlotCount;
 	uint32_t				m_imageCubeSlotCount;
-
-	imageShaderFrameBeginCallback_t* m_callback = nullptr;
 
 public:
 	ImageShaderTask() {}
