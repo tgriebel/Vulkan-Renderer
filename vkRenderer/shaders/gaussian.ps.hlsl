@@ -20,7 +20,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const float lod = 0.0f;
 
     float2 offset = dimensions.zw;
-    output.outColor = float4( localTextures[ 0 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, lod ).rgb * weights[ 0 ], 1.0f );
+    output.outColor = float4( localTextures[ texId ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, lod ).rgb * weights[ 0 ], 1.0f );
 
     if ( horizontal )
     {
