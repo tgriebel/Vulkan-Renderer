@@ -190,6 +190,12 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 					image = images[ descIx ];
 				}
 
+				if( image->gpuImage == nullptr )
+				{
+					std::cout << parms.AsString() << std::endl;
+					FATAL_ERROR( Shader Binding );
+				}
+
 				VkDescriptorImageInfo& info = infos[ descIx ];
 
 				info = {};

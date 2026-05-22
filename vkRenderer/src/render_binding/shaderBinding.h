@@ -272,10 +272,11 @@ public:
 class ShaderBindParms
 {
 private:
-	const ShaderBindSet*							bindSet;
-	std::unordered_map<uint32_t, ShaderAttachment>	attachments[ MaxFrameStates ];
-	std::unordered_map<uint32_t, bool>				dirty[ MaxFrameStates ];
-	uint32_t										entryId;
+	const ShaderBindSet*							m_bindSet;
+	std::string										m_name;
+	std::unordered_map<uint32_t, ShaderAttachment>	m_attachments[ MaxFrameStates ];
+	std::unordered_map<uint32_t, bool>				m_dirty[ MaxFrameStates ];
+	uint32_t										m_entryId;
 
 #ifdef USE_VULKAN
 	VkDescriptorSet									vk_descriptorSets[ MaxFrameStates ];
@@ -289,13 +290,14 @@ public:
 		InitApiObjects();
 	}
 
-	ShaderBindParms::ShaderBindParms( const ShaderBindSet* set, const uint32_t id )
+	ShaderBindParms::ShaderBindParms( const std::string name, const ShaderBindSet* set, const uint32_t id )
 	{
-		bindSet = set;
+		m_name = name;
+		m_bindSet = set;
 		for ( uint32_t i = 0; i < MaxFrameStates; ++i ) {
-			attachments[ i ].reserve( bindSet->Count() );
+			m_attachments[ i ].reserve( m_bindSet->Count() );
 		}
-		entryId = id;
+		m_entryId = id;
 
 		InitApiObjects();
 	}
@@ -307,7 +309,7 @@ public:
 
 	inline const ShaderBindSet*	GetSet() const
 	{
-		return bindSet;
+		return m_bindSet;
 	}
 
 	bool						IsValid() const;

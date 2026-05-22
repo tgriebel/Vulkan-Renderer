@@ -385,6 +385,8 @@ public:
 
 	void Destroy() override;
 
+	void DestroyCpuData();
+
 	bool OnResize( const uint32_t w, const uint32_t h ) override;
 
 	virtual bool IsView() const { return false; }

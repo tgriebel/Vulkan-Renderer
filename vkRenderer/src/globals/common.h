@@ -114,6 +114,8 @@ const std::string BakedMaterialExtension = ".mtl.bin";
 
 uint32_t Hash( const uint8_t* bytes, const uint32_t sizeBytes );
 
+#define FATAL_ERROR( MESSAGE ) throw std::runtime_error( "Fatal Error: " # MESSAGE );
+
 typedef void ( *debugMenuFuncPtr )( );
 
 class Renderer;

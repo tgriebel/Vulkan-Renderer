@@ -11,11 +11,11 @@ uint64_t RenderContext::CreateBindSet( const char* name, const ShaderBinding bin
 }
 
 
-ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
+ShaderBindParms* RenderContext::RegisterBindParm( const std::string name, const ShaderBindSet* set )
 {
 	const uint32_t id = bindParmsList.Count();
 
-	ShaderBindParms parms = ShaderBindParms( set, id );
+	ShaderBindParms parms = ShaderBindParms( name, set, id );
 
 	pendingIndices.Append( id );
 	bindParmsList.Append( parms );
@@ -24,15 +24,15 @@ ShaderBindParms* RenderContext::RegisterBindParm( const ShaderBindSet* set )
 }
 
 
-ShaderBindParms* RenderContext::RegisterBindParm( const uint64_t setId )
+ShaderBindParms* RenderContext::RegisterBindParm( const std::string name, const uint64_t setId )
 {
-	return RegisterBindParm( &bindSets[ setId ] );
+	return RegisterBindParm( name, &bindSets[ setId ] );
 }
 
 
-ShaderBindParms* RenderContext::RegisterBindParm( const char* setName )
+ShaderBindParms* RenderContext::RegisterBindParm( const std::string name, const char* setName )
 {
-	return RegisterBindParm( &bindSets[ Hash( setName ) ] );
+	return RegisterBindParm( name, &bindSets[ Hash( setName ) ] );
 }
 
 

@@ -148,7 +148,7 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 
 	m_imagePass = new PostPass( m_context, const_cast<FrameBuffer*>( m_imguiPass->GetFrameBuffer() ) );
 
-	m_imagePass->parms = m_context->RegisterBindParm( bindset_imageShader );
+	m_imagePass->parms = m_context->RegisterBindParm( "ImguiBindParms", bindset_imageShader);
 
 	m_imagePass->codeImages.SetRenderContext( m_context );
 	m_imagePass->codeCubeImages.SetRenderContext( m_context );
@@ -183,7 +183,7 @@ void ImguiTask::Init( const DrawPass* pass, RenderContext* renderContext, Resour
 	m_imageStatImages.Resize( 1 );
 	m_imageStatImages.BindIndex( 0, rc.defaultImage );
 
-	m_imageStatParms = m_context->RegisterBindParm( m_context->LookupBindSet( bindset_compute ) );
+	m_imageStatParms = m_context->RegisterBindParm( "ImageStatsBindParms", m_context->LookupBindSet( bindset_compute ) );
 	m_imageStatImage = nullptr;
 	m_imageStatDispatched = false;
 	memset( m_imageStatHistogram, 0, sizeof( m_imageStatHistogram ) );

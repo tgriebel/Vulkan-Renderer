@@ -141,6 +141,16 @@ void Image::Destroy()
 }
 
 
+void Image::DestroyCpuData()
+{
+	if( cpuImage != nullptr )
+	{
+		delete cpuImage;
+		cpuImage = nullptr;
+	}
+}
+
+
 bool Image::OnResize( uint32_t w, uint32_t h )
 {
 	if( m_resizeFn )

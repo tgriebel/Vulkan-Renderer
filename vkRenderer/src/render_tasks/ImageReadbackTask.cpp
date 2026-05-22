@@ -97,7 +97,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 	m_resourceBuffer.SetPos( 0 );
 	m_resourceBuffer.CopyData( &writeBackParms, sizeof( writeBackParms ) );
 
-	m_parms = m_context->RegisterBindParm( m_context->LookupBindSet( bindset_compute ) );
+	m_parms = m_context->RegisterBindParm( m_name, m_context->LookupBindSet( bindset_compute ) );
 }
 
 
@@ -198,7 +198,7 @@ void ImageReadbackTask::FrameEnd()
 	m_readbackBuffer.Invalidate();
 
 	// Clear old CPU image
-	m_readbackImage->Destroy();
+	m_readbackImage->DestroyCpuData();
 
 	imageInfo_t info = m_imageArray[ 0 ]->info;
 	info.type = IMAGE_TYPE_2D;

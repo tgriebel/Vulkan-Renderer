@@ -155,7 +155,7 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
 		}
 
-		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( bindset_imageShader );
+		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( m_dbgName, bindset_imageShader );
 
 		m_buffer[ passIndex ].Create( "Resource buffer", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::TASK, 1, MaxBufferSizeInBytes, bufferType_t::UNIFORM );
 	}
@@ -234,8 +234,6 @@ void ImageShaderTask::Shutdown()
 	{
 		if( m_taskImages[ i ] != nullptr )
 		{
-			// FIXME: gpu images leak CPU memory b/c ownership was never established
-			// FIXME: dependency issue with TASK resource cleanup
 			delete m_taskImages[ i ];
 			m_taskImages[ i ] = nullptr;
 		}

@@ -56,7 +56,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_isCubeView = info.isCubeView;
 
 	m_context = info.context;
-	m_viewParms = m_context->RegisterBindParm( bindset_view );
+	m_viewParms = m_context->RegisterBindParm( std::string( m_name ) + "BindParms", bindset_view);
 
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
@@ -147,7 +147,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 			}
 
 			const ShaderBindSet* bindset_pass = m_context->LookupBindSet( "bindset_pass"  );
-			passes[ multiViewIndex ][ passIx ]->parms = m_context->RegisterBindParm( bindset_pass );
+			passes[ multiViewIndex ][ passIx ]->parms = m_context->RegisterBindParm( std::string( m_name ) + "BindParms", bindset_pass );
 		}
 	}
 

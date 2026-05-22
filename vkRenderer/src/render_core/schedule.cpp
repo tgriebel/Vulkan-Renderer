@@ -25,36 +25,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.useCubeViews )
 	{
-		extern CVar r_cubeWidth;
-		extern CVar r_cubeHeight;
-
-		imageInfo_t colorInfo{};
-		colorInfo.width = r_cubeWidth.GetInt();
-		colorInfo.height = r_cubeHeight.GetInt();
-		colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
-		colorInfo.layers = 6;
-		colorInfo.subsamples = IMAGE_SMP_1;
-		colorInfo.fmt = IMAGE_FMT_RGBA_16;
-		colorInfo.type = IMAGE_TYPE_CUBE;
-		colorInfo.tiling = IMAGE_TILING_MORTON;
-
-		resources->cubeFbColorImage->Create(
-			colorInfo,
-			"FB_cubeColor", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, resourceLifeTime_t::REBOOT
-		);
-
-		resources->cubeFbColorImage->RegisterResize( nullptr );
-
-		imageInfo_t depthInfo = colorInfo;
-		depthInfo.fmt = IMAGE_FMT_D_16;
-
-		resources->cubeFbDepthImage->Create(
-			depthInfo,
-			"FB_cubeDepth", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, resourceLifeTime_t::REBOOT
-		);
-
-		resources->cubeFbDepthImage->RegisterResize( nullptr );
-
 		if( config.computeDiffuseIbl )
 		{
 			imageProcessCreateInfo_t info = {};
@@ -66,7 +36,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.baseMip = 0;
 			info.mipCount = 1;
 			info.taskImageCount = 1;
-			info.createInfos;
 
 			// Temp image
 			imageInfo_t imgInfo {};
@@ -830,14 +799,12 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 
 		{
-			const std::string fileName = "brdf_lut.img";
-
 			imageReadBackCreateInfo_t info {};
 			info.name = "BrdfLutReadback";
 			info.img = tasks.brdfLutTask->GetOutputImage();
 			info.context = renderContext;
 			info.resources = resources;
-			info.fileName = fileName.c_str();
+			info.fileName = "brdf_lut.img";
 			info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
 			info.flags |= imageReadbackFlags_t::PACKED_HDR;
 
@@ -959,7 +926,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( tasks.noiseGenTask ) {
 		schedule->Link( tasks.noiseGenTask );
 	}
-	if( tasks.readbackBrdfLut ) {
+	if( tasks.readbackNoiseImage ) {
 		schedule->Link( tasks.readbackNoiseImage );
 	}
 	schedule->Link( tasks.resolve );

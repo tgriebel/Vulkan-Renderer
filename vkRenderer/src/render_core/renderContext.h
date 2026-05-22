@@ -48,9 +48,9 @@ public:
 								return CreateBindSet( name, bindings.begin(), static_cast<uint32_t>( bindings.size() ) );
 							}
 
-	ShaderBindParms*		RegisterBindParm( const ShaderBindSet* set );
-	ShaderBindParms*		RegisterBindParm( const uint64_t setId );
-	ShaderBindParms*		RegisterBindParm( const char* setName );
+	ShaderBindParms*		RegisterBindParm( const std::string name, const ShaderBindSet* set );
+	ShaderBindParms*		RegisterBindParm( const std::string name, const uint64_t setId );
+	ShaderBindParms*		RegisterBindParm( const std::string name, const char* setName );
 	const ShaderBindSet*	LookupBindSet( const uint64_t setId ) const;
 	const ShaderBindSet*	LookupBindSet( const char* name ) const;
 	void					UpdateBindParms();

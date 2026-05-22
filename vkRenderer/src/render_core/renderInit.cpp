@@ -146,6 +146,38 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	if ( config.useCubeViews )
 	{
+		{
+			extern CVar r_cubeWidth;
+			extern CVar r_cubeHeight;
+
+			imageInfo_t colorInfo{};
+			colorInfo.width = r_cubeWidth.GetInt();
+			colorInfo.height = r_cubeHeight.GetInt();
+			colorInfo.mipLevels = MipCount( colorInfo.width, colorInfo.height );
+			colorInfo.layers = 6;
+			colorInfo.subsamples = IMAGE_SMP_1;
+			colorInfo.fmt = IMAGE_FMT_RGBA_16;
+			colorInfo.type = IMAGE_TYPE_CUBE;
+			colorInfo.tiling = IMAGE_TILING_MORTON;
+
+			resources.cubeFbColorImage->Create(
+				colorInfo,
+				"FB_cubeColor", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER, resourceLifeTime_t::REBOOT
+			);
+
+			resources.cubeFbColorImage->RegisterResize( nullptr );
+
+			imageInfo_t depthInfo = colorInfo;
+			depthInfo.fmt = IMAGE_FMT_D_16;
+
+			resources.cubeFbDepthImage->Create(
+				depthInfo,
+				"FB_cubeDepth", GPU_IMAGE_RW | GPU_IMAGE_TRANSFER_SRC, resourceLifeTime_t::REBOOT
+			);
+
+			resources.cubeFbDepthImage->RegisterResize( nullptr );
+		}
+
 		renderViewCreateInfo_t info{};
 		info.name = "Cube View";
 		info.viewType = renderViewType_t::STANDARD_RASTER;
@@ -387,10 +419,10 @@ void Renderer::InitShaderResources()
 	const ShaderBindSet& globalBindSet = renderContext.bindSets[ bindset_global ];
 	const ShaderBindSet& particleBindSet = renderContext.bindSets[ bindset_particle ];
 
-	renderContext.globalParms = renderContext.RegisterBindParm( &globalBindSet );
+	renderContext.globalParms = renderContext.RegisterBindParm( "GlobalBindParms", & globalBindSet);
 
 	{
-		particleState.parms = renderContext.RegisterBindParm( &particleBindSet );
+		particleState.parms = renderContext.RegisterBindParm( "ParticleBindParms", &particleBindSet );
 		particleState.x = ( MaxParticles / 256 );
 	}
 

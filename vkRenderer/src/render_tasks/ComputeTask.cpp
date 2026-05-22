@@ -61,7 +61,7 @@ void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 
 	CreateComputePipeline( *m_progAsset );
 
-	m_parms = m_context->RegisterBindParm( m_context->LookupBindSet( info.bindSetId ) );
+	m_parms = m_context->RegisterBindParm( m_name, m_context->LookupBindSet( info.bindSetId ) );
 }
 
 
