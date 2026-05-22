@@ -132,7 +132,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 
 	if( isTextured )
 	{
-		albedoSample *= SampleTextureSrgb( globalTextures, bilinearSamplerWrap, material, GGX_ALBEDO_MAP_SLOT, uv ).rgb;
+		albedoSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_ALBEDO_MAP_SLOT, uv ).rgb;
 
 		normalSample = SampleTextureNormal( globalTextures, bilinearSamplerWrap, material, GGX_NORMAL_MAP_SLOT, uv ).xyz;
 
@@ -142,7 +142,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 
 		aoSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_AO_MAP_SLOT, uv ).r;
 
-		emissiveSample *= SampleTextureSrgb( globalTextures, bilinearSamplerWrap, material, GGX_EMISSIVE_MAP_SLOT, uv ).rgb;
+		emissiveSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_EMISSIVE_MAP_SLOT, uv ).rgb;
 
 		ccSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_CC_MAP_SLOT, uv ).r;
 
@@ -150,7 +150,7 @@ surfaceInput_t CalculateSurfaceInput( const gpuGlobals_t globals, const gpuView_
 
 		ccNormalSample *= SampleTextureNormal( globalTextures, bilinearSamplerWrap, material, GGX_CC_NML_MAP_SLOT, uv ).xyz;
 
-		sheenSample *= SampleTextureSrgb( globalTextures, bilinearSamplerWrap, material, GGX_SHEEN_COLOR_MAP_SLOT, uv ).rgb;
+		sheenSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_SHEEN_COLOR_MAP_SLOT, uv ).rgb;
 
 		sheenRoughnessSample *= SampleTexture( globalTextures, bilinearSamplerWrap, material, GGX_SHEEN_ROUGHNESS_MAP_SLOT, uv ).r;
 
