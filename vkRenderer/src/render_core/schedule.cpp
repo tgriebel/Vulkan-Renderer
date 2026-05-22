@@ -506,6 +506,80 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				dofParms.maxCocRadius = userParms.maxCocRadius;
 			} );
 		}
+
+		// DoF Blur Calculation
+		{
+			struct dofBokeh_t
+			{
+				float cocRadius;
+				float apertureAngle;
+				int32_t ngonBlades;
+			};
+
+			// Image
+			{
+				imageInfo_t info{};
+				info.width = ( displayWidth / 2 );
+				info.height = ( displayHeight / 2 );
+				info.mipLevels = 1;
+				info.layers = 1;
+				info.subsamples = IMAGE_SMP_1;
+				info.fmt = IMAGE_FMT_R11G11B10_US;
+				info.type = IMAGE_TYPE_2D;
+				info.tiling = IMAGE_TILING_MORTON;
+
+				resources->dofBlur->Create(
+					info,
+					"FB_dofBlur", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+				);
+
+				resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+					{
+						imageInfo_t resized = info;
+						resized.width = ( w / 2 );
+						resized.height = ( h / 2 );
+						return resized;
+					} );
+			}
+
+			static dofBokeh_t dofBokehDefaults{};
+			dofBokehDefaults.cocRadius = 4.0f;
+			dofBokehDefaults.apertureAngle = PI / 4.0f;
+			dofBokehDefaults.ngonBlades = 6;
+
+			imageProcessCreateInfo_t info{};
+			info.name = "DoF Blur";
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = resources->dofBlur;
+			info.progName = "DofBokeh";
+			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
+			info.resourceImages[ 1 ] = resources->dofCocImage;
+		//	info.resourceImages[ 1 ] = resources->dofTileCocImage;
+			info.baseMip = 0;
+			info.mipCount = 1;
+			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
+			info.constants = &dofBokehDefaults;
+			info.constantsByteSize = sizeof( dofBokehDefaults );
+
+			tasks.dofBlurTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+			tasks.dofBlurTask->RegisterControls( [ resources, view, task = tasks.dofBlurTask ]()
+				{
+					dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
+
+					bool changed = false;
+					changed |= ImGui::SliderFloat( "Focal Length (mm)", &dofBokeh.cocRadius, 4.0f, 32.0f );
+					changed |= ImGui::SliderFloat( "Aperture Angle (mm)", &dofBokeh.apertureAngle, 0.0f, 2.0f * PI );
+					changed |= ImGui::SliderInt( "Ngon Blades (5=pentagon)", &dofBokeh.ngonBlades, 0, 12 );
+
+					if( changed ) {
+						task->UpdateConstants();
+					}
+				} );
+#endif
+		}
 	}
 
 	if( config.autoExposure )
@@ -850,6 +924,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( tasks.dofTileTask )
 	{
 		schedule->Link( tasks.dofTileTask );
+	}
+	if( tasks.dofBlurTask )
+	{
+		schedule->Link( tasks.dofBlurTask );
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 

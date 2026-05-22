@@ -45,6 +45,7 @@ struct availableTasks_t
 	ImageProcessTask*	ssaoBlurTask					= nullptr;
 	ImageProcessTask*	dofCocTask						= nullptr;
 	ComputeTask*		dofTileTask						= nullptr;
+	ImageProcessTask*	dofBlurTask						= nullptr;
 	CopyImageTask*		copyPreviousLuminance			= nullptr;
 	ImageProcessTask*	luminanceSceneAvg				= nullptr;
 	ImageProcessTask*	mipTask							= nullptr;

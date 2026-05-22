@@ -678,6 +678,9 @@
     <FxCompile Include="shaders\primaryRay.rgen.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="shaders\dofBokehSample.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\external\GfxCore\GfxCore\math\vector.natvis" />
