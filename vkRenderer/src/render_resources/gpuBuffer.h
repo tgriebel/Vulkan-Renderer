@@ -69,7 +69,7 @@ public:
 	void*			GetPrevious() const;
 
 	const char*		GetName() const;
-	GpuBufferView	GetView( const uint64_t baseElementIx, const uint64_t elementCount ) const;
+	GpuBufferView	GetBufferView( const uint64_t baseElementIx, const uint64_t elementCount ) const;
 
 protected:
 	struct buffer_t

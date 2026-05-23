@@ -4,13 +4,6 @@
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
   "skyName": "chapel",
-  "shaders": [
-    {
-      "name": "EquirectangularSampler",
-      "vs": "simple",
-      "ps": "equirectangularSky"
-    }
-  ],
   "images": [
     {
       "name": "checker.png",

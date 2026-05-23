@@ -4,13 +4,6 @@
   "reflink": "shaders_common.json",
   "reflink": "image_common.json",
   "skyName": "ferndalestudio",
-  "shaders": [
-    {
-      "name": "EquirectangularSampler",
-      "vs": "simple",
-      "ps": "equirectangularSky"
-    }
-  ],
   "images": [],
   "camera": [ -25.0, 5.0, 10.0 ],
   "materials": [

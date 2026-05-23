@@ -58,6 +58,13 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 	m_context = info.context;
 	m_viewParms = m_context->RegisterBindParm( std::string( m_name ) + "BindParms", bindset_view);
 
+	m_surfParmeters = m_resources->surfParms.GetBufferView( m_surfaceBufferId * MaxSurfaces, MaxSurfaces );
+
+	for( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
+	{
+		m_uploadViewIds[ multiViewIndex ] = m_resources->NextRenderView( m_viewParmeters[ multiViewIndex ] );
+	}
+
 	for ( uint32_t multiViewIndex = 0; multiViewIndex < m_multiViewCount; ++multiViewIndex )
 	{
 		for ( uint32_t passIx = 0; passIx < DRAWPASS_COUNT; ++passIx ) {
@@ -162,9 +169,6 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		m_clearDepth = info.clearDepth;
 		m_clearStencil = info.clearStencil;
 	}
-
-	m_viewParmeters = m_resources->viewParms.GetView( m_viewBufferId, m_multiViewCount );
-	m_surfParmeters = m_resources->surfParms.GetView( m_surfaceBufferId * MaxSurfaces, MaxSurfaces );
 }
 
 
@@ -274,8 +278,8 @@ void RenderView::FrameBegin( const drawPass_t begin, const drawPass_t end )
 			mat4x4f invCheck = viewBuffer.invProjMat * viewBuffer.projMat;
 			assert( IsIdentity( invCheck, 0.001f ) );
 
-			m_viewParmeters.SetPos( 0 );
-			m_viewParmeters.CopyData( &viewBuffer, sizeof( viewBuffer ) );
+			m_viewParmeters[ multiViewIndex ].SetPos(0);
+			m_viewParmeters[ multiViewIndex ].CopyData( &viewBuffer, sizeof( viewBuffer ) );
 		}
 	}
 
@@ -470,43 +474,43 @@ const viewport_t& RenderView::GetViewport() const
 }
 
 
-const mat4x4f& RenderView::GetViewMatrix( const uint32_t multiView ) const
+const mat4x4f& RenderView::GetViewMatrix( const uint32_t multiViewIndex ) const
 {
-	return m_viewMatrices[ multiView ];
+	return m_viewMatrices[ multiViewIndex ];
 }
 
 
-const mat4x4f& RenderView::GetProjMatrix( const uint32_t multiView ) const
+const mat4x4f& RenderView::GetProjMatrix( const uint32_t multiViewIndex ) const
 {
-	return m_projMatrices[ multiView ];
+	return m_projMatrices[ multiViewIndex ];
 }
 
 
-const mat4x4f& RenderView::GetInvProjMatrix( const uint32_t multiView ) const
+const mat4x4f& RenderView::GetInvProjMatrix( const uint32_t multiViewIndex ) const
 {
-	return m_invProjMatrices[ multiView ];
+	return m_invProjMatrices[ multiViewIndex ];
 }
 
 
-const mat4x4f& RenderView::GetViewProjMatrix( const uint32_t multiView ) const
+const mat4x4f& RenderView::GetViewProjMatrix( const uint32_t multiViewIndex ) const
 {
-	return m_viewProjMatrices[ multiView ];
+	return m_viewProjMatrices[ multiViewIndex ];
 }
 
 
-const mat4x4f& RenderView::GetPreviousViewProjMatrix( const uint32_t multiView ) const
+const mat4x4f& RenderView::GetPreviousViewProjMatrix( const uint32_t multiViewIndex ) const
 {
-	return m_previousViewProjMatrices[ multiView ];
+	return m_previousViewProjMatrices[ multiViewIndex ];
 }
 
 
-int RenderView::GetViewBufferId( const int multiView ) const
+int32_t RenderView::GetViewBufferUploadId( const int32_t multiViewIndex ) const
 {
-	return m_viewBufferId + multiView;
+	return m_uploadViewIds[ multiViewIndex ];
 }
 
 
-int RenderView::GetSurfaceBufferId() const
+int32_t RenderView::GetSurfaceBufferId() const
 {
 	return m_surfaceBufferId;
 }

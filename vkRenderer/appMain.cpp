@@ -138,13 +138,18 @@ void InitSceneType( const std::string type, Scene** scene )
 
 void CubeCaptureLoad( Scene* scene )
 {
-	const hdl_t cubemapTextureHdl = AssetLib<GpuProgram>::Handle( r_hdrCubemapSource.GetString() );
-
 	g_assets.GetLib<Image>()->AddDeferred( r_hdrCubemapSource.GetString(), pImgLoader_t( new ImageLoader( TexturePath, r_hdrCubemapSource.GetString(), false ) ) );
 
 	Material& material = g_assets.GetLib<Material>()->Find( "_sky" )->Get();
 
-	material.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "EquirectangularSampler" ) );
+	const hdl_t cubemapTextureHdl = AssetLib<GpuProgram>::Handle( r_hdrCubemapSource.GetString() );
+
+	const bool sampleAsCubemap = false;
+	if( sampleAsCubemap ) {
+		material.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "Sky" ), (uint32_t)shaderPermId_t::SKY_CUBE_SAMPLER );
+	} else {
+		material.AddShader( DRAWPASS_SKYBOX, AssetLib<GpuProgram>::Handle( "EquirectangularSampler" ) );	
+	}
 	material.AddTexture( 0, cubemapTextureHdl );
 }
 

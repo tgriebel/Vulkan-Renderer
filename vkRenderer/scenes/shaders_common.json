@@ -70,11 +70,6 @@
       "perms": ["skycube", "mrt"]
     },
 	{
-	  "name": "EquirectangularSampler",
-	  "vs": "simple",
-	  "ps": "equirectangularSky"
-    },
-	{
       "name": "LitDiffuse",
       "vs": "simple",
       "ps": "litViewDiffuse",

@@ -255,7 +255,7 @@ void RenderTask::RenderViewSurfaces( GfxCmdList* cmdContext, const uint32_t mult
 			assert( surface.sortKey.materialId < ( 1ull << KeyMaterialBits ) );
 
 			gpuPushConstants_t pushConstants = {};
-			pushConstants.viewId = uint32_t( m_renderView->GetViewBufferId( multiViewIndex ) );
+			pushConstants.viewId = uint32_t( m_renderView->GetViewBufferUploadId( multiViewIndex ) );
 			pushConstants.objectId = surface.objectOffset + m_renderView->drawGroupOffset[ passIx ];
 			pushConstants.materialId = uint32_t( surface.sortKey.materialId );
 

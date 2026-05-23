@@ -11,7 +11,7 @@
 class ResourceContext;
 class RenderContext;
 
-static const uint32_t MaxMultiViews = 6;
+static const uint32_t MaxMultiViews = 6; // Max of 6 because of cubemaps
 
 enum class renderViewType_t : uint32_t
 {
@@ -30,7 +30,7 @@ struct renderViewCreateInfo_t
 	frameBufferCreateInfo_t		fbImages;
 
 	const char*					name;
-	const ResourceContext*		resources;
+	ResourceContext*			resources;
 	RenderContext*				context;
 
 	vec4f						clearColor;
@@ -49,7 +49,7 @@ class RenderView
 private:
 	using debugMenuArray_t = Array<debugMenuFuncPtr, 12>;
 
-	const ResourceContext*	m_resources;
+	ResourceContext*		m_resources;
 	RenderContext*			m_context;
 	FrameBuffer*			m_framebuffers[ MaxMultiViews ];
 	ImageView*				m_colorViews[ MaxMultiViews ];
@@ -57,8 +57,9 @@ private:
 	ImageView*				m_gBuffer1Views[ MaxMultiViews ];
 	ImageView*				m_depthViews[ MaxMultiViews ];
 	ImageView*				m_stencilViews[ MaxMultiViews ];
+	uint32_t				m_uploadViewIds[ MaxMultiViews ];
+	GpuBufferView			m_viewParmeters[ MaxMultiViews ];
 	GpuBufferView			m_surfParmeters;
-	GpuBufferView			m_viewParmeters;
 	gpuSurface_t			m_surfBuffer[ MaxSurfaces ];
 
 	ShaderBindParms*		m_viewParms;
@@ -173,13 +174,13 @@ public:
 	void					SetViewRect( const int32_t x, const int32_t y, const uint32_t width, const uint32_t height );
 	const viewport_t&		GetViewport() const;
 	vec2i					GetFrameSize() const;
-	const mat4x4f&			GetViewMatrix( const uint32_t multiView = 0 ) const;
-	const mat4x4f&			GetProjMatrix( const uint32_t multiView = 0 ) const;
-	const mat4x4f&			GetInvProjMatrix( const uint32_t multiView = 0 ) const;
-	const mat4x4f&			GetViewProjMatrix( const uint32_t multiView = 0 ) const;
-	const mat4x4f&			GetPreviousViewProjMatrix( const uint32_t multiView = 0 ) const;
-	int						GetViewBufferId( const int multiView = 0 ) const; // TODO: Have view own it's view buffer. Eliminates indexing
-	int						GetSurfaceBufferId() const; // TODO: Have view own it's surface buffer. Eliminates indexing
+	const mat4x4f&			GetViewMatrix( const uint32_t multiViewIndex = 0 ) const;
+	const mat4x4f&			GetProjMatrix( const uint32_t multiViewIndex = 0 ) const;
+	const mat4x4f&			GetInvProjMatrix( const uint32_t multiViewIndex = 0 ) const;
+	const mat4x4f&			GetViewProjMatrix( const uint32_t multiViewIndex = 0 ) const;
+	const mat4x4f&			GetPreviousViewProjMatrix( const uint32_t multiViewIndex = 0 ) const;
+	int32_t					GetViewBufferUploadId( const int multiViewIndex = 0 ) const;
+	int32_t					GetSurfaceBufferId() const; // TODO: Have view own it's surface buffer. Eliminates indexing
 
 	uint32_t				GetMultiViewCount() const;
 

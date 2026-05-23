@@ -13,8 +13,6 @@ vsToPsInterpolators VSMain( vsInput_t input, uint vertexId : SV_VertexID, uint i
 	const gpuView_t view = views[viewlId];
 	const float4x4 modelMatrix = surfaces[ output.objectId ].model;
 
-	
-	
 	const float3 position = input.inPosition;
     const float4 wsPosition = mul( modelMatrix, float4( position, 1.0f ) );
 	

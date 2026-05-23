@@ -223,7 +223,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
 			info.resourceImages[ 1 ] = resources->gBufferLayerResolvedImage0;
 			info.baseMip = 0;
-			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
+			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 			info.constants = &ssaoDefaults;
 			info.constantsByteSize = sizeof( ssaoDefaults );
 
@@ -363,7 +363,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		userParms.focalPlaneDistanceMM = 10000.0f;
 		userParms.apertureDiameterMM = 25.0f;
 		userParms.maxCocRadius = 16.0f;
-		userParms.viewId = view->GetViewBufferId();
+		userParms.viewId = view->GetViewBufferUploadId();
 		userParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
 		userParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
 		userParms.srcDepthDimensions.z = 1.0f / userParms.srcDepthDimensions.x;
@@ -380,7 +380,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
 			info.baseMip = 0;
 			info.mipCount = 1;
-			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
+			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 			info.constants = &userParms;
 			info.constantsByteSize = sizeof( userParms );
 
@@ -463,7 +463,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			{
 				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
 
-				dofParms.viewId = view->GetViewBufferId();
+				dofParms.viewId = view->GetViewBufferUploadId();
 				dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
 				dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
 				dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
@@ -527,7 +527,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		//	info.resourceImages[ 1 ] = resources->dofTileCocImage;
 			info.baseMip = 0;
 			info.mipCount = 1;
-			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferId( 0 );
+			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 

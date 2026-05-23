@@ -13,7 +13,8 @@ class Image;
 class ResourceContext
 {
 private:
-	uint32_t				outputImageCount = 0;
+	uint32_t outputImageCount = 0;
+	uint32_t renderViewCount = 0;
 
 	Image* NextImage()
 	{
@@ -105,4 +106,6 @@ public:
 	{
 		return outputImageCount;
 	}
+
+	uint32_t NextRenderView( GpuBufferView& renderViewBuffer );
 };
