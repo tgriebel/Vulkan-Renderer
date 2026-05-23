@@ -52,6 +52,7 @@ void ImageReadbackTask::Init( const imageReadBackCreateInfo_t& info )
 			subView.baseArray = vk_MapToGlslCubemapConvention( i );
 			subView.baseMip = 0;
 			subView.mipLevels = info.mipLevels;
+			subView.aspect = GetColorAspectFlags( info.fmt );
 
 			m_cubeViews[ i ].Init( m_readbackImage, info, subView, resourceLifeTime_t::TASK );
 

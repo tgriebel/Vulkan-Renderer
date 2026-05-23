@@ -158,9 +158,6 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 			}
 
 			shaderPermId_t permSet = static_cast<shaderPermId_t>( material.GetShaderPerms( drawPass_t( passIx ) ) );
-			if ( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
-				SetFlags( permSet, shaderPermId_t::MRT );
-			}
 
 			surf.prog = &prog->Get();
 			surf.permSet = permSet;

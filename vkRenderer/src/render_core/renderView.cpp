@@ -163,7 +163,7 @@ void RenderView::Init( const renderViewCreateInfo_t& info )
 		m_clearStencil = info.clearStencil;
 	}
 
-	m_viewParmeters = m_resources->viewParms.GetView( m_viewBufferId, 1 );
+	m_viewParmeters = m_resources->viewParms.GetView( m_viewBufferId, m_multiViewCount );
 	m_surfParmeters = m_resources->surfParms.GetView( m_surfaceBufferId * MaxSurfaces, MaxSurfaces );
 }
 

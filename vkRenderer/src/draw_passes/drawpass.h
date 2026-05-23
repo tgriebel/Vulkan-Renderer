@@ -113,6 +113,11 @@ public:
 		return m_fb;
 	}
 
+	inline bool NeedsMrt() const
+	{
+		return HasFlags( m_stateBits, GFX_STATE_MRT_ENABLE ) && ( GetFrameBuffer()->ColorLayerCount() > 1 );
+	}
+
 	void InsertResourceBarriers( CommandList& cmdContext );
 
 	ImageArray					codeImages;

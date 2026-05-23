@@ -58,7 +58,7 @@ pipelineState_t CreateGfxState( const DrawPass* pass, const Asset<GpuProgram>& p
 	rasterState.viewportWidth = static_cast<float>( viewport.width );
 	rasterState.viewportHeight = static_cast<float>( viewport.height );
 
-	if( pass->GetFrameBuffer()->ColorLayerCount() > 1 ) {
+	if( pass->NeedsMrt() ) {
 		SetFlags( state.permSet, shaderPermId_t::MRT );
 	} else {
 		ClearFlags( state.permSet, shaderPermId_t::MRT );

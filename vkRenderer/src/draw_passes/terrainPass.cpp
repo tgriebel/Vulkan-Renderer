@@ -14,6 +14,7 @@ void TerrainPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_DEPTH_TEST;
 	m_stateBits |= GFX_STATE_DEPTH_WRITE;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
+	m_stateBits |= GFX_STATE_MRT_ENABLE;
 
 	codeImages.SetRenderContext( renderContext );
 	codeCubeImages.SetRenderContext( renderContext );

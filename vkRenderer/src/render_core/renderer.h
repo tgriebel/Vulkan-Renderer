@@ -46,6 +46,7 @@ struct renderConfig_t
 	bool			computeDiffuseIbl;
 	bool			computeSpecularIBL;
 	bool			downsampleScene;
+	bool			useImgui;
 	bool			bloom;
 	bool			autoExposure;
 	bool			screenshot;

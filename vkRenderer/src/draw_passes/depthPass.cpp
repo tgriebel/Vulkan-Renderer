@@ -18,6 +18,7 @@ void DepthPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 	m_stateBits |= GFX_STATE_COLOR0_MASK;
 	m_stateBits |= GFX_STATE_CULL_MODE_BACK;
 	m_stateBits |= GFX_STATE_STENCIL_ENABLE;
+	m_stateBits |= GFX_STATE_MRT_ENABLE;
 
 	if( velocityInDepth == false ) {
 		m_stateBits |= GFX_STATE_COLOR1_MASK;
