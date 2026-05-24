@@ -87,6 +87,6 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
     maxCocInPixels = min( cocClampInPixels, maxCocInPixels );
     
     if ( groupIndex == 0 ) {
-        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocInPixels * groupMaxSign, 1.0f );
+        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocInPixels * sign( groupMaxSign ), 1.0f );
     }
 }

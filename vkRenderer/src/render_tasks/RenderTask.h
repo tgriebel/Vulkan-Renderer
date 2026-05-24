@@ -18,8 +18,9 @@ using TaskCallback = std::function<void()>;
 class GpuTask
 {
 protected:
-	// 128 since that's also the push constants limit, but not a hard limit
-	static const uint32_t MaxCustomConstantBytes = 128;
+
+	static const uint32_t MaxCustomPushConstantBytes = 128;
+	static const uint32_t MaxCustomConstantBytes = 512;
 
 	GpuTask*		m_child			= nullptr;
 	bool			m_enabled		= true;

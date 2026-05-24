@@ -13,6 +13,7 @@
 #include "../render_tasks/imguiTask.h"
 #include "../render_tasks/ComputeTask.h"
 #include "../render_binding/bindings.h"
+#include <GfxCore/math/samplerGen.h>
 
 static availableTasks_t tasks;
 
@@ -480,9 +481,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			struct dofBokeh_t
 			{
-				float cocRadius;
-				float apertureAngle;
-				int32_t ngonBlades;
+				vec3f	bias;
+				float	colorScale;
+				vec2f	samples[ 49 ];
 			};
 
 			// Image
@@ -511,10 +512,17 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					} );
 			}
 
-			static dofBokeh_t dofBokehDefaults{};
-			dofBokehDefaults.cocRadius = 4.0f;
-			dofBokehDefaults.apertureAngle = PI / 4.0f;
-			dofBokehDefaults.ngonBlades = 6;
+			dofBokeh_t dofBokehDefaults{};
+			dofBokehDefaults.colorScale = 4.0f;
+
+			const uint32_t N = 7;
+			const uint32_t N2 = ( N * N );
+
+			ShirleyConcentricSamplerGen sampler( 5 );
+			sampler.AddRange( 0, static_cast<float>( N ) );
+			for ( uint32_t s = 0; s < N2; ++s ) {
+				dofBokehDefaults.samples[ s ] = sampler.Sample2D();
+			}
 
 			imageProcessCreateInfo_t info{};
 			info.name = "DoF Blur";
@@ -523,8 +531,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.outputImage = resources->dofBlur;
 			info.progName = "DofBokeh";
 			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
-			info.resourceImages[ 1 ] = resources->dofCocImage;
-		//	info.resourceImages[ 1 ] = resources->dofTileCocImage;
+			info.resourceImages[ 1 ] = resources->dofTileCocImage;
 			info.baseMip = 0;
 			info.mipCount = 1;
 			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
@@ -539,9 +546,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
 
 					bool changed = false;
-					changed |= ImGui::SliderFloat( "Focal Length (mm)", &dofBokeh.cocRadius, 4.0f, 32.0f );
-					changed |= ImGui::SliderFloat( "Aperture Angle (mm)", &dofBokeh.apertureAngle, 0.0f, 2.0f * PI );
-					changed |= ImGui::SliderInt( "Ngon Blades (5=pentagon)", &dofBokeh.ngonBlades, 0, 12 );
+					changed |= ImGui::SliderFloat( "Focal Length (mm)", &dofBokeh.colorScale, 4.0f, 32.0f );
 
 					if( changed ) {
 						task->UpdateConstants();

@@ -49,7 +49,6 @@ void ComputeTask::Init( const computeTaskCreateInfo_t& info )
 
 	m_bind = info.bind;
 
-
 	m_shaderConstantsByteSize = 0;
 	if( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
 	{
@@ -94,6 +93,9 @@ void ComputeTask::Execute( CommandList& cmdContext )
 		y = m_dispatchY;
 		z = m_dispatchZ;
 	}
+
+	// TODO: Add logic to add this to buffer if needed
+	assert( m_shaderConstantsByteSize < MaxCustomPushConstantBytes );
 
 	if ( HasConstants() ) {
 		cmdContext.Dispatch( *m_progAsset, *m_parms, m_shaderConstants, m_shaderConstantsByteSize, x, y, z );	
