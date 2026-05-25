@@ -51,7 +51,11 @@ public:
 	bool					HasConstants() const { return ( m_shaderConstantsByteSize > 0 ); }
 
 	template<typename T>
-	T*						GetConstants() { return reinterpret_cast<T*>( &m_shaderConstants ); }
+	T*						GetConstants()
+	{
+		assert( HasConstants() );
+		return reinterpret_cast<T*>( &m_shaderConstants );
+	}
 
 	template<typename T>
 	T*						GetShaderConstants() { return reinterpret_cast<T*>( &m_shaderConstants ); }

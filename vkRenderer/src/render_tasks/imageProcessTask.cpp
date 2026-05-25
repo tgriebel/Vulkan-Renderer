@@ -53,10 +53,9 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
 	m_permSet = info.permSet;
 
-	m_shaderConstantsByteSize = 0;
-	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
-	{
-		m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+	m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+
+	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) ) {
 		memcpy( m_shaderConstants, info.constants, m_shaderConstantsByteSize );
 	}
 

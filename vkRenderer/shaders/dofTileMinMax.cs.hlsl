@@ -7,7 +7,7 @@
 #define TILE_SIZE_Y       16
 #define TILE_THREADS    ( TILE_SIZE_X * TILE_SIZE_Y )
 
-struct dofTileConstants_t
+struct dofShaderConstants_t
 {
     float4  srcDepthDimensions;
     uint    viewId;
@@ -22,11 +22,13 @@ VIEW_LAYOUT( 0, 1 )
 CODE_IMAGE_LAYOUT( 0, 2, Texture2D )
 WRITE_IMAGE_LAYOUT( 0, 3, RWTexture2D<float4>, dofTileOut )
 
-BIND_INLINE dofTileConstants_t dofTileParms;
+BIND_INLINE dofShaderConstants_t dofTileParms;
 
-groupshared uint groupMinSample;
-groupshared uint groupMaxSample;
+groupshared uint groupMinDepthSample;
+groupshared uint groupMaxDepthSample;
+groupshared uint groupMinCocSample;
 groupshared uint groupMaxCocSample;
+groupshared int groupMinSign;
 groupshared int groupMaxSign;
 
 [numthreads( TILE_SIZE_X, TILE_SIZE_Y, 1 )]
@@ -38,9 +40,11 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
     
     if ( groupIndex == 0 )
     {
-        groupMinSample = asuint( 1.0f );
-        groupMaxSample = 0;
+        groupMinDepthSample = asuint( 1.0f );
+        groupMaxDepthSample = 0;
+        groupMinCocSample = asuint( 65504.0f );
         groupMaxCocSample = asuint( 0.0f );
+        groupMinSign = 1; // 1 is fine since we just care about +/-
         groupMaxSign = -1;
     }
     
@@ -66,16 +70,18 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
         
         const uint cocUint = asuint( abs( coc ) );
     
-        InterlockedMin( groupMinSample, depthUint );
-        InterlockedMax( groupMaxSample, depthUint );
+        InterlockedMin( groupMinDepthSample, depthUint );
+        InterlockedMax( groupMaxDepthSample, depthUint );
+        InterlockedMin( groupMinCocSample, cocUint );
         InterlockedMax( groupMaxCocSample, cocUint );
-        InterlockedAdd( groupMaxSign, cocSign );
+        InterlockedMin( groupMinSign, cocSign );
+        InterlockedMax( groupMaxSign, cocSign );
     }
     
     GroupMemoryBarrierWithGroupSync();
 
-    const float minDepthTile = asfloat( groupMinSample  );
-    const float maxDepthTile = asfloat( groupMaxSample );
+    const float minDepthTile = asfloat( groupMinDepthSample );
+    const float maxDepthTile = asfloat( groupMaxDepthSample );
 
     const float halfFovX = invProj[ 0 ][ 0 ]; // (i.e. tanHalfAngle)
     const float sensorWidth = 2.0f * focalLength * halfFovX;
@@ -83,10 +89,13 @@ void CSMain( uint3 threadId : SV_DispatchThreadID, uint3 groupId : SV_GroupID, u
 
     const float cocClampInPixels = dofTileParms.maxCocRadius;
 
+    float minCocInPixels = asfloat( groupMinCocSample ) * toPixelUnitsTransform;
+    minCocInPixels = min( cocClampInPixels, minCocInPixels );
+    
     float maxCocInPixels = asfloat( groupMaxCocSample ) * toPixelUnitsTransform;
     maxCocInPixels = min( cocClampInPixels, maxCocInPixels );
     
     if ( groupIndex == 0 ) {
-        dofTileOut[ groupId.xy ] = float4( minDepthTile, maxDepthTile, maxCocInPixels * sign( groupMaxSign ), 1.0f );
+        dofTileOut[ groupId.xy ] = float4( minCocInPixels * sign( groupMinSign ), maxCocInPixels * sign( groupMaxSign ), minDepthTile, maxDepthTile );
     }
 }

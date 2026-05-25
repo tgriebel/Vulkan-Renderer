@@ -313,12 +313,12 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		// Image
 		{
 			imageInfo_t info{};
-			info.width = ( displayWidth / 2 );
-			info.height = ( displayHeight / 2 );
+			info.width = displayWidth;
+			info.height = displayHeight;
 			info.mipLevels = 1;
 			info.layers = 1;
 			info.subsamples = IMAGE_SMP_1;
-			info.fmt = IMAGE_FMT_R11G11B10_US;
+			info.fmt = IMAGE_FMT_RG_16;
 			info.type = IMAGE_TYPE_2D;
 			info.tiling = IMAGE_TILING_MORTON;
 
@@ -326,14 +326,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info,
 				"FB_dofCoc", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 			);
-
-			resources->dofCocImage->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
-			{
-				imageInfo_t resized = info;
-				resized.width = ( w / 2 );
-				resized.height = ( h / 2 );
-				return resized;
-			} );
 		}
 
 		// Constants for all DoF Passes
@@ -382,10 +374,38 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.baseMip = 0;
 			info.mipCount = 1;
 			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
-			info.constants = &userParms;
-			info.constantsByteSize = sizeof( userParms );
+			info.constantsByteSize = sizeof( dofShaderConstants_t );
 
 			tasks.dofCocTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+			tasks.dofCocTask->RegisterControls( [ resources, view, task = tasks.dofCocTask ]()
+				{
+					bool changed = false;
+					changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
+					changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
+					changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
+					changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
+				} );
+#endif
+
+			tasks.dofCocTask->RegisterFrameBeginCallback( [ resources, view, task = tasks.dofCocTask ]()
+			{
+				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+
+				dofParms.viewId = view->GetViewBufferUploadId();
+				dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+				dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+				dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
+				dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+
+				dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
+				dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
+				dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
+				dofParms.maxCocRadius = userParms.maxCocRadius;
+
+				task->UpdateConstants();
+			} );
 		}
 
 		// DoF Tile min/max CoC binning
@@ -450,30 +470,14 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			tasks.dofTileTask = new ComputeTask( info );
 
-#if defined( USE_IMGUI )
-			tasks.dofTileTask->RegisterControls( [ resources, view, task = tasks.dofTileTask ]()
+			tasks.dofTileTask->RegisterFrameBeginCallback( [ resources, view, parentTask = tasks.dofCocTask, subtask = tasks.dofTileTask ]()
 			{
-				bool changed = false;
-				changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
-				changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
-				changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
-				changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
-			} );
-#endif
-			tasks.dofTileTask->RegisterFrameBeginCallback( [ resources, view, task = tasks.dofTileTask ]()
-			{
-				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+				// NOTE! Playing around with how to share constants between tasks
+				// This doesn't seem half bad, but I'd like to have parent tasks with child
+				const dofShaderConstants_t& sourceDofParms = *parentTask->GetConstants<dofShaderConstants_t>();
+				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
 
-				dofParms.viewId = view->GetViewBufferUploadId();
-				dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-				dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-				dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
-				dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
-
-				dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
-				dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
-				dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
-				dofParms.maxCocRadius = userParms.maxCocRadius;
+				destDofParms = sourceDofParms;
 			} );
 		}
 
@@ -481,6 +485,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			struct dofBokeh_t
 			{
+				vec4f	tileMapDimensions;
 				vec3f	bias;
 				float	colorScale;
 				vec2f	samples[ 49 ];
@@ -488,9 +493,10 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			// Image
 			{
+				// TODO: Half-res later
 				imageInfo_t info{};
-				info.width = ( displayWidth / 2 );
-				info.height = ( displayHeight / 2 );
+				info.width = displayWidth;
+				info.height = displayHeight;
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
@@ -503,17 +509,21 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					"FB_dofBlur", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 				);
 
-				resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
-					{
-						imageInfo_t resized = info;
-						resized.width = ( w / 2 );
-						resized.height = ( h / 2 );
-						return resized;
-					} );
+				//resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+				//{
+				//	imageInfo_t resized = info;
+				//	resized.width = ( w / 2 );
+				//	resized.height = ( h / 2 );
+				//	return resized;
+				//} );
 			}
 
 			dofBokeh_t dofBokehDefaults{};
 			dofBokehDefaults.colorScale = 4.0f;
+			dofBokehDefaults.tileMapDimensions.x = (float)resources->dofBlur->info.width;
+			dofBokehDefaults.tileMapDimensions.y = (float)resources->dofBlur->info.height;
+			dofBokehDefaults.tileMapDimensions.z = 1.0f / resources->dofBlur->info.width;
+			dofBokehDefaults.tileMapDimensions.w = 1.0f / resources->dofBlur->info.height;
 
 			const uint32_t N = 7;
 			const uint32_t N2 = ( N * N );
