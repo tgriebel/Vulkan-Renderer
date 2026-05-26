@@ -41,12 +41,6 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     const float depthSample = localTextures[ 1 ].SampleLevel( bilinearSamplerClampEdge, uv, 0 ).r;
 
-    if ( depthSample <= 0.0f )
-    {
-        output.outColor = float4( 1.0f, 0.0f, 0.0f, 1.0f );
-        return output;
-    }
-    
     const float4x4 invProj = views[ imageProcess.viewId ].invProjMat;
 
     const float apertureDiameter = imageProcess.apertureDiameter;

@@ -35,9 +35,9 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const float pixelCoc = cocMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).r;
 
     const bool nearPlane = ( planesCoc.r < 0.0f );
-
+    
     const float cocTileRadius = abs( planesCoc.r );
-
+    
     float3 colorSum = 0.0f;
     float weightSum = 0.0f;
 
@@ -49,13 +49,19 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
         const float3 sceneColor = colorMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0.0f ).rgb;
         const float2 sampleCocPlanes = cocMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0.0f ).rg;
-
+        
         const float sampleCoc = sampleCocPlanes.r;
 
         float weight = ( sign( sampleCoc ) == sign( pixelCoc ) )
              ? min( abs( sampleCoc ), abs( pixelCoc ) )
              : 0.0f;
-
+               
+        // Weight is the smaller of the two CoC radii — the destination pixel's blur
+        // caps how much it receives, and cross-boundary samples are naturally damped.
+        //const float weight = ( pixelForeground == sampleForeground )
+        //    ? min( abs( sampleCoc ), pixelCocRadius )
+        //    : min( abs( sampleCoc ), pixelCocRadius ) * 0.5f;
+        
         colorSum += sceneColor * weight;
         weightSum += weight;
     }
