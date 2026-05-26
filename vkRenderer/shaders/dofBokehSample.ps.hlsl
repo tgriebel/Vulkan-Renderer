@@ -30,13 +30,15 @@ psOutput_t PSMain( vsToPsInterpolators input )
     
     const float2 uv = input.uv0.xy;
     
-    const float2 planesCoc = tileMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).rg;
+    const float2 planesCoc = tileMap.SampleLevel( nearestSampler, uv, 0.0f ).rg;
 
     const float pixelCoc = cocMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).r;
+    const float pixelCocRadius = abs( pixelCoc );
+    const bool pixelForeground = ( pixelCoc < 0.0f );
 
-    const bool nearPlane = ( planesCoc.r < 0.0f );
-
-    const float cocTileRadius = abs( planesCoc.r );
+    // Near field: Tile is approximation of scatter-as-gather
+    // Far field: Using per-pixel CoC for the time being
+    const float cocTileRadius = pixelForeground ? abs( planesCoc.r ) : pixelCocRadius;
 
     float3 colorSum = 0.0f;
     float weightSum = 0.0f;
@@ -48,13 +50,11 @@ psOutput_t PSMain( vsToPsInterpolators input )
         const float2 sampleUV = input.uv0.xy + offset * cocTileRadius;
 
         const float3 sceneColor = colorMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0.0f ).rgb;
-        const float2 sampleCocPlanes = cocMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0.0f ).rg;
+        const float sampleCoc = cocMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0.0f ).r;
 
-        const float sampleCoc = sampleCocPlanes.r;
-
-        float weight = ( sign( sampleCoc ) == sign( pixelCoc ) )
-             ? min( abs( sampleCoc ), abs( pixelCoc ) )
-             : 0.0f;
+        const float weight = ( sign( sampleCoc ) == sign( pixelCoc ) )
+            ? min( abs( sampleCoc ), pixelCocRadius )
+            : 0.0f;
 
         colorSum += sceneColor * weight;
         weightSum += weight;
