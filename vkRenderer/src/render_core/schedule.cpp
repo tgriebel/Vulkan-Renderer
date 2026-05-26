@@ -486,8 +486,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			struct dofBokeh_t
 			{
 				vec4f	tileMapDimensions;
-				vec3f	bias;
-				float	colorScale;
 				vec2f	samples[ 49 ];
 			};
 
@@ -519,7 +517,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			}
 
 			dofBokeh_t dofBokehDefaults{};
-			dofBokehDefaults.colorScale = 4.0f;
 			dofBokehDefaults.tileMapDimensions.x = (float)resources->dofBlur->info.width;
 			dofBokehDefaults.tileMapDimensions.y = (float)resources->dofBlur->info.height;
 			dofBokehDefaults.tileMapDimensions.z = 1.0f / resources->dofBlur->info.width;
@@ -542,6 +539,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.progName = "DofBokeh";
 			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
 			info.resourceImages[ 1 ] = resources->dofTileCocImage;
+			info.resourceImages[ 2 ] = resources->dofCocImage;
 			info.baseMip = 0;
 			info.mipCount = 1;
 			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
@@ -556,7 +554,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
 
 					bool changed = false;
-					changed |= ImGui::SliderFloat( "Focal Length (mm)", &dofBokeh.colorScale, 4.0f, 32.0f );
 
 					if( changed ) {
 						task->UpdateConstants();

@@ -90,7 +90,6 @@ public:
 	Image*			GetOutputImage();
 
 	uint32_t		GetMipCount() const;
-	void			UpdateConstants( const void* data, uint32_t sizeInBytes );
 	void			UpdateConstants();
 
 	void			Execute( CommandList& context ) override;

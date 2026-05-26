@@ -49,6 +49,7 @@ struct renderConfig_t
 	bool			useImgui;
 	bool			bloom;
 	bool			autoExposure;
+	bool			chromaticAberration;
 	bool			screenshot;
 	bool			gaussianBlur;
 	bool			ssao;

@@ -16,7 +16,7 @@ void PostPass::Init( RenderContext* renderContext, FrameBuffer* frameBuffer )
 	codeImages.SetRenderContext( renderContext );
 	codeCubeImages.SetRenderContext( renderContext );
 
-	codeImages.Resize( 5 );
+	codeImages.Resize( 6 );
 
 	SetFrameBuffer( frameBuffer );
 }
@@ -26,9 +26,10 @@ void PostPass::FrameBegin( const ResourceContext* resources )
 {
 	codeImages.BindIndex( 0, resources->mainColorResolvedImage );
 	codeImages.BindIndex( 1, resources->depthStencilResolvedImage );
-	codeImages.BindIndex( 2, resources->blurredImage );
+	codeImages.BindIndex( 2, resources->dofBlur );
 	codeImages.BindIndex( 3, resources->currentLum );
 	codeImages.BindIndex( 4, resources->bloom );
+	codeImages.BindIndex( 5, resources->dofCocImage );
 
 	parms->Bind( BINDING_NAME( lightBuffer ),			&resources->lightParms );
 	parms->Bind( BINDING_NAME( imageCodeArray ),		&codeImages );

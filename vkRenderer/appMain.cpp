@@ -80,6 +80,7 @@ MakeCVar( BOOL,		s_threadedLoad, true );
 MakeCVar( BOOL,		r_shadows, true );
 MakeCVar( BOOL,		r_downsampleScene, true );
 MakeCVar( BOOL,		r_bloom, true );
+MakeCVar( BOOL,		r_chromaticAberration, true );
 MakeCVar( BOOL,		r_autoExposure, true );
 MakeCVar( BOOL,		r_screenshot, true );
 MakeCVar( BOOL,		r_gaussianBlur, true );
@@ -196,6 +197,7 @@ int main( int argc, char* argv[] )
 	config.shadows = r_shadows.GetBool();
 	config.downsampleScene = r_downsampleScene.GetBool();
 	config.bloom = r_bloom.GetBool();
+	config.chromaticAberration = r_chromaticAberration.GetBool();
 	config.autoExposure = r_autoExposure.GetBool();
 	config.screenshot = r_screenshot.GetBool();
 	config.cubemapName = r_cubemapName.GetString();

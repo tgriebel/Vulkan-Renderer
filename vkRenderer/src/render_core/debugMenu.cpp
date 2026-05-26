@@ -1314,8 +1314,8 @@ void DrawImageViewerDebugMenu()
 	if ( image->info.layers > 1 )
 	{
 		static const char* cubeFaceLabels[] = { "+X", "-X", "+Y", "-Y", "+Z", "-Z" };
-		const bool   isCube    = ( image->info.type == IMAGE_TYPE_CUBE );
-		const int    numLayers = (int)image->info.layers;
+		const bool isCube = ( image->info.type == IMAGE_TYPE_CUBE );
+		const int numLayers = (int)image->info.layers;
 
 		selectedLayer = Max( 0, Min( selectedLayer, numLayers - 1 ) );
 
@@ -1429,19 +1429,19 @@ void DrawImageViewerDebugMenu()
 			scale = Max( scale, 0.01f );
 		}
 
-		// UV inside the drawn image, then map to the image's own pixel grid.
+		// UV inside the drawn image, then map to the MIP level's pixel grid.
 		const ImVec2 mouse = ImGui::GetMousePos();
 		const float rangeX = imageMax.x - imageMin.x;
 		const float rangeY = imageMax.y - imageMin.y;
 		const float uvX = ( rangeX > 0.0f ) ? ( mouse.x - imageMin.x ) / rangeX : 0.0f;
 		const float uvY = ( rangeY > 0.0f ) ? ( mouse.y - imageMin.y ) / rangeY : 0.0f;
 
-		const uint32_t w = image->info.width;
-		const uint32_t h = image->info.height;
+		uint32_t w, h;
+		MipDimensions( static_cast<uint32_t>( selectedMip ), image->info.width, image->info.height, &w, &h );
 		pixelLocation.x = Clamp( static_cast<uint32_t>( uvX * w ), 0u, w - 1u );
 		pixelLocation.y = Clamp( static_cast<uint32_t>( uvY * h ), 0u, h - 1u );
 
-		// Screen size of one image pixel at current scale.
+		// Screen size of one MIP pixel at current scale.
 		const float pixelScreenSize = displayW / (float)w;
 		pixelBoxMin = ImVec2( imageMin.x + pixelLocation.x * pixelScreenSize,
 		                      imageMin.y + pixelLocation.y * pixelScreenSize );

@@ -4,22 +4,23 @@
 PS_LAYOUT_STANDARD( Texture2D )
 
 
-float SampleCoverage( const int2 pos, const uint stencilTextureId ) {
-    return localTextures[ stencilTextureId ].Load( int3( pos, 0 ) ).g;
+float SampleCoverage( const int2 pos, Texture2D depthTexture )
+{
+    return depthTexture.Load( int3( pos, 0 ) ).g;
 }
 
 
-float EdgeOutline( const int2 pixelLocation, const uint stencilTextureId )
+float EdgeOutline( const int2 pixelLocation, Texture2D depthTexture )
 {
-    const float c00 = SampleCoverage( pixelLocation + int2( -1, -1 ), stencilTextureId );
-    const float c10 = SampleCoverage( pixelLocation + int2( 0, -1 ), stencilTextureId );
-    const float c20 = SampleCoverage( pixelLocation + int2( 1, -1 ), stencilTextureId );
-    const float c01 = SampleCoverage( pixelLocation + int2( -1, 0 ), stencilTextureId );
-    const float c11 = SampleCoverage( pixelLocation + int2( 0, 0 ), stencilTextureId );
-    const float c21 = SampleCoverage( pixelLocation + int2( 1, 0 ), stencilTextureId );
-    const float c02 = SampleCoverage( pixelLocation + int2( -1, 1 ), stencilTextureId );
-    const float c12 = SampleCoverage( pixelLocation + int2( 0, 1 ), stencilTextureId );
-    const float c22 = SampleCoverage( pixelLocation + int2( 1, 1 ), stencilTextureId );
+    const float c00 = SampleCoverage( pixelLocation + int2( -1, -1 ), depthTexture );
+    const float c10 = SampleCoverage( pixelLocation + int2( 0, -1 ), depthTexture );
+    const float c20 = SampleCoverage( pixelLocation + int2( 1, -1 ), depthTexture );
+    const float c01 = SampleCoverage( pixelLocation + int2( -1, 0 ), depthTexture );
+    const float c11 = SampleCoverage( pixelLocation + int2( 0, 0 ), depthTexture );
+    const float c21 = SampleCoverage( pixelLocation + int2( 1, 0 ), depthTexture );
+    const float c02 = SampleCoverage( pixelLocation + int2( -1, 1 ), depthTexture );
+    const float c12 = SampleCoverage( pixelLocation + int2( 0, 1 ), depthTexture );
+    const float c22 = SampleCoverage( pixelLocation + int2( 1, 1 ), depthTexture );
 
     const float minCoverage = min( min( min( c00, c10 ), min( c20, c01 ) ),
         min( min( c11, c21 ), min( c02, min( c12, c22 ) ) ) );
@@ -117,10 +118,14 @@ psOutput_t PSMain( vsToPsInterpolators input )
 	const uint textureId2 = material.textureId[ 2 ];
 	const uint textureId3 = material.textureId[ 3 ];
 	const uint textureId4 = material.textureId[ 4 ];
-
+	const uint textureId5 = material.textureId[ 5 ];
+	
 	Texture2D sceneTexture = localTextures[ textureId0 ];
+	Texture2D depthTexture = localTextures[ textureId1 ];
+	Texture2D dofTexture = localTextures[ textureId2 ];
+    Texture2D luminanceTexture = localTextures[ textureId3 ];
 	Texture2D bloomTexture = localTextures[ textureId4 ];
-	Texture2D luminanceTexture = localTextures[ textureId3 ];
+	Texture2D dofCocTexture = localTextures[ textureId5 ];
 
     const float4x4 viewMat = view.viewMat;
     const float3 forward = -normalize( viewMat[2].xyz );
@@ -130,30 +135,23 @@ psOutput_t PSMain( vsToPsInterpolators input )
 
     const int2 pixelLocation = int2( view.dimensions.xy * input.uv0.xy );
 
-    const float stencilCoverage = EdgeOutline( pixelLocation, textureId1 );
+    const float stencilCoverage = EdgeOutline( pixelLocation, depthTexture );
 
     float4 sceneColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 
     const float4 uvColor = float4( input.uv0.xy, 0.0f, 1.0f );
-    const float sceneDepth = localTextures[ textureId1 ].Load( int3( pixelLocation, 0 ) ).r;
-    const float skyMask = ( sceneDepth > 0.0f ) ? 1.0f : 0.0f;
-    const float4 skyColor = float4( globalCubemaps[ textureId0 ].Sample( bilinearSamplerWrap, float3( -viewVector.y, viewVector.z, viewVector.x ) ).rgb, 1.0f );
 
     output.outColor.rgb = float3( 0.0f, 0.0f, 0.0f );
-    const bool enabled = globals.dof.x != 0.0f;
-    const float focalDepth = globals.dof.y;
-    const float focalRange = globals.dof.z;
-    float coc = ( sceneDepth - focalDepth ) / focalRange;
-    const int MAX_MIP_LEVELS = 3;
-    coc = clamp( coc, -1.0, 1.0f );
+    const bool dofEnabled = ( globals.dof.x != 0.0f );
+    const float coc = dofCocTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).r;
 
     float3 hdrColor;
-    if ( enabled && ( coc < 0.0f ) ) {
-        hdrColor.rgb = localTextures[ textureId2 ].SampleLevel( bilinearSamplerClampEdge, input.uv0.xy, int( -coc * MAX_MIP_LEVELS ) ).rgb;
+    if ( dofEnabled && ( coc < 0.0f ) ) {
+        hdrColor.rgb = dofTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
     } else {
         hdrColor.rgb = sceneTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
     }
-
+	
     const float3 tint = globals.toneMapTint.rgb;
 
 	float3 finalColor = tint * hdrColor;
@@ -163,31 +161,6 @@ psOutput_t PSMain( vsToPsInterpolators input )
 	finalColor = ApplyBloom( bloomTexture, finalColor, input.uv0.xy );
 
 	finalColor = ApplyTonemap( luminanceTexture, finalColor );
-
-	if ( globals.chromaticAberration.x != 0.0f )
-	{
-		const float intensity = globals.chromaticAberration.y;
-
-		const float2 dir = ( input.uv0.xy - 0.5f ); // direction from center
-		const float dist = length( dir );
-
-		const float2 offset = dir * dist * intensity;
-
-		float r = localTextures[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy + offset ).r;
-		float g = localTextures[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy ).g;
-		float b = localTextures[ textureId0 ].Sample( bilinearSamplerClampEdge, input.uv0.xy - offset ).b;
-
-		r = ApplyBloom( localTextures[ textureId4 ], r.xxx, input.uv0.xy + offset ).x;
-		r = ApplyTonemap( localTextures[ textureId3 ], r.xxx ).x;
-
-		g = ApplyBloom( localTextures[ textureId4 ], g.xxx, input.uv0.xy ).y;
-		g = ApplyTonemap( localTextures[ textureId3 ], g.xxx ).y;
-
-		b = ApplyBloom( localTextures[ textureId4], b.xxx, input.uv0.xy ).z;
-		b = ApplyTonemap( localTextures[ textureId3 ], b.xxx ).z;
-
-		finalColor.rgb = float3( r, g, b );
-	}
 
 	sceneColor.rgb = LinearToSrgb( finalColor );
 

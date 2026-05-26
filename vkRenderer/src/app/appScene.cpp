@@ -533,9 +533,17 @@ void DrawAssetDebugMenu()
 		const uint32_t shaderCount = GpuProgramLib().Count();
 		if ( ImGui::TreeNode( "Shaders", "Shaders (%i)", shaderCount ) )
 		{
+			std::vector<Asset<GpuProgram>*> sortedShaders( shaderCount );
 			for ( uint32_t s = 0; s < shaderCount; ++s )
 			{
-				Asset<GpuProgram>* shaderAsset = GpuProgramLib().Find( s );
+				sortedShaders[ s ] = GpuProgramLib().Find( s );
+			}
+			std::sort( sortedShaders.begin(), sortedShaders.end(), []( const Asset<GpuProgram>* a, const Asset<GpuProgram>* b )
+			{
+				return a->GetName() < b->GetName();
+			} );
+			for ( Asset<GpuProgram>* shaderAsset : sortedShaders )
+			{
 				DebugMenuShaderTreeNode( shaderAsset );
 			}
 			ImGui::TreePop();

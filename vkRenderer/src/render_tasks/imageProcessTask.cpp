@@ -324,14 +324,6 @@ void ImageProcessTask::UpdateConstants()
 }
 
 
-void ImageProcessTask::UpdateConstants( const void* data, const uint32_t sizeInBytes )
-{
-	m_shaderConstantsByteSize = Min( sizeInBytes, MaxCustomConstantBytes );
-	memcpy( m_shaderConstants, data, m_shaderConstantsByteSize );
-	UpdateConstants();
-}
-
-
 void ImageProcessTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
