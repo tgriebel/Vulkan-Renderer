@@ -468,6 +468,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
 			};
 
+			tasks.transitionWriteDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_STORAGE );
+
 			tasks.dofTileTask = new ComputeTask( info );
 
 			tasks.dofTileTask->RegisterFrameBeginCallback( [ resources, view, parentTask = tasks.dofCocTask, subtask = tasks.dofTileTask ]()
@@ -479,6 +481,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 				destDofParms = sourceDofParms;
 			} );
+
+			tasks.transitionReadDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_STORAGE, gpuImageStateFlags_t::GPU_IMAGE_READ );
 		}
 
 		// DoF Blur Calculation
@@ -902,7 +906,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 	if( tasks.dofTileTask )
 	{
+		schedule->Link( tasks.transitionWriteDofTileTask );
 		schedule->Link( tasks.dofTileTask );
+		schedule->Link( tasks.transitionReadDofTileTask );
 	}
 	if( tasks.dofBlurTask )
 	{
