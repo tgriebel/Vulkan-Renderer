@@ -59,7 +59,7 @@ float3 ApplyTonemap( const Texture2D luminanceTexture, const float3 sceneColor )
 {
 	float3 tonemapColor = sceneColor;
 	
-	const float middleGrey = globals.exposure.y;
+	const float middleGrey = globals.exposure.x;
 	const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
 
 	if ( globals.exposure2.x == 1.0f )
@@ -67,7 +67,7 @@ float3 ApplyTonemap( const Texture2D luminanceTexture, const float3 sceneColor )
 		const float maxLod = float( GetTextureLevels( luminanceTexture ) - 1 );
 		const float luminance = luminanceTexture.SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), maxLod ).r;
 
-		const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
+        const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
 
 		tonemapColor *= exposure;
 	}
