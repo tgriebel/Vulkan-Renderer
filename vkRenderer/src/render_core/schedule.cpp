@@ -573,8 +573,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			{
 				imageInfo_t info{};
-				info.width = ( displayWidth / 2 );
-				info.height = ( displayHeight / 2 );
+				info.width = ( displayWidth );
+				info.height = ( displayHeight );
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
@@ -587,13 +587,13 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					"FB_dofBlur", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 				);
 
-				resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
-				{
-					imageInfo_t resized = info;
-					resized.width = ( w / 2 );
-					resized.height = ( h / 2 );
-					return resized;
-				} );
+				//resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+				//{
+				//	imageInfo_t resized = info;
+				//	resized.width = ( w / 2 );
+				//	resized.height = ( h / 2 );
+				//	return resized;
+				//} );
 			}
 
 			imageShaderCreateInfo_t info{};
@@ -606,7 +606,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
 			info.resourceImages[ 2 ] = resources->dofCocImage;
 			info.resourceImages[ 3 ] = resources->dofTileCocImage;
-			info.passCount = 1;
+			info.passCount = 2;
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 

@@ -146,7 +146,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const float coc = dofCocTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).r;
 
     float3 hdrColor;
-    if ( dofEnabled && ( abs( coc ) > 0.0f ) ){
+    if ( dofEnabled && ( abs( coc ) > 1.0f ) ){
         hdrColor.rgb = dofTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
     } else {
         hdrColor.rgb = sceneTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
