@@ -6,7 +6,7 @@
 
 class ImageShaderTask;
 
-static const uint32_t MaxImageProcessSampleImages = 3;
+static const uint32_t MaxImageProcessSampleImages = 4;
 
 // Used for chained multi-pass processes such as MIP generation and downsampling
 struct imageProcessCreateInfo_t

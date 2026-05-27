@@ -12,6 +12,8 @@ class ResourceContext;
 
 class ImageShaderTask;
 
+static const uint32_t MaxImageShaderSampleImages = 4;
+
 struct imageShaderCreateInfo_t
 {
 	const char*			name;				// Debug name
@@ -23,8 +25,7 @@ struct imageShaderCreateInfo_t
 	Image*				outputImage1;		// Optional. MRT
 	Image*				outputImage2;		// Optional. MRT
 
-	uint32_t			inputImages;		// Optional. Input images to sample
-	uint32_t			inputCubeImages;	// Optional. Input cubemaps to sample
+	Image*				resourceImages[ MaxImageShaderSampleImages ]; // Optional. Input images to sample
 	uint32_t			mipLevel;			// Optional. Mip-level to work on
 	uint32_t			layer;				// Optional. Image layer to work on
 	uint32_t			passCount;			// Optional. Used for multi-pass shaders (e.g. Separable Gaussian)
@@ -73,14 +74,16 @@ private:
 	GpuBuffer				m_buffer[ MaxPasses ];
 	ImageView*				m_outputImageViews[ MaxPasses ][ MaxOutputImages ] = {};
 	Image*					m_image = nullptr;
+	Image*					m_resourceImages2d[ MaxImageShaderSampleImages ] = {};
+	Image*					m_resourceCubeImages[ MaxImageShaderSampleImages ] = {};
 	Image*					m_taskImages[ MaxOutputImages ] = {};
 	uint32_t				m_taskImageCount;
 	uint32_t				m_layer;
 	uint32_t				m_mipLevel;
 	uint32_t				m_viewId;
 	uint32_t				m_passCount;
-	uint32_t				m_image2dSlotCount;
-	uint32_t				m_imageCubeSlotCount;
+	uint32_t				m_resource2dCount;
+	uint32_t				m_resourceCubeCount;
 
 public:
 	ImageShaderTask() {}

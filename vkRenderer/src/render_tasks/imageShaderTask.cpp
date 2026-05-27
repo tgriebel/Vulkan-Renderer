@@ -139,20 +139,44 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 	uint32_t multiPassImageCount = ( m_passCount > 1 ) ? 1 : 0;
 
-	m_image2dSlotCount = info.inputImages;
-	m_imageCubeSlotCount = info.inputCubeImages;
+	// Images that are attached for sampling at all levels
+	for( uint32_t imageIx = 0; imageIx < MaxImageShaderSampleImages; ++imageIx )
+	{
+		if( info.resourceImages[ imageIx ] == nullptr )
+		{
+			continue;
+		}
+
+		if( info.resourceImages[ imageIx ]->info.type == IMAGE_TYPE_2D )
+		{
+			m_resourceImages2d[ m_resource2dCount ] = info.resourceImages[ imageIx ];
+			++m_resource2dCount;
+		}
+
+		if( info.resourceImages[ imageIx ]->info.type == IMAGE_TYPE_CUBE )
+		{
+			m_resourceCubeImages[ m_resourceCubeCount ] = info.resourceImages[ imageIx ];
+			++m_resourceCubeCount;
+		}
+	}
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{		
 		m_passes[ passIndex ]->codeImages.SetRenderContext( m_context );
 		m_passes[ passIndex ]->codeCubeImages.SetRenderContext( m_context );
 
-		m_passes[ passIndex ]->codeImages.Resize( info.inputImages + multiPassImageCount );
-		m_passes[ passIndex ]->codeCubeImages.Resize( info.inputCubeImages );
+		m_passes[ passIndex ]->codeImages.Resize( MaxImageShaderSampleImages + multiPassImageCount );
+		m_passes[ passIndex ]->codeCubeImages.Resize( MaxImageShaderSampleImages );
 
 		const uint32_t codeImageCount = m_passes[ passIndex ]->codeImages.Count();
-		for( uint32_t codeImageIx = 0; codeImageIx < codeImageCount; ++codeImageIx ) {
-			m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
+		for( uint32_t codeImageIx = 0; codeImageIx < codeImageCount; ++codeImageIx )
+		{
+			const Image* resourceImage = m_resourceImages2d[ codeImageIx ];
+			if( resourceImage == nullptr ) {
+				m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, rc.defaultImage );
+			} else {
+				m_passes[ passIndex ]->codeImages.BindIndex( codeImageIx, resourceImage );
+			}
 		}
 
 		m_passes[ passIndex ]->parms = m_context->RegisterBindParm( m_dbgName, bindset_imageShader );
@@ -192,13 +216,10 @@ ImageView* ImageShaderTask::GetOutputImage( const uint32_t outputImageIndex )
 void ImageShaderTask::SetSourceImage( const uint32_t slot, Image* image )
 {
 	assert( image->info.type == imageType_t::IMAGE_TYPE_2D );
-	assert( m_image2dSlotCount > slot );
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		if( slot < m_image2dSlotCount ) {
-			m_passes[ passIndex ]->codeImages.BindIndex( slot, image );
-		}
+		m_passes[ passIndex ]->codeImages.BindIndex( slot, image );
 	}
 }
 
@@ -206,11 +227,11 @@ void ImageShaderTask::SetSourceImage( const uint32_t slot, Image* image )
 void ImageShaderTask::SetSourceCubeImage( const uint32_t slot, Image* image )
 {
 	assert( image->info.type == imageType_t::IMAGE_TYPE_CUBE );
-	assert( m_imageCubeSlotCount > slot );
+	assert( m_resourceCubeCount > slot );
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{
-		if ( slot < m_imageCubeSlotCount ) {
+		if ( slot < m_resourceCubeCount ) {
 			m_passes[ passIndex ]->codeCubeImages.BindIndex( slot, image );
 		}
 	}
@@ -282,10 +303,12 @@ void ImageShaderTask::FrameBegin()
 			const float w = float( viewport.width );
 			const float h = float( viewport.height );
 
+			const uint32_t codeImageCount = m_passes[ passIndex ]->codeImages.Count();
+
 			baseConstants_t constants {};
 			constants.dimensions = vec4f( w, h, 1.0f / w, 1.0f / h );
 			constants.pass = passIndex;
-			constants.previousImageId = m_image2dSlotCount;
+			constants.previousImageId = ( codeImageCount - 1 );
 			constants.pad0 = m_viewId;
 			constants.level = m_mipLevel;
 			constants.layer = m_layer;

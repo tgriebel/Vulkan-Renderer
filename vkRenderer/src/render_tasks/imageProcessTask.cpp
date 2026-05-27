@@ -156,25 +156,37 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 	imgProcessInfo.context = m_context;
 	imgProcessInfo.resources = m_resources;
 	imgProcessInfo.passCount = m_multiPass ? 2 : 1;
-	imgProcessInfo.inputCubeImages = m_resourceCubeCount;
-	imgProcessInfo.inputImages = m_resource2dCount + 1; // Index zero always includes the sample source (even when redundant)
 	imgProcessInfo.layer = remappedLayerId;
 	imgProcessInfo.viewId = m_viewId;
 	imgProcessInfo.outputImage = m_image;
 	imgProcessInfo.progHdl = m_progHdl;
 	imgProcessInfo.permSet = m_permSet;
 
+	uint32_t resourceImages = 0;
+
+	for( uint32_t imageIx = 0; imageIx < m_resource2dCount; ++imageIx )
+	{
+		imgProcessInfo.resourceImages[ resourceImages ] = m_resourceImages2d[ imageIx ];
+		++resourceImages;
+	}
+
+	for( uint32_t imageIx = 0; imageIx < m_resourceCubeCount; ++imageIx )
+	{
+		imgProcessInfo.resourceImages[ imageIx ] = m_resourceCubeImages[ imageIx ];
+		++resourceImages;
+	}
+
 	// All but the first image need a framebuffer since they are being written to
 	imgProcessInfo.mipLevel = mipLevel;
 
-	ImageShaderTask* imageProcess = new ImageShaderTask( imgProcessInfo );
+	ImageShaderTask* imageShader = new ImageShaderTask( imgProcessInfo );
 
 	if ( m_cubeMip ) {
-		imageProcess->UpdateConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
+		imageShader->UpdateConstants( &m_viewMatrices[ layerId ], sizeof( mat4x4f ) );
 	} else if ( m_shaderConstantsByteSize > 0 ) {
-		imageProcess->UpdateConstants( m_shaderConstants, m_shaderConstantsByteSize );
+		imageShader->UpdateConstants( m_shaderConstants, m_shaderConstantsByteSize );
 	}
-	return imageProcess;
+	return imageShader;
 }
 
 

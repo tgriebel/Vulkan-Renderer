@@ -43,11 +43,11 @@ void ResolveImageTask::InitShaderTasks()
 			info.outputImage = dstImage;
 			info.context = m_context;
 			info.resources = m_resources;
-			info.inputImages = 2;
+			info.resourceImages[ 0 ] = &m_resources->depthImageView;
+			info.resourceImages[ 1 ] = &m_resources->stencilImageView;
 
 			m_shaderTasks[ i ] = new ImageShaderTask( info );
 
-			// FIXME: needs to be made locally or supplied
 			m_shaderTasks[ i ]->SetSourceImage( 0, &m_resources->depthImageView );
 			m_shaderTasks[ i ]->SetSourceImage( 1, &m_resources->stencilImageView );
 		}
@@ -61,7 +61,7 @@ void ResolveImageTask::InitShaderTasks()
 			info.outputImage = dstImage;
 			info.context = m_context;
 			info.resources = m_resources;
-			info.inputImages = 1;
+			info.resourceImages[ 0 ] = srcImage;
 
 			m_shaderTasks[ i ] = new ImageShaderTask( info );
 

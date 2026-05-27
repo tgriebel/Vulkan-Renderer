@@ -232,18 +232,18 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 #if defined( USE_IMGUI )
 			tasks.ssaoTask->RegisterControls( [ ssaoTask = tasks.ssaoTask ]()
+			{
+				ssaoConstants_t& c = *ssaoTask->GetConstants<ssaoConstants_t>();
+				bool changed = false;
+				changed |= ImGui::SliderFloat( "Radius", &c.radius, 0.1f, 2.0f );
+				changed |= ImGui::SliderInt( "Samples", (int*)&c.numSamples, 4, 32 );
+				changed |= ImGui::SliderFloat( "Bias", &c.bias, 0.0f, 0.1f );
+				changed |= ImGui::SliderFloat( "Strength", &c.strength, 0.5f, 4.0f );
+				if( changed )
 				{
-					ssaoConstants_t& c = *ssaoTask->GetConstants<ssaoConstants_t>();
-					bool changed = false;
-					changed |= ImGui::SliderFloat( "Radius", &c.radius, 0.1f, 2.0f );
-					changed |= ImGui::SliderInt( "Samples", (int*)&c.numSamples, 4, 32 );
-					changed |= ImGui::SliderFloat( "Bias", &c.bias, 0.0f, 0.1f );
-					changed |= ImGui::SliderFloat( "Strength", &c.strength, 0.5f, 4.0f );
-					if( changed )
-					{
-						ssaoTask->UpdateConstants();
-					}
-				} );
+					ssaoTask->UpdateConstants();
+				}
+			} );
 #endif
 		}
 
@@ -295,13 +295,13 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 #if defined( USE_IMGUI )
 			tasks.ssaoBlurTask->RegisterControls( [ blurTask = tasks.ssaoBlurTask ]()
+			{
+				bilateralConstants_t& c = *blurTask->GetConstants<bilateralConstants_t>();
+				if( ImGui::SliderFloat( "Edge Stop", &c.kDepth, 0.0f, 1.0f ) )
 				{
-					bilateralConstants_t& c = *blurTask->GetConstants<bilateralConstants_t>();
-					if( ImGui::SliderFloat( "Edge Stop", &c.kDepth, 0.0f, 1.0f ) )
-					{
-						blurTask->UpdateConstants();
-					}
-				} );
+					blurTask->UpdateConstants();
+				}
+			} );
 #endif
 		}
 	}
@@ -602,17 +602,15 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.resources = resources;
 			info.outputImage = resources->dofBlur;
 			info.progHdl = AssetLibGpuProgram::Handle( "DofBlur" );
-			info.inputImages = 4;
+			info.resourceImages[ 0 ] = resources->dofBokeh;
+			info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
+			info.resourceImages[ 2 ] = resources->dofCocImage;
+			info.resourceImages[ 3 ] = resources->dofTileCocImage;
 			info.passCount = 2;
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 
 			tasks.dofBlurTask = new ImageShaderTask( info );
-
-			tasks.dofBlurTask->SetSourceImage( 0, resources->dofBokeh );
-			tasks.dofBlurTask->SetSourceImage( 1, resources->depthStencilResolvedImage );
-			tasks.dofBlurTask->SetSourceImage( 2, resources->dofCocImage );
-			tasks.dofBlurTask->SetSourceImage( 3, resources->dofTileCocImage );
 		}
 	}
 
