@@ -26,7 +26,7 @@ void PostPass::FrameBegin( const ResourceContext* resources )
 {
 	codeImages.BindIndex( 0, resources->mainColorResolvedImage );
 	codeImages.BindIndex( 1, resources->depthStencilResolvedImage );
-	codeImages.BindIndex( 2, resources->dofBokeh );
+	codeImages.BindIndex( 2, resources->dofBlur );
 	codeImages.BindIndex( 3, resources->currentLum );
 	codeImages.BindIndex( 4, resources->bloom );
 	codeImages.BindIndex( 5, resources->dofCocImage );

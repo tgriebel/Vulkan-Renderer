@@ -1,95 +1,59 @@
 #include "globals.h"
+#include "lightUtil.h"
 
-static const uint SAMPLE_COUNT = 49;
+static const int TAP_COUNT = 3;
+static const float STEP_SIZE = 1.0f;  // pixels per tap
 
-struct dofBokeh_t
+struct dofBlur_t
 {
-    float4 tileMapDimensions;
-    float4 samples[ ( SAMPLE_COUNT / 2 ) + 1 ];
+    float4 padding;
 };
 
-PS_LAYOUT_IMAGE_SHADER( Texture2D, dofBokeh_t )
+PS_LAYOUT_IMAGE_SHADER( Texture2D, dofBlur_t )
 
-float2 UnpackSample( const uint index )
+void MaxAccumulateSample( const float3 sampleColor, inout float3 bestColor, inout float bestLuminance )
 {
-    const float4 packedSample = imageProcess.samples[ index / 2 ];
-    
-    const float2 unpackedSample = ( index % 2 ) == 0 ? packedSample.xy : packedSample.zw;
-    return unpackedSample;
+    const float lum = LuminanceFromRGB( sampleColor );
+    if ( lum > bestLuminance )
+    {
+        bestLuminance = lum;
+        bestColor = sampleColor;
+    }
 }
-
-static const int TAP_COUNT = 8;
-static const float STEP_SIZE = 2.0f;
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
     psOutput_t output = (psOutput_t)0;
-    
+
     const float2 uv = input.uv0.xy;
-    
-    Texture2D colorMap = localTextures[ 0 ];
-    Texture2D depthMap = localTextures[ 1 ];
-    Texture2D cocMap = localTextures[ 2 ];
-    Texture2D tileMap = localTextures[ 3 ];
-    
-    float3 sourceColor = colorMap.SampleLevel( bilinearSamplerClampEdge, uv, 0 ).rgb;
-    float sourceDepth = depthMap.SampleLevel( bilinearSamplerClampEdge, uv, 0 ).r;
-    float sourceCocPixel = cocMap.SampleLevel( bilinearSamplerClampEdge, uv, 0 ).r;
-    const float2 planesCoc = tileMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).rg;
+    const uint texId = ( pass == 0 ) ? 0 : previousImageId;
 
-    const float pixelCoc = cocMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).r;
-    const float pixelCocRadius = abs( pixelCoc );
-    const bool pixelForeground = ( pixelCoc < 0.0f );
+    Texture2D colorMap = localTextures[ texId ];
 
-    const float cocTileRadius = pixelForeground ? abs( planesCoc.r ) : pixelCocRadius;
-    
+    const float3 sourceColor = colorMap.SampleLevel( bilinearSamplerClampEdge, uv, 0 ).rgb;
+
     float3 bestColor = sourceColor;
-    
-    float3 accumulator = float3( 0.0f, 0.0f, 0.0f );
-    float sampleCount = 0;
+    float bestLuminance = LuminanceFromRGB( sourceColor );
 
-    for ( uint i = 0; i < 1; ++i )
+    if ( pass == 0 )
     {
-        const float2 offset = UnpackSample( i ) * dimensions.zw;
-        
-        float2 sampleUV = uv;
-        float3 sampleColor;
-
-        if ( pass == 0 )
+        for ( uint i = 1; i <= TAP_COUNT; ++i )
         {
-            sampleUV.x = offset.x * cocTileRadius;
-            sampleColor = colorMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0 ).rgb;
+            const float2 step = float2( 0.5f * dimensions.z * i * STEP_SIZE, 0.0f );
+            MaxAccumulateSample( colorMap.SampleLevel( bilinearSamplerClampEdge, uv + step, 0 ).rgb, bestColor, bestLuminance );
+            MaxAccumulateSample( colorMap.SampleLevel( bilinearSamplerClampEdge, uv - step, 0 ).rgb, bestColor, bestLuminance );
         }
-        else
+    }
+    else
+    {
+        for ( uint i = 1; i <= TAP_COUNT; ++i )
         {
-            Texture2D previousColorMap = localTextures[ previousImageId ];
-            
-            sampleUV.y = offset.y * cocTileRadius;
-            sampleColor = previousColorMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0 ).rgb;
+            const float2 step = float2( 0.0f, 0.5f * dimensions.w * i * STEP_SIZE );
+            MaxAccumulateSample( colorMap.SampleLevel( bilinearSamplerClampEdge, uv + step, 0 ).rgb, bestColor, bestLuminance );
+            MaxAccumulateSample( colorMap.SampleLevel( bilinearSamplerClampEdge, uv - step, 0 ).rgb, bestColor, bestLuminance );
         }
-        
-        const float sampleDepth = depthMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0 ).r;
-        const float sampleCoc = cocMap.SampleLevel( bilinearSamplerClampEdge, sampleUV, 0 ).r;
-        
-        const bool sampleIsCloserToCamera = ( sampleDepth > sourceDepth );
-        const bool sampleIsMoreFocused = ( sampleCoc < pixelCoc );
+    }
 
-        //if ( sampleIsCloserToCamera ) {
-        //    continue;
-        //}
-        
-        //if ( sampleIsMoreFocused ) {
-        //    continue;
-        //}
-        
-        accumulator += sampleColor;
-        sampleCount += 1.0f;
-    }
-    
-    if ( sampleCount > 0 ) {
-        output.outColor = float4( accumulator / sampleCount, 1.0f );
-    } else {
-        output.outColor = float4( 0.0f, 0.0f, 0.0f, 1.0f );
-    }
+    output.outColor = float4( bestColor, 1.0f );
     return output;
 }

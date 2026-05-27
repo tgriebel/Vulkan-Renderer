@@ -573,8 +573,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			{
 				imageInfo_t info{};
-				info.width = ( displayWidth  );
-				info.height = ( displayHeight  );
+				info.width = ( displayWidth / 2 );
+				info.height = ( displayHeight / 2 );
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
@@ -590,8 +590,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
 				{
 					imageInfo_t resized = info;
-					resized.width = ( w  );
-					resized.height = ( h  );
+					resized.width = ( w / 2 );
+					resized.height = ( h / 2 );
 					return resized;
 				} );
 			}
@@ -606,7 +606,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
 			info.resourceImages[ 2 ] = resources->dofCocImage;
 			info.resourceImages[ 3 ] = resources->dofTileCocImage;
-			info.passCount = 2;
+			info.passCount = 1;
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 
