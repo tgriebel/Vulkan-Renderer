@@ -5,8 +5,8 @@
 #endif
 
 #include "../globals/assetDefs.h"
-#include "../render_tasks/ImageShaderTask.h"
-#include "../render_tasks/ImageProcessTask.h"
+#include "../render_tasks/imageShaderTask.h"
+#include "../render_tasks/imageMipTask.h"
 #include "../render_tasks/ImageReadbackTask.h"
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/UtilTasks.h"

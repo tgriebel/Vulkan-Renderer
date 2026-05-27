@@ -1,4 +1,4 @@
-#include "imageProcessTask.h"
+#include "imageMipTask.h"
 
 #include <SysCore/systemUtils.h>
 

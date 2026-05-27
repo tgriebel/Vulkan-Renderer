@@ -345,7 +345,7 @@
     <ClInclude Include="src\render_state\rhi.h" />
     <ClInclude Include="src\render_tasks\imageShaderTask.h" />
     <ClInclude Include="src\render_tasks\ImageReadbackTask.h" />
-    <ClInclude Include="src\render_tasks\imageProcessTask.h" />
+    <ClInclude Include="src\render_tasks\imageMipTask.h" />
     <ClInclude Include="src\render_tasks\imguiTask.h" />
     <ClInclude Include="src\render_tasks\RenderTask.h" />
     <ClInclude Include="stdafx.h" />
@@ -421,7 +421,7 @@
     <ClCompile Include="src\render_state\frameBuffer.cpp" />
     <ClCompile Include="src\render_tasks\imageShaderTask.cpp" />
     <ClCompile Include="src\render_tasks\ImageReadbackTask.cpp" />
-    <ClCompile Include="src\render_tasks\imageProcessTask.cpp" />
+    <ClCompile Include="src\render_tasks\imageMipTask.cpp" />
     <ClCompile Include="src\render_tasks\imguiTask.cpp" />
     <ClCompile Include="src\render_tasks\RenderTask.cpp" />
     <ClCompile Include="src\render_tasks\taskSchedule.cpp" />

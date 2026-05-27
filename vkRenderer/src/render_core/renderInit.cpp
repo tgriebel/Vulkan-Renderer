@@ -9,7 +9,7 @@
 #include "../render_resources/imageArray.h"
 #include "../render_tasks/RenderTask.h"
 #include "../render_tasks/ImageReadbackTask.h"
-#include "../render_tasks/ImageProcessTask.h"
+#include "../render_tasks/imageMipTask.h"
 #include "../render_tasks/imguiTask.h"
 #include "../render_core/gpuTimerPool.h"
 

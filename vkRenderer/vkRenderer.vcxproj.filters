@@ -92,7 +92,7 @@
     <ClCompile Include="src\render_tasks\ImageReadbackTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_tasks\imageProcessTask.cpp">
+    <ClCompile Include="src\render_tasks\imageMipTask.cpp">
       <Filter>Tasks</Filter>
     </ClCompile>
     <ClCompile Include="src\render_tasks\imageShaderTask.cpp">
@@ -322,7 +322,7 @@
     <ClInclude Include="src\render_tasks\ImageReadbackTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_tasks\imageProcessTask.h">
+    <ClInclude Include="src\render_tasks\imageMipTask.h">
       <Filter>Tasks</Filter>
     </ClInclude>
     <ClInclude Include="scenes\tomtendoCore.h">
