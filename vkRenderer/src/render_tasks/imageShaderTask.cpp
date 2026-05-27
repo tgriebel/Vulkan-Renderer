@@ -171,6 +171,15 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 		const uint32_t codeImageCount = currentPass->codeImages.Count();
 		currentPass->codeImages.BindIndex( codeImageCount - 1, lastPassOutputColorImage );
 	}
+
+	assert( info.constantsByteSize <= MaxCustomConstantBytes );
+	m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+
+	if( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
+	{
+		memcpy( m_shaderConstants, info.constants, m_shaderConstantsByteSize );
+		UpdateConstants( m_shaderConstants, m_shaderConstantsByteSize );
+	}
 }
 
 

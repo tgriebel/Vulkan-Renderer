@@ -1,7 +1,6 @@
 #include "globals.h"
 
 static const uint SAMPLE_COUNT = 49;
-static const float PI = 3.14159265358979f;
 
 struct dofBokeh_t
 {
@@ -19,6 +18,9 @@ float2 UnpackSample( const uint index )
     return unpackedSample;
 }
 
+// "CryEngine3: Graphics Gems" (Advances in Real-Time Rendering 2013)
+// Additional: "Efficiently Simulating the Bokeh of Polygonal Apertures in a Post-Process Depth of Field Shader"
+// http://ivizlab.sfu.ca/papers/cgf2012.pdf
 
 psOutput_t PSMain( vsToPsInterpolators input )
 {
@@ -30,7 +32,7 @@ psOutput_t PSMain( vsToPsInterpolators input )
     
     const float2 uv = input.uv0.xy;
     
-    const float2 planesCoc = tileMap.SampleLevel( nearestSampler, uv, 0.0f ).rg;
+    const float2 planesCoc = tileMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).rg;
 
     const float pixelCoc = cocMap.SampleLevel( bilinearSamplerClampEdge, uv, 0.0f ).r;
     const float pixelCocRadius = abs( pixelCoc );
@@ -43,7 +45,6 @@ psOutput_t PSMain( vsToPsInterpolators input )
     float3 colorSum = 0.0f;
     float weightSum = 0.0f;
 
-    [unroll]
     for ( uint i = 0; i < SAMPLE_COUNT; ++i )
     {
         const float2 offset = UnpackSample( i ) * dimensions.zw;

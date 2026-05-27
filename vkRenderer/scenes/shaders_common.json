@@ -196,6 +196,13 @@
 	  "image_shader": true
     },
 	{
+      "name": "DofBlur",
+      "vs": "fullscreen",
+      "ps": "dofBlur",
+	  "bindset": "bindset_imageShader",
+	  "image_shader": true
+    },
+	{
       "name": "DiffuseIBL",
       "vs": "fullscreen",
       "ps": "preCalculatedDiffuseIbl",

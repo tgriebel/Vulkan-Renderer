@@ -48,7 +48,8 @@ struct availableTasks_t
 	ComputeTask*		dofTileTask						= nullptr;
 	TransitionImageTask* transitionWriteDofTileTask		= nullptr;
 	TransitionImageTask* transitionReadDofTileTask		= nullptr;
-	ImageProcessTask*	dofBlurTask						= nullptr;
+	ImageProcessTask*	dofBokehTask					= nullptr;
+	ImageShaderTask*	dofBlurTask						= nullptr;
 	CopyImageTask*		copyPreviousLuminance			= nullptr;
 	ImageProcessTask*	luminanceSceneAvg				= nullptr;
 	ImageProcessTask*	mipTask							= nullptr;

@@ -16,22 +16,25 @@ struct imageShaderCreateInfo_t
 {
 	const char*			name;				// Debug name
 	hdl_t				progHdl;			// Shaders
-	shaderPermId_t		permSet;			// Shader permutations
-	Image*				outputImage;		// Main render image
-	Image*				outputImage1;		// MRT
-	Image*				outputImage2;		// MRT
+	shaderPermId_t		permSet;			// Optional. Shader permutations
 	RenderContext*		context;			// Render context
 	ResourceContext*	resources;			// Resource context
-	uint32_t			inputImages;		// Input images to sample
-	uint32_t			inputCubeImages;	// Input cubemaps to sample
-	uint32_t			mipLevel;			// Mip-level to work on
-	uint32_t			layer;				// Image layer to work on
-	uint32_t			passCount;			// Used for multi-pass shaders (e.g. Separable Gaussian)
-	imageInfo_t*		createInfos;		// Inline created framebuffer images (useful for temp images)
-	uint32_t			taskImageCount;		// Number of inline framebuffer images
-	uint32_t			viewId;				// For pairing to a RenderView
-	bool				clear;				// Clear the output before rendering
-	bool				present;			// Present output after this shader runs
+	Image*				outputImage;		// Main render image
+	Image*				outputImage1;		// Optional. MRT
+	Image*				outputImage2;		// Optional. MRT
+
+	uint32_t			inputImages;		// Optional. Input images to sample
+	uint32_t			inputCubeImages;	// Optional. Input cubemaps to sample
+	uint32_t			mipLevel;			// Optional. Mip-level to work on
+	uint32_t			layer;				// Optional. Image layer to work on
+	uint32_t			passCount;			// Optional. Used for multi-pass shaders (e.g. Separable Gaussian)
+	imageInfo_t*		createInfos;		// Optional. Inline created framebuffer images (useful for temp images)
+	uint32_t			taskImageCount;		// Optional. Number of inline framebuffer images
+	uint32_t			viewId;				// Optional. Used to access RenderView constants (e.g. view matrix)
+	const void*			constants;			// Optional. Custom shader constants
+	uint32_t			constantsByteSize;	// Optional. Size in bytes of constants block
+	bool				clear;				// Optional. Clear the output before rendering
+	bool				present;			// Optional. Present output after this shader runs
 };
 
 class ImageShaderTask : public GpuTask

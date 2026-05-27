@@ -310,6 +310,30 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	{
 		const RenderView* view = viewContext->renderViews[ 0 ];
 
+		struct dofBokeh_t
+		{
+			vec4f	tileMapDimensions;
+			vec2f	samples[ 49 ];
+		};
+
+		const float cocTileSize = 16.0f;
+
+		dofBokeh_t dofBokehDefaults{};
+		dofBokehDefaults.tileMapDimensions.x = static_cast<float>( displayWidth ) / cocTileSize;
+		dofBokehDefaults.tileMapDimensions.y = static_cast<float>( displayWidth ) / cocTileSize;
+		dofBokehDefaults.tileMapDimensions.z = 1.0f / dofBokehDefaults.tileMapDimensions.x;
+		dofBokehDefaults.tileMapDimensions.w = 1.0f / dofBokehDefaults.tileMapDimensions.y;
+
+		const uint32_t N = 7;
+		const uint32_t N2 = ( N * N );
+
+		ShirleyConcentricSamplerGen sampler( 5 );
+		sampler.AddRange( 0, static_cast<float>( N ) );
+		for( uint32_t s = 0; s < N2; ++s )
+		{
+			dofBokehDefaults.samples[ s ] = sampler.Sample2D();
+		}
+
 		// Image
 		{
 			imageInfo_t info{};
@@ -412,8 +436,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		{
 			{
 				imageInfo_t info{};
-				info.width = ( displayWidth / 16 );
-				info.height = ( displayHeight / 16 );
+				info.width = (uint32_t)( displayWidth / cocTileSize );
+				info.height = (uint32_t)( displayHeight / cocTileSize );
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
@@ -426,11 +450,11 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					"FB_dofTileCoc", GPU_IMAGE_STORAGE | GPU_IMAGE_READ, resourceLifeTime_t::RESIZE
 				);
 
-				resources->dofTileCocImage->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+				resources->dofTileCocImage->RegisterResize( [ info, cocTileSize ]( uint32_t w, uint32_t h )->imageInfo_t
 				{
 					imageInfo_t resized = info;
-					resized.width = ( w / 16 );
-					resized.height = ( h / 16 );
+					resized.width = (uint32_t)( w / cocTileSize );
+					resized.height = (uint32_t)( h / cocTileSize );
 					return resized;
 				} );
 			}
@@ -454,8 +478,8 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.context = renderContext;
 			info.resources = resources;
 			info.progName = "DofTileMinMax";
-			info.imageTileSizeX = 16;
-			info.imageTileSizeY = 16;
+			info.imageTileSizeX = (uint32_t)cocTileSize;
+			info.imageTileSizeY = (uint32_t)cocTileSize;
 			info.image = resources->depthStencilResolvedImage;
 			info.constants = &userParms;
 			info.constantsByteSize = sizeof( userParms );
@@ -487,18 +511,70 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		// DoF Blur Calculation
 		{
-			struct dofBokeh_t
-			{
-				vec4f	tileMapDimensions;
-				vec2f	samples[ 49 ];
-			};
-
 			// Image
 			{
-				// TODO: Half-res later
+				// TODO: Make Half-res
 				imageInfo_t info{};
-				info.width = displayWidth;
-				info.height = displayHeight;
+				info.width = ( displayWidth  );
+				info.height = ( displayHeight  );
+				info.mipLevels = 1;
+				info.layers = 1;
+				info.subsamples = IMAGE_SMP_1;
+				info.fmt = IMAGE_FMT_R11G11B10_US;
+				info.type = IMAGE_TYPE_2D;
+				info.tiling = IMAGE_TILING_MORTON;
+
+				resources->dofBokeh->Create(
+					info,
+					"FB_dofBokeh", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+				);
+
+				//resources->dofBokeh->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+				//{
+				//	imageInfo_t resized = info;
+				//	resized.width = ( w / 2 );
+				//	resized.height = ( h / 2 );
+				//	return resized;
+				//} );
+			}
+
+			imageProcessCreateInfo_t info{};
+			info.name = "DoF Bokeh";
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = resources->dofBokeh;
+			info.progName = "DofBokeh";
+			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
+			info.resourceImages[ 1 ] = resources->dofTileCocImage;
+			info.resourceImages[ 2 ] = resources->dofCocImage;
+			info.baseMip = 0;
+			info.mipCount = 1;
+			info.viewId = view->GetViewBufferUploadId();
+			info.constants = &dofBokehDefaults;
+			info.constantsByteSize = sizeof( dofBokehDefaults );
+
+			tasks.dofBokehTask = new ImageProcessTask( info );
+
+#if defined( USE_IMGUI )
+			tasks.dofBokehTask->RegisterControls( [ resources, view, task = tasks.dofBokehTask ]()
+				{
+					dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
+
+					bool changed = false;
+
+					if( changed ) {
+						task->UpdateConstants();
+					}
+				} );
+#endif
+		}
+
+		// DoF Blur
+		{
+			{
+				imageInfo_t info{};
+				info.width = ( displayWidth  );
+				info.height = ( displayHeight  );
 				info.mipLevels = 1;
 				info.layers = 1;
 				info.subsamples = IMAGE_SMP_1;
@@ -511,59 +587,32 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 					"FB_dofBlur", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
 				);
 
-				//resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
-				//{
-				//	imageInfo_t resized = info;
-				//	resized.width = ( w / 2 );
-				//	resized.height = ( h / 2 );
-				//	return resized;
-				//} );
+				resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+				{
+					imageInfo_t resized = info;
+					resized.width = ( w  );
+					resized.height = ( h  );
+					return resized;
+				} );
 			}
 
-			dofBokeh_t dofBokehDefaults{};
-			dofBokehDefaults.tileMapDimensions.x = (float)resources->dofBlur->info.width;
-			dofBokehDefaults.tileMapDimensions.y = (float)resources->dofBlur->info.height;
-			dofBokehDefaults.tileMapDimensions.z = 1.0f / resources->dofBlur->info.width;
-			dofBokehDefaults.tileMapDimensions.w = 1.0f / resources->dofBlur->info.height;
-
-			const uint32_t N = 7;
-			const uint32_t N2 = ( N * N );
-
-			ShirleyConcentricSamplerGen sampler( 5 );
-			sampler.AddRange( 0, static_cast<float>( N ) );
-			for ( uint32_t s = 0; s < N2; ++s ) {
-				dofBokehDefaults.samples[ s ] = sampler.Sample2D();
-			}
-
-			imageProcessCreateInfo_t info{};
+			imageShaderCreateInfo_t info{};
 			info.name = "DoF Blur";
 			info.context = renderContext;
 			info.resources = resources;
 			info.outputImage = resources->dofBlur;
-			info.progName = "DofBokeh";
-			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
-			info.resourceImages[ 1 ] = resources->dofTileCocImage;
-			info.resourceImages[ 2 ] = resources->dofCocImage;
-			info.baseMip = 0;
-			info.mipCount = 1;
-			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
+			info.progHdl = AssetLibGpuProgram::Handle( "DofBlur" );
+			info.inputImages = 4;
+			info.passCount = 2;
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 
-			tasks.dofBlurTask = new ImageProcessTask( info );
+			tasks.dofBlurTask = new ImageShaderTask( info );
 
-#if defined( USE_IMGUI )
-			tasks.dofBlurTask->RegisterControls( [ resources, view, task = tasks.dofBlurTask ]()
-				{
-					dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
-
-					bool changed = false;
-
-					if( changed ) {
-						task->UpdateConstants();
-					}
-				} );
-#endif
+			tasks.dofBlurTask->SetSourceImage( 0, resources->dofBokeh );
+			tasks.dofBlurTask->SetSourceImage( 1, resources->depthStencilResolvedImage );
+			tasks.dofBlurTask->SetSourceImage( 2, resources->dofCocImage );
+			tasks.dofBlurTask->SetSourceImage( 3, resources->dofTileCocImage );
 		}
 	}
 
@@ -900,18 +949,13 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			schedule->Link( tasks.ssaoBlurTask );
 		}
 	}
-	if( tasks.dofCocTask )
+	if( config.dof )
 	{
 		schedule->Link( tasks.dofCocTask );
-	}
-	if( tasks.dofTileTask )
-	{
 		schedule->Link( tasks.transitionWriteDofTileTask );
 		schedule->Link( tasks.dofTileTask );
 		schedule->Link( tasks.transitionReadDofTileTask );
-	}
-	if( tasks.dofBlurTask )
-	{
+		schedule->Link( tasks.dofBokehTask );
 		schedule->Link( tasks.dofBlurTask );
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );

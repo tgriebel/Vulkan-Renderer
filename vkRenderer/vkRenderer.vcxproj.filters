@@ -681,7 +681,7 @@
     <FxCompile Include="shaders\dofBokehSample.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\dofFloodFill.ps.hlsl">
+    <FxCompile Include="shaders\dofBlur.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

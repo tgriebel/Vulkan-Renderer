@@ -47,6 +47,7 @@ public:
 	Image*					ssaoImage;
 	Image*					dofCocImage;
 	Image*					dofTileCocImage;
+	Image*					dofBokeh;
 	Image*					dofBlur;
 	Image*					ssaoBlurImage;
 	ImageView				depthImageView;
@@ -85,6 +86,7 @@ public:
 		ssaoBlurImage = NextImage();
 		dofCocImage = NextImage();
 		dofTileCocImage = NextImage();
+		dofBokeh = NextImage();
 		dofBlur = NextImage();
 
 		for( uint32_t i = 0; i < MaxShadowViews; ++i )

@@ -53,6 +53,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 	m_progHdl = AssetLib<GpuProgram>::Handle( info.progName );
 	m_permSet = info.permSet;
 
+	assert( info.constantsByteSize <= MaxCustomConstantBytes );
 	m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
 
 	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) ) {
