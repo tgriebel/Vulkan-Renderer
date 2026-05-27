@@ -6,7 +6,7 @@
 #include "../render_binding/bindings.h"
 #include "imageShaderTask.h"
 
-std::string ImageProcessTask::AsString() const
+std::string ImageMipTask::AsString() const
 {
 	std::stringstream ss;
 	ss << "ImageProcessTask: " << m_dbgName;
@@ -14,7 +14,7 @@ std::string ImageProcessTask::AsString() const
 }
 
 
-void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
+void ImageMipTask::Init( const imageMipTaskCreateInfo_t& info )
 {
 	SCOPED_TIMER_PRINT( MipImageTaskInit, MICROSECOND )
 
@@ -147,7 +147,7 @@ void ImageProcessTask::Init( const imageProcessCreateInfo_t& info )
 }
 
 
-ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel )
+ImageShaderTask* ImageMipTask::CreateImageShaderTask( const uint32_t layerId, const uint32_t mipLevel )
 {
 	const uint32_t remappedLayerId = m_cubeMip ? vk_MapToGlslCubemapConvention( layerId ) : layerId;
 
@@ -190,7 +190,7 @@ ImageShaderTask* ImageProcessTask::CreateImageShaderTask( const uint32_t layerId
 }
 
 
-void ImageProcessTask::FrameBegin()
+void ImageMipTask::FrameBegin()
 {
 	if ( m_useApi ) {
 		return;
@@ -239,7 +239,7 @@ void ImageProcessTask::FrameBegin()
 }
 
 
-void ImageProcessTask::FrameEnd()
+void ImageMipTask::FrameEnd()
 {
 	if ( m_useApi ) {
 		return;
@@ -253,7 +253,7 @@ void ImageProcessTask::FrameEnd()
 }
 
 
-void ImageProcessTask::Resize()
+void ImageMipTask::Resize()
 {
 	const uint32_t newMipLevels = ( m_requestedMipCount == 0 ) ? m_image->info.mipLevels : Min( m_requestedMipCount, m_image->info.mipLevels );
 	if ( m_useApi )
@@ -294,7 +294,7 @@ void ImageProcessTask::Resize()
 }
 
 
-void ImageProcessTask::Shutdown()
+void ImageMipTask::Shutdown()
 {
 	if ( m_useApi ) {
 		return;
@@ -310,19 +310,19 @@ void ImageProcessTask::Shutdown()
 }
 
 
-Image* ImageProcessTask::GetOutputImage()
+Image* ImageMipTask::GetOutputImage()
 {
 	return m_image;
 }
 
 
-uint32_t ImageProcessTask::GetMipCount() const
+uint32_t ImageMipTask::GetMipCount() const
 {
 	return m_mipLevels;
 }
 
 
-void ImageProcessTask::UpdateConstants()
+void ImageMipTask::UpdateConstants()
 {
 	for ( uint32_t layerId = 0; layerId < m_layers; ++layerId )
 	{
@@ -337,7 +337,7 @@ void ImageProcessTask::UpdateConstants()
 }
 
 
-void ImageProcessTask::Execute( CommandList& cmdContext )
+void ImageMipTask::Execute( CommandList& cmdContext )
 {
 	cmdContext.MarkerBeginRegion( m_dbgName.c_str(), ColorToVector( ColorPurple ) );
 

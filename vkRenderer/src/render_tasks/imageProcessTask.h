@@ -9,7 +9,7 @@ class ImageShaderTask;
 static const uint32_t MaxImageProcessSampleImages = 4;
 
 // Used for chained multi-pass processes such as MIP generation and downsampling
-struct imageProcessCreateInfo_t
+struct imageMipTaskCreateInfo_t
 {
 	const char*			name;
 	Image*				sourceImage;									// Input image to start the process. Same as outputImage when null
@@ -37,7 +37,7 @@ struct imageProcessCreateInfo_t
 };
 
 
-class ImageProcessTask : public GpuTask
+class ImageMipTask : public GpuTask
 {
 private:
 	static const uint32_t MaxMipMaps = 16;
@@ -74,12 +74,12 @@ private:
 
 public:
 
-	ImageProcessTask( const imageProcessCreateInfo_t& info )
+	ImageMipTask( const imageMipTaskCreateInfo_t& info )
 	{
 		Init( info );
 	}
 
-	void			Init( const imageProcessCreateInfo_t& info );
+	void			Init( const imageMipTaskCreateInfo_t& info );
 	void			Shutdown();
 
 	void			FrameBegin();
@@ -94,7 +94,7 @@ public:
 
 	void			Execute( CommandList& context ) override;
 
-	~ImageProcessTask() {
+	~ImageMipTask() {
 		Shutdown();
 	}
 };

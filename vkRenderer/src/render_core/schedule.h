@@ -2,7 +2,7 @@
 
 #include "renderer.h"
 
-class ImageProcessTask;
+class ImageMipTask;
 class ImageReadbackTask;
 class ImageShaderTask;
 class CopyImageTask;
@@ -24,15 +24,15 @@ struct RenderViewContext
 struct availableTasks_t
 {
 	// Prebaking Tasks
-	ImageProcessTask*	diffuseIBL						= nullptr;
+	ImageMipTask*	diffuseIBL						= nullptr;
 	ImageReadbackTask*	imageDiffuseIblReadbackTask		= nullptr;
-	ImageProcessTask*	specularIBL						= nullptr;
+	ImageMipTask*	specularIBL						= nullptr;
 	ImageReadbackTask*	imageSpecularIblReadBackTask	= nullptr;
 	ImageShaderTask*	brdfLutTask						= nullptr;
 	ImageReadbackTask*	readbackBrdfLut					= nullptr;
 	ImageShaderTask*	noiseGenTask					= nullptr;
 	ImageReadbackTask*	readbackNoiseImage				= nullptr;
-	ImageProcessTask*	mipCubeTask						= nullptr;
+	ImageMipTask*	mipCubeTask						= nullptr;
 	ImageReadbackTask*	imageCubemapReadBackTask		= nullptr;
 
 	// Core frame
@@ -41,20 +41,20 @@ struct availableTasks_t
 	ImageReadbackTask*	screenshotReadback				= nullptr;
 
 	// Image-Space
-	ImageProcessTask*	gaussianTask					= nullptr;
-	ImageProcessTask*	ssaoTask						= nullptr;
-	ImageProcessTask*	ssaoBlurTask					= nullptr;
-	ImageProcessTask*	dofCocTask						= nullptr;
+	ImageMipTask*	gaussianTask					= nullptr;
+	ImageMipTask*	ssaoTask						= nullptr;
+	ImageMipTask*	ssaoBlurTask					= nullptr;
+	ImageMipTask*	dofCocTask						= nullptr;
 	ComputeTask*		dofTileTask						= nullptr;
 	TransitionImageTask* transitionWriteDofTileTask		= nullptr;
 	TransitionImageTask* transitionReadDofTileTask		= nullptr;
-	ImageProcessTask*	dofBokehTask					= nullptr;
+	ImageMipTask*	dofBokehTask					= nullptr;
 	ImageShaderTask*	dofBlurTask						= nullptr;
 	CopyImageTask*		copyPreviousLuminance			= nullptr;
-	ImageProcessTask*	luminanceSceneAvg				= nullptr;
-	ImageProcessTask*	mipTask							= nullptr;
-	ImageProcessTask*	bloomDownsampleTask				= nullptr;
-	ImageProcessTask*	bloomUpsampleTask				= nullptr;
+	ImageMipTask*	luminanceSceneAvg				= nullptr;
+	ImageMipTask*	mipTask							= nullptr;
+	ImageMipTask*	bloomDownsampleTask				= nullptr;
+	ImageMipTask*	bloomUpsampleTask				= nullptr;
 };
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, TaskSchedule* schedule );

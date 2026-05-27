@@ -28,7 +28,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	{
 		if( config.computeDiffuseIbl )
 		{
-			imageProcessCreateInfo_t info = {};
+			imageMipTaskCreateInfo_t info = {};
 			info.name = "DiffuseIBL";
 			info.progName = "DiffuseIBL";
 			info.resourceImages[ 0 ] = resources->cubeFbColorImage;
@@ -55,7 +55,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.createInfos = { &imgInfo };
 			}
 
-			tasks.diffuseIBL = new ImageProcessTask( info );
+			tasks.diffuseIBL = new ImageMipTask( info );
 
 			// Readback
 			{
@@ -78,7 +78,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		if( config.computeSpecularIBL )
 		{
-			imageProcessCreateInfo_t info = {};
+			imageMipTaskCreateInfo_t info = {};
 			info.name = "SpecularIbl";
 			info.resourceImages[ 0 ] = resources->cubeFbColorImage;
 			info.context = renderContext;
@@ -102,7 +102,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				info.createInfos = { &imgInfo };
 			}
 
-			tasks.specularIBL = new ImageProcessTask( info );
+			tasks.specularIBL = new ImageMipTask( info );
 
 			{
 				const std::string fileName = std::string( config.cubemapName ) + "_specIbl.img";
@@ -170,7 +170,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.gaussianBlur )
 	{
-		imageProcessCreateInfo_t info {};
+		imageMipTaskCreateInfo_t info {};
 		info.name = "Separable Gaussian";
 		info.context = renderContext;
 		info.resources = resources;
@@ -180,7 +180,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.baseMip = 0;
 		info.multiPass = true;
 
-		tasks.gaussianTask = new ImageProcessTask( info );
+		tasks.gaussianTask = new ImageMipTask( info );
 	}
 
 	if( config.ssao )
@@ -215,7 +215,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			const ssaoConstants_t ssaoDefaults = { 0.5f, 16, 0.025f, 1.5f };
 
-			imageProcessCreateInfo_t info{};
+			imageMipTaskCreateInfo_t info{};
 			info.name = "SSAO";
 			info.context = renderContext;
 			info.resources = resources;
@@ -228,7 +228,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constants = &ssaoDefaults;
 			info.constantsByteSize = sizeof( ssaoDefaults );
 
-			tasks.ssaoTask = new ImageProcessTask( info );
+			tasks.ssaoTask = new ImageMipTask( info );
 
 #if defined( USE_IMGUI )
 			tasks.ssaoTask->RegisterControls( [ ssaoTask = tasks.ssaoTask ]()
@@ -277,7 +277,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			const bilateralConstants_t bilateralDefaults = { 1.0f, 0.0f, 0.0f, 0.0f };
 
-			imageProcessCreateInfo_t info{};
+			imageMipTaskCreateInfo_t info{};
 			info.name = "SSAO Bilateral Blur";
 			info.context = renderContext;
 			info.resources = resources;
@@ -291,7 +291,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constants = &bilateralDefaults;
 			info.constantsByteSize = sizeof( bilateralDefaults );
 
-			tasks.ssaoBlurTask = new ImageProcessTask( info );
+			tasks.ssaoBlurTask = new ImageMipTask( info );
 
 #if defined( USE_IMGUI )
 			tasks.ssaoBlurTask->RegisterControls( [ blurTask = tasks.ssaoBlurTask ]()
@@ -388,7 +388,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		// DoF Circle-of-Confusion Calculation
 		{
-			imageProcessCreateInfo_t info{};
+			imageMipTaskCreateInfo_t info{};
 			info.name = "DoF CoC";
 			info.context = renderContext;
 			info.resources = resources;
@@ -400,7 +400,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 			info.constantsByteSize = sizeof( dofShaderConstants_t );
 
-			tasks.dofCocTask = new ImageProcessTask( info );
+			tasks.dofCocTask = new ImageMipTask( info );
 
 #if defined( USE_IMGUI )
 			tasks.dofCocTask->RegisterControls( [ resources, view, task = tasks.dofCocTask ]()
@@ -538,7 +538,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				//} );
 			}
 
-			imageProcessCreateInfo_t info{};
+			imageMipTaskCreateInfo_t info{};
 			info.name = "DoF Bokeh";
 			info.context = renderContext;
 			info.resources = resources;
@@ -553,7 +553,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 
-			tasks.dofBokehTask = new ImageProcessTask( info );
+			tasks.dofBokehTask = new ImageMipTask( info );
 
 #if defined( USE_IMGUI )
 			tasks.dofBokehTask->RegisterControls( [ resources, view, task = tasks.dofBokehTask ]()
@@ -690,7 +690,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		// Average scene luminance
 		{
-			imageProcessCreateInfo_t info {};
+			imageMipTaskCreateInfo_t info {};
 			info.name = "LuminanceDownsample";
 			info.context = renderContext;
 			info.resources = resources;
@@ -701,14 +701,14 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.progressiveSampling = true;
 			info.progName = "LuminanceDownsample";
 
-			tasks.luminanceSceneAvg = new ImageProcessTask( info );
+			tasks.luminanceSceneAvg = new ImageMipTask( info );
 		}
 	}
 
 
 	if( config.downsampleScene )
 	{
-		imageProcessCreateInfo_t info {};
+		imageMipTaskCreateInfo_t info {};
 		info.name = "MainColorDownsample";
 		info.context = renderContext;
 		info.resources = resources;
@@ -717,7 +717,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progName = "DownSample";
 		info.baseMip = 1;
 
-		tasks.mipTask = new ImageProcessTask( info );
+		tasks.mipTask = new ImageMipTask( info );
 	}
 
 
@@ -743,7 +743,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		// First pass: Downsample
 		{
-			imageProcessCreateInfo_t info{};
+			imageMipTaskCreateInfo_t info{};
 			info.name = "BloomDownsample";
 			info.context = renderContext;
 			info.resources = resources;
@@ -754,7 +754,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.progressiveSampling = true;
 			info.progName = "BloomDownsample";
 
-			tasks.bloomDownsampleTask = new ImageProcessTask( info );
+			tasks.bloomDownsampleTask = new ImageMipTask( info );
 		}
 
 		// Second pass: Upsample
@@ -766,7 +766,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 			const bloomUpsampleConstants_t bloomUpsampleDefaults = { 0.005f };
 
-			imageProcessCreateInfo_t info{};
+			imageMipTaskCreateInfo_t info{};
 			info.name = "BloomUpsample";
 			info.context = renderContext;
 			info.resources = resources;
@@ -780,7 +780,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constants = &bloomUpsampleDefaults;
 			info.constantsByteSize = sizeof( bloomUpsampleDefaults );
 
-			tasks.bloomUpsampleTask = new ImageProcessTask( info );
+			tasks.bloomUpsampleTask = new ImageMipTask( info );
 
 #if defined( USE_IMGUI )
 			tasks.bloomUpsampleTask->RegisterControls( [ bloomUpsampleTask = tasks.bloomUpsampleTask ]()
@@ -800,7 +800,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	{
 		assert( config.useCubeViews );
 
-		imageProcessCreateInfo_t info {};
+		imageMipTaskCreateInfo_t info {};
 		info.name = "CubeDownsample";
 		info.context = renderContext;
 		info.resources = resources;
@@ -808,7 +808,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		info.progressiveSampling = true;
 		info.baseMip = 1;
 
-		tasks.mipCubeTask = new ImageProcessTask( info );
+		tasks.mipCubeTask = new ImageMipTask( info );
 	}
 
 
