@@ -17,6 +17,343 @@
 
 static availableTasks_t tasks;
 
+SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
+{
+	if( config.dof == false )
+	{
+		return nullptr;
+	}
+
+	const uint32_t displayWidth = renderContext->GetDisplayWidth();
+	const uint32_t displayHeight = renderContext->GetDisplayHeight();
+
+	// Constants for all DoF Passes
+
+	struct dofUserConstants_t
+	{
+		vec4f		srcDepthDimensions;
+		uint32_t	viewId;
+		float		focalLengthMM;
+		float		focalPlaneDistanceMM;
+		float		apertureDiameterMM;
+		float		maxCocRadius;
+	};
+
+	struct dofShaderConstants_t
+	{
+		vec4f		srcDepthDimensions;
+		uint32_t	viewId;
+		float		focalLength;
+		float		focalPlaneDistance;
+		float		apertureDiameter;
+		float		maxCocRadius;
+	};
+
+	SubScheduleTask* dofSchedule = new SubScheduleTask( "DoF", sizeof( dofShaderConstants_t ) );
+
+	const RenderView* view = viewContext->renderViews[ 0 ];
+
+	struct dofBokeh_t
+	{
+		vec4f	tileMapDimensions;
+		vec2f	samples[ 49 ];
+	};
+
+	const float cocTileSize = 16.0f;
+
+	dofBokeh_t dofBokehDefaults{};
+	dofBokehDefaults.tileMapDimensions.x = static_cast<float>( displayWidth ) / cocTileSize;
+	dofBokehDefaults.tileMapDimensions.y = static_cast<float>( displayHeight ) / cocTileSize;
+	dofBokehDefaults.tileMapDimensions.z = 1.0f / dofBokehDefaults.tileMapDimensions.x;
+	dofBokehDefaults.tileMapDimensions.w = 1.0f / dofBokehDefaults.tileMapDimensions.y;
+
+	const uint32_t N = 7;
+	const uint32_t N2 = ( N * N );
+
+	ShirleyConcentricSamplerGen sampler( 5 );
+	sampler.AddRange( 0, static_cast<float>( N ) );
+	for( uint32_t s = 0; s < N2; ++s )
+	{
+		dofBokehDefaults.samples[ s ] = sampler.Sample2D();
+	}
+
+	// Image
+	{
+		imageInfo_t info{};
+		info.width = displayWidth;
+		info.height = displayHeight;
+		info.mipLevels = 1;
+		info.layers = 1;
+		info.subsamples = IMAGE_SMP_1;
+		info.fmt = IMAGE_FMT_RG_16;
+		info.type = IMAGE_TYPE_2D;
+		info.tiling = IMAGE_TILING_MORTON;
+
+		resources->dofCocImage->Create(
+			info,
+			"FB_dofCoc", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+		);
+	}
+
+	static dofUserConstants_t userParms{};
+
+	userParms.focalLengthMM = 14.0f;
+	userParms.focalPlaneDistanceMM = 10000.0f;
+	userParms.apertureDiameterMM = 25.0f;
+	userParms.maxCocRadius = 16.0f;
+	userParms.viewId = view->GetViewBufferUploadId();
+	userParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+	userParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+	userParms.srcDepthDimensions.z = 1.0f / userParms.srcDepthDimensions.x;
+	userParms.srcDepthDimensions.w = 1.0f / userParms.srcDepthDimensions.y;
+
+#if defined( USE_IMGUI )
+	dofSchedule->RegisterControls( [ resources, view, task = dofSchedule ]()
+		{
+			bool changed = false;
+			changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
+			changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
+			changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
+			changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
+		} );
+#endif
+
+	dofSchedule->RegisterFrameBeginCallback( [ resources, view, task = dofSchedule ]()
+		{
+			dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+
+			dofParms.viewId = view->GetViewBufferUploadId();
+			dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+			dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+			dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
+			dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+
+			dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
+			dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
+			dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
+			dofParms.maxCocRadius = userParms.maxCocRadius;
+		} );
+
+	// DoF Circle-of-Confusion Calculation
+	{
+		imageMipTaskCreateInfo_t info{};
+		info.name = "DoF CoC";
+		info.context = renderContext;
+		info.resources = resources;
+		info.outputImage = resources->dofCocImage;
+		info.progName = "DofCoc";
+		info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
+		info.baseMip = 0;
+		info.mipCount = 1;
+		info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
+		info.constantsByteSize = sizeof( dofShaderConstants_t );
+
+		ImageMipTask* cocTask = new ImageMipTask( info );
+
+		cocTask->RegisterFrameBeginCallback( [ resources, view, task = dofSchedule, subtask = cocTask ]()
+			{
+				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+
+				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
+
+				destDofParms = dofParms;
+
+				subtask->UpdateConstants();
+			} );
+
+		dofSchedule->Link( cocTask );
+	}
+
+	// DoF Tile min/max CoC binning
+	{
+		{
+			imageInfo_t info{};
+			info.width = (uint32_t)( displayWidth / cocTileSize );
+			info.height = (uint32_t)( displayHeight / cocTileSize );
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_RGBA_32;
+			info.type = IMAGE_TYPE_2D;
+			info.tiling = IMAGE_TILING_MORTON;
+
+			resources->dofTileCocImage->Create(
+				info,
+				"FB_dofTileCoc", GPU_IMAGE_STORAGE | GPU_IMAGE_READ, resourceLifeTime_t::RESIZE
+			);
+
+			resources->dofTileCocImage->RegisterResize( [ info, cocTileSize ]( uint32_t w, uint32_t h )->imageInfo_t
+				{
+					imageInfo_t resized = info;
+					resized.width = (uint32_t)( w / cocTileSize );
+					resized.height = (uint32_t)( h / cocTileSize );
+					return resized;
+				} );
+		}
+
+		BINDING( dofSourceImage, IMAGE_2D, 1, BIND_STATE_CS );
+
+		const uint64_t bindset_dofTile = renderContext->CreateBindSet( "bindset_dofTile", {
+			BINDING_NAME( globalsBuffer ),
+			BINDING_NAME( viewBuffer ),
+			BINDING_NAME( dofSourceImage ),
+			BINDING_NAME( computeWriteImage ),
+			} );
+
+		Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "DofTileMinMax" );
+		GpuProgram& prog = progAsset->Get();
+		prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
+		prog.bindsetCount = 1;
+
+		computeTaskCreateInfo_t info{};
+		info.name = "DoF Tile MinMax";
+		info.context = renderContext;
+		info.resources = resources;
+		info.progName = "DofTileMinMax";
+		info.imageTileSizeX = (uint32_t)cocTileSize;
+		info.imageTileSizeY = (uint32_t)cocTileSize;
+		info.image = resources->depthStencilResolvedImage;
+		info.constants = &userParms;
+		info.constantsByteSize = sizeof( userParms );
+		info.bindSetId = bindset_dofTile;
+		info.bind = [ resources, view ]( ComputeTask* task, ShaderBindParms* p )
+			{
+				p->Bind( BINDING_NAME( globalsBuffer ), &resources->globalConstants );
+				p->Bind( BINDING_NAME( viewBuffer ), &resources->viewParms );
+				p->Bind( BINDING_NAME( dofSourceImage ), resources->depthStencilResolvedImage );
+				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
+			};
+
+		TransitionImageTask* transitionWriteDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_STORAGE );
+
+		ComputeTask* tileTask = new ComputeTask( info );
+
+		tileTask->RegisterFrameBeginCallback( [ resources, view, parentTask = dofSchedule, subtask = tileTask ]()
+			{
+				const dofShaderConstants_t& sourceDofParms = *parentTask->GetConstants<dofShaderConstants_t>();
+				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
+
+				destDofParms = sourceDofParms;
+			} );
+
+		TransitionImageTask* transitionReadDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_STORAGE, gpuImageStateFlags_t::GPU_IMAGE_READ );
+
+		dofSchedule->Link( transitionWriteDofTileTask );
+		dofSchedule->Link( tileTask );
+		dofSchedule->Link( transitionReadDofTileTask );
+	}
+
+	// DoF Blur Calculation
+	{
+		// Image
+		{
+			// TODO: Make Half-res
+			imageInfo_t info{};
+			info.width = ( displayWidth );
+			info.height = ( displayHeight );
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_R11G11B10_US;
+			info.type = IMAGE_TYPE_2D;
+			info.tiling = IMAGE_TILING_MORTON;
+
+			resources->dofBokeh->Create(
+				info,
+				"FB_dofBokeh", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+			);
+
+			//resources->dofBokeh->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+			//{
+			//	imageInfo_t resized = info;
+			//	resized.width = ( w / 2 );
+			//	resized.height = ( h / 2 );
+			//	return resized;
+			//} );
+		}
+
+		imageMipTaskCreateInfo_t info{};
+		info.name = "DoF Bokeh";
+		info.context = renderContext;
+		info.resources = resources;
+		info.outputImage = resources->dofBokeh;
+		info.progName = "DofBokeh";
+		info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
+		info.resourceImages[ 1 ] = resources->dofTileCocImage;
+		info.resourceImages[ 2 ] = resources->dofCocImage;
+		info.baseMip = 0;
+		info.mipCount = 1;
+		info.viewId = view->GetViewBufferUploadId();
+		info.constants = &dofBokehDefaults;
+		info.constantsByteSize = sizeof( dofBokehDefaults );
+
+		ImageMipTask* bokehTask = new ImageMipTask( info );
+
+#if defined( USE_IMGUI )
+		bokehTask->RegisterControls( [ resources, view, task = bokehTask ]()
+			{
+				dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
+
+				bool changed = false;
+
+				if( changed )
+				{
+					task->UpdateConstants();
+				}
+			} );
+#endif
+		dofSchedule->Link( bokehTask );
+	}
+
+	// DoF Blur
+	{
+		{
+			imageInfo_t info{};
+			info.width = ( displayWidth );
+			info.height = ( displayHeight );
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_R11G11B10_US;
+			info.type = IMAGE_TYPE_2D;
+			info.tiling = IMAGE_TILING_MORTON;
+
+			resources->dofBlur->Create(
+				info,
+				"FB_dofBlur", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+			);
+
+			//resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
+			//{
+			//	imageInfo_t resized = info;
+			//	resized.width = ( w / 2 );
+			//	resized.height = ( h / 2 );
+			//	return resized;
+			//} );
+		}
+
+		imageShaderCreateInfo_t info{};
+		info.name = "DoF Blur";
+		info.context = renderContext;
+		info.resources = resources;
+		info.outputImage = resources->dofBlur;
+		info.progHdl = AssetLibGpuProgram::Handle( "DofBlur" );
+		info.resourceImages[ 0 ] = resources->dofBokeh;
+		info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
+		info.resourceImages[ 2 ] = resources->dofCocImage;
+		info.resourceImages[ 3 ] = resources->dofTileCocImage;
+		info.passCount = 2;
+		info.constants = &dofBokehDefaults;
+		info.constantsByteSize = sizeof( dofBokehDefaults );
+
+		ImageShaderTask* blurTask = new ImageShaderTask( info );
+
+		dofSchedule->Link( blurTask );
+	}
+
+	return dofSchedule;
+}
+
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
 {
 	SCOPED_TIMER_PRINT( ScheduleBuild, MILLISECOND )
@@ -306,331 +643,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 	}
 
-	if( config.dof )
-	{
-		// Constants for all DoF Passes
-
-		struct dofUserConstants_t
-		{
-			vec4f		srcDepthDimensions;
-			uint32_t	viewId;
-			float		focalLengthMM;
-			float		focalPlaneDistanceMM;
-			float		apertureDiameterMM;
-			float		maxCocRadius;
-		};
-
-		struct dofShaderConstants_t
-		{
-			vec4f		srcDepthDimensions;
-			uint32_t	viewId;
-			float		focalLength;
-			float		focalPlaneDistance;
-			float		apertureDiameter;
-			float		maxCocRadius;
-		};
-
-		tasks.dof = new SubScheduleTask( "DoF", sizeof(dofShaderConstants_t));
-
-		const RenderView* view = viewContext->renderViews[ 0 ];
-
-		struct dofBokeh_t
-		{
-			vec4f	tileMapDimensions;
-			vec2f	samples[ 49 ];
-		};
-
-		const float cocTileSize = 16.0f;
-
-		dofBokeh_t dofBokehDefaults{};
-		dofBokehDefaults.tileMapDimensions.x = static_cast<float>( displayWidth ) / cocTileSize;
-		dofBokehDefaults.tileMapDimensions.y = static_cast<float>( displayHeight ) / cocTileSize;
-		dofBokehDefaults.tileMapDimensions.z = 1.0f / dofBokehDefaults.tileMapDimensions.x;
-		dofBokehDefaults.tileMapDimensions.w = 1.0f / dofBokehDefaults.tileMapDimensions.y;
-
-		const uint32_t N = 7;
-		const uint32_t N2 = ( N * N );
-
-		ShirleyConcentricSamplerGen sampler( 5 );
-		sampler.AddRange( 0, static_cast<float>( N ) );
-		for( uint32_t s = 0; s < N2; ++s )
-		{
-			dofBokehDefaults.samples[ s ] = sampler.Sample2D();
-		}
-
-		// Image
-		{
-			imageInfo_t info{};
-			info.width = displayWidth;
-			info.height = displayHeight;
-			info.mipLevels = 1;
-			info.layers = 1;
-			info.subsamples = IMAGE_SMP_1;
-			info.fmt = IMAGE_FMT_RG_16;
-			info.type = IMAGE_TYPE_2D;
-			info.tiling = IMAGE_TILING_MORTON;
-
-			resources->dofCocImage->Create(
-				info,
-				"FB_dofCoc", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
-			);
-		}
-
-		static dofUserConstants_t userParms{};
-
-		userParms.focalLengthMM = 14.0f;
-		userParms.focalPlaneDistanceMM = 10000.0f;
-		userParms.apertureDiameterMM = 25.0f;
-		userParms.maxCocRadius = 16.0f;
-		userParms.viewId = view->GetViewBufferUploadId();
-		userParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-		userParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-		userParms.srcDepthDimensions.z = 1.0f / userParms.srcDepthDimensions.x;
-		userParms.srcDepthDimensions.w = 1.0f / userParms.srcDepthDimensions.y;
-
-#if defined( USE_IMGUI )
-		tasks.dof->RegisterControls( [ resources, view, task = tasks.dof ]()
-		{
-			bool changed = false;
-			changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
-			changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
-			changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
-			changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
-		} );
-#endif
-
-		tasks.dof->RegisterFrameBeginCallback( [ resources, view, task = tasks.dof ]()
-		{
-			dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
-
-			dofParms.viewId = view->GetViewBufferUploadId();
-			dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-			dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-			dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
-			dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
-
-			dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
-			dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
-			dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
-			dofParms.maxCocRadius = userParms.maxCocRadius;
-		} );
-
-		// DoF Circle-of-Confusion Calculation
-		{
-			imageMipTaskCreateInfo_t info{};
-			info.name = "DoF CoC";
-			info.context = renderContext;
-			info.resources = resources;
-			info.outputImage = resources->dofCocImage;
-			info.progName = "DofCoc";
-			info.resourceImages[ 0 ] = resources->depthStencilResolvedImage;
-			info.baseMip = 0;
-			info.mipCount = 1;
-			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
-			info.constantsByteSize = sizeof( dofShaderConstants_t );
-
-			ImageMipTask* cocTask = new ImageMipTask( info );
-
-			cocTask->RegisterFrameBeginCallback( [ resources, view, task = tasks.dof, subtask = cocTask ]()
-			{
-				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
-
-				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
-
-				destDofParms = dofParms;
-
-				subtask->UpdateConstants();
-			} );
-
-			tasks.dof->Link(cocTask );
-		}
-
-		// DoF Tile min/max CoC binning
-		{
-			{
-				imageInfo_t info{};
-				info.width = (uint32_t)( displayWidth / cocTileSize );
-				info.height = (uint32_t)( displayHeight / cocTileSize );
-				info.mipLevels = 1;
-				info.layers = 1;
-				info.subsamples = IMAGE_SMP_1;
-				info.fmt = IMAGE_FMT_RGBA_32;
-				info.type = IMAGE_TYPE_2D;
-				info.tiling = IMAGE_TILING_MORTON;
-
-				resources->dofTileCocImage->Create(
-					info,
-					"FB_dofTileCoc", GPU_IMAGE_STORAGE | GPU_IMAGE_READ, resourceLifeTime_t::RESIZE
-				);
-
-				resources->dofTileCocImage->RegisterResize( [ info, cocTileSize ]( uint32_t w, uint32_t h )->imageInfo_t
-				{
-					imageInfo_t resized = info;
-					resized.width = (uint32_t)( w / cocTileSize );
-					resized.height = (uint32_t)( h / cocTileSize );
-					return resized;
-				} );
-			}
-
-			BINDING( dofSourceImage, IMAGE_2D, 1, BIND_STATE_CS );
-
-			const uint64_t bindset_dofTile = renderContext->CreateBindSet( "bindset_dofTile", {
-				BINDING_NAME( globalsBuffer ),
-				BINDING_NAME( viewBuffer ),
-				BINDING_NAME( dofSourceImage ),
-				BINDING_NAME( computeWriteImage ),
-			} );
-
-			Asset<GpuProgram>* progAsset = GpuProgramLib().Find( "DofTileMinMax" );
-			GpuProgram& prog = progAsset->Get();
-			prog.bindsets[ 0 ] = renderContext->LookupBindSet( "bindset_dofTile" );
-			prog.bindsetCount = 1;
-
-			computeTaskCreateInfo_t info{};
-			info.name = "DoF Tile MinMax";
-			info.context = renderContext;
-			info.resources = resources;
-			info.progName = "DofTileMinMax";
-			info.imageTileSizeX = (uint32_t)cocTileSize;
-			info.imageTileSizeY = (uint32_t)cocTileSize;
-			info.image = resources->depthStencilResolvedImage;
-			info.constants = &userParms;
-			info.constantsByteSize = sizeof( userParms );
-			info.bindSetId = bindset_dofTile;
-			info.bind = [ resources, view ]( ComputeTask* task, ShaderBindParms* p )
-			{
-				p->Bind( BINDING_NAME( globalsBuffer ), &resources->globalConstants );
-				p->Bind( BINDING_NAME( viewBuffer ), &resources->viewParms );
-				p->Bind( BINDING_NAME( dofSourceImage ), resources->depthStencilResolvedImage );
-				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
-			};
-
-			TransitionImageTask* transitionWriteDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_STORAGE );
-
-			ComputeTask* tileTask = new ComputeTask( info );
-
-			tileTask->RegisterFrameBeginCallback( [ resources, view, parentTask = tasks.dof, subtask = tileTask]()
-			{
-				const dofShaderConstants_t& sourceDofParms = *parentTask->GetConstants<dofShaderConstants_t>();
-				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
-
-				destDofParms = sourceDofParms;
-			} );
-
-			TransitionImageTask* transitionReadDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_STORAGE, gpuImageStateFlags_t::GPU_IMAGE_READ );
-		
-			tasks.dof->Link(transitionWriteDofTileTask );
-			tasks.dof->Link(tileTask );
-			tasks.dof->Link(transitionReadDofTileTask );
-		}
-
-		// DoF Blur Calculation
-		{
-			// Image
-			{
-				// TODO: Make Half-res
-				imageInfo_t info{};
-				info.width = ( displayWidth  );
-				info.height = ( displayHeight  );
-				info.mipLevels = 1;
-				info.layers = 1;
-				info.subsamples = IMAGE_SMP_1;
-				info.fmt = IMAGE_FMT_R11G11B10_US;
-				info.type = IMAGE_TYPE_2D;
-				info.tiling = IMAGE_TILING_MORTON;
-
-				resources->dofBokeh->Create(
-					info,
-					"FB_dofBokeh", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
-				);
-
-				//resources->dofBokeh->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
-				//{
-				//	imageInfo_t resized = info;
-				//	resized.width = ( w / 2 );
-				//	resized.height = ( h / 2 );
-				//	return resized;
-				//} );
-			}
-
-			imageMipTaskCreateInfo_t info{};
-			info.name = "DoF Bokeh";
-			info.context = renderContext;
-			info.resources = resources;
-			info.outputImage = resources->dofBokeh;
-			info.progName = "DofBokeh";
-			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
-			info.resourceImages[ 1 ] = resources->dofTileCocImage;
-			info.resourceImages[ 2 ] = resources->dofCocImage;
-			info.baseMip = 0;
-			info.mipCount = 1;
-			info.viewId = view->GetViewBufferUploadId();
-			info.constants = &dofBokehDefaults;
-			info.constantsByteSize = sizeof( dofBokehDefaults );
-
-			ImageMipTask* bokehTask = new ImageMipTask( info );
-
-#if defined( USE_IMGUI )
-			bokehTask->RegisterControls( [ resources, view, task = bokehTask ]()
-			{
-				dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
-
-				bool changed = false;
-
-				if( changed ) {
-					task->UpdateConstants();
-				}
-			} );
-#endif
-			tasks.dof->Link(bokehTask );
-		}
-
-		// DoF Blur
-		{
-			{
-				imageInfo_t info{};
-				info.width = ( displayWidth );
-				info.height = ( displayHeight );
-				info.mipLevels = 1;
-				info.layers = 1;
-				info.subsamples = IMAGE_SMP_1;
-				info.fmt = IMAGE_FMT_R11G11B10_US;
-				info.type = IMAGE_TYPE_2D;
-				info.tiling = IMAGE_TILING_MORTON;
-
-				resources->dofBlur->Create(
-					info,
-					"FB_dofBlur", GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
-				);
-
-				//resources->dofBlur->RegisterResize( [ info ]( uint32_t w, uint32_t h )->imageInfo_t
-				//{
-				//	imageInfo_t resized = info;
-				//	resized.width = ( w / 2 );
-				//	resized.height = ( h / 2 );
-				//	return resized;
-				//} );
-			}
-
-			imageShaderCreateInfo_t info{};
-			info.name = "DoF Blur";
-			info.context = renderContext;
-			info.resources = resources;
-			info.outputImage = resources->dofBlur;
-			info.progHdl = AssetLibGpuProgram::Handle( "DofBlur" );
-			info.resourceImages[ 0 ] = resources->dofBokeh;
-			info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
-			info.resourceImages[ 2 ] = resources->dofCocImage;
-			info.resourceImages[ 3 ] = resources->dofTileCocImage;
-			info.passCount = 2;
-			info.constants = &dofBokehDefaults;
-			info.constantsByteSize = sizeof( dofBokehDefaults );
-
-			ImageShaderTask* blurTask = new ImageShaderTask( info );
-
-			tasks.dof->Link(blurTask );
-		}
-	}
+	tasks.dof = BuildDofGraph( config, renderContext, resources, viewContext, schedule );
 
 	if( config.autoExposure )
 	{
@@ -965,15 +978,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			schedule->Link( tasks.ssaoBlurTask );
 		}
 	}
-	if( config.dof )
+	if( tasks.dof )
 	{
 		schedule->Link( tasks.dof );
-		//schedule->Link( tasks.dofCocTask );
-		//schedule->Link( tasks.transitionWriteDofTileTask );
-		//schedule->Link( tasks.dofTileTask );
-		//schedule->Link( tasks.transitionReadDofTileTask );
-		//schedule->Link( tasks.dofBokehTask );
-		//schedule->Link( tasks.dofBlurTask );
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
