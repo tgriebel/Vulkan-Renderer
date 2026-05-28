@@ -1,7 +1,12 @@
 #include "globals.h"
 #include "util.h"
 
-PS_LAYOUT_STANDARD( Texture2D )
+struct postProcess_t
+{
+    float4 padding;
+};
+
+PS_LAYOUT_IMAGE_SHADER( Texture2D, postProcess_t )
 
 
 float SampleCoverage( const int2 pos, Texture2D depthTexture )
@@ -82,56 +87,18 @@ float3 ApplyTonemap( const Texture2D luminanceTexture, const float3 sceneColor )
 }
 
 
-float3 ApplyChromaticAberration( const Texture2D sceneTexture, const float3 sceneColor, const float2 uv )
-{
-	float3 caColor;
-	
-	if ( globals.chromaticAberration.x != 0.0f )
-	{
-		const float intensity = globals.chromaticAberration.y;
-
-		const float2 dir = ( uv - 0.5f ); // direction from center
-		const float dist = length( dir );
-
-		const float2 offset = dir * dist * intensity;
-
-		const float r = sceneTexture.Sample( bilinearSamplerClampEdge, uv + offset ).r;
-		const float g = sceneColor.g;
-		const float b = sceneTexture.Sample( bilinearSamplerClampEdge, uv - offset ).b;
-		
-		caColor = float3( r, g, b );
-	}
-	else
-	{
-		caColor = sceneColor;
-	}
-	return caColor;
-}
-
-
 psOutput_t PSMain( vsToPsInterpolators input )
 {
     psOutput_t output = (psOutput_t)0;
 
-    const uint materialId = pushConstants.materialId;
-    const uint viewlId = pushConstants.viewId;
+    const gpuView_t view = views[ viewId ];
 
-	const gpuView_t view = views[viewlId];
-	const gpuMaterial_t material = materials[materialId];
-
-    const uint textureId0 = material.textureId[ 0 ];
-	const uint textureId1 = material.textureId[ 1 ];
-	const uint textureId2 = material.textureId[ 2 ];
-	const uint textureId3 = material.textureId[ 3 ];
-	const uint textureId4 = material.textureId[ 4 ];
-	const uint textureId5 = material.textureId[ 5 ];
-	
-	Texture2D sceneTexture = localTextures[ textureId0 ];
-	Texture2D depthTexture = localTextures[ textureId1 ];
-	Texture2D dofTexture = localTextures[ textureId2 ];
-    Texture2D luminanceTexture = localTextures[ textureId3 ];
-	Texture2D bloomTexture = localTextures[ textureId4 ];
-	Texture2D dofCocTexture = localTextures[ textureId5 ];
+	Texture2D sceneTexture = localTextures[ 0 ];
+	Texture2D depthTexture = localTextures[ 1 ];
+	Texture2D dofTexture = localTextures[ 2 ];
+    Texture2D luminanceTexture = localTextures[ 3 ];
+	Texture2D bloomTexture = localTextures[ 4 ];
+	Texture2D dofCocTexture = localTextures[ 5 ];
 
     const float4x4 viewMat = view.viewMat;
     const float3 forward = -normalize( viewMat[2].xyz );
@@ -161,8 +128,6 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const float3 tint = globals.toneMapTint.rgb;
 
 	float3 finalColor = tint * hdrColor;
-
-	finalColor = ApplyChromaticAberration( sceneTexture, finalColor, input.uv0.xy );
 
 	finalColor = ApplyBloom( bloomTexture, finalColor, input.uv0.xy );
 

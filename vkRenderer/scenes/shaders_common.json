@@ -96,8 +96,10 @@
     },
     {
       "name": "PostProcess",
-      "vs": "default",
-      "ps": "postProcess"
+      "vs": "fullscreen",
+      "ps": "postProcess",
+	  "bindset": "bindset_imageShader",
+	  "image_shader": true
     },
     {
       "name": "ImageViewer",
@@ -199,6 +201,13 @@
       "name": "DofBlur",
       "vs": "fullscreen",
       "ps": "dofBlur",
+	  "bindset": "bindset_imageShader",
+	  "image_shader": true
+    },
+	{
+      "name": "ChromaticAberration",
+      "vs": "fullscreen",
+      "ps": "chromaticAberration",
 	  "bindset": "bindset_imageShader",
 	  "image_shader": true
     },

@@ -684,6 +684,9 @@
     <FxCompile Include="shaders\dofBlur.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="shaders\chromaticAberration.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\external\GfxCore\GfxCore\math\vector.natvis" />

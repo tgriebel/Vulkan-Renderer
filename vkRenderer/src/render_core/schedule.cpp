@@ -15,6 +15,8 @@
 #include "../render_binding/bindings.h"
 #include <GfxCore/math/samplerGen.h>
 
+#include "swapChain.h"
+
 static availableTasks_t tasks;
 
 SubScheduleTask* BuildDofSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext )
@@ -980,6 +982,46 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 	}
 
+	if( 1 )
+	{
+		tasks.postProcessChain = new SubScheduleTask( "Post-Process" );
+
+		// This is a ping-pong chain
+
+		// Main Post-Process
+		{
+			imageShaderCreateInfo_t info = {};
+			info.name = "Post-Process";
+			info.progHdl = AssetLibGpuProgram::Handle( "PostProcess" );
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = resources->tempColorImage;
+			info.resourceImages[ 0 ] = resources->mainColorResolvedImage;
+			info.resourceImages[ 1 ] = resources->depthStencilResolvedImage;
+			info.resourceImages[ 2 ] = resources->dofBokeh;
+			info.resourceImages[ 3 ] = resources->currentLum;
+			info.resourceImages[ 4 ] = resources->bloom;
+			info.resourceImages[ 5 ] = resources->dofCocImage;
+
+			tasks.postProcessChain->Link( new ImageShaderTask( info ) );
+		}
+
+		// Chromatic Aberration
+		{
+			imageShaderCreateInfo_t info = {};
+			info.name = "ChromaticAberration";
+			info.progHdl = AssetLibGpuProgram::Handle( "ChromaticAberration" );
+			info.context = renderContext;
+			info.resources = resources;
+			info.outputImage = g_swapChain.GetBackBuffer();
+			info.resourceImages[ 0 ] = resources->tempColorImage;
+
+			tasks.postProcessChain->Link( new ImageShaderTask( info ) );
+		}
+
+		tasks.postProcessChain->Link( new TransitionImageTask( g_swapChain.GetBackBuffer(), gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_WRITE ) );
+	}
+
 	if( config.screenshot )
 	{
 		imageReadBackCreateInfo_t info {};
@@ -1065,9 +1107,15 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	if( config.gaussianBlur ) {
 		schedule->Link( tasks.gaussianTask );
 	}
+
+	if( tasks.postProcessChain ) {
+		schedule->Link( tasks.postProcessChain );
+	}
+
 	schedule->Link( new RenderTask( viewContext->view2Ds[ 0 ], DRAWPASS_2D, DRAWPASS_2D ) );
 	schedule->Link( new ImguiTask( viewContext->view2Ds[ 0 ]->passes[ 0 ][ DRAWPASS_DEBUG_2D ], renderContext, resources, false ) );
-	schedule->Link( new RenderTask( viewContext->view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) ); // FIXME: Causes framebuffer resize issue due to multiple calls to Resize()
+	schedule->Link( new RenderTask( viewContext->view2Ds[ 0 ], DRAWPASS_DEBUG_2D, DRAWPASS_DEBUG_2D ) );
+	//schedule->Link( new TransitionImageTask( g_swapChain.GetBackBuffer(), gpuImageStateFlags_t::GPU_IMAGE_WRITE, gpuImageStateFlags_t::GPU_IMAGE_PRESENT ) );
 
 	schedule->AsString();
 }

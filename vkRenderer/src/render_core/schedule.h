@@ -51,6 +51,8 @@ struct availableTasks_t
 	ImageMipTask*		mipTask							= nullptr;
 	ImageMipTask*		bloomDownsampleTask				= nullptr;
 	ImageMipTask*		bloomUpsampleTask				= nullptr;
+
+	SubScheduleTask*	postProcessChain				= nullptr;
 };
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, TaskSchedule* schedule );

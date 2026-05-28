@@ -12,7 +12,7 @@ class ResourceContext;
 
 class ImageShaderTask;
 
-static const uint32_t MaxImageShaderSampleImages = 4;
+static const uint32_t MaxImageShaderSampleImages = 6;
 
 struct imageShaderCreateInfo_t
 {

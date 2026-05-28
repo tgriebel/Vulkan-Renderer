@@ -223,7 +223,7 @@ void Renderer::Init( const renderConfig_t& cfg )
 		info.fbImages.swapBuffering = swapBuffering_t::MULTI_FRAME;
 		info.fbImages.color0 = g_swapChain.GetBackBuffer();
 
-		info.clear = true;
+		info.clear = false;
 		info.clearColor = vec4f( 0.0f, 0.5f, 0.5f, 1.0f );
 		info.finalize = true;
 

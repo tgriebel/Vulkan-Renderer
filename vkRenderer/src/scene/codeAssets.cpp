@@ -172,16 +172,6 @@ void CreateCodeAssets()
 		{
 			Material material;
 			material.usage = MATERIAL_USAGE_CODE;
-			material.AddShader( DRAWPASS_2D, AssetLibGpuProgram::Handle( "PostProcess" ) );
-			for ( uint32_t i = 0; i < MaxMaterialTextures; ++i ) {
-				material.AddTexture( i, i );
-			}
-			MaterialLib().Add( "TONEMAP", material );
-		}
-
-		{
-			Material material;
-			material.usage = MATERIAL_USAGE_CODE;
 			material.AddShader( DRAWPASS_DEBUG_2D, AssetLibGpuProgram::Handle( "Basic" ) );
 			MaterialLib().Add( "IMAGE2D", material );
 		}
@@ -209,11 +199,6 @@ void CreateCodeAssets()
 
 	// ----------------- MODELS ----------------- //
 	{
-		{
-			Model model;
-			CreateQuadSurface2D( model, "TONEMAP", vec2f( 0.0f, 0.0f ), vec2f( 2.0f ) );
-			ModelLib().Add( "_postProcessQuad", model );
-		}
 		{
 			Model model;
 			CreateQuadSurface2D( model, "IMAGE2D", vec2f( 0.0f, 0.0f ), vec2f( 1.0f, 1.0f ) );
