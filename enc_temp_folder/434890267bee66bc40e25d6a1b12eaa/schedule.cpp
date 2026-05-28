@@ -1109,8 +1109,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		schedule->Link( tasks.gaussianTask );
 	}
 
-	if( tasks.postProcessChain )
-	{
+	if( tasks.postProcessChain ) {
 		schedule->Link( tasks.postProcessChain );
 		schedule->Link( new TransitionImageTask( g_swapChain.GetBackBuffer(), gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_WRITE ) );
 	}
