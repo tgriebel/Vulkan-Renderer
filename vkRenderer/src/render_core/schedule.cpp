@@ -17,13 +17,8 @@
 
 static availableTasks_t tasks;
 
-SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
+SubScheduleTask* BuildDofSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext )
 {
-	if( config.dof == false )
-	{
-		return nullptr;
-	}
-
 	const uint32_t displayWidth = renderContext->GetDisplayWidth();
 	const uint32_t displayHeight = renderContext->GetDisplayHeight();
 
@@ -368,6 +363,71 @@ SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* ren
 	return dofSchedule;
 }
 
+
+SubScheduleTask* BuildDiffuseIblSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext )
+{
+	SubScheduleTask* diffuseIblSchedule = new SubScheduleTask( "Diffuse IBL" );
+
+	ImageMipTask* diffuseIBL = nullptr;
+
+	// Main task
+	{
+		imageMipTaskCreateInfo_t info = {};
+		info.name = "DiffuseIBL";
+		info.progName = "DiffuseIBL";
+		info.resourceImages[ 0 ] = resources->cubeFbColorImage;
+		info.context = renderContext;
+		info.resources = resources;
+		info.baseMip = 0;
+		info.mipCount = 1;
+		info.taskImageCount = 1;
+
+		// Temp image
+		imageInfo_t imgInfo{};
+		{
+			imgInfo.width = 32;
+			imgInfo.height = 32;
+			imgInfo.mipLevels = 1;
+			imgInfo.layers = 6;
+			imgInfo.channels = 4;
+			imgInfo.subsamples = IMAGE_SMP_1;
+			imgInfo.fmt = IMAGE_FMT_RGBA_16;
+			imgInfo.type = IMAGE_TYPE_CUBE;
+			imgInfo.tiling = IMAGE_TILING_MORTON;
+
+			info.taskImageCount = 1;
+			info.createInfos = { &imgInfo };
+		}
+
+		diffuseIBL = new ImageMipTask( info );
+		diffuseIblSchedule->Link( diffuseIBL );
+	}
+
+
+	// Readback
+	{
+		const std::string fileName = std::string( config.cubemapName ) + "_diffuseIbl.img";
+
+		imageReadBackCreateInfo_t info{};
+		info.name = "DiffuseIblReadback";
+		info.name = "DiffuseIblReadback";
+		info.img = diffuseIBL->GetOutputImage();
+		info.context = renderContext;
+		info.resources = resources;
+		info.fileName = fileName.c_str();
+		info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
+		info.flags |= imageReadbackFlags_t::CUBEMAP;
+		info.flags |= imageReadbackFlags_t::PACKED_HDR;
+
+		ImageReadbackTask* readbackTask = new ImageReadbackTask( info );
+
+		diffuseIblSchedule->Link( readbackTask );
+	}
+
+	return diffuseIblSchedule;
+}
+
+
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
 {
 	SCOPED_TIMER_PRINT( ScheduleBuild, MILLISECOND )
@@ -379,52 +439,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	{
 		if( config.computeDiffuseIbl )
 		{
-			imageMipTaskCreateInfo_t info = {};
-			info.name = "DiffuseIBL";
-			info.progName = "DiffuseIBL";
-			info.resourceImages[ 0 ] = resources->cubeFbColorImage;
-			info.context = renderContext;
-			info.resources = resources;
-			info.baseMip = 0;
-			info.mipCount = 1;
-			info.taskImageCount = 1;
-
-			// Temp image
-			imageInfo_t imgInfo {};
-			{				
-				imgInfo.width = 32;
-				imgInfo.height = 32;
-				imgInfo.mipLevels = 1;
-				imgInfo.layers = 6;
-				imgInfo.channels = 4;
-				imgInfo.subsamples = IMAGE_SMP_1;
-				imgInfo.fmt = IMAGE_FMT_RGBA_16;
-				imgInfo.type = IMAGE_TYPE_CUBE;
-				imgInfo.tiling = IMAGE_TILING_MORTON;
-
-				info.taskImageCount = 1;
-				info.createInfos = { &imgInfo };
-			}
-
-			tasks.diffuseIBL = new ImageMipTask( info );
-
-			// Readback
-			{
-				const std::string fileName = std::string( config.cubemapName ) + "_diffuseIbl.img";
-
-				imageReadBackCreateInfo_t info {};
-				info.name = "DiffuseIblReadback";
-				info.name = "DiffuseIblReadback";
-				info.img = tasks.diffuseIBL->GetOutputImage();
-				info.context = renderContext;
-				info.resources = resources;
-				info.fileName = fileName.c_str();
-				info.flags |= imageReadbackFlags_t::WRITE_TO_DISK;
-				info.flags |= imageReadbackFlags_t::CUBEMAP;
-				info.flags |= imageReadbackFlags_t::PACKED_HDR;
-
-				tasks.imageDiffuseIblReadbackTask = new ImageReadbackTask( info );
-			}
+			tasks.diffuseIBL = BuildDiffuseIblSchedule( config, renderContext, resources, viewContext );
 		}
 
 		if( config.computeSpecularIBL )
@@ -657,7 +672,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		}
 	}
 
-	tasks.dof = BuildDofGraph( config, renderContext, resources, viewContext, schedule );
+	if( config.dof ) {
+		tasks.dof = BuildDofSchedule( config, renderContext, resources, viewContext );
+	}
 
 	if( config.autoExposure )
 	{

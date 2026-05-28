@@ -25,15 +25,15 @@ struct RenderViewContext
 struct availableTasks_t
 {
 	// Prebaking Tasks
-	ImageMipTask*	diffuseIBL						= nullptr;
+	SubScheduleTask*	diffuseIBL						= nullptr;
 	ImageReadbackTask*	imageDiffuseIblReadbackTask		= nullptr;
-	ImageMipTask*	specularIBL						= nullptr;
+	ImageMipTask*		specularIBL						= nullptr;
 	ImageReadbackTask*	imageSpecularIblReadBackTask	= nullptr;
 	ImageShaderTask*	brdfLutTask						= nullptr;
 	ImageReadbackTask*	readbackBrdfLut					= nullptr;
 	ImageShaderTask*	noiseGenTask					= nullptr;
 	ImageReadbackTask*	readbackNoiseImage				= nullptr;
-	ImageMipTask*	mipCubeTask						= nullptr;
+	ImageMipTask*		mipCubeTask						= nullptr;
 	ImageReadbackTask*	imageCubemapReadBackTask		= nullptr;
 
 	// Core frame
@@ -42,15 +42,15 @@ struct availableTasks_t
 	ImageReadbackTask*	screenshotReadback				= nullptr;
 
 	// Image-Space
-	ImageMipTask*	gaussianTask					= nullptr;
-	ImageMipTask*	ssaoTask						= nullptr;
-	ImageMipTask*	ssaoBlurTask					= nullptr;
-	SubScheduleTask* dof							= nullptr;
-	CopyImageTask*	copyPreviousLuminance			= nullptr;
-	ImageMipTask*	luminanceSceneAvg				= nullptr;
-	ImageMipTask*	mipTask							= nullptr;
-	ImageMipTask*	bloomDownsampleTask				= nullptr;
-	ImageMipTask*	bloomUpsampleTask				= nullptr;
+	ImageMipTask*		gaussianTask					= nullptr;
+	ImageMipTask*		ssaoTask						= nullptr;
+	ImageMipTask*		ssaoBlurTask					= nullptr;
+	SubScheduleTask*	dof								= nullptr;
+	CopyImageTask*		copyPreviousLuminance			= nullptr;
+	ImageMipTask*		luminanceSceneAvg				= nullptr;
+	ImageMipTask*		mipTask							= nullptr;
+	ImageMipTask*		bloomDownsampleTask				= nullptr;
+	ImageMipTask*		bloomUpsampleTask				= nullptr;
 };
 
 void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, TaskSchedule* schedule );
