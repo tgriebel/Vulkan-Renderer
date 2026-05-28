@@ -58,20 +58,26 @@ float3 ApplyBloom( const Texture2D bloomTexture, const float3 sceneColor, const 
 
 float3 ApplyTonemap( const Texture2D luminanceTexture, const float3 sceneColor )
 {
-	float3 tonemapColor = sceneColor;
-	
 	const float middleGrey = globals.exposure.x;
+	const float whitePoint = globals.exposure.z;
+	const float darkLimit  = globals.exposure.w;
+
 	const float reinhardAlpha = clamp( middleGrey, 0.045f, 0.72f ); // Suggested middle-grey range from reinhard paper
+
+	float3 tonemapColor = sceneColor;
 
 	if ( globals.exposure2.x == 1.0f )
 	{
 		const float maxLod = float( GetTextureLevels( luminanceTexture ) - 1 );
 		const float luminance = luminanceTexture.SampleLevel( bilinearSamplerClampEdge, float2( 0.5f, 0.5f ), maxLod ).r;
-
-        const float exposure = reinhardAlpha / clamp( luminance, 0.005f, 10000.0f );
+		const float exposure = reinhardAlpha / clamp( luminance, darkLimit, 10000.0f );
 
 		tonemapColor *= exposure;
 	}
+
+	const float whitePoint2 = whitePoint * whitePoint;
+    tonemapColor = tonemapColor * ( 1.0f + tonemapColor / whitePoint2 ) / ( 1.0f + tonemapColor );
+
 	return tonemapColor;
 }
 

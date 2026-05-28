@@ -12,7 +12,7 @@ PS_LAYOUT_IMAGE_SHADER( Texture2D, LuminanceConstants )
 float ReinhardWeight( float logLuminance )
 {
 	const float luminance = exp( logLuminance );
-	const float whitePoint = 1.0f;
+	const float whitePoint = globals.exposure.z;
 	return luminance / ( whitePoint + luminance );
 }
 
