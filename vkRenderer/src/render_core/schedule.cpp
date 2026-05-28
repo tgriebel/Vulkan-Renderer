@@ -308,6 +308,30 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 	if( config.dof )
 	{
+		// Constants for all DoF Passes
+
+		struct dofUserConstants_t
+		{
+			vec4f		srcDepthDimensions;
+			uint32_t	viewId;
+			float		focalLengthMM;
+			float		focalPlaneDistanceMM;
+			float		apertureDiameterMM;
+			float		maxCocRadius;
+		};
+
+		struct dofShaderConstants_t
+		{
+			vec4f		srcDepthDimensions;
+			uint32_t	viewId;
+			float		focalLength;
+			float		focalPlaneDistance;
+			float		apertureDiameter;
+			float		maxCocRadius;
+		};
+
+		tasks.dof = new SubScheduleTask( "DoF", sizeof(dofShaderConstants_t));
+
 		const RenderView* view = viewContext->renderViews[ 0 ];
 
 		struct dofBokeh_t
@@ -320,7 +344,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 
 		dofBokeh_t dofBokehDefaults{};
 		dofBokehDefaults.tileMapDimensions.x = static_cast<float>( displayWidth ) / cocTileSize;
-		dofBokehDefaults.tileMapDimensions.y = static_cast<float>( displayWidth ) / cocTileSize;
+		dofBokehDefaults.tileMapDimensions.y = static_cast<float>( displayHeight ) / cocTileSize;
 		dofBokehDefaults.tileMapDimensions.z = 1.0f / dofBokehDefaults.tileMapDimensions.x;
 		dofBokehDefaults.tileMapDimensions.w = 1.0f / dofBokehDefaults.tileMapDimensions.y;
 
@@ -352,28 +376,6 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			);
 		}
 
-		// Constants for all DoF Passes
-
-		struct dofUserConstants_t
-		{
-			vec4f		srcDepthDimensions;
-			uint32_t	viewId;
-			float		focalLengthMM;
-			float		focalPlaneDistanceMM;
-			float		apertureDiameterMM;
-			float		maxCocRadius;
-		};
-
-		struct dofShaderConstants_t
-		{
-			vec4f		srcDepthDimensions;
-			uint32_t	viewId;
-			float		focalLength;
-			float		focalPlaneDistance;
-			float		apertureDiameter;
-			float		maxCocRadius;
-		};
-
 		static dofUserConstants_t userParms{};
 
 		userParms.focalLengthMM = 14.0f;
@@ -385,6 +387,33 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		userParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
 		userParms.srcDepthDimensions.z = 1.0f / userParms.srcDepthDimensions.x;
 		userParms.srcDepthDimensions.w = 1.0f / userParms.srcDepthDimensions.y;
+
+#if defined( USE_IMGUI )
+		tasks.dof->RegisterControls( [ resources, view, task = tasks.dof ]()
+		{
+			bool changed = false;
+			changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
+			changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
+			changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
+			changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
+		} );
+#endif
+
+		tasks.dof->RegisterFrameBeginCallback( [ resources, view, task = tasks.dof ]()
+		{
+			dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+
+			dofParms.viewId = view->GetViewBufferUploadId();
+			dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+			dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+			dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
+			dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+
+			dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
+			dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
+			dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
+			dofParms.maxCocRadius = userParms.maxCocRadius;
+		} );
 
 		// DoF Circle-of-Confusion Calculation
 		{
@@ -400,36 +429,20 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 			info.constantsByteSize = sizeof( dofShaderConstants_t );
 
-			tasks.dofCocTask = new ImageMipTask( info );
+			ImageMipTask* cocTask = new ImageMipTask( info );
 
-#if defined( USE_IMGUI )
-			tasks.dofCocTask->RegisterControls( [ resources, view, task = tasks.dofCocTask ]()
-				{
-					bool changed = false;
-					changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
-					changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
-					changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
-					changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
-				} );
-#endif
-
-			tasks.dofCocTask->RegisterFrameBeginCallback( [ resources, view, task = tasks.dofCocTask ]()
+			cocTask->RegisterFrameBeginCallback( [ resources, view, task = tasks.dof, subtask = cocTask ]()
 			{
 				dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
 
-				dofParms.viewId = view->GetViewBufferUploadId();
-				dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-				dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-				dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
-				dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
 
-				dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
-				dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
-				dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
-				dofParms.maxCocRadius = userParms.maxCocRadius;
+				destDofParms = dofParms;
 
-				task->UpdateConstants();
+				subtask->UpdateConstants();
 			} );
+
+			tasks.dof->Link(cocTask );
 		}
 
 		// DoF Tile min/max CoC binning
@@ -492,21 +505,23 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 				p->Bind( BINDING_NAME( computeWriteImage ), resources->dofTileCocImage );
 			};
 
-			tasks.transitionWriteDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_STORAGE );
+			TransitionImageTask* transitionWriteDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_READ, gpuImageStateFlags_t::GPU_IMAGE_STORAGE );
 
-			tasks.dofTileTask = new ComputeTask( info );
+			ComputeTask* tileTask = new ComputeTask( info );
 
-			tasks.dofTileTask->RegisterFrameBeginCallback( [ resources, view, parentTask = tasks.dofCocTask, subtask = tasks.dofTileTask ]()
+			tileTask->RegisterFrameBeginCallback( [ resources, view, parentTask = tasks.dof, subtask = tileTask]()
 			{
-				// NOTE! Playing around with how to share constants between tasks
-				// This doesn't seem half bad, but I'd like to have parent tasks with child
 				const dofShaderConstants_t& sourceDofParms = *parentTask->GetConstants<dofShaderConstants_t>();
 				dofShaderConstants_t& destDofParms = *subtask->GetConstants<dofShaderConstants_t>();
 
 				destDofParms = sourceDofParms;
 			} );
 
-			tasks.transitionReadDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_STORAGE, gpuImageStateFlags_t::GPU_IMAGE_READ );
+			TransitionImageTask* transitionReadDofTileTask = new TransitionImageTask( resources->dofTileCocImage, gpuImageStateFlags_t::GPU_IMAGE_STORAGE, gpuImageStateFlags_t::GPU_IMAGE_READ );
+		
+			tasks.dof->Link(transitionWriteDofTileTask );
+			tasks.dof->Link(tileTask );
+			tasks.dof->Link(transitionReadDofTileTask );
 		}
 
 		// DoF Blur Calculation
@@ -553,20 +568,21 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 
-			tasks.dofBokehTask = new ImageMipTask( info );
+			ImageMipTask* bokehTask = new ImageMipTask( info );
 
 #if defined( USE_IMGUI )
-			tasks.dofBokehTask->RegisterControls( [ resources, view, task = tasks.dofBokehTask ]()
-				{
-					dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
+			bokehTask->RegisterControls( [ resources, view, task = bokehTask ]()
+			{
+				dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
 
-					bool changed = false;
+				bool changed = false;
 
-					if( changed ) {
-						task->UpdateConstants();
-					}
-				} );
+				if( changed ) {
+					task->UpdateConstants();
+				}
+			} );
 #endif
+			tasks.dof->Link(bokehTask );
 		}
 
 		// DoF Blur
@@ -610,7 +626,9 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 			info.constants = &dofBokehDefaults;
 			info.constantsByteSize = sizeof( dofBokehDefaults );
 
-			tasks.dofBlurTask = new ImageShaderTask( info );
+			ImageShaderTask* blurTask = new ImageShaderTask( info );
+
+			tasks.dof->Link(blurTask );
 		}
 	}
 
@@ -949,12 +967,13 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 	if( config.dof )
 	{
-		schedule->Link( tasks.dofCocTask );
-		schedule->Link( tasks.transitionWriteDofTileTask );
-		schedule->Link( tasks.dofTileTask );
-		schedule->Link( tasks.transitionReadDofTileTask );
-		schedule->Link( tasks.dofBokehTask );
-		schedule->Link( tasks.dofBlurTask );
+		schedule->Link( tasks.dof );
+		//schedule->Link( tasks.dofCocTask );
+		//schedule->Link( tasks.transitionWriteDofTileTask );
+		//schedule->Link( tasks.dofTileTask );
+		//schedule->Link( tasks.transitionReadDofTileTask );
+		//schedule->Link( tasks.dofBokehTask );
+		//schedule->Link( tasks.dofBlurTask );
 	}
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
@@ -1016,36 +1035,48 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 }
 
 #if defined( USE_IMGUI )
+static void DrawScheduleTasks( TaskSchedule* schedule, int& index )
+{
+	GpuTask* task = schedule->GetHead();
+	while ( task != nullptr )
+	{
+		ImGui::PushID( index );
+
+		const bool hasContent = task->HasControls() || ( task->GetSubSchedule() != nullptr );
+		const ImGuiTreeNodeFlags flags = hasContent ? 0 : ImGuiTreeNodeFlags_Leaf;
+		const bool open = ImGui::CollapsingHeader( task->AsString().c_str(), flags );
+
+		bool enabled = task->IsEnabled();
+		ImGui::SameLine();
+		if ( ImGui::Checkbox( "##enabled", &enabled ) )
+		{
+			task->SetEnabled( enabled );
+		}
+
+		if ( open )
+		{
+			ImGui::Indent();
+			task->SetControls();
+
+			if ( TaskSchedule* sub = task->GetSubSchedule() )
+				DrawScheduleTasks( sub, index );
+
+			ImGui::Unindent();
+		}
+
+		ImGui::PopID();
+		task = task->GetChild();
+		++index;
+	}
+}
+
+
 void DrawScheduleDebugMenu( TaskSchedule* schedule )
 {
 	if ( ImGui::BeginTabItem( "Schedule" ) )
 	{
 		int index = 0;
-		GpuTask* task = schedule->GetHead();
-		while ( task != nullptr )
-		{
-			ImGui::PushID( index );
-
-			const bool open = ImGui::CollapsingHeader( task->AsString().c_str() );
-
-			bool enabled = task->IsEnabled();
-			ImGui::SameLine();
-			if ( ImGui::Checkbox( "##enabled", &enabled ) )
-			{
-				task->SetEnabled( enabled );
-			}
-
-			if ( open )
-			{
-				ImGui::Indent();
-				task->SetControls();
-				ImGui::Unindent();
-			}
-
-			ImGui::PopID();
-			task = task->GetChild();
-			++index;
-		}
+		DrawScheduleTasks( schedule, index );
 		ImGui::EndTabItem();
 	}
 }

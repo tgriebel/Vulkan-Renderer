@@ -35,18 +35,25 @@ void TaskSchedule::Clear()
 void TaskSchedule::Link( GpuTask* task )
 {
 	assert( task );
-	if( end == nullptr )
+
+	GpuTask* chainEnd = task;
+	while ( chainEnd->GetChild() != nullptr )
+	{
+		chainEnd = chainEnd->GetChild();
+		++taskCount;
+	}
+
+	if ( end == nullptr )
 	{
 		assert( tasks == nullptr );
 		tasks = task;
-		end = task;
 	}
 	else
 	{
 		end->SetChild( task );
-		end = task;
 	}
 
+	end = chainEnd;
 	++taskCount;
 }
 
@@ -84,6 +91,13 @@ void TaskSchedule::Resize()
 		t->Resize();
 		t = t->GetChild();
 	}
+}
+
+
+void TaskSchedule::DrainPending()
+{
+	while ( currentTask != nullptr )
+		currentTask = currentTask->GetChild();
 }
 
 

@@ -9,6 +9,7 @@ class CopyImageTask;
 class ResolveImageTask;
 class ComputeTask;
 class TransitionImageTask;
+class SubScheduleTask;
 
 // FIXME: Temp, remove once interface becomes clear
 // Intentionally lazy pointers to arrays because this will be removed
@@ -44,13 +45,8 @@ struct availableTasks_t
 	ImageMipTask*	gaussianTask					= nullptr;
 	ImageMipTask*	ssaoTask						= nullptr;
 	ImageMipTask*	ssaoBlurTask					= nullptr;
-	ImageMipTask*	dofCocTask						= nullptr;
-	ComputeTask*		dofTileTask						= nullptr;
-	TransitionImageTask* transitionWriteDofTileTask		= nullptr;
-	TransitionImageTask* transitionReadDofTileTask		= nullptr;
-	ImageMipTask*	dofBokehTask					= nullptr;
-	ImageShaderTask*	dofBlurTask						= nullptr;
-	CopyImageTask*		copyPreviousLuminance			= nullptr;
+	SubScheduleTask* dof							= nullptr;
+	CopyImageTask*	copyPreviousLuminance			= nullptr;
 	ImageMipTask*	luminanceSceneAvg				= nullptr;
 	ImageMipTask*	mipTask							= nullptr;
 	ImageMipTask*	bloomDownsampleTask				= nullptr;

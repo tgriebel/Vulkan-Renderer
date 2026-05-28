@@ -12,6 +12,7 @@ class RenderView;
 class RenderContext;
 class ResourceContext;
 class Image;
+class TaskSchedule;
 
 using TaskCallback = std::function<void()>;
 
@@ -44,6 +45,7 @@ public:
 
 	void					RegisterControls( TaskCallback fn ) { m_controlsFn = std::move( fn ); }
 	void					SetControls() const { if ( m_controlsFn ) { m_controlsFn(); } }
+	bool					HasControls() const { return m_controlsFn != nullptr; }
 
 	void					RegisterFrameBeginCallback( TaskCallback fn ) { m_frameBeginFn = std::move( fn ); }
 	void					OnFrameBegin()  const{ if( m_frameBeginFn ) { m_frameBeginFn(); } }
@@ -68,8 +70,11 @@ public:
 		m_child = child;
 	};
 
+	virtual TaskSchedule*	GetSubSchedule() { return nullptr; }
+
 	virtual ~GpuTask() {};
 };
+
 
 
 class RenderTask : public GpuTask
