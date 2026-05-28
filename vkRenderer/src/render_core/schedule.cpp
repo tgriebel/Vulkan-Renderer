@@ -37,6 +37,7 @@ SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* ren
 		float		focalPlaneDistanceMM;
 		float		apertureDiameterMM;
 		float		maxCocRadius;
+		int32_t		apertureSides;
 	};
 
 	struct dofShaderConstants_t
@@ -101,6 +102,7 @@ SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* ren
 	userParms.focalPlaneDistanceMM = 10000.0f;
 	userParms.apertureDiameterMM = 25.0f;
 	userParms.maxCocRadius = 16.0f;
+	userParms.apertureSides = 5;
 	userParms.viewId = view->GetViewBufferUploadId();
 	userParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
 	userParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
@@ -109,30 +111,30 @@ SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* ren
 
 #if defined( USE_IMGUI )
 	dofSchedule->RegisterControls( [ resources, view, task = dofSchedule ]()
-		{
-			bool changed = false;
-			changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
-			changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
-			changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
-			changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
-		} );
+	{
+		bool changed = false;
+		changed |= ImGui::SliderFloat( "Focal Length (mm)", &userParms.focalLengthMM, 14.0f, 200.0f );
+		changed |= ImGui::SliderFloat( "Aperture Diameter (mm)", &userParms.apertureDiameterMM, 1.0f, 50.0f );
+		changed |= ImGui::SliderFloat( "Focus Distance (mm)", &userParms.focalPlaneDistanceMM, 500.0f, 1000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic );
+		changed |= ImGui::SliderFloat( "Max CoC (pixels)", &userParms.maxCocRadius, 4.0f, 32.0f );
+	} );
 #endif
 
 	dofSchedule->RegisterFrameBeginCallback( [ resources, view, task = dofSchedule ]()
-		{
-			dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
+	{
+		dofShaderConstants_t& dofParms = *task->GetConstants<dofShaderConstants_t>();
 
-			dofParms.viewId = view->GetViewBufferUploadId();
-			dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
-			dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
-			dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
-			dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
+		dofParms.viewId = view->GetViewBufferUploadId();
+		dofParms.srcDepthDimensions.x = (float)resources->depthStencilResolvedImage->info.width;
+		dofParms.srcDepthDimensions.y = (float)resources->depthStencilResolvedImage->info.height;
+		dofParms.srcDepthDimensions.z = 1.0f / dofParms.srcDepthDimensions.x;
+		dofParms.srcDepthDimensions.w = 1.0f / dofParms.srcDepthDimensions.y;
 
-			dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
-			dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
-			dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
-			dofParms.maxCocRadius = userParms.maxCocRadius;
-		} );
+		dofParms.apertureDiameter = userParms.apertureDiameterMM / 1000.0f;
+		dofParms.focalPlaneDistance = userParms.focalPlaneDistanceMM / 1000.0f;
+		dofParms.focalLength = userParms.focalLengthMM / 1000.0f;
+		dofParms.maxCocRadius = userParms.maxCocRadius;
+	} );
 
 	// DoF Circle-of-Confusion Calculation
 	{
@@ -291,16 +293,28 @@ SubScheduleTask* BuildDofGraph( const renderConfig_t& config, RenderContext* ren
 
 #if defined( USE_IMGUI )
 		bokehTask->RegisterControls( [ resources, view, task = bokehTask ]()
+		{
+			dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
+
+			bool changed = false;
+
+			changed |= ImGui::SliderInt( "Aperture Sides", &userParms.apertureSides, 3, 12 );
+
+			ShirleyConcentricSamplerGen sampler( userParms.apertureSides );
+
+			const uint32_t N = 7;
+			const uint32_t N2 = ( N * N );
+
+			sampler.AddRange( 0, static_cast<float>( N ) );
+			for( uint32_t s = 0; s < N2; ++s ) {
+				dofBokeh.samples[ s ] = sampler.Sample2D();
+			}
+
+			if( changed )
 			{
-				dofBokeh_t& dofBokeh = *task->GetConstants<dofBokeh_t>();
-
-				bool changed = false;
-
-				if( changed )
-				{
-					task->UpdateConstants();
-				}
-			} );
+				task->UpdateConstants();
+			}
+		} );
 #endif
 		dofSchedule->Link( bokehTask );
 	}
