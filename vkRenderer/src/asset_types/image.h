@@ -318,14 +318,17 @@ inline imageInfo_t DefaultImage2dInfo( uint32_t w, uint32_t h )
 }
 
 
+class AliasableImageHeap;
+
 class Image : public RenderResource
 {
 public:
 	using ResizeFn = std::function<imageInfo_t( uint32_t width, uint32_t height )>;
 
 private:
-	static const uint32_t Version = 2;
-	ResizeFn m_resizeFn;
+	static const uint32_t	Version = 2;
+	ResizeFn				m_resizeFn;
+	AliasableImageHeap*		m_heap = nullptr; // Optional. For aliased images
 
 public:
 
@@ -333,10 +336,11 @@ public:
 	imageSubResourceView_t	subResourceView;
 	bool					generateMips;
 
+	// FIXME: Ownership has been tricky to resolve since Images do *a lot*, but should be resolvable after numerous refactorings
 	// `cpuImage` is loaded from disk, passed as a pointer to avoid slow copies. It can be explicitly deleted once uploaded
 	// Ownership for `cpuImage` needs to be clearer--whatever does the allocation should also delete
 	ImageBufferInterface*	cpuImage; // Memory lifetime is not tied to the object for now
-	GpuImage*				gpuImage; // Does not own memory
+	GpuImage*				gpuImage;
 
 	Image()
 	{
@@ -382,6 +386,8 @@ public:
 	void Create( const imageInfo_t& _info, ImageBufferInterface* _cpuImage );
 
 	void Create( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime );
+
+	void CreateAliased( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime, AliasableImageHeap& heap );
 
 	void Destroy() override;
 

@@ -9,6 +9,7 @@
 #include "../io/io.h"
 #include "../asset_types/assetLib.h"
 #include "../render_core/gpuImage.h"
+#include "../render_resources/aliasableImageHeap.h"
 
 
 void Image::Create( const imageInfo_t& _info, uint8_t* pixelBytes, const uint32_t byteCount )
@@ -99,6 +100,7 @@ void Image::Create( const imageInfo_t& _info, const char* _name, const gpuImageS
 	assert( HasFlags( _flags, gpuImageStateFlags_t::GPU_IMAGE_WRITE | gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) );
 
 	m_lifetime = _lifetime;
+	m_heap = nullptr;
 
 	{
 		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
@@ -110,6 +112,39 @@ void Image::Create( const imageInfo_t& _info, const char* _name, const gpuImageS
 	}
 
 	gpuImage = new GpuImage( _name, _info, _flags, m_lifetime );
+
+	info = _info;
+	info.layers = ( _info.type == IMAGE_TYPE_CUBE ) ? 6 : _info.layers;
+
+	subResourceView.baseArray = 0;
+	subResourceView.arrayCount = info.layers;
+	subResourceView.baseMip = 0;
+	subResourceView.mipLevels = info.mipLevels;
+
+	generateMips = true;
+
+	cpuImage = nullptr;
+}
+
+
+void Image::CreateAliased( const imageInfo_t& _info, const char* _name, const gpuImageStateFlags_t _flags, const resourceLifeTime_t _lifetime, AliasableImageHeap& heap )
+{
+	// Aliased images are only supported on framebuffers currently (not iamge storage buffers)
+	assert( HasFlags( _flags, gpuImageStateFlags_t::GPU_IMAGE_WRITE ) );
+
+	m_lifetime = _lifetime;
+	m_heap = &heap;
+
+	{
+		RenderResource::Create( resourceType_t::IMAGE, m_lifetime );
+
+		if ( !m_resizeFn )
+		{
+			RegisterResize( FullDimensionResizeFn( _info ) );
+		}
+	}
+
+	gpuImage = new GpuImage( _name, _info, _flags, m_lifetime, heap );
 
 	info = _info;
 	info.layers = ( _info.type == IMAGE_TYPE_CUBE ) ? 6 : _info.layers;
@@ -159,11 +194,17 @@ bool Image::OnResize( uint32_t w, uint32_t h )
 
 		if( gpuImage != nullptr )
 		{
+			const char* name = gpuImage->GetDebugName();
 			const gpuImageStateFlags_t flags = gpuImage->GetFlags();
 			const resourceLifeTime_t lifeTime = gpuImage->GetLifetime();
 
 			gpuImage->Destroy();
-			gpuImage->Create( gpuImage->GetDebugName(), info, flags, lifeTime );
+
+			if ( m_heap != nullptr ) {
+				gpuImage->CreateAliased( name, info, flags, lifeTime, *m_heap );
+			} else {
+				gpuImage->Create( name, info, flags, lifeTime );
+			}
 		}
 		return true;
 	}

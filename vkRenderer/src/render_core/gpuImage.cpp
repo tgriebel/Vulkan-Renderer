@@ -4,6 +4,7 @@
 #include "../render_state/rhi.h"
 #include "../asset_types/image.h"
 #include "../render_core/swapChain.h"
+#include "../render_resources/aliasableImageHeap.h"
 
 // TODO: move
 #ifdef USE_VULKAN	
@@ -29,8 +30,8 @@ static VkImageCreateInfo vk_GetImageCreateInfo( const imageInfo_t& info, const g
 	imageInfo.usage = 0;
 	if( ( flags & GPU_IMAGE_WRITE ) != 0 )
 	{
-		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_COLOR_BIT   ) != 0 ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT         : 0;
-		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_DEPTH_BIT   ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
+		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_COLOR_BIT ) != 0 ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT : 0;
+		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_DEPTH_BIT ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
 		imageInfo.usage |= ( aspect & VK_IMAGE_ASPECT_STENCIL_BIT ) != 0 ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : 0;
 	}
 	if( ( flags & GPU_IMAGE_STORAGE ) != 0 )
@@ -148,7 +149,7 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 
 void GpuImage::Destroy()
 {
-#ifdef USE_VULKAN	
+#ifdef USE_VULKAN
 	assert( context.device != VK_NULL_HANDLE );
 	if( context.device == VK_NULL_HANDLE ) {
 		return;
@@ -165,11 +166,76 @@ void GpuImage::Destroy()
 
 		if ( vk_image[ i ] != VK_NULL_HANDLE )
 		{
-			vmaDestroyImage( AllocatorMemory::GetVmaAllocator(), vk_image[ i ], m_allocation[ i ].m_allocation );
+			if ( m_ownsAllocation )
+			{
+				// Standard images. VMA owns both the image and backing allocation
+				vmaDestroyImage( AllocatorMemory::GetVmaAllocator(), vk_image[ i ], m_allocation[ i ].m_allocation );
+			}
+			else
+			{
+				// Aliased images. Backing memory allocation is owned by aliased heap
+				vkDestroyImage( context.device, vk_image[ i ], nullptr );
+			}
 			vk_image[ i ] = VK_NULL_HANDLE;
 			m_allocation[ i ].m_allocation = VK_NULL_HANDLE;
 			m_allocation[ i ].m_info = {};
 		}
 	}
+
+	m_ownsAllocation = true;
+#endif
+}
+
+
+void GpuImage::CreateAliased( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime, AliasableImageHeap& heap )
+{
+	assert( heap.GetLifetime() == resourceLifeTime_t::REBOOT );
+
+#ifdef USE_VULKAN
+	RenderResource::Create( resourceType_t::GPU_IMAGE, lifetime );
+
+	assert( name != nullptr && name[ 0 ] != '\0' );
+	m_isViewOwned = false;
+	m_ownsAllocation = false;
+	m_id = -1;
+	m_info = info;
+	m_flags = flags;
+	m_dbgName = name;
+	// Aliased images share a single heap allocation — multi-buffering would alias
+	// the same memory across frames simultaneously, violating non-simultaneous-use.
+	assert( ( flags & GPU_IMAGE_PERSISTENT ) == 0 );
+	m_swapBuffering = swapBuffering_t::SINGLE_FRAME;
+
+	VkImageCreateInfo imageInfo = vk_GetImageCreateInfo( info, flags );
+
+	imageInfo.flags |= VK_IMAGE_CREATE_ALIAS_BIT;
+
+	VkResult result = vmaCreateAliasingImage(
+		AllocatorMemory::GetVmaAllocator(),
+		heap.GetAllocation(),
+		&imageInfo,
+		&vk_image[ 0 ] );
+
+	if ( result != VK_SUCCESS )
+	{
+		throw std::runtime_error( std::string( "AliasableImage '" ) + name + "' failed — "
+			+ "heap may be too small for " + std::to_string( info.width ) + "x" + std::to_string( info.height )
+			+ " (format " + std::to_string( static_cast<int>( info.fmt ) ) + ")" );
+	}
+
+	m_allocation[ 0 ].m_allocation = VK_NULL_HANDLE; // Not owned
+	m_allocation[ 0 ].m_info       = {};
+
+	VkMemoryRequirements memRequirements;
+	vkGetImageMemoryRequirements( context.device, vk_image[ 0 ], &memRequirements );
+	m_allocation[ 0 ].m_alignment = memRequirements.alignment;
+
+	m_resourceByteCount = memRequirements.size;
+
+	if ( m_dbgName != nullptr && m_dbgName[ 0 ] != '\0' ) {
+		vk_SetObjectName( (uint64_t)vk_image[ 0 ], VK_OBJECT_TYPE_IMAGE, vk_BuildObjectName( "AliasImage", m_dbgName, 0 ).c_str() );
+	}
+
+	vk_view[ 0 ] = vk_CreateImageView( vk_image[ 0 ], info, m_dbgName, 0 );
 #endif
 }

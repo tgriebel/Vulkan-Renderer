@@ -66,17 +66,35 @@ void ImageShaderTask::Init( const imageShaderCreateInfo_t& info )
 
 		uint32_t passIndex = 0;
 
-		// Intermediate Frame Buffer
+		// Intermediate Frame Buffer (using aliased memory)
 		if ( m_passCount > 1 )
 		{
-			m_outputImageViews[ passIndex ][ 0 ] = new ImageView( info.resources->tempColorImage, imageInfo, view, resourceLifeTime_t::RESIZE );
+			assert( info.resources->tempColorImageHeap.GetAllocation() != VK_NULL_HANDLE );
 
-			assert( ( m_outputImageViews[ passIndex ][ 1 ] == nullptr ) && ( m_outputImageViews[ passIndex ][ 2 ] == nullptr ) ); // Not supported
+			// Single mip/layer since this is temp output
+			imageInfo_t tempInfo = imageInfo;
+			tempInfo.mipLevels = 1;
+			tempInfo.layers = 1;
+
+			imageSubResourceView_t tempView{};
+			tempView.baseArray = 0;
+			tempView.arrayCount = 1;
+			tempView.baseMip = 0;
+			tempView.mipLevels = 1;
+			tempView.aspect = GetColorAspectFlags( outputImage0->info.fmt );
+
+			m_tempPassImage.CreateAliased( tempInfo, "FB_ImageShaderTempImage", GPU_IMAGE_RW,
+				resourceLifeTime_t::RESIZE, info.resources->tempColorImageHeap );
+
+			m_outputImageViews[ passIndex ][ 0 ] = new ImageView( &m_tempPassImage, tempInfo, tempView, resourceLifeTime_t::RESIZE );
+
+			// Only a single output is supported currently (no MRT)
+			assert( ( m_outputImageViews[ passIndex ][ 1 ] == nullptr ) && ( m_outputImageViews[ passIndex ][ 2 ] == nullptr ) );
 
 			frameBufferCreateInfo_t fbInfo;
-			fbInfo.name = "TempImageProcessFb";
+			fbInfo.name = "ImageShaderTempFb";
 			fbInfo.color0 = m_outputImageViews[ passIndex ][ 0 ];
-			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME; 
+			fbInfo.swapBuffering = swapBuffering_t::SINGLE_FRAME;
 			fbInfo.context = m_context;
 
 			m_fb[ passIndex ].Create( fbInfo );
@@ -268,6 +286,10 @@ void ImageShaderTask::Shutdown()
 			m_taskImages[ i ] = nullptr;
 		}
 	}
+
+	// Safe to call even if the resource system already destroyed it through Cleanup(RESIZE).
+	// Image::Destroy() checks for a null gpuImage and is a no-op in that case.
+	m_tempPassImage.Destroy();
 
 	for ( uint32_t passIndex = 0; passIndex < m_passCount; ++passIndex )
 	{

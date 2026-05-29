@@ -6,6 +6,7 @@
 
 struct imageInfo_t;
 class AllocatorMemory;
+class AliasableImageHeap;
 class SwapChain;
 
 enum gpuImageStateFlags_t : uint8_t
@@ -39,6 +40,7 @@ protected:
 	const char*				m_dbgName;
 	int32_t					m_id;
 	bool					m_isViewOwned;
+	bool					m_ownsAllocation = true; // An aliased image does not own the backing allocation
 
 	inline uint32_t GetBufferId( const uint32_t bufferId = 0 ) const
 	{
@@ -47,9 +49,16 @@ protected:
 	}
 
 public:
+	GpuImage() = default;
+
 	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime )
 	{
 		Create( name, info, flags, lifetime );
+	}
+
+	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime, AliasableImageHeap& heap )
+	{
+		CreateAliased( name, info, flags, lifetime, heap );
 	}
 
 	GpuImage( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const SwapChain* swapChain );
@@ -152,5 +161,8 @@ public:
 	}
 
 	void Create( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime );
+
+	void CreateAliased( const char* name, const imageInfo_t& info, const gpuImageStateFlags_t flags, const resourceLifeTime_t lifetime, AliasableImageHeap& heap );
+
 	virtual void Destroy() override;
 };

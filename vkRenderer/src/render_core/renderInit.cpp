@@ -847,6 +847,22 @@ void Renderer::CreateFramebuffers()
 		);
 	}
 
+	// Aliasable heap for temp images
+	// Conservative sizing so aliased images fit within the space
+	{
+		imageInfo_t heapRef{};
+		heapRef.width = width;
+		heapRef.height = height;
+		heapRef.mipLevels = 1;
+		heapRef.layers = 1;
+		heapRef.subsamples = IMAGE_SMP_1;
+		heapRef.fmt = IMAGE_FMT_RGBA_32;
+		heapRef.type = IMAGE_TYPE_2D;
+		heapRef.tiling = IMAGE_TILING_MORTON;
+
+		resources.tempColorImageHeap.Create( "FB_TempColorHeap", heapRef, GPU_IMAGE_RW, resourceLifeTime_t::REBOOT );
+	}
+
 	// Luminance MIP-chain
 	{
 		imageInfo_t info{};

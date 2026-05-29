@@ -6,6 +6,7 @@
 #include "../render_resources/imageSampler.h"
 #include "../render_resources/imageArray.h"
 #include "../render_resources/imageView.h"
+#include "../render_resources/aliasableImageHeap.h"
 
 class Image;
 
@@ -54,6 +55,7 @@ public:
 	ImageView				stencilImageView;
 
 	// Code images
+	AliasableImageHeap		tempColorImageHeap;
 	ImageView				depthResolvedImageView;
 	ImageView				stencilResolvedImageView;
 	Image*					shadowMapImage[ MaxShadowViews ];

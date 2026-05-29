@@ -74,6 +74,7 @@ private:
 	GpuBuffer				m_buffer[ MaxPasses ];
 	ImageView*				m_outputImageViews[ MaxPasses ][ MaxOutputImages ] = {};
 	Image*					m_image = nullptr;
+	Image					m_tempPassImage; // For multi-pass tasks (e.g. separable gaussians)
 	Image*					m_resourceImages2d[ MaxImageShaderSampleImages ] = {};
 	Image*					m_resourceCubeImages[ MaxImageShaderSampleImages ] = {};
 	Image*					m_taskImages[ MaxOutputImages ] = {};
@@ -86,17 +87,21 @@ private:
 	uint32_t				m_resourceCubeCount;
 
 public:
-	ImageShaderTask() {}
+	ImageShaderTask( const imageShaderCreateInfo_t& info )
+	{
+		Init( info );
+	}
 
 	~ImageShaderTask()
 	{
 		Shutdown();
 	}
 
-	ImageShaderTask( const imageShaderCreateInfo_t& info )
-	{
-		Init( info );
-	}
+	ImageShaderTask() = delete;
+	ImageShaderTask( const ImageShaderTask& ) = delete;
+	ImageShaderTask& operator=( const ImageShaderTask& ) = delete;
+	ImageShaderTask( ImageShaderTask&& ) = delete;
+	ImageShaderTask& operator=( ImageShaderTask&& ) = delete;
 
 	void				Init( const imageShaderCreateInfo_t& info );
 	void				Resize();

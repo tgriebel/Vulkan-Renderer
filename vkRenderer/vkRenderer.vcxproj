@@ -298,6 +298,7 @@
     <ClInclude Include="src\render_core\renderUploader.h" />
     <ClInclude Include="src\render_core\resourceContext.h" />
     <ClInclude Include="src\render_core\schedule.h" />
+    <ClInclude Include="src\render_resources\aliasableImageHeap.h" />
     <ClInclude Include="src\render_resources\gpuAccelerationStructure.h" />
     <ClInclude Include="src\render_resources\gpuBuffer.h" />
     <ClInclude Include="src\render_resources\imageArray.h" />
@@ -379,6 +380,7 @@
     <ClCompile Include="src\render_core\renderUploader.cpp" />
     <ClCompile Include="src\render_core\resourceContext.cpp" />
     <ClCompile Include="src\render_core\schedule.cpp" />
+    <ClCompile Include="src\render_resources\aliasableImageHeap.cpp" />
     <ClCompile Include="src\render_resources\gpuAccelerationStructure.cpp" />
     <ClCompile Include="src\render_resources\gpuBuffer.cpp" />
     <ClCompile Include="src\render_resources\imageArray.cpp" />
