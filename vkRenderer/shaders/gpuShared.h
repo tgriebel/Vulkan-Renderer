@@ -97,7 +97,7 @@ enum hgtTextureSlot_t
 };
 
 
-enum gpuDebugLightingMode_t
+enum gpuDebugLightingMode_t : uint
 {
 	DEBUG_NONE,
 	DEBUG_ALBEDO,
