@@ -7,6 +7,16 @@
 
 DeviceContext context;
 
+#ifdef NDEBUG
+static const bool EnableValidationLayers = false;
+#else
+static const bool EnableValidationLayers = true;
+static const bool EnableSyncValidationLayers = false;
+#endif
+
+static const bool ValidateVerbose = false;
+static const bool ValidateWarnings = true;
+static const bool ValidateErrors = true;
 
 static bool IsRenderDocAttached()
 {
@@ -1193,14 +1203,27 @@ void DeviceContext::Create( Window& window )
 			std::cout << '\t' << extension.extensionName << '\n';
 		}
 
-		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
+		VkValidationFeaturesEXT validationFeatures{};
 		if ( EnableValidationLayers )
 		{
 			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
 			createInfo.ppEnabledLayerNames = validationLayers.data();
 
-			vk_PopulateDebugMessengerCreateInfo( debugCreateInfo );
-			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+			if( EnableSyncValidationLayers )
+			{
+				static const VkValidationFeatureEnableEXT validationEnables[] = {
+					VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
+				};
+				validationFeatures.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+				validationFeatures.enabledValidationFeatureCount = COUNTARRAY( validationEnables );
+				validationFeatures.pEnabledValidationFeatures = validationEnables;
+
+				vk_PopulateDebugMessengerCreateInfo( debugCreateInfo );
+
+				validationFeatures.pNext = &debugCreateInfo;
+				createInfo.pNext = &validationFeatures;
+			}
 		}
 		else
 		{

@@ -57,16 +57,6 @@
 #include "../asset_types/material.h"
 #include "../scene/camera.h"
 
-#ifdef NDEBUG
-const bool EnableValidationLayers = true;
-#else
-const bool EnableValidationLayers = true;
-#endif
-
-const bool		ValidateVerbose					= false;
-const bool		ValidateWarnings				= true;
-const bool		ValidateErrors					= true;
-
 const uint32_t	DescriptorPoolMaxUniformBuffers	= 1024;
 const uint32_t	DescriptorPoolMaxStorageBuffers	= 1024;
 const uint32_t	DescriptorPoolMaxSamplers		= 16;
