@@ -3,6 +3,88 @@
 
 using namespace SysCore;
 
+struct shaderFileTypeMapPair_t
+{
+	const char*		ext;
+	shaderType_t	type;
+};
+
+
+static shaderFileTypeMapPair_t s_fileExtTypeMap[ shaderType_t::COUNT ] =
+{
+	{ "vs",		shaderType_t::VERTEX },
+	{ "ps",		shaderType_t::PIXEL },
+	{ "cs",		shaderType_t::COMPUTE },
+	{ "rgen",	shaderType_t::RT_GEN },
+	{ "rint",	shaderType_t::RT_INTERSECTION },
+	{ "rchit",	shaderType_t::RT_CLOSEST_HIT },
+	{ "rahit",	shaderType_t::RT_ANY_HIT },
+	{ "rmiss",	shaderType_t::RT_MISS },
+	{ "rcall",	shaderType_t::RT_CALLABLE }
+};
+
+
+static shaderType_t GetTypeFromName( const std::string& fileName )
+{
+	std::string name;
+	std::string baseName;
+	std::string ext;
+	std::string ext2;
+	SplitFileName( fileName, baseName, ext2 );
+
+	assert( ext2 == "hlsl" );
+	SplitFileName( baseName, name, ext );
+
+	for( uint32_t i = 0; i < shaderType_t::COUNT; ++i )
+	{
+		if( ext == s_fileExtTypeMap[ i ].ext ) {
+			return s_fileExtTypeMap[ i ].type;
+		}
+	}
+	return shaderType_t::UNSPECIFIED;
+}
+
+
+static const char* GetExtFromType( const shaderType_t type )
+{
+	for( uint32_t i = 0; i < shaderType_t::COUNT; ++i )
+	{
+		if( type == s_fileExtTypeMap[ i ].type ) {
+			return s_fileExtTypeMap[ i ].ext;
+		}
+	}
+	return nullptr;
+}
+
+
+static pipelineType_t GetPipelineTypeForShaderType( const shaderType_t type )
+{
+	switch( type )
+	{
+		case VERTEX:
+		case PIXEL:
+			return pipelineType_t::RASTER;
+
+		case COMPUTE:
+			return pipelineType_t::COMPUTE;
+
+		case RT_GEN:
+			return pipelineType_t::RT_GEN;
+
+		case RT_CLOSEST_HIT:
+		case RT_ANY_HIT:
+		case RT_MISS:
+		case RT_INTERSECTION:
+			return pipelineType_t::RT_HIT_GROUP;
+
+		case RT_CALLABLE:
+			return pipelineType_t::RT_CALLABLE;
+	}
+	assert( 0 );
+	return pipelineType_t::UNSPECIFIED;
+}
+
+
 void GpuProgram::CreateApiObjects()
 {
 	for( uint32_t shaderIx = 0; shaderIx < shaderCount; ++shaderIx )
@@ -210,30 +292,33 @@ bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
 }
 
 
-bool GpuProgramLoader::LoadComputeProgram( GpuProgram& program )
+bool GpuProgramLoader::LoadSingleProgram( GpuProgram& program )
 {
-	program.type = pipelineType_t::COMPUTE;
+	const shaderType_t shaderType = GetTypeFromName( srcFileName );
+	const pipelineType_t pipelineType = GetPipelineTypeForShaderType( shaderType );
+
+	program.type = pipelineType;
 	program.shaderCount = 1;
 	program.bindsetCount = 0;
 	program.permCount = permIdCount;
 	program.permSet = shaderPermId_t::NONE;
 
-	const std::string csBinName = GetBinName( csFileName, shaderPermId_t::NONE );
+	const std::string binName = GetBinName( srcFileName, shaderPermId_t::NONE );
 
-	CheckCompileShader( srcPath + csFileName, binPath + csBinName, shaderPermId_t::NONE, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
+	CheckCompileShader( srcPath + srcFileName, binPath + binName, shaderPermId_t::NONE, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
 
-	ShaderSource& cs = program.shaders[ 0 ];
-	ShaderBin& csBin = program.shaderBins[ 0 ][ 0 ];
+	ShaderSource& source = program.shaders[ 0 ];
+	ShaderBin& bin = program.shaderBins[ 0 ][ 0 ];
 
-	cs.name = csFileName;
-	cs.src = ReadTextFile( srcPath + csFileName );
-	cs.type = shaderType_t::COMPUTE;
+	source.name = srcFileName;
+	source.src = ReadTextFile( srcPath + srcFileName );
+	source.type = shaderType;
 
-	csBin.binName = csBinName;
-	csBin.blob = ReadBinaryFile( binPath + csBinName );
-	csBin.type = shaderType_t::COMPUTE;
+	bin.binName = binName;
+	bin.blob = ReadBinaryFile( binPath + binName );
+	bin.type = shaderType;
 #ifdef USE_VULKAN
-	csBin.vk_shader = VK_NULL_HANDLE;
+	bin.vk_shader = VK_NULL_HANDLE;
 #endif
 
 	return true;
@@ -251,9 +336,9 @@ bool GpuProgramLoader::Load( Asset<GpuProgram>& programAsset )
 	{
 		return LoadRasterProgram( program );
 	}
-	else if ( !csFileName.empty() )
+	else if ( !srcFileName.empty() )
 	{
-		return LoadComputeProgram( program );
+		return LoadSingleProgram( program );
 	}
 	return false;
 }
@@ -315,6 +400,6 @@ void GpuProgramLoader::AddFilePaths( const std::string& vertexFileName, const st
 		psFileName = pixelFileName + ".ps.hlsl";
 	}
 	if ( !computeFileName.empty() ) {
-		csFileName = computeFileName + ".cs.hlsl";
+		srcFileName = computeFileName + ".cs.hlsl";
 	}
 }

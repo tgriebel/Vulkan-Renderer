@@ -19,11 +19,13 @@ enum shaderType_t : uint32_t
 	VERTEX,
 	PIXEL,
 	COMPUTE,
-	RAY_GEN,
-	RAY_HIT,
-	RAY_CLOSEST_HIT,
-	RAY_INTERSECTION,
-	RAY_MISS
+	RT_GEN,
+	RT_INTERSECTION,
+	RT_CLOSEST_HIT,
+	RT_ANY_HIT,
+	RT_MISS,
+	RT_CALLABLE,
+	COUNT
 };
 
 
@@ -32,8 +34,10 @@ enum class pipelineType_t : uint32_t
 	UNSPECIFIED = 0,
 	RASTER,
 	COMPUTE,
-	RAY_GEN,
-	HIT_GROUP,
+	RT_GEN,
+	RT_HIT_GROUP,
+	RT_MISS,
+	RT_CALLABLE,
 };
 
 
@@ -210,7 +214,7 @@ private:
 	std::string		compilerPath;
 	std::string		vsFileName;
 	std::string		psFileName;
-	std::string		csFileName;
+	std::string		srcFileName;
 	uint64_t		bindHash;
 	uint32_t		permIdCount;
 	shaderFlags_t	flags;
@@ -220,7 +224,7 @@ private:
 	std::string			GetCompileString( const std::string& srcPath, const std::string& binPath, const std::string& perms );
 	void				CheckCompileShader( const std::string& path, const std::string& binPath, const shaderPermId_t permSet, const bool forceRebuild = false );
 	bool				LoadRasterProgram( GpuProgram& program );
-	bool				LoadComputeProgram( GpuProgram& program );
+	bool				LoadSingleProgram( GpuProgram& program );
 	bool				Load( Asset<GpuProgram>& programAsset );
 
 public:
