@@ -149,6 +149,13 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 			usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR
 				  | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 		}
+		else if ( type == bufferType_t::AS_INSTANCE )
+		{
+			// VkAccelerationStructureInstanceKHR requires 16-byte alignment (Vulkan spec)
+			alignment = 16;
+			usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR
+				  | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+		}
 		else
 		{
 			assert(0);
@@ -175,6 +182,7 @@ void GpuBuffer::Create( const char* name, const swapBuffering_t swapBuffering, c
 								  | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 		}
 		else if ( ( type == bufferType_t::UNIFORM ) || ( type == bufferType_t::STAGING ) ||
+				  ( type == bufferType_t::AS_INSTANCE ) ||
 				  ( type == bufferType_t::STORAGE && HasFlags( flags, bufferFlags_t::RT_VISIBLE ) == false ) )
 		{
 			allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT

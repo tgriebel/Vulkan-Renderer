@@ -35,10 +35,11 @@ private:
 
 	// One entry per surface BLAS, populated by Build()
 	std::vector<blasEntry_t>	m_blasEntries;
-	GpuBuffer					m_blasScratch;		// shared scratch for all BLAS builds
-	GpuBuffer					m_blasStorage;		// shared storage for all BLAS handles
+	GpuBuffer					m_blasScratch;		// Shared scratch for all BLAS builds
+	GpuBuffer					m_blasStorage;		// Shared storage for all BLAS handles
 
 	// TLAS
+	GpuBuffer					m_tlasInstances;	// One per BLAS
 	GpuBuffer					m_tlasStorage;
 	GpuBuffer					m_tlasScratch;
 	VkAccelerationStructureKHR	m_tlas = VK_NULL_HANDLE;
