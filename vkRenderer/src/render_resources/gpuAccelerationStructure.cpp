@@ -1,4 +1,4 @@
-#include "gpuAccelerationStructure.h"
+﻿#include "gpuAccelerationStructure.h"
 #include "../render_state/cmdContext.h"
 #include "../render_state/deviceContext.h"
 #include "../render_core/renderUploader.h"
@@ -167,26 +167,39 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 		pRangeInfos[ i ] = &m_rangeInfo[ i ];
 	}
 
-	// 3: Submit all BLAS builds in one call
+	// 3: Barrier: vertex/index data was written by vkCmdCopyBuffer (TRANSFER_WRITE).
+	// The AS build reads geometry data as VK_ACCESS_SHADER_READ_BIT — ensure the copies are visible.
+	VkMemoryBarrier geometryUploadBarrier{};
+	geometryUploadBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+	geometryUploadBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	geometryUploadBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	vkCmdPipelineBarrier( cmdList->CommandBuffer(),
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
+		0, 1, &geometryUploadBarrier, 0, nullptr, 0, nullptr );
+
+	// 4: Submit all BLAS builds in one call
 	context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), blasCount, buildInfos.data(), pRangeInfos.data() );
 
 	m_geometry.clear();
 	m_rangeInfo.clear();
 	m_blasScratch.Destroy();
 
-	// 4: Construct TLAS
+	// 5: Construct TLAS
 	{
 		// Barrier: all BLAS writes must be visible before the TLAS build reads them
 		VkMemoryBarrier blasBarrier{};
 		blasBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
 		blasBarrier.srcAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
-		blasBarrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR;
+		blasBarrier.dstAccessMask = VK_ACCESS_ACCELERATION_STRUCTURE_READ_BIT_KHR
+			| VK_ACCESS_ACCELERATION_STRUCTURE_WRITE_BIT_KHR;
 		vkCmdPipelineBarrier( cmdList->CommandBuffer(),
 			VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
 			VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
 			0, 1, &blasBarrier, 0, nullptr, 0, nullptr );
 
-		// Build instance array — one identity-transform instance per BLAS
+		// Build instance array per BLAS.
+		// TODO: Build matrices
 		std::vector<VkAccelerationStructureInstanceKHR> instances( blasCount );
 		for( uint32_t i = 0; i < blasCount; ++i )
 		{

@@ -11,7 +11,7 @@ DeviceContext context;
 static const bool EnableValidationLayers = false;
 #else
 static const bool EnableValidationLayers = true;
-static const bool EnableSyncValidationLayers = false;
+static const bool EnableSyncValidationLayers = true;
 #endif
 
 static const bool ValidateVerbose = false;
