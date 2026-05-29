@@ -6,22 +6,14 @@
 
 class CommandList;
 
+struct surfaceUpload_t;
 
-struct blasSurfaceInfo_t
+struct blasCreateSurfaceInfo_t
 {
-	const char*			name;
-	const GpuBuffer*	vb;
-	const GpuBuffer*	ib;
-	const surface_t*	surface;
-	resourceLifeTime_t	lifetime;
-};
-
-
-struct tlasCreateInfo_t
-{
-	const char*			name;
-	uint32_t			instanceCount;
-	resourceLifeTime_t	lifetime;
+	const char*				name;
+	const GpuBuffer*		vb;
+	const GpuBuffer*		ib;
+	const surfaceUpload_t*	surface;
 };
 
 
@@ -29,18 +21,44 @@ class GpuAccelerationStructure : public RenderResource
 {
 private:
 
-	GpuBuffer					m_scratchBuffer;
-	GpuBuffer					m_storageBuffer;
 #ifdef USE_VULKAN_RTX
-	VkAccelerationStructureKHR	m_accelerationStructure = VK_NULL_HANDLE;
+	struct blasEntry_t
+	{
+		GpuBufferView				scratchView;
+		GpuBufferView				storageView;
+		VkAccelerationStructureKHR	handle = VK_NULL_HANDLE;
+	};
+
+	// Pending geometry accumulated by AddGeometry(), consumed by Build()
+	std::vector<VkAccelerationStructureGeometryKHR>			m_geometry;
+	std::vector<VkAccelerationStructureBuildRangeInfoKHR>	m_rangeInfo;
+
+	// One entry per surface BLAS, populated by Build()
+	std::vector<blasEntry_t>	m_blasEntries;
+	GpuBuffer					m_blasScratch;		// shared scratch for all BLAS builds
+	GpuBuffer					m_blasStorage;		// shared storage for all BLAS handles
+
+	// TLAS
+	GpuBuffer					m_tlasStorage;
+	GpuBuffer					m_tlasScratch;
+	VkAccelerationStructureKHR	m_tlas = VK_NULL_HANDLE;
+
+	const char*			m_name     = nullptr;
+	resourceLifeTime_t	m_lifetime = {};
+
+	void				Cleanup();
 #endif
 
 public:
-	void						AddGeometry( CommandList* cmdList, const blasSurfaceInfo_t& surfaceInfo );
-	void						Create( CommandList* cmdList, const tlasCreateInfo_t& info, VkDeviceAddress instanceBufferAddress );
+	void						Create( const char* name, resourceLifeTime_t lifetime );
+	void						AddGeometry( CommandList* cmdList, const blasCreateSurfaceInfo_t& surfaceInfo );
+	void						Build( CommandList* cmdList );
 	void						Destroy() override;
 
 #ifdef USE_VULKAN_RTX
+	VkDeviceAddress				GetBlasDeviceAddress( uint32_t index ) const;
+	uint32_t					GetBlasCount() const { return static_cast<uint32_t>( m_blasEntries.size() ); }
+
 	VkDeviceAddress				GetDeviceAddress() const;
 	VkAccelerationStructureKHR	GetVkObject() const;
 #endif

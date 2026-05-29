@@ -52,6 +52,7 @@ private:
 	GeometryContext				geometry;
 	UploadCmdList				commands;
 	GpuSemaphore				finishedSemaphore;
+	GpuFence					uploadFence;
 	GpuAccelerationStructure*	accelerationStructure;
 
 	RenderContext*				renderContext;

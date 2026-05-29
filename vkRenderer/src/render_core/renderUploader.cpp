@@ -25,6 +25,7 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 	commands.Create( "Upload Context", renderContext );
 
 	finishedSemaphore.Create( "UploadSemaphore" );
+	uploadFence.Create( "Upload Fence" );
 
 #ifdef USE_VULKAN
 	finishedSemaphore.waitStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
@@ -71,6 +72,7 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 	);
 
 	accelerationStructure = new GpuAccelerationStructure();
+	accelerationStructure->Create( "Scene AS", resourceLifeTime_t::REBOOT );
 }
 
 
@@ -83,24 +85,28 @@ void RenderUploader::Shutdown()
 	commands.Destroy();
 
 	finishedSemaphore.Destroy();
+	uploadFence.Destroy();
 
 	delete accelerationStructure;
+	accelerationStructure = nullptr;
 }
 
 
 void RenderUploader::OnReboot()
 {
+	uploadFence.Wait();
 	commands.Begin();
 
 	Transition( &commands, *g_swapChain.GetBackBuffer(), swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_PRESENT );
 
 	commands.End();
-	commands.Submit();
+	commands.Submit( &uploadFence );
 }
 
 
 void RenderUploader::OnFrameBegin()
 {
+	uploadFence.Wait();
 	commands.Begin();
 
 	RenderResource::TransitionNewImages( &commands );
@@ -112,7 +118,7 @@ void RenderUploader::OnFrameBegin()
 
 	commands.End();
 	commands.Signal( &finishedSemaphore );
-	commands.Submit();
+	commands.Submit( &uploadFence );
 
 	UpdateGpuMaterials();
 }
@@ -147,6 +153,7 @@ void RenderUploader::Upload()
 		}
 	}
 
+	uploadFence.Wait();
 	commands.Begin();
 	commands.MarkerBeginRegion( "UploadAssets", ColorToVector( Color::Green ) );
 
@@ -159,7 +166,7 @@ void RenderUploader::Upload()
 	commands.MarkerEndRegion();
 
 	commands.End();
-	commands.Submit();
+	commands.Submit( &uploadFence );
 
 	UpdateGpuMaterials();
 }
@@ -577,7 +584,20 @@ void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 
 				assert( geometry.ibBufElements < MaxIndices );
 			}
+
+			// Ray-tracing
+			{
+				blasCreateSurfaceInfo_t blasInfo{};
+				blasInfo.vb      = &geometry.vb;
+				blasInfo.ib      = &geometry.ib;
+				blasInfo.surface = &upload;
+
+				accelerationStructure->AddGeometry( cmdList, blasInfo );
+			}
 		}
+
 		modelAsset->CompleteUpload();
 	}
+
+	accelerationStructure->Build( cmdList );
 }
