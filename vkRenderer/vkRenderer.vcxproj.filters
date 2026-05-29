@@ -222,6 +222,7 @@
     <ClCompile Include="src\render_binding\vertexInput.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
+    <ClCompile Include="src\render_resources\aliasableImageHeap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -482,6 +483,10 @@
     <ClInclude Include="src\render_binding\vertexInput.h">
       <Filter>Binding</Filter>
     </ClInclude>
+    <ClInclude Include="src\render_resources\aliasableImageHeap.h" />
+    <ClInclude Include="shaders\rtGlobals.h">
+      <Filter>Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">
@@ -685,6 +690,9 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\chromaticAberration.ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\rtMiss.miss.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
