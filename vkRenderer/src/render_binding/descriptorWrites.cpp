@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <iterator>
 #include <numeric>
 #include <map>
@@ -11,6 +11,7 @@
 #include "../render_core/gpuImage.h"
 #include "../render_resources/imageSampler.h"
 #include "../render_state/rhi.h"
+#include "../render_state/deviceContext.h"
 #include "bindings.h"
 
 union descriptorInfo_t
@@ -144,6 +145,17 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 			info.range = ( info.range == 0 ) ? VK_WHOLE_SIZE : info.range;
 
 			assert( info.buffer != nullptr );
+
+			if ( writeInfo.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER )
+			{
+				const uint64_t storageAlign = context.deviceProperties.limits.minStorageBufferOffsetAlignment;
+				assert( storageAlign == 0 || ( info.offset % storageAlign ) == 0 );
+			}
+			else if ( writeInfo.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER )
+			{
+				const uint64_t uniformAlign = context.deviceProperties.limits.minUniformBufferOffsetAlignment;
+				assert( uniformAlign == 0 || ( info.offset % uniformAlign ) == 0 );
+			}
 
 			writeInfo.pBufferInfo = &info;
 		}
