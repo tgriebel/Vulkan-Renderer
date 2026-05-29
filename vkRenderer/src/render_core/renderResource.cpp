@@ -93,10 +93,13 @@ void RenderResource::TransitionNewImages( CommandList* cmdList )
 		if ( resourceList[ i ]->m_type == resourceType_t::GPU_IMAGE )
 		{
 			GpuImage* gpuImage = reinterpret_cast<GpuImage*>( resourceList[ i ] );
-			if( HasFlags( gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) ) {
-				Transition( cmdList, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_STORAGE );
-			} else if( HasFlags( gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_READ ) ) {
+			if( HasFlags( gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_READ ) )
+			{
 				Transition( cmdList, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_READ );
+			}
+			else if( HasFlags( gpuImage->GetFlags(), gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) )
+			{
+				Transition( cmdList, gpuImage, swapBuffering_t::MULTI_FRAME, GPU_IMAGE_NONE, GPU_IMAGE_STORAGE );
 			}
 		}
 	}
