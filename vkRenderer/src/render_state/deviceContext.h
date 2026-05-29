@@ -57,7 +57,7 @@ struct resolveImageInfo_t
 class DeviceContext
 {
 private:
-	bool isRendeDocAttached = false;
+	bool m_profilerAttached = false;
 
 public:
 #ifdef USE_VULKAN
@@ -125,7 +125,7 @@ public:
 	void	Create( Window& window );
 	void	Destroy( Window& window );
 
-	inline bool IsRenderDocAttached() const { return isRendeDocAttached; }
+	inline bool IsProfilerAttached() const { return m_profilerAttached; }
 };
 
 extern DeviceContext context;

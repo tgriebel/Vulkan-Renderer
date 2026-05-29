@@ -18,16 +18,33 @@ static const bool ValidateVerbose = false;
 static const bool ValidateWarnings = true;
 static const bool ValidateErrors = true;
 
-static bool IsRenderDocAttached()
+enum class attachedProfiler_t
+{
+	NONE,
+	RENDER_DOC,
+	NSIGHT,
+};
+
+
+static attachedProfiler_t DetectProfiler()
 {
 #if defined( _WIN32 )
-	// RenderDoc injects renderdoc.dll into the target process before Vulkan loads.
-	// Its timestamp-query handling is flaky during capture, so disable our pool
-	// when it's present.
-	return GetModuleHandleA( "renderdoc.dll" ) != nullptr;
-#else
-	return false;
+	// Profiles (RenderDoc, NSight) inject code that changes behavior
+	// This can manifest in validation errors, crashes, etc
+	// This function can be used for specialized logic where needed
+
+	if( GetModuleHandleA( "renderdoc.dll" ) != nullptr )
+	{
+		return attachedProfiler_t::RENDER_DOC;
+	}
+
+	if( ( GetModuleHandleA( "nv-nsight-interceptor.dll" ) != nullptr ) ||
+		( GetModuleHandleA( "nv-nsight-interceptor-win64.dll" ) != nullptr ) )
+	{
+		return attachedProfiler_t::NSIGHT;
+	}
 #endif
+	return attachedProfiler_t::NONE;
 }
 
 
@@ -1259,7 +1276,7 @@ void DeviceContext::Create( Window& window )
 #endif
 	}
 
-	isRendeDocAttached = ::IsRenderDocAttached();
+	m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
 
 	// Pick physical device
 	{

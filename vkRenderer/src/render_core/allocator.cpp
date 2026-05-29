@@ -76,6 +76,38 @@ void Allocation::Free()
 VmaAllocator AllocatorMemory::s_allocator = VK_NULL_HANDLE;
 
 
+// Workaround for profile code injection
+static void SuppressDedicatedAllocation( void* pNext )
+{
+	VkBaseOutStructure* node = static_cast<VkBaseOutStructure*>( pNext );
+	while ( node != nullptr )
+	{
+		if ( node->sType == VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS )
+		{
+			VkMemoryDedicatedRequirements* ded = reinterpret_cast<VkMemoryDedicatedRequirements*>( node );
+			ded->prefersDedicatedAllocation = VK_FALSE;
+			ded->requiresDedicatedAllocation = VK_FALSE;
+			break;
+		}
+		node = node->pNext;
+	}
+}
+
+static void VKAPI_CALL vma_GetBufferMemoryRequirements2(
+	VkDevice device, const VkBufferMemoryRequirementsInfo2* pInfo, VkMemoryRequirements2* pMemReqs )
+{
+	vkGetBufferMemoryRequirements2( device, pInfo, pMemReqs );
+	SuppressDedicatedAllocation( pMemReqs->pNext );
+}
+
+static void VKAPI_CALL vma_GetImageMemoryRequirements2(
+	VkDevice device, const VkImageMemoryRequirementsInfo2* pInfo, VkMemoryRequirements2* pMemReqs )
+{
+	vkGetImageMemoryRequirements2( device, pInfo, pMemReqs );
+	SuppressDedicatedAllocation( pMemReqs->pNext );
+}
+
+
 void AllocatorMemory::CreateVmaAllocator()
 {
 	if ( s_allocator != VK_NULL_HANDLE ) {
@@ -87,8 +119,15 @@ void AllocatorMemory::CreateVmaAllocator()
 	createInfo.device = context.device;
 	createInfo.instance = context.instance;
 	createInfo.vulkanApiVersion = VK_API_VERSION_1_2;
-
 	createInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+	VmaVulkanFunctions vmaFunctions{};
+	if ( context.IsProfilerAttached() )
+	{
+		vmaFunctions.vkGetBufferMemoryRequirements2KHR = vma_GetBufferMemoryRequirements2;
+		vmaFunctions.vkGetImageMemoryRequirements2KHR = vma_GetImageMemoryRequirements2;
+		createInfo.pVulkanFunctions = &vmaFunctions;
+	}
 
 	VK_CHECK_RESULT( vmaCreateAllocator( &createInfo, &s_allocator ) );
 }
