@@ -13,11 +13,6 @@ void DrawPass::InsertResourceBarriers( CommandList& cmdContext )
 		if( codeImages[ i ] == nullptr ) {
 			continue;
 		}
-
-		// HACK: depth-stencil transitions are creating validation issues
-		if ( IsDepthStencilCompatible( codeImages[ i ]->info.fmt ) ) {
-			continue;
-		}
 		Transition( &cmdContext, *codeImages[ i ], GPU_IMAGE_READ, GPU_IMAGE_READ );
 	}
 
@@ -25,11 +20,6 @@ void DrawPass::InsertResourceBarriers( CommandList& cmdContext )
 	for ( uint32_t i = 0; i < codeCubeImageCount; ++i )
 	{
 		if( codeCubeImages[ i ] == nullptr ) {
-			continue;
-		}
-
-		// HACK: depth-stencil transitions are creating validation issues
-		if( IsDepthStencilCompatible( codeImages[ i ]->info.fmt ) ) {
 			continue;
 		}
 		Transition( &cmdContext, *codeCubeImages[ i ], GPU_IMAGE_READ, GPU_IMAGE_READ );
