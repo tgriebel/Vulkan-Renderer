@@ -695,6 +695,15 @@
     <FxCompile Include="shaders\rtMiss.rmiss.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="shaders\rtAnyHit.rahit.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\rtClosestHit.rchit.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\rtIntersection.rint.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\external\GfxCore\GfxCore\math\vector.natvis" />

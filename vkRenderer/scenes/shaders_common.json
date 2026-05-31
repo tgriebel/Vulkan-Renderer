@@ -151,8 +151,20 @@
       "rgen": "rtPrimaryRay"
     },
 	{
+      "name": "RtIntersection",
+      "rint": "rtIntersection"
+    },
+	{
       "name": "RtMiss",
       "rmiss": "rtMiss"
+    },
+	{
+      "name": "RtDefaultHit",
+      "rchit": "rtClosestHit"
+    },
+	{
+      "name": "RtDefaultAnyHit",
+      "rahit": "rtAnyHit"
     },
 	{
       "name": "preCalculatedBrdfLut",
