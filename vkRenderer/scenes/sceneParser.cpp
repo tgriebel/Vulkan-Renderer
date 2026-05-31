@@ -684,28 +684,30 @@ int ParseShaderObject( parseState_t& st, void* object, uint32_t offset )
 	constexpr static uint32_t UniquePermCount = static_cast<uint32_t>( shaderPermId_t::COUNT );
 
 	char name[ TOKEN_LEN ] = "";
-	char vsShader[ TOKEN_LEN ] = "";
-	char psShader[ TOKEN_LEN ] = "";
-	char csShader[ TOKEN_LEN ] = "";
-	char rgenShader[ TOKEN_LEN ] = "";
+	char shaderNames[ shaderType_t::COUNT ][ TOKEN_LEN ] = {};
 	char bindSet[ TOKEN_LEN ] = "";
 	char perms[ UniquePermCount ][ TOKEN_LEN ] = {};
 	shaderFlags_t shaderFlags = shaderFlags_t::NONE;
 	AssetLib<GpuProgram>* shaders = reinterpret_cast<AssetLib<GpuProgram>*>( object );
 
-	const uint32_t objectCount = 10;
+	const uint32_t objectCount = 15;
 	const objectTuple_t objectMap[ objectCount ] =
 	{
-		{ "name",			&name,			TOKEN_LEN,				1,	&ParseStringObject },
-		{ "vs",				&vsShader,		TOKEN_LEN,				1,	&ParseStringObject },
-		{ "ps",				&psShader,		TOKEN_LEN,				1,	&ParseStringObject },
-		{ "cs",				&csShader,		TOKEN_LEN,				1,	&ParseStringObject },
-		{ "rgen",			&rgenShader,	TOKEN_LEN,				1,	&ParseStringObject },
-		{ "bindset",		&bindSet,		TOKEN_LEN,				1,	&ParseStringObject },
-		{ "perms",			&perms,			TOKEN_LEN,				1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
-		{ "sampling_ms",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
-		{ "image_shader",	&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
-		{ "no_vb",			&shaderFlags,	sizeof( shaderFlags_t ),1,	&ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> }
+		{ "name",			&name,											TOKEN_LEN,					1,	&ParseStringObject },
+		{ "vs",				&shaderNames[ shaderType_t::VERTEX ],			TOKEN_LEN,					1,	&ParseStringObject },
+		{ "ps",				&shaderNames[ shaderType_t::PIXEL ],			TOKEN_LEN,					1,	&ParseStringObject },
+		{ "cs",				&shaderNames[ shaderType_t::COMPUTE ],			TOKEN_LEN,					1,	&ParseStringObject },
+		{ "rgen",			&shaderNames[ shaderType_t::RT_GEN ],			TOKEN_LEN,					1,	&ParseStringObject },
+		{ "rmiss",			&shaderNames[ shaderType_t::RT_MISS ],			TOKEN_LEN,					1,	&ParseStringObject },
+		{ "rint",			&shaderNames[ shaderType_t::RT_INTERSECTION ],	TOKEN_LEN,					1,	&ParseStringObject },
+		{ "rchit",			&shaderNames[ shaderType_t::RT_CLOSEST_HIT ],	TOKEN_LEN,					1,	&ParseStringObject },
+		{ "rahit",			&shaderNames[ shaderType_t::RT_ANY_HIT ],		TOKEN_LEN,					1,	&ParseStringObject },
+		{ "rcall",			&shaderNames[ shaderType_t::RT_CALLABLE ],		TOKEN_LEN,					1,	&ParseStringObject },
+		{ "bindset",		&bindSet,										TOKEN_LEN,					1,	&ParseStringObject },
+		{ "perms",			&perms,											TOKEN_LEN,					1,	&ParseStringObject },	// NOTE: works for arrays via ParseArray string-element path
+		{ "sampling_ms",	&shaderFlags,									sizeof( shaderFlags_t ),	1,	&ParseFlagObject<(uint32_t)shaderFlags_t::USE_MSAA> },
+		{ "image_shader",	&shaderFlags,									sizeof( shaderFlags_t ),	1,	&ParseFlagObject<(uint32_t)shaderFlags_t::IMAGE_SHADER> },
+		{ "no_vb",			&shaderFlags,									sizeof( shaderFlags_t ),	1,	&ParseFlagObject<(uint32_t)shaderFlags_t::NO_VERTEX_BUFFER> }
 	};
 
 	ParseObject( st, objectMap, objectCount );
@@ -714,7 +716,11 @@ int ParseShaderObject( parseState_t& st, void* object, uint32_t offset )
 	loader->SetSourcePath( "shaders/" );
 	loader->SetBinPath( "shaders_bin/" );
 	loader->SetCompilerPath( "scripts/" );
-	loader->AddFilePaths( vsShader, psShader, csShader );
+	shaderFileNames_t fileNames;
+	for ( uint32_t i = 0; i < shaderType_t::COUNT; ++i ) {
+		fileNames.names[ i ] = shaderNames[ i ];
+	}
+	loader->AddFilePaths( fileNames );
 	loader->SetBindSet( bindSet );
 
 	for( uint32_t i = 0; i < UniquePermCount; ++i ) {

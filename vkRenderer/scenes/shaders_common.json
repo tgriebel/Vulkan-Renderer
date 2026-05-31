@@ -148,7 +148,11 @@
     },
 	{
       "name": "ScreenRayGen",
-      "rgen": "primaryRay"
+      "rgen": "rtPrimaryRay"
+    },
+	{
+      "name": "RtMiss",
+      "rmiss": "rtMiss"
     },
 	{
       "name": "preCalculatedBrdfLut",

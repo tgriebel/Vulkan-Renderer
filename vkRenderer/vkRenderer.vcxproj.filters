@@ -680,7 +680,7 @@
     <FxCompile Include="shaders\downsampleMin.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\primaryRay.rgen.hlsl">
+    <FxCompile Include="shaders\rtPrimaryRay.rgen.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="shaders\dofBokehSample.ps.hlsl">
@@ -692,7 +692,7 @@
     <FxCompile Include="shaders\chromaticAberration.ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\rtMiss.miss.hlsl">
+    <FxCompile Include="shaders\rtMiss.rmiss.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

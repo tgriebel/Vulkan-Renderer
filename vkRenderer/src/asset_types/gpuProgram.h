@@ -206,6 +206,12 @@ public:
 };
 
 
+struct shaderFileNames_t
+{
+	std::string names[ shaderType_t::COUNT ];
+};
+
+
 class GpuProgramLoader : public LoadHandler<GpuProgram>
 {
 private:
@@ -224,7 +230,7 @@ private:
 	std::string			GetCompileString( const std::string& srcPath, const std::string& binPath, const std::string& perms );
 	void				CheckCompileShader( const std::string& path, const std::string& binPath, const shaderPermId_t permSet, const bool forceRebuild = false );
 	bool				LoadRasterProgram( GpuProgram& program );
-	bool				LoadSingleProgram( GpuProgram& program );
+	bool				LoadSingleShader( GpuProgram& program );
 	bool				Load( Asset<GpuProgram>& programAsset );
 
 public:
@@ -242,7 +248,7 @@ public:
 	void AddPerm( const std::string& permName );
 	void SetFlags( const shaderFlags_t shaderFlags );
 	void SetCompilerPath( const std::string& path );
-	void AddFilePaths( const std::string& vertexFileName, const std::string& pixelFileName, const std::string& computeFileName );
+	void AddFilePaths( const shaderFileNames_t& fileNames );
 };
 
 using pShaderLoader_t = Asset<GpuProgram>::loadHandlerPtr_t;

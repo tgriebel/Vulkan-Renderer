@@ -125,25 +125,17 @@ std::string GpuProgramLoader::GetBinName( const std::string& fileName, const sha
 	std::string ext;
 	std::string ext2;
 	SplitFileName( fileName, baseName, ext2 );
+	assert( ext2 == "hlsl" );
+	SplitFileName( baseName, name, ext );
 
-	if( ext2 == "hlsl" )
+	for ( uint32_t i = 0; i < shaderType_t::COUNT; ++i )
 	{
-		SplitFileName( baseName, name, ext );
-	}
-	else
-	{
-		name = baseName;
-		ext = ext2;
-	}
-
-	if ( ext == "vert" || ext == "vs" ) {
-		name += "VS";
-	}
-	else if ( ext == "frag" || ext == "ps" ) {
-		name += "PS";
-	}
-	else if ( ext == "comp" || ext == "cs" ) {
-		name += "CS";
+		if ( s_fileExtTypeMap[ i ].ext != nullptr && ext == s_fileExtTypeMap[ i ].ext )
+		{
+			ToUpper( ext );
+			name += ext;
+			break;
+		}
 	}
 
 	for ( uint32_t i = 0; i < shaderPermId_t::COUNT; ++i )
@@ -292,7 +284,7 @@ bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
 }
 
 
-bool GpuProgramLoader::LoadSingleProgram( GpuProgram& program )
+bool GpuProgramLoader::LoadSingleShader( GpuProgram& program )
 {
 	const shaderType_t shaderType = GetTypeFromName( srcFileName );
 	const pipelineType_t pipelineType = GetPipelineTypeForShaderType( shaderType );
@@ -338,7 +330,7 @@ bool GpuProgramLoader::Load( Asset<GpuProgram>& programAsset )
 	}
 	else if ( !srcFileName.empty() )
 	{
-		return LoadSingleProgram( program );
+		return LoadSingleShader( program );
 	}
 	return false;
 }
@@ -391,15 +383,27 @@ void GpuProgramLoader::SetCompilerPath( const std::string& path )
 }
 
 
-void GpuProgramLoader::AddFilePaths( const std::string& vertexFileName, const std::string& pixelFileName, const std::string& computeFileName )
+void GpuProgramLoader::AddFilePaths( const shaderFileNames_t& fileNames )
 {
-	if ( !vertexFileName.empty() ) {
-		vsFileName = vertexFileName + ".vs.hlsl";
-	}
-	if ( !pixelFileName.empty() ) {
-		psFileName = pixelFileName + ".ps.hlsl";
-	}
-	if ( !computeFileName.empty() ) {
-		srcFileName = computeFileName + ".cs.hlsl";
+	for ( uint32_t i = 0; i < shaderType_t::COUNT; ++i )
+	{
+		if ( s_fileExtTypeMap[ i ].ext == nullptr ) {
+			continue;
+		}
+		const shaderType_t type = s_fileExtTypeMap[ i ].type;
+		const std::string& baseName = fileNames.names[ type ];
+		if ( baseName.empty() ) {
+			continue;
+		}
+
+		const std::string fullName = baseName + "." + s_fileExtTypeMap[ i ].ext + ".hlsl";
+
+		if ( type == shaderType_t::VERTEX ) {
+			vsFileName = fullName;
+		} else if ( type == shaderType_t::PIXEL ) {
+			psFileName = fullName;
+		} else {
+			srcFileName = fullName;
+		}
 	}
 }
