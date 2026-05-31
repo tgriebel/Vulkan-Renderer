@@ -44,12 +44,9 @@ enum class pipelineType_t : uint32_t
 enum class shaderFlags_t : uint32_t
 {
 	NONE					= 0,
-	USE_MSAA				= ( 1 << 0 ),
-	USE_CUBE_SAMPLER		= ( 1 << 1 ),
-	IMAGE_SHADER			= ( 1 << 2 ),
-	NO_VERTEX_BUFFER		= ( 1 << 3 ),
-	USE_MRT					= ( 1 << 4 ),
-	QUAD_2D					= ( 1 << 5 ),
+	IMAGE_SHADER			= ( 1 << 1 ),
+	NO_VERTEX_BUFFER		= ( 1 << 2 ),
+	QUAD_2D					= ( 1 << 3 ),
 };
 DEFINE_ENUM_OPERATORS( shaderFlags_t, uint32_t )
 
@@ -70,14 +67,13 @@ DEFINE_ENUM_OPERATORS( shaderPermId_t, uint32_t )
 // Right now just 1 flag is supported, but should change
 struct shaderPerm_t
 {
-	shaderFlags_t	flags;
 	shaderPermId_t	id;
 	std::string		macro;
 	std::string		tag;
 };
 
 
-#define SHADER_PERM(FLAG, PERM, TAG) { shaderFlags_t::FLAG, shaderPermId_t::PERM, #FLAG, TAG }
+#define SHADER_PERM(FLAG, PERM, TAG) { shaderPermId_t::PERM, #FLAG, TAG }
 
 static const shaderPerm_t ShaderPerms[] = {	SHADER_PERM( USE_MSAA,			MSAA,				"msaa" ),
 											SHADER_PERM( USE_MRT,			MRT,				"mrt" ),
