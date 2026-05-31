@@ -5,15 +5,13 @@
       "vs": "fullscreen",
       "ps": "resolve",
 	  "perms": ["msaa", "mrt"],
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "ResolveDepth",
       "vs": "fullscreen",
       "ps": "resolveDepth",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
     {
       "name": "Basic",
@@ -42,15 +40,13 @@
       "name": "NoiseGen",
       "vs": "fullscreen",
       "ps": "noiseGen",
-      "bindset": "bindset_imageShader",
-      "image_shader": true
+      "bindset": "bindset_imageShader"
     },
 	{
       "name": "SSAO",
       "vs": "fullscreen",
       "ps": "ssao",
-      "bindset": "bindset_imageShader",
-      "image_shader": true
+      "bindset": "bindset_imageShader"
     },
     {
       "name": "TerrainDepth",
@@ -98,8 +94,7 @@
       "name": "PostProcess",
       "vs": "fullscreen",
       "ps": "postProcess",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
     {
       "name": "ImageViewer",
@@ -107,7 +102,6 @@
       "ps": "imageViewer",
       "perms": ["msaa"],
 	  "bindset": "bindset_imageShader",
-	  "image_shader": true,
 	  "no_vb": true
     },
 	{
@@ -129,22 +123,19 @@
       "name": "DownSample",
       "vs": "fullscreen",
       "ps": "downsample",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "DownSampleMin",
       "vs": "fullscreen",
       "ps": "downsampleMin",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "DownSampleMax",
       "vs": "fullscreen",
       "ps": "downsampleMax",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "ScreenRayGen",
@@ -170,36 +161,31 @@
       "name": "preCalculatedBrdfLut",
       "vs": "fullscreen",
       "ps": "computeBrdfLut",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "preCalculatedSpecularIbl",
       "vs": "fullscreen",
       "ps": "preCalculatedSpecularIbl",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "SeparableGaussianBlur",
       "vs": "fullscreen",
       "ps": "gaussian",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "BilateralBlur",
       "vs": "fullscreen",
       "ps": "bilateralBlur",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "DofCoc",
       "vs": "fullscreen",
       "ps": "dofCoc",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "DofTileMinMax",
@@ -210,57 +196,49 @@
       "name": "DofBokeh",
       "vs": "fullscreen",
       "ps": "dofBokehSample",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "DofBlur",
       "vs": "fullscreen",
       "ps": "dofBlur",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "ChromaticAberration",
       "vs": "fullscreen",
       "ps": "chromaticAberration",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "DiffuseIBL",
       "vs": "fullscreen",
       "ps": "preCalculatedDiffuseIbl",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "LuminanceDownsample",
       "vs": "fullscreen",
       "ps": "luminanceDownsample",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "Luminance",
       "vs": "fullscreen",
       "ps": "luminance",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "BloomDownsample",
       "vs": "fullscreen",
       "ps": "bloomDownsample",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
       "name": "BloomUpsample",
       "vs": "fullscreen",
       "ps": "bloomUpsample",
-	  "bindset": "bindset_imageShader",
-	  "image_shader": true
+	  "bindset": "bindset_imageShader"
     },
 	{
 	  "name": "LitCRT",
