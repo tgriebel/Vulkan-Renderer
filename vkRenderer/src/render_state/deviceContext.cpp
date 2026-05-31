@@ -1362,12 +1362,8 @@ void DeviceContext::Create( Window& window )
 #ifdef USE_VULKAN_RTX
 		deviceFeatures.features.shaderStorageImageWriteWithoutFormat = VK_TRUE;
 	
-		enabledBufferDeviceAddresFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-		enabledBufferDeviceAddresFeatures.bufferDeviceAddress = VK_TRUE;
-
 		enabledRayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 		enabledRayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
-		enabledRayTracingPipelineFeatures.pNext = &enabledBufferDeviceAddresFeatures;
 
 		enabledAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
 		enabledAccelerationStructureFeatures.accelerationStructure = VK_TRUE;
@@ -1404,21 +1400,26 @@ void DeviceContext::Create( Window& window )
 		}
 
 		VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeature = {};
-		dynamicRenderingFeature.sType            = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+		dynamicRenderingFeature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
 		dynamicRenderingFeature.dynamicRendering = VK_TRUE;
-		dynamicRenderingFeature.pNext            = nullptr;
+		dynamicRenderingFeature.pNext = nullptr;
 
-		VkPhysicalDeviceDescriptorIndexingFeatures descIndexing;
-		memset( &descIndexing, 0, sizeof( VkPhysicalDeviceDescriptorIndexingFeatures ) );
-		descIndexing.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
-		descIndexing.pNext = &dynamicRenderingFeature;
-		descIndexing.runtimeDescriptorArray = true;
-		descIndexing.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+		VkPhysicalDeviceVulkan12Features vk12Features = {};
+		vk12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+		vk12Features.vulkanMemoryModel = VK_TRUE;
+		vk12Features.vulkanMemoryModelDeviceScope = VK_TRUE;
+		vk12Features.runtimeDescriptorArray = VK_TRUE;
+		vk12Features.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 #ifdef USE_VULKAN_RTX
-		enabledBufferDeviceAddresFeatures.pNext = &descIndexing;
+		vk12Features.bufferDeviceAddress = VK_TRUE;
+#endif
+		vk12Features.pNext = &dynamicRenderingFeature;
+
+#ifdef USE_VULKAN_RTX
+		enabledRayTracingPipelineFeatures.pNext = &vk12Features;
 		createInfo.pNext = &enabledAccelerationStructureFeatures;
 #else
-		createInfo.pNext = &descIndexing;
+		createInfo.pNext = &vk12Features;
 #endif
 
 		VK_CHECK_RESULT( vkCreateDevice( physicalDevice, &createInfo, nullptr, &device ) );
