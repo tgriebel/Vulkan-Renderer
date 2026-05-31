@@ -42,20 +42,6 @@ float EdgeOutline( const int2 pixelLocation, Texture2D depthTexture )
 }
 
 
-float3 ApplyDoF( const Texture2D dofTexture, const Texture2D dofCocTexture, const float3 sceneColor, const float2 uv )
-{
-    const bool dofEnabled = ( globals.dof.x != 0.0f );
-    if ( dofEnabled )
-    {
-        const float coc = dofCocTexture.Sample( bilinearSamplerClampEdge, uv ).r;
-        const float dofBlendWeight = ( abs( coc ) > 1.0f ) ? smoothstep( 1, 2, abs( coc ) ) : 0.0f;
-        const float3 dofValue = dofTexture.Sample( bilinearSamplerClampEdge, uv ).rgb;
-        return lerp( sceneColor, dofValue, dofBlendWeight );
-    }
-    return sceneColor;
-}
-
-
 float3 ApplyBloom( const Texture2D bloomTexture, const float3 sceneColor, const float2 uv )
 {
 	float3 bloomColor;
@@ -129,10 +115,16 @@ psOutput_t PSMain( vsToPsInterpolators input )
     const float4 uvColor = float4( input.uv0.xy, 0.0f, 1.0f );
 
     output.outColor.rgb = float3( 0.0f, 0.0f, 0.0f );
+    const bool dofEnabled = ( globals.dof.x != 0.0f );
+    const float coc = dofCocTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).r;
 
-    const float3 sceneTexColor = sceneTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
-    const float3 hdrColor = ApplyDoF( dofTexture, dofCocTexture, sceneTexColor, input.uv0.xy );
-
+    float3 hdrColor;
+    if ( dofEnabled && ( abs( coc ) > 1.0f ) ){
+        hdrColor.rgb = dofTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
+    } else {
+        hdrColor.rgb = sceneTexture.Sample( bilinearSamplerClampEdge, input.uv0.xy ).rgb;
+    }
+	
     const float3 tint = globals.toneMapTint.rgb;
 
 	float3 finalColor = tint * hdrColor;
