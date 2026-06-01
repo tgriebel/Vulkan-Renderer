@@ -284,6 +284,62 @@ bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
 }
 
 
+bool GpuProgramLoader::LoadHitGroupProgram( GpuProgram& program )
+{
+	program.type = pipelineType_t::RT_HIT_GROUP;
+	program.shaderCount = 0;
+	program.bindsetCount = 0;
+	program.permCount = 1;
+	program.permSet = shaderPermId_t::NONE;
+
+	const uint32_t shaderTypeCount = 3;
+
+	struct shaderFileInfo_t
+	{
+		std::string		filename;
+		shaderType_t	type;
+	};
+
+	const shaderFileInfo_t shaderFileInfo[ shaderTypeCount ] =
+	{
+		{ rchitFileName,	shaderType_t::RT_CLOSEST_HIT	},
+		{ rahitFileName,	shaderType_t::RT_ANY_HIT		},
+		{ rintFileName,		shaderType_t::RT_INTERSECTION	},
+	};
+
+	for ( uint32_t i = 0; i < shaderTypeCount; ++i )
+	{
+		if ( shaderFileInfo[ i ].filename.empty() ) {
+			continue;
+		}
+
+		const std::string& filename = shaderFileInfo[ i ].filename;
+		const shaderType_t type = shaderFileInfo[ i ].type;
+
+		const uint32_t shaderIx = program.shaderCount++;
+		const std::string binName = GetBinName( filename, shaderPermId_t::NONE );
+
+		CheckCompileShader( srcPath + filename, binPath + binName, shaderPermId_t::NONE, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
+
+		ShaderSource& source = program.shaders[ shaderIx ];
+		ShaderBin& bin = program.shaderBins[ shaderIx ][ 0 ];
+
+		source.name = filename;
+		source.src = ReadTextFile( srcPath + filename );
+		source.type = type;
+
+		bin.binName = binName;
+		bin.blob = ReadBinaryFile( binPath + binName );
+		bin.type = type;
+#ifdef USE_VULKAN
+		bin.vk_shader = VK_NULL_HANDLE;
+#endif
+	}
+
+	return ( program.shaderCount > 0 );
+}
+
+
 bool GpuProgramLoader::LoadSingleShader( GpuProgram& program )
 {
 	const shaderType_t shaderType = GetTypeFromName( srcFileName );
@@ -327,6 +383,10 @@ bool GpuProgramLoader::Load( Asset<GpuProgram>& programAsset )
 	if ( ( !vsFileName.empty() ) && ( !psFileName.empty() ) )
 	{
 		return LoadRasterProgram( program );
+	}
+	else if ( !rchitFileName.empty() || !rahitFileName.empty() || !rintFileName.empty() )
+	{
+		return LoadHitGroupProgram( program );
 	}
 	else if ( !srcFileName.empty() )
 	{
@@ -402,6 +462,12 @@ void GpuProgramLoader::AddFilePaths( const shaderFileNames_t& fileNames )
 			vsFileName = fullName;
 		} else if ( type == shaderType_t::PIXEL ) {
 			psFileName = fullName;
+		} else if ( type == shaderType_t::RT_CLOSEST_HIT ) {
+			rchitFileName = fullName;
+		} else if ( type == shaderType_t::RT_ANY_HIT ) {
+			rahitFileName = fullName;
+		} else if ( type == shaderType_t::RT_INTERSECTION ) {
+			rintFileName = fullName;
 		} else {
 			srcFileName = fullName;
 		}

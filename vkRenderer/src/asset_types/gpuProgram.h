@@ -152,7 +152,7 @@ public:
 
 	using ShaderPermMap = std::unordered_map<uint32_t, ShaderBin>;
 
-	static const uint32_t MaxShaders = 2;
+	static const uint32_t MaxShaders = 3;
 	static const uint32_t MaxBindSets = 5;
 	static const uint32_t MaxPermutations = ( 1 << static_cast<uint32_t>( shaderPermId_t::COUNT ) );
 
@@ -217,6 +217,9 @@ private:
 	std::string		vsFileName;
 	std::string		psFileName;
 	std::string		srcFileName;
+	std::string		rchitFileName;
+	std::string		rahitFileName;
+	std::string		rintFileName;
 	uint64_t		bindHash;
 	uint32_t		permIdCount;
 	shaderFlags_t	flags;
@@ -226,6 +229,7 @@ private:
 	std::string			GetCompileString( const std::string& srcPath, const std::string& binPath, const std::string& perms );
 	void				CheckCompileShader( const std::string& path, const std::string& binPath, const shaderPermId_t permSet, const bool forceRebuild = false );
 	bool				LoadRasterProgram( GpuProgram& program );
+	bool				LoadHitGroupProgram( GpuProgram& program );
 	bool				LoadSingleShader( GpuProgram& program );
 	bool				Load( Asset<GpuProgram>& programAsset );
 
