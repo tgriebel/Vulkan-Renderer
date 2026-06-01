@@ -211,26 +211,18 @@ struct shaderFileNames_t
 class GpuProgramLoader : public LoadHandler<GpuProgram>
 {
 private:
-	std::string		srcPath;
-	std::string		binPath;
-	std::string		compilerPath;
-	std::string		vsFileName;
-	std::string		psFileName;
-	std::string		srcFileName;
-	std::string		rchitFileName;
-	std::string		rahitFileName;
-	std::string		rintFileName;
-	uint64_t		bindHash;
-	uint32_t		permIdCount;
-	shaderFlags_t	flags;
-	shaderPermId_t	permList[ GpuProgram::MaxPermutations ];
+	std::string			srcPath;
+	std::string			binPath;
+	std::string			compilerPath;
+	shaderFileNames_t	fileNames;
+	uint64_t			bindHash;
+	uint32_t			permIdCount;
+	shaderFlags_t		flags;
+	shaderPermId_t		permList[ GpuProgram::MaxPermutations ];
 
 	static std::string	GetBinName( const std::string& fileName, const shaderPermId_t permSet );
 	std::string			GetCompileString( const std::string& srcPath, const std::string& binPath, const std::string& perms );
 	void				CheckCompileShader( const std::string& path, const std::string& binPath, const shaderPermId_t permSet, const bool forceRebuild = false );
-	bool				LoadRasterProgram( GpuProgram& program );
-	bool				LoadHitGroupProgram( GpuProgram& program );
-	bool				LoadSingleShader( GpuProgram& program );
 	bool				Load( Asset<GpuProgram>& programAsset );
 
 public:

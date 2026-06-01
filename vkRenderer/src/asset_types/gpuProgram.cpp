@@ -73,9 +73,11 @@ static pipelineType_t GetPipelineTypeForShaderType( const shaderType_t type )
 
 		case RT_CLOSEST_HIT:
 		case RT_ANY_HIT:
-		case RT_MISS:
 		case RT_INTERSECTION:
 			return pipelineType_t::RT_HIT_GROUP;
+
+		case RT_MISS:
+			return pipelineType_t::RT_MISS;
 
 		case RT_CALLABLE:
 			return pipelineType_t::RT_CALLABLE;
@@ -209,190 +211,100 @@ void GpuProgramLoader::CheckCompileShader( const std::string& path, const std::s
 }
 
 
-bool GpuProgramLoader::LoadRasterProgram( GpuProgram& program )
-{
-	assert( permIdCount >= 1 );
-
-	program.type = pipelineType_t::RASTER;
-	program.shaderCount = 2;
-	program.bindsetCount = 0;
-	program.permSet = shaderPermId_t::NONE;
-
-	shaderPermId_t permPowerSet[ GpuProgram::MaxPermutations ]; // Array of all set combinations
-	uint32_t permSetCount = 1; // Always 1+ b/c of "NONE"
-
-	for ( uint32_t permIndex = 0; permIndex < GpuProgram::MaxPermutations; ++permIndex )
-	{
-		permPowerSet[ permIndex ] = shaderPermId_t::NONE;
-	}
-
-	// Build superset of all permutations
-	shaderPermId_t superSet = shaderPermId_t::NONE;
-	for( uint32_t permIndex = 0; permIndex < permIdCount; ++permIndex )
-	{
-		superSet |= permList[ permIndex ];
-	}
-
-	// Build list of valid sets (i.e. powerset)
-	for ( uint32_t permIndex = 1; permIndex < GpuProgram::MaxPermutations; ++permIndex )
-	{
-		shaderPermId_t permSet = shaderPermId_t( permIndex );
-		if ( ( superSet & permSet ) != permSet ) {
-			continue;
-		}
-
-		permPowerSet[ permSetCount ] = permSet;
-		++permSetCount;
-	}
-
-	program.permCount = permSetCount;
-
-	// Go through the powerset and compile each specific combination
-	for ( uint32_t permSetIndex = 0; permSetIndex < permSetCount; ++permSetIndex )
-	{
-		const std::string vsBinName = GetBinName( vsFileName, permPowerSet[ permSetIndex ] );
-		const std::string psBinName = GetBinName( psFileName, permPowerSet[ permSetIndex ] );
-
-		CheckCompileShader( srcPath + vsFileName, binPath + vsBinName, permPowerSet[ permSetIndex ], HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
-		CheckCompileShader( srcPath + psFileName, binPath + psBinName, permPowerSet[ permSetIndex ], HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
-
-		const uint32_t shaderPermIndex = static_cast<uint32_t>( permPowerSet[ permSetIndex ] );
-		ShaderSource& vs = program.shaders[ 0 ];
-		ShaderBin& vsBin = program.shaderBins[ 0 ][ shaderPermIndex ];
-
-		vs.name = vsFileName;
-		vs.src = ReadTextFile( srcPath + vsFileName );
-		vs.type = shaderType_t::VERTEX;
-
-		vsBin.binName = vsBinName;
-		vsBin.blob = ReadBinaryFile( binPath + vsBinName );
-		vsBin.type = shaderType_t::VERTEX;
-
-		ShaderSource& ps = program.shaders[ 1 ];
-		ShaderBin& psBin = program.shaderBins[ 1 ][ shaderPermIndex ];
-
-		ps.name = psFileName;
-		ps.src = ReadTextFile( srcPath + psFileName );
-		ps.type = shaderType_t::PIXEL;
-
-		psBin.binName = psBinName;
-		psBin.blob = ReadBinaryFile( binPath + psBinName );
-		psBin.type = shaderType_t::PIXEL;
-	}
-
-	return true;
-}
-
-
-bool GpuProgramLoader::LoadHitGroupProgram( GpuProgram& program )
-{
-	program.type = pipelineType_t::RT_HIT_GROUP;
-	program.shaderCount = 0;
-	program.bindsetCount = 0;
-	program.permCount = 1;
-	program.permSet = shaderPermId_t::NONE;
-
-	const uint32_t shaderTypeCount = 3;
-
-	struct shaderFileInfo_t
-	{
-		std::string		filename;
-		shaderType_t	type;
-	};
-
-	const shaderFileInfo_t shaderFileInfo[ shaderTypeCount ] =
-	{
-		{ rchitFileName,	shaderType_t::RT_CLOSEST_HIT	},
-		{ rahitFileName,	shaderType_t::RT_ANY_HIT		},
-		{ rintFileName,		shaderType_t::RT_INTERSECTION	},
-	};
-
-	for ( uint32_t i = 0; i < shaderTypeCount; ++i )
-	{
-		if ( shaderFileInfo[ i ].filename.empty() ) {
-			continue;
-		}
-
-		const std::string& filename = shaderFileInfo[ i ].filename;
-		const shaderType_t type = shaderFileInfo[ i ].type;
-
-		const uint32_t shaderIx = program.shaderCount++;
-		const std::string binName = GetBinName( filename, shaderPermId_t::NONE );
-
-		CheckCompileShader( srcPath + filename, binPath + binName, shaderPermId_t::NONE, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
-
-		ShaderSource& source = program.shaders[ shaderIx ];
-		ShaderBin& bin = program.shaderBins[ shaderIx ][ 0 ];
-
-		source.name = filename;
-		source.src = ReadTextFile( srcPath + filename );
-		source.type = type;
-
-		bin.binName = binName;
-		bin.blob = ReadBinaryFile( binPath + binName );
-		bin.type = type;
-#ifdef USE_VULKAN
-		bin.vk_shader = VK_NULL_HANDLE;
-#endif
-	}
-
-	return ( program.shaderCount > 0 );
-}
-
-
-bool GpuProgramLoader::LoadSingleShader( GpuProgram& program )
-{
-	const shaderType_t shaderType = GetTypeFromName( srcFileName );
-	const pipelineType_t pipelineType = GetPipelineTypeForShaderType( shaderType );
-
-	program.type = pipelineType;
-	program.shaderCount = 1;
-	program.bindsetCount = 0;
-	program.permCount = permIdCount;
-	program.permSet = shaderPermId_t::NONE;
-
-	const std::string binName = GetBinName( srcFileName, shaderPermId_t::NONE );
-
-	CheckCompileShader( srcPath + srcFileName, binPath + binName, shaderPermId_t::NONE, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
-
-	ShaderSource& source = program.shaders[ 0 ];
-	ShaderBin& bin = program.shaderBins[ 0 ][ 0 ];
-
-	source.name = srcFileName;
-	source.src = ReadTextFile( srcPath + srcFileName );
-	source.type = shaderType;
-
-	bin.binName = binName;
-	bin.blob = ReadBinaryFile( binPath + binName );
-	bin.type = shaderType;
-#ifdef USE_VULKAN
-	bin.vk_shader = VK_NULL_HANDLE;
-#endif
-
-	return true;
-}
-
-
 bool GpuProgramLoader::Load( Asset<GpuProgram>& programAsset )
 {
 	GpuProgram& program = programAsset.Get();
-
 	program.bindHash = bindHash;
 	program.flags = flags;
+	program.shaderCount = 0;
+	program.bindsetCount = 0;
 
-	if ( ( !vsFileName.empty() ) && ( !psFileName.empty() ) )
+	// Collect active shader slots in map order
+	struct ShaderSlot
 	{
-		return LoadRasterProgram( program );
-	}
-	else if ( !rchitFileName.empty() || !rahitFileName.empty() || !rintFileName.empty() )
+		std::string fileName;
+		shaderType_t type;
+	};
+	ShaderSlot activeShaders[ shaderType_t::COUNT ] = {};
+	uint32_t activeCount = 0;
+
+	for ( uint32_t i = 0; i < shaderType_t::COUNT; ++i )
 	{
-		return LoadHitGroupProgram( program );
+		if ( s_fileExtTypeMap[ i ].ext == nullptr ) {
+			continue;
+		}
+		const shaderType_t type = s_fileExtTypeMap[ i ].type;
+
+		const std::string& baseName = fileNames.names[ type ];
+		if ( baseName.empty() ) {
+			continue;
+		}
+		activeShaders[ activeCount++ ] = { baseName + "." + s_fileExtTypeMap[ i ].ext + ".hlsl", type };
 	}
-	else if ( !srcFileName.empty() )
+
+	if ( activeCount == 0 ) {
+		return false;
+	}
+
+	program.type = GetPipelineTypeForShaderType( activeShaders[ 0 ].type );
+	program.shaderCount = activeCount;
+
+	// Build permutation superset and powerset
+	shaderPermId_t superSet = shaderPermId_t::NONE;
+	for ( uint32_t i = 0; i < permIdCount; ++i ) {
+		superSet |= permList[ i ];
+	}
+
+	shaderPermId_t permPowerSet[ GpuProgram::MaxPermutations ];
+	uint32_t permSetCount = 1;
+	permPowerSet[ 0 ] = shaderPermId_t::NONE;
+
+	for ( uint32_t permIndex = 1; permIndex < GpuProgram::MaxPermutations; ++permIndex )
 	{
-		return LoadSingleShader( program );
+		const shaderPermId_t perm = shaderPermId_t( permIndex );
+		if ( ( superSet & perm ) != perm ) {
+			continue;
+		}
+		permPowerSet[ permSetCount++ ] = perm;
 	}
-	return false;
+
+	program.permCount = permSetCount;
+	program.permSet = superSet;
+
+	// Load shader sources (same across all permutations)
+	for ( uint32_t shaderIx = 0; shaderIx < activeCount; ++shaderIx )
+	{
+		ShaderSource& source = program.shaders[ shaderIx ];
+		source.name = activeShaders[ shaderIx ].fileName;
+		source.src = ReadTextFile( srcPath + activeShaders[ shaderIx ].fileName );
+		source.type = activeShaders[ shaderIx ].type;
+	}
+
+	// Compile and load binaries for each permutation of each shader
+	for ( uint32_t permSetIndex = 0; permSetIndex < permSetCount; ++permSetIndex )
+	{
+		const shaderPermId_t perm = permPowerSet[ permSetIndex ];
+		const uint32_t permKey = static_cast<uint32_t>( perm );
+
+		for ( uint32_t shaderIx = 0; shaderIx < activeCount; ++shaderIx )
+		{
+			const std::string& fileName = activeShaders[ shaderIx ].fileName;
+			const shaderType_t shaderType = activeShaders[ shaderIx ].type;
+			const std::string binName = GetBinName( fileName, perm );
+
+			CheckCompileShader( srcPath + fileName, binPath + binName, perm, HasFlags( LOAD_HANDLER_FLAGS_REBAKE ) );
+
+			ShaderBin& bin = program.shaderBins[ shaderIx ][ permKey ];
+			bin.binName = binName;
+			bin.blob = ReadBinaryFile( binPath + binName );
+			bin.type = shaderType;
+#ifdef USE_VULKAN
+			bin.vk_shader = VK_NULL_HANDLE;
+#endif
+		}
+	}
+
+	return true;
 }
 
 
@@ -445,31 +357,5 @@ void GpuProgramLoader::SetCompilerPath( const std::string& path )
 
 void GpuProgramLoader::AddFilePaths( const shaderFileNames_t& fileNames )
 {
-	for ( uint32_t i = 0; i < shaderType_t::COUNT; ++i )
-	{
-		if ( s_fileExtTypeMap[ i ].ext == nullptr ) {
-			continue;
-		}
-		const shaderType_t type = s_fileExtTypeMap[ i ].type;
-		const std::string& baseName = fileNames.names[ type ];
-		if ( baseName.empty() ) {
-			continue;
-		}
-
-		const std::string fullName = baseName + "." + s_fileExtTypeMap[ i ].ext + ".hlsl";
-
-		if ( type == shaderType_t::VERTEX ) {
-			vsFileName = fullName;
-		} else if ( type == shaderType_t::PIXEL ) {
-			psFileName = fullName;
-		} else if ( type == shaderType_t::RT_CLOSEST_HIT ) {
-			rchitFileName = fullName;
-		} else if ( type == shaderType_t::RT_ANY_HIT ) {
-			rahitFileName = fullName;
-		} else if ( type == shaderType_t::RT_INTERSECTION ) {
-			rintFileName = fullName;
-		} else {
-			srcFileName = fullName;
-		}
-	}
+	this->fileNames = fileNames;
 }
