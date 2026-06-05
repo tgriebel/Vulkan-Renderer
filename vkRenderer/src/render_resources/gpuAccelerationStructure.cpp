@@ -216,7 +216,7 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 		}
 
 		m_tlasInstances.Create( m_name, swapBuffering_t::SINGLE_FRAME, m_lifetime,
-			blasCount, sizeof( VkAccelerationStructureInstanceKHR ), bufferType_t::AS_INSTANCE );
+			blasCount, sizeof( VkAccelerationStructureInstanceKHR ), bufferType_t::TLAS_INSTANCE_DATA );
 		m_tlasInstances.CopyData( instances.data(), instances.size() * sizeof( VkAccelerationStructureInstanceKHR ) );
 
 		// TLAS geometry points at the instance buffer

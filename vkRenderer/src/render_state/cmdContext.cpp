@@ -397,3 +397,53 @@ void FlushGPU()
 	vkDeviceWaitIdle( context.device );
 #endif
 }
+
+
+#ifdef USE_VULKAN_RTX
+void CommandList::TraceRays( const hdl_t rtPipelineHdl, const ShaderBindParms& bindParms, const uint32_t width, const uint32_t height )
+{
+	TraceRays( rtPipelineHdl, bindParms, nullptr, 0, width, height );
+}
+
+
+void CommandList::TraceRays( const hdl_t rtPipelineHdl, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsByteSize, const uint32_t width, const uint32_t height )
+{
+	assert( isOpen );
+	assert( ( constantsByteSize % 4 ) == 0 );
+
+	pipelineObject_t* pipelineObject = nullptr;
+	GetPipelineObject( rtPipelineHdl, &pipelineObject );
+	assert( pipelineObject && pipelineObject->pipeline );
+
+	MarkerBeginRegion( "TraceRays", ColorToVector( ColorWhite ) );
+
+	VkCommandBuffer cmdBuffer = CommandBuffer();
+
+	const VkShaderStageFlags rtStages =	( VK_SHADER_STAGE_RAYGEN_BIT_KHR
+									|	VK_SHADER_STAGE_MISS_BIT_KHR
+									|	VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+									|	VK_SHADER_STAGE_ANY_HIT_BIT_KHR
+									|	VK_SHADER_STAGE_INTERSECTION_BIT_KHR );
+
+	if ( ( constants != nullptr ) && ( constantsByteSize > 0 ) )
+	{
+		vkCmdPushConstants( cmdBuffer, pipelineObject->pipelineLayout, rtStages, 0, constantsByteSize, constants );
+	}
+
+	vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineObject->pipeline );
+
+	VkDescriptorSet set[ 1 ] = { bindParms.GetVkObject() };
+	vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
+
+	const vk_shaderBindTable_t& sbt = pipelineObject->state.rtState.sbt;
+	context.vkCmdTraceRaysKHR(
+		cmdBuffer,
+		&sbt.rgenRegion,
+		&sbt.missRegion,
+		&sbt.hitGroupRegion,
+		&sbt.callableRegion,
+		width, height, 1 );
+
+	MarkerEndRegion();
+}
+#endif

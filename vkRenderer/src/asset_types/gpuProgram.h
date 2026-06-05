@@ -34,10 +34,7 @@ enum class pipelineType_t : uint32_t
 	UNSPECIFIED = 0,
 	RASTER,
 	COMPUTE,
-	RT_GEN,
-	RT_HIT_GROUP,
-	RT_MISS,
-	RT_CALLABLE,
+	RAY_TRACING,
 };
 
 

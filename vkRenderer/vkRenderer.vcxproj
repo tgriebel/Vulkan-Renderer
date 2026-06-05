@@ -325,6 +325,7 @@
     <ClInclude Include="src\render_resources\imageSampler.h" />
     <ClInclude Include="src\render_resources\imageView.h" />
     <ClInclude Include="src\render_tasks\ComputeTask.h" />
+    <ClInclude Include="src\render_tasks\rayTracingTask.h" />
     <ClInclude Include="src\render_tasks\taskSchedule.h" />
     <ClInclude Include="src\render_tasks\UtilTasks.h" />
     <ClInclude Include="src\scene\assetBaker.h" />
@@ -407,6 +408,7 @@
     <ClCompile Include="src\render_resources\imageSampler.cpp" />
     <ClCompile Include="src\render_resources\imageView.cpp" />
     <ClCompile Include="src\render_tasks\ComputeTask.cpp" />
+    <ClCompile Include="src\render_tasks\rayTracingTask.cpp" />
     <ClCompile Include="src\render_tasks\UtilTasks.cpp" />
     <ClCompile Include="src\scene\assetBaker.cpp" />
     <ClCompile Include="src\scene\camera.cpp" />

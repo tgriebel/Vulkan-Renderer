@@ -69,18 +69,12 @@ static pipelineType_t GetPipelineTypeForShaderType( const shaderType_t type )
 			return pipelineType_t::COMPUTE;
 
 		case RT_GEN:
-			return pipelineType_t::RT_GEN;
-
 		case RT_CLOSEST_HIT:
 		case RT_ANY_HIT:
 		case RT_INTERSECTION:
-			return pipelineType_t::RT_HIT_GROUP;
-
 		case RT_MISS:
-			return pipelineType_t::RT_MISS;
-
 		case RT_CALLABLE:
-			return pipelineType_t::RT_CALLABLE;
+			return pipelineType_t::RAY_TRACING;
 	}
 	assert( 0 );
 	return pipelineType_t::UNSPECIFIED;

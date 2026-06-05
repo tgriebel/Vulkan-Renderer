@@ -12,7 +12,8 @@ enum class bufferType_t
 	STAGING,
 	READBACK,
 	ACCELERATION_STRUCTURE,
-	AS_INSTANCE,			// TLAS instance data: GPU-addressable, CPU-writable
+	TLAS_INSTANCE_DATA,
+	SHADER_BINDING_TABLE,
 };
 
 

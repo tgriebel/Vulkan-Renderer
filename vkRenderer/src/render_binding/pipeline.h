@@ -4,6 +4,7 @@
 #include "../globals/common.h"
 #include "../render_state/rhi.h"
 #include "../asset_types/gpuProgram.h"
+#include "../render_resources/gpuBuffer.h"
 
 class RenderContext;
 
@@ -50,24 +51,44 @@ struct computePipelineState_t
 };
 
 
-struct hitgroupPipelineState_t
+#ifdef USE_VULKAN_RTX
+struct vk_shaderBindTable_t
 {
+	VkStridedDeviceAddressRegionKHR	rgenRegion;
+	VkStridedDeviceAddressRegionKHR	missRegion;
+	VkStridedDeviceAddressRegionKHR	hitGroupRegion;
+	VkStridedDeviceAddressRegionKHR	callableRegion;
+};
+#endif
+
+
+struct rtPipelineState_t
+{
+#ifdef USE_VULKAN_RTX
+	hdl_t					missProgHdl;
+	hdl_t					hitGroupProgHdl;
+	const GpuProgram*		missProg;
+	const GpuProgram*		hitGroupProg;
+	vk_shaderBindTable_t	sbt;
+	GpuBuffer*				sbtBuffer;
+#endif
 };
 
 
 struct pipelineState_t
 {
-	pipelineType_t			type;
-	hdl_t					progHdl;
-	shaderPermId_t			permSet;
+	pipelineType_t				type;
+	hdl_t						progHdl;
+	shaderPermId_t				permSet;
 	union
 	{
 		rasterPipelineState_t	rasterState;
 		computePipelineState_t	computeState;
-		hitgroupPipelineState_t	hitgroupState;
+		rtPipelineState_t		rtState;
 	};
-	const GpuProgram*		prog;
-	const char*				dbgProgName;
+	const GpuProgram*			prog;
+	const char*					dbgProgName;
+
 };
 
 
@@ -90,7 +111,10 @@ inline bool operator<( const pipelineState_t& a, const pipelineState_t& b )
 	assert( a.prog != nullptr );
 	assert( a.prog == b.prog );
 
-	// Both objects are known to have the same state at this point
+	// Both objects are known to have the same type/progHdl/permSet at this point.
+	// For RASTER, the raster state bits further distinguish pipelines (one program
+	// can produce multiple pipelines with different blend/depth/viewport configs).
+	// For COMPUTE and RT, type+progHdl+permSet fully identify the pipeline.
 	if( a.type == pipelineType_t::RASTER )
 	{
 		if( a.rasterState.stateBits != b.rasterState.stateBits )
@@ -123,7 +147,7 @@ inline bool operator<( const pipelineState_t& a, const pipelineState_t& b )
 		}
 		return a.rasterState.passBits < b.rasterState.passBits;
 	}
-	return true;
+	return false;
 }
 
 class DrawPass;
@@ -176,11 +200,11 @@ struct pipelineObject_t
 {
 	pipelineState_t		state;
 #ifdef USE_VULKAN
-	VkPipeline			pipeline;
-	VkPipelineLayout	pipelineLayout;
+	VkPipeline			pipeline		= VK_NULL_HANDLE;
+	VkPipelineLayout	pipelineLayout	= VK_NULL_HANDLE;
 #endif
-	const GpuProgram*	prog;
-	const char*			dbgProgName;
+	const GpuProgram*	prog			= nullptr;
+	const char*			dbgProgName		= nullptr;
 };
 
 
@@ -195,3 +219,8 @@ hdl_t	CreateGraphicsPipeline( const hdl_t pipelineHdl, const pipelineState_t& st
 void	DestoryAllPipelines( const Asset<GpuProgram>& progAsset );
 hdl_t	CreateComputePipeline( const Asset<GpuProgram>& prog );
 hdl_t	CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& state );
+
+#ifdef USE_VULKAN_RTX
+hdl_t	CreateRtPipeline( const Asset<GpuProgram>& rgenProg, const Asset<GpuProgram>& missProg, const Asset<GpuProgram>& hitGroupProg );
+hdl_t	CreateRtPipeline( hdl_t pipelineHdl, const pipelineState_t& state );
+#endif

@@ -1,0 +1,81 @@
+#include "RayTracingTask.h"
+
+#include "../render_resources/gpuBuffer.h"
+#include "../render_binding/bindings.h"
+#include "../render_binding/pipeline.h"
+#include "../asset_types/gpuProgram.h"
+#include "../asset_types/assetLib.h"
+#include "../globals/assetDefs.h"
+
+
+std::string RayTracingTask::AsString() const
+{
+	std::stringstream ss;
+	ss << "RayTracingTask: " << m_name;
+	return ss.str();
+}
+
+
+void RayTracingTask::Init( const rayTracingTaskCreateInfo_t& info )
+{
+	m_context = info.context;
+	m_resources = info.resources;
+	m_name = info.name;
+	m_image = info.image;
+
+	m_shaderConstantsByteSize = 0;
+	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
+	{
+		m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+		memcpy( m_shaderConstants, info.constants, m_shaderConstantsByteSize );
+	}
+
+	Asset<GpuProgram>* rgenAsset = GpuProgramLib().Find( info.rgenProgName );
+	Asset<GpuProgram>* missAsset = GpuProgramLib().Find( info.missProgName );
+	Asset<GpuProgram>* hitGroupAsset = GpuProgramLib().Find( info.hitGroupProgName );
+
+	assert( rgenAsset && missAsset && hitGroupAsset );
+
+#ifdef USE_VULKAN_RTX
+	m_pipelineHdl = CreateRtPipeline( *rgenAsset, *missAsset, *hitGroupAsset );
+#endif
+
+	m_parms = m_context->RegisterBindParm( m_name, m_context->LookupBindSet( info.bindSetId ) );
+}
+
+
+void RayTracingTask::FrameBegin()
+{
+	if ( m_bind ) {
+		m_bind( this, m_parms );
+	}
+	GpuTask::OnFrameBegin();
+}
+
+
+void RayTracingTask::Execute( CommandList& cmdContext )
+{
+#ifdef USE_VULKAN_RTX
+	cmdContext.MarkerBeginRegion( m_name.c_str(), ColorToVector( ColorLGrey ) );
+
+	assert( m_image != nullptr );
+	const uint32_t width  = m_image->info.width;
+	const uint32_t height = m_image->info.height;
+
+	if ( HasConstants() )
+	{
+		cmdContext.TraceRays( m_pipelineHdl, *m_parms, m_shaderConstants, m_shaderConstantsByteSize, width, height );
+	}
+	else
+	{
+		cmdContext.TraceRays( m_pipelineHdl, *m_parms, width, height );
+	}
+
+	cmdContext.MarkerEndRegion();
+#endif
+}
+
+
+void RayTracingTask::Shutdown()
+{
+}

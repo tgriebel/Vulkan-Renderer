@@ -222,7 +222,12 @@
     <ClCompile Include="src\render_binding\vertexInput.cpp">
       <Filter>Binding</Filter>
     </ClCompile>
-    <ClCompile Include="src\render_resources\aliasableImageHeap.cpp" />
+    <ClCompile Include="src\render_tasks\rayTracingTask.cpp">
+      <Filter>Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_resources\aliasableImageHeap.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -483,9 +488,14 @@
     <ClInclude Include="src\render_binding\vertexInput.h">
       <Filter>Binding</Filter>
     </ClInclude>
-    <ClInclude Include="src\render_resources\aliasableImageHeap.h" />
     <ClInclude Include="shaders\rtGlobals.h">
       <Filter>Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_tasks\rayTracingTask.h">
+      <Filter>Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\render_resources\aliasableImageHeap.h">
+      <Filter>Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

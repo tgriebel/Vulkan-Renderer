@@ -10,8 +10,58 @@
 #include "../asset_types/assetLib.h"
 #include "vertexInput.h"
 
+#include <SysCore/common.h>
+
 static std::unordered_map< uint64_t, pipelineObject_t > s_pipelineLib;
 static std::unordered_map< uint64_t, std::set<pipelineState_t> > s_progToPipelines;
+
+#ifdef USE_VULKAN_RTX
+static constexpr uint32_t s_rgenGroupIndex = 0;
+static constexpr uint32_t s_missGroupIndex = 1;
+#endif
+
+static VkShaderStageFlagBits vk_ShaderTypeToVkStage( const shaderType_t type )
+{
+	switch( type )
+	{
+		case VERTEX:			return VK_SHADER_STAGE_VERTEX_BIT;
+		case PIXEL:				return VK_SHADER_STAGE_FRAGMENT_BIT;
+		case COMPUTE:			return VK_SHADER_STAGE_COMPUTE_BIT;
+#ifdef USE_VULKAN_RTX
+		case RT_GEN:			return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+		case RT_MISS:			return VK_SHADER_STAGE_MISS_BIT_KHR;
+		case RT_CLOSEST_HIT:	return VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+		case RT_ANY_HIT:		return VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+		case RT_INTERSECTION:	return VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
+		case RT_CALLABLE:		return VK_SHADER_STAGE_CALLABLE_BIT_KHR;
+#endif
+		default:
+			assert( 0 );
+			return VK_SHADER_STAGE_ALL;
+	}
+}
+
+
+static const char* GetShaderEntryPoint( const shaderType_t type )
+{
+	switch( type )
+	{
+	case VERTEX:			return "VSMain";
+	case PIXEL:				return "PSMain";
+	case COMPUTE:			return "CSMain";
+	case RT_GEN:			return "RayGen";
+	case RT_MISS:			return "miss_main";
+	case RT_CLOSEST_HIT:	return "closesthit_main";
+	case RT_ANY_HIT:		return "anyhit_main";
+	case RT_INTERSECTION:	return "intersection_main";
+	case RT_CALLABLE:		return "callable_main";
+
+	default:
+		assert( 0 );
+		return "main";
+	}
+}
+
 
 void ClearPipelineCache()
 {
@@ -23,8 +73,20 @@ void DestroyPipelineCache()
 {
 	for ( auto it = s_pipelineLib.begin(); it != s_pipelineLib.end(); ++it )
 	{
-		vkDestroyPipeline( context.device, it->second.pipeline, nullptr );
-		vkDestroyPipelineLayout( context.device, it->second.pipelineLayout, nullptr );
+		pipelineObject_t& obj = it->second;
+		vkDestroyPipeline( context.device, obj.pipeline, nullptr );
+		vkDestroyPipelineLayout( context.device, obj.pipelineLayout, nullptr );
+#ifdef USE_VULKAN_RTX
+		const pipelineType_t type = obj.state.type;
+		if ( type == pipelineType_t::RAY_TRACING )
+		{
+			rtPipelineState_t& rtState = obj.state.rtState;
+
+			rtState.sbtBuffer->Destroy();
+			delete rtState.sbtBuffer;
+			rtState.sbtBuffer = nullptr;
+		}
+#endif
 	}
 	s_pipelineLib.clear();
 }
@@ -430,10 +492,10 @@ hdl_t CreateGraphicsPipeline( const hdl_t pipelineHdl, const pipelineState_t& st
 	}
 
 	VkPipelineRenderingCreateInfo renderingCreateInfo = {};
-	renderingCreateInfo.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-	renderingCreateInfo.colorAttachmentCount    = colorAttachmentCount;
+	renderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+	renderingCreateInfo.colorAttachmentCount = colorAttachmentCount;
 	renderingCreateInfo.pColorAttachmentFormats = colorAttachmentFormats;
-	renderingCreateInfo.depthAttachmentFormat   = ( attachMask & RENDER_PASS_MASK_DEPTH   ) ? vk_GetTextureFormat( rasterState.passBits.depth.fmt   ) : VK_FORMAT_UNDEFINED;
+	renderingCreateInfo.depthAttachmentFormat = ( attachMask & RENDER_PASS_MASK_DEPTH   ) ? vk_GetTextureFormat( rasterState.passBits.depth.fmt   ) : VK_FORMAT_UNDEFINED;
 	renderingCreateInfo.stencilAttachmentFormat = ( attachMask & RENDER_PASS_MASK_STENCIL ) ? vk_GetTextureFormat( rasterState.passBits.stencil.fmt ) : VK_FORMAT_UNDEFINED;
 
 	pipelineInfo.pNext = &renderingCreateInfo;
@@ -534,3 +596,222 @@ hdl_t CreateComputePipeline( const hdl_t pipelineHdl, const pipelineState_t& sta
 
 	return pipelineHdl.Get();
 }
+
+
+#ifdef USE_VULKAN_RTX
+
+
+
+static pipelineState_t CreateRtState( const Asset<GpuProgram>& rgenProg, const Asset<GpuProgram>& missProg, const Asset<GpuProgram>& hitGroupProg )
+{
+	pipelineState_t state{};
+	state.type = pipelineType_t::RAY_TRACING;
+	state.progHdl = rgenProg.Handle();
+	state.prog = &rgenProg.Get();
+	state.dbgProgName = rgenProg.GetName().c_str();
+
+	state.rtState.missProgHdl = missProg.Handle();
+	state.rtState.hitGroupProgHdl = hitGroupProg.Handle();
+	state.rtState.missProg = &missProg.Get();
+	state.rtState.hitGroupProg = &hitGroupProg.Get();
+
+	return state;
+}
+
+
+hdl_t CreateRtPipeline( const Asset<GpuProgram>& rgenProg, const Asset<GpuProgram>& missProg, const Asset<GpuProgram>& hitGroupProg )
+{
+	const pipelineState_t state = CreateRtState( rgenProg, missProg, hitGroupProg );
+	const hdl_t pipelineHdl = GetPipelineStateHash( state );
+	return CreateRtPipeline( pipelineHdl, state );
+}
+
+
+hdl_t CreateRtPipeline( const hdl_t pipelineHdl, const pipelineState_t& state )
+{
+	auto it = s_pipelineLib.find( pipelineHdl.Get() );
+	if( it != s_pipelineLib.end() && it->second.pipeline != VK_NULL_HANDLE )
+	{
+		return pipelineHdl;
+	}
+
+	pipelineObject_t obj{};
+	obj.state = state;
+	obj.prog = state.prog;
+	obj.dbgProgName = state.dbgProgName;
+
+	const GpuProgram& rgen = *state.prog;
+	const GpuProgram& miss = *state.rtState.missProg;
+	const GpuProgram& hitGroup = *state.rtState.hitGroupProg;
+
+	std::vector<VkPipelineShaderStageCreateInfo> stages;
+	std::vector<VkRayTracingShaderGroupCreateInfoKHR> groups;
+
+	// Build pipeline
+	{
+		// Append the raygen and miss shaders
+		const GpuProgram* generalProgs[] = { &rgen, &miss };
+		for( const GpuProgram* prog : generalProgs )
+		{
+			assert( prog->shaderCount == 1 );
+			const ShaderBin& bin = prog->shaderBins[ 0 ].at( 0 );
+
+			VkPipelineShaderStageCreateInfo& stage = stages.emplace_back();
+			stage = {};
+			stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			stage.stage = vk_ShaderTypeToVkStage( bin.type );
+			stage.module = bin.vk_shader;
+			stage.pName = GetShaderEntryPoint( bin.type );
+
+			VkRayTracingShaderGroupCreateInfoKHR& group = groups.emplace_back();
+			group = {};
+			group.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+			group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+			group.generalShader = static_cast<uint32_t>( stages.size() - 1 );
+			group.closestHitShader = VK_SHADER_UNUSED_KHR;
+			group.anyHitShader = VK_SHADER_UNUSED_KHR;
+			group.intersectionShader = VK_SHADER_UNUSED_KHR;
+		}
+
+		uint32_t rchitStage = VK_SHADER_UNUSED_KHR;
+		uint32_t rahitStage = VK_SHADER_UNUSED_KHR;
+		uint32_t rintStage = VK_SHADER_UNUSED_KHR;
+
+		for( uint32_t i = 0; i < hitGroup.shaderCount; ++i )
+		{
+			const ShaderBin& bin = hitGroup.shaderBins[ i ].at( 0 );
+
+			VkPipelineShaderStageCreateInfo& stage = stages.emplace_back();
+			stage = {};
+			stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			stage.stage = vk_ShaderTypeToVkStage( bin.type );
+			stage.module = bin.vk_shader;
+			stage.pName = GetShaderEntryPoint( bin.type );
+
+			const uint32_t stageIndex = static_cast<uint32_t>( stages.size() - 1 );
+			switch( bin.type )
+			{
+				case RT_CLOSEST_HIT:  rchitStage = stageIndex; break;
+				case RT_ANY_HIT:      rahitStage = stageIndex; break;
+				case RT_INTERSECTION: rintStage = stageIndex; break;
+				default: break;
+			}
+		}
+
+		VkRayTracingShaderGroupCreateInfoKHR& hitGroupInfo = groups.emplace_back();
+		hitGroupInfo = {};
+		hitGroupInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR;
+		hitGroupInfo.type = ( rintStage != VK_SHADER_UNUSED_KHR ) ? VK_RAY_TRACING_SHADER_GROUP_TYPE_PROCEDURAL_HIT_GROUP_KHR
+			: VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
+		hitGroupInfo.generalShader = VK_SHADER_UNUSED_KHR;
+		hitGroupInfo.closestHitShader = rchitStage;
+		hitGroupInfo.anyHitShader = rahitStage;
+		hitGroupInfo.intersectionShader = rintStage;
+
+		VkDescriptorSetLayout layouts[ GpuProgram::MaxBindSets ];
+		for( uint32_t i = 0; i < rgen.bindsetCount; ++i )
+		{
+			layouts[ i ] = rgen.bindsets[ i ]->GetVkObject();
+		}
+
+		VkPushConstantRange pushRange{};
+		pushRange.stageFlags = ( VK_SHADER_STAGE_RAYGEN_BIT_KHR
+			| VK_SHADER_STAGE_MISS_BIT_KHR
+			| VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR
+			| VK_SHADER_STAGE_ANY_HIT_BIT_KHR
+			| VK_SHADER_STAGE_INTERSECTION_BIT_KHR );
+		pushRange.offset = 0;
+		pushRange.size = 128;
+
+		VkPipelineLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		layoutInfo.setLayoutCount = rgen.bindsetCount;
+		layoutInfo.pSetLayouts = rgen.bindsetCount > 0 ? layouts : nullptr;
+		layoutInfo.pushConstantRangeCount = 1;
+		layoutInfo.pPushConstantRanges = &pushRange;
+
+		VK_CHECK_RESULT( vkCreatePipelineLayout( context.device, &layoutInfo, nullptr, &obj.pipelineLayout ) );
+
+		VkRayTracingPipelineCreateInfoKHR pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_RAY_TRACING_PIPELINE_CREATE_INFO_KHR;
+		pipelineInfo.stageCount = static_cast<uint32_t>( stages.size() );
+		pipelineInfo.pStages = stages.data();
+		pipelineInfo.groupCount = static_cast<uint32_t>( groups.size() );
+		pipelineInfo.pGroups = groups.data();
+		pipelineInfo.maxPipelineRayRecursionDepth = 2;
+		pipelineInfo.layout = obj.pipelineLayout;
+
+		VK_CHECK_RESULT( context.vkCreateRayTracingPipelinesKHR(
+			context.device, VK_NULL_HANDLE, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &obj.pipeline ) );
+
+		vk_SetObjectName( (uint64_t)obj.pipeline, VK_OBJECT_TYPE_PIPELINE, "Pipeline (RT)" );
+		vk_SetObjectName( (uint64_t)obj.pipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT, "PipelineLayout (RT)" );
+	}
+
+	// Build shader binding table
+	{
+		const VkPhysicalDeviceRayTracingPipelinePropertiesKHR& rtProps = context.rayTracingPipelineProperties;
+
+		const uint32_t handleSize = rtProps.shaderGroupHandleSize;
+		const uint32_t handleSizeAligned = SysCore::Align( handleSize, rtProps.shaderGroupHandleAlignment );
+		const uint32_t baseAlignment = rtProps.shaderGroupBaseAlignment;
+
+		const uint32_t totalGroupCount = static_cast<uint32_t>( groups.size() );
+		const uint32_t hitGroupIndex = ( totalGroupCount - 1 );
+
+		const uint32_t dataSize = totalGroupCount * handleSize;
+		std::vector<uint8_t> handles( dataSize );
+		VK_CHECK_RESULT( context.vkGetRayTracingShaderGroupHandlesKHR(
+			context.device, obj.pipeline, 0, totalGroupCount, dataSize, handles.data() ) );
+
+		// Layout: <|rgen|pad|miss|pad|hitGroup>
+		const uint32_t rgenOffset = 0;
+		const uint32_t missOffset = SysCore::Align( rgenOffset + handleSizeAligned, baseAlignment );
+		const uint32_t hitGroupOffset = SysCore::Align( missOffset + handleSizeAligned, baseAlignment );
+		const uint32_t totalSize = hitGroupOffset + handleSizeAligned;
+
+		vk_shaderBindTable_t& sbt = obj.state.rtState.sbt;
+
+		obj.state.rtState.sbtBuffer = new GpuBuffer();
+		GpuBuffer& sbtBuffer = *obj.state.rtState.sbtBuffer;
+		sbtBuffer.Create( "ShaderBindTable", swapBuffering_t::SINGLE_FRAME, resourceLifeTime_t::REBOOT, 1, totalSize, bufferType_t::SHADER_BINDING_TABLE );
+
+		struct sbtEntry_t
+		{
+			uint32_t							groupIndex;
+			uint32_t							offset;
+			VkStridedDeviceAddressRegionKHR*	outRegion;
+		};
+
+		const sbtEntry_t entries[] =
+		{
+			{ s_rgenGroupIndex,	rgenOffset,		&sbt.rgenRegion		},
+			{ s_missGroupIndex,	missOffset,		&sbt.missRegion		},
+			{ hitGroupIndex,	hitGroupOffset,	&sbt.hitGroupRegion	},
+		};
+
+		for ( const sbtEntry_t& entry : entries )
+		{
+			sbtBuffer.SetPos( entry.offset );
+			sbtBuffer.CopyData( handles.data() + entry.groupIndex * handleSize, handleSize );
+
+			entry.outRegion->deviceAddress = 0; // Filled after Flush + GetDeviceAddress
+			entry.outRegion->stride = handleSizeAligned;
+			entry.outRegion->size = handleSizeAligned;
+		}
+
+		sbtBuffer.Flush();
+
+		const VkDeviceAddress baseAddr = sbtBuffer.GetDeviceAddress();
+		for ( const sbtEntry_t& entry : entries ) {
+			entry.outRegion->deviceAddress = baseAddr + entry.offset;
+		}
+
+		sbt.callableRegion = {};
+	}
+
+	s_pipelineLib[ pipelineHdl.Get() ] = std::move( obj );
+
+	return pipelineHdl;
+}
+#endif

@@ -117,6 +117,10 @@ public:
 	void						Submit( const GpuFence* fence = nullptr );
 	void						Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const uint32_t x, const uint32_t y, const uint32_t z );
 	void						Dispatch( const Asset<GpuProgram>& progAsset, const ShaderBindParms& bindParms, const void* constants, const uint32_t constantsByteSize, const uint32_t x, const uint32_t y, const uint32_t z );
+#ifdef USE_VULKAN_RTX
+	void						TraceRays( hdl_t rtPipelineHdl, const ShaderBindParms& bindParms, uint32_t width, uint32_t height );
+	void						TraceRays( hdl_t rtPipelineHdl, const ShaderBindParms& bindParms, const void* constants, uint32_t constantsByteSize, uint32_t width, uint32_t height );
+#endif
 
 
 	static uint32_t DispatchDim( const uint32_t dim, const uint32_t groupSize )
