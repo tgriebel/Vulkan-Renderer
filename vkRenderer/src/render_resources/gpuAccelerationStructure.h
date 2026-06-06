@@ -14,6 +14,7 @@ struct blasCreateSurfaceInfo_t
 	const GpuBuffer*		vb;
 	const GpuBuffer*		ib;
 	const surfaceUpload_t*	surface;
+	mat4x4f					transform;
 };
 
 
@@ -32,6 +33,7 @@ private:
 	// Pending geometry accumulated by AddGeometry(), consumed by Build()
 	std::vector<VkAccelerationStructureGeometryKHR>			m_geometry;
 	std::vector<VkAccelerationStructureBuildRangeInfoKHR>	m_rangeInfo;
+	std::vector<mat4x4f>									m_transforms;	// One per BLAS, world-space transform
 
 	// One entry per surface BLAS, populated by Build()
 	std::vector<blasEntry_t>	m_blasEntries;

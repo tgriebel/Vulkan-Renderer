@@ -50,6 +50,8 @@ void GpuAccelerationStructure::AddGeometry( CommandList* cmdList, const blasCrea
 	rangeInfo.transformOffset = 0;
 
 	m_rangeInfo.push_back( rangeInfo );
+
+	m_transforms.push_back( surfaceInfo.transform );
 }
 
 
@@ -167,8 +169,7 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 		pRangeInfos[ i ] = &m_rangeInfo[ i ];
 	}
 
-	// 3: Barrier: vertex/index data was written by vkCmdCopyBuffer (TRANSFER_WRITE).
-	// The AS build reads geometry data as VK_ACCESS_SHADER_READ_BIT — ensure the copies are visible.
+	// 3: Barrier: vertex/index data was written by vkCmdCopyBuffer
 	VkMemoryBarrier geometryUploadBarrier{};
 	geometryUploadBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
 	geometryUploadBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -180,10 +181,6 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 
 	// 4: Submit all BLAS builds in one call
 	context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), blasCount, buildInfos.data(), pRangeInfos.data() );
-
-	m_geometry.clear();
-	m_rangeInfo.clear();
-	m_blasScratch.Destroy();
 
 	// 5: Construct TLAS
 	{
@@ -198,16 +195,19 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 			VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
 			0, 1, &blasBarrier, 0, nullptr, 0, nullptr );
 
-		// Build instance array per BLAS.
-		// TODO: Build matrices
 		std::vector<VkAccelerationStructureInstanceKHR> instances( blasCount );
 		for( uint32_t i = 0; i < blasCount; ++i )
 		{
 			VkAccelerationStructureInstanceKHR& inst = instances[ i ];
 			inst = {};
-			inst.transform.matrix[ 0 ][ 0 ] = 1.0f;
-			inst.transform.matrix[ 1 ][ 1 ] = 1.0f;
-			inst.transform.matrix[ 2 ][ 2 ] = 1.0f;
+
+			const mat4x4f& m = m_transforms[ i ];
+			for ( int row = 0; row < 3; ++row ) {
+				for ( int col = 0; col < 4; ++col ) {
+					inst.transform.matrix[ row ][ col ] = m[ row ][ col ];
+				}
+			}
+
 			inst.instanceCustomIndex = i;
 			inst.mask = 0xFF;
 			inst.instanceShaderBindingTableRecordOffset = 0;
@@ -264,9 +264,13 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 		const VkAccelerationStructureBuildRangeInfoKHR* pTlasRangeInfo = &tlasRangeInfo;
 
 		context.vkCmdBuildAccelerationStructuresKHR( cmdList->CommandBuffer(), 1, &tlasBuildInfo, &pTlasRangeInfo );
+	}
 
-		m_tlasScratch.Destroy();
-		m_tlasInstances.Destroy();
+	// Cleanup geometry input from add
+	{
+		m_geometry.clear();
+		m_rangeInfo.clear();
+		m_transforms.clear();
 	}
 }
 

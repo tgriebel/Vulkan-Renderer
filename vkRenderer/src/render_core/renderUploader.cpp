@@ -8,11 +8,15 @@
 #include "../render_state/rhi.h"
 #include "../render_state/cmdContext.h"
 #include "../render_resources/gpuAccelerationStructure.h"
+#include "../scene/sceneBase.h"
+#include "../scene/entity.h"
 
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
 
 #include "swapChain.h"
+
+extern Scene* g_scene;
 
 
 void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
@@ -587,10 +591,28 @@ void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 
 			// Ray-tracing
 			{
+				mat4x4f transform = mat4x4f( 1.0f );
+				if ( g_scene != nullptr )
+				{
+					const uint32_t entCount = static_cast<uint32_t>( g_scene->entities.size() );
+					for ( uint32_t e = 0; e < entCount; ++e )
+					{
+						const Entity* ent = g_scene->entities[ e ];
+						if ( ent->modelHdl.IsValid() == false ) {
+							continue;
+						}
+						if ( ModelLib().Find( ent->modelHdl ) == modelAsset ) {
+							transform = ent->GetMatrix();
+							break;
+						}
+					}
+				}
+
 				blasCreateSurfaceInfo_t blasInfo{};
-				blasInfo.vb      = &geometry.vb;
-				blasInfo.ib      = &geometry.ib;
-				blasInfo.surface = &upload;
+				blasInfo.vb        = &geometry.vb;
+				blasInfo.ib        = &geometry.ib;
+				blasInfo.surface   = &upload;
+				blasInfo.transform = transform;
 
 				accelerationStructure->AddGeometry( cmdList, blasInfo );
 			}
