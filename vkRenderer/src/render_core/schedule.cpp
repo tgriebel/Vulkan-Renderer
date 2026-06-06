@@ -12,6 +12,7 @@
 #include "../render_tasks/UtilTasks.h"
 #include "../render_tasks/imguiTask.h"
 #include "../render_tasks/ComputeTask.h"
+#include "../render_tasks/RayTracingTask.h"
 #include "../render_binding/bindings.h"
 #include <GfxCore/math/samplerGen.h>
 
@@ -1056,6 +1057,47 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	{
 		schedule->Link( tasks.dof );
 	}
+
+#ifdef USE_VULKAN_RTX
+	{
+		// RT output image
+		{
+			imageInfo_t info{};
+			info.width = displayWidth;
+			info.height = displayHeight;
+			info.mipLevels = 1;
+			info.layers = 1;
+			info.subsamples = IMAGE_SMP_1;
+			info.fmt = IMAGE_FMT_RGBA_32;
+			info.type = IMAGE_TYPE_2D;
+			info.tiling = IMAGE_TILING_MORTON;
+
+			resources->rtOutputImage->Create(
+				info,
+				"FB_rtOutput", GPU_IMAGE_STORAGE | GPU_IMAGE_RW, resourceLifeTime_t::RESIZE
+			);
+		}
+
+		schedule->Link( new TransitionImageTask(  resources->rtOutputImage, gpuImageStateFlags_t::GPU_IMAGE_NONE, gpuImageStateFlags_t::GPU_IMAGE_STORAGE ) );
+
+		rayTracingTaskCreateInfo_t rtInfo{};
+		rtInfo.name = "PrimaryRayTrace";
+		rtInfo.rgenProgName = "RtRayGen";
+		rtInfo.missProgName = "RtMiss";
+		rtInfo.hitGroupProgName = "RtDefaultHitGroup";
+		rtInfo.context = renderContext;
+		rtInfo.resources = resources;
+		rtInfo.image = resources->rtOutputImage;
+		rtInfo.bindSetId = bindset_rayTracing;
+		rtInfo.tlas = resources->tlas;
+		rtInfo.rtOutputImage = resources->rtOutputImage;
+		rtInfo.constants = nullptr;
+		rtInfo.constantsByteSize = 0;
+
+		schedule->Link( new RayTracingTask( rtInfo ) );
+	}
+#endif
+
 	schedule->Link( new RenderTask( viewContext->renderViews[ 0 ], DRAWPASS_OPAQUE_COLOR_BEGIN, DRAWPASS_MAIN_END ) );
 
 	if( config.useCubeViews ) {

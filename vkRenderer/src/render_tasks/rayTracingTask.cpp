@@ -6,6 +6,7 @@
 #include "../asset_types/gpuProgram.h"
 #include "../asset_types/assetLib.h"
 #include "../globals/assetDefs.h"
+#include "../render_resources/gpuAccelerationStructure.h"
 
 
 std::string RayTracingTask::AsString() const
@@ -22,6 +23,8 @@ void RayTracingTask::Init( const rayTracingTaskCreateInfo_t& info )
 	m_resources = info.resources;
 	m_name = info.name;
 	m_image = info.image;
+	m_tlas = info.tlas;
+	m_rtOutputImage = info.rtOutputImage;
 
 	m_shaderConstantsByteSize = 0;
 	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
@@ -46,9 +49,14 @@ void RayTracingTask::Init( const rayTracingTaskCreateInfo_t& info )
 
 void RayTracingTask::FrameBegin()
 {
-	if ( m_bind ) {
-		m_bind( this, m_parms );
+#ifdef USE_VULKAN_RTX
+	if ( m_tlas != nullptr && m_tlas->IsBuilt() ) {
+		m_parms->Bind( bind_tlas, ShaderAttachment( m_tlas ) );
 	}
+	if ( m_rtOutputImage != nullptr ) {
+		m_parms->Bind( bind_rtOutputImage, ShaderAttachment( m_rtOutputImage ) );
+	}
+#endif
 	GpuTask::OnFrameBegin();
 }
 

@@ -93,11 +93,11 @@ void GpuAccelerationStructure::Build( CommandList* cmdList )
 {
 	const uint32_t blasCount = static_cast<uint32_t>( m_geometry.size() );
 
-	Cleanup();
-
 	if ( blasCount == 0 ) {
 		return;
 	}
+
+	Cleanup();
 
 	std::cout << "Building RT AS" << std::endl;
 

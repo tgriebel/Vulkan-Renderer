@@ -26,7 +26,7 @@ BINDING( sourceImages,			IMAGE_2D_ARRAY,		7,						BIND_STATE_PS );
 BINDING( sourceCubeImages,		IMAGE_CUBE,			1,						BIND_STATE_PS );
 
 // Raster Resources
-BINDING( viewBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
+BINDING( viewBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL );
 BINDING( modelBuffer,					READ_BUFFER,		1,						BIND_STATE_ALL_GFX );
 BINDING( image2DArray,					IMAGE_2D_ARRAY,		MaxImageDescriptors,	BIND_STATE_ALL_GFX );
 BINDING( imageCubeArray,				IMAGE_CUBE_ARRAY,	MaxImageDescriptors,	BIND_STATE_ALL_GFX );
@@ -42,6 +42,9 @@ BINDING( bilinearSamplerClampEdge,		IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX )
 BINDING( bilinearSamplerClampBorder,	IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 BINDING( depthShadowSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 
+// Ray-tracing Resources
+BINDING( tlas,							ACCELERATION_STRUCTURE,	1,					BIND_STATE_ALL_RTX );
+BINDING( rtOutputImage,					WRITE_IMAGE_BUFFER,		1,					BIND_STATE_RAYGEN );
 
 static const ShaderBinding g_globalBindings[] =
 {
@@ -102,3 +105,11 @@ static const ShaderBinding g_imageProcessBindings[] =
 	BINDING_NAME( imageProcess ),
 };
 const uint64_t bindset_imageShader = Hash( "bindset_imageShader" );
+
+
+static const ShaderBinding g_rtBindings[] =
+{
+	BINDING_NAME( tlas ),
+	BINDING_NAME( rtOutputImage ),
+};
+const uint64_t bindset_rayTracing = Hash( "bindset_rayTracing" );

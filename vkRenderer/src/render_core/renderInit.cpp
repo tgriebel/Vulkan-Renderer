@@ -249,6 +249,10 @@ void Renderer::Init( const renderConfig_t& cfg )
 
 	uploader.Boot( &renderContext, &resources );
 
+#ifdef USE_VULKAN_RTX
+	resources.tlas = uploader.GetAccelerationStructure();
+#endif
+
 	ClearPipelineCache();
 	BuildPipelines();
 
@@ -368,6 +372,11 @@ void Renderer::InitApi( const renderConfig_t& cfg )
 
 		bindset = &renderContext.bindSets[ bindset_imageShader ];
 		bindset->Create( "ImageProcessBindings", g_imageProcessBindings, COUNTARRAY( g_imageProcessBindings ) );
+
+#ifdef USE_VULKAN_RTX
+		bindset = &renderContext.bindSets[ bindset_rayTracing ];
+		bindset->Create( "RtBindings", g_rtBindings, COUNTARRAY( g_rtBindings ) );
+#endif
 	}
 }
 
@@ -397,14 +406,38 @@ void Renderer::AssignBindSetsToGpuProgs()
 					prog.bindsets[ prog.bindsetCount ] = &viewBindSet;
 					prog.bindsetCount += 1;
 				}
-			}
 
+				{
+					auto it = renderContext.bindSets.find( prog.bindHash );
+					if ( it != renderContext.bindSets.end() ) {
+						prog.bindsets[ prog.bindsetCount ] = &it->second;
+					} else {
+						prog.bindsets[ prog.bindsetCount ] = &passBindSet;
+					}
+					prog.bindsetCount += 1;
+				}
+			}
+#ifdef USE_VULKAN_RTX
+			else if ( prog.type == pipelineType_t::RAY_TRACING )
 			{
+				prog.bindsets[ prog.bindsetCount ] = &globalBindSet;
+				prog.bindsetCount += 1;
+
+				auto it = renderContext.bindSets.find( bindset_rayTracing );
+				if ( it != renderContext.bindSets.end() )
+				{
+					prog.bindsets[ prog.bindsetCount ] = &it->second;
+					prog.bindsetCount += 1;
+				}
+			}
+#endif
+			else
+			{
+				// COMPUTE and other pipeline types: single custom bindset
 				auto it = renderContext.bindSets.find( prog.bindHash );
 				if ( it != renderContext.bindSets.end() ) {
 					prog.bindsets[ prog.bindsetCount ] = &it->second;
-				}
-				else {
+				} else {
 					prog.bindsets[ prog.bindsetCount ] = &passBindSet;
 				}
 				prog.bindsetCount += 1;

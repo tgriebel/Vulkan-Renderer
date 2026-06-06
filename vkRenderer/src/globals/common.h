@@ -63,6 +63,9 @@ const uint32_t	DescriptorPoolMaxSamplers		= 16;
 const uint32_t	DescriptorPoolMaxImages			= 8192; // Must account for bindless arrays (MaxImageDescriptors) * MaxFrameStates * num bind set instances
 const uint32_t	DescriptorPoolMaxStorageImages	= 64;
 const uint32_t	DescriptorPoolMaxComboImages	= 128;
+#ifdef USE_VULKAN_RTX
+const uint32_t	DescriptorPoolMaxAccelStructures = 16; // One per RT bind set instance
+#endif
 const uint32_t	DescriptorPoolMaxSets			= ( DescriptorPoolMaxUniformBuffers + DescriptorPoolMaxStorageBuffers + \
 													DescriptorPoolMaxImages + DescriptorPoolMaxComboImages + DescriptorPoolMaxSamplers );
 const uint32_t	MaxImageDescriptors				= 128;

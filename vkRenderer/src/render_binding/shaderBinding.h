@@ -9,6 +9,7 @@ class GpuBuffer;
 class GpuImage;
 class ImageArray;
 class ImageSampler;
+class GpuAccelerationStructure;
 
 enum class bindType_t
 {
@@ -23,6 +24,7 @@ enum class bindType_t
 	READ_IMAGE_BUFFER,
 	WRITE_IMAGE_BUFFER,
 	IMAGE_SAMPLER,
+	ACCELERATION_STRUCTURE,
 	COUNT,
 };
 
@@ -39,6 +41,7 @@ static const char* s_bindTypeName[]
 	"Read Image Buffer",
 	"Write Image Buffer",
 	"Image Sampler",
+	"Acceleration Structure",
 };
 static_assert( COUNTARRAY( s_bindTypeName ) == (uint32_t)bindType_t::COUNT, "Name count mismatches enum." );
 
@@ -50,6 +53,7 @@ enum class bindSemantic_t
 	IMAGE,
 	IMAGE_ARRAY,
 	IMAGE_SAMPLER,
+	ACCELERATION_STRUCTURE,
 	COUNT,
 };
 
@@ -60,6 +64,7 @@ static const char* s_bindSemanticName[]
 	"Image",
 	"Image Array",
 	"Image Sampler",
+	"Acceleration Structure",
 };
 static_assert( COUNTARRAY( s_bindSemanticName ) == (uint32_t)bindSemantic_t::COUNT, "Name count mismatches enum." );
 
@@ -106,6 +111,9 @@ static inline bindSemantic_t GetBindSemantic( const bindType_t bindType )
 
 		case bindType_t::IMAGE_SAMPLER:
 			return bindSemantic_t::IMAGE_SAMPLER;
+
+		case bindType_t::ACCELERATION_STRUCTURE:
+			return bindSemantic_t::ACCELERATION_STRUCTURE;
 	}
 	return bindSemantic_t::UNKNOWN;
 }
@@ -157,11 +165,12 @@ class ShaderAttachment
 private:
 	union attach_t
 	{
-		const GpuBuffer*	buffer;
-		const Image*		image;
-		const ImageArray*	imageArray;
-		const ImageSampler*	imageSampler;
-		const void*			ptr;
+		const GpuBuffer*				buffer;
+		const Image*					image;
+		const ImageArray*				imageArray;
+		const ImageSampler*				imageSampler;
+		const GpuAccelerationStructure*	accelerationStruction;
+		const void*						ptr;
 	} u;
 	bindSemantic_t semantic;
 public:
@@ -197,6 +206,12 @@ public:
 		semantic = bindSemantic_t::IMAGE_SAMPLER;
 	}
 
+	ShaderAttachment( const GpuAccelerationStructure* accelStruct )
+	{
+		u.accelerationStruction = accelStruct;
+		semantic = bindSemantic_t::ACCELERATION_STRUCTURE;
+	}
+
 	inline bool operator==( const ShaderAttachment& rhs ) const
 	{
 		return ( u.ptr == rhs.u.ptr );
@@ -230,6 +245,11 @@ public:
 	inline const ImageSampler* GetImageSampler() const
 	{
 		return ( semantic == bindSemantic_t::IMAGE_SAMPLER ) ? u.imageSampler : nullptr;
+	}
+
+	inline const GpuAccelerationStructure* GetAccelerationStructure() const
+	{
+		return ( semantic == bindSemantic_t::ACCELERATION_STRUCTURE ) ? u.accelerationStruction : nullptr;
 	}
 };
 

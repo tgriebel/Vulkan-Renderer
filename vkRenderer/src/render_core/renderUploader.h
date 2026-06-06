@@ -96,4 +96,9 @@ public:
 	{
 		return &finishedSemaphore;
 	}
+
+	inline GpuAccelerationStructure* GetAccelerationStructure()
+	{
+		return accelerationStructure;
+	}
 };

@@ -59,6 +59,7 @@ public:
 #ifdef USE_VULKAN_RTX
 	VkDeviceAddress				GetBlasDeviceAddress( uint32_t index ) const;
 	uint32_t					GetBlasCount() const { return static_cast<uint32_t>( m_blasEntries.size() ); }
+	bool						IsBuilt() const { return m_tlas != VK_NULL_HANDLE; }
 
 	VkDeviceAddress				GetDeviceAddress() const;
 	VkAccelerationStructureKHR	GetVkObject() const;

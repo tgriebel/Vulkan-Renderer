@@ -9,6 +9,7 @@
 #include "../render_resources/aliasableImageHeap.h"
 
 class Image;
+class GpuAccelerationStructure;
 
 // Resources that are globally accessible for shader binding
 class ResourceContext
@@ -29,6 +30,7 @@ public:
 	GpuBuffer				materialBuffers;
 	GpuBuffer				lightParms;
 	GpuBuffer				particleBuffer;
+	GpuAccelerationStructure* tlas = nullptr;
 
 	ImageSampler			nearestSampler;
 	ImageSampler			bilinearSamplers[ SAMPLER_ADDRESS_MODES ];
@@ -68,6 +70,7 @@ public:
 	Image*					previousLum;
 	Image*					currentLum;
 	Image*					depthStencilResolvedImage;
+	Image*					rtOutputImage;
 	Image					gpuOutput2D[ MaxFrameImages ];
 
 	// Data images
@@ -104,6 +107,7 @@ public:
 		previousLum = NextImage();
 		currentLum = NextImage();
 		depthStencilResolvedImage = NextImage();
+		rtOutputImage = NextImage();
 	}
 
 	uint32_t OutputImageCount()

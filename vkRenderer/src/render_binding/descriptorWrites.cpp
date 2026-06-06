@@ -7,6 +7,7 @@
 //#include "../scene/entity.h"
 #include "../globals/renderConstants.h"
 #include "../render_core/renderer.h"
+#include "../render_resources/gpuAccelerationStructure.h"
 #include "../render_core/debugMenu.h"
 #include "../render_core/gpuImage.h"
 #include "../render_resources/imageSampler.h"
@@ -28,6 +29,11 @@ private:
 	uint32_t							imageInfoPoolFreeList = 0;
 	uint32_t							bufferInfoArrayPoolFreeList = 0;
 	uint32_t							imageInfoArrayPoolFreeList = 0;
+#ifdef USE_VULKAN_RTX
+	uint32_t							tlasInfoPoolFreeList = 0;
+	VkWriteDescriptorSetAccelerationStructureKHR tlasInfoPool[ MaxPoolSize ];
+	VkAccelerationStructureKHR			tlasHandlePool[ MaxPoolSize ];
+#endif
 	VkDescriptorBufferInfo				bufferInfoPool[ MaxPoolSize ];
 	VkDescriptorImageInfo				imageInfoPool[ MaxPoolSize ];
 	std::vector<VkDescriptorBufferInfo>	bufferInfoArrayPool[ MaxPoolSize ];
@@ -45,6 +51,9 @@ public:
 		imageInfoPoolFreeList = 0;
 		bufferInfoArrayPoolFreeList = 0;
 		imageInfoArrayPoolFreeList = 0;
+#ifdef USE_VULKAN_RTX
+		tlasInfoPoolFreeList = 0;
+#endif
 	}
 
 	void Reset()
@@ -58,6 +67,9 @@ public:
 		imageInfoPoolFreeList = 0;
 		bufferInfoArrayPoolFreeList = 0;
 		imageInfoArrayPoolFreeList = 0;
+#ifdef USE_VULKAN_RTX
+		tlasInfoPoolFreeList = 0;
+#endif
 	}
 
 	[[nodiscard]]
@@ -89,6 +101,21 @@ public:
 		imageInfoPool[ imageInfoPoolFreeList ] = {};
 		return imageInfoPool[ imageInfoPoolFreeList++ ];
 	}
+
+#ifdef USE_VULKAN_RTX
+	[[nodiscard]]
+	uint32_t NextTlasInfoIndex()
+	{
+		assert( tlasInfoPoolFreeList < MaxPoolSize );
+		const uint32_t idx = tlasInfoPoolFreeList++;
+		tlasInfoPool[ idx ] = {};
+		tlasHandlePool[ idx ] = VK_NULL_HANDLE;
+		return idx;
+	}
+
+	VkWriteDescriptorSetAccelerationStructureKHR& GetTlasInfo( uint32_t idx ) { return tlasInfoPool[ idx ]; }
+	VkAccelerationStructureKHR& GetTlasHandle( uint32_t idx ) { return tlasHandlePool[ idx ]; }
+#endif
 };
 
 static DescriptorWritesBuilder writeBuilder;
@@ -241,6 +268,25 @@ static void AppendDescriptorWrites( const ShaderBindParms& parms, const uint32_t
 
 			writeInfo.pImageInfo = &info;
 		}
+#ifdef USE_VULKAN_RTX
+		else if ( attachment->GetSemantic() == bindSemantic_t::ACCELERATION_STRUCTURE )
+		{
+			const GpuAccelerationStructure* accelStruct = attachment->GetAccelerationStructure();
+			assert( accelStruct != nullptr );
+
+			const uint32_t idx = writeBuilder.NextTlasInfoIndex();
+			VkWriteDescriptorSetAccelerationStructureKHR& asInfo = writeBuilder.GetTlasInfo( idx );
+			VkAccelerationStructureKHR& asHandle = writeBuilder.GetTlasHandle( idx );
+
+			asHandle = accelStruct->GetVkObject();
+			asInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+			asInfo.accelerationStructureCount = 1;
+			asInfo.pAccelerationStructures = &asHandle;
+
+			writeInfo.descriptorCount = 1;
+			writeInfo.pNext = &asInfo;
+		}
+#endif
 
 		descSetWrites.push_back( writeInfo );
 	}

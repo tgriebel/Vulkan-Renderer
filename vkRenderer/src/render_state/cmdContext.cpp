@@ -432,8 +432,11 @@ void CommandList::TraceRays( const hdl_t rtPipelineHdl, const ShaderBindParms& b
 
 	vkCmdBindPipeline( cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineObject->pipeline );
 
-	VkDescriptorSet set[ 1 ] = { bindParms.GetVkObject() };
-	vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineObject->pipelineLayout, 0, 1, set, 0, 0 );
+	const VkDescriptorSet sets[ 2 ] = {
+		m_renderContext->globalParms->GetVkObject(),
+		bindParms.GetVkObject()
+	};
+	vkCmdBindDescriptorSets( cmdBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipelineObject->pipelineLayout, 0, 2, sets, 0, 0 );
 
 	const vk_shaderBindTable_t& sbt = pipelineObject->state.rtState.sbt;
 	context.vkCmdTraceRaysKHR(
