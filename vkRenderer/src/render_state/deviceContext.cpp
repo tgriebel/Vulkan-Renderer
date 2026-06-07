@@ -1,4 +1,5 @@
 #include "deviceContext.h"
+#include "../render_core/log.h"
 #include "../render_core/swapChain.h"
 #include "../draw_passes/drawpass.h"
 #include "../render_core/gpuImage.h"
@@ -1136,16 +1137,28 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vk_DebugCallback( VkDebugUtilsMessageSever
 		}
 	}
 
-	std::cerr << "[Vulkan Validation - ";
-	if( ( messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT ) != 0 ) {
-		std::cerr << "Validation";
+	const char* system;
+	if ( ( messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT ) != 0 ) {
+		system = "Vulkan/Validation";
 	} else if ( ( messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT ) != 0 ) {
-		std::cerr << "Performance";
+		system = "Vulkan/Performance";
 	} else {
-		std::cerr << "General";
+		system = "Vulkan";
 	}
-	std::cerr << "]\t";
-	std::cerr << pCallbackData->pMessage << "\n" << std::endl;
+
+	logSeverity_t severity;
+	if ( ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT ) != 0 ) {
+		severity = logSeverity_t::Error;
+	} else if ( ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT ) != 0 ) {
+		severity = logSeverity_t::Warning;
+	} else if ( ( messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT ) != 0 ) {
+		severity = logSeverity_t::Info;
+	} else {
+		severity = logSeverity_t::Verbose;
+	}
+
+	LogMsg( system, severity, "%s", pCallbackData->pMessage );
+
 	return VK_FALSE;
 }
 

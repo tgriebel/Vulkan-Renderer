@@ -12,6 +12,7 @@
 
 #include "debugMenu.h"
 #include "gpuImage.h"
+#include "log.h"
 #include "gpuTimerPool.h"
 #include "swapChain.h"
 
@@ -271,6 +272,7 @@ void Renderer::WaitForEndFrame()
 #endif
 
 	++renderContext.frameNumber;
+	g_log.NewFrame();
 }
 
 
