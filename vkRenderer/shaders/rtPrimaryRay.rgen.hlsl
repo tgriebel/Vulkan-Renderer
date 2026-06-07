@@ -1,11 +1,12 @@
 // Primary ray generation — one ray per screen-space pixel
 
-#include "globals.h"
+#include "rtGlobals.h"
 
 GLOBALS_LAYOUT( 0, 0 )
 VIEW_LAYOUT( 0, 1 )
 RT_ACCELERATION_STRUCTURE( 1, 0, tlas )
 RT_OUTPUT( 1, 1, rtOutput )
+RT_PUSH_CONSTANTS
 
 struct rayPayload_t
 {
@@ -18,7 +19,7 @@ void RayGen()
     const uint2 launchIndex = DispatchRaysIndex().xy;
     const uint2 launchSize  = DispatchRaysDimensions().xy;
 
-    const gpuView_t view = views[ 0 ];
+    const gpuView_t view = views[ rtConstants.viewId ];
 
     const float2 pixelCenter = float2( launchIndex ) + 0.5f;
     const float2 ndc = ( pixelCenter / float2( launchSize ) ) * 2.0f - 1.0f;

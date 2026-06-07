@@ -370,6 +370,8 @@ void Renderer::CommitViews( const Scene* scene )
 		CommitLight( scene->lights[ i ] );
 	}
 
+	const renderConfig_t& config = renderContext.config;
+
 	// Main view
 	{
 		renderViews[ 0 ]->SetViewRect( 0, 0, width, height );
@@ -458,6 +460,8 @@ void Renderer::UpdateBuffers()
 
 		postProcessControls_t& postProcess = g_imguiControls.postProcess;
 
+		const renderConfig_t& config = renderContext.config;
+
 		globals.time = vec4f( elapsedTime, timeIntPart, timeFracPart, renderContext.deltaTimeMs );
 #if defined( USE_IMGUI )
 		globals.generic = vec4f( g_imguiControls.pbr.roughnessScale, g_imguiControls.pbr.roughnessBias, g_imguiControls.pbr.metalnessScale, g_imguiControls.pbr.metalnessBias );
@@ -512,9 +516,12 @@ void Renderer::InitConfig( const renderConfig_t& cfg )
 	maxSamples = vk_MaxImageSamples();
 #endif
 
-	config = cfg;
+	// This is the only place the config should be modified
+	// In the future, it can be *updated* once-per-frame
+	renderConfig_t* config = const_cast<renderConfig_t *>( &renderContext.config );
 
-	config.mainColorSubSamples = maxSamples;
+	*config = cfg;
+	config->mainColorSubSamples = maxSamples;
 }
 
 

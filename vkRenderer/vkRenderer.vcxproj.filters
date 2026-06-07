@@ -497,6 +497,9 @@
     <ClInclude Include="src\render_resources\aliasableImageHeap.h">
       <Filter>Resources</Filter>
     </ClInclude>
+    <ClInclude Include="src\globals\renderConfig.h">
+      <Filter>Globals</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Shaders">

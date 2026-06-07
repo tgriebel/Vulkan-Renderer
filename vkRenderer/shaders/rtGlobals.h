@@ -7,8 +7,16 @@ struct hitPayload_t
 	int		depth;
 };
 
-struct rtPushConstants_t
+// Push-constant layout — must match RayTracingTask::baseConstants_t (C++ side).
+// Occupies the first 16 bytes of the 128-byte push-constant budget.
+// User constants (if any) follow at offset 16.
+struct rtBaseConstants_t
 {
-	float dummy;
+	uint	viewId;
+	uint	width;
+	uint	height;
+	uint	pad;
 };
+
+#define RT_PUSH_CONSTANTS	BIND_INLINE rtBaseConstants_t rtConstants;
 

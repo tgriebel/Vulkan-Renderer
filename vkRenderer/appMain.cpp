@@ -86,6 +86,7 @@ MakeCVar( BOOL,		r_screenshot, true );
 MakeCVar( BOOL,		r_gaussianBlur, true );
 MakeCVar( BOOL,		r_ssao, true );
 MakeCVar( BOOL,		r_dof, true );
+MakeCVar( BOOL,		r_rtReflection, true );
 MakeCVar( BOOL,		c_imgui, true );
 MakeCVar( INT,		r_fullscreenMode, 0 );
 MakeCVar( INT,		r_windowWidth, -1 );
@@ -206,6 +207,8 @@ int main( int argc, char* argv[] )
 	config.gaussianBlur = r_gaussianBlur.GetBool();
 	config.ssao = r_ssao.GetBool();
 	config.dof = r_dof.GetBool();
+	config.rtReflections = r_rtReflection.GetBool();
+	config.rayTracingEnabled = config.rtReflections;
 	config.useImgui = c_imgui.GetBool();
 
 	std::thread renderThread( RenderThread );

@@ -4,6 +4,7 @@
 
 #include "../globals/common.h"
 #include "../globals/renderConstants.h"
+#include "../globals/renderConfig.h"
 
 #include "../render_state/cmdContext.h"
 #include "../render_resources/imageSampler.h"
@@ -33,32 +34,6 @@ extern Window						g_window;
 extern SwapChain					g_swapChain;
 
 extern renderConstants_t	rc;
-
-struct renderConfig_t
-{
-	imageSamples_t	mainColorSubSamples;
-	const char*		cubemapName;
-	bool			present;
-	bool			useCubeViews;
-	bool			cubeDownsample;
-	bool			writeCubeViews;
-	bool			computeEnvMap;
-	bool			computeDiffuseIbl;
-	bool			computeSpecularIBL;
-	bool			downsampleScene;
-	bool			useImgui;
-	bool			bloom;
-	bool			autoExposure;
-	bool			chromaticAberration;
-	bool			screenshot;
-	bool			gaussianBlur;
-	bool			ssao;
-	bool			dof;
-	bool			shadows;
-	bool			computeBrdfLut;
-	bool			computeNoiseImage;
-};
-
 
 struct ComputeState
 {
@@ -99,7 +74,6 @@ private:
 	static const uint32_t				ShadowMapHeight = 2048;
 	static const uint32_t				OutlineStencilBit = 0x01;
 
-	renderConfig_t						config;
 	RenderView							views[ MaxViews ];
 	RenderView*							activeViews[ MaxViews ];
 	RenderView*							renderViews[ Max3DViews ];

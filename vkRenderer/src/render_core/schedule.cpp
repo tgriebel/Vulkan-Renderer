@@ -1059,6 +1059,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 	}
 
 #ifdef USE_VULKAN_RTX
+	if( config.rtReflections )
 	{
 		// RT output image
 		{
@@ -1091,6 +1092,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		rtInfo.bindSetId = bindset_rayTracing;
 		rtInfo.tlas = resources->tlas;
 		rtInfo.rtOutputImage = resources->rtOutputImage;
+		rtInfo.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 		rtInfo.constants = nullptr;
 		rtInfo.constantsByteSize = 0;
 

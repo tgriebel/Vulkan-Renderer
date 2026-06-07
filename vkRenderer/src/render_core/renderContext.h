@@ -5,6 +5,7 @@
 #include <SysCore/timer.h>
 
 #include "../globals/common.h"
+#include "../globals/renderConfig.h"
 
 #include "../render_state/cmdContext.h"
 #include "../render_core/renderview.h"
@@ -32,6 +33,7 @@ private:
 
 public:
 	ShaderBindParms*		globalParms;
+	const renderConfig_t	config;
 
 	// Memory
 	AllocatorMemory			scratchMemory;

@@ -590,6 +590,7 @@ void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 			}
 
 			// Ray-tracing
+			if( renderContext->config.rayTracingEnabled )
 			{
 				mat4x4f transform = mat4x4f( 1.0f );
 				if ( g_scene != nullptr )
@@ -621,5 +622,7 @@ void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 		modelAsset->CompleteUpload();
 	}
 
-	accelerationStructure->Build( cmdList );
+	if( renderContext->config.rayTracingEnabled ) {
+		accelerationStructure->Build( cmdList );
+	}
 }

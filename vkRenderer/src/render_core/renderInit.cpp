@@ -27,9 +27,11 @@
 #include "schedule.h"
 
 
-void Renderer::Init( const renderConfig_t& cfg )
+void Renderer::Init( const renderConfig_t& initConfig )
 {
-	InitApi( cfg );
+	InitApi( initConfig );
+
+	const renderConfig_t& config = renderContext.config;
 
 	InitShaderResources();
 
@@ -317,7 +319,7 @@ void Renderer::BuildSchedule( TaskSchedule* schedule )
 	viewContext.shadowViews = &shadowViews[ 0 ];
 	viewContext.view2Ds = &view2Ds[ 0 ];
 
-	BuildSceneSchedule( config, &renderContext, &resources, &viewContext, schedule );
+	BuildSceneSchedule( renderContext.config, &renderContext, &resources, &viewContext, schedule );
 }
 
 
@@ -763,7 +765,7 @@ void Renderer::CreateFramebuffers()
 		info.height = height;
 		info.mipLevels = 1;
 		info.layers = 1;
-		info.subsamples = config.mainColorSubSamples;
+		info.subsamples = renderContext.config.mainColorSubSamples;
 		info.fmt = IMAGE_FMT_RGBA_16;
 		info.type = IMAGE_TYPE_2D;
 		info.tiling = IMAGE_TILING_MORTON;

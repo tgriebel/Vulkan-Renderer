@@ -304,4 +304,11 @@ void GpuAccelerationStructure::Destroy()
 	Cleanup();
 }
 
+#else // !USE_VULKAN_RTX
+
+void GpuAccelerationStructure::Create( const char*, resourceLifeTime_t ) {}
+void GpuAccelerationStructure::AddGeometry( CommandList*, const blasCreateSurfaceInfo_t& ) {}
+void GpuAccelerationStructure::Build( CommandList* ) {}
+void GpuAccelerationStructure::Destroy() {}
+
 #endif

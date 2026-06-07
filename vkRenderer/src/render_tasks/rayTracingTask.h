@@ -20,6 +20,7 @@ struct rayTracingTaskCreateInfo_t
 	const Image*				image;				// Output image. Determines trace dimensions
 
 	uint64_t					bindSetId;			// Bindset id
+	uint64_t					viewId;				// View id
 
 	const GpuAccelerationStructure* tlas;			// Scene TLAS
 	const Image*				rtOutputImage;		// Storage image written by the rgen shader
@@ -31,6 +32,18 @@ struct rayTracingTaskCreateInfo_t
 
 class RayTracingTask : public GpuTask
 {
+public:
+	struct baseConstants_t
+	{
+		uint32_t viewId;
+		uint32_t width;
+		uint32_t height;
+		uint32_t pad;
+	};
+
+	static const uint32_t ReservedConstantSizeInBytes = sizeof( baseConstants_t );
+	static const uint32_t MaxUserConstantSizeInBytes  = MaxCustomPushConstantBytes - ReservedConstantSizeInBytes;
+
 private:
 	RenderContext*					m_context;
 	ResourceContext*				m_resources;
@@ -41,6 +54,7 @@ private:
 	const Image*					m_image = nullptr;
 
 	hdl_t							m_pipelineHdl;
+	uint64_t						m_viewId;
 
 	const GpuAccelerationStructure*	m_tlas = nullptr;
 	const Image*					m_rtOutputImage = nullptr;

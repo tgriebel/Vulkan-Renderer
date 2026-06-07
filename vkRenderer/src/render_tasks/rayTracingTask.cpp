@@ -25,11 +25,12 @@ void RayTracingTask::Init( const rayTracingTaskCreateInfo_t& info )
 	m_image = info.image;
 	m_tlas = info.tlas;
 	m_rtOutputImage = info.rtOutputImage;
+	m_viewId = info.viewId;
 
 	m_shaderConstantsByteSize = 0;
 	if ( ( info.constants != nullptr ) && ( info.constantsByteSize > 0 ) )
 	{
-		m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxCustomConstantBytes );
+		m_shaderConstantsByteSize = Min( info.constantsByteSize, MaxUserConstantSizeInBytes );
 		memcpy( m_shaderConstants, info.constants, m_shaderConstantsByteSize );
 	}
 
@@ -52,6 +53,8 @@ void RayTracingTask::FrameBegin()
 #ifdef USE_VULKAN_RTX
 	if ( m_tlas != nullptr && m_tlas->IsBuilt() ) {
 		m_parms->Bind( bind_tlas, ShaderAttachment( m_tlas ) );
+	} else {
+		m_parms->Unbind( bind_tlas );
 	}
 	if ( m_rtOutputImage != nullptr ) {
 		m_parms->Bind( bind_rtOutputImage, ShaderAttachment( m_rtOutputImage ) );
@@ -70,14 +73,20 @@ void RayTracingTask::Execute( CommandList& cmdContext )
 	const uint32_t width  = m_image->info.width;
 	const uint32_t height = m_image->info.height;
 
-	if ( HasConstants() )
-	{
-		cmdContext.TraceRays( m_pipelineHdl, *m_parms, m_shaderConstants, m_shaderConstantsByteSize, width, height );
+	// Build push-constant block: [baseConstants_t | user constants]
+	uint8_t pushData[ MaxCustomPushConstantBytes ] = {};
+
+	baseConstants_t& base = *reinterpret_cast<baseConstants_t*>( pushData );
+	base.viewId = static_cast<uint32_t>( m_viewId );
+	base.width  = width;
+	base.height = height;
+
+	if ( m_shaderConstantsByteSize > 0 ) {
+		memcpy( pushData + ReservedConstantSizeInBytes, m_shaderConstants, m_shaderConstantsByteSize );
 	}
-	else
-	{
-		cmdContext.TraceRays( m_pipelineHdl, *m_parms, width, height );
-	}
+
+	const uint32_t totalBytes = ReservedConstantSizeInBytes + m_shaderConstantsByteSize;
+	cmdContext.TraceRays( m_pipelineHdl, *m_parms, pushData, totalBytes, width, height );
 
 	cmdContext.MarkerEndRegion();
 #endif

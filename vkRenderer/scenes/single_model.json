@@ -1,0 +1,19 @@
+{
+  "sceneClass": "test",
+  "type": "scene",
+  "reflink" : "shaders_common.json",
+  "reflink" : "image_common.json",
+  "skyName" : "ferndalestudio",
+  "images": [],
+  "materials": [],
+  "models": [],
+  "camera": [ -17.0, -1.0, 12.0 ],
+  "entities": [
+	{
+		"name" : "sphere",
+		"model" : "sphere.obj",
+		"hidden": "false",
+		"xyz": [ 0.0, 0.0, 10.0 ]
+	}
+  ]
+}

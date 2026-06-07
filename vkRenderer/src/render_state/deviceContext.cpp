@@ -26,24 +26,40 @@ enum class attachedProfiler_t
 };
 
 
+static const char* const s_nsightLayerSubstrings[] = {
+	"NV_nsight",		// VK_LAYER_NV_nsight
+	"NVIDIA_nsight",	// VK_LAYER_NVIDIA_nsight / VK_LAYER_NVIDIA_nsight_interception
+	"ngfx",				// VK_LAYER_NVIDIA_ngfx
+};
+
 static attachedProfiler_t DetectProfiler()
 {
 #if defined( _WIN32 )
-	// Profiles (RenderDoc, NSight) inject code that changes behavior
-	// This can manifest in validation errors, crashes, etc
-	// This function can be used for specialized logic where needed
-
+	// RenderDoc injects renderdoc.dll at process start — detectable via GetModuleHandle.
 	if( GetModuleHandleA( "renderdoc.dll" ) != nullptr )
 	{
 		return attachedProfiler_t::RENDER_DOC;
 	}
-
-	if( ( GetModuleHandleA( "nv-nsight-interceptor.dll" ) != nullptr ) ||
-		( GetModuleHandleA( "nv-nsight-interceptor-win64.dll" ) != nullptr ) )
-	{
-		return attachedProfiler_t::NSIGHT;
-	}
 #endif
+
+	{
+		uint32_t layerCount = 0;
+		vkEnumerateInstanceLayerProperties( &layerCount, nullptr );
+		std::vector<VkLayerProperties> layers( layerCount );
+		vkEnumerateInstanceLayerProperties( &layerCount, layers.data() );
+
+		for ( const VkLayerProperties& layer : layers )
+		{
+			for ( const char* substr : s_nsightLayerSubstrings )
+			{
+				if ( strstr( layer.layerName, substr ) != nullptr )
+				{
+					return attachedProfiler_t::NSIGHT;
+				}
+			}
+		}
+	}
+
 	return attachedProfiler_t::NONE;
 }
 
@@ -1121,10 +1137,12 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vk_DebugCallback( VkDebugUtilsMessageSever
 	}
 
 	std::cerr << "[Vulkan Validation - ";
-	if( ( messageType &= VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT ) != 0 ) {
-		std::cerr << "Error";
-	} else if ( ( messageType &= VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT ) != 0 ) {
+	if( ( messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT ) != 0 ) {
+		std::cerr << "Validation";
+	} else if ( ( messageType & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT ) != 0 ) {
 		std::cerr << "Performance";
+	} else {
+		std::cerr << "General";
 	}
 	std::cerr << "]\t";
 	std::cerr << pCallbackData->pMessage << "\n" << std::endl;
@@ -1210,6 +1228,8 @@ void DeviceContext::Create( Window& window )
 {
 	// Create Instance
 	{
+		m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
+
 		if ( EnableValidationLayers && !vk_CheckValidationLayerSupport() )
 		{
 			throw std::runtime_error( "validation layers requested, but not available!" );
@@ -1245,7 +1265,7 @@ void DeviceContext::Create( Window& window )
 			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
 			createInfo.ppEnabledLayerNames = validationLayers.data();
 
-			if( EnableSyncValidationLayers )
+			if( EnableSyncValidationLayers && !m_profilerAttached )
 			{
 				static const VkValidationFeatureEnableEXT validationEnables[] = {
 					VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
@@ -1293,8 +1313,6 @@ void DeviceContext::Create( Window& window )
 		window.CreateGlfwSurface( context.instance );
 #endif
 	}
-
-	m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
 
 	// Pick physical device
 	{

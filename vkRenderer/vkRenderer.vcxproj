@@ -311,6 +311,7 @@
     <ClInclude Include="src\asset_types\material.h" />
     <ClInclude Include="src\asset_types\model.h" />
     <ClInclude Include="src\asset_types\image.h" />
+    <ClInclude Include="src\globals\renderConfig.h" />
     <ClInclude Include="src\io\serializeClasses.h" />
     <ClInclude Include="src\render_binding\vertexInput.h" />
     <ClInclude Include="src\render_core\allocator.h" />
