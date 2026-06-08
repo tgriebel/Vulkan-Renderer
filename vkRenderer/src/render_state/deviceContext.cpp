@@ -5,6 +5,7 @@
 #include "../render_core/gpuImage.h"
 #include "../render_core/renderer.h"
 #include "../render_binding/bindings.h"
+#include "../app/cvar.h"
 
 DeviceContext context;
 
@@ -14,6 +15,8 @@ static bool s_enableValidationLayers = false;
 static bool s_enableValidationLayers = true;
 static bool s_enableSyncValidationLayers = true;
 #endif
+
+MakeCVar( BOOL, r_validation, true );
 
 static const char* const s_validationLayers[] = { "VK_LAYER_KHRONOS_validation" };
 static const uint32_t s_validationLayerCount = COUNTARRAY( s_validationLayers );
@@ -35,13 +38,6 @@ static const uint32_t s_deviceExtensionCount = COUNTARRAY( s_deviceExtensions );
 
 static const char* const s_debugExtensions[] = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
 
-static const char* const s_profilerDeviceExtensions[] =
-{
-	"VK_NV_device_diagnostic_checkpoints",
-	"VK_NV_device_diagnostics_config",
-	"VK_EXT_device_fault",
-};
-
 static const bool s_validateVerbose = false;
 static const bool s_validateWarnings = true;
 static const bool s_validateErrors = true;
@@ -60,7 +56,11 @@ static attachedProfiler_t DetectProfiler()
 	if ( GetModuleHandleA( "renderdoc.dll" ) != nullptr ) {
 		return attachedProfiler_t::RENDER_DOC;
 	}
-	if ( GetModuleHandleA( "Nvda.Graphics.Interception.dll" ) != nullptr ) {
+
+	if( ( GetModuleHandleA( "Nvda.Graphics.Interception.dll" ) != nullptr )	||
+		( GetModuleHandleA( "nv-nsight-interceptor.dll" ) != nullptr )		||
+		( GetModuleHandleA( "nv-nsight-interceptor-win64.dll" ) != nullptr ) )
+	{
 		return attachedProfiler_t::NSIGHT;
 	}
 #else
@@ -1257,13 +1257,11 @@ void DeviceContext::Create( Window& window )
 
 	// Create Instance
 	{
-		m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
+		const bool validationLayersRequested = ( s_enableValidationLayers && r_validation.GetBool() );
 
-		const bool validationLayersRequested = s_enableValidationLayers;
+		s_enableValidationLayers = ( validationLayersRequested && !m_profilerAttached && vk_CheckValidationLayerSupport() );
 
-		s_enableValidationLayers = ( s_enableValidationLayers && vk_CheckValidationLayerSupport() );
-
-		if ( validationLayersRequested && ( s_enableValidationLayers == false ) ) {
+		if ( validationLayersRequested && !s_enableValidationLayers ) {
 			std::cout << "Validation layers requested but unavailable." << std::endl;
 		}
 
@@ -1618,6 +1616,8 @@ void DeviceContext::Create( Window& window )
 
 		vk_SetObjectName( (uint64_t)descriptorPool, VK_OBJECT_TYPE_DESCRIPTOR_POOL, "DescriptorPool (Uniform | Storage | ImageSampler | Image)" );
 	}
+
+	m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
 
 	bufferId = 0;
 }
