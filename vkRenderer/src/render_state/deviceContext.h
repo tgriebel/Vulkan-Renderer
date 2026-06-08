@@ -58,23 +58,9 @@ class DeviceContext
 {
 private:
 	bool m_profilerAttached = false;
+	bool m_debugMarkersEnabled = false;
+	bool m_validationEnabled = false;
 
-public:
-#ifdef USE_VULKAN
-	const std::vector<const char*>		validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const std::vector<const char*>		deviceExtensions = {	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-																VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-#ifdef USE_VULKAN_RTX
-																VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
-																VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-																VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
-																VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
-																VK_KHR_SPIRV_1_4_EXTENSION_NAME,
-																VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME
-#endif
-															};
-
-#endif
 public:
 #ifdef USE_VULKAN
 	VkDevice											device;
@@ -153,8 +139,7 @@ class DrawPass;
 enum imageSamples_t : uint8_t;
 
 #ifdef USE_VULKAN
-bool				vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions );
-bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const std::vector<const char*>& deviceExtensions );
+bool				vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const char* const extensions[], uint32_t extensionCount );
 QueueFamilyIndices	vk_FindQueueFamilies( VkPhysicalDevice device, VkSurfaceKHR surface );
 bool				vk_ValidTextureFormat( const VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features );
 uint32_t			vk_FindMemoryType( uint32_t typeFilter, VkMemoryPropertyFlags properties );

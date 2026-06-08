@@ -9,15 +9,42 @@
 DeviceContext context;
 
 #ifdef NDEBUG
-static const bool EnableValidationLayers = false;
+static bool s_enableValidationLayers = false;
 #else
-static const bool EnableValidationLayers = true;
-static const bool EnableSyncValidationLayers = true;
+static bool s_enableValidationLayers = true;
+static bool s_enableSyncValidationLayers = true;
 #endif
 
-static const bool ValidateVerbose = false;
-static const bool ValidateWarnings = true;
-static const bool ValidateErrors = true;
+static const char* const s_validationLayers[] = { "VK_LAYER_KHRONOS_validation" };
+static const uint32_t s_validationLayerCount = COUNTARRAY( s_validationLayers );
+
+#ifdef USE_VULKAN
+static const char* const s_deviceExtensions[] = {	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+													VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+#ifdef USE_VULKAN_RTX
+													VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+													VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+													VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+													VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
+													VK_KHR_SPIRV_1_4_EXTENSION_NAME,
+													VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+#endif
+												};
+static const uint32_t s_deviceExtensionCount = COUNTARRAY( s_deviceExtensions );
+#endif
+
+static const char* const s_debugExtensions[] = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
+
+static const char* const s_profilerDeviceExtensions[] =
+{
+	"VK_NV_device_diagnostic_checkpoints",
+	"VK_NV_device_diagnostics_config",
+	"VK_EXT_device_fault",
+};
+
+static const bool s_validateVerbose = false;
+static const bool s_validateWarnings = true;
+static const bool s_validateErrors = true;
 
 enum class attachedProfiler_t
 {
@@ -27,69 +54,50 @@ enum class attachedProfiler_t
 };
 
 
-static const char* const s_nsightLayerSubstrings[] = {
-	"NV_nsight",		// VK_LAYER_NV_nsight
-	"NVIDIA_nsight",	// VK_LAYER_NVIDIA_nsight / VK_LAYER_NVIDIA_nsight_interception
-	"ngfx",				// VK_LAYER_NVIDIA_ngfx
-};
-
 static attachedProfiler_t DetectProfiler()
 {
 #if defined( _WIN32 )
-	// RenderDoc injects renderdoc.dll at process start — detectable via GetModuleHandle.
-	if( GetModuleHandleA( "renderdoc.dll" ) != nullptr )
-	{
+	if ( GetModuleHandleA( "renderdoc.dll" ) != nullptr ) {
 		return attachedProfiler_t::RENDER_DOC;
 	}
-#endif
-
-	{
-		uint32_t layerCount = 0;
-		vkEnumerateInstanceLayerProperties( &layerCount, nullptr );
-		std::vector<VkLayerProperties> layers( layerCount );
-		vkEnumerateInstanceLayerProperties( &layerCount, layers.data() );
-
-		for ( const VkLayerProperties& layer : layers )
-		{
-			for ( const char* substr : s_nsightLayerSubstrings )
-			{
-				if ( strstr( layer.layerName, substr ) != nullptr )
-				{
-					return attachedProfiler_t::NSIGHT;
-				}
-			}
-		}
+	if ( GetModuleHandleA( "Nvda.Graphics.Interception.dll" ) != nullptr ) {
+		return attachedProfiler_t::NSIGHT;
 	}
-
+#else
+	assert( 0 ); // Not implemented for other platforms yet
+#endif
 	return attachedProfiler_t::NONE;
 }
 
 
-bool vk_CheckDeviceExtensionSupport( VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions )
+bool vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface, const char* const extensions[], const uint32_t extensionCount )
 {
-	uint32_t extensionCount;
-	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, nullptr );
-
-	std::vector<VkExtensionProperties> availableExtensions( extensionCount );
-	vkEnumerateDeviceExtensionProperties( device, nullptr, &extensionCount, availableExtensions.data() );
-
-	std::set<std::string> requiredExtensions( deviceExtensions.begin(), deviceExtensions.end() );
-
-	for ( const auto& extension : availableExtensions ) {
-		requiredExtensions.erase( extension.extensionName );
-	}
-	return requiredExtensions.empty();
-}
-
-
-bool vk_IsDeviceSuitable( VkPhysicalDevice device, VkSurfaceKHR surface,  const std::vector<const char*>& deviceExtensions )
-{
-	VkPhysicalDeviceProperties deviceProperties;
-	vkGetPhysicalDeviceProperties( device, &deviceProperties );
-
 	QueueFamilyIndices indices = vk_FindQueueFamilies( device, surface );
 
-	bool extensionsSupported = vk_CheckDeviceExtensionSupport( device, deviceExtensions );
+	// Check every required extension is present
+	uint32_t availCount = 0;
+	vkEnumerateDeviceExtensionProperties( device, nullptr, &availCount, nullptr );
+	std::vector<VkExtensionProperties> avail( availCount );
+	vkEnumerateDeviceExtensionProperties( device, nullptr, &availCount, avail.data() );
+
+	bool extensionsSupported = true;
+	for ( uint32_t i = 0; i < extensionCount; ++i )
+	{
+		bool found = false;
+		for ( const VkExtensionProperties& ext : avail )
+		{
+			if ( strcmp( extensions[ i ], ext.extensionName ) == 0 )
+			{
+				found = true;
+				break;
+			}
+		}
+		if ( found == false )
+		{
+			extensionsSupported = false;
+			break;
+		}
+	}
 
 	bool swapChainAdequate = false;
 	if ( extensionsSupported )
@@ -1169,15 +1177,15 @@ void vk_PopulateDebugMessengerCreateInfo( VkDebugUtilsMessengerCreateInfoEXT& cr
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
 	createInfo.messageSeverity = 0;
-	if ( ValidateVerbose ) {
+	if ( s_validateVerbose ) {
 		createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
 	}
 
-	if ( ValidateWarnings ) {
+	if ( s_validateWarnings ) {
 		createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 	}
 
-	if ( ValidateErrors ) {
+	if ( s_validateErrors ) {
 		createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 	}
 
@@ -1199,15 +1207,21 @@ bool vk_CheckValidationLayerSupport()
 	std::vector<VkLayerProperties> availableLayers( layerCount );
 	vkEnumerateInstanceLayerProperties( &layerCount, availableLayers.data() );
 
-	for ( const char* layerName : context.validationLayers ) {
+	for ( uint32_t i = 0; i < s_validationLayerCount; ++i )
+	{
+		const char* layerName = s_validationLayers[ i ];
 		bool layerFound = false;
-		for ( const auto& layerProperties : availableLayers ) {
-			if ( strcmp( layerName, layerProperties.layerName ) == 0 ) {
+
+		for ( const VkLayerProperties& layerProperties : availableLayers )
+		{
+			if ( strcmp( layerName, layerProperties.layerName ) == 0 )
+			{
 				layerFound = true;
 				break;
 			}
 		}
-		if ( !layerFound ) {
+
+		if ( layerFound == false ) {
 			return false;
 		}
 	}
@@ -1215,44 +1229,47 @@ bool vk_CheckValidationLayerSupport()
 }
 
 
-std::vector<const char*> vk_GetRequiredExtensions()
+
+static bool vk_IsExtAvailable( const VkExtensionProperties* exts, uint32_t count, const char* name )
 {
-#ifdef USE_GLFW
-	uint32_t glfwExtensionCount = 0;
-	const char** glfwExtensions;
-	glfwExtensions = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
-
-	std::vector<const char*> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
-#else
-	std::vector<const char*> extensions;
-#endif
-
-	if ( EnableValidationLayers )
-	{
-		extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
-		extensions.push_back( VK_EXT_DEBUG_REPORT_EXTENSION_NAME );
+	for ( uint32_t i = 0; i < count; ++i ) {
+		if ( strcmp( exts[ i ].extensionName, name ) == 0 ) return true;
 	}
-
-	return extensions;
+	return false;
 }
 
 
 void DeviceContext::Create( Window& window )
 {
+	// These are declared up here to prevent dangling pointers in Vulkan structs
+	const char* requiredExtensions[ 16 ] = {};
+	const char* enabledExtensions[ 64 ] = {};
+	uint32_t enabledExtensionCount = 0;
+	float queuePriority = 1.0f;
+	VkDeviceQueueCreateInfo queueCreateInfos[ QUEUE_COUNT ] = {};
+	uint32_t queueCreateInfoCount = 0;
+
+	enabledExtensionCount = 0;
+	for ( uint32_t i = 0; i < s_deviceExtensionCount; ++i ) {
+		enabledExtensions[ enabledExtensionCount++ ] = s_deviceExtensions[ i ];
+	}
+	queueCreateInfoCount = 0;
+
 	// Create Instance
 	{
 		m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
 
-		if ( EnableValidationLayers && !vk_CheckValidationLayerSupport() )
-		{
-			throw std::runtime_error( "validation layers requested, but not available!" );
+		s_enableValidationLayers = ( s_enableValidationLayers && vk_CheckValidationLayerSupport() );
+
+		if ( s_enableValidationLayers ) {
+			std::cout << "Validation layers unavailable." << std::endl;
 		}
 
 		VkApplicationInfo appInfo{ };
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Extensa";
+		appInfo.pApplicationName = "Xtensa";
 		appInfo.applicationVersion = VK_MAKE_VERSION( 1, 0, 0 );
-		appInfo.pEngineName = "No Engine";
+		appInfo.pEngineName = "Xtensa";
 		appInfo.engineVersion = VK_MAKE_VERSION( 1, 0, 0 );
 		appInfo.apiVersion = VK_API_VERSION_1_3;
 
@@ -1260,25 +1277,25 @@ void DeviceContext::Create( Window& window )
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
 
-		uint32_t extensionCount = 0;
-		vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, nullptr );
-		std::vector<VkExtensionProperties> extensionProperties( extensionCount );
-		vkEnumerateInstanceExtensionProperties( nullptr, &extensionCount, extensionProperties.data() );
+		uint32_t instanceExtPropCount = 0;
+		vkEnumerateInstanceExtensionProperties( nullptr, &instanceExtPropCount, nullptr );
+		VkExtensionProperties extensionProperties[ 256 ];
+		instanceExtPropCount = instanceExtPropCount < COUNTARRAY( extensionProperties ) ? instanceExtPropCount : COUNTARRAY( extensionProperties );
+		vkEnumerateInstanceExtensionProperties( nullptr, &instanceExtPropCount, extensionProperties );
 
 		std::cout << "Available extensions:\n";
-
-		for ( const auto& extension : extensionProperties ) {
-			std::cout << '\t' << extension.extensionName << '\n';
+		for ( uint32_t i = 0; i < instanceExtPropCount; ++i ) {
+			std::cout << '\t' << extensionProperties[ i ].extensionName << '\n';
 		}
 
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 		VkValidationFeaturesEXT validationFeatures{};
-		if ( EnableValidationLayers )
+		if ( s_enableValidationLayers )
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
-			createInfo.ppEnabledLayerNames = validationLayers.data();
+			createInfo.enabledLayerCount = s_validationLayerCount;
+			createInfo.ppEnabledLayerNames = s_validationLayers;
 
-			if( EnableSyncValidationLayers && !m_profilerAttached )
+			if( s_enableSyncValidationLayers && !m_profilerAttached )
 			{
 				static const VkValidationFeatureEnableEXT validationEnables[] = {
 					VK_VALIDATION_FEATURE_ENABLE_SYNCHRONIZATION_VALIDATION_EXT,
@@ -1299,9 +1316,25 @@ void DeviceContext::Create( Window& window )
 			createInfo.pNext = nullptr;
 		}
 
-		auto extensions = vk_GetRequiredExtensions();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
-		createInfo.ppEnabledExtensionNames = extensions.data();
+		uint32_t requiredExtensionCount = 0;
+#ifdef USE_GLFW
+		{
+			uint32_t glfwCount = 0;
+			const char** glfwExtensions = glfwGetRequiredInstanceExtensions( &glfwCount );
+			for ( uint32_t i = 0; i < glfwCount && requiredExtensionCount < COUNTARRAY( requiredExtensions ); ++i ) {
+				requiredExtensions[ requiredExtensionCount++ ] = glfwExtensions[ i ];
+			}
+		}
+#endif
+		if ( s_enableValidationLayers )
+		{
+			assert( requiredExtensionCount + 2 <= COUNTARRAY( requiredExtensions ) );
+			requiredExtensions[ requiredExtensionCount++ ] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+			requiredExtensions[ requiredExtensionCount++ ] = VK_EXT_DEBUG_REPORT_EXTENSION_NAME;
+		}
+
+		createInfo.enabledExtensionCount = requiredExtensionCount;
+		createInfo.ppEnabledExtensionNames = requiredExtensions;
 
 		VK_CHECK_RESULT( vkCreateInstance( &createInfo, nullptr, &instance ) );
 
@@ -1310,7 +1343,7 @@ void DeviceContext::Create( Window& window )
 
 	// Debug Messenger
 	{
-		if ( !EnableValidationLayers ) {
+		if ( !s_enableValidationLayers ) {
 			return;
 		}
 
@@ -1336,14 +1369,16 @@ void DeviceContext::Create( Window& window )
 			throw std::runtime_error( "Failed to find GPUs with Vulkan support!" );
 		}
 
-		std::vector<VkPhysicalDevice> devices( deviceCount );
-		vkEnumeratePhysicalDevices( instance, &deviceCount, devices.data() );
+		VkPhysicalDevice devices[ 16 ];
+		deviceCount = deviceCount < COUNTARRAY( devices ) ? deviceCount : COUNTARRAY( devices );
+		vkEnumeratePhysicalDevices( instance, &deviceCount, devices );
 
 		deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 
-		for ( const auto& device : devices )
+		for ( uint32_t i = 0; i < deviceCount; ++i )
 		{
-			if ( vk_IsDeviceSuitable( device, window.vk_surface, deviceExtensions ) )
+			const VkPhysicalDevice device = devices[ i ];
+			if ( vk_IsDeviceSuitable( device, window.vk_surface, s_deviceExtensions, s_deviceExtensionCount ) )
 			{
 				vkGetPhysicalDeviceProperties( device, &deviceProperties );
 				vkGetPhysicalDeviceFeatures2( device, &deviceFeatures );
@@ -1365,24 +1400,46 @@ void DeviceContext::Create( Window& window )
 		queueFamilyIndices[ QUEUE_PRESENT ] = indices.presentFamily.value();
 		queueFamilyIndices[ QUEUE_COMPUTE ] = indices.computeFamily.value();
 
-		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value(), indices.computeFamily.value() };
+		const uint32_t candidateFamilies[] = {
+			indices.graphicsFamily.value(),
+			indices.presentFamily.value(),
+			indices.computeFamily.value()
+		};
 
-		float queuePriority = 1.0f;
-		for ( uint32_t queueFamily : uniqueQueueFamilies )
+		uint32_t uniqueFamilies[ QUEUE_COUNT ];
+		uint32_t uniqueFamilyCount = 0;
+		for ( uint32_t i = 0; i < COUNTARRAY( candidateFamilies ); ++i )
 		{
-			VkDeviceQueueCreateInfo queueCreateInfo{ };
-			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
-			queueCreateInfos.push_back( queueCreateInfo );
+			bool duplicate = false;
+			for ( uint32_t j = 0; j < uniqueFamilyCount; ++j )
+			{
+				if ( uniqueFamilies[ j ] == candidateFamilies[ i ] )
+				{
+					duplicate = true;
+					break;
+				}
+			}
+			if ( !duplicate ) {
+				uniqueFamilies[ uniqueFamilyCount++ ] = candidateFamilies[ i ];
+			}
 		}
+
+		assert( uniqueFamilyCount >= 1 );
+
+		for ( uint32_t i = 0; i < uniqueFamilyCount; ++i )
+		{
+			queueCreateInfos[ i ] = {};
+			queueCreateInfos[ i ].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfos[ i ].queueFamilyIndex = uniqueFamilies[ i ];
+			queueCreateInfos[ i ].queueCount = 1;
+			queueCreateInfos[ i ].pQueuePriorities = &queuePriority;
+		}
+		queueCreateInfoCount = uniqueFamilyCount;
 
 		VkDeviceCreateInfo createInfo{ };
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>( queueCreateInfos.size() );
-		createInfo.pQueueCreateInfos = queueCreateInfos.data();
+		createInfo.queueCreateInfoCount = queueCreateInfoCount;
+		createInfo.pQueueCreateInfos = queueCreateInfos;
 
 		deviceFeatures.features.samplerAnisotropy = VK_TRUE;
 		deviceFeatures.features.fillModeNonSolid = VK_TRUE;
@@ -1392,7 +1449,7 @@ void DeviceContext::Create( Window& window )
 		deviceFeatures.features.fragmentStoresAndAtomics = VK_TRUE;
 #ifdef USE_VULKAN_RTX
 		deviceFeatures.features.shaderStorageImageWriteWithoutFormat = VK_TRUE;
-	
+
 		enabledRayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 		enabledRayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
 
@@ -1406,24 +1463,27 @@ void DeviceContext::Create( Window& window )
 
 		createInfo.pEnabledFeatures = &deviceFeatures.features;
 
-		std::vector<const char*> enabledExtensions;
-		for ( auto ext : deviceExtensions )
+		// Enumerate all available device extensions once; used for optional extension checks below
+		uint32_t availDevExtCount = 0;
+		vkEnumerateDeviceExtensionProperties( physicalDevice, nullptr, &availDevExtCount, nullptr );
+
+		VkExtensionProperties availDevExts[ 512 ];
+		availDevExtCount = availDevExtCount < COUNTARRAY( availDevExts ) ? availDevExtCount : COUNTARRAY( availDevExts );
+		vkEnumerateDeviceExtensionProperties( physicalDevice, nullptr, &availDevExtCount, availDevExts );
+
+		for ( uint32_t i = 0; i < COUNTARRAY( s_debugExtensions ); ++i )
 		{
-			enabledExtensions.push_back( ext );
-		}
-		std::vector<const char*> captureExtensions = { VK_EXT_DEBUG_MARKER_EXTENSION_NAME };
-		if ( vk_IsDeviceSuitable( physicalDevice, window.vk_surface, captureExtensions ) ) {
-			for ( const char* ext : captureExtensions ) {
-				enabledExtensions.push_back( ext );
+			if ( vk_IsExtAvailable( availDevExts, availDevExtCount, s_debugExtensions[ i ] ) ) {
+				enabledExtensions[ enabledExtensionCount++ ] = s_debugExtensions[ i ];
 			}
 		}
 
-		createInfo.enabledExtensionCount = static_cast<uint32_t>( enabledExtensions.size() );
-		createInfo.ppEnabledExtensionNames = enabledExtensions.data();
-		if ( EnableValidationLayers )
+		createInfo.enabledExtensionCount = enabledExtensionCount;
+		createInfo.ppEnabledExtensionNames = enabledExtensions;
+		if ( s_enableValidationLayers )
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>( validationLayers.size() );
-			createInfo.ppEnabledLayerNames = validationLayers.data();
+			createInfo.enabledLayerCount = s_validationLayerCount;
+			createInfo.ppEnabledLayerNames = s_validationLayers;
 		}
 		else
 		{
@@ -1463,18 +1523,12 @@ void DeviceContext::Create( Window& window )
 
 	// Debug Markers
 	{
-		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties( physicalDevice, nullptr, &extensionCount, nullptr );
-
-		std::vector<VkExtensionProperties> availableExtensions( extensionCount );
-		vkEnumerateDeviceExtensionProperties( physicalDevice, nullptr, &extensionCount, availableExtensions.data() );
-
-		bool found = false;
-		for( const auto& extension : availableExtensions )
+		m_debugMarkersEnabled = false;
+		for ( uint32_t i = 0; i < enabledExtensionCount; ++i )
 		{
-			if( strcmp( extension.extensionName, VK_EXT_DEBUG_MARKER_EXTENSION_NAME ) == 0 )
+			if ( strcmp( enabledExtensions[ i ], VK_EXT_DEBUG_MARKER_EXTENSION_NAME ) == 0 )
 			{
-				found = true;
+				m_debugMarkersEnabled = true;
 				break;
 			}
 		}
@@ -1501,7 +1555,7 @@ void DeviceContext::Create( Window& window )
 		}
 #endif
 
-		if ( found )
+		if ( m_debugMarkersEnabled )
 		{
 			std::cout << "Enabling debug markers." << std::endl;
 
@@ -1580,7 +1634,7 @@ void DeviceContext::Destroy( Window& window )
 
 	vkDestroyDevice( device, nullptr );
 
-	if ( EnableValidationLayers )
+	if ( s_enableValidationLayers )
 	{
 		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr( instance, "vkDestroyDebugUtilsMessengerEXT" );
 		if ( func != nullptr ) {

@@ -129,10 +129,6 @@ void GpuImage::Create( const char* name, const imageInfo_t& info, const gpuImage
 			m_allocation[ i ].m_allocation = allocation;
 			m_allocation[ i ].m_info = allocInfo;
 
-			VkMemoryRequirements memRequirements;
-			vkGetImageMemoryRequirements( context.device, vk_image[ i ], &memRequirements );
-			m_allocation[ i ].m_alignment = memRequirements.alignment;
-
 			m_resourceByteCount = allocInfo.size;
 
 			if ( m_dbgName != "" )
