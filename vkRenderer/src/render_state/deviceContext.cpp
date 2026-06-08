@@ -1259,10 +1259,12 @@ void DeviceContext::Create( Window& window )
 	{
 		m_profilerAttached = ( DetectProfiler() != attachedProfiler_t::NONE );
 
+		const bool validationLayersRequested = s_enableValidationLayers;
+
 		s_enableValidationLayers = ( s_enableValidationLayers && vk_CheckValidationLayerSupport() );
 
-		if ( s_enableValidationLayers ) {
-			std::cout << "Validation layers unavailable." << std::endl;
+		if ( validationLayersRequested && ( s_enableValidationLayers == false ) ) {
+			std::cout << "Validation layers requested but unavailable." << std::endl;
 		}
 
 		VkApplicationInfo appInfo{ };
@@ -1342,11 +1344,8 @@ void DeviceContext::Create( Window& window )
 	}
 
 	// Debug Messenger
+	if ( s_enableValidationLayers )
 	{
-		if ( !s_enableValidationLayers ) {
-			return;
-		}
-
 		VkDebugUtilsMessengerCreateInfoEXT createInfo;
 		vk_PopulateDebugMessengerCreateInfo( createInfo );
 
