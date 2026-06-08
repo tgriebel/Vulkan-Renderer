@@ -53,7 +53,11 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		MaxVertices,
 		sizeof( vsInput_t ),
 		bufferType_t::VERTEX,
+#ifdef USE_VULKAN_RTX
 		bufferFlags_t::RT_VISIBLE
+#else
+		bufferFlags_t::NONE
+#endif
 	);
 
 	geometry.ib.Create(
@@ -63,7 +67,11 @@ void RenderUploader::Boot( RenderContext* context, ResourceContext* resources )
 		MaxIndices,
 		sizeof( uint32_t ),
 		bufferType_t::INDEX,
+#ifdef USE_VULKAN_RTX
 		bufferFlags_t::RT_VISIBLE
+#else
+		bufferFlags_t::NONE
+#endif
 	);
 
 	geometry.stagingBuffer.Create(

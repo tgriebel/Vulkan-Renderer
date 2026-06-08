@@ -81,6 +81,36 @@ static pipelineType_t GetPipelineTypeForShaderType( const shaderType_t type )
 }
 
 
+bool IsRasterShader( const shaderType_t type )
+{
+	if( ( type == VERTEX ) || ( type == PIXEL ) )
+	{
+		return true;
+	}
+	return false;
+}
+
+
+bool IsComptuteShader( const shaderType_t type )
+{
+	if( type == COMPUTE ) {
+		return true;
+	}
+	return false;
+}
+
+
+bool IsRayTracingShader( const shaderType_t type )
+{
+	if( ( type == RT_GEN ) || ( type == RT_CLOSEST_HIT ) || ( type == RT_ANY_HIT ) ||
+		( type == RT_INTERSECTION ) || ( type == RT_MISS ) || ( type == RT_CALLABLE ) )
+	{
+		return true;
+	}
+	return false;
+}
+
+
 void GpuProgram::CreateApiObjects()
 {
 	for( uint32_t shaderIx = 0; shaderIx < shaderCount; ++shaderIx )
@@ -88,6 +118,13 @@ void GpuProgram::CreateApiObjects()
 		GpuProgram::ShaderPermMap& shaderMap = shaderBins[ shaderIx ];
 		for( auto permIt = shaderMap.begin(); permIt != shaderMap.end(); ++permIt )
 		{
+#ifndef USE_VULKAN_RTX
+			const shaderType_t type = permIt->second.type;
+			if ( IsRayTracingShader( type ) )
+			{
+				continue;
+			}
+#endif
 #ifdef USE_VULKAN
 			permIt->second.vk_shader = vk_CreateShaderModule( permIt->second.blob, permIt->second.binName.c_str() );
 #endif

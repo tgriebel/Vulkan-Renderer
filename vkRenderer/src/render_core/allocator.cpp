@@ -119,7 +119,9 @@ void AllocatorMemory::CreateVmaAllocator()
 	createInfo.device = context.device;
 	createInfo.instance = context.instance;
 	createInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+#ifdef USE_VULKAN_RTX
 	createInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+#endif
 
 	VmaVulkanFunctions vmaFunctions{};
 	if ( context.IsProfilerAttached() )
