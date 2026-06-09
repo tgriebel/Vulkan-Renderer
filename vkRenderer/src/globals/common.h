@@ -2,7 +2,7 @@
 
 #if defined( RENDERER )
 	#define USE_VULKAN
-//	#define USE_VULKAN_RTX
+	#define USE_VULKAN_RTX
 	#define USE_IMGUI
 	#define USE_GLFW
 	#define USE_TINYFD

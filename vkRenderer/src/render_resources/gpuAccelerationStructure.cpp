@@ -30,7 +30,7 @@ void GpuAccelerationStructure::AddGeometry( CommandList* cmdList, const blasCrea
 	triangles.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_TRIANGLES_DATA_KHR;
 	triangles.vertexFormat = VK_FORMAT_R32G32B32_SFLOAT;
 	triangles.vertexData.deviceAddress = surfaceInfo.vb->GetDeviceAddress();
-	triangles.vertexStride = surfaceInfo.vb->GetElementSizeAligned();
+	triangles.vertexStride = surfaceInfo.vb->GetElementSize();
 	triangles.maxVertex = surfaceInfo.surface->vertexOffset + surfaceInfo.surface->vertexCount - 1;
 	triangles.indexType = VK_INDEX_TYPE_UINT32;
 	triangles.indexData.deviceAddress = surfaceInfo.ib->GetDeviceAddress();
