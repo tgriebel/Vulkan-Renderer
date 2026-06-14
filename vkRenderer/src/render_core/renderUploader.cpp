@@ -597,40 +597,27 @@ void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 				assert( geometry.ibBufElements < MaxIndices );
 			}
 
-			// Ray-tracing
+#ifdef USE_VULKAN_RTX
 			if( renderContext->config.rayTracingEnabled )
 			{
-				mat4x4f transform = mat4x4f( 1.0f );
-				if ( g_scene != nullptr )
-				{
-					const uint32_t entCount = static_cast<uint32_t>( g_scene->entities.size() );
-					for ( uint32_t e = 0; e < entCount; ++e )
-					{
-						const Entity* ent = g_scene->entities[ e ];
-						if ( ent->modelHdl.IsValid() == false ) {
-							continue;
-						}
-						if ( ModelLib().Find( ent->modelHdl ) == modelAsset ) {
-							transform = ent->GetMatrix();
-							break;
-						}
-					}
-				}
+				rtSurfaceInfo_t surfInfo{};
+				surfInfo.geometry = &geometry;
+				surfInfo.surface = &upload;
+				surfInfo.name = modelAsset->GetName().c_str();
 
-				blasCreateSurfaceInfo_t blasInfo{};
-				blasInfo.vb        = &geometry.vb;
-				blasInfo.ib        = &geometry.ib;
-				blasInfo.surface   = &upload;
-				blasInfo.transform = transform;
-
-				accelerationStructure->AddGeometry( cmdList, blasInfo );
+				accelerationStructure->AddGeometry( cmdList, surfInfo );
 			}
+#endif
 		}
 
 		modelAsset->CompleteUpload();
 	}
 
-	if( renderContext->config.rayTracingEnabled ) {
-		accelerationStructure->Build( cmdList );
+#ifdef USE_VULKAN_RTX
+	if( renderContext->config.rayTracingEnabled )
+	{
+		accelerationStructure->BuildPendingGeometry( cmdList );
+		accelerationStructure->Update( cmdList );
 	}
+#endif
 }

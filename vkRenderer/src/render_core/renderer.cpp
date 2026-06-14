@@ -44,6 +44,8 @@
 #define SHADER_STRUCTS_CPP
 #include "../../shaders/gpuShared.h"
 
+#include "../render_resources/gpuAccelerationStructure.h"
+
 extern imguiControls_t g_imguiControls;
 
 extern Scene* g_scene;
@@ -128,6 +130,15 @@ void Renderer::CommitModel( RenderView& view, const Entity& ent )
 		instance.diffuseIblId = ImageLib().Find( ent.diffuseIblMap )->Get().gpuImage->GetId();
 
 		surf.uploadId = ( model.uploadId + i );
+
+#ifdef USE_VULKAN_RTX
+		if ( renderContext.config.rayTracingEnabled  )
+		{
+			GpuAccelerationStructure* as = uploader.GetAccelerationStructure();
+			as->UpdateSurfaceInstance( surf.uploadId, instance.modelMatrix );
+		}
+#endif
+
 		surf.stencilBit = ent.outline ? OutlineStencilBit : 0;
 		surf.objectOffset = 0;
 		surf.flags = renderFlags;	
