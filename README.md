@@ -1,8 +1,8 @@
-# Extensa: Vulkan-Renderer
+#Xtensa: Vulkan-Renderer
 
 This is close to a deployable state, but I haven't really tested how well it works by just downloading and building...
 
-Calling this "Extensa" after Descartes Res Extensa--"a thing extended in space". I've always conceived of 3D rendering as giving shape to abstract logical worlds so felt the name fit.
+Named this "Xtensa" after Descartes Res Extensa--"a thing extended in space". Computer code, such as scene logic, represents a formal abstract world and renderers transform this into relatable space
 
 Work-in-progress. I've done a lot of work on architecture, but I've moved on to visual quality. The Sys-Core Gfx-Core repos are essential for this repo.
 
