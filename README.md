@@ -10,9 +10,9 @@ Features:
 * Depth-prepass
 * Shadow maps
 * PBR (Epic's precomputed BRDF, IBL, GGX)
-* Bloom
-* Luminance
-* Depth-of-Field
+* PBR Bloom
+* Auto-exposure
+* Bokeh Depth-of-Field
 * Transparents
 * Post-process
 * Multiple shaders (+ hot reloading)
