@@ -716,7 +716,7 @@ int ParseShaderObject( parseState_t& st, void* object, uint32_t offset )
 
 	GpuProgramLoader* loader = new GpuProgramLoader();
 	loader->SetSourcePath( "shaders/" );
-	loader->SetBinPath( "shaders_bin/" );
+	loader->SetBinPath( "shaders/bin/" );
 	loader->SetCompilerPath( "scripts/" );
 	shaderFileNames_t fileNames;
 	for ( uint32_t i = 0; i < shaderType_t::COUNT; ++i ) {

@@ -24,12 +24,12 @@ SCRIPT_DIR = Path( __file__ ).resolve().parent
 BIN_DIR    = SCRIPT_DIR.parent.parent / "external" / "vulkan" / "Bin"
 DXC        = str( BIN_DIR / "dxc.exe" )
 SHADER_DIR = str( SCRIPT_DIR.parent / "shaders" ) + os.sep
-OUT_DIR    = str( SCRIPT_DIR.parent / "shaders_bin" ) + os.sep
+OUT_DIR    = str( SCRIPT_DIR.parent / "shaders" / "bin" ) + os.sep
 LOG_FILE   = str( SCRIPT_DIR / "shader_build.log" )
 
 # Display paths — relative to script folder for clean log output
 SHADER_DIR_DISPLAY = ".." + os.sep + "shaders" + os.sep
-OUT_DIR_DISPLAY    = ".." + os.sep + "shaders_bin" + os.sep
+OUT_DIR_DISPLAY    = ".." + os.sep + "shaders" + os.sep + "bin" + os.sep
 
 FLAG_MAP = {
     "msaa"    : "USE_MSAA",
