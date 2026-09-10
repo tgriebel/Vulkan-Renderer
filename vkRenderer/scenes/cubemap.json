@@ -12,27 +12,27 @@
   ],
   "images": [
 	{
-	  "name": "debug_right.jpg",
+	  "name": "skymaps/debug_right.jpg",
 	  "type": "2D"
 	},
 	{
-	  "name": "debug_left.jpg",
+	  "name": "skymaps/debug_left.jpg",
 	  "type": "2D"
 	},
 	{
-	  "name": "debug_top.jpg",
+	  "name": "skymaps/debug_top.jpg",
 	  "type": "2D"
 	},
 	{
-	  "name": "debug_bottom.jpg",
+	  "name": "skymaps/debug_bottom.jpg",
 	  "type": "2D"
 	},
 	{
-	  "name": "debug_front.jpg",
+	  "name": "skymaps/debug_front.jpg",
 	  "type": "2D"
 	},
 	{
-	  "name": "debug_back.jpg",
+	  "name": "skymaps/debug_back.jpg",
 	  "type": "2D"
 	}
   ],
@@ -43,12 +43,12 @@
 			"DRAWPASS_SKYBOX": { "shader": "Sky", "perms": [""] }
 		},
 		"textures": {
-			"CUBE_RIGHT_MAP_SLOT": "debug_right.jpg",
-			"CUBE_LEFT_MAP_SLOT": "debug_left.jpg",
-			"CUBE_TOP_MAP_SLOT": "debug_top.jpg",
-			"CUBE_BOTTOM_MAP_SLOT": "debug_bottom.jpg",
-			"CUBE_FRONT_MAP_SLOT": "debug_front.jpg",
-			"CUBE_BACK_MAP_SLOT": "debug_back.jpg"
+			"CUBE_RIGHT_MAP_SLOT": "skymaps/debug_right.jpg",
+			"CUBE_LEFT_MAP_SLOT": "skymaps/debug_left.jpg",
+			"CUBE_TOP_MAP_SLOT": "skymaps/debug_top.jpg",
+			"CUBE_BOTTOM_MAP_SLOT": "skymaps/debug_bottom.jpg",
+			"CUBE_FRONT_MAP_SLOT": "skymaps/debug_front.jpg",
+			"CUBE_BACK_MAP_SLOT": "skymaps/debug_back.jpg"
 		}
 	}
   ],

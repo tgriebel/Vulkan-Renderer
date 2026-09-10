@@ -13,23 +13,23 @@
 	],
 	"images": [
 		{
-			"name": "checker.png",
+			"name": "textures/checker.png",
 			"type": "2D"
 		},
 		{
-			"name": "grid2.png",
+			"name": "textures/grid2.png",
 			"type": "2D"
 		},
 		{
-			"name": "white.jpg",
+			"name": "textures/white.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "black.jpg",
+			"name": "textures/black.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "skybox80s.png",
+			"name": "textures/skybox80s.png",
 			"type": "2D"
 		},
 		{
@@ -64,7 +64,7 @@
 				}
 			},
 			"textures": {
-				"GGX_ALBEDO_MAP_SLOT": "grid2.png"
+				"GGX_ALBEDO_MAP_SLOT": "textures/grid2.png"
 			}
 		},
 		{
@@ -193,27 +193,27 @@
 				}
 			},
 			"textures": {
-				"CUBE_RIGHT_MAP_SLOT": "skybox80s.png",
-				"CUBE_LEFT_MAP_SLOT": "skybox80s.png",
-				"CUBE_TOP_MAP_SLOT": "skybox80s.png",
-				"CUBE_BOTTOM_MAP_SLOT": "skybox80s.png",
-				"CUBE_FRONT_MAP_SLOT": "skybox80s.png",
-				"CUBE_BACK_MAP_SLOT": "skybox80s.png"
+				"CUBE_RIGHT_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_LEFT_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_TOP_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_BOTTOM_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_FRONT_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_BACK_MAP_SLOT": "textures/skybox80s.png"
 			}
 		}
 	],
 	"models": [
 		{
 			"name": "cube",
-			"model": "cube.obj"
+			"model": "models/cube/cube.obj"
 		},
 		{
 			"name": "axis",
-			"model": "axis.obj"
+			"model": "models/axis/axis.obj"
 		},
 		{
 			"name": "tubetv",
-			"model": "tubetv.obj"
+			"model": "models/tubetv/tubetv.obj"
 		},
 		{
 			"name": "grid",
@@ -304,7 +304,7 @@
 		},
 		{
 			"name": "sphere",
-			"model": "sphere.obj",
+			"model": "models/sphere/sphere.obj",
 			"hidden": "true"
 		}
 	]

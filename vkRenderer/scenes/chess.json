@@ -6,28 +6,28 @@
   "skyName": "chapel",
   "images": [
     {
-      "name": "checker.png",
+      "name": "textures/checker.png",
       "type": "2D"
     },
     {
-      "name": "sapeli.jpg",
+      "name": "textures/sapeli.jpg",
       "type": "2D"
     },
     {
-      "name": "white.jpg",
+      "name": "textures/white.jpg",
       "type": "2D"
     },
     {
-      "name": "black.jpg",
+      "name": "textures/black.jpg",
       "type": "2D"
     }
   ],
   "materials": [
     {
-      "name": "ChessWhite.mtl"
+      "name": "models/chess_materials/ChessWhite.mtl"
     },
     {
-      "name": "ChessBlack.mtl"
+      "name": "models/chess_materials/ChessBlack.mtl"
     },
     {
       "name": "WHITE_WOOD",
@@ -50,7 +50,7 @@
         }
       },
       "textures": {
-        "GGX_ALBEDO_MAP_SLOT": "sapeli.jpg"
+        "GGX_ALBEDO_MAP_SLOT": "textures/sapeli.jpg"
       }
     },
     {
@@ -82,56 +82,56 @@
   "models": [
     {
       "name": "cube",
-      "model": "cube.obj"
+      "model": "models/cube/cube.obj"
     },
     {
       "name": "diamond",
-      "model": "diamond.obj"
+      "model": "models/diamond/diamond.obj"
     },
     {
       "name": "pawn",
-      "model": "pawn.obj"
+      "model": "models/pawn/pawn.obj"
     },
     {
       "name": "rook",
-      "model": "rook.obj"
+      "model": "models/rook/rook.obj"
     },
     {
       "name": "knight",
-      "model": "knight.obj"
+      "model": "models/knight/knight.obj"
     },
     {
       "name": "bishop",
-      "model": "bishop.obj"
+      "model": "models/bishop/bishop.obj"
     },
     {
       "name": "king",
-      "model": "king.obj"
+      "model": "models/king/king.obj"
     },
     {
       "name": "queen",
-      "model": "queen.obj"
+      "model": "models/queen/queen.obj"
     },
     {
       "name": "plane",
-      "model": "plane.obj"
+      "model": "models/plane/plane.obj"
     },
     {
       "name": "axis",
-      "model": "axis.obj"
+      "model": "models/axis/axis.obj"
     }
   ],
   "camera": [ -17.0, -1.0, 12.0 ],
   "entities": [
     {
       "name": "chess_board",
-      "model": "chess_board.obj",
+      "model": "models/chess_board/chess_board.obj",
       "rotation": [ 0.0, 0.0, 0.0 ],
       "scale": [ 1.0, 1.0, 1.0 ]
     },
     {
       "name": "sphere",
-      "model": "sphere.obj",
+      "model": "models/sphere/sphere.obj",
       "hidden": "false",
       "xyz": [ 0.0, 0.0, 10.0 ]
     }

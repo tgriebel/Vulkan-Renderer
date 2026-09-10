@@ -94,8 +94,8 @@ const uint32_t	DefaultDisplayWidth				= 1280;
 const uint32_t	DefaultDisplayHeight			= 720;
 const bool		ForceDisableMSAA				= false;
 
-const std::string ModelPath = ".\\models\\";
-const std::string TexturePath = ".\\textures\\";
+const std::string ModelPath = ".\\assets\\";
+const std::string TexturePath = ".\\assets\\";
 const std::string CodeAssetPath = ".\\code_assets\\";
 const std::string ScreenshotPath = "..\\screenshots\\";
 const std::string ScenePath = ".\\scenes\\";

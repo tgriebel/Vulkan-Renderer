@@ -11,47 +11,47 @@
   "entities": [
 	{
 		"name" : "chess_board",
-		"model" : "chess_board.obj",
+		"model" : "models/chess_board/chess_board.obj",
 		"rotation": [ 0.0, 0.0, 0.0 ],
 		"scale": [ 1.0, 1.0, 1.0 ]
 	},
 	{
 		"name" : "ToyCar",
-		"model": "ToyCar.glb",
+		"model": "models/ToyCar/ToyCar.glb",
 		"xyz": [ 4.5, 3.5, 1.5 ],
 		"rotation": [ 180.0, 0.0, 180.0 ],
 		"scale": [ 0.01, 0.01, 0.01 ]
 	},
 	{
 		"name" : "DamagedHelmet",
-		"model": "DamagedHelmet.glb",
+		"model": "models/DamagedHelmet/DamagedHelmet.glb",
 		"xyz": [ -1.5, 3.5, 1.5 ],
 		"rotation": [ 180.0, 0.0, 180.0 ],
 		"scale": [ 1.0, 1.0, 1.0 ]
 	},
 	{
 		"name" : "AnisotropyBarnLamp",
-		"model" : "AnisotropyBarnLamp.glb",
+		"model" : "models/AnisotropyBarnLamp/AnisotropyBarnLamp.glb",
 		"rotation": [ 0.0, 0.0, -45.0 ],
 		"scale": [ 10.0, 10.0, 10.0 ]
 	},
 	{
 		"name" : "SheenChair",
-		"model" : "SheenChair.glb",
+		"model" : "models/SheenChair/SheenChair.glb",
 		"xyz": [ 0.0, -4.5, 0.0 ],
 		"rotation": [ 90.0, 0.0, -90.0 ],
 		"scale": [ 5.0, 5.0, 5.0 ]
 	},
 	{
 		"name" : "PotOfCoals",
-		"model": "PotOfCoals.glb",
+		"model": "models/PotOfCoals/PotOfCoals.glb",
 		"xyz": [ -3.5, 3.5, 0.0 ],
 		"rotation": [ 0.0, 0.0, -90.0 ],
 		"scale": [ 10.0, 10.0, 10.0 ]
 	},
 	{
 		"name" : "sphere",
-		"model" : "sphere.obj",
+		"model" : "models/sphere/sphere.obj",
 		"hidden": "false",
 		"xyz": [ 0.0, 0.0, 10.0 ]
 	}

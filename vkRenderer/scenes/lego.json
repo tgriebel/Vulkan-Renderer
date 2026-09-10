@@ -6,47 +6,47 @@
 	"skyName": "chapel",
 	"images": [
 		{
-			"name": "checker.png",
+			"name": "textures/checker.png",
 			"type": "2D"
 		},
 		{
-			"name": "sapeli.jpg",
+			"name": "textures/sapeli.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "white.jpg",
+			"name": "textures/white.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "black.jpg",
+			"name": "textures/black.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "grid.png",
+			"name": "textures/grid.png",
 			"type": "2D"
 		},
 		{
-			"name": "chapel_right.jpg",
+			"name": "skymaps/chapel_right.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "chapel_left.jpg",
+			"name": "skymaps/chapel_left.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "chapel_top.jpg",
+			"name": "skymaps/chapel_top.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "chapel_bottom.jpg",
+			"name": "skymaps/chapel_bottom.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "chapel_front.jpg",
+			"name": "skymaps/chapel_front.jpg",
 			"type": "2D"
 		},
 		{
-			"name": "chapel_back.jpg",
+			"name": "skymaps/chapel_back.jpg",
 			"type": "2D"
 		},
 		{
@@ -83,7 +83,7 @@
 				}
 			},
 			"textures": {
-				"GGX_ALBEDO_MAP_SLOT": "grid.png"
+				"GGX_ALBEDO_MAP_SLOT": "textures/grid.png"
 			}
 		},
 		{
@@ -95,27 +95,27 @@
 				}
 			},
 			"textures": {
-				"CUBE_RIGHT_MAP_SLOT": "skybox80s.png",
-				"CUBE_LEFT_MAP_SLOT": "skybox80s.png",
-				"CUBE_TOP_MAP_SLOT": "skybox80s.png",
-				"CUBE_BOTTOM_MAP_SLOT": "skybox80s.png",
-				"CUBE_FRONT_MAP_SLOT": "skybox80s.png",
-				"CUBE_BACK_MAP_SLOT": "skybox80s.png"
+				"CUBE_RIGHT_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_LEFT_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_TOP_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_BOTTOM_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_FRONT_MAP_SLOT": "textures/skybox80s.png",
+				"CUBE_BACK_MAP_SLOT": "textures/skybox80s.png"
 			}
 		}
 	],
 	"models": [
 		{
 			"name": "cube",
-			"model": "cube.obj"
+			"model": "models/cube/cube.obj"
 		},
 		{
 			"name": "plane",
-			"model": "plane.obj"
+			"model": "models/plane/plane.obj"
 		},
 		{
 			"name": "axis",
-			"model": "axis.obj"
+			"model": "models/axis/axis.obj"
 		},
 		{
 			"name": "grid",
@@ -138,14 +138,14 @@
 		},
 		{
 			"name": "spyrius",
-			"model": "spyrius_lego.obj",
+			"model": "models/spyrius_lego/spyrius_lego.obj",
 			"xyz": [ 0.0, 0.0, 0.0 ],
 			"rotation": [ 0.0, 0.0, 0.0 ],
 			"scale": [ 0.01, 0.01, 0.01 ]
 		},
 		{
 			"name": "sphere",
-			"model": "sphere.obj",
+			"model": "models/sphere/sphere.obj",
 			"hidden": "true"
 		}
 	]

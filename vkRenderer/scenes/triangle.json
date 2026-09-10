@@ -10,7 +10,7 @@
   ],
   "images": [
     {
-	  "name": "checker.png",
+	  "name": "textures/checker.png",
 	  "type": "2D"
 	},
 	{
@@ -34,14 +34,14 @@
 		  "DRAWPASS_DEBUG_WIREFRAME": { "shader": "Debug", "perms": [""] }
       },
 	  "textures": {
-		  "GGX_ALBEDO_MAP_SLOT" : "grid2.png"
+		  "GGX_ALBEDO_MAP_SLOT" : "textures/grid2.png"
 	  }
     }
   ],
   "models": [
   	{
       "name" : "cube",
-      "model" : "cube.obj"
+      "model" : "models/cube/cube.obj"
     }
   ],
   "entities": [

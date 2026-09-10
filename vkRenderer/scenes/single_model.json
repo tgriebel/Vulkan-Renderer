@@ -11,7 +11,7 @@
   "entities": [
 	{
 		"name" : "sphere",
-		"model" : "sphere.obj",
+		"model" : "models/sphere/sphere.obj",
 		"hidden": "false",
 		"xyz": [ 0.0, 0.0, 10.0 ]
 	}

@@ -1,0 +1,17 @@
+# Blender MTL File
+# Material Count: 1
+
+newmtl ChessBlack
+Ns 650.249991
+Ka 1.000000 1.000000 1.000000
+Kd 0.100000 0.100000 0.100000
+Ks 0.363636 0.363636 0.363636
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+Pr 0.6
+Pm 0.0
+map_Kd models/chess_materials/NORUS-Diffuse.jpg
+map_Bump models/chess_materials/NORUS-Normal.jpg
+map_Pr NORUS-Bump.jpg
