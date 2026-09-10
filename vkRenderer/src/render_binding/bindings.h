@@ -45,6 +45,9 @@ BINDING( depthShadowSampler,			IMAGE_SAMPLER,		1,						BIND_STATE_ALL_GFX );
 // Ray-tracing Resources
 BINDING( tlas,							ACCELERATION_STRUCTURE,	1,					BIND_STATE_ALL_RTX );
 BINDING( rtOutputImage,					WRITE_IMAGE_BUFFER,		1,					BIND_STATE_RAYGEN );
+BINDING( rtVertexBuffer,				READ_BUFFER,			1,					BIND_STATE_ALL_RTX );
+BINDING( rtIndexBuffer,					READ_BUFFER,			1,					BIND_STATE_ALL_RTX );
+BINDING( rtSurfaceInfos,				READ_BUFFER,			1,					BIND_STATE_ALL_RTX );
 
 static const ShaderBinding g_globalBindings[] =
 {
@@ -111,5 +114,8 @@ static const ShaderBinding g_rtBindings[] =
 {
 	BINDING_NAME( tlas ),
 	BINDING_NAME( rtOutputImage ),
+	BINDING_NAME( rtVertexBuffer ),
+	BINDING_NAME( rtIndexBuffer ),
+	BINDING_NAME( rtSurfaceInfos ),
 };
 const uint64_t bindset_rayTracing = Hash( "bindset_rayTracing" );

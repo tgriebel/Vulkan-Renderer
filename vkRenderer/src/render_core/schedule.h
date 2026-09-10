@@ -55,7 +55,7 @@ struct availableTasks_t
 	SubScheduleTask*	postProcessChain				= nullptr;
 };
 
-void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, TaskSchedule* schedule );
+void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resourceContext, RenderViewContext* viewContext, const GeometryContext* geometry, TaskSchedule* schedule );
 
 #if defined( USE_IMGUI )
 void DrawScheduleDebugMenu( TaskSchedule* schedule );

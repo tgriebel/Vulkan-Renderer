@@ -431,7 +431,7 @@ SubScheduleTask* BuildDiffuseIblSchedule( const renderConfig_t& config, RenderCo
 }
 
 
-void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, TaskSchedule* schedule )
+void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderContext, ResourceContext* resources, RenderViewContext* viewContext, const GeometryContext* geometry, TaskSchedule* schedule )
 {
 	SCOPED_TIMER_PRINT( ScheduleBuild, MILLISECOND )
 
@@ -1091,6 +1091,7 @@ void BuildSceneSchedule( const renderConfig_t& config, RenderContext* renderCont
 		rtInfo.image = resources->rtOutputImage;
 		rtInfo.bindSetId = bindset_rayTracing;
 		rtInfo.tlas = resources->tlas;
+		rtInfo.geometry = geometry;
 		rtInfo.rtOutputImage = resources->rtOutputImage;
 		rtInfo.viewId = viewContext->renderViews[ 0 ]->GetViewBufferUploadId();
 		rtInfo.constants = nullptr;

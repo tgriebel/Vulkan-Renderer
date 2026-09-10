@@ -53,6 +53,11 @@ void GpuAccelerationStructure::AddGeometry( CommandList* cmdList, const rtSurfac
 	rangeInfo.transformOffset = 0;
 
 	m_rangeInfo.push_back( rangeInfo );
+
+	gpuRtSurface_t surfInfoEntry{};
+	surfInfoEntry.vertexOffset = surfaceInfo.surface->vertexOffset;
+	surfInfoEntry.firstIndex   = surfaceInfo.surface->firstIndex;
+	m_pendingSurfaceInfos.push_back( surfInfoEntry );
 }
 
 
@@ -70,10 +75,14 @@ void GpuAccelerationStructure::Cleanup()
 		}
 	}
 	m_blasEntries.clear();
+	m_cpuSurfaceInfos.clear();
 	m_pendingInstances.clear();
 
 	if ( m_blasScratch.GetMaxSize() > 0 ) {
 		m_blasScratch.Destroy();
+	}
+	if ( m_rtSurfaceInfoBuf.GetMaxSize() > 0 ) {
+		m_rtSurfaceInfoBuf.Destroy();
 	}
 
 	if ( m_tlas != VK_NULL_HANDLE )
@@ -204,6 +213,21 @@ void GpuAccelerationStructure::BuildPendingGeometry( CommandList* cmdList )
 			VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
 			0, 1, &blasBarrier, 0, nullptr, 0, nullptr );
 	}
+	// Commit pending surface infos and upload the full array to the GPU buffer.
+	// Recreate the buffer if the element count changed (incremental BLAS adds).
+	for ( const gpuRtSurface_t& si : m_pendingSurfaceInfos ) {
+		m_cpuSurfaceInfos.push_back( si );
+	}
+	m_pendingSurfaceInfos.clear();
+
+	if ( m_rtSurfaceInfoBuf.GetMaxSize() > 0 ) {
+		m_rtSurfaceInfoBuf.Destroy();
+	}
+	const uint32_t surfCount = static_cast<uint32_t>( m_cpuSurfaceInfos.size() );
+	m_rtSurfaceInfoBuf.Create( m_name, swapBuffering_t::SINGLE_FRAME, m_lifetime,
+		surfCount, sizeof( gpuRtSurface_t ), bufferType_t::STORAGE );
+	m_rtSurfaceInfoBuf.CopyData( m_cpuSurfaceInfos.data(), surfCount * sizeof( gpuRtSurface_t ) );
+
 	m_geometry.clear();
 	m_rangeInfo.clear();
 }

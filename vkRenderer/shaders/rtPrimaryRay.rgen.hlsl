@@ -8,11 +8,6 @@ RT_ACCELERATION_STRUCTURE( 1, 0, tlas )
 RT_OUTPUT( 1, 1, rtOutput )
 RT_PUSH_CONSTANTS
 
-struct rayPayload_t
-{
-    float4 color;
-};
-
 [shader( "raygeneration" )]
 void RayGen()
 {
@@ -30,21 +25,21 @@ void RayGen()
     const float3 worldDir = normalize( mul( camDir, (float3x3)view.viewMat ) );
 
     RayDesc ray;
-    ray.Origin = view.viewOrigin;
+    ray.Origin    = view.viewOrigin;
     ray.Direction = worldDir;
-    ray.TMin = 0.001f;
-    ray.TMax = 10000.0f;
+    ray.TMin      = 0.001f;
+    ray.TMax      = 10000.0f;
 
-    rayPayload_t payload;
+    hitPayload_t payload;
     payload.color = float4( 0.0f, 0.0f, 0.0f, 1.0f );
 
     TraceRay(
         tlas,
         RAY_FLAG_NONE,
-        0xFF, // instance mask — all instances
-        0, // hit group index
-        0, // hit group stride
-        0, // miss shader index
+        0xFF,   // instance mask — all instances
+        0,      // hit group index
+        0,      // hit group stride
+        0,      // miss shader index
         ray,
         payload );
 

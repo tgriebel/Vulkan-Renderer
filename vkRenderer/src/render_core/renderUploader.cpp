@@ -548,7 +548,7 @@ void RenderUploader::UploadModelsToGPU( CommandList* cmdList )
 				vertexStream.resize( vertexCount );
 				for( uint32_t vIx = 0; vIx < vertexCount; ++vIx )
 				{
-					vertexStream[ vIx ].inPosition = Trunc<4, 1>( surf.vertices[ vIx ].pos );
+					vertexStream[ vIx ].inPosition = surf.vertices[ vIx ].pos;
 					vertexStream[ vIx ].inColor = ColorToVector( surf.vertices[ vIx ].color );
 					vertexStream[ vIx ].inNormal = surf.vertices[ vIx ].normal;
 					vertexStream[ vIx ].inTangent = surf.vertices[ vIx ].tangent;

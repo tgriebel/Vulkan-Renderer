@@ -24,6 +24,7 @@ void RayTracingTask::Init( const rayTracingTaskCreateInfo_t& info )
 	m_name = info.name;
 	m_image = info.image;
 	m_tlas = info.tlas;
+	m_geometry = info.geometry;
 	m_rtOutputImage = info.rtOutputImage;
 	m_viewId = info.viewId;
 
@@ -58,6 +59,13 @@ void RayTracingTask::FrameBegin()
 	}
 	if ( m_rtOutputImage != nullptr ) {
 		m_parms->Bind( bind_rtOutputImage, ShaderAttachment( m_rtOutputImage ) );
+	}
+	if ( m_geometry != nullptr ) {
+		m_parms->Bind( bind_rtVertexBuffer,  ShaderAttachment( &m_geometry->vb ) );
+		m_parms->Bind( bind_rtIndexBuffer,   ShaderAttachment( &m_geometry->ib ) );
+	}
+	if ( m_tlas != nullptr && m_tlas->GetSurfaceInfoBuffer()->GetMaxSize() > 0 ) {
+		m_parms->Bind( bind_rtSurfaceInfos, ShaderAttachment( m_tlas->GetSurfaceInfoBuffer() ) );
 	}
 #endif
 	GpuTask::OnFrameBegin();

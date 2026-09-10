@@ -244,15 +244,37 @@ struct gpuPushConstants_t
 };
 
 
+struct gpuRtSurface_t
+{
+	uint	vertexOffset;
+	uint	firstIndex;
+	uint	pad0;
+	uint	pad1;
+};
+
+
 struct vsInput_t
 { 
-	BIND_SLOT( 0 ) float3 inPosition	SEMANTIC( POSITION );
+	BIND_SLOT( 0 ) float4 inPosition	SEMANTIC( POSITION );
 	BIND_SLOT( 1 ) float4 inColor		SEMANTIC( COLOR0 );
 	BIND_SLOT( 2 ) float3 inNormal		SEMANTIC( NORMAL );
 	BIND_SLOT( 3 ) float3 inTangent		SEMANTIC( TANGENT );
 	BIND_SLOT( 4 ) float3 inBitangent	SEMANTIC( BINORMAL );
 	BIND_SLOT( 5 ) float2 uv0			SEMANTIC( TEXCOORD0 );
 	BIND_SLOT( 6 ) float2 uv1			SEMANTIC( TEXCOORD1 );
+};
+
+
+struct rtVertex_t
+{
+	float4	position;	// offset  0, 12 bytes
+	float4	color;		// offset 12, 16 bytes
+	float3	normal;		// offset 28, 12 bytes
+	float3	tangent;	// offset 40, 12 bytes
+	float3	bitangent;	// offset 52, 12 bytes
+	float2	uv0;		// offset 64,  8 bytes
+	float2	uv1;		// offset 72,  8 bytes
+	// stride: 80 bytes
 };
 
 

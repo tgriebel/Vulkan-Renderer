@@ -9,5 +9,5 @@ RT_PUSH_CONSTANTS
 [shader( "miss" )]
 void miss_main( inout hitPayload_t payload )
 {
-    payload.color = float3( 0.5, 0.5, 0.5 );
+    payload.color = float4( 0.5f, 0.5f, 0.5f, 1.0f );
 }

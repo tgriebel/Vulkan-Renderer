@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "../render_core/renderer.h"
+#include "../render_core/renderUploader.h"
 #include "../render_resources/imageView.h"
 #include "../render_resources/gpuAccelerationStructure.h"
 
@@ -23,6 +24,7 @@ struct rayTracingTaskCreateInfo_t
 	uint64_t					viewId;				// View id
 
 	const GpuAccelerationStructure* tlas;			// Scene TLAS
+	const GeometryContext*		geometry;			// Scene VB/IB for closest-hit attribute fetch
 	const Image*				rtOutputImage;		// Storage image written by the rgen shader
 
 	const void*					constants;			// Optional, Custom shader constants pushed at execute time
@@ -57,6 +59,7 @@ private:
 	uint64_t						m_viewId;
 
 	const GpuAccelerationStructure*	m_tlas = nullptr;
+	const GeometryContext*			m_geometry = nullptr;
 	const Image*					m_rtOutputImage = nullptr;
 
 	void Init( const rayTracingTaskCreateInfo_t& info );

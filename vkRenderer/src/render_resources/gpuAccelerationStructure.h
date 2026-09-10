@@ -37,12 +37,15 @@ private:
 	// Pending geometry accumulated by AddGeometry(), consumed by BuildPendingGeometry()
 	std::vector<VkAccelerationStructureGeometryKHR>			m_geometry;
 	std::vector<VkAccelerationStructureBuildRangeInfoKHR>	m_rangeInfo;
+	std::vector<gpuRtSurface_t>								m_pendingSurfaceInfos;	// Parallel to m_geometry
 
 	// Per-frame TLAS instance list, populated by UpdateSurfaceInstance(), consumed by Update()
 	std::vector<instanceData_t>		m_pendingInstances;
 
 	std::vector<blasEntry_t>		m_blasEntries;
+	std::vector<gpuRtSurface_t>		m_cpuSurfaceInfos;	// CPU mirror, one entry per blasEntry; uploaded to m_rtSurfaceInfoBuf
 	GpuBuffer						m_blasScratch;		// Shared scratch for the current build batch only
+	GpuBuffer						m_rtSurfaceInfoBuf;	// Per-BLAS vertex/index offsets for closest-hit attribute fetch
 
 	GpuBuffer						m_tlasInstanceBuf;	// GPU instance buffer
 	GpuBuffer						m_tlasStorage;
@@ -68,6 +71,7 @@ public:
 	VkDeviceAddress				GetBlasDeviceAddress( uint32_t index ) const;
 	uint32_t					GetBlasCount() const { return static_cast<uint32_t>( m_blasEntries.size() ); }
 	bool						IsBuilt() const { return m_tlas != VK_NULL_HANDLE; }
+	const GpuBuffer*			GetSurfaceInfoBuffer() const { return &m_rtSurfaceInfoBuf; }
 
 	VkDeviceAddress				GetDeviceAddress() const;
 	VkAccelerationStructureKHR	GetVkObject() const;

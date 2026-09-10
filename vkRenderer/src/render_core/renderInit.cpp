@@ -319,7 +319,7 @@ void Renderer::BuildSchedule( TaskSchedule* schedule )
 	viewContext.shadowViews = &shadowViews[ 0 ];
 	viewContext.view2Ds = &view2Ds[ 0 ];
 
-	BuildSceneSchedule( renderContext.config, &renderContext, &resources, &viewContext, schedule );
+	BuildSceneSchedule( renderContext.config, &renderContext, &resources, &viewContext, uploader.GetGeometry(), schedule );
 }
 
 
