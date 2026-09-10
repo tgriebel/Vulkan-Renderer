@@ -62,3 +62,7 @@ vkRenderer/models/lion-crushing-a-serpent/textures/sp.jpg
 .claude/
 *.vsidx
 /.vs
+
+# Vendored Vulkan SDK subset (needed so builds match across machines)
+!external/vulkan/Lib/vulkan-1.lib
+!external/vulkan/Bin/*.exe
