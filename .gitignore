@@ -66,3 +66,6 @@ vkRenderer/models/lion-crushing-a-serpent/textures/sp.jpg
 # Vendored Vulkan SDK subset (needed so builds match across machines)
 !external/vulkan/Lib/vulkan-1.lib
 !external/vulkan/Bin/*.exe
+
+# Vendored GLFW libs (same reason)
+!external/glfw/lib-vc2019/*.lib
