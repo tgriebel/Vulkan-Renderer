@@ -14,8 +14,8 @@
 #include "src/scene/codeAssets.h"
 #include "src/app/cvar.h"
 
-#include "scenes/chessScene.h"
-#include "scenes/nesScene.h"
+#include "scenes/chess/chessScene.h"
+#include "scenes/emu/nesScene.h"
 
 #include "src/app/imguiInterface.h"
 
@@ -27,7 +27,7 @@ Window								g_window;
 using namespace SysCore;
 
 
-static const char* sceneFile = "chess.json";
+static const char* sceneFile = "chess/chess.json";
 
 #if defined( USE_IMGUI )
 imguiControls_t g_imguiControls;
@@ -289,11 +289,9 @@ int main( int argc, char* argv[] )
 				std::vector<const char*> filters;
 				filters.push_back( "*.json" );
 				std::string path = g_window.OpenFileDialog( "Open Scene", filters, "Scene files" );
-				
-				std::string dir;
-				std::string file;
-				SplitPath( path, dir, file );
-		
+
+				const std::string file = SysCore::MakeRelative( path, ScenePath );
+
 				ShutdownScene( g_scene );
 				delete g_scene;
 				g_scene = nullptr;

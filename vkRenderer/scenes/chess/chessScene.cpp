@@ -1,5 +1,5 @@
 #include "chessScene.h"
-#include "../src/globals/assetDefs.h"
+#include "../../src/globals/assetDefs.h"
 
 extern Window			g_window;
 
@@ -76,7 +76,7 @@ void ChessScene::Init()
 	const int piecesNum = 16;
 
 	gameConfig_t cfg;
-	LoadConfig( "scenes/chessCfg/default_board.txt", cfg );
+	LoadConfig( "scenes/chess/chessCfg/default_board.txt", cfg );
 	chessEngine.Init( cfg );
 	//board.SetEventCallback( &ProcessEvent );
 

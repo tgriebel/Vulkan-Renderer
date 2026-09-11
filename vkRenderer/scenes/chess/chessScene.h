@@ -1,16 +1,16 @@
 #pragma once
-#include "../src/globals/common.h"
-#include "../src/globals/render_util.h"
-#include "../src/io/io.h"
-#include "../src/app/window.h"
-#include "../src/app/input.h"
+#include "../../src/globals/common.h"
+#include "../../src/globals/render_util.h"
+#include "../../src/io/io.h"
+#include "../../src/app/window.h"
+#include "../../src/app/input.h"
 #include "Chess.h"
 #include <syscore/timer.h>
-#include "../src/scene/entity.h"
-#include "../src/scene/sceneBase.h"
-#include "../src/asset_types/gpuProgram.h"
-#include "../src/asset_types/model.h"
-#include "../src/io/io.h"
+#include "../../src/scene/entity.h"
+#include "../../src/scene/sceneBase.h"
+#include "../../src/asset_types/gpuProgram.h"
+#include "../../src/asset_types/model.h"
+#include "../../src/io/io.h"
 #include <algorithm>
 
 class PieceEntity : public Entity {

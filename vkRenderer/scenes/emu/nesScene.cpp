@@ -1,6 +1,6 @@
 #include "nesScene.h"
-#include "../src/app/window.h"
-#include "../src/globals/assetDefs.h"
+#include "../../src/app/window.h"
+#include "../../src/globals/assetDefs.h"
 
 #include <windows.h> 
 #include <stdio.h>
@@ -114,7 +114,7 @@ static inline void ThreadRun( Tomtendo::Emulator* emu, const char* bufferName )
 void NesScene::Init()
 {
 	// Get a handle to the DLL module.
-	hinstLib = LoadLibrary( TEXT( "scenes/wintendoCore.dll" ) );
+	hinstLib = LoadLibrary( TEXT( "scenes/emu/wintendoCore.dll" ) );
 
 	if ( hinstLib == nullptr ) {
 		return;
@@ -123,10 +123,10 @@ void NesScene::Init()
 
 	std::wstring filePaths[ EmuInstances ] =
 	{
-		L"scenes/Super Mario Bros.nes",
-		L"scenes/Super C.nes",
-		L"scenes/Ninja Gaiden.nes",
-		L"scenes/Metroid.nes"
+		L"scenes/emu/roms/Super Mario Bros.nes",
+		L"scenes/emu/roms/Super C.nes",
+		L"scenes/emu/roms/Ninja Gaiden.nes",
+		L"scenes/emu/roms/Metroid.nes"
 	};
 
 	Tomtendo::LoadDllInterface( &tomtendo, hinstLib );
