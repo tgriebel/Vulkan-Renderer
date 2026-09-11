@@ -3,6 +3,7 @@
 *.db
 *.ipch
 *.obj
+!vkRenderer/assets/models/**/*.obj
 *.pdb
 *.recipe
 *.pch
