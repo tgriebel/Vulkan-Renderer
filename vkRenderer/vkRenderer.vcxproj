@@ -196,7 +196,7 @@
     <ClInclude Include="..\external\tiny_obj_loader.h" />
     <ClInclude Include="scenes\chess\chessScene.h" />
     <ClInclude Include="scenes\emu\nesScene.h" />
-    <ClInclude Include="scenes\sceneParser.h" />
+    <ClInclude Include="src\scene\sceneParser.h" />
     <ClInclude Include="scenes\emu\tomtendoCore.h" />
     <FxCompile Include="shaders\bilateralBlur.ps.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -390,7 +390,7 @@
     <ClCompile Include="..\external\tinyfiledialogs\tinyfiledialogs.c" />
     <ClCompile Include="scenes\chess\chessScene.cpp" />
     <ClCompile Include="scenes\emu\nesScene.cpp" />
-    <ClCompile Include="scenes\sceneParser.cpp" />
+    <ClCompile Include="src\scene\sceneParser.cpp" />
     <ClCompile Include="src\app\appScene.cpp" />
     <ClCompile Include="src\asset_types\gpuProgram.cpp" />
     <ClCompile Include="src\asset_types\material.cpp" />

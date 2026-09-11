@@ -9,7 +9,7 @@
 #include "src/globals/renderConstants.h"
 #include "src/render_core/renderer.h"
 #include "src/render_core/schedule.h"
-#include "scenes/sceneParser.h"
+#include "src/scene/sceneParser.h"
 #include "src/scene/assetBaker.h"
 #include "src/scene/codeAssets.h"
 #include "src/app/cvar.h"

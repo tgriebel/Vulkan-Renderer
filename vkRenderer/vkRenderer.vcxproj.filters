@@ -155,7 +155,7 @@
     <ClCompile Include="src\scene\sceneBase.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="scenes\sceneParser.cpp">
+    <ClCompile Include="src\scene\sceneParser.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\scene\entity.cpp">
@@ -406,7 +406,7 @@
     <ClInclude Include="src\scene\sceneBase.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="scenes\sceneParser.h">
+    <ClInclude Include="src\scene\sceneParser.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\scene\entity.h">

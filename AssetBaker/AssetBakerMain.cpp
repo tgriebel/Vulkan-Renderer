@@ -19,7 +19,7 @@
 #include "../vkRenderer/src/asset_types/material.h"
 #include "../vkRenderer/src/asset_types/image.h"
 #include "../vkRenderer/src/asset_types/gpuProgram.h"
-#include "../vkRenderer/scenes/sceneParser.h"
+#include "../vkRenderer/src/scene/sceneParser.h"
 
 // Globals expected by shared translation units (asset libraries, scene parser, etc.)
 AssetManager	g_assets;

@@ -3,16 +3,16 @@
 #include <algorithm>
 #include <string>
 
-#include "../src/globals/common.h"
-#include "../src/globals/render_util.h"
-#include "../src/render_core/gpuImage.h"
-#include "../src/scene/entity.h"
-#include "../src/scene/sceneBase.h"
-#include "../src/asset_types/gpuProgram.h"
-#include "../src/asset_types/model.h"
-#include "../src/asset_types/material.h"
+#include "../globals/common.h"
+#include "../globals/render_util.h"
+#include "../render_core/gpuImage.h"
+#include "entity.h"
+#include "sceneBase.h"
+#include "../asset_types/gpuProgram.h"
+#include "../asset_types/model.h"
+#include "../asset_types/material.h"
 
-#include "../src/io/io.h"
+#include "../io/io.h"
 
 //#define JSMN_PARENT_LINKS
 #include <SysCore/jsmn.h>

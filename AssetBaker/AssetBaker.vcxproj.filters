@@ -18,7 +18,7 @@
     <ClCompile Include="AssetBakerMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\vkRenderer\scenes\sceneParser.cpp">
+    <ClCompile Include="..\vkRenderer\src\scene\sceneParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\vkRenderer\src\scene\assetBaker.cpp">

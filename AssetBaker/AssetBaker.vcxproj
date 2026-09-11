@@ -158,7 +158,7 @@
     <ClCompile Include="..\vkRenderer\src\render_core\gpuImage.cpp" />
     <ClCompile Include="..\vkRenderer\src\render_core\renderResource.cpp" />
     <ClCompile Include="AssetBakerMain.cpp" />
-    <ClCompile Include="..\vkRenderer\scenes\sceneParser.cpp" />
+    <ClCompile Include="..\vkRenderer\src\scene\sceneParser.cpp" />
     <ClCompile Include="..\vkRenderer\src\scene\assetBaker.cpp" />
     <ClCompile Include="..\vkRenderer\src\scene\codeAssets.cpp" />
     <ClCompile Include="..\vkRenderer\src\scene\sceneBase.cpp" />
