@@ -173,7 +173,7 @@
     <ClCompile Include="src\asset_types\image.cpp">
       <Filter>Asset Classes</Filter>
     </ClCompile>
-    <ClCompile Include="appMain.cpp">
+    <ClCompile Include="src\app\appMain.cpp">
       <Filter>app</Filter>
     </ClCompile>
     <ClCompile Include="src\render_resources\gpuBuffer.cpp">

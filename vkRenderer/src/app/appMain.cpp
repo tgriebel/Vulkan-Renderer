@@ -1,23 +1,23 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #include <thread>
-#include "src/globals/common.h"
-#include "src/globals/assetDefs.h"
+#include "../globals/common.h"
+#include "../globals/assetDefs.h"
 #include <syscore/systemUtils.h>
-#include "src/scene/sceneBase.h"
-#include "src/app/window.h"
-#include "src/globals/renderConstants.h"
-#include "src/render_core/renderer.h"
-#include "src/render_core/schedule.h"
-#include "src/scene/sceneParser.h"
-#include "src/scene/assetBaker.h"
-#include "src/scene/codeAssets.h"
-#include "src/app/cvar.h"
+#include "../scene/sceneBase.h"
+#include "window.h"
+#include "../globals/renderConstants.h"
+#include "../render_core/renderer.h"
+#include "../render_core/schedule.h"
+#include "../scene/sceneParser.h"
+#include "../scene/assetBaker.h"
+#include "../scene/codeAssets.h"
+#include "cvar.h"
 
-#include "scenes/chess/chessScene.h"
-#include "scenes/emu/nesScene.h"
+#include "../../scenes/chess/chessScene.h"
+#include "../../scenes/emu/nesScene.h"
 
-#include "src/app/imguiInterface.h"
+#include "imguiInterface.h"
 
 AssetManager						g_assets;
 Scene*								g_scene;
