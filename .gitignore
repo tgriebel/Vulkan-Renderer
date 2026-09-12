@@ -65,14 +65,9 @@ vkRenderer/models/lion-crushing-a-serpent/textures/sp.jpg
 *.vsidx
 /.vs
 
-# Vendored SDK tools under external/ (*.exe is blanket-ignored above, so
-# build tools like dxc/glslc need an explicit exception)
 !external/vulkan/Bin/*.exe
-
-# Vendored/checked-in dependency libs: everything under external/ (Vulkan,
-# GLFW, etc.) and the prebuilt scene deps in vkRenderer/scenes/libs (Chess,
-# ChessDebug) are meant to be tracked, even though *.lib is ignored
-# everywhere else. This deliberately does NOT touch x64/Debug, x64/Release,
-# or vkRenderer/x64/* — those are real build output and should stay ignored.
 !external/**/*.lib
-!vkRenderer/scenes/libs/*.lib
+!vkRenderer/scenes/chess/libs/*.lib
+
+*.user
+vkRenderer/LocalConfig.ini

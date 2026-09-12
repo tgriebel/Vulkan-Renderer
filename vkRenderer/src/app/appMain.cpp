@@ -103,7 +103,7 @@ void ParseCmdArgs( const int argc, char* argv[] )
 }
 
 
-void ParseConfig( std::string& fileName )
+void ParseConfig( const std::string& fileName )
 {
 	std::ifstream file;
 
@@ -164,6 +164,12 @@ int main( int argc, char* argv[] )
 	g_assets.RegisterLib<GpuProgram>( "Gpu Program" );
 
 	CreateCodeAssets(); // TODO: Check render dependencies, may need to move into render init?
+
+	const std::string localConfigFile = "LocalConfig.ini";
+	if ( SysCore::FileExists( localConfigFile ) == false ) {
+		SysCore::CloneFile( "DefaultConfig.ini", localConfigFile );
+	}
+	ParseConfig( localConfigFile );
 
 	for( int32_t i = 1; i < argc; ++i )
 	{
