@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31005.135
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer", "vkRenderer\vkRenderer.vcxproj", "{8596C8E2-5174-4549-90DD-A8A7250C1CBC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "renderer", "xtensa\xtensa.vcxproj", "{8596C8E2-5174-4549-90DD-A8A7250C1CBC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GfxCore", "external\GfxCore\GfxCore.vcxproj", "{3DE9A00C-B04B-43AB-943D-1973C47DECE3}"
 EndProject

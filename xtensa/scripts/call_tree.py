@@ -11,9 +11,9 @@ Usage:
     --cycles    Only report circular call chains.
     --no-ext    Hide calls to functions not defined in the project.
     --file FILE Limit the root search to functions defined in FILE
-                (relative to vkRenderer/).  Calls are still resolved globally.
+                (relative to xtensa/).  Calls are still resolved globally.
 
-Scans all .h, .cpp, .hlsl files under vkRenderer/src/ and vkRenderer/shaders/.
+Scans all .h, .cpp, .hlsl files under xtensa/src/ and xtensa/shaders/.
 Functions defined in multiple files (overloads / header guards) keep the first
 occurrence found.  Method calls (obj.Foo(), ptr->Bar()) are excluded.
 """
@@ -462,7 +462,7 @@ def main():
                         help="Hide calls to unresolved / external functions")
     parser.add_argument("--file", metavar="FILE",
                         help="Root candidates limited to functions defined in FILE "
-                             "(relative to vkRenderer/).  Calls still resolved globally.")
+                             "(relative to xtensa/).  Calls still resolved globally.")
     args = parser.parse_args()
 
     show_external = not args.no_ext

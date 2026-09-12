@@ -84,13 +84,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)vkRenderer\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)xtensa\</LocalDebuggerWorkingDirectory>
     <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\external\GfxCore;..\external;$(IncludePath)</IncludePath>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)vkRenderer\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)xtensa\</LocalDebuggerWorkingDirectory>
     <IntDir>$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -154,23 +154,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\vkRenderer\src\asset_types\image.cpp" />
-    <ClCompile Include="..\vkRenderer\src\render_core\gpuImage.cpp" />
-    <ClCompile Include="..\vkRenderer\src\render_core\renderResource.cpp" />
+    <ClCompile Include="..\xtensa\src\asset_types\image.cpp" />
+    <ClCompile Include="..\xtensa\src\render_core\gpuImage.cpp" />
+    <ClCompile Include="..\xtensa\src\render_core\renderResource.cpp" />
     <ClCompile Include="AssetBakerMain.cpp" />
-    <ClCompile Include="..\vkRenderer\src\scene\sceneParser.cpp" />
-    <ClCompile Include="..\vkRenderer\src\scene\assetBaker.cpp" />
-    <ClCompile Include="..\vkRenderer\src\scene\codeAssets.cpp" />
-    <ClCompile Include="..\vkRenderer\src\scene\sceneBase.cpp" />
-    <ClCompile Include="..\vkRenderer\src\scene\entity.cpp" />
-    <ClCompile Include="..\vkRenderer\src\scene\camera.cpp" />
-    <ClCompile Include="..\vkRenderer\src\asset_types\model.cpp" />
-    <ClCompile Include="..\vkRenderer\src\asset_types\material.cpp" />
-    <ClCompile Include="..\vkRenderer\src\asset_types\gpuProgram.cpp" />
-    <ClCompile Include="..\vkRenderer\src\io\io.cpp" />
-    <ClCompile Include="..\vkRenderer\src\io\serializeClasses.cpp" />
-    <ClCompile Include="..\vkRenderer\src\globals\render_util.cpp" />
-    <ClCompile Include="..\vkRenderer\src\app\cvar.cpp" />
+    <ClCompile Include="..\xtensa\src\scene\sceneParser.cpp" />
+    <ClCompile Include="..\xtensa\src\scene\assetBaker.cpp" />
+    <ClCompile Include="..\xtensa\src\scene\codeAssets.cpp" />
+    <ClCompile Include="..\xtensa\src\scene\sceneBase.cpp" />
+    <ClCompile Include="..\xtensa\src\scene\entity.cpp" />
+    <ClCompile Include="..\xtensa\src\scene\camera.cpp" />
+    <ClCompile Include="..\xtensa\src\asset_types\model.cpp" />
+    <ClCompile Include="..\xtensa\src\asset_types\material.cpp" />
+    <ClCompile Include="..\xtensa\src\asset_types\gpuProgram.cpp" />
+    <ClCompile Include="..\xtensa\src\io\io.cpp" />
+    <ClCompile Include="..\xtensa\src\io\serializeClasses.cpp" />
+    <ClCompile Include="..\xtensa\src\globals\render_util.cpp" />
+    <ClCompile Include="..\xtensa\src\app\cvar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\external\GfxCore\GfxCore.vcxproj">

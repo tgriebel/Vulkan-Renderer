@@ -4,7 +4,7 @@
 
 #define WINDOWS
 
-static const char *const ApplicationName = "Extensa";
+static const char *const ApplicationName = "Xtensa";
 
 enum class fullScreenMode_t : int32_t
 {

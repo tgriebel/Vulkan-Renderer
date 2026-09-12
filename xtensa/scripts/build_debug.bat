@@ -6,7 +6,7 @@ REM Usage: build_debug.bat
 
 set SCRIPT_DIR=%~dp0
 set SOLUTION_DIR=%SCRIPT_DIR%..\..
-set SOLUTION_FILE=%SOLUTION_DIR%\vkRenderer.sln
+set SOLUTION_FILE=%SOLUTION_DIR%\xtensa.sln
 
 set VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe
 if not exist "%VSWHERE%" (

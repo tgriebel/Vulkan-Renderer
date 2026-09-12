@@ -4,7 +4,7 @@ setlocal
 REM Precompute env cubemap, diffuse IBL, and specular IBL from a source .hdr file.
 REM Usage: build_hdr_skycube.bat <source.hdr> <cubemap_name>
 REM
-REM <source.hdr>    is resolved relative to vkRenderer\ (the renderer's working directory).
+REM <source.hdr>    is resolved relative to xtensa\ (the renderer's working directory).
 REM <cubemap_name>  prefix for output files in code_assets\:
 REM                   <name>_env.img, <name>_diffuseIbl.img, <name>_specIbl.img
 

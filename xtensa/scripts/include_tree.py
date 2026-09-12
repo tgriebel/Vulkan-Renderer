@@ -6,13 +6,13 @@ Usage:
     python include_tree.py [root_file]  [--all]  [--cycles]  [--no-ext]
 
     root_file   Entry point to trace from (default: src/render_core/renderer.h).
-                Relative to the vkRenderer directory.
+                Relative to the xtensa directory.
 
     --all       Print a tree rooted at every .h file instead of one root.
     --cycles    Only report circular include chains.
     --no-ext    Suppress external / third-party headers (Vulkan, GfxCore, SysCore, STL).
 
-Reads all .h files under the vkRenderer/ tree.  External headers that cannot
+Reads all .h files under the xtensa/ tree.  External headers that cannot
 be resolved to a file on disk are shown in brackets, e.g. [SysCore/timer.h].
 """
 
@@ -241,7 +241,7 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("root_file", nargs="?",
                         default="src/render_core/renderer.h",
-                        help="File to root the tree at (relative to vkRenderer/)")
+                        help="File to root the tree at (relative to xtensa/)")
     parser.add_argument("--all", action="store_true",
                         help="Print trees for all .h files")
     parser.add_argument("--cycles", action="store_true",
